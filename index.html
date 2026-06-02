@@ -48,20 +48,34 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
   display:flex;
   align-items:center;
   overflow:hidden;
-  background-image: url('assets/images/iribarren-verde.jpg');
+  background-image: url('assets/images/iribarren-verde.jpg'), url('assets/images/iribarren-verde.png');
   background-size:cover;
   background-position:center center;
   background-repeat:no-repeat;
-  background-color:#0a2e16;
+  background-color:#c2622a;
+}
+/* Fallback gradient cuando no hay imagen */
+.hero-bg-fallback{
+  position:absolute;inset:0;z-index:0;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 100%, rgba(139,69,19,.85) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 40% at 50% 70%, rgba(194,98,42,.9) 0%, transparent 60%),
+    linear-gradient(180deg,
+      #d4824a 0%,
+      #c2622a 20%,
+      #b8561f 45%,
+      #8b4513 70%,
+      #5a2d0c 100%
+    );
 }
 .hero-overlay-left{
   position:absolute;inset:0;z-index:1;
   background:linear-gradient(
     90deg,
-    rgba(8,20,12,.90) 0%,
-    rgba(8,20,12,.85) 35%,
-    rgba(8,20,12,.55) 58%,
-    rgba(8,20,12,.10) 75%,
+    rgba(4,12,6,.92) 0%,
+    rgba(4,12,6,.88) 35%,
+    rgba(4,12,6,.60) 58%,
+    rgba(4,12,6,.15) 75%,
     rgba(0,0,0,0) 100%
   );
 }
@@ -391,6 +405,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 
   <div class="hero-wrap">
     <div class="hero">
+      <div class="hero-bg-fallback"></div>
       <div class="hero-overlay-left"></div>
       <div class="hero-overlay-depth"></div>
       <div class="hero-content">
