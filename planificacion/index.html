@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>IAGAMI · Planificación y Reportes SIGAP</title>
+<meta name="description" content="Módulo de planificación semanal y reporte diario de actividades IAGAMI SIGAP"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+
+<!-- ══════════════════ NAV ══════════════════ -->
+<nav class="nav">
+  <div class="navinner">
+    <a class="logo" href="../index.html">
+      <div class="logo-img">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+      </div>
+      <div>
+        <div class="logo-text">IAGAMI · SIGAP</div>
+        <div class="logo-sub">Planificación y Reportes</div>
+      </div>
+    </a>
+    <div style="display:flex;gap:8px">
+      <button class="navbtn-o" onclick="renderDashboard()">Dashboard</button>
+      <a href="../index.html" class="navbtn" style="text-decoration:none;display:inline-flex;align-items:center">← Portal</a>
+    </div>
+  </div>
+</nav>
+
+
+<!-- ══════════════════════════════════════════
+     VIEW: DASHBOARD
+══════════════════════════════════════════ -->
+<div id="view-dashboard" class="view">
+  <div class="main">
+
+    <div class="page-header">
+      <div>
+        <h1>📊 Planificación y Reportes SIGAP</h1>
+        <p>Gestión de actividades programadas y reportes diarios institucionales</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn-draft" onclick="openFormPlan()">
+          📋 Nueva Planificación
+        </button>
+        <button class="btn-submit" onclick="openFormReport()">
+          📝 Nuevo Reporte Diario
+        </button>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="ico">📋</div>
+        <div class="num" id="stat-plans">0</div>
+        <div class="lbl">Planificaciones</div>
+      </div>
+      <div class="stat-card">
+        <div class="ico">📝</div>
+        <div class="num" id="stat-reports">0</div>
+        <div class="lbl">Reportes diarios</div>
+      </div>
+      <div class="stat-card">
+        <div class="ico">✅</div>
+        <div class="num" id="stat-sent">0</div>
+        <div class="lbl">Enviados</div>
+      </div>
+      <div class="stat-card">
+        <div class="ico">🕐</div>
+        <div class="num" id="stat-draft">0</div>
+        <div class="lbl">Borradores</div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" data-tab="plans" onclick="switchTab('plans')">📋 Planificaciones</button>
+      <button class="tab" data-tab="reports" onclick="switchTab('reports')">📝 Reportes Diarios</button>
+    </div>
+
+    <!-- Plans table -->
+    <div id="tab-plans">
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Semana</th>
+              <th>Responsable</th>
+              <th>Institución</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="plans-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Reports table -->
+    <div id="tab-reports" style="display:none">
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Fecha</th>
+              <th>Responsable</th>
+              <th>Institución</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="reports-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     VIEW: FORM PLANIFICACIÓN
+══════════════════════════════════════════ -->
+<div id="view-form-plan" class="view">
+  <div class="main">
+
+    <div class="page-header">
+      <div>
+        <h1 id="form-plan-title">Nueva Planificación Semanal</h1>
+        <p>Completa los datos de la planificación y agrega las actividades programadas</p>
+      </div>
+    </div>
+
+    <!-- Datos generales -->
+    <div class="form-card">
+      <h2>📋 Datos generales <span class="tag">PLANIFICACIÓN</span></h2>
+      <div class="form-grid cols-3">
+        <div class="fg">
+          <label class="required" for="fp-institucion">Institución</label>
+          <input type="text" id="fp-institucion" placeholder="Ej: IAGAMI — Dirección de Calidad Ambiental"/>
+        </div>
+        <div class="fg">
+          <label class="required" for="fp-responsable">Responsable</label>
+          <input type="text" id="fp-responsable" placeholder="Nombre completo del responsable"/>
+        </div>
+        <div class="fg">
+          <label class="required" for="fp-semana">Semana</label>
+          <input type="week" id="fp-semana"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actividades programadas -->
+    <div class="form-card">
+      <h2>📅 Actividades programadas</h2>
+      <div class="nota">💡 Agrega una fila por cada actividad planificada. Puedes tener múltiples actividades por día.</div>
+      <div class="act-section">
+        <table class="act-table" style="width:100%">
+          <thead>
+            <tr>
+              <th style="width:120px">Día</th>
+              <th style="width:100px">Hora</th>
+              <th>Actividad programada</th>
+              <th style="width:40px"></th>
+            </tr>
+          </thead>
+          <tbody id="plan-activities-body"></tbody>
+        </table>
+        <button class="btn-add" onclick="addPlanRow()">+ Agregar actividad</button>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="form-footer">
+      <button class="btn-cancel" onclick="renderDashboard()">Cancelar</button>
+      <div class="spacer"></div>
+      <button class="btn-draft"  onclick="savePlan('borrador')">💾 Guardar borrador</button>
+      <button class="btn-submit" onclick="savePlan('enviado')">
+        📤 Guardar y enviar
+      </button>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     VIEW: FORM REPORTE DIARIO
+══════════════════════════════════════════ -->
+<div id="view-form-report" class="view">
+  <div class="main">
+
+    <div class="page-header">
+      <div>
+        <h1 id="form-report-title">Nuevo Reporte Diario</h1>
+        <p>Registra las actividades realizadas, observaciones y evidencias del día</p>
+      </div>
+    </div>
+
+    <!-- Datos generales -->
+    <div class="form-card">
+      <h2>📋 Datos generales <span class="tag">REPORTE</span></h2>
+      <div class="form-grid cols-3">
+        <div class="fg">
+          <label class="required" for="fr-fecha">Fecha</label>
+          <input type="date" id="fr-fecha"/>
+        </div>
+        <div class="fg">
+          <label class="required" for="fr-institucion">Institución</label>
+          <input type="text" id="fr-institucion" placeholder="Institución"/>
+        </div>
+        <div class="fg">
+          <label class="required" for="fr-responsable">Responsable</label>
+          <input type="text" id="fr-responsable" placeholder="Nombre del responsable"/>
+        </div>
+        <div class="fg">
+          <label for="fr-hora-ini">Hora inicio</label>
+          <input type="time" id="fr-hora-ini"/>
+        </div>
+        <div class="fg">
+          <label for="fr-hora-fin">Hora fin</label>
+          <input type="time" id="fr-hora-fin"/>
+        </div>
+        <div class="fg">
+          <label for="fr-plan">Planificación relacionada</label>
+          <select id="fr-plan">
+            <option value="">— Sin planificación relacionada —</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actividades realizadas -->
+    <div class="form-card">
+      <h2>✅ Actividades realizadas</h2>
+      <div class="nota">💡 Marca las actividades que fueron completadas. Puedes agregar actividades no previstas.</div>
+      <table class="act-table" style="width:100%">
+        <thead>
+          <tr>
+            <th style="width:50px">Hecha</th>
+            <th>Descripción de la actividad</th>
+            <th style="width:40px"></th>
+          </tr>
+        </thead>
+        <tbody id="report-activities-body"></tbody>
+      </table>
+      <button class="btn-add" onclick="addReportActivity()">+ Agregar actividad</button>
+    </div>
+
+    <!-- Observaciones -->
+    <div class="form-card">
+      <h2>📝 Observaciones</h2>
+      <div class="fg">
+        <label for="fr-observaciones">Observaciones generales del día</label>
+        <textarea id="fr-observaciones" placeholder="Describe novedades, incidentes, logros, pendientes u observaciones relevantes del día…" style="min-height:120px"></textarea>
+      </div>
+    </div>
+
+    <!-- Evidencias -->
+    <div class="form-card">
+      <h2>📎 Evidencias</h2>
+      <p style="font-size:12px;color:#4a8a6a;margin-bottom:14px">Sube imágenes o PDFs como respaldo del reporte. Máximo 2 MB por archivo.</p>
+      <div class="file-drop" id="file-drop"
+           ondragover="event.preventDefault();this.classList.add('drag')"
+           ondragleave="this.classList.remove('drag')"
+           ondrop="event.preventDefault();this.classList.remove('drag');handleFileInput({files:event.dataTransfer.files,value:''})">
+        <input type="file" accept="image/*,.pdf" multiple onchange="handleFileInput(this)"/>
+        <div class="ico">📁</div>
+        <p><strong>Arrastra archivos aquí</strong> o haz clic para seleccionar</p>
+        <p style="font-size:11px;margin-top:4px">Imágenes (JPG, PNG, WEBP) o PDF · Máx. 2 MB c/u</p>
+      </div>
+      <div class="file-list" id="file-list"></div>
+    </div>
+
+    <!-- Footer -->
+    <div class="form-footer">
+      <button class="btn-cancel" onclick="renderDashboard()">Cancelar</button>
+      <div class="spacer"></div>
+      <button class="btn-draft"  onclick="saveReport('borrador')">💾 Guardar borrador</button>
+      <button class="btn-submit" onclick="saveReport('enviado')">
+        📤 Guardar y enviar
+      </button>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     VIEW: DETALLE PLANIFICACIÓN
+══════════════════════════════════════════ -->
+<div id="view-detail-plan" class="view">
+  <div class="main">
+    <div class="page-header">
+      <div>
+        <h1>📋 Detalle de Planificación</h1>
+      </div>
+    </div>
+    <div id="detail-plan-content"></div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     VIEW: DETALLE REPORTE
+══════════════════════════════════════════ -->
+<div id="view-detail-report" class="view">
+  <div class="main">
+    <div class="page-header">
+      <div>
+        <h1>📝 Detalle de Reporte Diario</h1>
+      </div>
+    </div>
+    <div id="detail-report-content"></div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     MODAL CONFIRMAR
+══════════════════════════════════════════ -->
+<div id="modal-confirm" class="modal-bg" onclick="if(event.target===this)closeConfirm()">
+  <div class="modal">
+    <h3 id="confirm-title">¿Confirmar acción?</h3>
+    <p id="confirm-msg">Esta acción no se puede deshacer.</p>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeConfirm()">Cancelar</button>
+      <button class="btn-submit" style="background:#dc2626" onclick="doConfirm()">Eliminar</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     TOAST
+══════════════════════════════════════════ -->
+<div id="toast" class="toast"></div>
+
+
+<!-- ══════════════════════════════════════════
+     SCRIPTS
+══════════════════════════════════════════ -->
+<script src="db.js"></script>
+<script src="app.js"></script>
+
+<!-- Fix: tab switching shows/hides correct table -->
+<script>
+  const _switchTab = switchTab;
+  switchTab = function(tab) {
+    document.getElementById('tab-plans').style.display   = tab === 'plans'   ? 'block' : 'none';
+    document.getElementById('tab-reports').style.display = tab === 'reports' ? 'block' : 'none';
+    _switchTab(tab);
+  };
+</script>
+
+</body>
+</html>
