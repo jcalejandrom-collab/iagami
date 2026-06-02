@@ -333,7 +333,30 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 .ftextarea{resize:vertical;min-height:100px}
 .ai-btn{font-size:11px;padding:4px 11px;border-radius:6px;border:1px solid #a8dfc0;background:#e8f5ee;color:#1d6b3e;cursor:pointer;display:flex;align-items:center;gap:4px;transition:.15s}
 .ai-btn:hover{background:#d0ebdb}
-.ai-box{background:#fef9eb;border:1px solid #fcd34d;border-radius:9px;padding:11px 13px;font-size:12px;color:#92400e;margin-bottom:16px;display:flex;gap:9px;line-height:1.6}
+.ai-box{background:#fef9eb;border:1px solid #fcd34d;border-radius:9px;padding:11px 13px;font-size:12px;color:#92400e;margin-bottom:16px;display:none;gap:9px;line-height:1.6}
+/* ===== TOAST ===== */
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);background:#1a3d2b;color:#fff;padding:11px 22px;border-radius:10px;font-size:13px;font-weight:500;z-index:9999;opacity:0;transition:.3s;pointer-events:none;white-space:nowrap;box-shadow:0 4px 24px rgba(0,0,0,.25)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+/* ===== MODAL ===== */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;display:none;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:#fff;border-radius:16px;padding:28px;max-width:380px;width:90%;position:relative;box-shadow:0 8px 40px rgba(0,0,0,.2)}
+.modal h3{font-family:'Poppins',sans-serif;font-size:18px;font-weight:700;color:#1a3d2b;margin-bottom:4px}
+.modal p{font-size:12px;color:#4a8a6a;margin-bottom:18px}
+.modal-close{position:absolute;top:14px;right:16px;background:none;border:none;font-size:20px;cursor:pointer;color:#4a8a6a;line-height:1}
+.modal .fg{margin-bottom:12px}
+.modal-footer{display:flex;gap:10px;margin-top:6px}
+/* ===== CHAT PANEL ===== */
+.chat-panel{position:fixed;bottom:84px;right:20px;width:300px;background:#fff;border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,.18);z-index:400;display:none;flex-direction:column;overflow:hidden;border:1px solid #d4edd8}
+.chat-panel.open{display:flex}
+.chat-head{background:#1d6b3e;color:#fff;padding:12px 16px;display:flex;justify-content:space-between;align-items:center}
+.chat-head span{font-size:13px;font-weight:600}
+.chat-close{background:none;border:none;color:#fff;font-size:18px;cursor:pointer;line-height:1}
+.chat-msgs{padding:14px;min-height:160px;font-size:12px;color:#4a6a5a;display:flex;flex-direction:column;gap:8px}
+.chat-bubble{background:#e8f5ee;border-radius:10px 10px 10px 2px;padding:9px 12px;max-width:85%;line-height:1.5}
+.chat-input-row{display:flex;border-top:1px solid #d4edd8}
+.chat-input-row input{flex:1;border:none;padding:10px 12px;font-size:12px;outline:none;font-family:'Inter',sans-serif}
+.chat-input-row button{background:#1d6b3e;border:none;color:#fff;padding:0 14px;cursor:pointer;font-size:14px}
 .fgrid2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
 .fnote{background:#e8f5ee;border:1px solid #a8dfc0;border-radius:9px;padding:9px 13px;font-size:11px;color:#1d6b3e;margin-bottom:16px}
 .fsubmit{width:100%;padding:13px;background:#1d6b3e;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;font-family:'Poppins',sans-serif;transition:.15s}
@@ -380,17 +403,17 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
         </div>
       </a>
       <div class="navlinks">
-        <a class="nl active" href="#" onclick="showPage('home');return false">Inicio</a>
-        <a class="nl" href="#">Noticias</a>
-        <a class="nl" href="#" onclick="showPage('denuncia');return false">Denuncias</a>
-        <a class="nl" href="#">Trámites</a>
-        <a class="nl" href="#">Agenda</a>
-        <a class="nl" href="#">Transparencia</a>
-        <a class="nl" href="#">Organización</a>
+        <a class="nl active" data-page="home" href="#" onclick="showPage('home');return false">Inicio</a>
+        <a class="nl" href="#" onclick="toast('Noticias — próximamente');return false">Noticias</a>
+        <a class="nl" data-page="denuncia" href="#" onclick="showPage('denuncia');return false">Denuncias</a>
+        <a class="nl" href="#" onclick="toast('Trámites en línea — próximamente');return false">Trámites</a>
+        <a class="nl" href="#" onclick="toast('Agenda — próximamente');return false">Agenda</a>
+        <a class="nl" href="#" onclick="toast('Transparencia — próximamente');return false">Transparencia</a>
+        <a class="nl" href="#" onclick="toast('Organización — próximamente');return false">Organización</a>
       </div>
       <div class="navr">
         <button class="navbtn-o" onclick="showPage('admin')">Admin</button>
-        <button class="navbtn">Acceder</button>
+        <button class="navbtn" onclick="openModal('modal-login')">Acceder</button>
       </div>
     </div>
   </nav>
@@ -421,7 +444,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
               Presentar Denuncia
             </button>
-            <button class="btn-s">
+            <button class="btn-s" onclick="toast('Trámites en línea — próximamente')">
               Ver Trámites
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
             </button>
@@ -494,7 +517,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
         </div>
 
       </div>
-      <button class="chat-fab" title="Romina — Asistente Virtual IAGAMI" aria-label="Abrir asistente virtual Romina">
+      <button class="chat-fab" title="Romina — Asistente Virtual IAGAMI" aria-label="Abrir asistente virtual Romina" onclick="toggleChat()">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
         <div class="chat-fab-dot"></div>
       </button>
@@ -511,13 +534,13 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
       </div>
       <div class="svc-grid">
         <div class="svc-card" onclick="showPage('denuncia')"><div class="svc-ico" style="background:#fee2e2">🚨</div><div class="svc-name">Presentar Denuncia</div><div class="svc-desc">Reporta problemas ambientales</div></div>
-        <div class="svc-card"><div class="svc-ico" style="background:#dbeafe">📋</div><div class="svc-name">Trámites en Línea</div><div class="svc-desc">Permisos y certificaciones</div></div>
-        <div class="svc-card"><div class="svc-ico" style="background:#fef3c7">⚖️</div><div class="svc-name">Multas Ambientales</div><div class="svc-desc">Consulta y paga multas</div></div>
-        <div class="svc-card"><div class="svc-ico" style="background:#f3e8ff">👥</div><div class="svc-name">Atención Ciudadana</div><div class="svc-desc">Consultas y seguimiento</div></div>
-        <div class="svc-card"><div class="svc-ico" style="background:#ccfbf1">🏛️</div><div class="svc-name">Transparencia</div><div class="svc-desc">Información institucional</div></div>
-        <div class="svc-card"><div class="svc-ico" style="background:#e0f2fe">📅</div><div class="svc-name">Agenda SIGAP</div><div class="svc-desc">Actividades programadas</div></div>
-        <div class="svc-card"><div class="svc-ico" style="background:#dcfce7">🏢</div><div class="svc-name">Registro Empresa</div><div class="svc-desc">Registro ambiental</div></div>
-        <div class="svc-card"><div class="svc-ico" style="background:#fce7f3">🌿</div><div class="svc-name">Registro Comunal</div><div class="svc-desc">Consejos comunales</div></div>
+        <div class="svc-card" onclick="toast('Trámites en línea — próximamente')"><div class="svc-ico" style="background:#dbeafe">📋</div><div class="svc-name">Trámites en Línea</div><div class="svc-desc">Permisos y certificaciones</div></div>
+        <div class="svc-card" onclick="toast('Multas ambientales — próximamente')"><div class="svc-ico" style="background:#fef3c7">⚖️</div><div class="svc-name">Multas Ambientales</div><div class="svc-desc">Consulta y paga multas</div></div>
+        <div class="svc-card" onclick="toast('Atención ciudadana — próximamente')"><div class="svc-ico" style="background:#f3e8ff">👥</div><div class="svc-name">Atención Ciudadana</div><div class="svc-desc">Consultas y seguimiento</div></div>
+        <div class="svc-card" onclick="toast('Transparencia — próximamente')"><div class="svc-ico" style="background:#ccfbf1">🏛️</div><div class="svc-name">Transparencia</div><div class="svc-desc">Información institucional</div></div>
+        <div class="svc-card" onclick="toast('Agenda SIGAP — próximamente')"><div class="svc-ico" style="background:#e0f2fe">📅</div><div class="svc-name">Agenda SIGAP</div><div class="svc-desc">Actividades programadas</div></div>
+        <div class="svc-card" onclick="toast('Registro de empresa — próximamente')"><div class="svc-ico" style="background:#dcfce7">🏢</div><div class="svc-name">Registro Empresa</div><div class="svc-desc">Registro ambiental</div></div>
+        <div class="svc-card" onclick="toast('Registro comunal — próximamente')"><div class="svc-ico" style="background:#fce7f3">🌿</div><div class="svc-name">Registro Comunal</div><div class="svc-desc">Consejos comunales</div></div>
       </div>
     </div>
   </div>
@@ -637,18 +660,18 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
           <h4>Servicios</h4>
           <ul>
             <li onclick="showPage('denuncia')">Presentar Denuncia</li>
-            <li>Trámites en Línea</li>
-            <li>Consulta de Multas</li>
-            <li>Atención Ciudadana</li>
+            <li onclick="toast('Trámites en línea — próximamente')">Trámites en Línea</li>
+            <li onclick="toast('Consulta de multas — próximamente')">Consulta de Multas</li>
+            <li onclick="toast('Atención ciudadana — próximamente')">Atención Ciudadana</li>
           </ul>
         </div>
         <div class="footer-col">
           <h4>Institución</h4>
           <ul>
-            <li>Organización</li>
-            <li>Transparencia</li>
-            <li>Noticias</li>
-            <li>Agenda SIGAP</li>
+            <li onclick="toast('Organización — próximamente')">Organización</li>
+            <li onclick="toast('Transparencia — próximamente')">Transparencia</li>
+            <li onclick="toast('Noticias — próximamente')">Noticias</li>
+            <li onclick="toast('Agenda SIGAP — próximamente')">Agenda SIGAP</li>
           </ul>
         </div>
         <div class="footer-col">
@@ -683,7 +706,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
       </div>
       <div class="navr">
         <button class="navbtn-o" onclick="showPage('admin')">Admin</button>
-        <button class="navbtn">Acceder</button>
+        <button class="navbtn" onclick="openModal('modal-login')">Acceder</button>
       </div>
     </div>
   </nav>
@@ -712,7 +735,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
           <div class="fg">
             <div class="flabel-row">
               <label class="flabel" style="margin:0">Descripción de los hechos *</label>
-              <button class="ai-btn">✨ Analizar con IA</button>
+              <button class="ai-btn" onclick="analizarIA()">✨ Analizar con IA</button>
             </div>
             <textarea class="ftextarea" placeholder="Describe detalladamente lo que observas: qué pasa, desde cuándo, qué está siendo afectado..."></textarea>
           </div>
@@ -723,9 +746,9 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
           <div class="fg">
             <div class="flabel-row">
               <label class="flabel" style="margin:0">Ubicación del hecho</label>
-              <button class="ai-btn">📍 Mi ubicación GPS</button>
+              <button class="ai-btn" onclick="getGPS()">📍 Mi ubicación GPS</button>
             </div>
-            <input class="finput" placeholder="Dirección, coordenadas o referencia del lugar"/>
+            <input id="input-ubicacion" class="finput" placeholder="Dirección, coordenadas o referencia del lugar"/>
           </div>
           <div class="fg">
             <label class="flabel">Datos del denunciante</label>
@@ -737,7 +760,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
             </div>
           </div>
           <div class="fnote">🔒 Tu identidad es <strong>confidencial</strong>. La denuncia es analizada automáticamente por IAGAMI IA y asignada al área competente. Número de caso generado al enviar.</div>
-          <button class="fsubmit">
+          <button class="fsubmit" onclick="enviarDenuncia()">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
             Enviar Denuncia
           </button>
@@ -785,17 +808,17 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
       </a>
       <div class="navlinks">
         <a class="nl active" href="#">Dashboard</a>
-        <a class="nl" href="#">Noticias</a>
-        <a class="nl" href="#">Denuncias</a>
-        <a class="nl" href="#">Trámites</a>
-        <a class="nl" href="#">Multas</a>
-        <a class="nl" href="#">Proyectos</a>
-        <a class="nl" href="#">SIGAP</a>
-        <a class="nl" href="#">Indicadores</a>
+        <a class="nl" href="#" onclick="toast('Módulo Noticias — próximamente');return false">Noticias</a>
+        <a class="nl" href="#" onclick="toast('Módulo Denuncias — próximamente');return false">Denuncias</a>
+        <a class="nl" href="#" onclick="toast('Módulo Trámites — próximamente');return false">Trámites</a>
+        <a class="nl" href="#" onclick="toast('Módulo Multas — próximamente');return false">Multas</a>
+        <a class="nl" href="#" onclick="toast('Módulo Proyectos — próximamente');return false">Proyectos</a>
+        <a class="nl" href="#" onclick="toast('Módulo SIGAP — próximamente');return false">SIGAP</a>
+        <a class="nl" href="#" onclick="toast('Módulo Indicadores — próximamente');return false">Indicadores</a>
       </div>
       <div class="navr">
         <button class="navbtn-o" onclick="showPage('home')">← Portal</button>
-        <button class="navbtn">Cerrar sesión</button>
+        <button class="navbtn" onclick="showPage('home')">Cerrar sesión</button>
       </div>
     </div>
   </nav>
@@ -824,14 +847,14 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
     </div>
     <div class="lists-grid">
       <div class="list-card">
-        <h3>Últimas Denuncias <span class="see-all">Ver todas →</span></h3>
+        <h3>Últimas Denuncias <span class="see-all" onclick="toast('Ver todas las denuncias — próximamente')">Ver todas →</span></h3>
         <div class="list-row"><div><div class="lr-main">Carlos Medina</div><div class="lr-sub">contaminacion_agua · Catedral</div></div><span class="badge b-amber">pendiente</span></div>
         <div class="list-row"><div><div class="lr-main">María González</div><div class="lr-sub">deforestacion · Tamaca</div></div><span class="badge b-blue">en revisión</span></div>
         <div class="list-row"><div><div class="lr-main">Luis Rodríguez</div><div class="lr-sub">quema · Santa Rosa</div></div><span class="badge b-green">resuelta</span></div>
         <div class="list-row"><div><div class="lr-main">Ana Pérez</div><div class="lr-sub">residuos_solidos · El Cují</div></div><span class="badge b-purple">en proceso</span></div>
       </div>
       <div class="list-card">
-        <h3>Últimos Trámites <span class="see-all">Ver todos →</span></h3>
+        <h3>Últimos Trámites <span class="see-all" onclick="toast('Ver todos los trámites — próximamente')">Ver todos →</span></h3>
         <div class="list-row"><div><div class="lr-main">Inversiones C.A.</div><div class="lr-sub" style="font-family:monospace;font-size:10px">TRA-293847 · Permiso Ambiental</div></div><span class="badge b-blue">en revisión</span></div>
         <div class="list-row"><div><div class="lr-main">Constructora XYZ</div><div class="lr-sub" style="font-family:monospace;font-size:10px">TRA-293821 · Estudio Ambiental</div></div><span class="badge b-amber">recibido</span></div>
         <div class="list-row"><div><div class="lr-main">Farmacia Norte</div><div class="lr-sub" style="font-family:monospace;font-size:10px">TRA-293798 · Certificación</div></div><span class="badge b-green">aprobado</span></div>
@@ -842,11 +865,148 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 </div><!-- /page-admin -->
 
 <script>
+/* ===== ROUTING ===== */
 function showPage(name) {
+  const el = document.getElementById('page-' + name);
+  if (!el) { toast('Página no disponible'); return; }
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById('page-' + name).classList.add('active');
+  el.classList.add('active');
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
+
+/* ===== TOAST ===== */
+let toastTimer;
+function toast(msg) {
+  let t = document.getElementById('app-toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'app-toast';
+    t.className = 'toast';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+/* ===== MODALES ===== */
+function openModal(id) {
+  const m = document.getElementById(id);
+  if (m) m.classList.add('open');
+}
+function closeModal(id) {
+  const m = document.getElementById(id);
+  if (m) m.classList.remove('open');
+}
+
+/* ===== CHAT ===== */
+function toggleChat() {
+  const p = document.getElementById('chat-panel');
+  if (p) p.classList.toggle('open');
+}
+function sendChat() {
+  const inp = document.getElementById('chat-input');
+  const msgs = document.getElementById('chat-msgs');
+  const txt = inp.value.trim();
+  if (!txt) return;
+  const userBubble = document.createElement('div');
+  userBubble.style.cssText = 'background:#1d6b3e;color:#fff;border-radius:10px 10px 2px 10px;padding:9px 12px;max-width:85%;align-self:flex-end;font-size:12px;line-height:1.5';
+  userBubble.textContent = txt;
+  msgs.appendChild(userBubble);
+  inp.value = '';
+  msgs.scrollTop = msgs.scrollHeight;
+  setTimeout(() => {
+    const resp = document.createElement('div');
+    resp.className = 'chat-bubble';
+    resp.textContent = 'Gracias por tu mensaje. Un agente de IAGAMI te responderá pronto. También puedes presentar una denuncia formal usando el formulario.';
+    msgs.appendChild(resp);
+    msgs.scrollTop = msgs.scrollHeight;
+  }, 900);
+}
+
+/* ===== IA ANÁLISIS ===== */
+function analizarIA() {
+  const textarea = document.querySelector('.ftextarea');
+  const box = document.querySelector('.ai-box');
+  if (!textarea.value.trim()) {
+    toast('Escribe la descripción antes de analizar');
+    return;
+  }
+  box.style.display = 'flex';
+  toast('✨ Análisis IA completado');
+}
+
+/* ===== GPS ===== */
+function getGPS() {
+  if (!navigator.geolocation) { toast('GPS no disponible en este dispositivo'); return; }
+  toast('Obteniendo ubicación…');
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      const coords = pos.coords.latitude.toFixed(5) + ', ' + pos.coords.longitude.toFixed(5);
+      document.getElementById('input-ubicacion').value = coords;
+      toast('📍 Ubicación capturada');
+    },
+    () => toast('No se pudo obtener la ubicación GPS')
+  );
+}
+
+/* ===== ENVIAR DENUNCIA ===== */
+function enviarDenuncia() {
+  const tipo = document.querySelector('.fselect').value;
+  const desc = document.querySelector('.ftextarea').value.trim();
+  const nombre = document.querySelectorAll('.finput')[1] ? document.querySelectorAll('.finput')[1].value.trim() : '';
+  if (!tipo) { toast('⚠ Selecciona el tipo de denuncia'); return; }
+  if (!desc) { toast('⚠ Escribe la descripción del hecho'); return; }
+  const num = 'DEN-' + Date.now().toString().slice(-6);
+  toast('✅ Denuncia enviada · Caso ' + num);
+  setTimeout(() => openModal('modal-denuncia-ok'), 400);
+  document.querySelector('.fselect').value = '';
+  document.querySelector('.ftextarea').value = '';
+  document.querySelectorAll('.finput').forEach(i => i.value = '');
+  document.querySelector('.ai-box').style.display = 'none';
+}
 </script>
+
+<!-- ===== MODAL LOGIN ===== -->
+<div id="modal-login" class="modal-bg" onclick="if(event.target===this)closeModal('modal-login')">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-login')">×</button>
+    <h3>Acceder</h3>
+    <p>Acceso para funcionarios y personal autorizado de IAGAMI</p>
+    <div class="fg"><label class="flabel">Usuario</label><input class="finput" placeholder="usuario@iagami.gob.ve"/></div>
+    <div class="fg"><label class="flabel">Contraseña</label><input class="finput" type="password" placeholder="••••••••"/></div>
+    <div class="modal-footer">
+      <button class="fsubmit" style="flex:1" onclick="toast('Acceso solo disponible para personal autorizado');closeModal('modal-login')">Iniciar sesión</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL DENUNCIA OK ===== -->
+<div id="modal-denuncia-ok" class="modal-bg" onclick="if(event.target===this)closeModal('modal-denuncia-ok')">
+  <div class="modal" style="text-align:center">
+    <button class="modal-close" onclick="closeModal('modal-denuncia-ok')">×</button>
+    <div style="font-size:48px;margin-bottom:12px">✅</div>
+    <h3>¡Denuncia enviada!</h3>
+    <p style="margin-bottom:8px">Tu caso ha sido registrado y asignado al área competente.</p>
+    <p style="font-size:11px;color:#4a8a6a">Recibirás respuesta en el tiempo establecido según la prioridad asignada.</p>
+    <button class="fsubmit" style="margin-top:18px" onclick="closeModal('modal-denuncia-ok')">Aceptar</button>
+  </div>
+</div>
+
+<!-- ===== CHAT PANEL ===== -->
+<div id="chat-panel" class="chat-panel">
+  <div class="chat-head">
+    <span>💬 Romina — Asistente IAGAMI</span>
+    <button class="chat-close" onclick="toggleChat()">×</button>
+  </div>
+  <div class="chat-msgs" id="chat-msgs">
+    <div class="chat-bubble">Hola, soy Romina 👋 Asistente virtual de IAGAMI. ¿En qué puedo ayudarte hoy?</div>
+  </div>
+  <div class="chat-input-row">
+    <input id="chat-input" placeholder="Escribe tu consulta…" onkeydown="if(event.key==='Enter')sendChat()"/>
+    <button onclick="sendChat()">➤</button>
+  </div>
+</div>
 </body>
 </html>
