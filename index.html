@@ -37,7 +37,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 .navbtn-o:hover{background:#e8f5ee}
 
 /* ===== ALERT BAR ===== */
-.alert-bar{background:#fffbeb;border-bottom:1.5px solid #fcd34d;padding:7px 24px;display:flex;align-items:center;gap:8px;font-size:11px;color:#92400e;overflow:hidden}
+.alert-bar{background:#fffbeb;border-bottom:1.5px solid #fcd34d;padding:7px 24px;display:flex;align-items:center;gap:8px;font-size:11px;color:#92400e;overflow:hidden;flex-wrap:wrap}
 .alert-pill{background:#fef3c7;border:1px solid #fcd34d;border-radius:20px;padding:3px 10px;white-space:nowrap;font-size:10px;font-weight:600;flex-shrink:0}
 
 /* ===== HERO ===== */
@@ -52,21 +52,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
   background-size:cover;
   background-position:center top;
   background-repeat:no-repeat;
-  background-color:#c2622a;
-}
-/* Fallback gradient cuando no hay imagen */
-.hero-bg-fallback{
-  position:absolute;inset:0;z-index:0;
-  background:
-    radial-gradient(ellipse 80% 60% at 50% 100%, rgba(139,69,19,.85) 0%, transparent 70%),
-    radial-gradient(ellipse 60% 40% at 50% 70%, rgba(194,98,42,.9) 0%, transparent 60%),
-    linear-gradient(180deg,
-      #d4824a 0%,
-      #c2622a 20%,
-      #b8561f 45%,
-      #8b4513 70%,
-      #5a2d0c 100%
-    );
+  background-color:#1a4a2e;
 }
 .hero-overlay-left{
   position:absolute;inset:0;z-index:1;
@@ -131,7 +117,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
   display:inline-flex;align-items:center;gap:7px;
   font-family:'Poppins',sans-serif;
   box-shadow:0 4px 24px rgba(29,107,62,.55);
-  transition:.2s;
+  transition:.2s;text-decoration:none;
 }
 .btn-p:hover{background:#155c32;transform:translateY(-1px)}
 .btn-s{
@@ -139,7 +125,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
   border:1.5px solid rgba(255,255,255,.38);border-radius:10px;
   padding:13px 22px;font-size:13px;font-weight:500;cursor:pointer;
   display:inline-flex;align-items:center;gap:7px;
-  backdrop-filter:blur(8px);transition:.2s;
+  backdrop-filter:blur(8px);transition:.2s;text-decoration:none;
 }
 .btn-s:hover{background:rgba(255,255,255,.2)}
 .hero-stats{
@@ -210,7 +196,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 
 /* ===== SERVICES ===== */
 .svc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(115px,1fr));gap:11px}
-.svc-card{background:#fff;border:1px solid #d4edd8;border-radius:13px;padding:16px 10px;text-align:center;cursor:pointer;transition:.2s}
+.svc-card{background:#fff;border:1px solid #d4edd8;border-radius:13px;padding:16px 10px;text-align:center;cursor:pointer;transition:.2s;text-decoration:none;display:block}
 .svc-card:hover{border-color:#1d6b3e;transform:translateY(-3px);box-shadow:0 8px 28px rgba(29,107,62,.12)}
 .svc-ico{width:44px;height:44px;border-radius:11px;display:flex;align-items:center;justify-content:center;margin:0 auto 9px;font-size:20px}
 .svc-name{font-size:12px;font-weight:600;color:#1a3d2b;line-height:1.3}
@@ -228,21 +214,23 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 
 /* ===== NEWS ===== */
 .news-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
-.news-card{background:#fff;border:1px solid #d4edd8;border-radius:13px;overflow:hidden;cursor:pointer;transition:.2s}
+.news-card{background:#fff;border:1px solid #d4edd8;border-radius:13px;overflow:hidden;cursor:pointer;transition:.2s;display:block;text-decoration:none}
 .news-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(29,107,62,.1);border-color:#a8dfc0}
-.news-img{height:115px;display:flex;align-items:center;justify-content:center;font-size:36px}
-.news-img img{width:100%;height:100%;object-fit:cover}
+.news-img{height:115px;display:flex;align-items:center;justify-content:center;font-size:36px;position:relative;overflow:hidden}
+.news-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .news-body{padding:13px}
 .news-cat{font-size:10px;font-weight:700;background:#e8f5ee;color:#1d6b3e;border-radius:20px;padding:2px 9px;display:inline-block;margin-bottom:6px}
 .news-title{font-size:12px;font-weight:600;color:#1a3d2b;line-height:1.45;margin-bottom:5px}
 .news-date{font-size:10px;color:#4a8a6a}
+.ver-mas-row{text-align:center;margin-top:20px}
+.btn-ver-mas{display:inline-flex;align-items:center;gap:7px;padding:11px 24px;background:#fff;color:#1d6b3e;border:1.5px solid #a8dfc0;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;transition:.2s;text-decoration:none}
+.btn-ver-mas:hover{background:#e8f5ee;border-color:#1d6b3e}
 
 /* ===== PROJECTS ===== */
 .proj-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}
-.proj-card{background:#fff;border:1px solid #d4edd8;border-radius:13px;overflow:hidden;transition:.2s}
+.proj-card{background:#fff;border:1px solid #d4edd8;border-radius:13px;overflow:hidden;transition:.2s;display:block;text-decoration:none}
 .proj-card:hover{box-shadow:0 6px 20px rgba(29,107,62,.1);border-color:#a8dfc0}
 .proj-img{height:80px;display:flex;align-items:center;justify-content:center;font-size:28px}
-.proj-img img{width:100%;height:100%;object-fit:cover}
 .proj-body{padding:13px}
 .ps{display:inline-block;font-size:10px;font-weight:700;border-radius:20px;padding:2px 9px;margin-bottom:6px}
 .ps-exec{background:#dbeafe;color:#1e40af}
@@ -282,47 +270,16 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 .footer-brand p{font-size:11.5px;line-height:1.75;color:rgba(255,255,255,.65)}
 .footer-col h4{color:#a8dfc0;font-size:11px;font-weight:700;margin-bottom:10px;letter-spacing:.06em;text-transform:uppercase}
 .footer-col ul{list-style:none}
-.footer-col li{font-size:11.5px;padding:3px 0;cursor:pointer;transition:.15s;color:rgba(255,255,255,.65)}
-.footer-col li:hover{color:#fff;padding-left:4px}
+.footer-col li,.footer-col a{font-size:11.5px;padding:3px 0;cursor:pointer;transition:.15s;color:rgba(255,255,255,.65);display:block;text-decoration:none}
+.footer-col li:hover,.footer-col a:hover{color:#fff;padding-left:4px}
 .footer-col .contact-item{font-size:11.5px;padding:3px 0;display:flex;align-items:center;gap:7px;color:rgba(255,255,255,.65)}
 .footer-bottom{border-top:1px solid rgba(255,255,255,.08);padding-top:18px;text-align:center;font-size:10.5px;opacity:.4}
 
 /* ===== PAGE ROUTING ===== */
 .page{display:none}.page.active{display:block}
 
-/* ===== ADMIN ===== */
-.admin-wrap{background:#f8fcfa;padding:28px 24px;max-width:1200px;margin:0 auto}
-.admin-header{margin-bottom:22px}
-.admin-header h1{font-family:'Poppins',sans-serif;font-size:22px;font-weight:700;color:#1a3d2b}
-.admin-header p{font-size:13px;color:#4a8a6a;margin-top:3px}
-.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:11px;margin-bottom:22px}
-.stat-card{background:#fff;border:1px solid #d4edd8;border-radius:13px;padding:16px;text-align:center}
-.stat-ico{width:38px;height:38px;border-radius:9px;margin:0 auto 9px;display:flex;align-items:center;justify-content:center;font-size:17px}
-.stat-num{font-family:'Poppins',sans-serif;font-size:26px;font-weight:700;color:#1a3d2b}
-.stat-lbl{font-size:11px;color:#4a8a6a;margin-top:2px}
-.mod-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:11px;margin-bottom:22px}
-.mod-card{background:#fff;border:1px solid #d4edd8;border-radius:13px;padding:15px;cursor:pointer;transition:.2s;display:flex;align-items:center;gap:10px}
-.mod-card:hover{border-color:#1d6b3e;box-shadow:0 4px 16px rgba(29,107,62,.1)}
-.mod-ico{width:38px;height:38px;border-radius:9px;background:#e8f5ee;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
-.mod-name{font-size:12px;font-weight:600;color:#1a3d2b}
-.mod-desc{font-size:10px;color:#4a8a6a;margin-top:1px}
-.lists-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.list-card{background:#fff;border:1px solid #d4edd8;border-radius:13px;padding:16px}
-.list-card h3{font-size:13px;font-weight:600;color:#1a3d2b;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
-.see-all{font-size:11px;color:#1d6b3e;font-weight:400;cursor:pointer}
-.list-row{display:flex;align-items:center;justify-content:space-between;padding:9px 11px;border-radius:9px;background:#f8fcfa;margin-bottom:6px;transition:.15s}
-.list-row:hover{background:#e8f5ee}
-.lr-main{font-size:12px;font-weight:500;color:#1a3d2b}
-.lr-sub{font-size:10px;color:#4a8a6a;margin-top:1px}
-.badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;white-space:nowrap}
-.b-amber{background:#fef3c7;color:#92400e}
-.b-blue{background:#dbeafe;color:#1e40af}
-.b-green{background:#dcfce7;color:#166534}
-.b-red{background:#fee2e2;color:#991b1b}
-.b-purple{background:#f3e8ff;color:#6b21a8}
-
 /* ===== DENUNCIA ===== */
-.denuncia-wrap{background:#f8fcfa;padding:36px 24px;max-width:1200px;margin:0 auto}
+.denuncia-wrap{background:#f8fcfa;padding:28px 24px;max-width:1200px;margin:0 auto}
 .denuncia-grid{display:grid;grid-template-columns:1fr 340px;gap:28px;align-items:start}
 .dform{background:#fff;border:1px solid #d4edd8;border-radius:16px;padding:24px}
 .fg{margin-bottom:16px}
@@ -334,9 +291,19 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 .ai-btn{font-size:11px;padding:4px 11px;border-radius:6px;border:1px solid #a8dfc0;background:#e8f5ee;color:#1d6b3e;cursor:pointer;display:flex;align-items:center;gap:4px;transition:.15s}
 .ai-btn:hover{background:#d0ebdb}
 .ai-box{background:#fef9eb;border:1px solid #fcd34d;border-radius:9px;padding:11px 13px;font-size:12px;color:#92400e;margin-bottom:16px;display:none;gap:9px;line-height:1.6}
+.fgrid2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.fnote{background:#e8f5ee;border:1px solid #a8dfc0;border-radius:9px;padding:9px 13px;font-size:11px;color:#1d6b3e;margin-bottom:16px}
+.fsubmit{width:100%;padding:13px;background:#1d6b3e;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;font-family:'Poppins',sans-serif;transition:.15s}
+.fsubmit:hover{background:#155c32}
+.dinfo-card{background:#fff;border:1px solid #d4edd8;border-radius:16px;padding:20px;margin-bottom:14px}
+.dinfo-card h4{font-size:13px;font-weight:600;color:#1a3d2b;margin-bottom:12px}
+.dinfo-row{display:flex;align-items:flex-start;gap:8px;margin-bottom:8px;font-size:12px;color:#4a8a6a}
+.dinfo-ico{font-size:14px;flex-shrink:0;margin-top:1px}
+
 /* ===== TOAST ===== */
 .toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);background:#1a3d2b;color:#fff;padding:11px 22px;border-radius:10px;font-size:13px;font-weight:500;z-index:9999;opacity:0;transition:.3s;pointer-events:none;white-space:nowrap;box-shadow:0 4px 24px rgba(0,0,0,.25)}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
 /* ===== MODAL ===== */
 .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;display:none;align-items:center;justify-content:center}
 .modal-bg.open{display:flex}
@@ -346,6 +313,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 .modal-close{position:absolute;top:14px;right:16px;background:none;border:none;font-size:20px;cursor:pointer;color:#4a8a6a;line-height:1}
 .modal .fg{margin-bottom:12px}
 .modal-footer{display:flex;gap:10px;margin-top:6px}
+
 /* ===== CHAT PANEL ===== */
 .chat-panel{position:fixed;bottom:84px;right:20px;width:300px;background:#fff;border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,.18);z-index:400;display:none;flex-direction:column;overflow:hidden;border:1px solid #d4edd8}
 .chat-panel.open{display:flex}
@@ -357,14 +325,10 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 .chat-input-row{display:flex;border-top:1px solid #d4edd8}
 .chat-input-row input{flex:1;border:none;padding:10px 12px;font-size:12px;outline:none;font-family:'Inter',sans-serif}
 .chat-input-row button{background:#1d6b3e;border:none;color:#fff;padding:0 14px;cursor:pointer;font-size:14px}
-.fgrid2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
-.fnote{background:#e8f5ee;border:1px solid #a8dfc0;border-radius:9px;padding:9px 13px;font-size:11px;color:#1d6b3e;margin-bottom:16px}
-.fsubmit{width:100%;padding:13px;background:#1d6b3e;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;font-family:'Poppins',sans-serif;transition:.15s}
-.fsubmit:hover{background:#155c32}
-.dinfo-card{background:#fff;border:1px solid #d4edd8;border-radius:16px;padding:20px;margin-bottom:14px}
-.dinfo-card h4{font-size:13px;font-weight:600;color:#1a3d2b;margin-bottom:12px}
-.dinfo-row{display:flex;align-items:flex-start;gap:8px;margin-bottom:8px;font-size:12px;color:#4a8a6a}
-.dinfo-ico{font-size:14px;flex-shrink:0;margin-top:1px}
+
+/* ===== EMPTY STATE ===== */
+.empty-state{text-align:center;padding:32px 16px;color:#4a8a6a;font-size:13px}
+.empty-state .ico{font-size:32px;margin-bottom:10px}
 
 /* ===== RESPONSIVE ===== */
 @media(max-width:900px){
@@ -373,7 +337,6 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
   .hero h1{font-size:26px}
   .footer-grid{grid-template-columns:1fr 1fr}
   .denuncia-grid{grid-template-columns:1fr}
-  .lists-grid{grid-template-columns:1fr}
 }
 @media(max-width:640px){
   .navlinks{display:none}
@@ -403,9 +366,9 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
         </div>
       </a>
       <div class="navlinks">
-        <a class="nl active" data-page="home" href="#" onclick="showPage('home');return false">Inicio</a>
+        <a class="nl active" href="#" onclick="showPage('home');return false">Inicio</a>
         <a class="nl" href="noticias/index.html">Noticias</a>
-        <a class="nl" data-page="denuncia" href="#" onclick="showPage('denuncia');return false">Denuncias</a>
+        <a class="nl" href="#" onclick="showPage('denuncia');return false">Denuncias</a>
         <a class="nl" href="tramites/index.html">Trámites</a>
         <a class="nl" href="agenda/index.html">Agenda</a>
         <a class="nl" href="transparencia/index.html">Transparencia</a>
@@ -418,13 +381,8 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
     </div>
   </nav>
 
-  <div class="alert-bar">
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-    <strong style="margin-right:4px">ALERTAS ACTIVAS:</strong>
-    <span class="alert-pill">⚠ Quema controlada Zona Norte</span>
-    <span class="alert-pill">🌊 Preventiva: Río Turbio</span>
-    <span class="alert-pill">🌡 Calor extremo: hidratación</span>
-  </div>
+  <!-- ALERTAS DINÁMICAS -->
+  <div id="alert-bar" class="alert-bar" style="display:none" role="alert" aria-live="polite"></div>
 
   <div class="hero-wrap">
     <div class="hero">
@@ -443,20 +401,20 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
               Presentar Denuncia
             </button>
-            <button class="btn-s" onclick="toast('Trámites en línea — próximamente')">
+            <a class="btn-s" href="tramites/index.html">
               Ver Trámites
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-            </button>
+            </a>
           </div>
-          <div class="hero-stats">
-            <div><div class="stat-v">7</div><div class="stat-l">Direcciones activas</div></div>
+          <div class="hero-stats" id="hero-stats">
+            <div><div class="stat-v" id="stat-consejos">—</div><div class="stat-l">Consejos comunales</div></div>
             <div><div class="stat-v">24/7</div><div class="stat-l">Recepción denuncias</div></div>
-            <div><div class="stat-v">100%</div><div class="stat-l">Compromiso ambiental</div></div>
+            <div><div class="stat-v" id="stat-empresas">—</div><div class="stat-l">Empresas registradas</div></div>
           </div>
         </div>
 
         <!-- PANEL SIGAP DERECHA -->
-        <div class="hero-panel">
+        <div class="hero-panel" aria-hidden="true">
           <div class="panel-bar">
             <div class="pdot" style="background:rgba(255,255,255,.55)"></div>
             <div class="pdot" style="background:rgba(255,255,255,.35)"></div>
@@ -464,54 +422,8 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
             <span class="panel-title">SIGAP · MONITOR AMBIENTAL v3.0</span>
             <span class="plive"><span style="width:6px;height:6px;background:#4ade80;border-radius:50%;display:inline-block;animation:pulse 2s infinite"></span> EN LÍNEA</span>
           </div>
-          <div class="panel-body">
-            <div class="mc">
-              <div class="mc-lbl">CALIDAD AIRE</div>
-              <div class="mc-val">87<span class="mc-unit">%</span></div>
-              <div class="mc-sub" style="color:#4ade80">↑ mejora continua</div>
-            </div>
-            <div class="mc">
-              <div class="mc-lbl">COBERTURA VERDE</div>
-              <div class="mc-val">1.2<span class="mc-unit">k Ha</span></div>
-              <div class="mc-sub" style="color:#4ade80">↑ +340 Ha reforestadas</div>
-            </div>
-            <div class="mc mc-blue">
-              <div class="mc-lbl">DENUNCIAS ACTIVAS</div>
-              <div class="mc-val">12<span class="mc-unit"> casos</span></div>
-              <div class="mc-sub">→ en proceso</div>
-            </div>
-            <div class="mc mc-blue">
-              <div class="mc-lbl">TRÁMITES PENDIENTES</div>
-              <div class="mc-val">7<span class="mc-unit"> solicitudes</span></div>
-              <div class="mc-sub">→ en revisión</div>
-            </div>
-            <div class="bar-sec">
-              <div class="bar-lbl-top">ACTIVIDADES SIGAP — AVANCE MENSUAL</div>
-              <div class="bar-row">
-                <span class="bar-name">Planificac.</span>
-                <div class="bar-track"><div class="bar-fill" style="width:85%;background:#4ade80"></div></div>
-                <span class="bar-pct" style="color:#4ade80">85%</span>
-              </div>
-              <div class="bar-row">
-                <span class="bar-name">Ejecución</span>
-                <div class="bar-track"><div class="bar-fill" style="width:72%;background:#60b8f0"></div></div>
-                <span class="bar-pct" style="color:#60b8f0">72%</span>
-              </div>
-              <div class="bar-row">
-                <span class="bar-name">Control</span>
-                <div class="bar-track"><div class="bar-fill" style="width:91%;background:#eea82a"></div></div>
-                <span class="bar-pct" style="color:#eea82a">91%</span>
-              </div>
-            </div>
-            <div class="sys-row">
-              <div class="sys-top">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#4ac9e3" stroke-width="2" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-                SYS MONITOR · IAGAMI
-                <span style="width:5px;height:5px;background:#4ade80;border-radius:50%;margin-left:auto;animation:pulse 2s infinite;display:inline-block"></span>
-              </div>
-              <div class="sys-line">SYS.ENV › status: ONLINE · uptime: 99.97% · CPU: 23%</div>
-              <div class="sys-line2">ENV_INDEX: 0.87 · SIGAP: running · ALERTS: 3 activas</div>
-            </div>
+          <div class="panel-body" id="hero-panel-body">
+            <!-- Populated by renderHeroPanel() -->
           </div>
         </div>
 
@@ -532,38 +444,65 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
         <p>Accede a los servicios institucionales del municipio desde cualquier dispositivo</p>
       </div>
       <div class="svc-grid">
-        <div class="svc-card" onclick="showPage('denuncia')"><div class="svc-ico" style="background:#fee2e2">🚨</div><div class="svc-name">Presentar Denuncia</div><div class="svc-desc">Reporta problemas ambientales</div></div>
-        <div class="svc-card" onclick="window.location='tramites/index.html'"><div class="svc-ico" style="background:#dbeafe">📋</div><div class="svc-name">Trámites en Línea</div><div class="svc-desc">Permisos y certificaciones</div></div>
-        <div class="svc-card" onclick="toast('Multas ambientales — próximamente')"><div class="svc-ico" style="background:#fef3c7">⚖️</div><div class="svc-name">Multas Ambientales</div><div class="svc-desc">Consulta y paga multas</div></div>
-        <div class="svc-card" onclick="toast('Atención ciudadana — próximamente')"><div class="svc-ico" style="background:#f3e8ff">👥</div><div class="svc-name">Atención Ciudadana</div><div class="svc-desc">Consultas y seguimiento</div></div>
-        <div class="svc-card" onclick="toast('Transparencia — próximamente')"><div class="svc-ico" style="background:#ccfbf1">🏛️</div><div class="svc-name">Transparencia</div><div class="svc-desc">Información institucional</div></div>
-        <div class="svc-card" onclick="window.location='agenda/index.html'"><div class="svc-ico" style="background:#e0f2fe">📅</div><div class="svc-name">Agenda SIGAP</div><div class="svc-desc">Actividades programadas</div></div>
-        <div class="svc-card" onclick="toast('Registro de empresa — próximamente')"><div class="svc-ico" style="background:#dcfce7">🏢</div><div class="svc-name">Registro Empresa</div><div class="svc-desc">Registro ambiental</div></div>
-        <div class="svc-card" onclick="toast('Registro comunal — próximamente')"><div class="svc-ico" style="background:#fce7f3">🌿</div><div class="svc-name">Registro Comunal</div><div class="svc-desc">Consejos comunales</div></div>
+        <a class="svc-card" href="#" onclick="showPage('denuncia');return false">
+          <div class="svc-ico" style="background:#fee2e2">🚨</div>
+          <div class="svc-name">Presentar Denuncia</div>
+          <div class="svc-desc">Reporta problemas ambientales</div>
+        </a>
+        <a class="svc-card" href="tramites/index.html">
+          <div class="svc-ico" style="background:#dbeafe">📋</div>
+          <div class="svc-name">Trámites en Línea</div>
+          <div class="svc-desc">Permisos y certificaciones</div>
+        </a>
+        <a class="svc-card" href="tramites/index.html">
+          <div class="svc-ico" style="background:#fef3c7">⚖️</div>
+          <div class="svc-name">Multas Ambientales</div>
+          <div class="svc-desc">Consulta expedientes</div>
+        </a>
+        <a class="svc-card" href="#" onclick="showPage('denuncia');return false">
+          <div class="svc-ico" style="background:#f3e8ff">👥</div>
+          <div class="svc-name">Atención Ciudadana</div>
+          <div class="svc-desc">Consultas y seguimiento</div>
+        </a>
+        <a class="svc-card" href="transparencia/index.html">
+          <div class="svc-ico" style="background:#ccfbf1">🏛️</div>
+          <div class="svc-name">Transparencia</div>
+          <div class="svc-desc">Información institucional</div>
+        </a>
+        <a class="svc-card" href="agenda/index.html">
+          <div class="svc-ico" style="background:#e0f2fe">📅</div>
+          <div class="svc-name">Agenda SIGAP</div>
+          <div class="svc-desc">Actividades programadas</div>
+        </a>
+        <a class="svc-card" href="empresas/index.html">
+          <div class="svc-ico" style="background:#dcfce7">🏢</div>
+          <div class="svc-name">Registro Empresa</div>
+          <div class="svc-desc">Registro ambiental</div>
+        </a>
+        <a class="svc-card" href="consejos-comunales/index.html">
+          <div class="svc-ico" style="background:#fce7f3">🌿</div>
+          <div class="svc-name">Registro Comunal</div>
+          <div class="svc-desc">Consejos comunales</div>
+        </a>
       </div>
     </div>
   </div>
 
-  <!-- INDICADORES -->
+  <!-- INDICADORES DINÁMICOS -->
   <div class="sec-wrap2">
     <div class="section">
       <div class="sec-head">
         <div class="sec-tag">INDICADORES AMBIENTALES</div>
         <h2>Estado del medio ambiente en Iribarren</h2>
-        <p>Datos del monitoreo ambiental municipal en tiempo real</p>
+        <p>Datos del monitoreo ambiental municipal actualizados desde el sistema SIGAP</p>
       </div>
-      <div class="ind-grid">
-        <div class="ind-card"><div class="ind-ico">💨</div><div class="ind-val">87<span class="ind-unit">%</span></div><div class="ind-name">Calidad del Aire</div><div class="ind-t" style="color:#16a34a">↑ mejora</div></div>
-        <div class="ind-card"><div class="ind-ico">💧</div><div class="ind-val">72<span class="ind-unit">%</span></div><div class="ind-name">Calidad del Agua</div><div class="ind-t" style="color:#64748b">— estable</div></div>
-        <div class="ind-card"><div class="ind-ico">🌿</div><div class="ind-val">1.2<span class="ind-unit">k Ha</span></div><div class="ind-name">Áreas verdes</div><div class="ind-t" style="color:#16a34a">↑ mejora</div></div>
-        <div class="ind-card"><div class="ind-ico">♻️</div><div class="ind-val">43<span class="ind-unit">%</span></div><div class="ind-name">Reciclaje</div><div class="ind-t" style="color:#16a34a">↑ mejora</div></div>
-        <div class="ind-card"><div class="ind-ico">🌳</div><div class="ind-val">340<span class="ind-unit"> Ha</span></div><div class="ind-name">Reforestación</div><div class="ind-t" style="color:#64748b">— estable</div></div>
-        <div class="ind-card"><div class="ind-ico">📊</div><div class="ind-val">95<span class="ind-unit">%</span></div><div class="ind-name">Gestión inst.</div><div class="ind-t" style="color:#16a34a">↑ mejora</div></div>
+      <div id="home-indicadores-grid" class="ind-grid">
+        <!-- Populated by renderHomeIndicadores() -->
       </div>
     </div>
   </div>
 
-  <!-- NOTICIAS -->
+  <!-- NOTICIAS DINÁMICAS -->
   <div class="sec-wrap3">
     <div class="section">
       <div class="sec-head">
@@ -571,27 +510,19 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
         <h2>Últimas noticias de IAGAMI</h2>
         <p>Información institucional y ambiental del municipio</p>
       </div>
-      <div class="news-grid">
-        <div class="news-card">
-          <div class="news-img" style="background:linear-gradient(135deg,#dcf5e8,#a8dfc0)">
-            <img src="assets/images/noticia-reforestacion.jpg" alt="Reforestación" onerror="this.style.display='none'"/>
-            🌿
-          </div>
-          <div class="news-body"><span class="news-cat">Medio Ambiente</span><div class="news-title">Jornada de reforestación en el Parque del Este beneficia 200 familias</div><div class="news-date">28 mayo 2026</div></div>
-        </div>
-        <div class="news-card">
-          <div class="news-img" style="background:linear-gradient(135deg,#dbeafe,#bfdbfe)">💧</div>
-          <div class="news-body"><span class="news-cat" style="background:#dbeafe;color:#1e40af">Comunidad</span><div class="news-title">Nuevo sistema de monitoreo de calidad del agua en el Río Turbio</div><div class="news-date">25 mayo 2026</div></div>
-        </div>
-        <div class="news-card">
-          <div class="news-img" style="background:linear-gradient(135deg,#fef3c7,#fde68a)">📋</div>
-          <div class="news-body"><span class="news-cat" style="background:#fef3c7;color:#92400e">Normativa</span><div class="news-title">IAGAMI actualiza reglamento de permisos para actividades industriales</div><div class="news-date">20 mayo 2026</div></div>
-        </div>
+      <div id="home-noticias-grid" class="news-grid">
+        <!-- Populated by renderHomeNoticias() -->
+      </div>
+      <div class="ver-mas-row">
+        <a class="btn-ver-mas" href="noticias/index.html">
+          Ver todas las noticias
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
       </div>
     </div>
   </div>
 
-  <!-- PROYECTOS -->
+  <!-- PROYECTOS DINÁMICOS -->
   <div class="sec-wrap2">
     <div class="section">
       <div class="sec-head">
@@ -599,27 +530,19 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
         <h2>Proyectos en ejecución</h2>
         <p>Iniciativas activas de gestión y restauración ambiental</p>
       </div>
-      <div class="proj-grid">
-        <div class="proj-card">
-          <div class="proj-img" style="background:linear-gradient(135deg,#dcf5e8,#a8dfc0)">
-            <img src="assets/images/proyecto-reforestacion.jpg" alt="Reforestación Terepaima" onerror="this.style.display='none'"/>
-            🌳
-          </div>
-          <div class="proj-body"><span class="ps ps-exec">En Ejecución</span><div class="proj-name">Reforestación Terepaima Norte</div><div class="proj-bar"><div class="proj-fill" style="width:68%"></div></div><div class="proj-pct">68% · 340 Ha plantadas</div></div>
-        </div>
-        <div class="proj-card">
-          <div class="proj-img" style="background:linear-gradient(135deg,#dbeafe,#bfdbfe)">💧</div>
-          <div class="proj-body"><span class="ps ps-exec">En Ejecución</span><div class="proj-name">Recuperación Río Turbio Sector 3</div><div class="proj-bar"><div class="proj-fill" style="width:45%"></div></div><div class="proj-pct">45% · 12 km recuperados</div></div>
-        </div>
-        <div class="proj-card">
-          <div class="proj-img" style="background:linear-gradient(135deg,#fef3c7,#fde68a)">♻️</div>
-          <div class="proj-body"><span class="ps ps-done">Completado</span><div class="proj-name">Planta de Reciclaje El Cují</div><div class="proj-bar"><div class="proj-fill" style="width:100%;background:#16a34a"></div></div><div class="proj-pct">100% · 2,400 familias beneficiadas</div></div>
-        </div>
+      <div id="home-proyectos-grid" class="proj-grid">
+        <!-- Populated by renderHomeProyectos() -->
+      </div>
+      <div class="ver-mas-row">
+        <a class="btn-ver-mas" href="proyectos/index.html">
+          Ver todos los proyectos
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
       </div>
     </div>
   </div>
 
-  <!-- AGENDA -->
+  <!-- AGENDA DINÁMICA -->
   <div class="sec-wrap3">
     <div class="section">
       <div class="sec-head">
@@ -627,11 +550,14 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
         <h2>Próximas actividades programadas</h2>
         <p>Eventos, talleres, inspecciones y jornadas institucionales</p>
       </div>
-      <div class="agenda-grid">
-        <div class="ev-card"><div class="ev-date"><div class="ev-day">05</div><div class="ev-mon">Jun</div></div><div><span class="ev-tipo">Taller</span><div class="ev-title">Educación ambiental escolar</div><div class="ev-place">📍 UPEL Barquisimeto</div></div></div>
-        <div class="ev-card"><div class="ev-date"><div class="ev-day">12</div><div class="ev-mon">Jun</div></div><div><span class="ev-tipo">Inspección</span><div class="ev-title">Monitoreo Zona Industrial Norte</div><div class="ev-place">📍 Parroquia Juan de Villegas</div></div></div>
-        <div class="ev-card"><div class="ev-date"><div class="ev-day">18</div><div class="ev-mon">Jun</div></div><div><span class="ev-tipo">Jornada</span><div class="ev-title">Campaña de reforestación comunitaria</div><div class="ev-place">📍 Parroquia Santa Rosa</div></div></div>
-        <div class="ev-card"><div class="ev-date"><div class="ev-day">25</div><div class="ev-mon">Jun</div></div><div><span class="ev-tipo">Reunión</span><div class="ev-title">Mesa técnica consejos comunales</div><div class="ev-place">📍 Sede IAGAMI</div></div></div>
+      <div id="home-agenda-grid" class="agenda-grid">
+        <!-- Populated by renderHomeAgenda() -->
+      </div>
+      <div class="ver-mas-row">
+        <a class="btn-ver-mas" href="agenda/index.html">
+          Ver agenda completa
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
       </div>
     </div>
   </div>
@@ -659,18 +585,19 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
           <h4>Servicios</h4>
           <ul>
             <li onclick="showPage('denuncia')">Presentar Denuncia</li>
-            <li onclick="toast('Trámites en línea — próximamente')">Trámites en Línea</li>
-            <li onclick="toast('Consulta de multas — próximamente')">Consulta de Multas</li>
-            <li onclick="toast('Atención ciudadana — próximamente')">Atención Ciudadana</li>
+            <li><a href="tramites/index.html">Trámites en Línea</a></li>
+            <li><a href="tramites/index.html">Consulta de Multas</a></li>
+            <li onclick="showPage('denuncia')">Atención Ciudadana</li>
           </ul>
         </div>
         <div class="footer-col">
           <h4>Institución</h4>
           <ul>
-            <li onclick="toast('Organización — próximamente')">Organización</li>
-            <li onclick="toast('Transparencia — próximamente')">Transparencia</li>
-            <li onclick="toast('Noticias — próximamente')">Noticias</li>
-            <li onclick="toast('Agenda SIGAP — próximamente')">Agenda SIGAP</li>
+            <li><a href="organizacion/index.html">Organización</a></li>
+            <li><a href="transparencia/index.html">Transparencia</a></li>
+            <li><a href="noticias/index.html">Noticias</a></li>
+            <li><a href="agenda/index.html">Agenda SIGAP</a></li>
+            <li><a href="proyectos/index.html">Proyectos</a></li>
           </ul>
         </div>
         <div class="footer-col">
@@ -719,8 +646,8 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
       <div class="denuncia-grid">
         <div class="dform">
           <div class="fg">
-            <label class="flabel">Tipo de Denuncia *</label>
-            <select class="fselect">
+            <label class="flabel" for="den-tipo">Tipo de Denuncia *</label>
+            <select id="den-tipo" class="fselect">
               <option value="">Selecciona el tipo...</option>
               <option>Contaminación del Agua</option>
               <option>Contaminación del Aire</option>
@@ -733,18 +660,18 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
           </div>
           <div class="fg">
             <div class="flabel-row">
-              <label class="flabel" style="margin:0">Descripción de los hechos *</label>
+              <label class="flabel" for="den-desc" style="margin:0">Descripción de los hechos *</label>
               <button class="ai-btn" onclick="analizarIA()">✨ Analizar con IA</button>
             </div>
-            <textarea class="ftextarea" placeholder="Describe detalladamente lo que observas: qué pasa, desde cuándo, qué está siendo afectado..."></textarea>
+            <textarea id="den-desc" class="ftextarea" placeholder="Describe detalladamente lo que observas: qué pasa, desde cuándo, qué está siendo afectado..."></textarea>
           </div>
-          <div class="ai-box">
+          <div id="ai-box" class="ai-box" role="status">
             <span>⚠️</span>
             <span><strong>Análisis IA activo:</strong> Prioridad alta detectada — posible afectación hídrica al Río Turbio. Área competente: Dirección de Calidad Ambiental. Riesgos identificados: contaminación fauna acuática, salud pública.</span>
           </div>
           <div class="fg">
             <div class="flabel-row">
-              <label class="flabel" style="margin:0">Ubicación del hecho</label>
+              <label class="flabel" for="input-ubicacion" style="margin:0">Ubicación del hecho</label>
               <button class="ai-btn" onclick="getGPS()">📍 Mi ubicación GPS</button>
             </div>
             <input id="input-ubicacion" class="finput" placeholder="Dirección, coordenadas o referencia del lugar"/>
@@ -752,10 +679,10 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
           <div class="fg">
             <label class="flabel">Datos del denunciante</label>
             <div class="fgrid2">
-              <input class="finput" placeholder="Nombre completo *"/>
-              <input class="finput" type="email" placeholder="Correo electrónico"/>
-              <input class="finput" placeholder="Teléfono"/>
-              <input class="finput" placeholder="Cédula de identidad"/>
+              <input id="den-nombre" class="finput" placeholder="Nombre completo *"/>
+              <input id="den-email" class="finput" type="email" placeholder="Correo electrónico"/>
+              <input id="den-tel" class="finput" placeholder="Teléfono"/>
+              <input id="den-cedula" class="finput" placeholder="Cédula de identidad"/>
             </div>
           </div>
           <div class="fnote">🔒 Tu identidad es <strong>confidencial</strong>. La denuncia es analizada automáticamente por IAGAMI IA y asignada al área competente. Número de caso generado al enviar.</div>
@@ -793,103 +720,135 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 </div><!-- /page-denuncia -->
 
 
-<!-- ===== ADMIN ===== -->
-<div id="page-admin" class="page">
-  <div class="topbar">IAGAMI — Panel de Administración Institucional SIGAP · Solo personal autorizado</div>
-  <nav class="nav">
-    <div class="navinner">
-      <a class="logo" href="#" onclick="showPage('home');return false">
-        <div class="logo-img">
-          <img src="assets/images/logo-iagami.png" alt="Logo IAGAMI" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"/>
-          <svg style="display:none" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        </div>
-        <div><div class="logo-text">IAGAMI · Admin</div><div class="logo-sub">Panel de Control SIGAP</div></div>
-      </a>
-      <div class="navlinks">
-        <a class="nl active" href="#">Dashboard</a>
-        <a class="nl" href="#" onclick="toast('Módulo Noticias — próximamente');return false">Noticias</a>
-        <a class="nl" href="#" onclick="toast('Módulo Denuncias — próximamente');return false">Denuncias</a>
-        <a class="nl" href="#" onclick="toast('Módulo Trámites — próximamente');return false">Trámites</a>
-        <a class="nl" href="#" onclick="toast('Módulo Multas — próximamente');return false">Multas</a>
-        <a class="nl" href="#" onclick="toast('Módulo Proyectos — próximamente');return false">Proyectos</a>
-        <a class="nl" href="#" onclick="toast('Módulo SIGAP — próximamente');return false">SIGAP</a>
-        <a class="nl" href="#" onclick="toast('Módulo Indicadores — próximamente');return false">Indicadores</a>
-      </div>
-      <div class="navr">
-        <button class="navbtn-o" onclick="showPage('home')">← Portal</button>
-        <button class="navbtn" onclick="showPage('home')">Cerrar sesión</button>
-      </div>
-    </div>
-  </nav>
-  <div class="admin-wrap">
-    <div class="admin-header">
-      <h1>Dashboard Institucional</h1>
-      <p>Panel de Control IAGAMI · SIGAP — Administrador del sistema</p>
-    </div>
-    <div class="stat-grid">
-      <div class="stat-card"><div class="stat-ico" style="background:#fee2e2">⚠️</div><div class="stat-num">12</div><div class="stat-lbl">Denuncias pendientes</div></div>
-      <div class="stat-card"><div class="stat-ico" style="background:#dbeafe">📋</div><div class="stat-num">7</div><div class="stat-lbl">Trámites recibidos</div></div>
-      <div class="stat-card"><div class="stat-ico" style="background:#fef3c7">⚖️</div><div class="stat-num">3</div><div class="stat-lbl">Multas pendientes</div></div>
-      <div class="stat-card"><div class="stat-ico" style="background:#dcfce7">✅</div><div class="stat-num">18</div><div class="stat-lbl">Multas pagadas</div></div>
-      <div class="stat-card"><div class="stat-ico" style="background:#fed7aa">🔔</div><div class="stat-num">2</div><div class="stat-lbl">Alertas activas</div></div>
-      <div class="stat-card"><div class="stat-ico" style="background:#dcf5e8">📊</div><div class="stat-num">5</div><div class="stat-lbl">Proyectos activos</div></div>
-    </div>
-    <div class="mod-grid">
-      <div class="mod-card"><div class="mod-ico">📰</div><div><div class="mod-name">Gestión de Noticias</div><div class="mod-desc">Publicar y administrar</div></div></div>
-      <div class="mod-card"><div class="mod-ico">⚠️</div><div><div class="mod-name">Denuncias</div><div class="mod-desc">Gestionar reportes ciudadanos</div></div></div>
-      <div class="mod-card"><div class="mod-ico">📋</div><div><div class="mod-name">Trámites</div><div class="mod-desc">Revisar solicitudes</div></div></div>
-      <div class="mod-card"><div class="mod-ico">⚖️</div><div><div class="mod-name">Multas</div><div class="mod-desc">Gestionar expedientes</div></div></div>
-      <div class="mod-card"><div class="mod-ico">📈</div><div><div class="mod-name">Proyectos SIGAP</div><div class="mod-desc">Actividades programadas</div></div></div>
-      <div class="mod-card"><div class="mod-ico">🔔</div><div><div class="mod-name">Alertas y Agenda</div><div class="mod-desc">Publicar alertas</div></div></div>
-      <div class="mod-card"><div class="mod-ico">📊</div><div><div class="mod-name">Indicadores</div><div class="mod-desc">Actualizar métricas</div></div></div>
-      <div class="mod-card"><div class="mod-ico">🏢</div><div><div class="mod-name">Empresas</div><div class="mod-desc">Registros y permisos</div></div></div>
-    </div>
-    <div class="lists-grid">
-      <div class="list-card">
-        <h3>Últimas Denuncias <span class="see-all" onclick="toast('Ver todas las denuncias — próximamente')">Ver todas →</span></h3>
-        <div class="list-row"><div><div class="lr-main">Carlos Medina</div><div class="lr-sub">contaminacion_agua · Catedral</div></div><span class="badge b-amber">pendiente</span></div>
-        <div class="list-row"><div><div class="lr-main">María González</div><div class="lr-sub">deforestacion · Tamaca</div></div><span class="badge b-blue">en revisión</span></div>
-        <div class="list-row"><div><div class="lr-main">Luis Rodríguez</div><div class="lr-sub">quema · Santa Rosa</div></div><span class="badge b-green">resuelta</span></div>
-        <div class="list-row"><div><div class="lr-main">Ana Pérez</div><div class="lr-sub">residuos_solidos · El Cují</div></div><span class="badge b-purple">en proceso</span></div>
-      </div>
-      <div class="list-card">
-        <h3>Últimos Trámites <span class="see-all" onclick="toast('Ver todos los trámites — próximamente')">Ver todos →</span></h3>
-        <div class="list-row"><div><div class="lr-main">Inversiones C.A.</div><div class="lr-sub" style="font-family:monospace;font-size:10px">TRA-293847 · Permiso Ambiental</div></div><span class="badge b-blue">en revisión</span></div>
-        <div class="list-row"><div><div class="lr-main">Constructora XYZ</div><div class="lr-sub" style="font-family:monospace;font-size:10px">TRA-293821 · Estudio Ambiental</div></div><span class="badge b-amber">recibido</span></div>
-        <div class="list-row"><div><div class="lr-main">Farmacia Norte</div><div class="lr-sub" style="font-family:monospace;font-size:10px">TRA-293798 · Certificación</div></div><span class="badge b-green">aprobado</span></div>
-        <div class="list-row"><div><div class="lr-main">Empresa Minera S.A.</div><div class="lr-sub" style="font-family:monospace;font-size:10px">TRA-293776 · Licencia</div></div><span class="badge b-red">rechazado</span></div>
-      </div>
+<!-- ===== MODAL LOGIN ===== -->
+<div id="modal-login" class="modal-bg" onclick="if(event.target===this)closeModal('modal-login')" role="dialog" aria-modal="true" aria-labelledby="login-title">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-login')" aria-label="Cerrar">×</button>
+    <h3 id="login-title">Acceder</h3>
+    <p>Acceso para funcionarios y personal autorizado de IAGAMI</p>
+    <div class="fg"><label class="flabel" for="login-user">Usuario</label><input id="login-user" class="finput" placeholder="usuario@iagami.gob.ve" autocomplete="username"/></div>
+    <div class="fg"><label class="flabel" for="login-pass">Contraseña</label><input id="login-pass" class="finput" type="password" placeholder="••••••••" autocomplete="current-password"/></div>
+    <div class="modal-footer">
+      <button class="fsubmit" style="flex:1" onclick="window.location='admin/index.html'">Iniciar sesión</button>
     </div>
   </div>
-</div><!-- /page-admin -->
+</div>
+
+<!-- ===== MODAL DENUNCIA OK ===== -->
+<div id="modal-denuncia-ok" class="modal-bg" onclick="if(event.target===this)closeModal('modal-denuncia-ok')" role="dialog" aria-modal="true" aria-labelledby="denuncia-ok-title">
+  <div class="modal" style="text-align:center">
+    <button class="modal-close" onclick="closeModal('modal-denuncia-ok')" aria-label="Cerrar">×</button>
+    <div style="font-size:48px;margin-bottom:12px" aria-hidden="true">✅</div>
+    <h3 id="denuncia-ok-title">¡Denuncia enviada!</h3>
+    <p style="margin-bottom:8px">Tu caso ha sido registrado y asignado al área competente.</p>
+    <p id="modal-caso-num" style="font-size:12px;color:#1d6b3e;font-weight:700;margin-bottom:4px"></p>
+    <p style="font-size:11px;color:#4a8a6a">Recibirás respuesta en el tiempo establecido según la prioridad asignada.</p>
+    <button class="fsubmit" style="margin-top:18px" onclick="closeModal('modal-denuncia-ok')">Aceptar</button>
+  </div>
+</div>
+
+<!-- ===== CHAT PANEL ===== -->
+<div id="chat-panel" class="chat-panel" role="dialog" aria-label="Asistente virtual Romina">
+  <div class="chat-head">
+    <span>💬 Romina — Asistente IAGAMI</span>
+    <button class="chat-close" onclick="toggleChat()" aria-label="Cerrar chat">×</button>
+  </div>
+  <div class="chat-msgs" id="chat-msgs" aria-live="polite">
+    <div class="chat-bubble">Hola, soy Romina 👋 Asistente virtual de IAGAMI. ¿En qué puedo ayudarte hoy?</div>
+  </div>
+  <div class="chat-input-row">
+    <input id="chat-input" placeholder="Escribe tu consulta…" aria-label="Mensaje para Romina" onkeydown="if(event.key==='Enter')sendChat()"/>
+    <button onclick="sendChat()" aria-label="Enviar mensaje">➤</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="app-toast" class="toast" role="status" aria-live="polite"></div>
+
+<!-- CMS Database -->
+<script src="cms/db.js"></script>
 
 <script>
-/* ===== ROUTING ===== */
+'use strict';
+
+/* ─── HELPERS ─── */
+const MESES_CORTO = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+const MESES_LARGO = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+
+function fmtFecha(isoStr) {
+  if (!isoStr) return '';
+  const d = new Date(isoStr + 'T12:00:00');
+  return d.getDate() + ' ' + MESES_CORTO[d.getMonth()] + ' ' + d.getFullYear();
+}
+
+function fmtDiaMes(isoStr) {
+  if (!isoStr) return { dia: '--', mes: '---' };
+  const d = new Date(isoStr + 'T12:00:00');
+  return { dia: d.getDate(), mes: MESES_CORTO[d.getMonth()].toUpperCase() };
+}
+
+function catColor(categoria) {
+  const map = {
+    'Medio Ambiente': 'background:#e8f5ee;color:#166534',
+    'Comunidad':      'background:#dbeafe;color:#1e40af',
+    'Normativa':      'background:#fef3c7;color:#92400e',
+    'Educación':      'background:#f3e8ff;color:#6b21a8',
+    'Institucional':  'background:#f1f5f9;color:#475569'
+  };
+  return map[categoria] || 'background:#e8f5ee;color:#166534';
+}
+
+function catIcon(categoria) {
+  const map = {
+    'Medio Ambiente':'🌿','Comunidad':'💧','Normativa':'📋','Educación':'📚','Institucional':'🏛️'
+  };
+  return map[categoria] || '📰';
+}
+
+function estadoProy(estado) {
+  if (!estado) return { cls:'ps-plan', label:'Planificado' };
+  if (estado === 'En Ejecución') return { cls:'ps-exec', label:'En Ejecución' };
+  if (estado === 'Completado')   return { cls:'ps-done', label:'Completado' };
+  return { cls:'ps-plan', label: estado };
+}
+
+function proyIcon(nombre) {
+  if (!nombre) return '🌳';
+  const n = nombre.toLowerCase();
+  if (n.includes('refores') || n.includes('árbol') || n.includes('arbol')) return '🌳';
+  if (n.includes('río') || n.includes('rio') || n.includes('agua')) return '💧';
+  if (n.includes('recicl')) return '♻️';
+  if (n.includes('parque') || n.includes('verde')) return '🌿';
+  return '🏗️';
+}
+
+function tendIcon(t) {
+  if (t === 'mejora') return { icon:'↑', color:'#16a34a' };
+  if (t === 'deterioro' || t === 'baja') return { icon:'↓', color:'#dc2626' };
+  return { icon:'—', color:'#64748b' };
+}
+
+/* ─── ROUTING ─── */
 function showPage(name) {
   const el = document.getElementById('page-' + name);
   if (!el) { toast('Página no disponible'); return; }
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   el.classList.add('active');
   window.scrollTo({ top: 0, behavior: 'smooth' });
+  document.querySelectorAll('.nl[data-page]').forEach(l => l.classList.toggle('active', l.dataset.page === name));
 }
 
-/* ===== TOAST ===== */
+/* ─── TOAST ─── */
 let toastTimer;
 function toast(msg) {
-  let t = document.getElementById('app-toast');
-  if (!t) {
-    t = document.createElement('div');
-    t.id = 'app-toast';
-    t.className = 'toast';
-    document.body.appendChild(t);
-  }
+  const t = document.getElementById('app-toast');
   t.textContent = msg;
   t.classList.add('show');
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
 }
 
-/* ===== MODALES ===== */
+/* ─── MODALS ─── */
 function openModal(id) {
   const m = document.getElementById(id);
   if (m) m.classList.add('open');
@@ -899,7 +858,7 @@ function closeModal(id) {
   if (m) m.classList.remove('open');
 }
 
-/* ===== CHAT ===== */
+/* ─── CHAT ─── */
 function toggleChat() {
   const p = document.getElementById('chat-panel');
   if (p) p.classList.toggle('open');
@@ -924,19 +883,16 @@ function sendChat() {
   }, 900);
 }
 
-/* ===== IA ANÁLISIS ===== */
+/* ─── IA ANÁLISIS ─── */
 function analizarIA() {
-  const textarea = document.querySelector('.ftextarea');
-  const box = document.querySelector('.ai-box');
-  if (!textarea.value.trim()) {
-    toast('Escribe la descripción antes de analizar');
-    return;
-  }
+  const desc = document.getElementById('den-desc');
+  const box  = document.getElementById('ai-box');
+  if (!desc || !desc.value.trim()) { toast('Escribe la descripción antes de analizar'); return; }
   box.style.display = 'flex';
   toast('✨ Análisis IA completado');
 }
 
-/* ===== GPS ===== */
+/* ─── GPS ─── */
 function getGPS() {
   if (!navigator.geolocation) { toast('GPS no disponible en este dispositivo'); return; }
   toast('Obteniendo ubicación…');
@@ -950,62 +906,266 @@ function getGPS() {
   );
 }
 
-/* ===== ENVIAR DENUNCIA ===== */
+/* ─── ENVIAR DENUNCIA ─── */
 function enviarDenuncia() {
-  const tipo = document.querySelector('.fselect').value;
-  const desc = document.querySelector('.ftextarea').value.trim();
-  const nombre = document.querySelectorAll('.finput')[1] ? document.querySelectorAll('.finput')[1].value.trim() : '';
-  if (!tipo) { toast('⚠ Selecciona el tipo de denuncia'); return; }
-  if (!desc) { toast('⚠ Escribe la descripción del hecho'); return; }
+  const tipo   = document.getElementById('den-tipo').value;
+  const desc   = document.getElementById('den-desc').value.trim();
+  const nombre = document.getElementById('den-nombre').value.trim();
+  if (!tipo)   { toast('⚠ Selecciona el tipo de denuncia'); return; }
+  if (!desc)   { toast('⚠ Escribe la descripción del hecho'); return; }
+  if (!nombre) { toast('⚠ Ingresa tu nombre completo'); return; }
+
+  const item = {
+    tipo,
+    descripcion: desc,
+    nombre,
+    email:     document.getElementById('den-email').value,
+    telefono:  document.getElementById('den-tel').value,
+    cedula:    document.getElementById('den-cedula').value,
+    ubicacion: document.getElementById('input-ubicacion').value,
+    estado:    'pendiente',
+    fecha:     new Date().toISOString().slice(0, 10)
+  };
+  CMSDB.save('denuncias', item);
+
   const num = 'DEN-' + Date.now().toString().slice(-6);
+  const el = document.getElementById('modal-caso-num');
+  if (el) el.textContent = 'Número de caso: ' + num;
   toast('✅ Denuncia enviada · Caso ' + num);
   setTimeout(() => openModal('modal-denuncia-ok'), 400);
-  document.querySelector('.fselect').value = '';
-  document.querySelector('.ftextarea').value = '';
-  document.querySelectorAll('.finput').forEach(i => i.value = '');
-  document.querySelector('.ai-box').style.display = 'none';
+
+  document.getElementById('den-tipo').value    = '';
+  document.getElementById('den-desc').value    = '';
+  document.getElementById('den-nombre').value  = '';
+  document.getElementById('den-email').value   = '';
+  document.getElementById('den-tel').value     = '';
+  document.getElementById('den-cedula').value  = '';
+  document.getElementById('input-ubicacion').value = '';
+  document.getElementById('ai-box').style.display  = 'none';
 }
-</script>
 
-<!-- ===== MODAL LOGIN ===== -->
-<div id="modal-login" class="modal-bg" onclick="if(event.target===this)closeModal('modal-login')">
-  <div class="modal">
-    <button class="modal-close" onclick="closeModal('modal-login')">×</button>
-    <h3>Acceder</h3>
-    <p>Acceso para funcionarios y personal autorizado de IAGAMI</p>
-    <div class="fg"><label class="flabel">Usuario</label><input class="finput" placeholder="usuario@iagami.gob.ve"/></div>
-    <div class="fg"><label class="flabel">Contraseña</label><input class="finput" type="password" placeholder="••••••••"/></div>
-    <div class="modal-footer">
-      <button class="fsubmit" style="flex:1" onclick="toast('Acceso solo disponible para personal autorizado');closeModal('modal-login')">Iniciar sesión</button>
+/* ═══════════════════════════════════════
+   PORTAL DINÁMICO — SECCIONES CMS
+═══════════════════════════════════════ */
+
+function renderAlertBar() {
+  const bar = document.getElementById('alert-bar');
+  if (!bar) return;
+  const today = new Date().toISOString().slice(0, 10);
+  const alertas = CMSDB.getAll('alertas').filter(a => {
+    if (!a.activa) return false;
+    if (a.fecha_fin && a.fecha_fin < today) return false;
+    if (a.fecha_inicio && a.fecha_inicio > today) return false;
+    return true;
+  });
+  if (!alertas.length) { bar.style.display = 'none'; return; }
+  bar.style.display = 'flex';
+  const svgBell = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>`;
+  bar.innerHTML = svgBell + '<strong style="margin-right:4px;flex-shrink:0">ALERTAS ACTIVAS:</strong>' +
+    alertas.map(a => `<span class="alert-pill">${a.mensaje}</span>`).join('');
+}
+
+function renderHeroPanel() {
+  const body = document.getElementById('hero-panel-body');
+  if (!body) return;
+  const inds = CMSDB.getAll('indicadores');
+  const aire  = inds.find(i => i.nombre && i.nombre.toLowerCase().includes('aire'));
+  const agua  = inds.find(i => i.nombre && i.nombre.toLowerCase().includes('agua'));
+  const dens  = CMSDB.getAll('denuncias').filter(d => d.estado === 'pendiente' || !d.estado).length;
+  const trams = CMSDB.getAll('tramites').length;
+
+  const proySeed = CMSDB.getAll('proyectos');
+  const execPct  = proySeed.length ? Math.round(proySeed.reduce((s,p) => s + (p.porcentaje_avance||0), 0) / proySeed.length) : 0;
+
+  body.innerHTML = `
+    <div class="mc">
+      <div class="mc-lbl">CALIDAD AIRE</div>
+      <div class="mc-val">${aire ? aire.valor_actual : '—'}<span class="mc-unit">${aire ? aire.unidad : ''}</span></div>
+      <div class="mc-sub" style="color:#4ade80">↑ mejora continua</div>
     </div>
-  </div>
-</div>
+    <div class="mc">
+      <div class="mc-lbl">CALIDAD AGUA</div>
+      <div class="mc-val">${agua ? agua.valor_actual : '—'}<span class="mc-unit">${agua ? agua.unidad : ''}</span></div>
+      <div class="mc-sub" style="color:#64748b">— monitoreo activo</div>
+    </div>
+    <div class="mc mc-blue">
+      <div class="mc-lbl">DENUNCIAS ACTIVAS</div>
+      <div class="mc-val">${dens}<span class="mc-unit"> casos</span></div>
+      <div class="mc-sub">→ en proceso</div>
+    </div>
+    <div class="mc mc-blue">
+      <div class="mc-lbl">TRÁMITES VIGENTES</div>
+      <div class="mc-val">${trams}<span class="mc-unit"> tipos</span></div>
+      <div class="mc-sub">→ disponibles</div>
+    </div>
+    <div class="bar-sec">
+      <div class="bar-lbl-top">ACTIVIDADES SIGAP — AVANCE PROMEDIO</div>
+      <div class="bar-row">
+        <span class="bar-name">Proyectos</span>
+        <div class="bar-track"><div class="bar-fill" style="width:${execPct}%;background:#4ade80"></div></div>
+        <span class="bar-pct" style="color:#4ade80">${execPct}%</span>
+      </div>
+      <div class="bar-row">
+        <span class="bar-name">Agua</span>
+        <div class="bar-track"><div class="bar-fill" style="width:${agua ? agua.valor_actual : 72}%;background:#60b8f0"></div></div>
+        <span class="bar-pct" style="color:#60b8f0">${agua ? agua.valor_actual : 72}%</span>
+      </div>
+      <div class="bar-row">
+        <span class="bar-name">Aire</span>
+        <div class="bar-track"><div class="bar-fill" style="width:${aire ? aire.valor_actual : 87}%;background:#eea82a"></div></div>
+        <span class="bar-pct" style="color:#eea82a">${aire ? aire.valor_actual : 87}%</span>
+      </div>
+    </div>
+    <div class="sys-row">
+      <div class="sys-top">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#4ac9e3" stroke-width="2" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        SYS MONITOR · IAGAMI
+        <span style="width:5px;height:5px;background:#4ade80;border-radius:50%;margin-left:auto;animation:pulse 2s infinite;display:inline-block"></span>
+      </div>
+      <div class="sys-line">SYS.ENV › status: ONLINE · uptime: 99.97% · CPU: 23%</div>
+      <div class="sys-line2">ENV_INDEX: 0.87 · SIGAP: running · ALERTS: ${CMSDB.getAll('alertas').filter(a=>a.activa).length} activas</div>
+    </div>`;
+}
 
-<!-- ===== MODAL DENUNCIA OK ===== -->
-<div id="modal-denuncia-ok" class="modal-bg" onclick="if(event.target===this)closeModal('modal-denuncia-ok')">
-  <div class="modal" style="text-align:center">
-    <button class="modal-close" onclick="closeModal('modal-denuncia-ok')">×</button>
-    <div style="font-size:48px;margin-bottom:12px">✅</div>
-    <h3>¡Denuncia enviada!</h3>
-    <p style="margin-bottom:8px">Tu caso ha sido registrado y asignado al área competente.</p>
-    <p style="font-size:11px;color:#4a8a6a">Recibirás respuesta en el tiempo establecido según la prioridad asignada.</p>
-    <button class="fsubmit" style="margin-top:18px" onclick="closeModal('modal-denuncia-ok')">Aceptar</button>
-  </div>
-</div>
+function renderHeroStats() {
+  const consejos = CMSDB.getAll('consejos').filter(c => c.estatus === 'Activo').length;
+  const empresas = CMSDB.getAll('empresas').length;
+  const sc = document.getElementById('stat-consejos');
+  const se = document.getElementById('stat-empresas');
+  if (sc) sc.textContent = consejos;
+  if (se) se.textContent = empresas;
+}
 
-<!-- ===== CHAT PANEL ===== -->
-<div id="chat-panel" class="chat-panel">
-  <div class="chat-head">
-    <span>💬 Romina — Asistente IAGAMI</span>
-    <button class="chat-close" onclick="toggleChat()">×</button>
-  </div>
-  <div class="chat-msgs" id="chat-msgs">
-    <div class="chat-bubble">Hola, soy Romina 👋 Asistente virtual de IAGAMI. ¿En qué puedo ayudarte hoy?</div>
-  </div>
-  <div class="chat-input-row">
-    <input id="chat-input" placeholder="Escribe tu consulta…" onkeydown="if(event.key==='Enter')sendChat()"/>
-    <button onclick="sendChat()">➤</button>
-  </div>
-</div>
+function renderHomeIndicadores() {
+  const grid = document.getElementById('home-indicadores-grid');
+  if (!grid) return;
+  const inds = CMSDB.getAll('indicadores');
+  if (!inds.length) {
+    grid.innerHTML = '<div class="empty-state"><div class="ico">📊</div>No hay indicadores configurados.</div>';
+    return;
+  }
+  grid.innerHTML = inds.map(ind => {
+    const t = tendIcon(ind.tendencia);
+    const val = ind.valor_actual !== undefined ? ind.valor_actual : '—';
+    return `<div class="ind-card">
+      <div class="ind-ico">${ind.icono || '📊'}</div>
+      <div class="ind-val">${val}<span class="ind-unit">${ind.unidad || ''}</span></div>
+      <div class="ind-name">${ind.nombre}</div>
+      <div class="ind-t" style="color:${t.color}">${t.icon} ${ind.tendencia || ''}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderHomeNoticias() {
+  const grid = document.getElementById('home-noticias-grid');
+  if (!grid) return;
+  const noticias = CMSDB.getAll('noticias')
+    .filter(n => n.estado === 'publicado')
+    .sort((a, b) => (b.fecha || '').localeCompare(a.fecha || ''))
+    .slice(0, 3);
+  if (!noticias.length) {
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="ico">📰</div>No hay noticias publicadas aún.</div>';
+    return;
+  }
+  grid.innerHTML = noticias.map(n => {
+    const icon = catIcon(n.categoria);
+    const cc   = catColor(n.categoria);
+    const gradMap = {
+      'Medio Ambiente':'linear-gradient(135deg,#dcf5e8,#a8dfc0)',
+      'Comunidad':     'linear-gradient(135deg,#dbeafe,#bfdbfe)',
+      'Normativa':     'linear-gradient(135deg,#fef3c7,#fde68a)',
+      'Educación':     'linear-gradient(135deg,#f3e8ff,#e9d5ff)',
+      'Institucional': 'linear-gradient(135deg,#f1f5f9,#e2e8f0)'
+    };
+    const bg = gradMap[n.categoria] || 'linear-gradient(135deg,#dcf5e8,#a8dfc0)';
+    return `<a class="news-card" href="noticias/index.html">
+      <div class="news-img" style="background:${bg}">
+        ${n.imagen ? `<img src="${n.imagen}" alt="${n.titulo}" loading="lazy"/>` : ''}
+        ${icon}
+      </div>
+      <div class="news-body">
+        <span class="news-cat" style="${cc}">${n.categoria || 'General'}</span>
+        <div class="news-title">${n.titulo}</div>
+        <div class="news-date">${fmtFecha(n.fecha)}</div>
+      </div>
+    </a>`;
+  }).join('');
+}
+
+function renderHomeProyectos() {
+  const grid = document.getElementById('home-proyectos-grid');
+  if (!grid) return;
+  const proyectos = CMSDB.getAll('proyectos').slice(0, 3);
+  if (!proyectos.length) {
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="ico">🌳</div>No hay proyectos registrados aún.</div>';
+    return;
+  }
+  grid.innerHTML = proyectos.map(p => {
+    const { cls, label } = estadoProy(p.estado);
+    const pct  = Math.min(100, Math.max(0, p.porcentaje_avance || 0));
+    const fill = p.estado === 'Completado' ? '#16a34a' : '#1d6b3e';
+    const icon = proyIcon(p.nombre);
+    const gradMap = { 'En Ejecución':'linear-gradient(135deg,#dbeafe,#bfdbfe)', 'Completado':'linear-gradient(135deg,#dcfce7,#bbf7d0)' };
+    const bg = gradMap[p.estado] || 'linear-gradient(135deg,#f1f5f9,#e2e8f0)';
+    return `<a class="proj-card" href="proyectos/index.html">
+      <div class="proj-img" style="background:${bg}">${icon}</div>
+      <div class="proj-body">
+        <span class="ps ${cls}">${label}</span>
+        <div class="proj-name">${p.nombre}</div>
+        <div class="proj-bar"><div class="proj-fill" style="width:${pct}%;background:${fill}"></div></div>
+        <div class="proj-pct">${pct}%${p.beneficiados ? ' · ' + p.beneficiados + ' beneficiados' : ''}</div>
+      </div>
+    </a>`;
+  }).join('');
+}
+
+function renderHomeAgenda() {
+  const container = document.getElementById('home-agenda-grid');
+  if (!container) return;
+  const today  = new Date().toISOString().slice(0, 10);
+  let eventos  = CMSDB.getAll('eventos')
+    .filter(e => e.fecha >= today && e.estado !== 'cancelado')
+    .sort((a, b) => a.fecha.localeCompare(b.fecha))
+    .slice(0, 4);
+
+  if (!eventos.length) {
+    eventos = CMSDB.getAll('eventos')
+      .sort((a, b) => a.fecha.localeCompare(b.fecha))
+      .slice(0, 4);
+  }
+  if (!eventos.length) {
+    container.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="ico">📅</div>No hay eventos programados.</div>';
+    return;
+  }
+  container.innerHTML = eventos.map(e => {
+    const { dia, mes } = fmtDiaMes(e.fecha);
+    const hora = e.hora_inicio ? e.hora_inicio.slice(0, 5) : '';
+    return `<div class="ev-card">
+      <div class="ev-date">
+        <div class="ev-day">${dia}</div>
+        <div class="ev-mon">${mes}</div>
+      </div>
+      <div>
+        <span class="ev-tipo">${e.tipo || 'Evento'}</span>
+        <div class="ev-title">${e.titulo}</div>
+        <div class="ev-place">📍 ${e.lugar || ''}${hora ? ' · ' + hora : ''}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ─── INIT ─── */
+function initPortal() {
+  renderAlertBar();
+  renderHeroPanel();
+  renderHeroStats();
+  renderHomeIndicadores();
+  renderHomeNoticias();
+  renderHomeProyectos();
+  renderHomeAgenda();
+}
+
+document.addEventListener('DOMContentLoaded', initPortal);
+</script>
 </body>
 </html>
