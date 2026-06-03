@@ -1,0 +1,1667 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IAGAMI Admin CMS</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+<script src="../cms/db.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --primary:#1d6b3e;--primary-dark:#0d2d1a;--primary-light:#e8f5ee;
+  --primary-lighter:#f0faf5;--border:#d4edd8;--text:#1a3d2b;--muted:#4a8a6a;
+  --white:#fff;--danger:#dc2626;--warning:#d97706;--sidebar-w:240px;
+}
+body{font-family:'Inter',sans-serif;background:#f8fcfa;color:var(--text);min-height:100vh}
+a{color:inherit;text-decoration:none}
+button{cursor:pointer;font-family:inherit}
+input,select,textarea{font-family:inherit}
+
+/* ── SIDEBAR ── */
+#sidebar{
+  position:fixed;top:0;left:0;width:var(--sidebar-w);height:100vh;
+  background:var(--primary-dark);color:#fff;display:flex;flex-direction:column;
+  z-index:200;overflow-y:auto;transition:transform .25s ease;
+}
+.sidebar-logo{
+  padding:20px 16px 16px;display:flex;align-items:center;gap:10px;
+  border-bottom:1px solid rgba(255,255,255,.1);
+}
+.sidebar-logo svg{flex-shrink:0}
+.sidebar-logo-text{font-family:'Poppins',sans-serif;font-size:15px;font-weight:700;line-height:1.2}
+.sidebar-logo-text span{font-size:11px;font-weight:400;opacity:.7;display:block}
+.sidebar-nav{flex:1;padding:8px 0}
+.nav-item{
+  display:flex;align-items:center;gap:10px;padding:10px 16px;
+  font-size:13.5px;cursor:pointer;transition:background .15s;
+  border:none;background:none;color:#fff;width:100%;text-align:left;
+}
+.nav-item:hover{background:rgba(255,255,255,.08)}
+.nav-item.active{background:var(--primary);border-right:3px solid #5ddb8f}
+.nav-item .nav-icon{font-size:16px;width:20px;text-align:center}
+.sidebar-bottom{padding:12px 16px;border-top:1px solid rgba(255,255,255,.1)}
+.sidebar-bottom a{
+  display:flex;align-items:center;gap:8px;font-size:13px;
+  opacity:.75;padding:8px;border-radius:6px;transition:opacity .15s,background .15s;
+}
+.sidebar-bottom a:hover{opacity:1;background:rgba(255,255,255,.08)}
+
+/* ── OVERLAY ── */
+#overlay{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:190;
+}
+
+/* ── MAIN ── */
+#main{margin-left:var(--sidebar-w);min-height:100vh;display:flex;flex-direction:column}
+
+/* ── TOPBAR ── */
+#topbar{
+  position:sticky;top:0;height:56px;background:#fff;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 24px;gap:16px;z-index:100;
+}
+#hamburger{
+  display:none;background:none;border:none;color:var(--text);font-size:20px;
+  padding:4px 8px;border-radius:4px;
+}
+#hamburger:hover{background:var(--primary-light)}
+#breadcrumb{font-size:14px;color:var(--muted);flex:1}
+#breadcrumb strong{color:var(--text)}
+.topbar-user{
+  display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);
+}
+.topbar-avatar{
+  width:32px;height:32px;border-radius:50%;background:var(--primary);
+  color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;
+}
+
+/* ── CONTENT AREA ── */
+#content{flex:1;padding:24px}
+
+/* ── SECTIONS ── */
+.section{display:none}
+.section.active{display:block}
+
+/* ── PAGE TITLE ── */
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px}
+.page-title{font-family:'Poppins',sans-serif;font-size:20px;font-weight:700;color:var(--text)}
+.page-subtitle{font-size:13px;color:var(--muted);margin-top:2px}
+
+/* ── BUTTONS ── */
+.btn{
+  display:inline-flex;align-items:center;gap:6px;padding:8px 16px;
+  border-radius:7px;font-size:13.5px;font-weight:500;border:none;transition:all .15s;
+}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:hover{background:#165730}
+.btn-secondary{background:#fff;color:var(--text);border:1px solid var(--border)}
+.btn-secondary:hover{background:var(--primary-light)}
+.btn-danger{background:var(--danger);color:#fff}
+.btn-danger:hover{background:#b91c1c}
+.btn-sm{padding:5px 10px;font-size:12px}
+.btn-icon{padding:5px 8px;border-radius:6px;font-size:14px;border:1px solid var(--border);background:#fff;color:var(--muted)}
+.btn-icon:hover{background:var(--primary-light);color:var(--primary)}
+.btn-icon.danger:hover{background:#fef2f2;color:var(--danger);border-color:#fca5a5}
+
+/* ── TOOLBAR ── */
+.toolbar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
+.toolbar-search{position:relative;flex:1;min-width:180px}
+.toolbar-search input{
+  width:100%;padding:8px 12px 8px 34px;border:1px solid var(--border);border-radius:7px;
+  font-size:13.5px;outline:none;background:#fff;
+}
+.toolbar-search input:focus{border-color:var(--primary)}
+.toolbar-search::before{
+  content:'🔍';position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:13px;
+}
+.toolbar select{
+  padding:8px 12px;border:1px solid var(--border);border-radius:7px;
+  font-size:13.5px;outline:none;background:#fff;color:var(--text);
+}
+.toolbar select:focus{border-color:var(--primary)}
+
+/* ── TABLE ── */
+.table-wrap{background:#fff;border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.table-wrap table{width:100%;border-collapse:collapse;font-size:13.5px}
+.table-wrap th{
+  background:var(--primary-light);color:var(--text);font-weight:600;
+  padding:10px 14px;text-align:left;font-size:12.5px;border-bottom:1px solid var(--border);
+}
+.table-wrap td{padding:10px 14px;border-bottom:1px solid var(--primary-lighter);vertical-align:middle}
+.table-wrap tr:last-child td{border-bottom:none}
+.table-wrap tr:hover td{background:var(--primary-lighter)}
+.empty-state{text-align:center;padding:48px 24px;color:var(--muted);font-size:14px}
+.empty-state .empty-icon{font-size:36px;margin-bottom:8px}
+
+/* ── BADGES ── */
+.badge{
+  display:inline-block;padding:2px 8px;border-radius:20px;font-size:11.5px;font-weight:600;
+}
+.badge-green{background:#dcfce7;color:#166534}
+.badge-yellow{background:#fef9c3;color:#854d0e}
+.badge-red{background:#fee2e2;color:#991b1b}
+.badge-gray{background:#f1f5f9;color:#475569}
+.badge-blue{background:#dbeafe;color:#1e40af}
+
+/* ── PAGINATION ── */
+.pagination{display:flex;gap:4px;justify-content:flex-end;margin-top:12px;align-items:center;font-size:13px;color:var(--muted)}
+.pagination button{
+  padding:4px 10px;border:1px solid var(--border);border-radius:5px;background:#fff;
+  font-size:13px;cursor:pointer;color:var(--text);
+}
+.pagination button:hover{background:var(--primary-light)}
+.pagination button.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.pagination button:disabled{opacity:.4;cursor:default}
+
+/* ── FORM PANEL ── */
+.form-panel{
+  background:#fff;border:1px solid var(--border);border-radius:10px;padding:24px;
+}
+.form-title{font-family:'Poppins',sans-serif;font-size:17px;font-weight:700;margin-bottom:20px;color:var(--text)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.form-grid.cols-1{grid-template-columns:1fr}
+.form-full{grid-column:1/-1}
+.form-group{display:flex;flex-direction:column;gap:4px}
+.form-group label{font-size:12.5px;font-weight:600;color:var(--muted)}
+.form-group input,.form-group select,.form-group textarea{
+  padding:9px 12px;border:1px solid var(--border);border-radius:7px;
+  font-size:13.5px;outline:none;color:var(--text);background:#fff;
+}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--primary)}
+.form-group textarea{resize:vertical}
+.form-check{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13.5px}
+.form-check input{width:16px;height:16px;accent-color:var(--primary);cursor:pointer}
+.form-actions{display:flex;gap:10px;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)}
+.range-wrap{display:flex;align-items:center;gap:10px}
+.range-wrap input{flex:1}
+.range-val{font-size:13px;font-weight:600;color:var(--primary);min-width:36px}
+
+/* ── DYNAMIC LIST ── */
+.dynamic-list{display:flex;flex-direction:column;gap:6px;margin-bottom:6px}
+.dynamic-item{display:flex;gap:6px;align-items:center}
+.dynamic-item input{flex:1;padding:7px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;outline:none}
+.dynamic-item input:focus{border-color:var(--primary)}
+.dynamic-item button{flex-shrink:0;background:#fff;border:1px solid var(--border);border-radius:6px;padding:6px 8px;cursor:pointer;color:var(--muted)}
+.dynamic-item button:hover{background:#fef2f2;color:var(--danger);border-color:#fca5a5}
+.add-item-btn{
+  background:none;border:1px dashed var(--border);border-radius:6px;
+  padding:6px 12px;font-size:12.5px;color:var(--muted);cursor:pointer;text-align:left;
+}
+.add-item-btn:hover{background:var(--primary-light);border-color:var(--primary);color:var(--primary)}
+
+/* ── DASHBOARD ── */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;margin-bottom:24px}
+.stat-card{
+  background:#fff;border:1px solid var(--border);border-radius:10px;padding:16px;
+  cursor:pointer;transition:box-shadow .15s,transform .15s;
+}
+.stat-card:hover{box-shadow:0 4px 16px rgba(29,107,62,.1);transform:translateY(-1px)}
+.stat-icon{font-size:24px;margin-bottom:8px}
+.stat-value{font-size:26px;font-weight:700;color:var(--primary);line-height:1}
+.stat-label{font-size:12px;color:var(--muted);margin-top:4px}
+.recent-section{background:#fff;border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:24px}
+.recent-title{font-weight:700;font-size:15px;margin-bottom:12px;color:var(--text)}
+.recent-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--primary-lighter);align-items:flex-start}
+.recent-item:last-child{border-bottom:none}
+.recent-dot{width:8px;height:8px;border-radius:50%;background:var(--primary);margin-top:5px;flex-shrink:0}
+.recent-info{flex:1;font-size:13px}
+.recent-info strong{display:block;color:var(--text)}
+.recent-info span{color:var(--muted);font-size:12px}
+.quick-actions{background:#fff;border:1px solid var(--border);border-radius:10px;padding:20px}
+.quick-actions-title{font-weight:700;font-size:15px;margin-bottom:12px;color:var(--text)}
+.qa-grid{display:flex;flex-wrap:wrap;gap:8px}
+.qa-btn{
+  background:var(--primary-light);color:var(--primary);border:1px solid var(--border);
+  border-radius:7px;padding:7px 14px;font-size:13px;font-weight:500;cursor:pointer;
+  transition:background .15s;
+}
+.qa-btn:hover{background:var(--primary);color:#fff}
+
+/* ── MEDIA GRID ── */
+.media-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px}
+.media-card{
+  background:#fff;border:1px solid var(--border);border-radius:8px;overflow:hidden;
+  transition:box-shadow .15s;
+}
+.media-card:hover{box-shadow:0 4px 12px rgba(0,0,0,.08)}
+.media-thumb{
+  height:110px;display:flex;align-items:center;justify-content:center;
+  background:var(--primary-lighter);overflow:hidden;
+}
+.media-thumb img{width:100%;height:100%;object-fit:cover}
+.pdf-icon{font-size:40px}
+.media-info{padding:8px 10px}
+.media-name{font-size:12px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.media-meta{font-size:11px;color:var(--muted);margin-top:2px}
+.media-actions{display:flex;gap:4px;margin-top:6px}
+
+/* ── MODAL ── */
+#modal-overlay{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:400;
+  align-items:center;justify-content:center;
+}
+#modal-overlay.open{display:flex}
+.modal{
+  background:#fff;border-radius:12px;padding:28px;width:90%;max-width:420px;
+  box-shadow:0 20px 60px rgba(0,0,0,.2);
+}
+.modal-title{font-size:16px;font-weight:700;margin-bottom:8px;color:var(--text)}
+.modal-body{font-size:14px;color:var(--muted);margin-bottom:20px}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end}
+
+/* ── TOAST ── */
+#toast-container{position:fixed;bottom:20px;right:20px;z-index:500;display:flex;flex-direction:column;gap:8px}
+.toast{
+  padding:12px 18px;border-radius:8px;font-size:13.5px;font-weight:500;
+  color:#fff;box-shadow:0 4px 12px rgba(0,0,0,.15);
+  animation:slideIn .25s ease;min-width:200px;
+}
+.toast-success{background:var(--primary)}
+.toast-error{background:var(--danger)}
+.toast-warning{background:var(--warning)}
+@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes fadeOut{to{transform:translateX(100%);opacity:0}}
+
+/* ── DENUNCIAS STATUS ── */
+.status-select{
+  padding:4px 8px;border:1px solid var(--border);border-radius:5px;font-size:12px;
+  background:#fff;color:var(--text);outline:none;cursor:pointer;
+}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  #sidebar{transform:translateX(-100%)}
+  #sidebar.open{transform:translateX(0)}
+  #overlay.open{display:block}
+  #main{margin-left:0}
+  #hamburger{display:block}
+  .form-grid{grid-template-columns:1fr}
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .media-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:480px){
+  #content{padding:16px}
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .page-header{flex-direction:column;align-items:flex-start}
+}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav id="sidebar">
+  <div class="sidebar-logo">
+    <svg width="34" height="34" viewBox="0 0 34 34" fill="none">
+      <path d="M17 2L4 8v9c0 7.73 5.58 14.96 13 16.93C24.42 31.96 30 24.73 30 17V8L17 2z" fill="#1d6b3e"/>
+      <path d="M17 6L8 11v6c0 5.14 3.72 9.96 9 11.31C22.28 26.96 26 22.14 26 17v-6L17 6z" fill="#5ddb8f" opacity=".4"/>
+      <path d="M13 17l3 3 5-5" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div class="sidebar-logo-text">IAGAMI Admin<span>Panel de Control</span></div>
+  </div>
+  <div class="sidebar-nav" id="sidebar-nav"></div>
+  <div class="sidebar-bottom">
+    <a href="../index.html">← Ver Portal</a>
+  </div>
+</nav>
+
+<div id="overlay"></div>
+
+<!-- MAIN -->
+<div id="main">
+  <header id="topbar">
+    <button id="hamburger" onclick="toggleSidebar()">☰</button>
+    <div id="breadcrumb">Inicio / <strong id="breadcrumb-label">Dashboard</strong></div>
+    <div class="topbar-user">
+      <div class="topbar-avatar">A</div>
+      <span>Administrador</span>
+    </div>
+  </header>
+
+  <div id="content">
+    <!-- DASHBOARD -->
+    <div class="section active" id="sec-dashboard">
+      <div class="page-header">
+        <div><div class="page-title">Dashboard</div><div class="page-subtitle">Resumen general del sistema</div></div>
+      </div>
+      <div class="stats-grid" id="stats-grid"></div>
+      <div class="recent-section">
+        <div class="recent-title">Actividad Reciente</div>
+        <div id="recent-list"></div>
+      </div>
+      <div class="quick-actions">
+        <div class="quick-actions-title">Acciones Rápidas</div>
+        <div class="qa-grid" id="qa-grid"></div>
+      </div>
+    </div>
+
+    <!-- NOTICIAS -->
+    <div class="section" id="sec-noticias">
+      <div class="page-header">
+        <div><div class="page-title">📰 Noticias</div><div class="page-subtitle">Gestión de noticias publicadas</div></div>
+        <button class="btn btn-primary" onclick="openForm('noticias')">+ Nueva Noticia</button>
+      </div>
+      <div id="noticias-list-view">
+        <div class="toolbar">
+          <div class="toolbar-search"><input type="text" placeholder="Buscar noticia..." id="noticias-search" oninput="renderNoticias()"></div>
+          <select id="noticias-cat" onchange="renderNoticias()"><option value="">Todas las categorías</option><option>Medio Ambiente</option><option>Comunidad</option><option>Normativa</option><option>Educación</option><option>Institucional</option></select>
+          <select id="noticias-estado" onchange="renderNoticias()"><option value="">Todos los estados</option><option>publicado</option><option>borrador</option></select>
+        </div>
+        <div class="table-wrap"><table><thead><tr><th>ID</th><th>Título</th><th>Categoría</th><th>Autor</th><th>Fecha</th><th>Destacada</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="noticias-tbody"></tbody></table></div>
+        <div id="noticias-pagination" class="pagination"></div>
+      </div>
+      <div id="noticias-form-view" style="display:none">
+        <div class="form-panel">
+          <div class="form-title" id="noticias-form-title">Nueva Noticia</div>
+          <form id="noticias-form" onsubmit="saveNoticias(event)">
+            <div class="form-grid">
+              <div class="form-group form-full"><label>Título *</label><input type="text" name="titulo" required></div>
+              <div class="form-group"><label>Categoría</label><select name="categoria"><option>Medio Ambiente</option><option>Comunidad</option><option>Normativa</option><option>Educación</option><option>Institucional</option></select></div>
+              <div class="form-group"><label>Autor</label><input type="text" name="autor"></div>
+              <div class="form-group"><label>Fecha de Publicación</label><input type="date" name="fecha_publicacion"></div>
+              <div class="form-group"><label>Estado</label><select name="estado"><option value="publicado">Publicado</option><option value="borrador">Borrador</option></select></div>
+              <div class="form-group form-full"><label>Contenido *</label><textarea name="contenido" rows="8" required></textarea></div>
+              <div class="form-group"><label>URL de Imagen</label><input type="text" name="imagen_url" placeholder="URL de imagen o dejar vacío"></div>
+              <div class="form-group"><label>URL de Video (opcional)</label><input type="text" name="video_url"></div>
+              <div class="form-group"><label>Tags (separados por coma)</label><input type="text" name="tags"></div>
+              <div class="form-group"><label class="form-check"><input type="checkbox" name="destacada"> Noticia Destacada</label></div>
+            </div>
+            <input type="hidden" name="id">
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">Guardar</button>
+              <button type="button" class="btn btn-secondary" onclick="cancelForm('noticias')">Cancelar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- TRAMITES -->
+    <div class="section" id="sec-tramites">
+      <div class="page-header">
+        <div><div class="page-title">📋 Trámites</div><div class="page-subtitle">Gestión de trámites y servicios</div></div>
+        <button class="btn btn-primary" onclick="openForm('tramites')">+ Nuevo Trámite</button>
+      </div>
+      <div id="tramites-list-view">
+        <div class="toolbar">
+          <div class="toolbar-search"><input type="text" placeholder="Buscar trámite..." id="tramites-search" oninput="renderTramites()"></div>
+          <select id="tramites-cat" onchange="renderTramites()"><option value="">Todas las categorías</option><option>Permisos</option><option>Certificaciones</option><option>Registros</option><option>Licencias</option><option>Otros</option></select>
+        </div>
+        <div class="table-wrap"><table><thead><tr><th>Nombre</th><th>Categoría</th><th>Tiempo</th><th>Costo</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="tramites-tbody"></tbody></table></div>
+        <div id="tramites-pagination" class="pagination"></div>
+      </div>
+      <div id="tramites-form-view" style="display:none">
+        <div class="form-panel">
+          <div class="form-title" id="tramites-form-title">Nuevo Trámite</div>
+          <form id="tramites-form" onsubmit="saveTramites(event)">
+            <div class="form-grid">
+              <div class="form-group form-full"><label>Nombre *</label><input type="text" name="nombre" required></div>
+              <div class="form-group"><label>Categoría</label><select name="categoria"><option>Permisos</option><option>Certificaciones</option><option>Registros</option><option>Licencias</option><option>Otros</option></select></div>
+              <div class="form-group"><label>Tiempo de Respuesta</label><input type="text" name="tiempo_respuesta"></div>
+              <div class="form-group"><label>Costo</label><input type="text" name="costo"></div>
+              <div class="form-group"><label>Estado</label><select name="estado"><option value="activo">Activo</option><option value="inactivo">Inactivo</option></select></div>
+              <div class="form-group form-full"><label>Descripción</label><textarea name="descripcion" rows="4"></textarea></div>
+              <div class="form-group form-full">
+                <label>Requisitos</label>
+                <div class="dynamic-list" id="req-list"></div>
+                <button type="button" class="add-item-btn" onclick="addItem('req-list')">+ Agregar Requisito</button>
+              </div>
+              <div class="form-group form-full">
+                <label>Pasos del Proceso</label>
+                <div class="dynamic-list" id="pasos-list"></div>
+                <button type="button" class="add-item-btn" onclick="addItem('pasos-list')">+ Agregar Paso</button>
+              </div>
+            </div>
+            <input type="hidden" name="id">
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">Guardar</button>
+              <button type="button" class="btn btn-secondary" onclick="cancelForm('tramites')">Cancelar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- AGENDA -->
+    <div class="section" id="sec-agenda">
+      <div class="page-header">
+        <div><div class="page-title">📅 Agenda</div><div class="page-subtitle">Gestión de eventos y actividades</div></div>
+        <button class="btn btn-primary" onclick="openForm('agenda')">+ Nuevo Evento</button>
+      </div>
+      <div id="agenda-list-view">
+        <div class="toolbar">
+          <div class="toolbar-search"><input type="text" placeholder="Buscar evento..." id="agenda-search" oninput="renderAgenda()"></div>
+          <select id="agenda-tipo" onchange="renderAgenda()"><option value="">Todos los tipos</option><option>Taller</option><option>Inspección</option><option>Jornada</option><option>Reunión</option><option>Otro</option></select>
+        </div>
+        <div class="table-wrap"><table><thead><tr><th>Título</th><th>Tipo</th><th>Fecha</th><th>Hora</th><th>Lugar</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="agenda-tbody"></tbody></table></div>
+        <div id="agenda-pagination" class="pagination"></div>
+      </div>
+      <div id="agenda-form-view" style="display:none">
+        <div class="form-panel">
+          <div class="form-title" id="agenda-form-title">Nuevo Evento</div>
+          <form id="agenda-form" onsubmit="saveAgenda(event)">
+            <div class="form-grid">
+              <div class="form-group form-full"><label>Título *</label><input type="text" name="titulo" required></div>
+              <div class="form-group"><label>Tipo</label><select name="tipo"><option>Taller</option><option>Inspección</option><option>Jornada</option><option>Reunión</option><option>Otro</option></select></div>
+              <div class="form-group"><label>Fecha</label><input type="date" name="fecha"></div>
+              <div class="form-group"><label>Hora Inicio</label><input type="time" name="hora_inicio"></div>
+              <div class="form-group"><label>Hora Fin</label><input type="time" name="hora_fin"></div>
+              <div class="form-group"><label>Lugar</label><input type="text" name="lugar"></div>
+              <div class="form-group"><label>Responsable</label><input type="text" name="responsable"></div>
+              <div class="form-group"><label>Estado</label><select name="estado"><option value="publicado">Publicado</option><option value="borrador">Borrador</option><option value="programado">Programado</option><option value="cancelado">Cancelado</option></select></div>
+              <div class="form-group form-full"><label>Descripción</label><textarea name="descripcion" rows="4"></textarea></div>
+              <div class="form-group"><label class="form-check"><input type="checkbox" name="destacado"> Evento Destacado</label></div>
+            </div>
+            <input type="hidden" name="id">
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">Guardar</button>
+              <button type="button" class="btn btn-secondary" onclick="cancelForm('agenda')">Cancelar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- TRANSPARENCIA -->
+    <div class="section" id="sec-transparencia">
+      <div class="page-header">
+        <div><div class="page-title">🏛️ Transparencia</div><div class="page-subtitle">Gestión de documentos públicos</div></div>
+        <button class="btn btn-primary" onclick="openForm('transparencia')">+ Nuevo Documento</button>
+      </div>
+      <div id="transparencia-list-view">
+        <div class="toolbar">
+          <div class="toolbar-search"><input type="text" placeholder="Buscar documento..." id="transparencia-search" oninput="renderTransparencia()"></div>
+          <select id="transparencia-cat" onchange="renderTransparencia()"><option value="">Todas las categorías</option><option>Informes</option><option>Memorias</option><option>Presupuestos</option><option>Resoluciones</option><option>Documentos Legales</option></select>
+        </div>
+        <div class="table-wrap"><table><thead><tr><th>Título</th><th>Categoría</th><th>Año</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="transparencia-tbody"></tbody></table></div>
+        <div id="transparencia-pagination" class="pagination"></div>
+      </div>
+      <div id="transparencia-form-view" style="display:none">
+        <div class="form-panel">
+          <div class="form-title" id="transparencia-form-title">Nuevo Documento</div>
+          <form id="transparencia-form" onsubmit="saveTransparencia(event)">
+            <div class="form-grid">
+              <div class="form-group form-full"><label>Título *</label><input type="text" name="titulo" required></div>
+              <div class="form-group"><label>Categoría</label><select name="categoria"><option>Informes</option><option>Memorias</option><option>Presupuestos</option><option>Resoluciones</option><option>Documentos Legales</option></select></div>
+              <div class="form-group"><label>Año</label><input type="number" name="año" min="2000" max="2100"></div>
+              <div class="form-group"><label>Estado</label><select name="estado"><option value="publicado">Publicado</option><option value="borrador">Borrador</option></select></div>
+              <div class="form-group form-full"><label>Descripción</label><textarea name="descripcion" rows="4"></textarea></div>
+              <div class="form-group form-full"><label>URL del PDF (opcional)</label><input type="text" name="pdf_url" placeholder="https://..."></div>
+            </div>
+            <input type="hidden" name="id">
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">Guardar</button>
+              <button type="button" class="btn btn-secondary" onclick="cancelForm('transparencia')">Cancelar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- ORGANIZACIÓN -->
+    <div class="section" id="sec-organizacion">
+      <div class="page-header">
+        <div><div class="page-title">🏢 Organización</div><div class="page-subtitle">Estructura organizacional</div></div>
+        <button class="btn btn-primary" onclick="openForm('organizacion')">+ Nueva Unidad</button>
+      </div>
+      <div id="organizacion-list-view">
+        <div class="table-wrap"><table><thead><tr><th>Nombre</th><th>Tipo</th><th>Responsable</th><th>Acciones</th></tr></thead><tbody id="organizacion-tbody"></tbody></table></div>
+        <div id="organizacion-pagination" class="pagination"></div>
+      </div>
+      <div id="organizacion-form-view" style="display:none">
+        <div class="form-panel">
+          <div class="form-title" id="organizacion-form-title">Nueva Unidad Organizacional</div>
+          <form id="organizacion-form" onsubmit="saveOrganizacion(event)">
+            <div class="form-grid">
+              <div class="form-group form-full"><label>Nombre *</label><input type="text" name="nombre" required></div>
+              <div class="form-group"><label>Tipo</label><select name="tipo"><option value="direccion">Dirección</option><option value="coordinacion">Coordinación</option><option value="departamento">Departamento</option></select></div>
+              <div class="form-group"><label>Unidad Padre</label><select name="padre" id="org-padre-select"></select></div>
+              <div class="form-group"><label>Responsable</label><input type="text" name="responsable"></div>
+              <div class="form-group"><label>Teléfono</label><input type="text" name="telefono"></div>
+              <div class="form-group"><label>Email</label><input type="email" name="email"></div>
+              <div class="form-group"><label>Estado</label><select name="estado"><option value="activo">Activo</option><option value="inactivo">Inactivo</option></select></div>
+              <div class="form-group form-full"><label>Funciones</label><textarea name="funciones" rows="4"></textarea></div>
+            </div>
+            <input type="hidden" name="id">
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">Guardar</button>
+              <button type="button" class="btn btn-secondary" onclick="cancelForm('organizacion')">Cancelar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROYECTOS -->
+    <div class="section" id="sec-proyectos">
+      <div class="page-header">
+        <div><div class="page-title">🌳 Proyectos</div><div class="page-subtitle">Gestión de proyectos ambientales</div></div>
+        <button class="btn btn-primary" onclick="openForm('proyectos')">+ Nuevo Proyecto</button>
+      </div>
+      <div id="proyectos-list-view">
+        <div class="toolbar">
+          <div class="toolbar-search"><input type="text" placeholder="Buscar proyecto..." id="proyectos-search" oninput="renderProyectos()"></div>
+          <select id="proyectos-estado" onchange="renderProyectos()"><option value="">Todos los estados</option><option>En Ejecución</option><option>Completado</option><option>Planificado</option><option>Suspendido</option></select>
+        </div>
+        <div class="table-wrap"><table><thead><tr><th>Nombre</th><th>Estado</th><th>Avance</th><th>Responsable</th><th>Acciones</th></tr></thead><tbody id="proyectos-tbody"></tbody></table></div>
+        <div id="proyectos-pagination" class="pagination"></div>
+      </div>
+      <div id="proyectos-form-view" style="display:none">
+        <div class="form-panel">
+          <div class="form-title" id="proyectos-form-title">Nuevo Proyecto</div>
+          <form id="proyectos-form" onsubmit="saveProyectos(event)">
+            <div class="form-grid">
+              <div class="form-group form-full"><label>Nombre *</label><input type="text" name="nombre" required></div>
+              <div class="form-group"><label>Estado</label><select name="estado"><option>En Ejecución</option><option>Completado</option><option>Planificado</option><option>Suspendido</option></select></div>
+              <div class="form-group"><label>Responsable</label><input type="text" name="responsable"></div>
+              <div class="form-group form-full">
+                <label>Porcentaje de Avance</label>
+                <div class="range-wrap">
+                  <input type="range" name="porcentaje_avance" min="0" max="100" value="0" oninput="this.nextElementSibling.textContent=this.value+'%'">
+                  <span class="range-val">0%</span>
+                </div>
+              </div>
+              <div class="form-group"><label>Fecha Inicio</label><input type="date" name="fecha_inicio"></div>
+              <div class="form-group"><label>Fecha Fin Estimada</label><input type="date" name="fecha_fin_estimada"></div>
+              <div class="form-group"><label>Municipio</label><input type="text" name="municipio"></div>
+              <div class="form-group"><label>Beneficiados</label><input type="text" name="beneficiados"></div>
+              <div class="form-group form-full"><label>Presupuesto</label><input type="text" name="presupuesto"></div>
+              <div class="form-group form-full"><label>Descripción</label><textarea name="descripcion" rows="4"></textarea></div>
+              <div class="form-group form-full">
+                <label>Hitos</label>
+                <div class="dynamic-list" id="hitos-list"></div>
+                <button type="button" class="add-item-btn" onclick="addItem('hitos-list')">+ Agregar Hito</button>
+              </div>
+            </div>
+            <input type="hidden" name="id">
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">Guardar</button>
+              <button type="button" class="btn btn-secondary" onclick="cancelForm('proyectos')">Cancelar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- INDICADORES -->
+    <div class="section" id="sec-indicadores">
+      <div class="page-header">
+        <div><div class="page-title">📈 Indicadores</div><div class="page-subtitle">Indicadores de gestión ambiental</div></div>
+        <button class="btn btn-primary" onclick="openForm('indicadores')">+ Nuevo Indicador</button>
+      </div>
+      <div id="indicadores-list-view">
+        <div class="table-wrap"><table><thead><tr><th>Nombre</th><th>Valor</th><th>Unidad</th><th>Meta</th><th>Tendencia</th><th>Acciones</th></tr></thead><tbody id="indicadores-tbody"></tbody></table></div>
+        <div id="indicadores-pagination" class="pagination"></div>
+      </div>
+      <div id="indicadores-form-view" style="display:none">
+        <div class="form-panel">
+          <div class="form-title" id="indicadores-form-title">Nuevo Indicador</div>
+          <form id="indicadores-form" onsubmit="saveIndicadores(event)">
+            <div class="form-grid">
+              <div class="form-group form-full"><label>Nombre *</label><input type="text" name="nombre" required></div>
+              <div class="form-group"><label>Ícono (emoji)</label><input type="text" name="icono" placeholder="📊"></div>
+              <div class="form-group"><label>Categoría</label><input type="text" name="categoria"></div>
+              <div class="form-group"><label>Valor Actual</label><input type="number" name="valor_actual" step="any"></div>
+              <div class="form-group"><label>Unidad</label><input type="text" name="unidad" placeholder="%, Ha, etc."></div>
+              <div class="form-group"><label>Meta</label><input type="number" name="meta" step="any"></div>
+              <div class="form-group"><label>Tendencia</label><select name="tendencia"><option value="mejora">Mejora ↑</option><option value="estable">Estable →</option><option value="deterioro">Deterioro ↓</option></select></div>
+              <div class="form-group form-full"><label>Descripción</label><textarea name="descripcion" rows="3"></textarea></div>
+            </div>
+            <input type="hidden" name="id">
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">Guardar</button>
+              <button type="button" class="btn btn-secondary" onclick="cancelForm('indicadores')">Cancelar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMPRESAS -->
+    <div class="section" id="sec-empresas">
+      <div class="page-header">
+        <div><div class="page-title">🏭 Empresas</div><div class="page-subtitle">Registro de empresas y permisos</div></div>
+        <button class="btn btn-primary" onclick="openForm('empresas')">+ Nueva Empresa</button>
+      </div>
+      <div id="empresas-list-view">
+        <div class="toolbar">
+          <div class="toolbar-search"><input type="text" placeholder="Buscar empresa..." id="empresas-search" oninput="renderEmpresas()"></div>
+          <select id="empresas-permiso" onchange="renderEmpresas()"><option value="">Todos los permisos</option><option>Vigente</option><option>En Proceso</option><option>Vencido</option><option>Suspendido</option></select>
+        </div>
+        <div class="table-wrap"><table><thead><tr><th>Nombre</th><th>RIF</th><th>Categoría</th><th>Estado Permiso</th><th>Acciones</th></tr></thead><tbody id="empresas-tbody"></tbody></table></div>
+        <div id="empresas-pagination" class="pagination"></div>
+      </div>
+      <div id="empresas-form-view" style="display:none">
+        <div class="form-panel">
+          <div class="form-title" id="empresas-form-title">Nueva Empresa</div>
+          <form id="empresas-form" onsubmit="saveEmpresas(event)">
+            <div class="form-grid">
+              <div class="form-group form-full"><label>Nombre *</label><input type="text" name="nombre" required></div>
+              <div class="form-group"><label>RIF</label><input type="text" name="rif"></div>
+              <div class="form-group"><label>Categoría</label><select name="categoria"><option>Industrial</option><option>Construcción</option><option>Comercial</option><option>Servicios</option><option>Agrícola</option></select></div>
+              <div class="form-group"><label>Responsable</label><input type="text" name="responsable"></div>
+              <div class="form-group"><label>Teléfono</label><input type="text" name="telefono"></div>
+              <div class="form-group"><label>Email</label><input type="email" name="email"></div>
+              <div class="form-group"><label>Estado Permiso</label><select name="estado_permiso"><option>Vigente</option><option>En Proceso</option><option>Vencido</option><option>Suspendido</option></select></div>
+              <div class="form-group"><label>Fecha de Registro</label><input type="date" name="fecha_registro"></div>
+              <div class="form-group form-full"><label>Dirección</label><input type="text" name="direccion"></div>
+              <div class="form-group form-full"><label>Observaciones</label><textarea name="observaciones" rows="3"></textarea></div>
+            </div>
+            <input type="hidden" name="id">
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">Guardar</button>
+              <button type="button" class="btn btn-secondary" onclick="cancelForm('empresas')">Cancelar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- ALERTAS -->
+    <div class="section" id="sec-alertas">
+      <div class="page-header">
+        <div><div class="page-title">🚨 Alertas</div><div class="page-subtitle">Gestión de alertas del portal</div></div>
+        <button class="btn btn-primary" onclick="openForm('alertas')">+ Nueva Alerta</button>
+      </div>
+      <div id="alertas-list-view">
+        <div class="table-wrap"><table><thead><tr><th>Mensaje</th><th>Tipo</th><th>Activa</th><th>Acciones</th></tr></thead><tbody id="alertas-tbody"></tbody></table></div>
+        <div id="alertas-pagination" class="pagination"></div>
+      </div>
+      <div id="alertas-form-view" style="display:none">
+        <div class="form-panel">
+          <div class="form-title" id="alertas-form-title">Nueva Alerta</div>
+          <form id="alertas-form" onsubmit="saveAlertas(event)">
+            <div class="form-grid">
+              <div class="form-group form-full"><label>Mensaje *</label><input type="text" name="mensaje" required></div>
+              <div class="form-group"><label>Tipo</label><select name="tipo"><option value="warning">Warning (amarillo)</option><option value="info">Info (azul)</option><option value="danger">Danger (rojo)</option></select></div>
+              <div class="form-group"><label>Fecha Inicio</label><input type="date" name="fecha_inicio"></div>
+              <div class="form-group"><label>Fecha Fin</label><input type="date" name="fecha_fin"></div>
+              <div class="form-group form-full"><label class="form-check"><input type="checkbox" name="activa"> Alerta Activa</label></div>
+            </div>
+            <input type="hidden" name="id">
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">Guardar</button>
+              <button type="button" class="btn btn-secondary" onclick="cancelForm('alertas')">Cancelar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- MULTAS -->
+    <div class="section" id="sec-multas">
+      <div class="page-header">
+        <div><div class="page-title">⚖️ Multas</div><div class="page-subtitle">Expedientes de multas e infracciones</div></div>
+        <button class="btn btn-primary" onclick="openForm('multas')">+ Nueva Multa</button>
+      </div>
+      <div id="multas-list-view">
+        <div class="toolbar">
+          <div class="toolbar-search"><input type="text" placeholder="Buscar expediente..." id="multas-search" oninput="renderMultas()"></div>
+          <select id="multas-estado" onchange="renderMultas()"><option value="">Todos los estados</option><option>Pendiente</option><option>En Proceso</option><option>Pagada</option><option>Anulada</option></select>
+        </div>
+        <div class="table-wrap"><table><thead><tr><th>Expediente</th><th>Empresa/Persona</th><th>Infracción</th><th>Monto</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="multas-tbody"></tbody></table></div>
+        <div id="multas-pagination" class="pagination"></div>
+      </div>
+      <div id="multas-form-view" style="display:none">
+        <div class="form-panel">
+          <div class="form-title" id="multas-form-title">Nueva Multa</div>
+          <form id="multas-form" onsubmit="saveMultas(event)">
+            <div class="form-grid">
+              <div class="form-group"><label>N° Expediente</label><input type="text" name="expediente"></div>
+              <div class="form-group"><label>Empresa / Persona</label><input type="text" name="empresa_persona"></div>
+              <div class="form-group"><label>Tipo de Infracción</label><select name="tipo_infraccion"><option>Contaminación agua</option><option>Contaminación aire</option><option>Deforestación</option><option>Residuos sólidos</option><option>Quema ilegal</option><option>Otro</option></select></div>
+              <div class="form-group"><label>Monto (Bs.)</label><input type="number" name="monto" step="0.01" min="0"></div>
+              <div class="form-group"><label>Estado</label><select name="estado"><option>Pendiente</option><option>En Proceso</option><option>Pagada</option><option>Anulada</option></select></div>
+              <div class="form-group"><label>Fecha</label><input type="date" name="fecha"></div>
+              <div class="form-group form-full"><label>Descripción</label><textarea name="descripcion" rows="4"></textarea></div>
+            </div>
+            <input type="hidden" name="id">
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">Guardar</button>
+              <button type="button" class="btn btn-secondary" onclick="cancelForm('multas')">Cancelar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- DENUNCIAS -->
+    <div class="section" id="sec-denuncias">
+      <div class="page-header">
+        <div><div class="page-title">⚠️ Denuncias</div><div class="page-subtitle">Denuncias recibidas del portal ciudadano</div></div>
+      </div>
+      <div class="table-wrap"><table><thead><tr><th>#</th><th>Tipo</th><th>Descripción</th><th>Estado</th><th>Fecha</th><th>Acciones</th></tr></thead><tbody id="denuncias-tbody"></tbody></table></div>
+      <div id="denuncias-pagination" class="pagination"></div>
+    </div>
+
+    <!-- ARCHIVOS -->
+    <div class="section" id="sec-archivos">
+      <div class="page-header">
+        <div><div class="page-title">📁 Archivos</div><div class="page-subtitle">Gestor de medios y archivos</div></div>
+        <label class="btn btn-primary" style="cursor:pointer">
+          + Subir Archivo <input type="file" id="file-upload" style="display:none" accept="image/*,.pdf" onchange="handleFileUpload(event)">
+        </label>
+      </div>
+      <div class="toolbar">
+        <button class="btn btn-secondary btn-sm" onclick="setMediaFilter('all')" id="mf-all">Todos</button>
+        <button class="btn btn-secondary btn-sm" onclick="setMediaFilter('image')" id="mf-image">Imágenes</button>
+        <button class="btn btn-secondary btn-sm" onclick="setMediaFilter('pdf')" id="mf-pdf">PDFs</button>
+      </div>
+      <div class="media-grid" id="media-grid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE MODAL -->
+<div id="modal-overlay">
+  <div class="modal">
+    <div class="modal-title">¿Eliminar registro?</div>
+    <div class="modal-body">Esta acción no se puede deshacer.</div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-danger" id="modal-confirm-btn">Eliminar</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div id="toast-container"></div>
+
+<script>
+'use strict';
+
+/* ─── NAVIGATION ─── */
+const NAV = [
+  {id:'dashboard',     icon:'📊', label:'Dashboard'},
+  {id:'noticias',      icon:'📰', label:'Noticias'},
+  {id:'tramites',      icon:'📋', label:'Trámites'},
+  {id:'agenda',        icon:'📅', label:'Agenda'},
+  {id:'transparencia', icon:'🏛️', label:'Transparencia'},
+  {id:'organizacion',  icon:'🏢', label:'Organización'},
+  {id:'proyectos',     icon:'🌳', label:'Proyectos'},
+  {id:'indicadores',   icon:'📈', label:'Indicadores'},
+  {id:'empresas',      icon:'🏭', label:'Empresas'},
+  {id:'alertas',       icon:'🚨', label:'Alertas'},
+  {id:'multas',        icon:'⚖️',  label:'Multas'},
+  {id:'denuncias',     icon:'⚠️',  label:'Denuncias'},
+  {id:'archivos',      icon:'📁', label:'Archivos'},
+];
+
+let currentSection = 'dashboard';
+let mediaFilter = 'all';
+const pages = {};
+
+/* ─── BUILD SIDEBAR NAV ─── */
+(function buildNav() {
+  const nav = document.getElementById('sidebar-nav');
+  NAV.forEach(item => {
+    const btn = document.createElement('button');
+    btn.className = 'nav-item' + (item.id === 'dashboard' ? ' active' : '');
+    btn.dataset.section = item.id;
+    btn.innerHTML = `<span class="nav-icon">${item.icon}</span><span>${item.label}</span>`;
+    btn.addEventListener('click', () => { showSection(item.id); closeSidebar(); });
+    nav.appendChild(btn);
+  });
+})();
+
+function showSection(name) {
+  currentSection = name;
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b => {
+    b.classList.toggle('active', b.dataset.section === name);
+  });
+  const sec = document.getElementById('sec-' + name);
+  if (sec) sec.classList.add('active');
+  const nav = NAV.find(n => n.id === name);
+  document.getElementById('breadcrumb-label').textContent = nav ? nav.label : name;
+  renderSection(name);
+}
+
+function renderSection(name) {
+  switch(name) {
+    case 'dashboard':     renderDashboard(); break;
+    case 'noticias':      renderNoticias(); break;
+    case 'tramites':      renderTramites(); break;
+    case 'agenda':        renderAgenda(); break;
+    case 'transparencia': renderTransparencia(); break;
+    case 'organizacion':  renderOrganizacion(); break;
+    case 'proyectos':     renderProyectos(); break;
+    case 'indicadores':   renderIndicadores(); break;
+    case 'empresas':      renderEmpresas(); break;
+    case 'alertas':       renderAlertas(); break;
+    case 'multas':        renderMultas(); break;
+    case 'denuncias':     renderDenuncias(); break;
+    case 'archivos':      renderArchivos(); break;
+  }
+}
+
+/* ─── MOBILE ─── */
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('open');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('open');
+}
+document.getElementById('overlay').addEventListener('click', closeSidebar);
+
+/* ─── TOAST ─── */
+function toast(msg, type='success') {
+  const tc = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  t.className = `toast toast-${type}`;
+  t.textContent = msg;
+  tc.appendChild(t);
+  setTimeout(() => {
+    t.style.animation = 'fadeOut .3s ease forwards';
+    setTimeout(() => t.remove(), 300);
+  }, 3000);
+}
+
+/* ─── DELETE MODAL ─── */
+let deleteCallback = null;
+function confirmDelete(cb) {
+  deleteCallback = cb;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  deleteCallback = null;
+}
+document.getElementById('modal-confirm-btn').addEventListener('click', () => {
+  if (deleteCallback) deleteCallback();
+  closeModal();
+});
+
+/* ─── PAGINATION HELPER ─── */
+function paginate(items, key, perPage=10) {
+  if (!pages[key]) pages[key] = 1;
+  const total = Math.ceil(items.length / perPage);
+  if (pages[key] > total) pages[key] = Math.max(1, total);
+  const start = (pages[key]-1)*perPage;
+  return { items: items.slice(start, start+perPage), total, current: pages[key] };
+}
+
+function renderPagination(containerId, key, totalPages, currentPage, onChangeCb) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  if (totalPages <= 1) { el.innerHTML=''; return; }
+  let html = `<button onclick="changePage('${key}',${currentPage-1},${onChangeCb})" ${currentPage===1?'disabled':''}>‹</button>`;
+  for (let i=1; i<=totalPages; i++) {
+    html += `<button class="${i===currentPage?'active':''}" onclick="changePage('${key}',${i},'${onChangeCb}')">${i}</button>`;
+  }
+  html += `<button onclick="changePage('${key}',${currentPage+1},'${onChangeCb}')" ${currentPage===totalPages?'disabled':''}>›</button>`;
+  el.innerHTML = html;
+}
+
+function changePage(key, page, renderFnName) {
+  pages[key] = page;
+  window[renderFnName]();
+}
+
+/* ─── DYNAMIC LIST HELPERS ─── */
+function addItem(listId, val='') {
+  const list = document.getElementById(listId);
+  const div = document.createElement('div');
+  div.className = 'dynamic-item';
+  div.innerHTML = `<input type="text" value="${escHtml(val)}" placeholder="Escribir..."><button type="button" onclick="removeItem(this)">×</button>`;
+  list.appendChild(div);
+}
+
+function removeItem(btn) {
+  btn.parentElement.remove();
+}
+
+function getListValues(listId) {
+  return Array.from(document.querySelectorAll(`#${listId} .dynamic-item input`))
+    .map(i => i.value.trim()).filter(Boolean);
+}
+
+function populateList(listId, values=[]) {
+  document.getElementById(listId).innerHTML='';
+  values.forEach(v => addItem(listId, v));
+}
+
+/* ─── FORM PANEL HELPERS ─── */
+function openForm(section, id=null) {
+  const lv = document.getElementById(section+'-list-view');
+  const fv = document.getElementById(section+'-form-view');
+  if (lv) lv.style.display = 'none';
+  if (fv) fv.style.display = 'block';
+
+  const form = document.getElementById(section+'-form');
+  const titleEl = document.getElementById(section+'-form-title');
+
+  // Dynamic list resets
+  ['req-list','pasos-list','hitos-list'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = '';
+  });
+
+  if (!id) {
+    form.reset();
+    if (titleEl) titleEl.textContent = formTitles[section] ? 'Nueva '+formTitles[section] : 'Nuevo registro';
+    // set defaults
+    if (section==='transparencia') {
+      const yField = form.querySelector('[name="año"]');
+      if (yField) yField.value = new Date().getFullYear();
+    }
+    if (section==='organizacion') populateOrgParentSelect(null);
+    const rangeEl = form.querySelector('[type="range"]');
+    if (rangeEl) { rangeEl.value=0; rangeEl.nextElementSibling.textContent='0%'; }
+  } else {
+    const keyMap = {agenda:'eventos', transparencia:'documentos', organizacion:'org'};
+    const dbKey = keyMap[section] || section;
+    const item = CMSDB.getOne(dbKey, id);
+    if (!item) return;
+    if (titleEl) titleEl.textContent = formTitles[section] ? 'Editar '+formTitles[section] : 'Editar registro';
+    fillForm(form, item, section);
+  }
+}
+
+const formTitles = {
+  noticias:'Noticia', tramites:'Trámite', agenda:'Evento',
+  transparencia:'Documento', organizacion:'Unidad Organizacional',
+  proyectos:'Proyecto', indicadores:'Indicador', empresas:'Empresa',
+  alertas:'Alerta', multas:'Multa'
+};
+
+function fillForm(form, item, section) {
+  form.reset();
+  // Fill standard inputs
+  Array.from(form.elements).forEach(el => {
+    if (!el.name || el.name==='id') return;
+    const val = item[el.name];
+    if (val === undefined || val === null) return;
+    if (el.type === 'checkbox') {
+      el.checked = !!val;
+    } else if (el.type === 'range') {
+      el.value = val;
+      el.nextElementSibling.textContent = val+'%';
+    } else {
+      el.value = val;
+    }
+  });
+  const idField = form.querySelector('[name="id"]');
+  if (idField) idField.value = item.id || '';
+
+  // Dynamic lists
+  if (section === 'tramites') {
+    populateList('req-list', item.requisitos || []);
+    populateList('pasos-list', item.pasos || []);
+  }
+  if (section === 'proyectos') {
+    populateList('hitos-list', item.hitos || item.indicadores_clave || []);
+  }
+  if (section === 'organizacion') {
+    populateOrgParentSelect(item.id, item.padre);
+  }
+}
+
+function cancelForm(section) {
+  const lv = document.getElementById(section+'-list-view');
+  const fv = document.getElementById(section+'-form-view');
+  if (lv) lv.style.display = 'block';
+  if (fv) fv.style.display = 'none';
+}
+
+function collectForm(form) {
+  const data = {};
+  Array.from(form.elements).forEach(el => {
+    if (!el.name) return;
+    if (el.type === 'checkbox') data[el.name] = el.checked;
+    else data[el.name] = el.value;
+  });
+  return data;
+}
+
+/* ─── BADGE HELPERS ─── */
+function estadoBadge(estado) {
+  const map = {
+    publicado:'badge-green', activo:'badge-green', 'En Ejecución':'badge-green',
+    'Vigente':'badge-green', 'Completado':'badge-blue', 'Planificado':'badge-blue',
+    borrador:'badge-gray', inactivo:'badge-gray', 'Suspendido':'badge-gray',
+    'Vencido':'badge-red', 'Pendiente':'badge-yellow', 'En Proceso':'badge-yellow',
+    'Pagada':'badge-green', 'Anulada':'badge-gray', programado:'badge-blue',
+    cancelado:'badge-red'
+  };
+  const cls = map[estado] || 'badge-gray';
+  return `<span class="badge ${cls}">${estado||'—'}</span>`;
+}
+
+function tendenciaBadge(t) {
+  const map = {mejora:'badge-green',estable:'badge-yellow',deterioro:'badge-red'};
+  const icons = {mejora:'↑',estable:'→',deterioro:'↓'};
+  return `<span class="badge ${map[t]||'badge-gray'}">${icons[t]||''} ${t||'—'}</span>`;
+}
+
+function permisoBadge(p) {
+  const map = {Vigente:'badge-green','En Proceso':'badge-yellow',Vencido:'badge-red',Suspendido:'badge-gray'};
+  return `<span class="badge ${map[p]||'badge-gray'}">${p||'—'}</span>`;
+}
+
+function escHtml(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* ─── PROGRESS BAR ─── */
+function progressBar(val) {
+  const p = parseInt(val)||0;
+  return `<div style="display:flex;align-items:center;gap:6px">
+    <div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden">
+      <div style="width:${p}%;height:100%;background:var(--primary);border-radius:3px"></div>
+    </div>
+    <span style="font-size:12px;color:var(--muted);min-width:30px">${p}%</span>
+  </div>`;
+}
+
+/* ─── ACTION BUTTONS ─── */
+function actionBtns(section, id) {
+  return `<div style="display:flex;gap:4px">
+    <button class="btn-icon" title="Editar" onclick="openForm('${section}','${id}')">✏️</button>
+    <button class="btn-icon danger" title="Eliminar" onclick="deleteRecord('${section}','${id}')">🗑️</button>
+  </div>`;
+}
+
+function deleteRecord(section, id) {
+  confirmDelete(() => {
+    const keyMap = {agenda:'eventos', transparencia:'documentos', organizacion:'org'};
+    const dbKey = keyMap[section] || section;
+    CMSDB.remove(dbKey, id);
+    toast('Eliminado correctamente', 'success');
+    renderSection(section);
+  });
+}
+
+/* ─── EMPTY STATE ─── */
+function emptyState(msg='No hay registros') {
+  return `<tr><td colspan="20"><div class="empty-state"><div class="empty-icon">📭</div>${msg}</div></td></tr>`;
+}
+
+/* ─── FILTER HELPER ─── */
+function filterItems(items, search, fields) {
+  if (!search) return items;
+  const q = search.toLowerCase();
+  return items.filter(it => fields.some(f => (it[f]||'').toLowerCase().includes(q)));
+}
+
+/* ════════════════════════════════════════
+   DASHBOARD
+════════════════════════════════════════ */
+function renderDashboard() {
+  const alertas = CMSDB.getAll('alertas').filter(a=>a.activa).length;
+  const multasPend = CMSDB.getAll('multas').filter(m=>m.estado==='Pendiente').length;
+  const stats = [
+    {icon:'📰', label:'Noticias', val: CMSDB.getAll('noticias').length, sec:'noticias'},
+    {icon:'📋', label:'Trámites', val: CMSDB.getAll('tramites').length, sec:'tramites'},
+    {icon:'📅', label:'Eventos', val: CMSDB.getAll('eventos').length, sec:'agenda'},
+    {icon:'🏛️', label:'Documentos', val: CMSDB.getAll('documentos').length, sec:'transparencia'},
+    {icon:'🌳', label:'Proyectos', val: CMSDB.getAll('proyectos').length, sec:'proyectos'},
+    {icon:'🏭', label:'Empresas', val: CMSDB.getAll('empresas').length, sec:'empresas'},
+    {icon:'🚨', label:'Alertas Activas', val: alertas, sec:'alertas'},
+    {icon:'⚖️', label:'Multas Pendientes', val: multasPend, sec:'multas'},
+  ];
+  document.getElementById('stats-grid').innerHTML = stats.map(s =>
+    `<div class="stat-card" onclick="showSection('${s.sec}')">
+      <div class="stat-icon">${s.icon}</div>
+      <div class="stat-value">${s.val}</div>
+      <div class="stat-label">${s.label}</div>
+    </div>`
+  ).join('');
+
+  // Recent activity: gather all items with updatedAt
+  const allItems = [];
+  const sources = [
+    {key:'noticias',label:'Noticia',field:'titulo'},
+    {key:'tramites',label:'Trámite',field:'nombre'},
+    {key:'eventos',label:'Evento',field:'titulo'},
+    {key:'documentos',label:'Documento',field:'titulo'},
+    {key:'proyectos',label:'Proyecto',field:'nombre'},
+    {key:'empresas',label:'Empresa',field:'nombre'},
+    {key:'alertas',label:'Alerta',field:'mensaje'},
+    {key:'multas',label:'Multa',field:'expediente'},
+  ];
+  sources.forEach(s => {
+    CMSDB.getAll(s.key).forEach(it => {
+      allItems.push({label:s.label, name:(it[s.field]||'Sin nombre').slice(0,50), date:it.updated_at||it.created_at||''});
+    });
+  });
+  allItems.sort((a,b) => b.date.localeCompare(a.date));
+  const recent = allItems.slice(0,5);
+  document.getElementById('recent-list').innerHTML = recent.length
+    ? recent.map(r => `<div class="recent-item">
+        <div class="recent-dot"></div>
+        <div class="recent-info">
+          <strong>${escHtml(r.name)}</strong>
+          <span>${r.label} · ${r.date ? new Date(r.date).toLocaleDateString('es-VE') : '—'}</span>
+        </div>
+      </div>`).join('')
+    : '<div class="empty-state">Sin actividad reciente</div>';
+
+  document.getElementById('qa-grid').innerHTML = NAV.filter(n=>n.id!=='dashboard')
+    .map(n => `<button class="qa-btn" onclick="showSection('${n.id}')">${n.icon} ${n.label}</button>`).join('');
+}
+
+/* ════════════════════════════════════════
+   NOTICIAS
+════════════════════════════════════════ */
+function renderNoticias() {
+  let items = CMSDB.getAll('noticias');
+  const search = (document.getElementById('noticias-search')||{}).value||'';
+  const cat = (document.getElementById('noticias-cat')||{}).value||'';
+  const estado = (document.getElementById('noticias-estado')||{}).value||'';
+  items = filterItems(items, search, ['titulo','autor','categoria']);
+  if (cat) items = items.filter(i=>i.categoria===cat);
+  if (estado) items = items.filter(i=>i.estado===estado);
+  const {items:page, total, current} = paginate(items,'noticias');
+  const tbody = document.getElementById('noticias-tbody');
+  tbody.innerHTML = !page.length ? emptyState() : page.map(n => `<tr>
+    <td style="font-size:11px;color:var(--muted)">${(n.id||'').slice(0,10)}</td>
+    <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(n.titulo||'')}</td>
+    <td>${escHtml(n.categoria||'')}</td>
+    <td>${escHtml(n.autor||'')}</td>
+    <td>${n.fecha_publicacion||n.fecha||'—'}</td>
+    <td>${n.destacada?'⭐':'—'}</td>
+    <td>${estadoBadge(n.estado)}</td>
+    <td>
+      <div style="display:flex;gap:4px">
+        <button class="btn-icon" onclick="openForm('noticias','${n.id}')">✏️</button>
+        <button class="btn-icon" title="Toggle estado" onclick="toggleEstado('noticias','${n.id}','estado','publicado','borrador')">👁️</button>
+        <button class="btn-icon danger" onclick="deleteRecord('noticias','${n.id}')">🗑️</button>
+      </div>
+    </td>
+  </tr>`).join('');
+  renderPagination('noticias-pagination','noticias',total,current,'renderNoticias');
+}
+
+function saveNoticias(e) {
+  e.preventDefault();
+  const form = document.getElementById('noticias-form');
+  const data = collectForm(form);
+  data.destacada = form.querySelector('[name="destacada"]').checked;
+  CMSDB.save('noticias', data);
+  toast('Noticia guardada');
+  cancelForm('noticias');
+  renderNoticias();
+}
+
+function toggleEstado(key, id, field, val1, val2) {
+  const item = CMSDB.getOne(key, id);
+  if (!item) return;
+  item[field] = item[field]===val1 ? val2 : val1;
+  CMSDB.save(key, item);
+  renderSection(currentSection);
+}
+
+/* ════════════════════════════════════════
+   TRAMITES
+════════════════════════════════════════ */
+function renderTramites() {
+  let items = CMSDB.getAll('tramites');
+  const search = (document.getElementById('tramites-search')||{}).value||'';
+  const cat = (document.getElementById('tramites-cat')||{}).value||'';
+  items = filterItems(items, search, ['nombre','categoria']);
+  if (cat) items = items.filter(i=>i.categoria===cat);
+  const {items:page, total, current} = paginate(items,'tramites');
+  const tbody = document.getElementById('tramites-tbody');
+  tbody.innerHTML = !page.length ? emptyState() : page.map(t => `<tr>
+    <td style="font-weight:500">${escHtml(t.nombre||'')}</td>
+    <td>${escHtml(t.categoria||'')}</td>
+    <td>${escHtml(t.tiempo_respuesta||'—')}</td>
+    <td>${escHtml(t.costo||'—')}</td>
+    <td>${estadoBadge(t.estado)}</td>
+    <td>${actionBtns('tramites',t.id)}</td>
+  </tr>`).join('');
+  renderPagination('tramites-pagination','tramites',total,current,'renderTramites');
+}
+
+function saveTramites(e) {
+  e.preventDefault();
+  const form = document.getElementById('tramites-form');
+  const data = collectForm(form);
+  data.requisitos = getListValues('req-list');
+  data.pasos = getListValues('pasos-list');
+  CMSDB.save('tramites', data);
+  toast('Trámite guardado');
+  cancelForm('tramites');
+  renderTramites();
+}
+
+/* ════════════════════════════════════════
+   AGENDA
+════════════════════════════════════════ */
+function renderAgenda() {
+  let items = CMSDB.getAll('eventos');
+  const search = (document.getElementById('agenda-search')||{}).value||'';
+  const tipo = (document.getElementById('agenda-tipo')||{}).value||'';
+  items = filterItems(items, search, ['titulo','lugar','responsable','organizador']);
+  if (tipo) items = items.filter(i=>i.tipo===tipo);
+  const {items:page, total, current} = paginate(items,'agenda');
+  const tbody = document.getElementById('agenda-tbody');
+  tbody.innerHTML = !page.length ? emptyState() : page.map(ev => `<tr>
+    <td style="font-weight:500">${escHtml(ev.titulo||'')}</td>
+    <td>${escHtml(ev.tipo||'')}</td>
+    <td>${ev.fecha||'—'}</td>
+    <td>${ev.hora_inicio||'—'}${ev.hora_fin?' – '+ev.hora_fin:''}</td>
+    <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(ev.lugar||'')}</td>
+    <td>${estadoBadge(ev.estado)}</td>
+    <td>${actionBtns('agenda',ev.id)}</td>
+  </tr>`).join('');
+  renderPagination('agenda-pagination','agenda',total,current,'renderAgenda');
+}
+
+function saveAgenda(e) {
+  e.preventDefault();
+  const form = document.getElementById('agenda-form');
+  const data = collectForm(form);
+  data.destacado = form.querySelector('[name="destacado"]').checked;
+  CMSDB.save('eventos', data);
+  toast('Evento guardado');
+  cancelForm('agenda');
+  renderAgenda();
+}
+
+/* ════════════════════════════════════════
+   TRANSPARENCIA
+════════════════════════════════════════ */
+function renderTransparencia() {
+  let items = CMSDB.getAll('documentos');
+  const search = (document.getElementById('transparencia-search')||{}).value||'';
+  const cat = (document.getElementById('transparencia-cat')||{}).value||'';
+  items = filterItems(items, search, ['titulo','categoria']);
+  if (cat) items = items.filter(i=>i.categoria===cat);
+  const {items:page, total, current} = paginate(items,'transparencia');
+  const tbody = document.getElementById('transparencia-tbody');
+  tbody.innerHTML = !page.length ? emptyState() : page.map(d => `<tr>
+    <td style="font-weight:500">${escHtml(d.titulo||'')}</td>
+    <td>${escHtml(d.categoria||'')}</td>
+    <td>${d.año||d['año']||'—'}</td>
+    <td>${estadoBadge(d.estado)}</td>
+    <td>${actionBtns('transparencia',d.id)}</td>
+  </tr>`).join('');
+  renderPagination('transparencia-pagination','transparencia',total,current,'renderTransparencia');
+}
+
+function saveTransparencia(e) {
+  e.preventDefault();
+  const form = document.getElementById('transparencia-form');
+  const data = collectForm(form);
+  CMSDB.save('documentos', data);
+  toast('Documento guardado');
+  cancelForm('transparencia');
+  renderTransparencia();
+}
+
+/* ════════════════════════════════════════
+   ORGANIZACIÓN
+════════════════════════════════════════ */
+function populateOrgParentSelect(currentId=null, selectedPadre=null) {
+  const sel = document.getElementById('org-padre-select');
+  if (!sel) return;
+  const units = CMSDB.getAll('org').filter(u => u.id !== currentId);
+  sel.innerHTML = '<option value="">Ninguno</option>';
+  units.forEach(u => {
+    const opt = document.createElement('option');
+    opt.value = u.id;
+    opt.textContent = u.nombre;
+    if (u.id === selectedPadre) opt.selected = true;
+    sel.appendChild(opt);
+  });
+}
+
+function renderOrganizacion() {
+  const items = CMSDB.getAll('org');
+  const {items:page, total, current} = paginate(items,'organizacion');
+  const tbody = document.getElementById('organizacion-tbody');
+  tbody.innerHTML = !page.length ? emptyState() : page.map(o => `<tr>
+    <td style="font-weight:500">${escHtml(o.nombre||'')}</td>
+    <td>${escHtml(o.tipo||'')}</td>
+    <td>${escHtml(o.responsable||'—')}</td>
+    <td>${actionBtns('organizacion',o.id)}</td>
+  </tr>`).join('');
+  renderPagination('organizacion-pagination','organizacion',total,current,'renderOrganizacion');
+}
+
+function saveOrganizacion(e) {
+  e.preventDefault();
+  const form = document.getElementById('organizacion-form');
+  const data = collectForm(form);
+  if (!data.padre) data.padre = null;
+  CMSDB.save('org', data);
+  toast('Unidad organizacional guardada');
+  cancelForm('organizacion');
+  renderOrganizacion();
+}
+
+/* ════════════════════════════════════════
+   PROYECTOS
+════════════════════════════════════════ */
+function renderProyectos() {
+  let items = CMSDB.getAll('proyectos');
+  const search = (document.getElementById('proyectos-search')||{}).value||'';
+  const estado = (document.getElementById('proyectos-estado')||{}).value||'';
+  items = filterItems(items, search, ['nombre','responsable','municipio']);
+  if (estado) items = items.filter(i=>i.estado===estado);
+  const {items:page, total, current} = paginate(items,'proyectos');
+  const tbody = document.getElementById('proyectos-tbody');
+  tbody.innerHTML = !page.length ? emptyState() : page.map(p => `<tr>
+    <td style="font-weight:500">${escHtml(p.nombre||'')}</td>
+    <td>${estadoBadge(p.estado)}</td>
+    <td style="min-width:120px">${progressBar(p.porcentaje_avance)}</td>
+    <td>${escHtml(p.responsable||'—')}</td>
+    <td>${actionBtns('proyectos',p.id)}</td>
+  </tr>`).join('');
+  renderPagination('proyectos-pagination','proyectos',total,current,'renderProyectos');
+}
+
+function saveProyectos(e) {
+  e.preventDefault();
+  const form = document.getElementById('proyectos-form');
+  const data = collectForm(form);
+  data.hitos = getListValues('hitos-list');
+  data.porcentaje_avance = parseInt(data.porcentaje_avance)||0;
+  CMSDB.save('proyectos', data);
+  toast('Proyecto guardado');
+  cancelForm('proyectos');
+  renderProyectos();
+}
+
+/* ════════════════════════════════════════
+   INDICADORES
+════════════════════════════════════════ */
+function renderIndicadores() {
+  const items = CMSDB.getAll('indicadores');
+  const {items:page, total, current} = paginate(items,'indicadores');
+  const tbody = document.getElementById('indicadores-tbody');
+  tbody.innerHTML = !page.length ? emptyState() : page.map(ind => `<tr>
+    <td><span style="margin-right:6px">${ind.icono||''}</span><strong>${escHtml(ind.nombre||'')}</strong></td>
+    <td style="font-weight:700;color:var(--primary)">${ind.valor_actual??'—'}</td>
+    <td>${escHtml(ind.unidad||'')}</td>
+    <td>${ind.meta??'—'}</td>
+    <td>${tendenciaBadge(ind.tendencia)}</td>
+    <td>${actionBtns('indicadores',ind.id)}</td>
+  </tr>`).join('');
+  renderPagination('indicadores-pagination','indicadores',total,current,'renderIndicadores');
+}
+
+function saveIndicadores(e) {
+  e.preventDefault();
+  const data = collectForm(document.getElementById('indicadores-form'));
+  data.valor_actual = parseFloat(data.valor_actual)||0;
+  data.meta = parseFloat(data.meta)||0;
+  CMSDB.save('indicadores', data);
+  toast('Indicador guardado');
+  cancelForm('indicadores');
+  renderIndicadores();
+}
+
+/* ════════════════════════════════════════
+   EMPRESAS
+════════════════════════════════════════ */
+function renderEmpresas() {
+  let items = CMSDB.getAll('empresas');
+  const search = (document.getElementById('empresas-search')||{}).value||'';
+  const permiso = (document.getElementById('empresas-permiso')||{}).value||'';
+  items = filterItems(items, search, ['nombre','rif','categoria']);
+  if (permiso) items = items.filter(i=>i.estado_permiso===permiso);
+  const {items:page, total, current} = paginate(items,'empresas');
+  const tbody = document.getElementById('empresas-tbody');
+  tbody.innerHTML = !page.length ? emptyState() : page.map(em => `<tr>
+    <td style="font-weight:500">${escHtml(em.nombre||'')}</td>
+    <td style="font-size:12px;color:var(--muted)">${escHtml(em.rif||'—')}</td>
+    <td>${escHtml(em.categoria||'')}</td>
+    <td>${permisoBadge(em.estado_permiso)}</td>
+    <td>${actionBtns('empresas',em.id)}</td>
+  </tr>`).join('');
+  renderPagination('empresas-pagination','empresas',total,current,'renderEmpresas');
+}
+
+function saveEmpresas(e) {
+  e.preventDefault();
+  const data = collectForm(document.getElementById('empresas-form'));
+  CMSDB.save('empresas', data);
+  toast('Empresa guardada');
+  cancelForm('empresas');
+  renderEmpresas();
+}
+
+/* ════════════════════════════════════════
+   ALERTAS
+════════════════════════════════════════ */
+function renderAlertas() {
+  const items = CMSDB.getAll('alertas');
+  const {items:page, total, current} = paginate(items,'alertas');
+  const tbody = document.getElementById('alertas-tbody');
+  tbody.innerHTML = !page.length ? emptyState() : page.map(a => `<tr>
+    <td style="max-width:280px">${escHtml(a.mensaje||'')}</td>
+    <td><span class="badge ${a.tipo==='danger'?'badge-red':a.tipo==='warning'?'badge-yellow':'badge-blue'}">${a.tipo||'—'}</span></td>
+    <td>${a.activa?'<span class="badge badge-green">Activa</span>':'<span class="badge badge-gray">Inactiva</span>'}</td>
+    <td>
+      <div style="display:flex;gap:4px">
+        <button class="btn-icon" onclick="openForm('alertas','${a.id}')">✏️</button>
+        <button class="btn-icon" title="Toggle activa" onclick="toggleEstado('alertas','${a.id}','activa',true,false)">👁️</button>
+        <button class="btn-icon danger" onclick="deleteRecord('alertas','${a.id}')">🗑️</button>
+      </div>
+    </td>
+  </tr>`).join('');
+  renderPagination('alertas-pagination','alertas',total,current,'renderAlertas');
+}
+
+function saveAlertas(e) {
+  e.preventDefault();
+  const form = document.getElementById('alertas-form');
+  const data = collectForm(form);
+  data.activa = form.querySelector('[name="activa"]').checked;
+  CMSDB.save('alertas', data);
+  toast('Alerta guardada');
+  cancelForm('alertas');
+  renderAlertas();
+}
+
+// Override toggleEstado for boolean field
+const _origToggle = toggleEstado;
+window.toggleEstado = function(key, id, field, val1, val2) {
+  const item = CMSDB.getOne(key, id);
+  if (!item) return;
+  if (typeof item[field] === 'boolean') {
+    item[field] = !item[field];
+  } else {
+    item[field] = item[field]===val1 ? val2 : val1;
+  }
+  CMSDB.save(key, item);
+  renderSection(currentSection);
+};
+
+/* ════════════════════════════════════════
+   MULTAS
+════════════════════════════════════════ */
+function renderMultas() {
+  let items = CMSDB.getAll('multas');
+  const search = (document.getElementById('multas-search')||{}).value||'';
+  const estado = (document.getElementById('multas-estado')||{}).value||'';
+  items = filterItems(items, search, ['expediente','empresa_persona','tipo_infraccion']);
+  if (estado) items = items.filter(i=>i.estado===estado);
+  const {items:page, total, current} = paginate(items,'multas');
+  const tbody = document.getElementById('multas-tbody');
+  tbody.innerHTML = !page.length
+    ? emptyState('No hay multas registradas')
+    : page.map(m => `<tr>
+    <td style="font-family:monospace;font-size:12px">${escHtml(m.expediente||'—')}</td>
+    <td>${escHtml(m.empresa_persona||'—')}</td>
+    <td>${escHtml(m.tipo_infraccion||'—')}</td>
+    <td>${m.monto ? 'Bs. '+Number(m.monto).toLocaleString('es-VE') : '—'}</td>
+    <td>${estadoBadge(m.estado)}</td>
+    <td>${actionBtns('multas',m.id)}</td>
+  </tr>`).join('');
+  renderPagination('multas-pagination','multas',total,current,'renderMultas');
+}
+
+function saveMultas(e) {
+  e.preventDefault();
+  const data = collectForm(document.getElementById('multas-form'));
+  data.monto = parseFloat(data.monto)||0;
+  CMSDB.save('multas', data);
+  toast('Multa guardada');
+  cancelForm('multas');
+  renderMultas();
+}
+
+/* ════════════════════════════════════════
+   DENUNCIAS (read-only + status mgmt)
+════════════════════════════════════════ */
+function renderDenuncias() {
+  // Try both storage keys
+  let items = CMSDB.getAll('denuncias');
+  if (!items.length) {
+    try {
+      const raw = localStorage.getItem('iagami_denuncias');
+      if (raw) items = JSON.parse(raw);
+    } catch(e) {}
+  }
+  const {items:page, total, current} = paginate(items,'denuncias');
+  const tbody = document.getElementById('denuncias-tbody');
+  if (!items.length) {
+    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">📬</div>No hay denuncias registradas aún. Las denuncias del portal aparecerán aquí.</div></td></tr>`;
+    document.getElementById('denuncias-pagination').innerHTML='';
+    return;
+  }
+  tbody.innerHTML = page.map((d,i) => `<tr>
+    <td>${(pages.denuncias-1||0)*10+i+1}</td>
+    <td>${escHtml(d.tipo||d.categoria||'—')}</td>
+    <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(d.descripcion||d.contenido||'—')}</td>
+    <td>
+      <select class="status-select" onchange="updateDenunciaStatus('${d.id}',this.value)">
+        ${['Pendiente','En revisión','Resuelta','Archivada'].map(s=>`<option ${(d.estado||'Pendiente')===s?'selected':''}>${s}</option>`).join('')}
+      </select>
+    </td>
+    <td style="font-size:12px;white-space:nowrap">${d.fecha||d.created_at||(d.fecha_denuncia)||'—'}</td>
+    <td>
+      <button class="btn-icon" title="Ver nota" onclick="toggleNota('nota-${d.id}')">📝</button>
+    </td>
+  </tr>
+  <tr id="nota-${d.id}" style="display:none;background:var(--primary-lighter)">
+    <td colspan="6" style="padding:10px 14px">
+      <label style="font-size:12px;font-weight:600;color:var(--muted)">Notas / Respuesta:</label>
+      <textarea style="width:100%;margin-top:4px;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:13px;resize:vertical" rows="3" onchange="saveDenunciaNota('${d.id}',this.value)">${escHtml(d.notas||'')}</textarea>
+    </td>
+  </tr>`).join('');
+  renderPagination('denuncias-pagination','denuncias',total,current,'renderDenuncias');
+}
+
+function toggleNota(id) {
+  const row = document.getElementById(id);
+  if (row) row.style.display = row.style.display==='none' ? '' : 'none';
+}
+
+function updateDenunciaStatus(id, estado) {
+  let item = CMSDB.getOne('denuncias', id);
+  if (!item) {
+    // try alternate key
+    try {
+      const raw = localStorage.getItem('iagami_denuncias');
+      const list = raw ? JSON.parse(raw) : [];
+      item = list.find(d=>d.id===id);
+      if (item) { item.estado = estado; localStorage.setItem('iagami_denuncias', JSON.stringify(list)); toast('Estado actualizado'); return; }
+    } catch(e) {}
+  }
+  if (item) { item.estado = estado; CMSDB.save('denuncias', item); toast('Estado actualizado'); }
+}
+
+function saveDenunciaNota(id, notas) {
+  let item = CMSDB.getOne('denuncias', id);
+  if (!item) {
+    try {
+      const raw = localStorage.getItem('iagami_denuncias');
+      const list = raw ? JSON.parse(raw) : [];
+      item = list.find(d=>d.id===id);
+      if (item) { item.notas = notas; localStorage.setItem('iagami_denuncias', JSON.stringify(list)); return; }
+    } catch(e) {}
+  }
+  if (item) { item.notas = notas; CMSDB.save('denuncias', item); }
+}
+
+/* ════════════════════════════════════════
+   ARCHIVOS (MEDIA)
+════════════════════════════════════════ */
+function setMediaFilter(f) {
+  mediaFilter = f;
+  ['all','image','pdf'].forEach(k => {
+    const btn = document.getElementById('mf-'+k);
+    if (btn) btn.classList.toggle('btn-primary', k===f);
+    if (btn) btn.classList.toggle('btn-secondary', k!==f);
+  });
+  renderArchivos();
+}
+
+function renderArchivos() {
+  let items = CMSDB.getAll('media');
+  if (mediaFilter === 'image') items = items.filter(i => i.tipo && i.tipo.startsWith('image'));
+  if (mediaFilter === 'pdf') items = items.filter(i => i.tipo === 'application/pdf');
+  const grid = document.getElementById('media-grid');
+  if (!items.length) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:48px;color:var(--muted)"><div style="font-size:36px">📂</div>No hay archivos subidos aún</div>';
+    return;
+  }
+  grid.innerHTML = items.map(f => `
+    <div class="media-card">
+      <div class="media-thumb">
+        ${f.tipo && f.tipo.startsWith('image') && f.data
+          ? `<img src="${f.data}" alt="${escHtml(f.nombre||'')}">`
+          : `<div class="pdf-icon">📄</div>`}
+      </div>
+      <div class="media-info">
+        <div class="media-name" title="${escHtml(f.nombre||'')}">${escHtml(f.nombre||'')}</div>
+        <div class="media-meta">${formatSize(f.tamaño)} · ${f.fecha ? new Date(f.fecha).toLocaleDateString('es-VE') : '—'}</div>
+        <div class="media-actions">
+          <button class="btn-icon btn-sm" title="Copiar enlace" onclick="showMediaInfo()">🔗</button>
+          <button class="btn-icon danger btn-sm" onclick="deleteMedia('${f.id}')">🗑️</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function formatSize(bytes) {
+  if (!bytes) return '—';
+  if (bytes < 1024) return bytes+'B';
+  if (bytes < 1048576) return (bytes/1024).toFixed(1)+'KB';
+  return (bytes/1048576).toFixed(1)+'MB';
+}
+
+function handleFileUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (file.size > 2*1024*1024) { toast('El archivo supera el límite de 2MB', 'error'); e.target.value=''; return; }
+  const reader = new FileReader();
+  reader.onload = evt => {
+    CMSDB.save('media', {
+      nombre: file.name,
+      tipo: file.type,
+      tamaño: file.size,
+      data: evt.target.result,
+      fecha: new Date().toISOString()
+    });
+    toast('Archivo subido correctamente');
+    renderArchivos();
+  };
+  reader.readAsDataURL(file);
+  e.target.value='';
+}
+
+function deleteMedia(id) {
+  confirmDelete(() => {
+    CMSDB.remove('media', id);
+    toast('Archivo eliminado');
+    renderArchivos();
+  });
+}
+
+function showMediaInfo() {
+  toast('Los archivos se almacenan localmente en este navegador', 'warning');
+}
+
+/* ─── INIT ─── */
+showSection('dashboard');
+setMediaFilter('all');
+</script>
+</body>
+</html>
