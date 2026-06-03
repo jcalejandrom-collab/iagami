@@ -9,6 +9,7 @@ const path = require('path');
 const { testConnection } = require('./config/db');
 const authRouter = require('./routes/auth');
 const submissionsRouter = require('./routes/submissions');
+const revistasRouter = require('./routes/revistas');
 
 // ─── App setup ────────────────────────────────────────────────────────────────
 
@@ -48,6 +49,7 @@ app.use('/uploads', express.static(uploadDir));
 
 app.use('/api/auth', authRouter);
 app.use('/api/submissions', submissionsRouter);
+app.use('/api/revistas', revistasRouter);
 
 // ─── Health check ─────────────────────────────────────────────────────────────
 
