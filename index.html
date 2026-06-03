@@ -48,7 +48,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
   display:flex;
   align-items:center;
   overflow:hidden;
-  background-image:url('https://raw.githubusercontent.com/jcalejandrom-collab/iagami/main/hero-iagami..png');
+  background-image:url('https://raw.githubusercontent.com/jcalejandrom-collab/iagami/main/hero-iagami.png');
   background-size:cover;
   background-position:center top;
   background-repeat:no-repeat;
@@ -955,9 +955,43 @@ function sendChat() {
 function analizarIA() {
   const desc = document.getElementById('den-desc');
   const box  = document.getElementById('ai-box');
+  const btn  = document.querySelector('.ai-btn');
   if (!desc || !desc.value.trim()) { toast('Escribe la descripción antes de analizar'); return; }
-  box.style.display = 'flex';
-  toast('✨ Análisis IA completado');
+
+  // Simulate analysis with loading state
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Analizando...'; }
+  setTimeout(() => {
+    // Classify by keywords
+    const text = desc.value.toLowerCase();
+    const tipos = [
+      { kw:['agua','río','quebrada','laguna','derrame','líquido'],   tipo:'Contaminación del Agua',   prioridad:'Alta',   area:'Dirección de Calidad Ambiental' },
+      { kw:['humo','aire','olor','gas','emisión','quema'],           tipo:'Contaminación del Aire',   prioridad:'Alta',   area:'Dirección de Calidad Ambiental' },
+      { kw:['árbol','tala','deforest','madera','bosque'],            tipo:'Deforestación',            prioridad:'Media',  area:'Dirección de Recursos Naturales' },
+      { kw:['basura','residuo','desecho','vertedero','escombro'],    tipo:'Manejo de Residuos',       prioridad:'Media',  area:'Dirección de Residuos Sólidos' },
+      { kw:['ruido','sonido','música','bocina','escándalo'],         tipo:'Contaminación Sonora',     prioridad:'Baja',   area:'Dirección de Control Ambiental' },
+      { kw:['incendio','fuego','quema','llama'],                     tipo:'Quema Ilegal',             prioridad:'Alta',   area:'Dirección de Emergencias' }
+    ];
+    const match = tipos.find(t => t.kw.some(k => text.includes(k))) || { tipo:'Denuncia Ambiental', prioridad:'Media', area:'Dirección General IAGAMI' };
+
+    // Fill ai-box fields if they exist
+    const tipoEl = document.getElementById('ai-tipo');
+    const prioEl = document.getElementById('ai-prioridad');
+    const areaEl = document.getElementById('ai-area');
+    if (tipoEl) tipoEl.textContent = match.tipo;
+    if (prioEl) prioEl.textContent = match.prioridad;
+    if (areaEl) areaEl.textContent = match.area;
+
+    // Auto-select tipo in dropdown if matches
+    const sel = document.getElementById('den-tipo');
+    if (sel && !sel.value) {
+      const opt = [...sel.options].find(o => o.text.toLowerCase().includes(match.tipo.split(' ')[0].toLowerCase()));
+      if (opt) sel.value = opt.value;
+    }
+
+    box.style.display = 'flex';
+    if (btn) { btn.disabled = false; btn.textContent = '✨ Analizar con IA'; }
+    toast('✨ Clasificación completada');
+  }, 1800);
 }
 
 /* ─── GPS ─── */
@@ -1047,7 +1081,9 @@ function removeAdjunto(idx) {
 }
 
 /* ─── ENVIAR DENUNCIA ─── */
+let _enviandoDenuncia = false;
 function enviarDenuncia() {
+  if (_enviandoDenuncia) return;
   const tipo   = document.getElementById('den-tipo').value;
   const desc   = document.getElementById('den-desc').value.trim();
   const nombre = document.getElementById('den-nombre').value.trim();
@@ -1055,38 +1091,54 @@ function enviarDenuncia() {
   if (!desc)   { toast('⚠ Escribe la descripción del hecho'); return; }
   if (!nombre) { toast('⚠ Ingresa tu nombre completo'); return; }
 
-  const item = {
-    tipo,
-    descripcion: desc,
-    nombre,
-    email:     document.getElementById('den-email').value,
-    telefono:  document.getElementById('den-tel').value,
-    cedula:    document.getElementById('den-cedula').value,
-    ubicacion: document.getElementById('input-ubicacion').value,
-    estado:    'pendiente',
-    fecha:     new Date().toISOString().slice(0, 10),
-    adjuntos:  adjuntosData.map(f => ({ name: f.name, type: f.type, size: f.size, dataUrl: f.dataUrl }))
-  };
-  CMSDB.save('denuncias', item);
+  // Block duplicate submissions
+  _enviandoDenuncia = true;
+  const submitBtn = document.querySelector('.fsubmit');
+  const originalText = submitBtn ? submitBtn.textContent : '';
+  if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = '⏳ Enviando...'; }
 
-  const num = 'DEN-' + Date.now().toString().slice(-6);
-  const el = document.getElementById('modal-caso-num');
-  if (el) el.textContent = 'Número de caso: ' + num;
-  const adjMsg = adjuntosData.length ? ` · ${adjuntosData.length} archivo(s) adjunto(s)` : '';
-  toast('✅ Denuncia enviada · Caso ' + num + adjMsg);
-  setTimeout(() => openModal('modal-denuncia-ok'), 400);
+  setTimeout(() => {
+    try {
+      const num = 'DEN-' + Date.now().toString().slice(-6);
+      const item = {
+        caso:      num,
+        tipo,
+        descripcion: desc,
+        nombre,
+        email:     document.getElementById('den-email').value,
+        telefono:  document.getElementById('den-tel').value,
+        cedula:    document.getElementById('den-cedula').value,
+        ubicacion: document.getElementById('input-ubicacion').value,
+        estado:    'recibida',
+        publicado: true,
+        fecha:     new Date().toISOString().slice(0, 10),
+        historial: [{ estado:'recibida', fecha: new Date().toISOString().slice(0,10), comentario:'Denuncia registrada en el sistema SIGAP.' }],
+        adjuntos:  adjuntosData.map(f => ({ name: f.name, type: f.type, size: f.size, dataUrl: f.dataUrl }))
+      };
+      CMSDB.save('denuncias', item);
 
-  // Reset form
-  document.getElementById('den-tipo').value    = '';
-  document.getElementById('den-desc').value    = '';
-  document.getElementById('den-nombre').value  = '';
-  document.getElementById('den-email').value   = '';
-  document.getElementById('den-tel').value     = '';
-  document.getElementById('den-cedula').value  = '';
-  document.getElementById('input-ubicacion').value = '';
-  document.getElementById('ai-box').style.display  = 'none';
-  adjuntosData = [];
-  renderAdjuntos();
+      const el = document.getElementById('modal-caso-num');
+      if (el) el.textContent = 'Número de caso: ' + num;
+      const adjMsg = adjuntosData.length ? ` · ${adjuntosData.length} archivo(s) adjunto(s)` : '';
+      toast('✅ Denuncia registrada · Caso ' + num + adjMsg);
+      setTimeout(() => openModal('modal-denuncia-ok'), 400);
+
+      // Reset form
+      ['den-tipo','den-desc','den-nombre','den-email','den-tel','den-cedula','input-ubicacion'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+      document.getElementById('ai-box').style.display = 'none';
+      adjuntosData = [];
+      renderAdjuntos();
+    } catch(e) {
+      toast('⚠ Error al guardar la denuncia. Intenta nuevamente.');
+      console.error('enviarDenuncia error:', e);
+    } finally {
+      _enviandoDenuncia = false;
+      if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = originalText; }
+    }
+  }, 600);
 }
 
 /* ═══════════════════════════════════════
@@ -1215,14 +1267,14 @@ function renderHomeNoticias() {
   grid.innerHTML = noticias.map(n => {
     const icon = catIcon(n.categoria);
     const cc   = catColor(n.categoria);
-    const gradMap = {
-      'Medio Ambiente':'linear-gradient(135deg,#dcf5e8,#a8dfc0)',
-      'Comunidad':     'linear-gradient(135deg,#dbeafe,#bfdbfe)',
-      'Normativa':     'linear-gradient(135deg,#fef3c7,#fde68a)',
-      'Educación':     'linear-gradient(135deg,#f3e8ff,#e9d5ff)',
-      'Institucional': 'linear-gradient(135deg,#f1f5f9,#e2e8f0)'
+    const bgMap = {
+      'Medio Ambiente':'#e8f5ee',
+      'Comunidad':     '#eff6ff',
+      'Normativa':     '#fefce8',
+      'Educación':     '#faf5ff',
+      'Institucional': '#f8fafc'
     };
-    const bg = gradMap[n.categoria] || 'linear-gradient(135deg,#dcf5e8,#a8dfc0)';
+    const bg = bgMap[n.categoria] || '#e8f5ee';
     return `<a class="news-card" href="noticias/index.html">
       <div class="news-img" style="background:${bg}">
         ${n.imagen ? `<img src="${n.imagen}" alt="${n.titulo}" loading="lazy"/>` : ''}
