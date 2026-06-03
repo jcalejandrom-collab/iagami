@@ -62,6 +62,17 @@ async function request(method, path, body = undefined) {
   }
 }
 
+/**
+ * Build query string from params object, filtering out empty values.
+ */
+function buildQuery(params) {
+  if (!params) return '';
+  const q = new URLSearchParams(
+    Object.entries(params).filter(([, v]) => v !== undefined && v !== null && v !== '')
+  ).toString();
+  return q ? '?' + q : '';
+}
+
 /* ---- Auth ---- */
 export const auth = {
   /**
@@ -177,5 +188,73 @@ export const submissions = {
   },
 };
 
+/* ── REVISTAS (public) ── */
+export const revistas = {
+  /** GET /revistas?... — list published magazines */
+  getAll: (params) => request('GET', '/revistas' + buildQuery(params)),
+
+  /** GET /revistas/:id — get single magazine (increments view count) */
+  getOne: (id) => request('GET', `/revistas/${id}`),
+
+  /** GET /revistas/:id/descargar — get download URL (increments download count) */
+  descargar: (id) => request('GET', `/revistas/${id}/descargar`),
+
+  /** GET /revistas/categorias — list available categories */
+  getCategorias: () => request('GET', '/revistas/categorias'),
+
+  // ── Admin ──
+
+  /** GET /revistas/admin/todas?... — list all magazines (admin) */
+  getAllAdmin: (params) => request('GET', '/revistas/admin/todas' + buildQuery(params)),
+
+  /** GET /revistas/admin/estadisticas — aggregate stats */
+  getEstadisticas: () => request('GET', '/revistas/admin/estadisticas'),
+
+  /** POST /revistas/admin — create magazine with multipart FormData */
+  create: (formData) => {
+    const token = localStorage.getItem('iagami_token');
+    return fetch(`${BASE_URL}/revistas/admin`, {
+      method: 'POST',
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: formData, // FormData for multipart
+    }).then(async (r) => {
+      const contentType = r.headers.get('content-type') || '';
+      const data = contentType.includes('application/json') ? await r.json() : await r.text();
+      if (!r.ok) {
+        const message = (data && (data.message || data.error)) || `Error ${r.status}`;
+        return { data: null, error: message, status: r.status };
+      }
+      return { data, error: null, status: r.status };
+    }).catch((err) => ({ data: null, error: err.message || 'Error de red.', status: 0 }));
+  },
+
+  /** PUT /revistas/admin/:id — update magazine with multipart FormData */
+  update: (id, formData) => {
+    const token = localStorage.getItem('iagami_token');
+    return fetch(`${BASE_URL}/revistas/admin/${id}`, {
+      method: 'PUT',
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: formData,
+    }).then(async (r) => {
+      const contentType = r.headers.get('content-type') || '';
+      const data = contentType.includes('application/json') ? await r.json() : await r.text();
+      if (!r.ok) {
+        const message = (data && (data.message || data.error)) || `Error ${r.status}`;
+        return { data: null, error: message, status: r.status };
+      }
+      return { data, error: null, status: r.status };
+    }).catch((err) => ({ data: null, error: err.message || 'Error de red.', status: 0 }));
+  },
+
+  /** DELETE /revistas/admin/:id */
+  delete: (id) => request('DELETE', `/revistas/admin/${id}`),
+
+  /** PATCH /revistas/admin/:id/estado — toggle publicada/borrador */
+  toggleEstado: (id) => request('PATCH', `/revistas/admin/${id}/estado`),
+
+  /** PATCH /revistas/admin/:id/destacada — toggle destacada flag */
+  toggleDestacada: (id) => request('PATCH', `/revistas/admin/${id}/destacada`),
+};
+
 /* Default export for convenience */
-export default { auth, submissions };
+export default { auth, submissions, revistas };
