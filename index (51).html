@@ -1,0 +1,1445 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>IAGAMI — Portal de Gestión Ambiental del Municipio Iribarren</title>
+<meta name="description" content="Portal digital de IAGAMI. Gestión ambiental, denuncias ciudadanas, noticias y participación comunitaria para el Municipio Iribarren, Lara, Venezuela."/>
+<meta name="theme-color" content="#1d6b3e"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+/* ===== RESET & BASE ===== */
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height:1.6}
+
+/* ===== TOPBAR ===== */
+.topbar{background:#1d6b3e;color:rgba(255,255,255,.88);text-align:center;font-size:11px;padding:6px 16px;letter-spacing:.06em;font-weight:500}
+
+/* ===== NAV ===== */
+.nav{background:#fff;border-bottom:1px solid #c8ead8;position:sticky;top:0;z-index:200;box-shadow:0 1px 12px rgba(29,107,62,.06)}
+.navinner{max-width:1200px;margin:0 auto;padding:0 24px;height:58px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.logo{display:flex;align-items:center;gap:10px;flex-shrink:0;text-decoration:none}
+.logo-img{width:48px;height:48px;background:#fff;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;border:1px solid #d4edd8}
+.logo-img img{width:44px;height:44px;object-fit:contain}
+.logo-img svg{width:22px;height:22px}
+.logo-text{font-family:'Poppins',sans-serif;font-size:15px;font-weight:700;color:#1a3d2b;line-height:1.1}
+.logo-sub{font-size:10px;color:#4a8a6a;font-weight:400}
+.navlinks{display:flex;gap:2px;align-items:center}
+.nl{font-size:12px;padding:6px 10px;border-radius:7px;color:#4a6a5a;cursor:pointer;transition:.15s;white-space:nowrap;text-decoration:none;border:none;background:none}
+.nl:hover,.nl.active{background:#e8f5ee;color:#1d6b3e}
+.navr{display:flex;gap:8px;flex-shrink:0}
+.navbtn{font-size:12px;padding:7px 16px;border-radius:8px;background:#1d6b3e;color:#fff;border:none;cursor:pointer;font-weight:600;transition:.15s}
+.navbtn:hover{background:#155c32}
+.navbtn-o{font-size:12px;padding:6px 14px;border-radius:8px;background:transparent;color:#1d6b3e;border:1.5px solid #a8dfc0;cursor:pointer;font-weight:500;transition:.15s}
+.navbtn-o:hover{background:#e8f5ee}
+
+/* ===== ALERT BAR ===== */
+.alert-bar{background:#fffbeb;border-bottom:1.5px solid #fcd34d;padding:7px 24px;display:flex;align-items:center;gap:8px;font-size:11px;color:#92400e;overflow:hidden;flex-wrap:wrap}
+.alert-pill{background:#fef3c7;border:1px solid #fcd34d;border-radius:20px;padding:3px 10px;white-space:nowrap;font-size:10px;font-weight:600;flex-shrink:0}
+
+/* ===== HERO ===== */
+.hero-wrap{position:relative}
+.hero{
+  position:relative;
+  min-height:520px;
+  display:flex;
+  align-items:center;
+  overflow:hidden;
+  background-image:url('https://raw.githubusercontent.com/jcalejandrom-collab/iagami/main/hero-iagami.png');
+  background-size:cover;
+  background-position:center top;
+  background-repeat:no-repeat;
+  background-color:#1a4a2e;
+}
+.hero-overlay-left{
+  position:absolute;inset:0;z-index:1;
+  background:linear-gradient(
+    90deg,
+    rgba(4,12,6,.92) 0%,
+    rgba(4,12,6,.88) 35%,
+    rgba(4,12,6,.60) 58%,
+    rgba(4,12,6,.15) 75%,
+    rgba(0,0,0,0) 100%
+  );
+}
+.hero-overlay-depth{
+  position:absolute;inset:0;z-index:1;
+  background:linear-gradient(
+    180deg,
+    rgba(0,0,0,.18) 0%,
+    rgba(0,0,0,0) 35%,
+    rgba(0,0,0,0) 65%,
+    rgba(0,0,0,.30) 100%
+  );
+}
+.hero-content{
+  position:relative;z-index:2;
+  width:100%;max-width:1200px;
+  margin:0 auto;
+  padding:52px 24px 60px;
+  display:grid;
+  grid-template-columns:1fr 420px;
+  gap:36px;
+  align-items:center;
+}
+.hero-left{max-width:460px}
+
+.pulse{width:7px;height:7px;background:#4ade80;border-radius:50%;display:inline-block;animation:pulse 2s infinite;flex-shrink:0}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+
+.hero-badge{
+  display:inline-flex;align-items:center;gap:7px;
+  background:rgba(74,222,128,.14);color:#a8f0c8;
+  border:1px solid rgba(74,222,128,.35);border-radius:20px;
+  font-size:11px;font-weight:600;padding:5px 14px;
+  margin-bottom:12px;letter-spacing:.05em;
+  backdrop-filter:blur(6px);
+}
+.hero-slogan{
+  font-family:'Poppins',sans-serif;font-size:16px;font-weight:700;
+  color:#a8f0c8;margin-bottom:10px;letter-spacing:.02em;font-style:italic;
+  text-shadow:0 2px 12px rgba(0,0,0,.4);
+}
+.hero h1{
+  font-family:'Poppins',sans-serif;font-size:34px;font-weight:800;
+  line-height:1.15;color:#fff;margin-bottom:12px;
+  text-shadow:0 2px 24px rgba(0,0,0,.5);
+}
+.hero h1 .green{color:#4ade80}
+.hero-desc{font-size:13.5px;color:rgba(255,255,255,.82);line-height:1.75;margin-bottom:24px;max-width:420px}
+.hero-btns{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:28px}
+.btn-p{
+  background:#1d6b3e;color:#fff;border:none;border-radius:10px;
+  padding:13px 22px;font-size:13px;font-weight:700;cursor:pointer;
+  display:inline-flex;align-items:center;gap:7px;
+  font-family:'Poppins',sans-serif;
+  box-shadow:0 4px 24px rgba(29,107,62,.55);
+  transition:.2s;text-decoration:none;
+}
+.btn-p:hover{background:#155c32;transform:translateY(-1px)}
+.btn-s{
+  background:rgba(255,255,255,.12);color:#fff;
+  border:1.5px solid rgba(255,255,255,.38);border-radius:10px;
+  padding:13px 22px;font-size:13px;font-weight:500;cursor:pointer;
+  display:inline-flex;align-items:center;gap:7px;
+  backdrop-filter:blur(8px);transition:.2s;text-decoration:none;
+}
+.btn-s:hover{background:rgba(255,255,255,.2)}
+.hero-stats{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:12px;
+  border-top:1px solid rgba(255,255,255,.18);padding-top:20px;
+}
+.stat-v{font-family:'Poppins',sans-serif;font-size:24px;font-weight:800;color:#4ade80;text-shadow:0 0 20px rgba(74,222,128,.4)}
+.stat-l{font-size:10px;color:rgba(255,255,255,.6);margin-top:2px;line-height:1.4}
+
+/* ===== PANEL SIGAP ===== */
+.hero-panel{
+  background:rgba(8,20,12,.88);
+  border:1px solid rgba(74,222,128,.28);
+  border-radius:16px;
+  backdrop-filter:blur(14px);
+  overflow:hidden;
+  box-shadow:0 8px 40px rgba(0,0,0,.35);
+}
+.panel-bar{
+  height:32px;background:linear-gradient(90deg,#1a5a30,#2d7a4f);
+  display:flex;align-items:center;padding:0 14px;gap:5px;
+}
+.pdot{width:9px;height:9px;border-radius:50%}
+.panel-title{font-size:10px;color:rgba(255,255,255,.72);margin-left:7px;font-family:'Courier New',monospace;letter-spacing:.05em}
+.plive{margin-left:auto;font-size:9px;color:rgba(255,255,255,.5);display:flex;align-items:center;gap:4px}
+.panel-body{padding:14px;display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.mc{background:rgba(255,255,255,.05);border:1px solid rgba(74,222,128,.18);border-radius:9px;padding:10px 11px}
+.mc-lbl{font-size:9px;color:rgba(74,222,128,.78);font-family:'Courier New',monospace;letter-spacing:.06em;margin-bottom:3px}
+.mc-val{font-family:'Poppins',sans-serif;font-size:18px;font-weight:700;color:#4ade80}
+.mc-unit{font-size:9px;color:rgba(255,255,255,.42);margin-left:2px}
+.mc-sub{font-size:9px;margin-top:2px;color:rgba(255,255,255,.45)}
+.mc-blue{border-color:rgba(96,184,240,.2)}
+.mc-blue .mc-lbl{color:rgba(96,184,240,.8)}
+.mc-blue .mc-val{color:#60b8f0}
+.bar-sec{grid-column:1/-1;background:rgba(255,255,255,.04);border:1px solid rgba(96,184,240,.14);border-radius:9px;padding:10px 11px}
+.bar-lbl-top{font-size:9px;color:rgba(96,184,240,.78);font-family:'Courier New',monospace;letter-spacing:.06em;margin-bottom:8px}
+.bar-row{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.bar-name{font-size:9px;color:rgba(255,255,255,.5);width:52px;flex-shrink:0}
+.bar-track{flex:1;height:4px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden}
+.bar-fill{height:100%;border-radius:2px;transition:width 1s ease}
+.bar-pct{font-size:9px;font-weight:600;width:26px;text-align:right}
+.sys-row{grid-column:1/-1;background:rgba(0,0,0,.28);border:1px solid rgba(42,154,238,.12);border-radius:9px;padding:8px 11px}
+.sys-top{font-size:9px;color:#4ac9e3;font-family:'Courier New',monospace;font-weight:700;letter-spacing:.08em;margin-bottom:4px;display:flex;align-items:center;gap:5px}
+.sys-line{font-size:9px;color:#4ade80;font-family:'Courier New',monospace;opacity:.78;padding:1.5px 0}
+.sys-line2{font-size:9px;color:#60b8f0;font-family:'Courier New',monospace;opacity:.65;padding:1.5px 0}
+
+/* ===== CHAT FAB ===== */
+.chat-fab{
+  position:absolute;bottom:20px;right:20px;z-index:3;
+  width:50px;height:50px;background:#1d6b3e;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  box-shadow:0 4px 22px rgba(29,107,62,.65);transition:.2s;border:none;
+}
+.chat-fab:hover{transform:scale(1.08)}
+.chat-fab-dot{
+  position:absolute;top:-1px;right:-1px;width:14px;height:14px;
+  background:#4ade80;border-radius:50%;border:2px solid #fff;
+  animation:pulse 2s infinite;
+}
+
+/* ===== SECTIONS ===== */
+.section{padding:40px 24px;max-width:1200px;margin:0 auto}
+.sec-wrap{background:#f8fcfa}.sec-wrap2{background:#fff}.sec-wrap3{background:#f0faf5}
+.sec-tag{display:inline-block;font-size:11px;font-weight:700;color:#1d6b3e;background:#e8f5ee;border:1px solid #a8dfc0;border-radius:20px;padding:3px 13px;margin-bottom:9px;letter-spacing:.05em}
+.sec-head{text-align:center;margin-bottom:26px}
+.sec-head h2{font-family:'Poppins',sans-serif;font-size:22px;font-weight:700;color:#1a3d2b;margin-bottom:5px}
+.sec-head p{font-size:13px;color:#4a8a6a}
+
+/* ===== SERVICES ===== */
+.svc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(115px,1fr));gap:11px}
+.svc-card{background:#fff;border:1px solid #d4edd8;border-radius:13px;padding:16px 10px;text-align:center;cursor:pointer;transition:.2s;text-decoration:none;display:block}
+.svc-card:hover{border-color:#1d6b3e;transform:translateY(-3px);box-shadow:0 8px 28px rgba(29,107,62,.12)}
+.svc-ico{width:44px;height:44px;border-radius:11px;display:flex;align-items:center;justify-content:center;margin:0 auto 9px;font-size:20px}
+.svc-name{font-size:12px;font-weight:600;color:#1a3d2b;line-height:1.3}
+.svc-desc{font-size:10px;color:#4a8a6a;margin-top:3px;line-height:1.4}
+
+/* ===== INDICATORS ===== */
+.ind-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:11px}
+.ind-card{background:#f8fcfa;border:1px solid #d4edd8;border-radius:11px;padding:13px;text-align:center;transition:.2s}
+.ind-card:hover{border-color:#a8dfc0;box-shadow:0 4px 16px rgba(29,107,62,.08)}
+.ind-ico{font-size:22px;margin-bottom:4px}
+.ind-val{font-family:'Poppins',sans-serif;font-size:19px;font-weight:700;color:#1d6b3e}
+.ind-unit{font-size:10px;color:#4a8a6a}
+.ind-name{font-size:10px;color:#4a8a6a;margin-top:2px}
+.ind-t{font-size:10px;margin-top:3px;font-weight:500}
+
+/* ===== NEWS ===== */
+.news-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+.news-card{background:#fff;border:1px solid #d4edd8;border-radius:13px;overflow:hidden;cursor:pointer;transition:.2s;display:block;text-decoration:none}
+.news-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(29,107,62,.1);border-color:#a8dfc0}
+.news-img{height:115px;display:flex;align-items:center;justify-content:center;font-size:36px;position:relative;overflow:hidden}
+.news-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.news-body{padding:13px}
+.news-cat{font-size:10px;font-weight:700;background:#e8f5ee;color:#1d6b3e;border-radius:20px;padding:2px 9px;display:inline-block;margin-bottom:6px}
+.news-title{font-size:12px;font-weight:600;color:#1a3d2b;line-height:1.45;margin-bottom:5px}
+.news-date{font-size:10px;color:#4a8a6a}
+.ver-mas-row{text-align:center;margin-top:20px}
+.btn-ver-mas{display:inline-flex;align-items:center;gap:7px;padding:11px 24px;background:#fff;color:#1d6b3e;border:1.5px solid #a8dfc0;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;transition:.2s;text-decoration:none}
+.btn-ver-mas:hover{background:#e8f5ee;border-color:#1d6b3e}
+
+/* ===== PROJECTS ===== */
+.proj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+.proj-card{background:#fff;border:1px solid #d4edd8;border-radius:13px;overflow:hidden;transition:.2s;display:block;text-decoration:none}
+.proj-card:hover{box-shadow:0 6px 20px rgba(29,107,62,.1);border-color:#a8dfc0}
+.proj-img{height:80px;display:flex;align-items:center;justify-content:center;font-size:28px}
+.proj-body{padding:13px}
+.ps{display:inline-block;font-size:10px;font-weight:700;border-radius:20px;padding:2px 9px;margin-bottom:6px}
+.ps-exec{background:#dbeafe;color:#1e40af}
+.ps-done{background:#dcfce7;color:#166534}
+.ps-plan{background:#f1f5f9;color:#475569}
+.proj-name{font-size:12px;font-weight:600;color:#1a3d2b;margin-bottom:7px}
+.proj-bar{width:100%;height:5px;background:#e8f5ee;border-radius:3px;overflow:hidden;margin-bottom:3px}
+.proj-fill{height:100%;border-radius:3px;background:#1d6b3e}
+.proj-pct{font-size:10px;color:#4a8a6a}
+
+/* ===== AGENDA ===== */
+.agenda-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.ev-card{background:#fff;border:1px solid #d4edd8;border-radius:11px;padding:13px;display:flex;gap:11px;transition:.2s}
+.ev-card:hover{border-color:#a8dfc0;box-shadow:0 4px 14px rgba(29,107,62,.08)}
+.ev-date{background:#e8f5ee;border-radius:9px;padding:6px 9px;text-align:center;flex-shrink:0;min-width:44px}
+.ev-day{font-family:'Poppins',sans-serif;font-size:19px;font-weight:800;color:#1d6b3e;line-height:1}
+.ev-mon{font-size:9px;color:#4a8a6a;text-transform:uppercase;letter-spacing:.06em}
+.ev-tipo{font-size:10px;background:#e8f5ee;color:#1d6b3e;border-radius:20px;padding:1px 8px;display:inline-block;margin-bottom:3px;font-weight:600}
+.ev-title{font-size:12px;font-weight:600;color:#1a3d2b;margin-bottom:2px;line-height:1.35}
+.ev-place{font-size:10px;color:#4a8a6a}
+
+/* ===== CTA ===== */
+.cta{background:linear-gradient(135deg,#0d2d1a 0%,#1d6b3e 100%);padding:56px 24px;text-align:center;color:#fff;position:relative;overflow:hidden}
+.cta::before,.cta::after{content:'';position:absolute;border-radius:50%;background:rgba(74,222,128,.06)}
+.cta::before{width:300px;height:300px;top:-80px;right:-60px}
+.cta::after{width:200px;height:200px;bottom:-60px;left:-40px}
+.cta h2{font-family:'Poppins',sans-serif;font-size:26px;font-weight:800;margin-bottom:10px;position:relative}
+.cta p{font-size:13.5px;opacity:.83;max-width:440px;margin:0 auto 24px;line-height:1.75;position:relative}
+.cta-btn{background:#fff;color:#1d6b3e;border:none;border-radius:11px;padding:14px 26px;font-size:13px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:8px;position:relative;box-shadow:0 4px 24px rgba(0,0,0,.2);transition:.2s;font-family:'Poppins',sans-serif}
+.cta-btn:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,.25)}
+
+/* ===== FOOTER ===== */
+.footer{background:#0a1f0e;color:rgba(255,255,255,.7);padding:40px 24px 24px}
+.footer-inner{max-width:1200px;margin:0 auto}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:28px;margin-bottom:28px}
+.footer-brand h3{color:#fff;font-family:'Poppins',sans-serif;font-size:14px;font-weight:700;margin-bottom:8px}
+.footer-brand p{font-size:11.5px;line-height:1.75;color:rgba(255,255,255,.65)}
+.footer-col h4{color:#a8dfc0;font-size:11px;font-weight:700;margin-bottom:10px;letter-spacing:.06em;text-transform:uppercase}
+.footer-col ul{list-style:none}
+.footer-col li,.footer-col a{font-size:11.5px;padding:3px 0;cursor:pointer;transition:.15s;color:rgba(255,255,255,.65);display:block;text-decoration:none}
+.footer-col li:hover,.footer-col a:hover{color:#fff;padding-left:4px}
+.footer-col .contact-item{font-size:11.5px;padding:3px 0;display:flex;align-items:center;gap:7px;color:rgba(255,255,255,.65)}
+.footer-bottom{border-top:1px solid rgba(255,255,255,.08);padding-top:18px;text-align:center;font-size:10.5px;opacity:.4}
+
+/* ===== PAGE ROUTING ===== */
+.page{display:none}.page.active{display:block}
+
+/* ===== DENUNCIA ===== */
+.denuncia-wrap{background:#f8fcfa;padding:28px 24px;max-width:1200px;margin:0 auto}
+.denuncia-grid{display:grid;grid-template-columns:1fr 340px;gap:28px;align-items:start}
+.dform{background:#fff;border:1px solid #d4edd8;border-radius:16px;padding:24px}
+.fg{margin-bottom:16px}
+.flabel{font-size:12px;font-weight:600;color:#1a3d2b;display:block;margin-bottom:5px}
+.flabel-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.fselect,.finput,.ftextarea{width:100%;padding:10px 13px;border:1px solid #d4edd8;border-radius:9px;font-size:13px;color:#1a3d2b;background:#fff;outline:none;transition:.15s;font-family:'Inter',sans-serif}
+.fselect:focus,.finput:focus,.ftextarea:focus{border-color:#1d6b3e;box-shadow:0 0 0 3px rgba(29,107,62,.08)}
+.ftextarea{resize:vertical;min-height:100px}
+.ai-btn{font-size:11px;padding:4px 11px;border-radius:6px;border:1px solid #a8dfc0;background:#e8f5ee;color:#1d6b3e;cursor:pointer;display:flex;align-items:center;gap:4px;transition:.15s}
+.ai-btn:hover{background:#d0ebdb}
+.ai-box{background:#fef9eb;border:1px solid #fcd34d;border-radius:9px;padding:11px 13px;font-size:12px;color:#92400e;margin-bottom:16px;display:none;gap:9px;line-height:1.6}
+.fgrid2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.fnote{background:#e8f5ee;border:1px solid #a8dfc0;border-radius:9px;padding:9px 13px;font-size:11px;color:#1d6b3e;margin-bottom:16px}
+.fsubmit{width:100%;padding:13px;background:#1d6b3e;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;font-family:'Poppins',sans-serif;transition:.15s}
+.fsubmit:hover{background:#155c32}
+.dinfo-card{background:#fff;border:1px solid #d4edd8;border-radius:16px;padding:20px;margin-bottom:14px}
+.dinfo-card h4{font-size:13px;font-weight:600;color:#1a3d2b;margin-bottom:12px}
+.dinfo-row{display:flex;align-items:flex-start;gap:8px;margin-bottom:8px;font-size:12px;color:#4a8a6a}
+.dinfo-ico{font-size:14px;flex-shrink:0;margin-top:1px}
+
+/* ===== TOAST ===== */
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);background:#1a3d2b;color:#fff;padding:11px 22px;border-radius:10px;font-size:13px;font-weight:500;z-index:9999;opacity:0;transition:.3s;pointer-events:none;white-space:nowrap;box-shadow:0 4px 24px rgba(0,0,0,.25)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ===== MODAL ===== */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;display:none;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:#fff;border-radius:16px;padding:28px;max-width:380px;width:90%;position:relative;box-shadow:0 8px 40px rgba(0,0,0,.2)}
+.modal h3{font-family:'Poppins',sans-serif;font-size:18px;font-weight:700;color:#1a3d2b;margin-bottom:4px}
+.modal p{font-size:12px;color:#4a8a6a;margin-bottom:18px}
+.modal-close{position:absolute;top:14px;right:16px;background:none;border:none;font-size:20px;cursor:pointer;color:#4a8a6a;line-height:1}
+.modal .fg{margin-bottom:12px}
+.modal-footer{display:flex;gap:10px;margin-top:6px}
+
+/* ===== CHAT PANEL ===== */
+.chat-panel{position:fixed;bottom:84px;right:20px;width:300px;background:#fff;border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,.18);z-index:400;display:none;flex-direction:column;overflow:hidden;border:1px solid #d4edd8}
+.chat-panel.open{display:flex}
+.chat-head{background:#1d6b3e;color:#fff;padding:12px 16px;display:flex;justify-content:space-between;align-items:center}
+.chat-head span{font-size:13px;font-weight:600}
+.chat-close{background:none;border:none;color:#fff;font-size:18px;cursor:pointer;line-height:1}
+.chat-msgs{padding:14px;min-height:160px;font-size:12px;color:#4a6a5a;display:flex;flex-direction:column;gap:8px}
+.chat-bubble{background:#e8f5ee;border-radius:10px 10px 10px 2px;padding:9px 12px;max-width:85%;line-height:1.5}
+.chat-input-row{display:flex;border-top:1px solid #d4edd8}
+.chat-input-row input{flex:1;border:none;padding:10px 12px;font-size:12px;outline:none;font-family:'Inter',sans-serif}
+.chat-input-row button{background:#1d6b3e;border:none;color:#fff;padding:0 14px;cursor:pointer;font-size:14px}
+
+/* ===== EMPTY STATE ===== */
+.empty-state{text-align:center;padding:32px 16px;color:#4a8a6a;font-size:13px}
+.empty-state .ico{font-size:32px;margin-bottom:10px}
+
+/* ===== DROP ZONE ===== */
+.drop-zone{border:2px dashed #a8dfc0;border-radius:10px;padding:22px 16px;text-align:center;cursor:pointer;transition:.2s;background:#f8fcfa;user-select:none}
+.drop-zone:hover,.drop-zone.over{border-color:#1d6b3e;background:#e8f5ee}
+.dz-icon{font-size:28px;margin-bottom:6px}
+.dz-text{font-size:13px;color:#1a3d2b;margin-bottom:3px}
+.dz-sub{font-size:11px;color:#4a8a6a}
+.adjuntos-preview{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+.adj-item{position:relative;border:1px solid #d4edd8;border-radius:8px;overflow:hidden;background:#fff;width:90px;flex-shrink:0}
+.adj-img{width:90px;height:70px;object-fit:cover;display:block}
+.adj-file{width:90px;height:70px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:10px;color:#4a8a6a;padding:4px}
+.adj-file-ico{font-size:26px}
+.adj-name{font-size:9px;color:#4a8a6a;text-align:center;padding:3px 4px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;max-width:88px}
+.adj-remove{position:absolute;top:2px;right:2px;width:18px;height:18px;background:rgba(220,38,38,.9);border:none;border-radius:50%;color:#fff;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1}
+.adj-size{font-size:9px;color:#4a8a6a;text-align:center;padding-bottom:3px}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:900px){
+  .hero-content{grid-template-columns:1fr}
+  .hero-panel{display:none}
+  .hero h1{font-size:26px}
+  .footer-grid{grid-template-columns:1fr 1fr}
+  .denuncia-grid{grid-template-columns:1fr}
+}
+@media(max-width:640px){
+  .navlinks{display:none}
+  .hero h1{font-size:22px}
+  .hero-stats{grid-template-columns:repeat(3,1fr)}
+  .footer-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ===== HOME ===== -->
+<div id="page-home" class="page active">
+
+  <div class="topbar">Instituto Autónomo de Gestión Ambiental — Municipio Iribarren · Estado Lara · Venezuela &nbsp;|&nbsp; SIGAP v3.0</div>
+
+  <nav class="nav">
+    <div class="navinner">
+      <a class="logo" href="#" onclick="showPage('home');return false">
+        <div class="logo-img">
+          <img src="https://raw.githubusercontent.com/jcalejandrom-collab/iagami/main/logo-iagami.png" alt="Logo IAGAMI" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"/>
+          <svg style="display:none" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div>
+          <div class="logo-text">IAGAMI</div>
+          <div class="logo-sub">Gestión Ambiental · Iribarren</div>
+        </div>
+      </a>
+      <div class="navlinks">
+        <a class="nl active" href="#" onclick="showPage('home');return false">Inicio</a>
+        <a class="nl" href="noticias/index.html">Noticias</a>
+        <a class="nl" href="revista/index.html">Revista</a>
+        <a class="nl" href="#" onclick="showPage('denuncia');return false">Denuncias</a>
+        <a class="nl" href="tramites/index.html">Trámites</a>
+        <a class="nl" href="agenda/index.html">Agenda</a>
+        <a class="nl" href="transparencia/index.html">Transparencia</a>
+        <a class="nl" href="organizacion/index.html">Organización</a>
+      </div>
+      <div class="navr">
+        <button class="navbtn-o" onclick="window.location='admin/index.html'">Admin</button>
+        <button class="navbtn" onclick="openModal('modal-login')">Acceder</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ALERTAS DINÁMICAS -->
+  <div id="alert-bar" class="alert-bar" style="display:none" role="alert" aria-live="polite"></div>
+
+  <div class="hero-wrap">
+    <div class="hero">
+      <div class="hero-overlay-left"></div>
+      <div class="hero-overlay-depth"></div>
+      <div class="hero-content">
+
+        <!-- TEXTO IZQUIERDA -->
+        <div class="hero-left">
+          <div class="hero-badge"><span class="pulse"></span> SIGAP · Sistema Integral de Gestión Ambiental</div>
+          <div class="hero-slogan">Iribarren Verde para la vida</div>
+          <h1>Gestionamos el <span class="green">futuro ambiental</span> de nuestro municipio</h1>
+          <p class="hero-desc">Portal institucional IAGAMI. Planificación estratégica, seguimiento de actividades programadas, denuncias ciudadanas y monitoreo ambiental en tiempo real para el Municipio Iribarren, Estado Lara.</p>
+          <div class="hero-btns">
+            <button class="btn-p" onclick="showPage('denuncia')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              Presentar Denuncia
+            </button>
+            <a class="btn-s" href="tramites/index.html">
+              Ver Trámites
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </a>
+          </div>
+          <div class="hero-stats" id="hero-stats">
+            <div><div class="stat-v" id="stat-consejos">—</div><div class="stat-l">Consejos comunales</div></div>
+            <div><div class="stat-v">24/7</div><div class="stat-l">Recepción denuncias</div></div>
+            <div><div class="stat-v" id="stat-empresas">—</div><div class="stat-l">Empresas registradas</div></div>
+          </div>
+        </div>
+
+        <!-- PANEL SIGAP DERECHA -->
+        <div class="hero-panel" aria-hidden="true">
+          <div class="panel-bar">
+            <div class="pdot" style="background:rgba(255,255,255,.55)"></div>
+            <div class="pdot" style="background:rgba(255,255,255,.35)"></div>
+            <div class="pdot" style="background:rgba(255,255,255,.2)"></div>
+            <span class="panel-title">SIGAP · MONITOR AMBIENTAL v3.0</span>
+            <span class="plive"><span style="width:6px;height:6px;background:#4ade80;border-radius:50%;display:inline-block;animation:pulse 2s infinite"></span> EN LÍNEA</span>
+          </div>
+          <div class="panel-body" id="hero-panel-body">
+            <!-- Populated by renderHeroPanel() -->
+          </div>
+        </div>
+
+      </div>
+      <button class="chat-fab" title="Romina — Asistente Virtual IAGAMI" aria-label="Abrir asistente virtual Romina" onclick="toggleChat()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <div class="chat-fab-dot"></div>
+      </button>
+    </div>
+  </div>
+
+  <!-- SERVICIOS -->
+  <div class="sec-wrap">
+    <div class="section">
+      <div class="sec-head">
+        <div class="sec-tag">SERVICIOS EN LÍNEA</div>
+        <h2>Todo lo que necesitas, en un solo lugar</h2>
+        <p>Accede a los servicios institucionales del municipio desde cualquier dispositivo</p>
+      </div>
+      <div class="svc-grid">
+        <a class="svc-card" href="#" onclick="showPage('denuncia');return false">
+          <div class="svc-ico" style="background:#fee2e2">🚨</div>
+          <div class="svc-name">Presentar Denuncia</div>
+          <div class="svc-desc">Reporta problemas ambientales</div>
+        </a>
+        <a class="svc-card" href="tramites/index.html">
+          <div class="svc-ico" style="background:#dbeafe">📋</div>
+          <div class="svc-name">Trámites en Línea</div>
+          <div class="svc-desc">Permisos y certificaciones</div>
+        </a>
+        <a class="svc-card" href="multas/index.html">
+          <div class="svc-ico" style="background:#fef3c7">⚖️</div>
+          <div class="svc-name">Multas Ambientales</div>
+          <div class="svc-desc">Consulta expedientes</div>
+        </a>
+        <a class="svc-card" href="#" onclick="showPage('denuncia');return false">
+          <div class="svc-ico" style="background:#f3e8ff">👥</div>
+          <div class="svc-name">Atención Ciudadana</div>
+          <div class="svc-desc">Consultas y seguimiento</div>
+        </a>
+        <a class="svc-card" href="transparencia/index.html">
+          <div class="svc-ico" style="background:#ccfbf1">🏛️</div>
+          <div class="svc-name">Transparencia</div>
+          <div class="svc-desc">Información institucional</div>
+        </a>
+        <a class="svc-card" href="agenda/index.html">
+          <div class="svc-ico" style="background:#e0f2fe">📅</div>
+          <div class="svc-name">Agenda SIGAP</div>
+          <div class="svc-desc">Actividades programadas</div>
+        </a>
+        <a class="svc-card" href="empresas/index.html">
+          <div class="svc-ico" style="background:#dcfce7">🏢</div>
+          <div class="svc-name">Registro Empresa</div>
+          <div class="svc-desc">Registro ambiental</div>
+        </a>
+        <a class="svc-card" href="consejos-comunales/index.html">
+          <div class="svc-ico" style="background:#fce7f3">🌿</div>
+          <div class="svc-name">Registro Comunal</div>
+          <div class="svc-desc">Consejos comunales</div>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- INDICADORES DINÁMICOS -->
+  <div class="sec-wrap2">
+    <div class="section">
+      <div class="sec-head">
+        <div class="sec-tag">INDICADORES AMBIENTALES</div>
+        <h2>Estado del medio ambiente en Iribarren</h2>
+        <p>Datos del monitoreo ambiental municipal actualizados desde el sistema SIGAP</p>
+      </div>
+      <div id="home-indicadores-grid" class="ind-grid">
+        <!-- Populated by renderHomeIndicadores() -->
+      </div>
+    </div>
+  </div>
+
+  <!-- NOTICIAS DINÁMICAS -->
+  <div class="sec-wrap3">
+    <div class="section">
+      <div class="sec-head">
+        <div class="sec-tag">NOTICIAS</div>
+        <h2>Últimas noticias de IAGAMI</h2>
+        <p>Información institucional y ambiental del municipio</p>
+      </div>
+      <div id="home-noticias-grid" class="news-grid">
+        <!-- Populated by renderHomeNoticias() -->
+      </div>
+      <div class="ver-mas-row">
+        <a class="btn-ver-mas" href="noticias/index.html">
+          Ver todas las noticias
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROYECTOS DINÁMICOS -->
+  <div class="sec-wrap2">
+    <div class="section">
+      <div class="sec-head">
+        <div class="sec-tag">PROYECTOS SIGAP</div>
+        <h2>Proyectos en ejecución</h2>
+        <p>Iniciativas activas de gestión y restauración ambiental</p>
+      </div>
+      <div id="home-proyectos-grid" class="proj-grid">
+        <!-- Populated by renderHomeProyectos() -->
+      </div>
+      <div class="ver-mas-row">
+        <a class="btn-ver-mas" href="proyectos/index.html">
+          Ver todos los proyectos
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- AGENDA DINÁMICA -->
+  <div class="sec-wrap3">
+    <div class="section">
+      <div class="sec-head">
+        <div class="sec-tag">AGENDA SIGAP</div>
+        <h2>Próximas actividades programadas</h2>
+        <p>Eventos, talleres, inspecciones y jornadas institucionales</p>
+      </div>
+      <div id="home-agenda-grid" class="agenda-grid">
+        <!-- Populated by renderHomeAgenda() -->
+      </div>
+      <div class="ver-mas-row">
+        <a class="btn-ver-mas" href="agenda/index.html">
+          Ver agenda completa
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- REVISTA DIGITAL -->
+  <div class="sec-wrap2">
+    <div class="section">
+      <div class="sec-head">
+        <div class="sec-tag">REVISTA DIGITAL</div>
+        <h2>Revista Digital IAGAMI</h2>
+        <p>Publicaciones institucionales sobre gestión ambiental, proyectos y avances del Municipio Iribarren</p>
+      </div>
+      <div id="home-revista-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:18px;margin-bottom:8px"></div>
+      <div class="ver-mas-row">
+        <a class="btn-ver-mas" href="revista/index.html">
+          Ver todas las ediciones
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta">
+    <div class="sec-tag" style="background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.25);color:#a8f0c8">PARTICIPACIÓN CIUDADANA</div>
+    <h2 style="margin-top:10px">¿Observas un problema ambiental?</h2>
+    <p>Tu denuncia es importante. Con tecnología IA asignamos prioridad y área competente automáticamente. Juntos protegemos el Municipio Iribarren.</p>
+    <button class="cta-btn" onclick="showPage('denuncia')">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Presentar Denuncia Ahora
+    </button>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <h3>IAGAMI · SIGAP</h3>
+          <p>Instituto Autónomo de Gestión Ambiental del Municipio Iribarren. Sistema Integral de Gestión de Actividades Programadas.<br><em style="color:#a8dfc0;font-style:italic">Iribarren Verde para la vida.</em></p>
+        </div>
+        <div class="footer-col">
+          <h4>Servicios</h4>
+          <ul>
+            <li onclick="showPage('denuncia')">Presentar Denuncia</li>
+            <li><a href="tramites/index.html">Trámites en Línea</a></li>
+            <li><a href="multas/index.html">Consulta de Multas</a></li>
+            <li onclick="showPage('denuncia')">Atención Ciudadana</li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Institución</h4>
+          <ul>
+            <li><a href="organizacion/index.html">Organización</a></li>
+            <li><a href="transparencia/index.html">Transparencia</a></li>
+            <li><a href="noticias/index.html">Noticias</a></li>
+            <li><a href="agenda/index.html">Agenda SIGAP</a></li>
+            <li><a href="proyectos/index.html">Proyectos</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Contacto</h4>
+          <div class="contact-item">📍 Barquisimeto, Estado Lara</div>
+          <div class="contact-item">📞 +58 (251) 000-0000</div>
+          <div class="contact-item">✉️ contacto@iagami.gob.ve</div>
+          <div class="contact-item">🕐 Lun–Vie 8:00–16:00</div>
+        </div>
+      </div>
+      <div class="footer-bottom">© 2026 IAGAMI — Municipio Iribarren, Estado Lara, Venezuela. Todos los derechos reservados.</div>
+    </div>
+  </footer>
+
+</div><!-- /page-home -->
+
+
+<!-- ===== DENUNCIA ===== -->
+<div id="page-denuncia" class="page">
+  <div class="topbar">Instituto Autónomo de Gestión Ambiental — Municipio Iribarren · Estado Lara · Venezuela</div>
+  <nav class="nav">
+    <div class="navinner">
+      <a class="logo" href="#" onclick="showPage('home');return false">
+        <div class="logo-img">
+          <img src="https://raw.githubusercontent.com/jcalejandrom-collab/iagami/main/logo-iagami.png" alt="Logo IAGAMI" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"/>
+          <svg style="display:none" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div><div class="logo-text">IAGAMI</div><div class="logo-sub">Gestión Ambiental · Iribarren</div></div>
+      </a>
+      <div class="navlinks">
+        <a class="nl" href="#" onclick="showPage('home');return false">← Volver al Inicio</a>
+      </div>
+      <div class="navr">
+        <button class="navbtn-o" onclick="window.location='admin/index.html'">Admin</button>
+        <button class="navbtn" onclick="openModal('modal-login')">Acceder</button>
+      </div>
+    </div>
+  </nav>
+  <div class="sec-wrap">
+    <div class="denuncia-wrap">
+      <div class="sec-head" style="text-align:left;margin-bottom:24px">
+        <div class="sec-tag">PARTICIPACIÓN CIUDADANA</div>
+        <h2 style="text-align:left">Presentar Denuncia Ambiental</h2>
+        <p style="text-align:left">Tu denuncia es procesada automáticamente con IA para asignar prioridad y área competente</p>
+      </div>
+      <div class="denuncia-grid">
+        <div class="dform">
+          <div class="fg">
+            <label class="flabel" for="den-tipo">Tipo de Denuncia *</label>
+            <select id="den-tipo" class="fselect">
+              <option value="">Selecciona el tipo...</option>
+              <option>Contaminación del Agua</option>
+              <option>Contaminación del Aire</option>
+              <option>Deforestación</option>
+              <option>Residuos Sólidos</option>
+              <option>Quema Ilegal</option>
+              <option>Contaminación Sonora</option>
+              <option>Otro</option>
+            </select>
+          </div>
+          <div class="fg">
+            <div class="flabel-row">
+              <label class="flabel" for="den-desc" style="margin:0">Descripción de los hechos *</label>
+              <button class="ai-btn" onclick="analizarIA()">✨ Analizar con IA</button>
+            </div>
+            <textarea id="den-desc" class="ftextarea" placeholder="Describe detalladamente lo que observas: qué pasa, desde cuándo, qué está siendo afectado..."></textarea>
+          </div>
+          <div id="ai-box" class="ai-box" role="status">
+            <span>⚠️</span>
+            <span><strong>Análisis IA activo:</strong> Prioridad alta detectada — posible afectación hídrica al Río Turbio. Área competente: Dirección de Calidad Ambiental. Riesgos identificados: contaminación fauna acuática, salud pública.</span>
+          </div>
+          <div class="fg">
+            <div class="flabel-row">
+              <label class="flabel" for="input-ubicacion" style="margin:0">Ubicación del hecho</label>
+              <button class="ai-btn" onclick="getGPS()">📍 Mi ubicación GPS</button>
+            </div>
+            <input id="input-ubicacion" class="finput" placeholder="Dirección, coordenadas o referencia del lugar"/>
+          </div>
+          <div class="fg">
+            <label class="flabel">Datos del denunciante</label>
+            <div class="fgrid2">
+              <input id="den-nombre" class="finput" placeholder="Nombre completo *"/>
+              <input id="den-email" class="finput" type="email" placeholder="Correo electrónico"/>
+              <input id="den-tel" class="finput" placeholder="Teléfono"/>
+              <input id="den-cedula" class="finput" placeholder="Cédula de identidad"/>
+            </div>
+          </div>
+          <!-- ADJUNTOS -->
+          <div class="fg">
+            <label class="flabel">Fotos o documentos adjuntos <span style="font-weight:400;color:#4a8a6a">(opcional)</span></label>
+            <div id="drop-zone" class="drop-zone" onclick="document.getElementById('den-archivos').click()" ondragover="dzOver(event)" ondragleave="dzLeave(event)" ondrop="dzDrop(event)" role="button" tabindex="0" aria-label="Zona para adjuntar archivos" onkeydown="if(event.key==='Enter')this.click()">
+              <div class="dz-icon">📎</div>
+              <div class="dz-text">Arrastra archivos aquí o <strong>haz clic para seleccionar</strong></div>
+              <div class="dz-sub">JPG, PNG, GIF, PDF, DOC, DOCX, MP4 · Máx. 5 archivos · 10 MB cada uno</div>
+              <input id="den-archivos" type="file" multiple accept="image/*,.pdf,.doc,.docx,.mp4,.mov" style="display:none" onchange="handleFiles(this.files)"/>
+            </div>
+            <div id="adjuntos-preview" class="adjuntos-preview"></div>
+          </div>
+          <div class="fnote">🔒 Tu identidad es <strong>confidencial</strong>. La denuncia es analizada automáticamente por IAGAMI IA y asignada al área competente. Número de caso generado al enviar.</div>
+          <button class="fsubmit" onclick="enviarDenuncia()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+            Enviar Denuncia
+          </button>
+        </div>
+        <div>
+          <div class="dinfo-card">
+            <h4>¿Qué tipos de denuncias atendemos?</h4>
+            <div class="dinfo-row"><span class="dinfo-ico">💧</span><span>Contaminación del agua y vertidos ilegales</span></div>
+            <div class="dinfo-row"><span class="dinfo-ico">💨</span><span>Contaminación del aire y emisiones</span></div>
+            <div class="dinfo-row"><span class="dinfo-ico">🌳</span><span>Deforestación y tala ilegal</span></div>
+            <div class="dinfo-row"><span class="dinfo-ico">🗑️</span><span>Manejo inadecuado de residuos sólidos</span></div>
+            <div class="dinfo-row"><span class="dinfo-ico">🔥</span><span>Quemas ilegales en zonas protegidas</span></div>
+            <div class="dinfo-row"><span class="dinfo-ico">📢</span><span>Contaminación sonora industrial</span></div>
+          </div>
+          <div class="dinfo-card">
+            <h4>Tiempo de respuesta</h4>
+            <div class="dinfo-row"><span class="dinfo-ico">🚨</span><span><strong>Urgente:</strong> 24 horas hábiles</span></div>
+            <div class="dinfo-row"><span class="dinfo-ico">⚠️</span><span><strong>Alta:</strong> 2–3 días hábiles</span></div>
+            <div class="dinfo-row"><span class="dinfo-ico">📋</span><span><strong>Media/Baja:</strong> 5–7 días hábiles</span></div>
+          </div>
+          <div class="dinfo-card">
+            <h4>Contacto directo</h4>
+            <div class="dinfo-row"><span class="dinfo-ico">📞</span><span>+58 (251) 000-0000</span></div>
+            <div class="dinfo-row"><span class="dinfo-ico">✉️</span><span>denuncias@iagami.gob.ve</span></div>
+            <div class="dinfo-row"><span class="dinfo-ico">🕐</span><span>Lun–Vie 8:00 AM – 4:00 PM</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div><!-- /page-denuncia -->
+
+
+<!-- ===== MODAL LOGIN ===== -->
+<div id="modal-login" class="modal-bg" onclick="if(event.target===this)closeModal('modal-login')" role="dialog" aria-modal="true" aria-labelledby="login-title">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-login')" aria-label="Cerrar">×</button>
+    <h3 id="login-title">Acceder</h3>
+    <p>Acceso para funcionarios y personal autorizado de IAGAMI</p>
+    <div class="fg"><label class="flabel" for="login-user">Usuario</label><input id="login-user" class="finput" placeholder="usuario@iagami.gob.ve" autocomplete="username"/></div>
+    <div class="fg"><label class="flabel" for="login-pass">Contraseña</label><input id="login-pass" class="finput" type="password" placeholder="••••••••" autocomplete="current-password"/></div>
+    <div class="modal-footer">
+      <button class="fsubmit" style="flex:1" onclick="window.location='admin/index.html'">Iniciar sesión</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL DENUNCIA OK ===== -->
+<div id="modal-denuncia-ok" class="modal-bg" onclick="if(event.target===this)closeModal('modal-denuncia-ok')" role="dialog" aria-modal="true" aria-labelledby="denuncia-ok-title">
+  <div class="modal" style="text-align:center">
+    <button class="modal-close" onclick="closeModal('modal-denuncia-ok')" aria-label="Cerrar">×</button>
+    <div style="font-size:48px;margin-bottom:12px" aria-hidden="true">✅</div>
+    <h3 id="denuncia-ok-title">¡Denuncia enviada!</h3>
+    <p style="margin-bottom:8px">Tu caso ha sido registrado y asignado al área competente.</p>
+    <p id="modal-caso-num" style="font-size:12px;color:#1d6b3e;font-weight:700;margin-bottom:4px"></p>
+    <p style="font-size:11px;color:#4a8a6a">Recibirás respuesta en el tiempo establecido según la prioridad asignada.</p>
+    <button class="fsubmit" style="margin-top:18px" onclick="closeModal('modal-denuncia-ok')">Aceptar</button>
+  </div>
+</div>
+
+<!-- ===== CHAT PANEL ===== -->
+<div id="chat-panel" class="chat-panel" role="dialog" aria-label="Asistente virtual Romina">
+  <div class="chat-head">
+    <span>💬 Romina — Asistente IAGAMI</span>
+    <button class="chat-close" onclick="toggleChat()" aria-label="Cerrar chat">×</button>
+  </div>
+  <div class="chat-msgs" id="chat-msgs" aria-live="polite">
+    <div class="chat-bubble">Hola, soy Romina 👋 Asistente virtual de IAGAMI. ¿En qué puedo ayudarte hoy?</div>
+  </div>
+  <div class="chat-input-row">
+    <input id="chat-input" placeholder="Escribe tu consulta…" aria-label="Mensaje para Romina" onkeydown="if(event.key==='Enter')sendChat()"/>
+    <button onclick="sendChat()" aria-label="Enviar mensaje">➤</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="app-toast" class="toast" role="status" aria-live="polite"></div>
+
+<!-- BIENVENIDA MODAL -->
+<div id="bienvenida-modal" style="position:fixed;inset:0;z-index:2000;display:none;align-items:center;justify-content:center;animation:fadeIn .4s ease">
+  <div id="bienvenida-overlay" style="position:absolute;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px)"></div>
+  <div id="bienvenida-box" style="position:relative;z-index:1;max-width:680px;width:90%;border-radius:20px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.5);animation:slideUp .4s ease">
+    <div id="bienvenida-img-wrap" style="min-height:200px;display:flex;align-items:center;justify-content:center;background:#1d6b3e;padding:40px 32px;text-align:center">
+      <div>
+        <div id="bienvenida-logo" style="font-size:64px;margin-bottom:16px">🌿</div>
+        <div id="bienvenida-titulo" style="font-family:'Poppins',sans-serif;font-size:26px;font-weight:800;color:#fff;line-height:1.2;margin-bottom:12px"></div>
+        <div id="bienvenida-mensaje" style="font-size:14px;color:rgba(255,255,255,.82);line-height:1.7;max-width:420px;margin:0 auto"></div>
+      </div>
+    </div>
+    <div style="background:#fff;padding:20px 32px;display:flex;align-items:center;justify-content:space-between;gap:12px">
+      <div style="font-size:12px;color:#4a8a6a">Portal Institucional IAGAMI · Municipio Iribarren</div>
+      <button id="bienvenida-btn" onclick="cerrarBienvenida()" style="background:#1d6b3e;color:#fff;border:none;border-radius:10px;padding:12px 28px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;display:inline-flex;align-items:center;gap:8px;transition:.2s;white-space:nowrap">
+        Entrar al Sistema
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- CMS Database -->
+<script src="cms/db.js"></script>
+
+<script>
+'use strict';
+
+/* ─── HELPERS ─── */
+const MESES_CORTO = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+const MESES_LARGO = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+
+function fmtFecha(isoStr) {
+  if (!isoStr) return '';
+  const d = new Date(isoStr + 'T12:00:00');
+  return d.getDate() + ' ' + MESES_CORTO[d.getMonth()] + ' ' + d.getFullYear();
+}
+
+function fmtDiaMes(isoStr) {
+  if (!isoStr) return { dia: '--', mes: '---' };
+  const d = new Date(isoStr + 'T12:00:00');
+  return { dia: d.getDate(), mes: MESES_CORTO[d.getMonth()].toUpperCase() };
+}
+
+function catColor(categoria) {
+  const map = {
+    'Medio Ambiente': 'background:#e8f5ee;color:#166534',
+    'Comunidad':      'background:#dbeafe;color:#1e40af',
+    'Normativa':      'background:#fef3c7;color:#92400e',
+    'Educación':      'background:#f3e8ff;color:#6b21a8',
+    'Institucional':  'background:#f1f5f9;color:#475569'
+  };
+  return map[categoria] || 'background:#e8f5ee;color:#166534';
+}
+
+function catIcon(categoria) {
+  const map = {
+    'Medio Ambiente':'🌿','Comunidad':'💧','Normativa':'📋','Educación':'📚','Institucional':'🏛️'
+  };
+  return map[categoria] || '📰';
+}
+
+function estadoProy(estado) {
+  if (!estado) return { cls:'ps-plan', label:'Planificado' };
+  if (estado === 'En Ejecución') return { cls:'ps-exec', label:'En Ejecución' };
+  if (estado === 'Completado')   return { cls:'ps-done', label:'Completado' };
+  return { cls:'ps-plan', label: estado };
+}
+
+function proyIcon(nombre) {
+  if (!nombre) return '🌳';
+  const n = nombre.toLowerCase();
+  if (n.includes('refores') || n.includes('árbol') || n.includes('arbol')) return '🌳';
+  if (n.includes('río') || n.includes('rio') || n.includes('agua')) return '💧';
+  if (n.includes('recicl')) return '♻️';
+  if (n.includes('parque') || n.includes('verde')) return '🌿';
+  return '🏗️';
+}
+
+function tendIcon(t) {
+  if (t === 'mejora') return { icon:'↑', color:'#16a34a' };
+  if (t === 'deterioro' || t === 'baja') return { icon:'↓', color:'#dc2626' };
+  return { icon:'—', color:'#64748b' };
+}
+
+/* ─── ROUTING ─── */
+function showPage(name) {
+  const el = document.getElementById('page-' + name);
+  if (!el) { toast('Página no disponible'); return; }
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  document.querySelectorAll('.nl[data-page]').forEach(l => l.classList.toggle('active', l.dataset.page === name));
+}
+
+/* ─── TOAST ─── */
+let toastTimer;
+function toast(msg) {
+  const t = document.getElementById('app-toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+/* ─── MODALS ─── */
+function openModal(id) {
+  const m = document.getElementById(id);
+  if (m) m.classList.add('open');
+}
+function closeModal(id) {
+  const m = document.getElementById(id);
+  if (m) m.classList.remove('open');
+}
+
+/* ─── CHAT ─── */
+function toggleChat() {
+  const p = document.getElementById('chat-panel');
+  if (p) p.classList.toggle('open');
+}
+function sendChat() {
+  const inp = document.getElementById('chat-input');
+  const msgs = document.getElementById('chat-msgs');
+  const txt = inp.value.trim();
+  if (!txt) return;
+  const userBubble = document.createElement('div');
+  userBubble.style.cssText = 'background:#1d6b3e;color:#fff;border-radius:10px 10px 2px 10px;padding:9px 12px;max-width:85%;align-self:flex-end;font-size:12px;line-height:1.5';
+  userBubble.textContent = txt;
+  msgs.appendChild(userBubble);
+  inp.value = '';
+  msgs.scrollTop = msgs.scrollHeight;
+  setTimeout(() => {
+    const resp = document.createElement('div');
+    resp.className = 'chat-bubble';
+    resp.textContent = 'Gracias por tu mensaje. Un agente de IAGAMI te responderá pronto. También puedes presentar una denuncia formal usando el formulario.';
+    msgs.appendChild(resp);
+    msgs.scrollTop = msgs.scrollHeight;
+  }, 900);
+}
+
+/* ─── IA ANÁLISIS ─── */
+function analizarIA() {
+  const desc = document.getElementById('den-desc');
+  const box  = document.getElementById('ai-box');
+  const btn  = document.querySelector('.ai-btn');
+  if (!desc || !desc.value.trim()) { toast('Escribe la descripción antes de analizar'); return; }
+
+  // Simulate analysis with loading state
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Analizando...'; }
+  setTimeout(() => {
+    // Classify by keywords
+    const text = desc.value.toLowerCase();
+    const tipos = [
+      { kw:['agua','río','quebrada','laguna','derrame','líquido'],   tipo:'Contaminación del Agua',   prioridad:'Alta',   area:'Dirección de Calidad Ambiental' },
+      { kw:['humo','aire','olor','gas','emisión','quema'],           tipo:'Contaminación del Aire',   prioridad:'Alta',   area:'Dirección de Calidad Ambiental' },
+      { kw:['árbol','tala','deforest','madera','bosque'],            tipo:'Deforestación',            prioridad:'Media',  area:'Dirección de Recursos Naturales' },
+      { kw:['basura','residuo','desecho','vertedero','escombro'],    tipo:'Manejo de Residuos',       prioridad:'Media',  area:'Dirección de Residuos Sólidos' },
+      { kw:['ruido','sonido','música','bocina','escándalo'],         tipo:'Contaminación Sonora',     prioridad:'Baja',   area:'Dirección de Control Ambiental' },
+      { kw:['incendio','fuego','quema','llama'],                     tipo:'Quema Ilegal',             prioridad:'Alta',   area:'Dirección de Emergencias' }
+    ];
+    const match = tipos.find(t => t.kw.some(k => text.includes(k))) || { tipo:'Denuncia Ambiental', prioridad:'Media', area:'Dirección General IAGAMI' };
+
+    // Fill ai-box fields if they exist
+    const tipoEl = document.getElementById('ai-tipo');
+    const prioEl = document.getElementById('ai-prioridad');
+    const areaEl = document.getElementById('ai-area');
+    if (tipoEl) tipoEl.textContent = match.tipo;
+    if (prioEl) prioEl.textContent = match.prioridad;
+    if (areaEl) areaEl.textContent = match.area;
+
+    // Auto-select tipo in dropdown if matches
+    const sel = document.getElementById('den-tipo');
+    if (sel && !sel.value) {
+      const opt = [...sel.options].find(o => o.text.toLowerCase().includes(match.tipo.split(' ')[0].toLowerCase()));
+      if (opt) sel.value = opt.value;
+    }
+
+    box.style.display = 'flex';
+    if (btn) { btn.disabled = false; btn.textContent = '✨ Analizar con IA'; }
+    toast('✨ Clasificación completada');
+  }, 1800);
+}
+
+/* ─── GPS ─── */
+function getGPS() {
+  if (!navigator.geolocation) { toast('GPS no disponible en este dispositivo'); return; }
+  toast('Obteniendo ubicación…');
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      const coords = pos.coords.latitude.toFixed(5) + ', ' + pos.coords.longitude.toFixed(5);
+      document.getElementById('input-ubicacion').value = coords;
+      toast('📍 Ubicación capturada');
+    },
+    () => toast('No se pudo obtener la ubicación GPS')
+  );
+}
+
+/* ─── ADJUNTOS ─── */
+const MAX_FILES = 5;
+const MAX_SIZE  = 10 * 1024 * 1024; // 10 MB
+let adjuntosData = []; // { name, type, size, dataUrl }
+
+function dzOver(e) {
+  e.preventDefault();
+  document.getElementById('drop-zone').classList.add('over');
+}
+function dzLeave(e) {
+  document.getElementById('drop-zone').classList.remove('over');
+}
+function dzDrop(e) {
+  e.preventDefault();
+  document.getElementById('drop-zone').classList.remove('over');
+  handleFiles(e.dataTransfer.files);
+}
+
+function handleFiles(fileList) {
+  const files = Array.from(fileList);
+  const remaining = MAX_FILES - adjuntosData.length;
+  if (remaining <= 0) { toast('Máximo ' + MAX_FILES + ' archivos permitidos'); return; }
+  const toProcess = files.slice(0, remaining);
+  if (files.length > remaining) toast('Solo se agregaron ' + remaining + ' archivo(s) — límite de ' + MAX_FILES);
+
+  toProcess.forEach(file => {
+    if (file.size > MAX_SIZE) { toast('⚠ "' + file.name + '" supera 10 MB y no fue agregado'); return; }
+    const reader = new FileReader();
+    reader.onload = e => {
+      adjuntosData.push({ name: file.name, type: file.type, size: file.size, dataUrl: e.target.result });
+      renderAdjuntos();
+    };
+    reader.readAsDataURL(file);
+  });
+  // Reset input so same file can be re-selected
+  document.getElementById('den-archivos').value = '';
+}
+
+function renderAdjuntos() {
+  const container = document.getElementById('adjuntos-preview');
+  if (!container) return;
+  container.innerHTML = adjuntosData.map((f, i) => {
+    const isImg = f.type.startsWith('image/');
+    const sizeStr = f.size > 1024*1024 ? (f.size/1024/1024).toFixed(1)+' MB' : Math.round(f.size/1024)+' KB';
+    const fileIcon = f.type.includes('pdf') ? '📄' : f.type.includes('word') || f.type.includes('doc') ? '📝' : f.type.includes('video') ? '🎥' : '📎';
+    return `<div class="adj-item">
+      <button class="adj-remove" onclick="removeAdjunto(${i})" aria-label="Eliminar ${f.name}" title="Eliminar">×</button>
+      ${isImg
+        ? `<img class="adj-img" src="${f.dataUrl}" alt="${f.name}"/>`
+        : `<div class="adj-file"><span class="adj-file-ico">${fileIcon}</span><span style="font-size:9px;color:#4a8a6a;text-align:center;padding:2px 4px">${f.type.split('/')[1]?.toUpperCase()||'FILE'}</span></div>`
+      }
+      <div class="adj-name" title="${f.name}">${f.name}</div>
+      <div class="adj-size">${sizeStr}</div>
+    </div>`;
+  }).join('');
+
+  // Update drop zone label
+  const dz = document.getElementById('drop-zone');
+  if (dz) {
+    const left = MAX_FILES - adjuntosData.length;
+    dz.querySelector('.dz-sub').textContent =
+      adjuntosData.length > 0
+        ? `${adjuntosData.length} archivo(s) adjunto(s) · Puedes agregar ${left} más`
+        : 'JPG, PNG, GIF, PDF, DOC, DOCX, MP4 · Máx. 5 archivos · 10 MB cada uno';
+  }
+}
+
+function removeAdjunto(idx) {
+  adjuntosData.splice(idx, 1);
+  renderAdjuntos();
+}
+
+/* ─── ENVIAR DENUNCIA ─── */
+let _enviandoDenuncia = false;
+function enviarDenuncia() {
+  if (_enviandoDenuncia) return;
+  const tipo   = document.getElementById('den-tipo').value;
+  const desc   = document.getElementById('den-desc').value.trim();
+  const nombre = document.getElementById('den-nombre').value.trim();
+  if (!tipo)   { toast('⚠ Selecciona el tipo de denuncia'); return; }
+  if (!desc)   { toast('⚠ Escribe la descripción del hecho'); return; }
+  if (!nombre) { toast('⚠ Ingresa tu nombre completo'); return; }
+
+  // Block duplicate submissions
+  _enviandoDenuncia = true;
+  const submitBtn = document.querySelector('.fsubmit');
+  const originalText = submitBtn ? submitBtn.textContent : '';
+  if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = '⏳ Enviando...'; }
+
+  setTimeout(() => {
+    try {
+      const num = 'DEN-' + Date.now().toString().slice(-6);
+      const item = {
+        caso:      num,
+        tipo,
+        descripcion: desc,
+        nombre,
+        email:     document.getElementById('den-email').value,
+        telefono:  document.getElementById('den-tel').value,
+        cedula:    document.getElementById('den-cedula').value,
+        ubicacion: document.getElementById('input-ubicacion').value,
+        estado:    'recibida',
+        publicado: true,
+        fecha:     new Date().toISOString().slice(0, 10),
+        historial: [{ estado:'recibida', fecha: new Date().toISOString().slice(0,10), comentario:'Denuncia registrada en el sistema SIGAP.' }],
+        adjuntos:  adjuntosData.map(f => ({ name: f.name, type: f.type, size: f.size, dataUrl: f.dataUrl }))
+      };
+      CMSDB.save('denuncias', item);
+
+      const el = document.getElementById('modal-caso-num');
+      if (el) el.textContent = 'Número de caso: ' + num;
+      const adjMsg = adjuntosData.length ? ` · ${adjuntosData.length} archivo(s) adjunto(s)` : '';
+      toast('✅ Denuncia registrada · Caso ' + num + adjMsg);
+      setTimeout(() => openModal('modal-denuncia-ok'), 400);
+
+      // Reset form
+      ['den-tipo','den-desc','den-nombre','den-email','den-tel','den-cedula','input-ubicacion'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+      document.getElementById('ai-box').style.display = 'none';
+      adjuntosData = [];
+      renderAdjuntos();
+    } catch(e) {
+      toast('⚠ Error al guardar la denuncia. Intenta nuevamente.');
+      console.error('enviarDenuncia error:', e);
+    } finally {
+      _enviandoDenuncia = false;
+      if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = originalText; }
+    }
+  }, 600);
+}
+
+/* ═══════════════════════════════════════
+   PORTAL DINÁMICO — SECCIONES CMS
+═══════════════════════════════════════ */
+
+function renderAlertBar() {
+  const bar = document.getElementById('alert-bar');
+  if (!bar) return;
+  const today = new Date().toISOString().slice(0, 10);
+  const alertas = CMSDB.getAll('alertas').filter(a => {
+    if (!a.activa) return false;
+    if (a.fecha_fin && a.fecha_fin < today) return false;
+    if (a.fecha_inicio && a.fecha_inicio > today) return false;
+    return true;
+  });
+  if (!alertas.length) { bar.style.display = 'none'; return; }
+  bar.style.display = 'flex';
+  const svgBell = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>`;
+  bar.innerHTML = svgBell + '<strong style="margin-right:4px;flex-shrink:0">ALERTAS ACTIVAS:</strong>' +
+    alertas.map(a => `<span class="alert-pill">${a.mensaje}</span>`).join('');
+}
+
+function renderHeroPanel() {
+  const body = document.getElementById('hero-panel-body');
+  if (!body) return;
+  const inds = CMSDB.getAll('indicadores');
+  const aire  = inds.find(i => i.nombre && i.nombre.toLowerCase().includes('aire'));
+  const agua  = inds.find(i => i.nombre && i.nombre.toLowerCase().includes('agua'));
+  const dens  = CMSDB.getAll('denuncias').filter(d => d.estado === 'pendiente' || !d.estado).length;
+  const trams = CMSDB.getAll('tramites').length;
+
+  const proySeed = CMSDB.getAll('proyectos');
+  const execPct  = proySeed.length ? Math.round(proySeed.reduce((s,p) => s + (p.porcentaje_avance||0), 0) / proySeed.length) : 0;
+
+  body.innerHTML = `
+    <div class="mc">
+      <div class="mc-lbl">CALIDAD AIRE</div>
+      <div class="mc-val">${aire ? aire.valor_actual : '—'}<span class="mc-unit">${aire ? aire.unidad : ''}</span></div>
+      <div class="mc-sub" style="color:#4ade80">↑ mejora continua</div>
+    </div>
+    <div class="mc">
+      <div class="mc-lbl">CALIDAD AGUA</div>
+      <div class="mc-val">${agua ? agua.valor_actual : '—'}<span class="mc-unit">${agua ? agua.unidad : ''}</span></div>
+      <div class="mc-sub" style="color:#64748b">— monitoreo activo</div>
+    </div>
+    <div class="mc mc-blue">
+      <div class="mc-lbl">DENUNCIAS ACTIVAS</div>
+      <div class="mc-val">${dens}<span class="mc-unit"> casos</span></div>
+      <div class="mc-sub">→ en proceso</div>
+    </div>
+    <div class="mc mc-blue">
+      <div class="mc-lbl">TRÁMITES VIGENTES</div>
+      <div class="mc-val">${trams}<span class="mc-unit"> tipos</span></div>
+      <div class="mc-sub">→ disponibles</div>
+    </div>
+    <div class="bar-sec">
+      <div class="bar-lbl-top">ACTIVIDADES SIGAP — AVANCE PROMEDIO</div>
+      <div class="bar-row">
+        <span class="bar-name">Proyectos</span>
+        <div class="bar-track"><div class="bar-fill" style="width:${execPct}%;background:#4ade80"></div></div>
+        <span class="bar-pct" style="color:#4ade80">${execPct}%</span>
+      </div>
+      <div class="bar-row">
+        <span class="bar-name">Agua</span>
+        <div class="bar-track"><div class="bar-fill" style="width:${agua ? agua.valor_actual : 72}%;background:#60b8f0"></div></div>
+        <span class="bar-pct" style="color:#60b8f0">${agua ? agua.valor_actual : 72}%</span>
+      </div>
+      <div class="bar-row">
+        <span class="bar-name">Aire</span>
+        <div class="bar-track"><div class="bar-fill" style="width:${aire ? aire.valor_actual : 87}%;background:#eea82a"></div></div>
+        <span class="bar-pct" style="color:#eea82a">${aire ? aire.valor_actual : 87}%</span>
+      </div>
+    </div>
+    <div class="sys-row">
+      <div class="sys-top">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#4ac9e3" stroke-width="2" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        SYS MONITOR · IAGAMI
+        <span style="width:5px;height:5px;background:#4ade80;border-radius:50%;margin-left:auto;animation:pulse 2s infinite;display:inline-block"></span>
+      </div>
+      <div class="sys-line">SYS.ENV › status: ONLINE · uptime: 99.97% · CPU: 23%</div>
+      <div class="sys-line2">ENV_INDEX: 0.87 · SIGAP: running · ALERTS: ${CMSDB.getAll('alertas').filter(a=>a.activa).length} activas</div>
+    </div>`;
+}
+
+function renderHeroStats() {
+  const consejos = CMSDB.getAll('consejos').filter(c => c.estatus === 'Activo').length;
+  const empresas = CMSDB.getAll('empresas').length;
+  const sc = document.getElementById('stat-consejos');
+  const se = document.getElementById('stat-empresas');
+  if (sc) sc.textContent = consejos;
+  if (se) se.textContent = empresas;
+}
+
+function renderHomeIndicadores() {
+  const grid = document.getElementById('home-indicadores-grid');
+  if (!grid) return;
+  const inds = CMSDB.getAll('indicadores');
+  if (!inds.length) {
+    grid.innerHTML = '<div class="empty-state"><div class="ico">📊</div>No hay indicadores configurados.</div>';
+    return;
+  }
+  grid.innerHTML = inds.map(ind => {
+    const t = tendIcon(ind.tendencia);
+    const val = ind.valor_actual !== undefined ? ind.valor_actual : '—';
+    return `<div class="ind-card">
+      <div class="ind-ico">${ind.icono || '📊'}</div>
+      <div class="ind-val">${val}<span class="ind-unit">${ind.unidad || ''}</span></div>
+      <div class="ind-name">${ind.nombre}</div>
+      <div class="ind-t" style="color:${t.color}">${t.icon} ${ind.tendencia || ''}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderHomeNoticias() {
+  const grid = document.getElementById('home-noticias-grid');
+  if (!grid) return;
+  const noticias = CMSDB.getAll('noticias')
+    .filter(n => n.publicado !== false && n.estado !== 'borrador')
+    .sort((a, b) => (b.fecha || '').localeCompare(a.fecha || ''))
+    .slice(0, 40);
+  if (!noticias.length) {
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="ico">📰</div>No hay noticias publicadas aún. Agrega noticias desde el panel de administración.</div>';
+    return;
+  }
+  grid.innerHTML = noticias.map(n => {
+    const icon = catIcon(n.categoria);
+    const cc   = catColor(n.categoria);
+    const bgMap = {
+      'Medio Ambiente':'#e8f5ee',
+      'Comunidad':     '#eff6ff',
+      'Normativa':     '#fefce8',
+      'Educación':     '#faf5ff',
+      'Institucional': '#f8fafc'
+    };
+    const bg = bgMap[n.categoria] || '#e8f5ee';
+    return `<a class="news-card" href="noticias/index.html">
+      <div class="news-img" style="background:${bg}">
+        ${n.imagen ? `<img src="${n.imagen}" alt="${n.titulo}" loading="lazy"/>` : ''}
+        ${icon}
+      </div>
+      <div class="news-body">
+        <span class="news-cat" style="${cc}">${n.categoria || 'General'}</span>
+        <div class="news-title">${n.titulo}</div>
+        <div class="news-date">${fmtFecha(n.fecha)}</div>
+      </div>
+    </a>`;
+  }).join('');
+}
+
+function renderHomeProyectos() {
+  const grid = document.getElementById('home-proyectos-grid');
+  if (!grid) return;
+  const proyectos = CMSDB.getAll('proyectos')
+    .filter(p => p.publicado !== false)
+    .slice(0, 15);
+  if (!proyectos.length) {
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="ico">🌳</div>No hay proyectos registrados aún. Agrega proyectos desde el panel de administración.</div>';
+    return;
+  }
+  grid.innerHTML = proyectos.map(p => {
+    const { cls, label } = estadoProy(p.estado);
+    const pct  = Math.min(100, Math.max(0, p.porcentaje_avance || 0));
+    const fill = p.estado === 'Completado' ? '#16a34a' : '#1d6b3e';
+    const icon = proyIcon(p.nombre);
+    const gradMap = { 'En Ejecución':'linear-gradient(135deg,#dbeafe,#bfdbfe)', 'Completado':'linear-gradient(135deg,#dcfce7,#bbf7d0)' };
+    const bg = gradMap[p.estado] || 'linear-gradient(135deg,#f1f5f9,#e2e8f0)';
+    return `<a class="proj-card" href="proyectos/index.html">
+      <div class="proj-img" style="background:${bg}">${icon}</div>
+      <div class="proj-body">
+        <span class="ps ${cls}">${label}</span>
+        <div class="proj-name">${p.nombre}</div>
+        <div class="proj-bar"><div class="proj-fill" style="width:${pct}%;background:${fill}"></div></div>
+        <div class="proj-pct">${pct}%${p.beneficiados ? ' · ' + p.beneficiados + ' beneficiados' : ''}</div>
+      </div>
+    </a>`;
+  }).join('');
+}
+
+function renderHomeAgenda() {
+  const container = document.getElementById('home-agenda-grid');
+  if (!container) return;
+  const today  = new Date().toISOString().slice(0, 10);
+  let eventos  = CMSDB.getAll('eventos')
+    .filter(e => e.fecha >= today && e.estado !== 'cancelado')
+    .sort((a, b) => a.fecha.localeCompare(b.fecha))
+    .slice(0, 20);
+
+  if (!eventos.length) {
+    eventos = CMSDB.getAll('eventos')
+      .sort((a, b) => a.fecha.localeCompare(b.fecha))
+      .slice(0, 20);
+  }
+  if (!eventos.length) {
+    container.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="ico">📅</div>No hay eventos programados. Agrega actividades desde el panel de administración.</div>';
+    return;
+  }
+  container.innerHTML = eventos.map(e => {
+    const { dia, mes } = fmtDiaMes(e.fecha);
+    const hora = e.hora_inicio ? e.hora_inicio.slice(0, 5) : '';
+    return `<div class="ev-card">
+      <div class="ev-date">
+        <div class="ev-day">${dia}</div>
+        <div class="ev-mon">${mes}</div>
+      </div>
+      <div>
+        <span class="ev-tipo">${e.tipo || 'Evento'}</span>
+        <div class="ev-title">${e.titulo}</div>
+        <div class="ev-place">📍 ${e.lugar || ''}${hora ? ' · ' + hora : ''}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ─── REVISTA ─── */
+function renderHomeRevista() {
+  const grid = document.getElementById('home-revista-grid');
+  if (!grid) return;
+  const revistas = CMSDB.getAll('revistas')
+    .filter(r => r.estado === 'publicada')
+    .sort((a, b) => (b.fecha || '').localeCompare(a.fecha || ''))
+    .slice(0, 4);
+  if (!revistas.length) {
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="ico">📰</div>No hay ediciones publicadas aún.</div>';
+    return;
+  }
+  grid.innerHTML = revistas.map(r => {
+    const firstBlock = Array.isArray(r.contenido_bloques) ? r.contenido_bloques.find(b => b.tipo === 'portada') : null;
+    const bg = firstBlock?.color_fondo || '#1d6b3e';
+    const coverHtml = r.portada_url
+      ? `<img src="${r.portada_url}" alt="${r.titulo}" style="width:100%;height:100%;object-fit:cover;display:block" loading="lazy"/>`
+      : `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:16px;text-align:center">
+           <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.6);letter-spacing:.1em;margin-bottom:6px">EDICIÓN Nº ${r.numero_edicion}</div>
+           <div style="font-family:'Poppins',sans-serif;font-size:14px;font-weight:800;color:#fff;line-height:1.25">${r.titulo}</div>
+         </div>`;
+    return `<div style="background:#fff;border:1px solid #d4edd8;border-radius:14px;overflow:hidden;transition:.2s;display:flex;flex-direction:column" onmouseover="this.style.boxShadow='0 6px 24px rgba(29,107,62,.12)';this.style.transform='translateY(-2px)'" onmouseout="this.style.boxShadow='none';this.style.transform='none'">
+      <div style="height:180px;background:linear-gradient(160deg,${bg},${bg}cc);position:relative;overflow:hidden">${coverHtml}${r.destacada?'<span style="position:absolute;top:8px;right:8px;background:#4ade80;color:#0d2d1a;font-size:10px;font-weight:800;border-radius:20px;padding:2px 9px">⭐ Destacada</span>':''}</div>
+      <div style="padding:14px;flex:1;display:flex;flex-direction:column;gap:6px">
+        <div style="font-size:10px;font-weight:700;color:#1d6b3e;text-transform:uppercase;letter-spacing:.06em">${r.categoria || 'Institucional'}</div>
+        <div style="font-family:'Poppins',sans-serif;font-size:13px;font-weight:700;color:#1a3d2b;line-height:1.3;flex:1">${r.titulo}</div>
+        <div style="font-size:11px;color:#4a8a6a">📅 ${r.fecha || '—'} · Edición Nº ${r.numero_edicion}</div>
+        <div style="display:flex;gap:7px;margin-top:6px">
+          <a href="revista/visor.html?id=${r.id}" style="flex:1;padding:7px;background:#1d6b3e;color:#fff;border-radius:7px;font-size:11px;font-weight:700;text-align:center;text-decoration:none;font-family:'Poppins',sans-serif">👁 Ver</a>
+          <a href="revista/index.html" style="flex:1;padding:7px;background:#fff;color:#1d6b3e;border:1.5px solid #1d6b3e;border-radius:7px;font-size:11px;font-weight:700;text-align:center;text-decoration:none;font-family:'Poppins',sans-serif">⬇ PDF</a>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ─── BIENVENIDA ─── */
+function checkBienvenida() {
+  const items = CMSDB.getAll('bienvenida');
+  const activa = items.find(b => b.activa);
+  if (!activa) return;
+  // Check if should show (mostrarSiempre or not seen this session)
+  if (!activa.mostrarSiempre) {
+    const seen = sessionStorage.getItem('iagami_bienvenida_' + activa.id);
+    if (seen) return;
+  }
+  const modal = document.getElementById('bienvenida-modal');
+  const titulo = document.getElementById('bienvenida-titulo');
+  const mensaje = document.getElementById('bienvenida-mensaje');
+  const wrap = document.getElementById('bienvenida-img-wrap');
+  if (titulo) titulo.textContent = activa.titulo || '';
+  if (mensaje) mensaje.textContent = activa.mensaje || '';
+  if (activa.imagen && wrap) {
+    wrap.style.backgroundImage = `url('${activa.imagen}')`;
+    wrap.style.backgroundSize = 'cover';
+    wrap.style.backgroundPosition = 'center';
+  }
+  if (activa.color_fondo && wrap && !activa.imagen) {
+    wrap.style.background = activa.color_fondo;
+  }
+  if (modal) { modal.style.display = 'flex'; document.body.style.overflow = 'hidden'; }
+}
+
+function cerrarBienvenida() {
+  const items = CMSDB.getAll('bienvenida');
+  const activa = items.find(b => b.activa);
+  if (activa && !activa.mostrarSiempre) {
+    sessionStorage.setItem('iagami_bienvenida_' + activa.id, '1');
+  }
+  const modal = document.getElementById('bienvenida-modal');
+  if (modal) { modal.style.display = 'none'; document.body.style.overflow = ''; }
+}
+
+/* ─── INIT ─── */
+function initPortal() {
+  checkBienvenida();
+  renderAlertBar();
+  renderHeroPanel();
+  renderHeroStats();
+  renderHomeIndicadores();
+  renderHomeNoticias();
+  renderHomeProyectos();
+  renderHomeAgenda();
+  renderHomeRevista();
+}
+
+document.addEventListener('DOMContentLoaded', initPortal);
+</script>
+</body>
+</html>
