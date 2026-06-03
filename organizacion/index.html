@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Organización Institucional — IAGAMI</title>
+<meta name="description" content="Organigrama y directorio de unidades del Instituto Autónomo de Gestión Ambiental del Municipio Iribarren."/>
+<meta name="theme-color" content="#1d6b3e"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height:1.6}
+
+/* NAV */
+.nav{background:#fff;border-bottom:1px solid #c8ead8;position:sticky;top:0;z-index:200;box-shadow:0 1px 12px rgba(29,107,62,.06)}
+.navinner{max-width:1200px;margin:0 auto;padding:0 24px;height:58px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.logo{display:flex;align-items:center;gap:10px;flex-shrink:0;text-decoration:none}
+.logo-icon{width:38px;height:38px;background:#1d6b3e;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo-text{font-family:'Poppins',sans-serif;font-size:15px;font-weight:700;color:#1a3d2b;line-height:1.1}
+.logo-sub{font-size:10px;color:#4a8a6a;font-weight:400}
+.back-link{display:flex;align-items:center;gap:6px;font-size:13px;color:#1d6b3e;text-decoration:none;font-weight:500;padding:6px 12px;border-radius:8px;border:1.5px solid #a8dfc0;transition:.15s}
+.back-link:hover{background:#e8f5ee}
+
+/* HERO */
+.hero{background:linear-gradient(135deg,#1a3d2b 0%,#1d6b3e 50%,#22854d 100%);padding:64px 24px 56px;text-align:center;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")}
+.hero-content{position:relative;z-index:1;max-width:700px;margin:0 auto}
+.hero-emoji{font-size:52px;display:block;margin-bottom:16px}
+.hero h1{font-family:'Poppins',sans-serif;font-size:clamp(26px,5vw,40px);font-weight:800;color:#fff;margin-bottom:12px}
+.hero p{font-size:16px;color:rgba(255,255,255,.8);max-width:560px;margin:0 auto}
+
+/* MAIN */
+.main{max-width:1200px;margin:0 auto;padding:32px 24px 64px}
+
+/* VIEW TOGGLE */
+.view-toggle{display:flex;gap:8px;background:#fff;border:1.5px solid #d4edd8;border-radius:12px;padding:4px;width:fit-content;margin:0 auto 36px}
+.vtbtn{padding:8px 20px;border-radius:8px;border:none;background:transparent;color:#4a8a6a;font-size:14px;font-weight:500;cursor:pointer;transition:.15s;font-family:'Inter',sans-serif}
+.vtbtn.active{background:#1d6b3e;color:#fff}
+.vtbtn:hover:not(.active){background:#e8f5ee;color:#1d6b3e}
+
+/* ─── ORG CHART ─── */
+.org-tree{display:flex;flex-direction:column;align-items:center;gap:0;padding:12px 0 32px}
+
+/* Root level */
+.org-root-wrap{display:flex;flex-direction:column;align-items:center}
+.org-box{background:#fff;border:2px solid #d4edd8;border-radius:12px;padding:14px 18px;min-width:140px;max-width:200px;text-align:center;cursor:pointer;transition:.2s;position:relative}
+.org-box:hover{border-color:#1d6b3e;box-shadow:0 4px 16px rgba(29,107,62,.12);transform:translateY(-2px)}
+.org-box.root{background:#1d6b3e;color:#fff;border-color:#1d6b3e;min-width:200px;padding:18px 24px}
+.org-box.root:hover{background:#155c32;border-color:#155c32}
+.org-box .box-icon{font-size:22px;margin-bottom:4px}
+.org-box .box-name{font-family:'Poppins',sans-serif;font-size:13px;font-weight:700;line-height:1.25;margin-bottom:4px}
+.org-box.root .box-name{font-size:15px;color:#fff}
+.org-box .box-resp{font-size:11px;color:#4a8a6a;line-height:1.3}
+.org-box.root .box-resp{color:rgba(255,255,255,.8)}
+.org-box .box-click-hint{font-size:10px;color:#a8dfc0;margin-top:4px;display:block}
+.org-box.root .box-click-hint{color:rgba(255,255,255,.5)}
+
+/* Connector: root to level line */
+.connector-v{width:2px;background:#a8dfc0;height:32px;margin:0 auto}
+
+/* Horizontal connector bar */
+.h-bar-wrap{position:relative;display:flex;justify-content:center;width:100%}
+.h-bar{height:2px;background:#a8dfc0;position:absolute;top:0}
+
+/* Children level */
+.org-children{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;padding-top:32px;position:relative}
+.org-children::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:calc(100% - 140px);height:2px;background:#a8dfc0;min-width:60px}
+
+/* Each child with its own vertical line */
+.org-child-col{display:flex;flex-direction:column;align-items:center}
+.org-child-col::before{content:'';width:2px;height:32px;background:#a8dfc0;display:block}
+
+/* ─── SIDE PANEL ─── */
+.panel-overlay{position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:290;opacity:0;pointer-events:none;transition:.3s}
+.panel-overlay.open{opacity:1;pointer-events:all}
+.side-panel{position:fixed;right:-360px;top:0;width:340px;height:100vh;background:#fff;box-shadow:-4px 0 24px rgba(0,0,0,.12);z-index:300;transition:.3s;overflow-y:auto;padding:0}
+.side-panel.open{right:0}
+.panel-header{background:linear-gradient(135deg,#1a3d2b,#1d6b3e);padding:24px;position:sticky;top:0;z-index:1}
+.panel-header h2{font-family:'Poppins',sans-serif;font-size:16px;font-weight:700;color:#fff;line-height:1.3;padding-right:32px}
+.panel-close{position:absolute;top:16px;right:16px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:.15s}
+.panel-close:hover{background:rgba(255,255,255,.25)}
+.panel-body{padding:20px}
+.panel-tipo-badge{display:inline-block;font-size:11px;font-weight:600;padding:2px 10px;border-radius:20px;margin-bottom:14px}
+.panel-tipo-badge.dirección{background:#dcfce7;color:#15803d}
+.panel-tipo-badge.coordinación{background:#dbeafe;color:#1d4ed8}
+.panel-section{margin-bottom:18px}
+.panel-section-title{font-size:11px;font-weight:700;color:#4a8a6a;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.panel-value{font-size:14px;color:#1a3d2b;font-weight:500}
+.panel-value a{color:#1d6b3e;text-decoration:none}
+.panel-value a:hover{text-decoration:underline}
+.panel-funcs{list-style:none;display:flex;flex-direction:column;gap:6px}
+.panel-funcs li{font-size:13px;color:#4a6a5a;line-height:1.5;display:flex;gap:8px;align-items:flex-start}
+.panel-funcs li::before{content:'▸';color:#1d6b3e;flex-shrink:0;margin-top:1px}
+.panel-divider{height:1px;background:#f0faf5;margin:16px 0}
+
+/* ─── DIRECTORIO ─── */
+.dir-search-row{display:flex;gap:12px;margin-bottom:24px;flex-wrap:wrap}
+.dir-search-wrap{flex:1;min-width:220px;position:relative}
+.dir-search-wrap .si-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:16px;pointer-events:none}
+.dir-search{width:100%;padding:10px 14px 10px 38px;border:1.5px solid #d4edd8;border-radius:10px;background:#fff;color:#1a3d2b;font-size:14px;font-family:'Inter',sans-serif;outline:none;transition:.15s}
+.dir-search:focus{border-color:#1d6b3e}
+.tipo-select{padding:10px 14px;border:1.5px solid #d4edd8;border-radius:10px;background:#fff;color:#1a3d2b;font-size:14px;font-family:'Inter',sans-serif;outline:none;cursor:pointer}
+
+.dir-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+@media(max-width:640px){.dir-grid{grid-template-columns:1fr}}
+
+.dir-card{background:#fff;border:1.5px solid #d4edd8;border-radius:14px;padding:20px;cursor:pointer;transition:.2s}
+.dir-card:hover{border-color:#1d6b3e;box-shadow:0 4px 16px rgba(29,107,62,.1);transform:translateY(-1px)}
+.dir-card-header{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px}
+.dir-unit-icon{font-size:28px;flex-shrink:0}
+.dir-card-header-text{flex:1;min-width:0}
+.dir-tipo-badge{font-size:11px;font-weight:600;padding:2px 10px;border-radius:20px;display:inline-block;margin-bottom:4px}
+.dir-tipo-badge.dirección{background:#dcfce7;color:#15803d}
+.dir-tipo-badge.coordinación{background:#dbeafe;color:#1d4ed8}
+.dir-unit-name{font-family:'Poppins',sans-serif;font-size:14px;font-weight:700;color:#1a3d2b;line-height:1.3}
+.dir-card-info{display:flex;flex-direction:column;gap:5px;font-size:13px;color:#4a6a5a}
+.dir-card-info .info-row{display:flex;gap:8px;align-items:flex-start}
+.dir-card-info .info-row span:first-child{flex-shrink:0}
+.dir-card-cta{margin-top:12px;font-size:12px;font-weight:600;color:#1d6b3e}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#1d6b3e;color:#fff;padding:12px 24px;border-radius:12px;font-size:14px;font-weight:500;z-index:1000;opacity:0;transition:.3s;box-shadow:0 8px 24px rgba(29,107,62,.3)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* FOOTER */
+.footer{background:#1a3d2b;color:rgba(255,255,255,.6);text-align:center;padding:24px;font-size:12px}
+
+/* RESPONSIVE ORG */
+@media(max-width:900px){
+  .org-children{gap:8px}
+  .org-box{min-width:110px;padding:10px 12px}
+  .org-box .box-name{font-size:11px}
+  .org-children::before{width:calc(100% - 80px)}
+}
+@media(max-width:640px){
+  .org-children{flex-direction:column;align-items:center;gap:0;padding-top:0}
+  .org-children::before{display:none}
+  .org-child-col::before{height:12px}
+  .org-box{min-width:200px}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="navinner">
+    <a class="logo" href="../index.html">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="22" height="22">
+          <path d="M12 2L3 6.5V12c0 4.8 3.8 9.3 9 10.4C17.2 21.3 21 16.8 21 12V6.5L12 2z" fill="white" opacity=".9"/>
+          <path d="M9 12l2 2 4-4" stroke="#1d6b3e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div>
+        <div class="logo-text">IAGAMI</div>
+        <div class="logo-sub">Gestión Ambiental Municipal</div>
+      </div>
+    </a>
+    <a class="back-link" href="../index.html">← Portal</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-content">
+    <span class="hero-emoji">🏢</span>
+    <h1>Organización Institucional</h1>
+    <p>Estructura organizativa, organigrama y directorio de unidades del Instituto Autónomo de Gestión Ambiental del Municipio Iribarren</p>
+  </div>
+</div>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- VIEW TOGGLE -->
+  <div class="view-toggle">
+    <button class="vtbtn active" id="btn-org" onclick="switchTab('organigrama')">🌳 Organigrama</button>
+    <button class="vtbtn" id="btn-dir" onclick="switchTab('directorio')">👥 Directorio</button>
+  </div>
+
+  <!-- ORGANIGRAMA -->
+  <div id="view-organigrama">
+    <div class="org-tree" id="org-tree"></div>
+  </div>
+
+  <!-- DIRECTORIO -->
+  <div id="view-directorio" style="display:none">
+    <div class="dir-search-row">
+      <div class="dir-search-wrap">
+        <span class="si-icon">🔍</span>
+        <input class="dir-search" type="text" id="dir-search" placeholder="Buscar unidad por nombre o responsable…" oninput="searchDirectory()"/>
+      </div>
+      <select class="tipo-select" id="tipo-filter" onchange="searchDirectory()">
+        <option value="">Todos los tipos</option>
+        <option value="Dirección">Dirección</option>
+        <option value="Coordinación">Coordinación</option>
+      </select>
+    </div>
+    <div class="dir-grid" id="dir-grid"></div>
+  </div>
+
+</main>
+
+<!-- SIDE PANEL OVERLAY -->
+<div class="panel-overlay" id="panel-overlay" onclick="closePanel()"></div>
+
+<!-- SIDE PANEL -->
+<div class="side-panel" id="side-panel">
+  <div class="panel-header">
+    <button class="panel-close" onclick="closePanel()">✕</button>
+    <h2 id="panel-title"></h2>
+  </div>
+  <div class="panel-body">
+    <span class="panel-tipo-badge" id="panel-tipo"></span>
+
+    <div class="panel-section">
+      <div class="panel-section-title">👤 Responsable</div>
+      <div class="panel-value" id="panel-responsable"></div>
+    </div>
+
+    <div class="panel-divider"></div>
+
+    <div class="panel-section">
+      <div class="panel-section-title">📋 Funciones Principales</div>
+      <ul class="panel-funcs" id="panel-funcs"></ul>
+    </div>
+
+    <div class="panel-divider"></div>
+
+    <div class="panel-section">
+      <div class="panel-section-title">📞 Contacto</div>
+      <div class="panel-value" id="panel-telefono" style="margin-bottom:4px"></div>
+      <div class="panel-value" id="panel-email"></div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <p>© 2026 IAGAMI — Instituto Autónomo de Gestión Ambiental del Municipio Iribarren. Barquisimeto, Lara, Venezuela.</p>
+</footer>
+
+<script src="../cms/db.js"></script>
+<script>
+// ── State ──
+let currentTab = 'organigrama';
+
+document.addEventListener('DOMContentLoaded', () => {
+  buildOrgTree();
+  renderDirectory();
+});
+
+// ── Tab switch ──
+function switchTab(tab) {
+  currentTab = tab;
+  document.getElementById('view-organigrama').style.display = tab === 'organigrama' ? 'block' : 'none';
+  document.getElementById('view-directorio').style.display = tab === 'directorio' ? 'block' : 'none';
+  document.getElementById('btn-org').classList.toggle('active', tab === 'organigrama');
+  document.getElementById('btn-dir').classList.toggle('active', tab === 'directorio');
+}
+
+// ── Build Org Tree ──
+function buildOrgTree() {
+  const units = CMSDB.unidades || [];
+  const root = units.find(u => u.parent === null);
+  if (!root) return;
+  const children = units.filter(u => u.parent === root.id);
+
+  const tree = document.getElementById('org-tree');
+
+  // Root box
+  const rootWrap = document.createElement('div');
+  rootWrap.className = 'org-root-wrap';
+  rootWrap.innerHTML = `
+    <div class="org-box root" onclick="openUnit('${root.id}')">
+      <div class="box-icon">🏛️</div>
+      <div class="box-name">${root.nombre}</div>
+      <div class="box-resp">${root.responsable}</div>
+      <span class="box-click-hint">Tap para ver detalles</span>
+    </div>`;
+  tree.appendChild(rootWrap);
+
+  if (children.length === 0) return;
+
+  // Vertical connector from root down
+  const vConn = document.createElement('div');
+  vConn.className = 'connector-v';
+  tree.appendChild(vConn);
+
+  // Children row
+  const childrenRow = document.createElement('div');
+  childrenRow.className = 'org-children';
+
+  children.forEach(child => {
+    const col = document.createElement('div');
+    col.className = 'org-child-col';
+    const icon = child.tipo === 'Dirección' ? '🏛️' : '📋';
+    col.innerHTML = `
+      <div class="org-box" onclick="openUnit('${child.id}')">
+        <div class="box-icon">${icon}</div>
+        <div class="box-name">${child.nombre}</div>
+        <div class="box-resp">${child.responsable}</div>
+        <span class="box-click-hint">Ver detalles</span>
+      </div>`;
+    childrenRow.appendChild(col);
+  });
+
+  tree.appendChild(childrenRow);
+}
+
+// ── Open unit detail ──
+function openUnit(id) {
+  const unit = (CMSDB.unidades || []).find(u => u.id === id);
+  if (!unit) return;
+
+  document.getElementById('panel-title').textContent = unit.nombre;
+
+  const tipoEl = document.getElementById('panel-tipo');
+  tipoEl.textContent = unit.tipo;
+  tipoEl.className = 'panel-tipo-badge ' + unit.tipo.toLowerCase();
+
+  document.getElementById('panel-responsable').textContent = unit.responsable;
+
+  const funcs = document.getElementById('panel-funcs');
+  funcs.innerHTML = (unit.funciones || []).map(f => `<li>${f}</li>`).join('');
+
+  document.getElementById('panel-telefono').innerHTML = `📞 <a href="tel:${unit.telefono}">${unit.telefono}</a>`;
+  document.getElementById('panel-email').innerHTML = `✉️ <a href="mailto:${unit.email}">${unit.email}</a>`;
+
+  document.getElementById('panel-overlay').classList.add('open');
+  document.getElementById('side-panel').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closePanel() {
+  document.getElementById('panel-overlay').classList.remove('open');
+  document.getElementById('side-panel').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// ── Directory ──
+function renderDirectory(search = '', tipo = '') {
+  const units = CMSDB.unidades || [];
+  const filtered = units.filter(u => {
+    const matchSearch = !search ||
+      u.nombre.toLowerCase().includes(search) ||
+      u.responsable.toLowerCase().includes(search);
+    const matchTipo = !tipo || u.tipo === tipo;
+    return matchSearch && matchTipo;
+  });
+
+  const grid = document.getElementById('dir-grid');
+  if (filtered.length === 0) {
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:48px 24px;color:#4a8a6a"><span style="font-size:40px;display:block;margin-bottom:12px">🔍</span><p>No se encontraron unidades.</p></div>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map(u => dirCardHTML(u)).join('');
+}
+
+function dirCardHTML(u) {
+  const icon = u.tipo === 'Dirección' ? '🏛️' : '📋';
+  const tipoClass = u.tipo.toLowerCase();
+  return `
+    <div class="dir-card" onclick="openUnit('${u.id}')">
+      <div class="dir-card-header">
+        <div class="dir-unit-icon">${icon}</div>
+        <div class="dir-card-header-text">
+          <span class="dir-tipo-badge ${tipoClass}">${u.tipo}</span>
+          <div class="dir-unit-name">${u.nombre}</div>
+        </div>
+      </div>
+      <div class="dir-card-info">
+        <div class="info-row"><span>👤</span><span>${u.responsable}</span></div>
+        <div class="info-row"><span>📞</span><span>${u.telefono}</span></div>
+        <div class="info-row"><span>✉️</span><span>${u.email}</span></div>
+      </div>
+      <div class="dir-card-cta">Ver funciones y detalle →</div>
+    </div>`;
+}
+
+function searchDirectory() {
+  const search = document.getElementById('dir-search').value.toLowerCase();
+  const tipo = document.getElementById('tipo-filter').value;
+  renderDirectory(search, tipo);
+}
+
+// ── Toast ──
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closePanel(); });
+</script>
+</body>
+</html>
