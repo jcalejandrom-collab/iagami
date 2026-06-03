@@ -13,11 +13,19 @@ import { AuthProvider, useAuth } from './hooks/useAuth.jsx';
 import ReporteDiario       from './components/forms/ReporteDiario.jsx';
 import PlanificacionSemanal from './components/forms/PlanificacionSemanal.jsx';
 
+// Public revistas
+import RevistasPublic from './components/revistas/RevistasPublic.jsx';
+import RevistaVisor   from './components/revistas/RevistaVisor.jsx';
+
 // Admin
 import Login           from './components/admin/Login.jsx';
 import Dashboard       from './components/admin/Dashboard.jsx';
 import SubmissionList  from './components/admin/SubmissionList.jsx';
 import SubmissionDetail from './components/admin/SubmissionDetail.jsx';
+
+// Admin revistas
+import RevistasAdmin from './components/admin/revistas/RevistasAdmin.jsx';
+import RevistaForm   from './components/admin/revistas/RevistaForm.jsx';
 
 /* ============================================================
    Toast Context
@@ -114,8 +122,12 @@ export default function App() {
         <ToastProvider>
           <Routes>
             {/* ---- Public forms ---- */}
-            <Route path="/form/reporte-diario"      element={<ReporteDiario />} />
+            <Route path="/form/reporte-diario"        element={<ReporteDiario />} />
             <Route path="/form/planificacion-semanal" element={<PlanificacionSemanal />} />
+
+            {/* ---- Public revistas ---- */}
+            <Route path="/revistas"    element={<RevistasPublic />} />
+            <Route path="/revista/:id" element={<RevistaVisor />} />
 
             {/* ---- Auth ---- */}
             <Route path="/admin/login" element={<LoginGuard />} />
@@ -158,6 +170,32 @@ export default function App() {
               element={
                 <PrivateRoute>
                   <SubmissionDetail />
+                </PrivateRoute>
+              }
+            />
+
+            {/* ---- Protected admin: revistas ---- */}
+            <Route
+              path="/admin/revistas"
+              element={
+                <PrivateRoute>
+                  <RevistasAdmin />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/admin/revistas/nueva"
+              element={
+                <PrivateRoute>
+                  <RevistaForm />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/admin/revistas/editar/:id"
+              element={
+                <PrivateRoute>
+                  <RevistaForm />
                 </PrivateRoute>
               }
             />
