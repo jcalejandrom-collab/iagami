@@ -3,364 +3,248 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>IAGAMI · Planificación y Reportes SIGAP</title>
-<meta name="description" content="Módulo de planificación semanal y reporte diario de actividades IAGAMI SIGAP"/>
+<title>Planificación Institucional — IAGAMI SIGAP</title>
+<meta name="description" content="Planificación y proyectos institucionales del IAGAMI, Municipio Iribarren."/>
+<meta name="theme-color" content="#1d6b3e"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="styles.css"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height:1.6}
+.topbar{background:#1d6b3e;color:rgba(255,255,255,.88);text-align:center;font-size:11px;padding:6px 16px;letter-spacing:.06em;font-weight:500}
+.nav{background:#fff;border-bottom:1px solid #c8ead8;position:sticky;top:0;z-index:200;box-shadow:0 1px 12px rgba(29,107,62,.06)}
+.navinner{max-width:1100px;margin:0 auto;padding:0 24px;height:58px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.logo{display:flex;align-items:center;gap:10px;flex-shrink:0;text-decoration:none}
+.logo-img{width:42px;height:42px;background:#1d6b3e;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo-img svg{width:22px;height:22px}
+.logo-text{font-family:'Poppins',sans-serif;font-size:15px;font-weight:700;color:#1a3d2b;line-height:1.1}
+.logo-sub{font-size:10px;color:#4a8a6a;font-weight:400}
+.navbtn{font-size:12px;padding:7px 16px;border-radius:8px;background:#1d6b3e;color:#fff;border:none;cursor:pointer;font-weight:600;transition:.15s;text-decoration:none}
+.navbtn:hover{background:#155c32}
+.navlinks{display:flex;gap:2px}
+.nl{font-size:12px;padding:6px 10px;border-radius:7px;color:#4a6a5a;text-decoration:none;transition:.15s}
+.nl:hover{background:#e8f5ee;color:#1d6b3e}
+
+.hero{background:linear-gradient(135deg,#0d2d1a 0%,#1d6b3e 100%);padding:44px 24px;color:#fff;text-align:center;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;width:340px;height:340px;border-radius:50%;background:rgba(74,222,128,.06);top:-80px;right:-70px}
+.hero-tag{display:inline-block;font-size:11px;font-weight:700;background:rgba(74,222,128,.14);color:#a8f0c8;border:1px solid rgba(74,222,128,.35);border-radius:20px;padding:4px 14px;margin-bottom:12px;letter-spacing:.05em;position:relative}
+.hero h1{font-family:'Poppins',sans-serif;font-size:26px;font-weight:800;line-height:1.2;margin-bottom:10px;position:relative}
+.hero p{font-size:13.5px;color:rgba(255,255,255,.78);max-width:520px;margin:0 auto;position:relative}
+
+.stats-bar{background:#fff;border-bottom:1px solid #d4edd8}
+.stats-inner{max-width:1100px;margin:0 auto;padding:16px 24px;display:flex;gap:20px;flex-wrap:wrap}
+.stat-pill{display:flex;align-items:center;gap:9px;font-size:13px;color:#1a3d2b}
+.stat-num{font-family:'Poppins',sans-serif;font-size:18px;font-weight:800;color:#1d6b3e}
+
+.main-wrap{max-width:1100px;margin:0 auto;padding:32px 24px}
+.toolbar{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+.search-input{flex:1;min-width:200px;padding:10px 14px;border:1.5px solid #d4edd8;border-radius:9px;font-size:13px;color:#1a3d2b;outline:none;font-family:'Inter',sans-serif;transition:.15s}
+.search-input:focus{border-color:#1d6b3e;box-shadow:0 0 0 3px rgba(29,107,62,.08)}
+.filter-select{padding:10px 14px;border:1.5px solid #d4edd8;border-radius:9px;font-size:13px;color:#1a3d2b;outline:none;background:#fff;cursor:pointer;transition:.15s}
+.filter-select:focus{border-color:#1d6b3e}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.plan-card{background:#fff;border:1px solid #d4edd8;border-radius:13px;padding:20px;transition:.15s;display:flex;flex-direction:column;gap:12px}
+.plan-card:hover{box-shadow:0 4px 20px rgba(29,107,62,.1)}
+.plan-header{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.plan-titulo{font-family:'Poppins',sans-serif;font-size:14px;font-weight:700;color:#1a3d2b;line-height:1.3}
+.plan-desc{font-size:12.5px;color:#4a8a6a;line-height:1.6}
+.plan-meta{display:flex;flex-wrap:wrap;gap:8px;font-size:11.5px;color:#4a8a6a}
+.meta-item{display:flex;align-items:center;gap:4px}
+.progress-wrap{display:flex;align-items:center;gap:9px}
+.progress-bar{flex:1;height:7px;border-radius:4px;background:#e8f5ee;overflow:hidden}
+.progress-fill{height:100%;background:#1d6b3e;border-radius:4px;transition:.4s}
+.progress-pct{font-size:11px;font-weight:700;color:#1d6b3e;white-space:nowrap}
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;white-space:nowrap}
+.badge-pendiente{background:#f1f5f9;color:#475569}
+.badge-progreso{background:#dbeafe;color:#1e40af}
+.badge-completado{background:#dcfce7;color:#166534}
+.badge-cancelado{background:#fee2e2;color:#991b1b}
+.pri-alta{background:#fee2e2;color:#991b1b}
+.pri-media{background:#fef3c7;color:#92400e}
+.pri-baja{background:#dcfce7;color:#166534}
+
+.empty-state{text-align:center;padding:56px 24px;background:#fff;border:1px solid #d4edd8;border-radius:13px}
+.empty-state .ico{font-size:48px;margin-bottom:12px}
+.empty-state h3{font-family:'Poppins',sans-serif;font-size:17px;font-weight:700;color:#1a3d2b;margin-bottom:7px}
+.empty-state p{font-size:13px;color:#4a8a6a}
+
+.footer{background:#0a1f0e;color:rgba(255,255,255,.7);padding:28px 24px 20px}
+.footer-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.footer-brand{font-family:'Poppins',sans-serif;font-size:13px;font-weight:700;color:#fff}
+.footer-links{display:flex;gap:16px}
+.footer-links a{font-size:11.5px;color:rgba(255,255,255,.6);text-decoration:none;transition:.15s}
+.footer-links a:hover{color:#fff}
+.footer-copy{width:100%;text-align:center;font-size:10.5px;opacity:.35;margin-top:12px}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#1a3d2b;color:#fff;padding:10px 20px;border-radius:9px;font-size:13px;z-index:9999;opacity:0;transition:.3s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media(max-width:640px){
+  .hero h1{font-size:20px}
+  .stats-inner{gap:12px}
+  .toolbar{flex-direction:column}
+}
+</style>
 </head>
 <body>
 
-<!-- ══════════════════ NAV ══════════════════ -->
+<div class="topbar">Instituto Autónomo de Gestión Ambiental — Municipio Iribarren · Estado Lara · Venezuela &nbsp;|&nbsp; SIGAP v3.0</div>
+
 <nav class="nav">
   <div class="navinner">
     <a class="logo" href="../index.html">
       <div class="logo-img">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-        </svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
       </div>
       <div>
-        <div class="logo-text">IAGAMI · SIGAP</div>
-        <div class="logo-sub">Planificación y Reportes</div>
+        <div class="logo-text">IAGAMI</div>
+        <div class="logo-sub">Gestión Ambiental · Iribarren</div>
       </div>
     </a>
-    <div style="display:flex;gap:8px">
-      <button class="navbtn-o" onclick="renderDashboard()">Dashboard</button>
-      <a href="../index.html" class="navbtn" style="text-decoration:none;display:inline-flex;align-items:center">← Portal</a>
+    <div class="navlinks">
+      <a class="nl" href="../index.html">← Portal</a>
+      <a class="nl" href="../noticias/index.html">Noticias</a>
+      <a class="nl" href="../proyectos/index.html">Proyectos</a>
     </div>
+    <a class="navbtn" href="../admin/index.html">Admin</a>
   </div>
 </nav>
 
+<div class="hero">
+  <div class="hero-tag">GESTIÓN INSTITUCIONAL</div>
+  <h1>Planificación Institucional SIGAP</h1>
+  <p>Consulta el plan de actividades y proyectos del Instituto Autónomo de Gestión Ambiental del Municipio Iribarren.</p>
+</div>
 
-<!-- ══════════════════════════════════════════
-     VIEW: DASHBOARD
-══════════════════════════════════════════ -->
-<div id="view-dashboard" class="view">
-  <div class="main">
-
-    <div class="page-header">
-      <div>
-        <h1>📊 Planificación y Reportes SIGAP</h1>
-        <p>Gestión de actividades programadas y reportes diarios institucionales</p>
-      </div>
-      <div class="header-actions">
-        <button class="btn-draft" onclick="openFormPlan()">
-          📋 Nueva Planificación
-        </button>
-        <button class="btn-submit" onclick="openFormReport()">
-          📝 Nuevo Reporte Diario
-        </button>
-      </div>
-    </div>
-
-    <!-- Stats -->
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="ico">📋</div>
-        <div class="num" id="stat-plans">0</div>
-        <div class="lbl">Planificaciones</div>
-      </div>
-      <div class="stat-card">
-        <div class="ico">📝</div>
-        <div class="num" id="stat-reports">0</div>
-        <div class="lbl">Reportes diarios</div>
-      </div>
-      <div class="stat-card">
-        <div class="ico">✅</div>
-        <div class="num" id="stat-sent">0</div>
-        <div class="lbl">Enviados</div>
-      </div>
-      <div class="stat-card">
-        <div class="ico">🕐</div>
-        <div class="num" id="stat-draft">0</div>
-        <div class="lbl">Borradores</div>
-      </div>
-    </div>
-
-    <!-- Tabs -->
-    <div class="tabs">
-      <button class="tab active" data-tab="plans" onclick="switchTab('plans')">📋 Planificaciones</button>
-      <button class="tab" data-tab="reports" onclick="switchTab('reports')">📝 Reportes Diarios</button>
-    </div>
-
-    <!-- Plans table -->
-    <div id="tab-plans">
-      <div class="table-wrap">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Semana</th>
-              <th>Responsable</th>
-              <th>Institución</th>
-              <th>Estado</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody id="plans-tbody"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- Reports table -->
-    <div id="tab-reports" style="display:none">
-      <div class="table-wrap">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Fecha</th>
-              <th>Responsable</th>
-              <th>Institución</th>
-              <th>Estado</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody id="reports-tbody"></tbody>
-        </table>
-      </div>
-    </div>
-
+<div class="stats-bar">
+  <div class="stats-inner" id="stats-bar">
+    <div class="stat-pill"><span class="stat-num" id="stat-total">0</span><span>actividades totales</span></div>
+    <div class="stat-pill"><span class="stat-num" id="stat-progreso">0</span><span>en progreso</span></div>
+    <div class="stat-pill"><span class="stat-num" id="stat-completados">0</span><span>completadas</span></div>
+    <div class="stat-pill"><span class="stat-num" id="stat-pendientes">0</span><span>pendientes</span></div>
   </div>
 </div>
 
-
-<!-- ══════════════════════════════════════════
-     VIEW: FORM PLANIFICACIÓN
-══════════════════════════════════════════ -->
-<div id="view-form-plan" class="view">
-  <div class="main">
-
-    <div class="page-header">
-      <div>
-        <h1 id="form-plan-title">Nueva Planificación Semanal</h1>
-        <p>Completa los datos de la planificación y agrega las actividades programadas</p>
-      </div>
-    </div>
-
-    <!-- Datos generales -->
-    <div class="form-card">
-      <h2>📋 Datos generales <span class="tag">PLANIFICACIÓN</span></h2>
-      <div class="form-grid cols-3">
-        <div class="fg">
-          <label class="required" for="fp-institucion">Institución</label>
-          <input type="text" id="fp-institucion" placeholder="Ej: IAGAMI — Dirección de Calidad Ambiental"/>
-        </div>
-        <div class="fg">
-          <label class="required" for="fp-responsable">Responsable</label>
-          <input type="text" id="fp-responsable" placeholder="Nombre completo del responsable"/>
-        </div>
-        <div class="fg">
-          <label class="required" for="fp-semana">Semana</label>
-          <input type="week" id="fp-semana"/>
-        </div>
-      </div>
-    </div>
-
-    <!-- Actividades programadas -->
-    <div class="form-card">
-      <h2>📅 Actividades programadas</h2>
-      <div class="nota">💡 Agrega una fila por cada actividad planificada. Puedes tener múltiples actividades por día.</div>
-      <div class="act-section">
-        <table class="act-table" style="width:100%">
-          <thead>
-            <tr>
-              <th style="width:120px">Día</th>
-              <th style="width:100px">Hora</th>
-              <th>Actividad programada</th>
-              <th style="width:40px"></th>
-            </tr>
-          </thead>
-          <tbody id="plan-activities-body"></tbody>
-        </table>
-        <button class="btn-add" onclick="addPlanRow()">+ Agregar actividad</button>
-      </div>
-    </div>
-
-    <!-- Footer -->
-    <div class="form-footer">
-      <button class="btn-cancel" onclick="renderDashboard()">Cancelar</button>
-      <div class="spacer"></div>
-      <button class="btn-draft"  onclick="savePlan('borrador')">💾 Guardar borrador</button>
-      <button class="btn-submit" onclick="savePlan('enviado')">
-        📤 Guardar y enviar
-      </button>
-    </div>
-
+<div class="main-wrap">
+  <div class="toolbar">
+    <input class="search-input" type="text" id="q-input" placeholder="Buscar por título, responsable..." oninput="renderItems()"/>
+    <select class="filter-select" id="f-estado" onchange="renderItems()">
+      <option value="">Todos los estados</option>
+      <option value="Pendiente">Pendiente</option>
+      <option value="En Progreso">En Progreso</option>
+      <option value="Completado">Completado</option>
+      <option value="Cancelado">Cancelado</option>
+    </select>
+    <select class="filter-select" id="f-prioridad" onchange="renderItems()">
+      <option value="">Todas las prioridades</option>
+      <option value="Alta">Alta</option>
+      <option value="Media">Media</option>
+      <option value="Baja">Baja</option>
+    </select>
   </div>
+
+  <div id="grid-container"></div>
 </div>
 
-
-<!-- ══════════════════════════════════════════
-     VIEW: FORM REPORTE DIARIO
-══════════════════════════════════════════ -->
-<div id="view-form-report" class="view">
-  <div class="main">
-
-    <div class="page-header">
-      <div>
-        <h1 id="form-report-title">Nuevo Reporte Diario</h1>
-        <p>Registra las actividades realizadas, observaciones y evidencias del día</p>
-      </div>
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">🌿 IAGAMI · SIGAP</div>
+    <div class="footer-links">
+      <a href="../index.html">Portal</a>
+      <a href="../transparencia/index.html">Transparencia</a>
+      <a href="../noticias/index.html">Noticias</a>
+      <a href="../admin/index.html">Administración</a>
     </div>
-
-    <!-- Datos generales -->
-    <div class="form-card">
-      <h2>📋 Datos generales <span class="tag">REPORTE</span></h2>
-      <div class="form-grid cols-3">
-        <div class="fg">
-          <label class="required" for="fr-fecha">Fecha</label>
-          <input type="date" id="fr-fecha"/>
-        </div>
-        <div class="fg">
-          <label class="required" for="fr-institucion">Institución</label>
-          <input type="text" id="fr-institucion" placeholder="Institución"/>
-        </div>
-        <div class="fg">
-          <label class="required" for="fr-responsable">Responsable</label>
-          <input type="text" id="fr-responsable" placeholder="Nombre del responsable"/>
-        </div>
-        <div class="fg">
-          <label for="fr-hora-ini">Hora inicio</label>
-          <input type="time" id="fr-hora-ini"/>
-        </div>
-        <div class="fg">
-          <label for="fr-hora-fin">Hora fin</label>
-          <input type="time" id="fr-hora-fin"/>
-        </div>
-        <div class="fg">
-          <label for="fr-plan">Planificación relacionada</label>
-          <select id="fr-plan">
-            <option value="">— Sin planificación relacionada —</option>
-          </select>
-        </div>
-      </div>
-    </div>
-
-    <!-- Actividades realizadas -->
-    <div class="form-card">
-      <h2>✅ Actividades realizadas</h2>
-      <div class="nota">💡 Marca las actividades que fueron completadas. Puedes agregar actividades no previstas.</div>
-      <table class="act-table" style="width:100%">
-        <thead>
-          <tr>
-            <th style="width:50px">Hecha</th>
-            <th>Descripción de la actividad</th>
-            <th style="width:40px"></th>
-          </tr>
-        </thead>
-        <tbody id="report-activities-body"></tbody>
-      </table>
-      <button class="btn-add" onclick="addReportActivity()">+ Agregar actividad</button>
-    </div>
-
-    <!-- Observaciones -->
-    <div class="form-card">
-      <h2>📝 Observaciones</h2>
-      <div class="fg">
-        <label for="fr-observaciones">Observaciones generales del día</label>
-        <textarea id="fr-observaciones" placeholder="Describe novedades, incidentes, logros, pendientes u observaciones relevantes del día…" style="min-height:120px"></textarea>
-      </div>
-    </div>
-
-    <!-- Evidencias -->
-    <div class="form-card">
-      <h2>📎 Evidencias</h2>
-      <p style="font-size:12px;color:#4a8a6a;margin-bottom:14px">Sube imágenes o PDFs como respaldo del reporte. Máximo 2 MB por archivo.</p>
-      <div class="file-drop" id="file-drop"
-           ondragover="event.preventDefault();this.classList.add('drag')"
-           ondragleave="this.classList.remove('drag')"
-           ondrop="event.preventDefault();this.classList.remove('drag');handleFileInput({files:event.dataTransfer.files,value:''})">
-        <input type="file" accept="image/*,.pdf" multiple onchange="handleFileInput(this)"/>
-        <div class="ico">📁</div>
-        <p><strong>Arrastra archivos aquí</strong> o haz clic para seleccionar</p>
-        <p style="font-size:11px;margin-top:4px">Imágenes (JPG, PNG, WEBP) o PDF · Máx. 2 MB c/u</p>
-      </div>
-      <div class="file-list" id="file-list"></div>
-    </div>
-
-    <!-- Footer -->
-    <div class="form-footer">
-      <button class="btn-cancel" onclick="renderDashboard()">Cancelar</button>
-      <div class="spacer"></div>
-      <button class="btn-draft"  onclick="saveReport('borrador')">💾 Guardar borrador</button>
-      <button class="btn-submit" onclick="saveReport('enviado')">
-        📤 Guardar y enviar
-      </button>
-    </div>
-
+    <div class="footer-copy">© 2026 IAGAMI — Municipio Iribarren, Estado Lara, Venezuela. Todos los derechos reservados.</div>
   </div>
-</div>
+</footer>
 
+<div id="app-toast" class="toast"></div>
 
-<!-- ══════════════════════════════════════════
-     VIEW: DETALLE PLANIFICACIÓN
-══════════════════════════════════════════ -->
-<div id="view-detail-plan" class="view">
-  <div class="main">
-    <div class="page-header">
-      <div>
-        <h1>📋 Detalle de Planificación</h1>
-      </div>
-    </div>
-    <div id="detail-plan-content"></div>
-  </div>
-</div>
-
-
-<!-- ══════════════════════════════════════════
-     VIEW: DETALLE REPORTE
-══════════════════════════════════════════ -->
-<div id="view-detail-report" class="view">
-  <div class="main">
-    <div class="page-header">
-      <div>
-        <h1>📝 Detalle de Reporte Diario</h1>
-      </div>
-    </div>
-    <div id="detail-report-content"></div>
-  </div>
-</div>
-
-
-<!-- ══════════════════════════════════════════
-     MODAL CONFIRMAR
-══════════════════════════════════════════ -->
-<div id="modal-confirm" class="modal-bg" onclick="if(event.target===this)closeConfirm()">
-  <div class="modal">
-    <h3 id="confirm-title">¿Confirmar acción?</h3>
-    <p id="confirm-msg">Esta acción no se puede deshacer.</p>
-    <div class="modal-btns">
-      <button class="btn-cancel" onclick="closeConfirm()">Cancelar</button>
-      <button class="btn-submit" style="background:#dc2626" onclick="doConfirm()">Eliminar</button>
-    </div>
-  </div>
-</div>
-
-
-<!-- ══════════════════════════════════════════
-     TOAST
-══════════════════════════════════════════ -->
-<div id="toast" class="toast"></div>
-
-
-<!-- ══════════════════════════════════════════
-     SCRIPTS
-══════════════════════════════════════════ -->
-<script src="db.js"></script>
-<script src="app.js"></script>
-
-<!-- Fix: tab switching shows/hides correct table -->
+<script src="../cms/db.js"></script>
 <script>
-  const _switchTab = switchTab;
-  switchTab = function(tab) {
-    document.getElementById('tab-plans').style.display   = tab === 'plans'   ? 'block' : 'none';
-    document.getElementById('tab-reports').style.display = tab === 'reports' ? 'block' : 'none';
-    _switchTab(tab);
-  };
-</script>
+'use strict';
 
+const MESES_CORTO = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+
+function fmtFecha(iso) {
+  if (!iso) return '—';
+  try {
+    const d = new Date(iso + 'T12:00:00');
+    return d.getDate() + ' ' + MESES_CORTO[d.getMonth()] + ' ' + d.getFullYear();
+  } catch(e) { return iso; }
+}
+
+function renderStats(items) {
+  document.getElementById('stat-total').textContent = items.length;
+  document.getElementById('stat-progreso').textContent = items.filter(p => p.estado === 'En Progreso').length;
+  document.getElementById('stat-completados').textContent = items.filter(p => p.estado === 'Completado').length;
+  document.getElementById('stat-pendientes').textContent = items.filter(p => p.estado === 'Pendiente').length;
+}
+
+function badgeClass(estado) {
+  const m = {Pendiente:'badge-pendiente','En Progreso':'badge-progreso',Completado:'badge-completado',Cancelado:'badge-cancelado'};
+  return m[estado] || 'badge-pendiente';
+}
+
+function priClass(p) {
+  const m = {Alta:'pri-alta',Media:'pri-media',Baja:'pri-baja'};
+  return m[p] || 'pri-media';
+}
+
+function renderItems() {
+  const q = (document.getElementById('q-input').value || '').toLowerCase();
+  const fEst = document.getElementById('f-estado').value;
+  const fPri = document.getElementById('f-prioridad').value;
+
+  let items = CMSDB.getAll('planificacion');
+  renderStats(items);
+
+  if (q) items = items.filter(p => (p.titulo+' '+p.responsable+' '+(p.descripcion||'')).toLowerCase().includes(q));
+  if (fEst) items = items.filter(p => p.estado === fEst);
+  if (fPri) items = items.filter(p => p.prioridad === fPri);
+
+  const container = document.getElementById('grid-container');
+
+  if (!items.length) {
+    container.innerHTML = `<div class="empty-state">
+      <div class="ico">📆</div>
+      <h3>No se encontraron actividades</h3>
+      <p>${q || fEst || fPri ? 'Prueba con otros filtros o términos de búsqueda.' : 'No hay actividades de planificación registradas aún.'}</p>
+    </div>`;
+    return;
+  }
+
+  container.innerHTML = `<div class="grid">${items.map(p => {
+    const avance = Math.min(100, Math.max(0, parseInt(p.avance)||0));
+    return `<div class="plan-card">
+      <div class="plan-header">
+        <div class="plan-titulo">${escHtml(p.titulo||'Sin título')}</div>
+        <span class="badge ${badgeClass(p.estado)}">${p.estado||'—'}</span>
+      </div>
+      ${p.descripcion ? `<div class="plan-desc">${escHtml(p.descripcion)}</div>` : ''}
+      <div class="plan-meta">
+        ${p.responsable ? `<div class="meta-item">👤 ${escHtml(p.responsable)}</div>` : ''}
+        ${p.fecha ? `<div class="meta-item">📅 ${fmtFecha(p.fecha)}</div>` : ''}
+        ${p.prioridad ? `<span class="badge ${priClass(p.prioridad)}">${p.prioridad}</span>` : ''}
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-bar"><div class="progress-fill" style="width:${avance}%"></div></div>
+        <span class="progress-pct">${avance}%</span>
+      </div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+function escHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+document.addEventListener('DOMContentLoaded', renderItems);
+</script>
 </body>
 </html>

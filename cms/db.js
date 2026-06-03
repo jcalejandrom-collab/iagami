@@ -21,7 +21,9 @@ const CMSDB = (() => {
     multas:      'iagami_cms_multas',
     denuncias:   'iagami_cms_denuncias',
     media:       'iagami_cms_media',
-    consejos:    'iagami_cms_consejos'
+    consejos:    'iagami_cms_consejos',
+    bienvenida:   'iagami_cms_bienvenida',
+    planificacion:'iagami_cms_planificacion'
   };
 
   /* ─────────────────────────────────────────
@@ -585,7 +587,45 @@ const CMSDB = (() => {
         publicado: true
       }
     ]);
-    _seed('denuncias',[]);
+    _seed('denuncias', [
+      {
+        id: 'den-001',
+        caso: 'DEN-001',
+        tipo: 'Contaminación del Agua',
+        descripcion: 'Vertido de aguas negras a la quebrada La Ruezga en el sector El Trompillo.',
+        ubicacion: 'Sector El Trompillo, Parroquia Santa Rosa',
+        nombre: 'Ciudadano Anónimo',
+        email: '',
+        telefono: '',
+        fecha: '2026-05-20',
+        estado: 'inspeccion',
+        publicado: true,
+        historial: [
+          { estado: 'recibida', fecha: '2026-05-20', comentario: 'Denuncia recibida y registrada en el sistema SIGAP.' },
+          { estado: 'revision', fecha: '2026-05-21', comentario: 'Expediente asignado a la Dirección de Calidad Ambiental para revisión técnica.' },
+          { estado: 'inspeccion', fecha: '2026-05-24', comentario: 'Inspector asignado. Visita de campo programada para el 27/05/2026.' }
+        ]
+      },
+      {
+        id: 'den-002',
+        caso: 'DEN-002',
+        tipo: 'Deforestación',
+        descripcion: 'Tala de árboles en zona residencial sin permiso ambiental.',
+        ubicacion: 'Urbanización Los Jardines, Parroquia Concepción',
+        nombre: 'María González',
+        email: '',
+        telefono: '',
+        fecha: '2026-05-28',
+        estado: 'cerrada',
+        publicado: true,
+        historial: [
+          { estado: 'recibida', fecha: '2026-05-28', comentario: 'Denuncia recibida correctamente.' },
+          { estado: 'revision', fecha: '2026-05-29', comentario: 'Revisión documental completada. Se constata la infracción.' },
+          { estado: 'inspeccion', fecha: '2026-06-01', comentario: 'Inspección realizada. Sanción emitida al infractor.' },
+          { estado: 'cerrada', fecha: '2026-06-03', comentario: 'Caso cerrado. Infractor multado. Árboles serán repuestos en 30 días.' }
+        ]
+      }
+    ]);
     _seed('media',    []);
 
     /* ── CONSEJOS COMUNALES ── */
@@ -594,6 +634,51 @@ const CMSDB = (() => {
       { id:'cc-002', nombre:'Consejo Comunal Los Jardines', codigo:'CC-IRB-002', estado:'Lara', municipio:'Iribarren', parroquia:'Concepción', comunidad:'Urbanización Los Jardines', direccion:'Av. Los Jardines, Sector B, Barquisimeto', fecha_constitucion:'2010-07-22', num_familias:85, num_habitantes:340, responsable:'Carlos Méndez', cedula:'V-15678901', telefono:'+58 414 555-0002', email:'cclosjardines@gmail.com', coordenadas:'10.0712,-69.3421', estatus:'Activo', observaciones:'Participan activamente en programas de reciclaje y reforestación.', documentos:[] },
       { id:'cc-003', nombre:'Consejo Comunal Santa Rosa Norte', codigo:'CC-IRB-003', estado:'Lara', municipio:'Iribarren', parroquia:'Santa Rosa', comunidad:'Santa Rosa Norte', direccion:'Carrera 45, Santa Rosa, Barquisimeto', fecha_constitucion:'2012-11-05', num_familias:200, num_habitantes:820, responsable:'Ana Pérez', cedula:'V-18901234', telefono:'+58 416 555-0003', email:'ccsantarosanorte@gmail.com', coordenadas:'10.0589,-69.3298', estatus:'Activo', observaciones:'Uno de los consejos más activos de la parroquia Santa Rosa.', documentos:[] },
       { id:'cc-004', nombre:'Consejo Comunal El Cují Verde', codigo:'CC-IRB-004', estado:'Lara', municipio:'Iribarren', parroquia:'Juan de Villegas', comunidad:'El Cují', direccion:'Sector El Cují, Zona Industrial, Barquisimeto', fecha_constitucion:'2015-04-18', num_familias:65, num_habitantes:260, responsable:'Luis Rodríguez', cedula:'V-20123456', telefono:'+58 426 555-0004', email:'ccelcuji@gmail.com', coordenadas:'10.0445,-69.3102', estatus:'Inactivo', observaciones:'En proceso de renovación de voceros.', documentos:[] }
+    ]);
+
+    _seed('bienvenida', [
+      {
+        id: 'bienvenida-001',
+        titulo: 'Bienvenido al Portal SIGAP-IAGAMI',
+        mensaje: 'Sistema Integral de Gestión Ambiental del Municipio Iribarren. Accede a trámites, denuncias, proyectos y más.',
+        imagen: null,
+        color_fondo: '#1d6b3e',
+        activa: false,
+        mostrarSiempre: false
+      }
+    ]);
+
+    _seed('planificacion', [
+      {
+        id: 'plan-001',
+        titulo: 'Plan de Reforestación Municipal 2026',
+        descripcion: 'Plan integral de reforestación en las parroquias de mayor déficit de cobertura verde del municipio Iribarren.',
+        responsable: 'Dirección de Proyectos',
+        fecha: '2026-06-30',
+        prioridad: 'alta',
+        estado: 'en_proceso',
+        avance: 45
+      },
+      {
+        id: 'plan-002',
+        titulo: 'Campaña de Educación Ambiental Escolar',
+        descripcion: 'Talleres y actividades de educación ambiental en 20 instituciones educativas del municipio.',
+        responsable: 'Dirección de Comunicaciones',
+        fecha: '2026-07-15',
+        prioridad: 'media',
+        estado: 'pendiente',
+        avance: 0
+      },
+      {
+        id: 'plan-003',
+        titulo: 'Monitoreo de Calidad del Agua — Segundo Trimestre',
+        descripcion: 'Monitoreo sistemático de los cuerpos de agua del municipio con las nuevas estaciones instaladas.',
+        responsable: 'Dirección de Calidad Ambiental',
+        fecha: '2026-06-20',
+        prioridad: 'alta',
+        estado: 'completado',
+        avance: 100
+      }
     ]);
   }
 

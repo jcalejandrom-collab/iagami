@@ -15,25 +15,9 @@
   --err-bg:#fee2e2;--err:#991b1b;--info-bg:#dbeafe;--info:#1e40af;
 }
 body{margin:0;font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden}
-/* ── Login ── */
-#login-overlay{position:fixed;inset:0;z-index:1000;background:var(--green-dark);display:flex;align-items:center;justify-content:center}
-.login-box{background:#fff;border-radius:16px;padding:40px 36px;width:380px;max-width:95vw;box-shadow:0 20px 60px rgba(0,0,0,.4)}
-.login-logo{text-align:center;margin-bottom:24px}
-.login-logo .brand{font-family:'Poppins',sans-serif;font-size:26px;font-weight:700;color:var(--green)}
-.login-logo .sub{font-size:12px;color:var(--muted);margin-top:2px}
-.login-box h2{font-size:16px;font-weight:600;color:var(--text);margin-bottom:20px;text-align:center}
-.form-group{margin-bottom:14px}
-.form-group label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px}
-.form-group input{width:100%;border:1px solid var(--green-border);border-radius:8px;padding:10px 12px;font-size:14px;outline:none;transition:border-color .2s}
-.form-group input:focus{border-color:var(--green)}
-.btn-login{width:100%;background:var(--green);color:#fff;border:none;border-radius:8px;padding:12px;font-size:15px;font-weight:600;cursor:pointer;transition:background .2s;margin-top:8px}
-.btn-login:hover{background:#155c33}
-.login-msg{font-size:13px;text-align:center;margin-top:10px;padding:8px;border-radius:6px;display:none}
-.login-msg.error{background:var(--err-bg);color:var(--err);display:block}
-.login-msg.warn{background:var(--warn-bg);color:var(--warn);display:block}
 /* ── App layout ── */
-#app{display:none;flex:1;overflow:hidden}
-#app.visible{display:flex}
+#app{display:none;flex:1;overflow:hidden;opacity:0;transition:opacity .3s}
+#app.visible{display:flex;opacity:1}
 #sidebar{width:260px;background:var(--green-dark);color:#fff;display:flex;flex-direction:column;overflow-y:auto;flex-shrink:0}
 .sidebar-header{padding:20px 16px 16px;border-bottom:1px solid rgba(255,255,255,.1)}
 .sidebar-brand{font-family:'Poppins',sans-serif;font-size:18px;font-weight:700;color:#fff}
@@ -156,26 +140,7 @@ tr:hover td{background:#f8fef9}
 </head>
 <body>
 
-<!-- LOGIN OVERLAY -->
-<div id="login-overlay">
-  <div class="login-box">
-    <div class="login-logo">
-      <div class="brand">🌿 IAGAMI</div>
-      <div class="sub">Instituto Autónomo de Gestión Ambiental</div>
-    </div>
-    <h2>Centro de Mantenimiento</h2>
-    <div class="form-group">
-      <label>Usuario</label>
-      <input type="text" id="login-user" placeholder="Nombre de usuario" autocomplete="username">
-    </div>
-    <div class="form-group">
-      <label>Contraseña</label>
-      <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password">
-    </div>
-    <button class="btn-login" onclick="doLogin()">Iniciar Sesión</button>
-    <div id="login-msg" class="login-msg"></div>
-  </div>
-</div>
+<!-- No login overlay: access is controlled via admin/index.html session -->
 
 <!-- APP -->
 <div id="app">
@@ -431,120 +396,21 @@ let _scanData = null;
 /* ═══════════════════════════════════════════════
    HASH
 ═══════════════════════════════════════════════ */
-function hashPwd(pwd) {
-  const str = 'IAGAMI_SIGAP_2026_' + pwd;
-  let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
-  for (let i = 0; i < str.length; i++) {
-    const ch = str.charCodeAt(i);
-    h1 = Math.imul(h1 ^ ch, 2654435761);
-    h2 = Math.imul(h2 ^ ch, 1597334677);
-  }
-  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
-  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
-  return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(16);
-}
-
-/* ═══════════════════════════════════════════════
-   USERS
-═══════════════════════════════════════════════ */
-function initUsers() {
-  if (localStorage.getItem(SYS_USERS)) return;
-  const now = new Date().toISOString();
-  const users = [
-    {id:'u-001',username:'jcalejandrom',passwordHash:hashPwd('20236195'),role:'admin',nombre:'Administrador Principal',activo:true,failedAttempts:0,locked:false,lockUntil:null,created:now},
-    {id:'u-002',username:'sistema_respaldo',passwordHash:hashPwd('SR-2026-EMG'),role:'recovery',nombre:'Sistema de Respaldo',activo:true,failedAttempts:0,locked:false,lockUntil:null,created:now}
-  ];
-  localStorage.setItem(SYS_USERS, JSON.stringify(users));
-}
-
-function getUsers() { try { return JSON.parse(localStorage.getItem(SYS_USERS)||'[]'); } catch(e){return[];} }
-function saveUsers(u) { localStorage.setItem(SYS_USERS, JSON.stringify(u)); }
-
-/* ═══════════════════════════════════════════════
-   AUTH
-═══════════════════════════════════════════════ */
-function doLogin() {
-  const username = document.getElementById('login-user').value.trim();
-  const password = document.getElementById('login-pass').value;
-  const msg = document.getElementById('login-msg');
-  msg.className = 'login-msg'; msg.style.display = 'none';
-
-  if (!username || !password) { showLoginMsg('Completa todos los campos','warn'); return; }
-
-  const users = getUsers();
-  const user = users.find(u => u.username === username);
-
-  if (!user) {
-    logRawAction(username,'?','login','auth','Usuario no encontrado','failed');
-    showLoginMsg('Credenciales incorrectas','error'); return;
-  }
-  if (!user.activo) { showLoginMsg('Usuario desactivado','error'); return; }
-
-  // Check lock
-  if (user.locked && user.lockUntil) {
-    const lockEnd = new Date(user.lockUntil);
-    if (Date.now() < lockEnd.getTime()) {
-      const mins = Math.ceil((lockEnd - Date.now()) / 60000);
-      showLoginMsg(`Cuenta bloqueada. Intenta en ${mins} min.`,'error'); return;
-    } else {
-      user.locked = false; user.lockUntil = null; user.failedAttempts = 0;
-    }
-  }
-
-  if (user.passwordHash !== hashPwd(password)) {
-    user.failedAttempts = (user.failedAttempts || 0) + 1;
-    const remaining = 5 - user.failedAttempts;
-    if (user.failedAttempts >= 5) {
-      user.locked = true;
-      user.lockUntil = new Date(Date.now() + 15 * 60000).toISOString();
-      saveUsers(users);
-      logRawAction(username,user.role,'login','auth','Cuenta bloqueada por intentos fallidos','blocked');
-      showLoginMsg('Cuenta bloqueada por 15 minutos','error'); return;
-    }
-    saveUsers(users);
-    logRawAction(username,user.role,'login','auth','Contraseña incorrecta','failed');
-    showLoginMsg(`Contraseña incorrecta. Intentos restantes: ${remaining}`,'error'); return;
-  }
-
-  // Success
-  user.failedAttempts = 0; user.locked = false; user.lockUntil = null;
-  user.lastAccess = new Date().toISOString();
-  saveUsers(users);
-
-  const session = {userId:user.id, username:user.username, role:user.role, nombre:user.nombre, loginTime:new Date().toISOString()};
-  sessionStorage.setItem(SYS_SESSION, JSON.stringify(session));
-
-  logRawAction(user.username, user.role, 'login', 'auth', 'Inicio de sesión exitoso', 'success');
-  startApp(session);
-}
-
-function showLoginMsg(text, type) {
-  const m = document.getElementById('login-msg');
-  m.textContent = text; m.className = `login-msg ${type}`; m.style.display = 'block';
-}
-
-function logout() {
-  const sess = getCurrentUser();
-  if (sess) logAction('logout','auth','Cierre de sesión','success');
-  sessionStorage.removeItem(SYS_SESSION);
-  if (_monitorInterval) { clearInterval(_monitorInterval); _monitorInterval = null; }
-  document.getElementById('app').classList.remove('visible');
-  document.getElementById('login-overlay').style.display = 'flex';
-  document.getElementById('login-user').value = '';
-  document.getElementById('login-pass').value = '';
-  document.getElementById('login-msg').style.display = 'none';
-}
-
 function getCurrentUser() {
   try { return JSON.parse(sessionStorage.getItem(SYS_SESSION)||'null'); } catch(e){return null;}
 }
 
+function logout() {
+  sessionStorage.removeItem(SYS_SESSION);
+  sessionStorage.removeItem('iagami_admin_session');
+  window.location.href = '../admin/index.html';
+}
+
 function startApp(session) {
-  document.getElementById('login-overlay').style.display = 'none';
   const app = document.getElementById('app');
   app.classList.add('visible');
-  document.getElementById('sb-username').textContent = session.nombre || session.username;
-  document.getElementById('sb-role').textContent = session.role;
+  document.getElementById('sb-username').textContent = session.nombre || session.username || 'Administrador';
+  document.getElementById('sb-role').textContent = session.role || 'admin';
   showSection('dashboard');
 }
 
@@ -1600,12 +1466,10 @@ document.addEventListener('keydown', e => {
    INIT
 ═══════════════════════════════════════════════ */
 (function init() {
-  initUsers();
-  const sess = getCurrentUser();
-  if (sess) {
-    startApp(sess);
-  }
-  // Login overlay is visible by default via CSS
+  const adminSess = sessionStorage.getItem('iagami_admin_session');
+  if (!adminSess) { window.location.replace('index.html'); return; }
+  const sess = getCurrentUser() || {username:'admin', role:'admin', nombre:'Administrador'};
+  startApp(sess);
 })();
 </script>
 </body>
