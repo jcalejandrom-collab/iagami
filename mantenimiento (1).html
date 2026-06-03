@@ -1,0 +1,1476 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IAGAMI — Centro de Mantenimiento</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --green:#1d6b3e;--green-dark:#0a1f0e;--green-light:#e8f5ee;--green-border:#d4edd8;
+  --text:#1a3d2b;--muted:#4a8a6a;--white:#fff;--bg:#f0faf5;
+  --ok-bg:#dcfce7;--ok:#166534;--warn-bg:#fef3c7;--warn:#92400e;
+  --err-bg:#fee2e2;--err:#991b1b;--info-bg:#dbeafe;--info:#1e40af;
+}
+body{margin:0;font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden}
+/* ── App layout ── */
+#app{display:none;flex:1;overflow:hidden;opacity:0;transition:opacity .3s}
+#app.visible{display:flex;opacity:1}
+#sidebar{width:260px;background:var(--green-dark);color:#fff;display:flex;flex-direction:column;overflow-y:auto;flex-shrink:0}
+.sidebar-header{padding:20px 16px 16px;border-bottom:1px solid rgba(255,255,255,.1)}
+.sidebar-brand{font-family:'Poppins',sans-serif;font-size:18px;font-weight:700;color:#fff}
+.sidebar-subtitle{font-size:11px;color:rgba(255,255,255,.5);margin-top:2px}
+.sidebar-nav{flex:1;padding:10px 0}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 16px;cursor:pointer;font-size:13px;color:rgba(255,255,255,.75);transition:background .15s,color .15s;border-left:3px solid transparent}
+.nav-item:hover{background:rgba(255,255,255,.08);color:#fff}
+.nav-item.active{background:rgba(29,107,62,.4);color:#fff;border-left-color:#4ade80}
+.nav-sep{border:none;border-top:1px solid rgba(255,255,255,.12);margin:8px 16px}
+.nav-link{display:flex;align-items:center;gap:10px;padding:10px 16px;font-size:13px;color:rgba(255,255,255,.65);text-decoration:none;transition:color .15s}
+.nav-link:hover{color:#fff}
+.btn-logout{margin:12px 16px;background:rgba(220,38,38,.15);border:1px solid rgba(220,38,38,.3);color:#fca5a5;border-radius:8px;padding:9px;font-size:13px;cursor:pointer;transition:background .2s;width:calc(100% - 32px);text-align:center}
+.btn-logout:hover{background:rgba(220,38,38,.3)}
+.sidebar-footer{padding:14px 16px;border-top:1px solid rgba(255,255,255,.1);font-size:12px;color:rgba(255,255,255,.5)}
+.sidebar-footer .user-name{color:#fff;font-weight:600;font-size:13px}
+.role-badge{display:inline-block;background:var(--green);color:#fff;font-size:10px;padding:1px 7px;border-radius:10px;margin-top:3px}
+/* ── Main ── */
+#main-content{flex:1;overflow-y:auto;background:var(--bg)}
+.section{display:none;padding:28px 32px}
+.section.active{display:block}
+.section-title{font-family:'Poppins',sans-serif;font-size:22px;font-weight:700;color:var(--text);margin-bottom:4px}
+.section-sub{font-size:14px;color:var(--muted);margin-bottom:24px}
+/* ── Cards ── */
+.card{background:#fff;border:1px solid var(--green-border);border-radius:12px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.card-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:14px}
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+.stat-card{background:#fff;border:1px solid var(--green-border);border-radius:12px;padding:18px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.stat-card .val{font-family:'Poppins',sans-serif;font-size:28px;font-weight:700;color:var(--green)}
+.stat-card .lbl{font-size:12px;color:var(--muted);margin-top:4px}
+.stat-card .status{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:8px;margin-top:6px}
+.status-ok{background:var(--ok-bg);color:var(--ok)}
+.status-warn{background:var(--warn-bg);color:var(--warn)}
+.status-err{background:var(--err-bg);color:var(--err)}
+.status-info{background:var(--info-bg);color:var(--info)}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:8px 12px;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid var(--green-border)}
+td{padding:8px 12px;border-bottom:1px solid #f0f0f0;color:var(--text)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#f8fef9}
+/* ── Buttons ── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .2s}
+.btn-primary{background:var(--green);color:#fff}.btn-primary:hover{background:#155c33}
+.btn-secondary{background:var(--green-light);color:var(--green);border:1px solid var(--green-border)}.btn-secondary:hover{background:var(--green-border)}
+.btn-danger{background:var(--err-bg);color:var(--err);border:1px solid #fca5a5}.btn-danger:hover{background:#fecaca}
+.btn-warn{background:var(--warn-bg);color:var(--warn);border:1px solid #fcd34d}.btn-warn:hover{background:#fde68a}
+.btn-sm{padding:5px 10px;font-size:12px}
+/* ── Toast ── */
+#toast-container{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px}
+.toast{padding:12px 18px;border-radius:10px;font-size:14px;font-weight:500;min-width:260px;max-width:360px;box-shadow:0 4px 12px rgba(0,0,0,.15);animation:slideIn .2s ease}
+@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+.toast.success{background:var(--ok-bg);color:var(--ok);border-left:4px solid var(--ok)}
+.toast.error{background:var(--err-bg);color:var(--err);border-left:4px solid var(--err)}
+.toast.warning{background:var(--warn-bg);color:var(--warn);border-left:4px solid var(--warn)}
+.toast.info{background:var(--info-bg);color:var(--info);border-left:4px solid var(--info)}
+/* ── Progress bar ── */
+.progress-wrap{background:#e5e7eb;border-radius:4px;height:10px;overflow:hidden;margin:6px 0}
+.progress-bar{height:100%;background:var(--green);border-radius:4px;transition:width .4s}
+/* ── Check result list ── */
+.check-list{list-style:none;display:flex;flex-direction:column;gap:8px;margin:16px 0}
+.check-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;font-size:13px}
+.check-item.ok{background:var(--ok-bg);color:var(--ok)}
+.check-item.warn{background:var(--warn-bg);color:var(--warn)}
+.check-item.err{background:var(--err-bg);color:var(--err)}
+.check-item .icon{font-size:16px;flex-shrink:0}
+/* ── Score ── */
+.score-circle{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;width:100px;height:100px;border-radius:50%;font-family:'Poppins',sans-serif;border:6px solid var(--green);margin:16px auto;display:flex}
+.score-num{font-size:28px;font-weight:700;color:var(--green)}
+.score-lbl{font-size:11px;color:var(--muted)}
+/* ── Modal ── */
+.modal-overlay{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:14px;padding:28px;width:460px;max-width:95vw;max-height:85vh;overflow-y:auto;box-shadow:0 20px 50px rgba(0,0,0,.25)}
+.modal-title{font-family:'Poppins',sans-serif;font-size:18px;font-weight:700;margin-bottom:16px;color:var(--text)}
+.modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px}
+/* ── Form ── */
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:4px;text-transform:uppercase}
+.field input,.field select{width:100%;border:1px solid var(--green-border);border-radius:8px;padding:9px 11px;font-size:13px;outline:none}
+.field input:focus,.field select:focus{border-color:var(--green)}
+/* ── Accordion ── */
+.accordion-item{border:1px solid var(--green-border);border-radius:10px;margin-bottom:8px;overflow:hidden}
+.accordion-hdr{padding:13px 16px;cursor:pointer;font-weight:600;font-size:14px;background:var(--green-light);display:flex;justify-content:space-between;align-items:center}
+.accordion-body{display:none;padding:14px 16px;font-size:13px;line-height:1.6;color:var(--text)}
+.accordion-body.open{display:block}
+/* ── Monitor module row ── */
+.mod-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--green-border)}
+.mod-row:last-child{border-bottom:none}
+.tabs{display:flex;gap:4px;margin-bottom:20px;border-bottom:2px solid var(--green-border);padding-bottom:0}
+.tab{padding:9px 16px;cursor:pointer;font-size:13px;font-weight:500;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px}
+.tab.active{color:var(--green);border-bottom-color:var(--green);font-weight:600}
+.tab-panel{display:none}.tab-panel.active{display:block}
+.info-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f0f0f0;font-size:13px}
+.info-row:last-child{border-bottom:none}
+.info-row .key{color:var(--muted);font-weight:500}
+.info-row .val{font-weight:600;color:var(--text)}
+.action-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}
+.action-card{background:#fff;border:1px solid var(--green-border);border-radius:12px;padding:18px;text-align:center}
+.action-card .ac-icon{font-size:28px;margin-bottom:8px}
+.action-card .ac-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px}
+.action-card .ac-desc{font-size:11px;color:var(--muted);margin-bottom:12px}
+.action-result{font-size:12px;color:var(--muted);margin-top:8px;min-height:16px}
+.pagination{display:flex;align-items:center;gap:6px;justify-content:flex-end;margin-top:14px}
+.page-btn{padding:5px 11px;border-radius:6px;border:1px solid var(--green-border);background:#fff;font-size:12px;cursor:pointer;color:var(--text)}
+.page-btn.active{background:var(--green);color:#fff;border-color:var(--green)}
+.filter-row{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:flex-end}
+.filter-row .field{margin-bottom:0}
+.filter-row label{font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:3px}
+.filter-row input,.filter-row select{padding:7px 10px;border:1px solid var(--green-border);border-radius:7px;font-size:13px;outline:none}
+.audit-module{background:#fff;border:1px solid var(--green-border);border-radius:10px;padding:16px;margin-bottom:12px}
+.audit-module-title{font-weight:700;font-size:14px;color:var(--text);margin-bottom:10px}
+.audit-stat{display:inline-block;background:var(--green-light);color:var(--green);font-size:12px;font-weight:600;padding:3px 10px;border-radius:8px;margin:2px}
+.health-bar{height:18px;border-radius:9px;background:var(--green);display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700;transition:width .5s}
+.tech-table{font-size:13px}
+.tech-table td{padding:7px 10px}
+.tree{font-family:monospace;font-size:12px;line-height:1.8;background:#f8fef9;border:1px solid var(--green-border);border-radius:8px;padding:14px;white-space:pre}
+.changelog tr td:first-child{white-space:nowrap;color:var(--muted);font-size:12px}
+</style>
+</head>
+<body>
+
+<!-- No login overlay: access is controlled via admin/index.html session -->
+
+<!-- APP -->
+<div id="app">
+  <!-- SIDEBAR -->
+  <div id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-brand">🌿 IAGAMI</div>
+      <div class="sidebar-subtitle">Centro de Mantenimiento</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-item active" onclick="showSection('dashboard')">📊 Dashboard</div>
+      <div class="nav-item" onclick="showSection('diagnostico')">🔍 Diagnóstico</div>
+      <div class="nav-item" onclick="showSection('monitor')">📡 Monitor</div>
+      <div class="nav-item" onclick="showSection('optimizacion')">⚡ Optimización</div>
+      <div class="nav-item" onclick="showSection('respaldos')">💾 Respaldos</div>
+      <div class="nav-item" onclick="showSection('actividades')">📋 Actividades</div>
+      <div class="nav-item" onclick="showSection('seguridad')">🔐 Seguridad</div>
+      <div class="nav-item" onclick="showSection('auditoria')">🧪 Auditoría</div>
+      <div class="nav-item" onclick="showSection('limpieza')">🧹 Limpieza</div>
+      <div class="nav-item" onclick="showSection('documentacion')">📚 Documentación</div>
+      <hr class="nav-sep">
+      <a class="nav-link" href="index.html">← Volver al Admin</a>
+      <button class="btn-logout" onclick="logout()">Cerrar Sesión</button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-name" id="sb-username">—</div>
+      <div><span class="role-badge" id="sb-role">—</span></div>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div id="main-content">
+
+    <!-- DASHBOARD -->
+    <section class="section active" id="s-dashboard">
+      <div class="section-title">📊 Dashboard</div>
+      <div class="section-sub">Resumen del estado general del sistema SIGAP</div>
+      <div class="stat-grid" id="dash-stats"></div>
+      <div class="two-col">
+        <div class="card">
+          <div class="card-title">📦 Resumen del Portal</div>
+          <table id="dash-modules-table"><thead><tr><th>Módulo</th><th>Registros</th><th>Estado</th></tr></thead><tbody></tbody></table>
+        </div>
+        <div class="card">
+          <div class="card-title">🕐 Actividad Reciente</div>
+          <table id="dash-logs-table"><thead><tr><th>Hora</th><th>Usuario</th><th>Acción</th></tr></thead><tbody></tbody></table>
+        </div>
+      </div>
+    </section>
+
+    <!-- DIAGNÓSTICO -->
+    <section class="section" id="s-diagnostico">
+      <div class="section-title">🔍 Diagnóstico General</div>
+      <div class="section-sub">Analiza el estado completo del portal y detecta problemas</div>
+      <button class="btn btn-primary" onclick="runDiagnostic()">🔍 Analizar Sistema Completo</button>
+      <div id="diag-result" style="margin-top:20px"></div>
+    </section>
+
+    <!-- MONITOR -->
+    <section class="section" id="s-monitor">
+      <div class="section-title">📡 Monitor del Sistema</div>
+      <div class="section-sub">Estadísticas en tiempo real del portal</div>
+      <div style="display:flex;gap:10px;margin-bottom:20px">
+        <button class="btn btn-primary" onclick="renderMonitor()">🔄 Actualizar</button>
+        <span id="mon-last-update" style="font-size:12px;color:var(--muted);align-self:center"></span>
+      </div>
+      <div id="monitor-content"></div>
+    </section>
+
+    <!-- OPTIMIZACIÓN -->
+    <section class="section" id="s-optimizacion">
+      <div class="section-title">⚡ Centro de Optimización</div>
+      <div class="section-sub">Acciones de mantenimiento y limpieza del sistema</div>
+      <div class="action-grid" id="optim-grid"></div>
+    </section>
+
+    <!-- RESPALDOS -->
+    <section class="section" id="s-respaldos">
+      <div class="section-title">💾 Gestión de Respaldos</div>
+      <div class="section-sub">Crea y restaura respaldos completos o parciales del portal</div>
+      <div class="two-col" style="margin-bottom:24px">
+        <div class="card">
+          <div class="card-title">📥 Crear Respaldo</div>
+          <div style="margin-bottom:12px">
+            <button class="btn btn-primary" onclick="createBackup('completo')" style="margin-right:8px">💾 Completo</button>
+            <button class="btn btn-secondary" onclick="openPartialBackup()">📋 Parcial</button>
+          </div>
+          <div id="backup-modules" style="display:none;margin-top:12px">
+            <div style="font-size:13px;font-weight:600;margin-bottom:8px">Seleccionar módulos:</div>
+            <div id="backup-module-checks" style="display:grid;grid-template-columns:1fr 1fr;gap:6px"></div>
+            <button class="btn btn-primary" style="margin-top:12px" onclick="createBackup('parcial')">Descargar Seleccionados</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">📤 Restaurar Respaldo</div>
+          <p style="font-size:13px;color:var(--muted);margin-bottom:12px">Selecciona un archivo .json de respaldo para restaurar los datos del portal.</p>
+          <input type="file" id="restore-file" accept=".json" style="font-size:13px;margin-bottom:10px">
+          <button class="btn btn-warn" onclick="restoreBackup()">⚠️ Restaurar</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">📋 Historial de Respaldos</div>
+        <table id="backup-history-table">
+          <thead><tr><th>Fecha</th><th>Tipo</th><th>Módulos</th><th>Tamaño</th><th>Estado</th></tr></thead>
+          <tbody id="backup-history-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ACTIVIDADES -->
+    <section class="section" id="s-actividades">
+      <div class="section-title">📋 Registro de Actividades</div>
+      <div class="section-sub">Historial completo de acciones realizadas en el sistema</div>
+      <div class="filter-row">
+        <div class="field">
+          <label>Usuario</label>
+          <select id="log-filter-user" onchange="renderLogs()"><option value="">Todos</option></select>
+        </div>
+        <div class="field">
+          <label>Módulo</label>
+          <select id="log-filter-module" onchange="renderLogs()"><option value="">Todos</option></select>
+        </div>
+        <div class="field">
+          <label>Desde</label>
+          <input type="date" id="log-filter-from" onchange="renderLogs()">
+        </div>
+        <div class="field">
+          <label>Hasta</label>
+          <input type="date" id="log-filter-to" onchange="renderLogs()">
+        </div>
+        <button class="btn btn-secondary btn-sm" onclick="exportLogs()">⬇ Exportar CSV</button>
+        <button class="btn btn-danger btn-sm" onclick="cleanOldLogs()">🗑 Limpiar Logs</button>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <table>
+          <thead><tr><th>Fecha/Hora</th><th>Usuario</th><th>Acción</th><th>Módulo</th><th>Detalle</th><th>Resultado</th></tr></thead>
+          <tbody id="logs-tbody"></tbody>
+        </table>
+      </div>
+      <div class="pagination" id="logs-pagination"></div>
+    </section>
+
+    <!-- SEGURIDAD -->
+    <section class="section" id="s-seguridad">
+      <div class="section-title">🔐 Centro de Seguridad</div>
+      <div class="section-sub">Gestión de usuarios, contraseñas e historial de accesos</div>
+      <div class="tabs">
+        <div class="tab active" onclick="secTab(this,'sec-users')">👥 Usuarios</div>
+        <div class="tab" onclick="secTab(this,'sec-password')">🔑 Cambiar Contraseña</div>
+        <div class="tab" onclick="secTab(this,'sec-history')">📜 Historial de Accesos</div>
+      </div>
+      <div class="tab-panel active" id="sec-users">
+        <button class="btn btn-primary" style="margin-bottom:14px" onclick="openNewUserModal()">+ Nuevo Usuario</button>
+        <div class="card" style="padding:0;overflow:hidden">
+          <table>
+            <thead><tr><th>Usuario</th><th>Nombre</th><th>Rol</th><th>Estado</th><th>Intentos</th><th>Acciones</th></tr></thead>
+            <tbody id="users-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="tab-panel" id="sec-password">
+        <div class="card" style="max-width:420px">
+          <div class="card-title">🔑 Cambiar Contraseña</div>
+          <div class="field"><label>Contraseña Actual</label><input type="password" id="pwd-current" placeholder="••••••••"></div>
+          <div class="field"><label>Nueva Contraseña</label><input type="password" id="pwd-new" placeholder="Min. 8 caracteres"></div>
+          <div class="field"><label>Confirmar Nueva</label><input type="password" id="pwd-confirm" placeholder="Repetir contraseña"></div>
+          <button class="btn btn-primary" onclick="changePassword()">Guardar Cambios</button>
+        </div>
+      </div>
+      <div class="tab-panel" id="sec-history">
+        <div class="card" style="padding:0;overflow:hidden">
+          <table>
+            <thead><tr><th>Fecha/Hora</th><th>Usuario</th><th>Acción</th><th>Resultado</th><th>Detalle</th></tr></thead>
+            <tbody id="access-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- AUDITORÍA -->
+    <section class="section" id="s-auditoria">
+      <div class="section-title">🧪 Centro de Auditoría</div>
+      <div class="section-sub">Análisis de calidad de datos por módulo</div>
+      <div style="display:flex;gap:10px;margin-bottom:20px;align-items:center">
+        <button class="btn btn-primary" onclick="runAudit()">🧪 Ejecutar Auditoría</button>
+        <button class="btn btn-secondary" onclick="exportAudit()">⬇ Exportar Reporte JSON</button>
+      </div>
+      <div id="audit-content"></div>
+    </section>
+
+    <!-- LIMPIEZA -->
+    <section class="section" id="s-limpieza">
+      <div class="section-title">🧹 Centro de Limpieza</div>
+      <div class="section-sub">Detección y eliminación de datos obsoletos o duplicados</div>
+      <button class="btn btn-primary" style="margin-bottom:20px" onclick="scanSystem()">🔎 Escanear Sistema</button>
+      <div id="scan-result" style="margin-bottom:20px"></div>
+      <div class="action-grid" id="clean-grid"></div>
+    </section>
+
+    <!-- DOCUMENTACIÓN -->
+    <section class="section" id="s-documentacion">
+      <div class="section-title">📚 Centro de Documentación</div>
+      <div class="section-sub">Arquitectura, módulos, versión y manual del sistema</div>
+      <div id="doc-content"></div>
+    </section>
+
+  </div><!-- /main-content -->
+</div><!-- /app -->
+
+<!-- NEW USER MODAL -->
+<div class="modal-overlay" id="modal-newuser">
+  <div class="modal">
+    <div class="modal-title">➕ Nuevo Usuario</div>
+    <div class="form-row">
+      <div class="field"><label>Username</label><input type="text" id="nu-username"></div>
+      <div class="field"><label>Nombre</label><input type="text" id="nu-nombre"></div>
+    </div>
+    <div class="form-row">
+      <div class="field"><label>Contraseña</label><input type="password" id="nu-pwd"></div>
+      <div class="field"><label>Rol</label>
+        <select id="nu-role"><option value="viewer">viewer</option><option value="editor">editor</option><option value="admin">admin</option><option value="recovery">recovery</option></select>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('modal-newuser')">Cancelar</button>
+      <button class="btn btn-primary" onclick="createUser()">Crear Usuario</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div id="toast-container"></div>
+
+<script src="../cms/db.js"></script>
+<script>
+'use strict';
+
+/* ═══════════════════════════════════════════════
+   CONSTANTS
+═══════════════════════════════════════════════ */
+const SYS_USERS = 'iagami_sys_users';
+const SYS_SESSION = 'iagami_sys_session';
+const SYS_LOGS = 'iagami_sys_logs';
+const SYS_BACKUPS = 'iagami_sys_backups';
+const CMS_MODULES = ['noticias','tramites','eventos','documentos','org','proyectos','indicadores','empresas','alertas','multas','denuncias','media','consejos'];
+const MODULE_LABELS = {noticias:'Noticias',tramites:'Trámites',eventos:'Eventos',documentos:'Documentos',org:'Organigrama',proyectos:'Proyectos',indicadores:'Indicadores',empresas:'Empresas',alertas:'Alertas',multas:'Multas',denuncias:'Denuncias',media:'Media',consejos:'Consejos'};
+let _monitorInterval = null;
+let _logPage = 1;
+const LOGS_PER_PAGE = 20;
+let _auditData = null;
+let _scanData = null;
+
+/* ═══════════════════════════════════════════════
+   HASH
+═══════════════════════════════════════════════ */
+function getCurrentUser() {
+  try { return JSON.parse(sessionStorage.getItem(SYS_SESSION)||'null'); } catch(e){return null;}
+}
+
+function logout() {
+  sessionStorage.removeItem(SYS_SESSION);
+  sessionStorage.removeItem('iagami_admin_session');
+  window.location.href = '../admin/index.html';
+}
+
+function startApp(session) {
+  const app = document.getElementById('app');
+  app.classList.add('visible');
+  document.getElementById('sb-username').textContent = session.nombre || session.username || 'Administrador';
+  document.getElementById('sb-role').textContent = session.role || 'admin';
+  showSection('dashboard');
+}
+
+/* ═══════════════════════════════════════════════
+   LOGS
+═══════════════════════════════════════════════ */
+function getLogs() { try { return JSON.parse(localStorage.getItem(SYS_LOGS)||'[]'); } catch(e){return[];} }
+function saveLogs(l) { localStorage.setItem(SYS_LOGS, JSON.stringify(l)); }
+
+function logRawAction(username, role, action, module, detail, result) {
+  const logs = getLogs();
+  logs.push({id:'l-'+Date.now()+Math.random().toString(36).slice(2,6), timestamp:new Date().toISOString(), username, role, action, module, detail, result});
+  saveLogs(logs);
+}
+
+function logAction(action, module, detail, result) {
+  const sess = getCurrentUser();
+  logRawAction(sess ? sess.username : 'sistema', sess ? sess.role : 'system', action, module, detail, result);
+}
+
+/* ═══════════════════════════════════════════════
+   NAVIGATION
+═══════════════════════════════════════════════ */
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const section = document.getElementById('s-'+id);
+  if (section) section.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.textContent.toLowerCase().includes(id.toLowerCase().slice(0,5))) n.classList.add('active');
+  });
+  if (_monitorInterval && id !== 'monitor') { clearInterval(_monitorInterval); _monitorInterval = null; }
+  const renders = {dashboard:renderDashboard, monitor:renderMonitor, optimizacion:renderOptimizacion, respaldos:renderRespaldos, actividades:()=>renderLogs(), seguridad:renderSecurity, limpieza:renderLimpieza, documentacion:renderDocumentacion};
+  if (renders[id]) renders[id]();
+}
+
+/* ═══════════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════════ */
+function toast(msg, type='info') {
+  const c = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.textContent = msg;
+  c.appendChild(t);
+  setTimeout(() => t.remove(), 3500);
+}
+
+/* ═══════════════════════════════════════════════
+   MODAL HELPERS
+═══════════════════════════════════════════════ */
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+/* ═══════════════════════════════════════════════
+   DASHBOARD
+═══════════════════════════════════════════════ */
+function renderDashboard() {
+  // Stat cards
+  const lsOk = (() => { try { localStorage.setItem('_t','1'); localStorage.removeItem('_t'); return true; } catch(e){return false;} })();
+  let totalRecords = 0;
+  let activeModules = 0;
+  CMS_MODULES.forEach(k => {
+    const arr = CMSDB.getAll(k);
+    totalRecords += arr.length;
+    if (arr.length > 0) activeModules++;
+  });
+  const alertas = CMSDB.getAll('alertas').filter(a => a.activa !== false).length;
+
+  const stats = [
+    {label:'Sistema',val:lsOk?'OK':'ERROR',status:lsOk?'ok':'err'},
+    {label:'Base de Datos',val:totalRecords,status:totalRecords>0?'ok':'warn'},
+    {label:'Módulos Activos',val:activeModules,status:activeModules>0?'ok':'warn'},
+    {label:'Alertas Activas',val:alertas,status:alertas>0?'warn':'ok'}
+  ];
+  const sg = document.getElementById('dash-stats');
+  sg.innerHTML = stats.map(s => `
+    <div class="stat-card">
+      <div class="val">${s.val}</div>
+      <div class="lbl">${s.label}</div>
+      <span class="status status-${s.status}">${s.status.toUpperCase()}</span>
+    </div>`).join('');
+
+  // Modules table
+  const tbody = document.querySelector('#dash-modules-table tbody');
+  tbody.innerHTML = CMS_MODULES.map(k => {
+    const items = CMSDB.getAll(k);
+    const status = items.length === 0 ? '<span class="status status-warn">vacío</span>' : '<span class="status status-ok">activo</span>';
+    return `<tr><td>${MODULE_LABELS[k]}</td><td>${items.length}</td><td>${status}</td></tr>`;
+  }).join('');
+
+  // Recent logs
+  const logs = getLogs().slice(-10).reverse();
+  const ltbody = document.querySelector('#dash-logs-table tbody');
+  ltbody.innerHTML = logs.length === 0 ? '<tr><td colspan="3" style="color:var(--muted);text-align:center;padding:14px">Sin actividad</td></tr>' :
+    logs.map(l => `<tr><td style="font-size:11px">${fmtDateTime(l.timestamp)}</td><td>${l.username}</td><td>${l.action}</td></tr>`).join('');
+}
+
+/* ═══════════════════════════════════════════════
+   DIAGNÓSTICO
+═══════════════════════════════════════════════ */
+function runDiagnostic() {
+  const checks = [];
+  // 1. localStorage
+  const lsOk = (() => { try { localStorage.setItem('_t','1'); localStorage.removeItem('_t'); return true; } catch(e){return false;} })();
+  checks.push({text:'localStorage disponible', status: lsOk ? 'ok' : 'err'});
+
+  // 2. Noticias
+  const noticias = CMSDB.getAll('noticias');
+  const notsPublicadas = noticias.filter(n => n.publicada || n.estado === 'publicada').length;
+  const notsMissingFields = noticias.filter(n => !n.titulo || !n.fecha).length;
+  checks.push({text:`Noticias: ${noticias.length} registros, ${notsPublicadas} publicadas`, status: noticias.length > 0 ? 'ok' : 'warn'});
+  if (notsMissingFields > 0) checks.push({text:`Noticias: ${notsMissingFields} con campos faltantes (titulo/fecha)`, status:'warn'});
+
+  // 3. Proyectos
+  const proyectos = CMSDB.getAll('proyectos');
+  const projMissingAvance = proyectos.filter(p => p.porcentaje_avance === undefined && p.avance === undefined).length;
+  checks.push({text:`Proyectos: ${proyectos.length} registros${projMissingAvance > 0 ? `, ${projMissingAvance} sin porcentaje_avance` : ''}`, status: proyectos.length > 0 ? (projMissingAvance > 0 ? 'warn' : 'ok') : 'warn'});
+
+  // 4. Eventos
+  const eventos = CMSDB.getAll('eventos');
+  const now = new Date();
+  const upcoming = eventos.filter(e => e.fecha && new Date(e.fecha) > now).length;
+  checks.push({text:`Eventos: ${eventos.length} registros, ${upcoming} próximos`, status: eventos.length > 0 ? 'ok' : 'warn'});
+
+  // 5. Alertas vencidas
+  const alertas = CMSDB.getAll('alertas');
+  const expiredActive = alertas.filter(a => a.activa !== false && a.fecha_expiracion && new Date(a.fecha_expiracion) < now).length;
+  checks.push({text:`Alertas: ${alertas.length} total${expiredActive > 0 ? `, ${expiredActive} activas vencidas` : ', ninguna vencida activa'}`, status: expiredActive > 0 ? 'warn' : 'ok'});
+
+  // 6. Empresas permisos
+  const empresas = CMSDB.getAll('empresas');
+  const expiredPermisos = empresas.filter(e => e.permiso_vencimiento && new Date(e.permiso_vencimiento) < now).length;
+  checks.push({text:`Empresas: ${empresas.length} registros${expiredPermisos > 0 ? `, ${expiredPermisos} con permisos vencidos` : ''}`, status: expiredPermisos > 0 ? 'warn' : 'ok'});
+
+  // 7. Consejos
+  const consejos = CMSDB.getAll('consejos');
+  const activeConsejos = consejos.filter(c => c.activo !== false).length;
+  checks.push({text:`Consejos: ${consejos.length} total, ${activeConsejos} activos`, status: consejos.length > 0 ? 'ok' : 'warn'});
+
+  // 8. Indicadores
+  const indicadores = CMSDB.getAll('indicadores');
+  checks.push({text:`Indicadores: ${indicadores.length}/6 registros`, status: indicadores.length >= 6 ? 'ok' : (indicadores.length > 0 ? 'warn' : 'err')});
+
+  // 9. Trámites
+  const tramites = CMSDB.getAll('tramites');
+  checks.push({text:`Trámites: ${tramites.length} registros`, status: tramites.length > 0 ? 'ok' : 'warn'});
+
+  // 10. localStorage quota
+  let usedBytes = 0;
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    usedBytes += (k.length + (localStorage.getItem(k)||'').length) * 2;
+  }
+  const usedKB = (usedBytes / 1024).toFixed(1);
+  const pct = ((usedBytes / (5 * 1024 * 1024)) * 100).toFixed(1);
+  checks.push({text:`localStorage: ${usedKB} KB usados de ~5 MB (${pct}%)`, status: parseFloat(pct) > 80 ? 'err' : (parseFloat(pct) > 60 ? 'warn' : 'ok')});
+
+  const okCount = checks.filter(c => c.status === 'ok').length;
+  const score = Math.round((okCount / checks.length) * 100);
+  const scoreColor = score >= 80 ? 'var(--ok)' : (score >= 50 ? 'var(--warn)' : 'var(--err)');
+
+  const recs = [];
+  if (notsMissingFields > 0) recs.push('Completar campos titulo/fecha en noticias');
+  if (expiredActive > 0) recs.push('Archivar alertas activas vencidas en el Centro de Limpieza');
+  if (expiredPermisos > 0) recs.push('Revisar y renovar permisos de empresas vencidos');
+  if (indicadores.length < 6) recs.push('Agregar los indicadores faltantes al CMS');
+  if (parseFloat(pct) > 60) recs.push('Limpiar logs y datos temporales para liberar espacio');
+
+  const html = `
+    <div style="display:flex;align-items:center;gap:24px;margin-bottom:20px">
+      <div class="score-circle" style="border-color:${scoreColor}">
+        <div class="score-num" style="color:${scoreColor}">${score}</div>
+        <div class="score-lbl">/ 100</div>
+      </div>
+      <div>
+        <div style="font-size:18px;font-weight:700;color:${scoreColor}">Puntuación del Sistema</div>
+        <div style="font-size:13px;color:var(--muted);margin-top:4px">${okCount} de ${checks.length} verificaciones aprobadas</div>
+      </div>
+    </div>
+    <ul class="check-list">${checks.map(c => `
+      <li class="check-item ${c.status}">
+        <span class="icon">${c.status==='ok'?'✅':c.status==='warn'?'⚠️':'❌'}</span>
+        <span>${c.text}</span>
+      </li>`).join('')}
+    </ul>
+    ${recs.length > 0 ? `
+    <div class="card" style="margin-top:16px">
+      <div class="card-title">💡 Recomendaciones</div>
+      <ul style="padding-left:18px;font-size:13px;color:var(--text);line-height:2">${recs.map(r=>`<li>${r}</li>`).join('')}</ul>
+    </div>` : '<div style="color:var(--ok);font-weight:600;margin-top:16px">✅ Sistema en buen estado. Sin recomendaciones.</div>'}
+  `;
+  document.getElementById('diag-result').innerHTML = html;
+  logAction('diagnostic','sistema','Diagnóstico completo ejecutado',`score:${score}`);
+}
+
+/* ═══════════════════════════════════════════════
+   MONITOR
+═══════════════════════════════════════════════ */
+function renderMonitor() {
+  let usedBytes = 0;
+  const lsData = {};
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    const v = localStorage.getItem(k)||'';
+    usedBytes += (k.length + v.length) * 2;
+    lsData[k] = v.length;
+  }
+  const usedKB = (usedBytes / 1024).toFixed(2);
+  const totalKB = 5 * 1024;
+  const pct = Math.min(100, (usedBytes / (totalKB * 1024)) * 100).toFixed(1);
+  const barColor = parseFloat(pct) > 80 ? '#ef4444' : parseFloat(pct) > 60 ? '#f59e0b' : '#1d6b3e';
+  const sess = getCurrentUser();
+  const loginTime = sess ? new Date(sess.loginTime) : null;
+  const dur = loginTime ? Math.round((Date.now() - loginTime) / 60000) : 0;
+
+  const html = `
+    <div class="two-col" style="margin-bottom:20px">
+      <div class="card">
+        <div class="card-title">💾 Uso de localStorage</div>
+        <div style="font-size:24px;font-weight:700;color:var(--green);margin-bottom:4px">${usedKB} KB</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:8px">de ~5,120 KB disponibles (${pct}%)</div>
+        <div class="progress-wrap"><div class="progress-bar" style="width:${pct}%;background:${barColor}"></div></div>
+        <div style="font-size:12px;color:var(--muted);margin-top:6px">${localStorage.length} claves almacenadas</div>
+      </div>
+      <div class="card">
+        <div class="card-title">👤 Sesión Actual</div>
+        ${sess ? `
+          <div class="info-row"><span class="key">Usuario</span><span class="val">${sess.username}</span></div>
+          <div class="info-row"><span class="key">Rol</span><span class="val">${sess.role}</span></div>
+          <div class="info-row"><span class="key">Login</span><span class="val">${fmtDateTime(sess.loginTime)}</span></div>
+          <div class="info-row"><span class="key">Duración</span><span class="val">${dur} min</span></div>
+        ` : '<div style="color:var(--muted)">Sin sesión activa</div>'}
+      </div>
+    </div>
+    <div class="two-col" style="margin-bottom:20px">
+      <div class="card">
+        <div class="card-title">📦 Estado de Módulos CMS</div>
+        ${CMS_MODULES.map(k => {
+          const items = CMSDB.getAll(k);
+          const badge = items.length === 0 ? '<span class="status status-warn">vacío</span>' : `<span class="status status-ok">${items.length} reg.</span>`;
+          return `<div class="mod-row"><span>${MODULE_LABELS[k]}</span>${badge}</div>`;
+        }).join('')}
+      </div>
+      <div class="card">
+        <div class="card-title">🌐 Información del Navegador</div>
+        <div class="info-row"><span class="key">Plataforma</span><span class="val">${navigator.platform||'—'}</span></div>
+        <div class="info-row"><span class="key">Idioma</span><span class="val">${navigator.language||'—'}</span></div>
+        <div class="info-row"><span class="key">Cookies</span><span class="val">${navigator.cookieEnabled?'Habilitadas':'Deshabilitadas'}</span></div>
+        <div class="info-row"><span class="key">Online</span><span class="val">${navigator.onLine?'Sí':'No'}</span></div>
+        <div style="margin-top:8px;font-size:11px;color:var(--muted);word-break:break-all">${navigator.userAgent}</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">⏱ Rendimiento</div>
+      <div class="info-row"><span class="key">Hora del sistema</span><span class="val">${new Date().toLocaleString('es-VE')}</span></div>
+      <div class="info-row"><span class="key">Timestamp</span><span class="val">${Date.now()}</span></div>
+      <div class="info-row"><span class="key">Zona horaria</span><span class="val">${Intl.DateTimeFormat().resolvedOptions().timeZone}</span></div>
+    </div>
+  `;
+  document.getElementById('monitor-content').innerHTML = html;
+  document.getElementById('mon-last-update').textContent = 'Actualizado: ' + new Date().toLocaleTimeString('es-VE');
+}
+
+/* ═══════════════════════════════════════════════
+   OPTIMIZACIÓN
+═══════════════════════════════════════════════ */
+function renderOptimizacion() {
+  const actions = [
+    {icon:'🗑',title:'Limpiar Caché',desc:'Elimina claves temporales de localStorage',fn:'cleanCache'},
+    {icon:'⏰',title:'Alertas Vencidas',desc:'Elimina alertas inactivas con más de 30 días',fn:'removeExpiredAlerts'},
+    {icon:'🔄',title:'Deduplicar Denuncias',desc:'Elimina denuncias duplicadas (mismo tipo+nombre+fecha)',fn:'deduplicateDenuncias'},
+    {icon:'🆔',title:'Validar IDs',desc:'Verifica que todos los registros tengan campo id',fn:'validateIDs'},
+    {icon:'📊',title:'Regenerar Estadísticas',desc:'Recalcula y muestra estadísticas del portal',fn:'regenStats'},
+    {icon:'📋',title:'Limpiar Sesiones',desc:'Mantiene solo los últimos 500 logs',fn:'cleanSessions'},
+  ];
+  document.getElementById('optim-grid').innerHTML = actions.map(a => `
+    <div class="action-card">
+      <div class="ac-icon">${a.icon}</div>
+      <div class="ac-title">${a.title}</div>
+      <div class="ac-desc">${a.desc}</div>
+      <button class="btn btn-primary btn-sm" onclick="${a.fn}(this)">Ejecutar</button>
+      <div class="action-result" id="res-${a.fn}"></div>
+    </div>`).join('');
+}
+
+function setActionResult(fn, msg, type='ok') {
+  const el = document.getElementById('res-'+fn);
+  if (!el) return;
+  const colors = {ok:'var(--ok)',warn:'var(--warn)',err:'var(--err)',info:'var(--info)'};
+  el.style.color = colors[type]||colors.info;
+  el.textContent = msg;
+}
+
+function cleanCache(btn) {
+  btn.disabled = true;
+  const cmsKeys = new Set(CMS_MODULES.map(m => `iagami_cms_${m}`));
+  const sysKeys = new Set([SYS_USERS, SYS_SESSION, SYS_LOGS, SYS_BACKUPS]);
+  const allowed = new Set([...cmsKeys, ...sysKeys]);
+  const toRemove = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (!allowed.has(k) && k.startsWith('iagami_')) toRemove.push(k);
+  }
+  toRemove.forEach(k => localStorage.removeItem(k));
+  setActionResult('cleanCache', `${toRemove.length} claves eliminadas`);
+  logAction('cleanCache','sistema',`${toRemove.length} claves temporales eliminadas`,'success');
+  toast(`Caché limpiado: ${toRemove.length} claves eliminadas`, 'success');
+  btn.disabled = false;
+}
+
+function removeExpiredAlerts(btn) {
+  if (!confirm('¿Eliminar alertas inactivas con más de 30 días?')) return;
+  btn.disabled = true;
+  const cutoff = new Date(Date.now() - 30 * 86400000);
+  const all = CMSDB.getAll('alertas');
+  const toKeep = all.filter(a => !(a.activa === false && a.fecha && new Date(a.fecha) < cutoff));
+  const removed = all.length - toKeep.length;
+  CMSDB.getAll('alertas').forEach(a => { if (!toKeep.find(t => t.id === a.id)) CMSDB.remove('alertas', a.id); });
+  setActionResult('removeExpiredAlerts', `${removed} alertas eliminadas`);
+  logAction('removeExpiredAlerts','alertas',`${removed} alertas vencidas eliminadas`,'success');
+  toast(`${removed} alertas vencidas eliminadas`, 'success');
+  btn.disabled = false;
+}
+
+function deduplicateDenuncias(btn) {
+  if (!confirm('¿Eliminar denuncias duplicadas?')) return;
+  btn.disabled = true;
+  const all = CMSDB.getAll('denuncias');
+  const seen = new Set();
+  let removed = 0;
+  all.forEach(d => {
+    const key = `${d.tipo||''}|${d.nombre||''}|${d.fecha||''}`;
+    if (seen.has(key)) { CMSDB.remove('denuncias', d.id); removed++; }
+    else seen.add(key);
+  });
+  setActionResult('deduplicateDenuncias', `${removed} duplicados eliminados`);
+  logAction('deduplicateDenuncias','denuncias',`${removed} duplicados eliminados`,'success');
+  toast(`${removed} denuncias duplicadas eliminadas`, 'success');
+  btn.disabled = false;
+}
+
+function validateIDs(btn) {
+  btn.disabled = true;
+  let total = 0, fixed = 0;
+  CMS_MODULES.forEach(k => {
+    const items = CMSDB.getAll(k);
+    items.forEach(item => {
+      total++;
+      if (!item.id) { item.id = k.slice(0,2)+'-'+Date.now()+Math.random().toString(36).slice(2,5); CMSDB.save(k, item); fixed++; }
+    });
+  });
+  setActionResult('validateIDs', `${total} registros revisados, ${fixed} corregidos`);
+  logAction('validateIDs','sistema',`${fixed} IDs asignados de ${total} registros`,'success');
+  toast(`Validación completa: ${fixed} IDs asignados`, 'success');
+  btn.disabled = false;
+}
+
+function regenStats(btn) {
+  btn.disabled = true;
+  let html = '<div style="font-size:12px;text-align:left">';
+  CMS_MODULES.forEach(k => {
+    html += `${MODULE_LABELS[k]}: ${CMSDB.getAll(k).length} | `;
+  });
+  html += '</div>';
+  const result = CMS_MODULES.map(k => `${MODULE_LABELS[k]}:${CMSDB.getAll(k).length}`).join(', ');
+  setActionResult('regenStats', 'Estadísticas actualizadas ✓');
+  logAction('regenStats','sistema','Estadísticas regeneradas: '+result,'success');
+  toast('Estadísticas regeneradas correctamente', 'success');
+  btn.disabled = false;
+}
+
+function cleanSessions(btn) {
+  if (!confirm('¿Mantener solo los últimos 500 registros de actividad?')) return;
+  btn.disabled = true;
+  const logs = getLogs();
+  const before = logs.length;
+  const kept = logs.slice(-500);
+  saveLogs(kept);
+  const removed = before - kept.length;
+  setActionResult('cleanSessions', `${removed} entradas eliminadas, ${kept.length} conservadas`);
+  logAction('cleanSessions','logs',`${removed} logs antiguos eliminados`,'success');
+  toast(`Logs limpiados: ${removed} entradas eliminadas`, 'success');
+  btn.disabled = false;
+}
+
+/* ═══════════════════════════════════════════════
+   RESPALDOS
+═══════════════════════════════════════════════ */
+function renderRespaldos() {
+  // Populate module checkboxes
+  const cont = document.getElementById('backup-module-checks');
+  cont.innerHTML = CMS_MODULES.map(k => `
+    <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer">
+      <input type="checkbox" value="${k}" checked> ${MODULE_LABELS[k]}
+    </label>`).join('');
+  renderBackupHistory();
+}
+
+function openPartialBackup() {
+  const bm = document.getElementById('backup-modules');
+  bm.style.display = bm.style.display === 'none' ? 'block' : 'none';
+}
+
+function createBackup(tipo) {
+  const data = {};
+  let modules;
+  if (tipo === 'parcial') {
+    modules = Array.from(document.querySelectorAll('#backup-module-checks input:checked')).map(c => c.value);
+    if (modules.length === 0) { toast('Selecciona al menos un módulo', 'warning'); return; }
+  } else {
+    modules = CMS_MODULES;
+  }
+  modules.forEach(k => { data[k] = CMSDB.getAll(k); });
+  const meta = {version:'SIGAP v3.0', created: new Date().toISOString(), tipo, modules};
+  const blob = new Blob([JSON.stringify({__meta:meta, ...data}, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const dateStr = new Date().toISOString().split('T')[0];
+  a.href = url; a.download = `iagami-backup-${dateStr}.json`; a.click();
+  URL.revokeObjectURL(url);
+
+  // Save metadata
+  const backups = getBackups();
+  backups.push({id:'bk-'+Date.now(), fecha:new Date().toISOString(), tipo, modules:modules.join(','), size: Math.round(blob.size/1024)+'KB', estado:'completado'});
+  localStorage.setItem(SYS_BACKUPS, JSON.stringify(backups));
+  renderBackupHistory();
+  logAction('backup','sistema',`Respaldo ${tipo} creado: ${modules.join(',')}`, 'success');
+  toast(`Respaldo ${tipo} descargado exitosamente`, 'success');
+}
+
+function getBackups() { try { return JSON.parse(localStorage.getItem(SYS_BACKUPS)||'[]'); } catch(e){return[];} }
+
+function renderBackupHistory() {
+  const backups = getBackups().reverse();
+  const tbody = document.getElementById('backup-history-body');
+  if (!tbody) return;
+  tbody.innerHTML = backups.length === 0 ? '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:14px">Sin respaldos</td></tr>' :
+    backups.map(b => `<tr>
+      <td style="font-size:12px">${fmtDateTime(b.fecha)}</td>
+      <td><span class="status status-info">${b.tipo}</span></td>
+      <td style="font-size:11px">${b.modules}</td>
+      <td>${b.size}</td>
+      <td><span class="status status-ok">${b.estado}</span></td>
+    </tr>`).join('');
+}
+
+function restoreBackup() {
+  const file = document.getElementById('restore-file').files[0];
+  if (!file) { toast('Selecciona un archivo de respaldo', 'warning'); return; }
+  if (!confirm('⚠️ ATENCIÓN: Esto sobrescribirá los datos actuales del portal. ¿Continuar?')) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      const meta = data.__meta;
+      let restored = 0;
+      CMS_MODULES.forEach(k => {
+        if (data[k] !== undefined) {
+          localStorage.setItem(`iagami_cms_${k}`, JSON.stringify(data[k]));
+          restored++;
+        }
+      });
+      logAction('restore','sistema',`Respaldo restaurado: ${meta?.tipo||'?'}, ${restored} módulos`,'success');
+      toast(`Respaldo restaurado: ${restored} módulos cargados`, 'success');
+      renderBackupHistory();
+    } catch(err) {
+      toast('Error al leer el archivo: formato inválido', 'error');
+      logAction('restore','sistema','Error al restaurar respaldo: '+err.message,'failed');
+    }
+  };
+  reader.readAsText(file);
+}
+
+/* ═══════════════════════════════════════════════
+   ACTIVIDADES (LOGS)
+═══════════════════════════════════════════════ */
+function renderLogs(filters) {
+  let logs = getLogs().reverse();
+  // Populate filter dropdowns first time
+  const userSel = document.getElementById('log-filter-user');
+  const modSel = document.getElementById('log-filter-module');
+  if (userSel && userSel.options.length <= 1) {
+    const users = [...new Set(logs.map(l => l.username))];
+    users.forEach(u => { const o = document.createElement('option'); o.value = u; o.textContent = u; userSel.appendChild(o); });
+  }
+  if (modSel && modSel.options.length <= 1) {
+    const mods = [...new Set(logs.map(l => l.module))];
+    mods.forEach(m => { const o = document.createElement('option'); o.value = m; o.textContent = m; modSel.appendChild(o); });
+  }
+  // Apply filters
+  const fu = document.getElementById('log-filter-user')?.value;
+  const fm = document.getElementById('log-filter-module')?.value;
+  const ff = document.getElementById('log-filter-from')?.value;
+  const ft = document.getElementById('log-filter-to')?.value;
+  if (fu) logs = logs.filter(l => l.username === fu);
+  if (fm) logs = logs.filter(l => l.module === fm);
+  if (ff) logs = logs.filter(l => l.timestamp >= ff);
+  if (ft) logs = logs.filter(l => l.timestamp <= ft+'T23:59:59');
+
+  const total = logs.length;
+  const pages = Math.max(1, Math.ceil(total / LOGS_PER_PAGE));
+  if (_logPage > pages) _logPage = 1;
+  const slice = logs.slice((_logPage-1)*LOGS_PER_PAGE, _logPage*LOGS_PER_PAGE);
+
+  const tbody = document.getElementById('logs-tbody');
+  tbody.innerHTML = slice.length === 0 ? '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">Sin registros</td></tr>' :
+    slice.map(l => {
+      const rColor = l.result==='success'?'ok':l.result==='failed'||l.result==='blocked'?'err':'info';
+      return `<tr>
+        <td style="font-size:11px;white-space:nowrap">${fmtDateTime(l.timestamp)}</td>
+        <td>${l.username}</td>
+        <td>${l.action}</td>
+        <td>${l.module}</td>
+        <td style="font-size:12px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${l.detail||'—'}</td>
+        <td><span class="status status-${rColor}">${l.result}</span></td>
+      </tr>`;
+    }).join('');
+
+  // Pagination
+  const pgEl = document.getElementById('logs-pagination');
+  let pgHtml = `<span style="font-size:12px;color:var(--muted)">${total} registros</span>`;
+  for (let i = 1; i <= Math.min(pages, 10); i++) {
+    pgHtml += `<button class="page-btn ${i===_logPage?'active':''}" onclick="_logPage=${i};renderLogs()">${i}</button>`;
+  }
+  pgEl.innerHTML = pgHtml;
+}
+
+function exportLogs() {
+  const logs = getLogs();
+  const header = 'Fecha,Usuario,Acción,Módulo,Detalle,Resultado\n';
+  const rows = logs.map(l => `"${l.timestamp}","${l.username}","${l.action}","${l.module}","${(l.detail||'').replace(/"/g,'""')}","${l.result}"`).join('\n');
+  const blob = new Blob([header+rows], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `iagami-logs-${new Date().toISOString().split('T')[0]}.csv`; a.click();
+  URL.revokeObjectURL(url);
+  logAction('exportLogs','logs','Logs exportados como CSV','success');
+  toast('Logs exportados correctamente', 'success');
+}
+
+function cleanOldLogs() {
+  if (!confirm('¿Mantener solo los últimos 100 registros de actividad?')) return;
+  const logs = getLogs();
+  const kept = logs.slice(-100);
+  saveLogs(kept);
+  _logPage = 1;
+  renderLogs();
+  toast(`Logs limpiados. Se conservaron ${kept.length} entradas.`, 'success');
+}
+
+/* ═══════════════════════════════════════════════
+   SEGURIDAD
+═══════════════════════════════════════════════ */
+function secTab(el, panelId) {
+  document.querySelectorAll('#s-seguridad .tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('#s-seguridad .tab-panel').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById(panelId).classList.add('active');
+  if (panelId === 'sec-users') renderUsers();
+  if (panelId === 'sec-history') renderAccessHistory();
+}
+
+function renderSecurity() {
+  renderUsers();
+  renderAccessHistory();
+}
+
+function renderUsers() {
+  const users = getUsers();
+  const tbody = document.getElementById('users-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = users.map(u => {
+    const isLocked = u.locked && u.lockUntil && new Date(u.lockUntil) > new Date();
+    const statusBadge = !u.activo ? '<span class="status status-err">inactivo</span>' :
+      isLocked ? '<span class="status status-warn">bloqueado</span>' : '<span class="status status-ok">activo</span>';
+    return `<tr>
+      <td><strong>${u.username}</strong></td>
+      <td>${u.nombre}</td>
+      <td><span class="status status-info">${u.role}</span></td>
+      <td>${statusBadge}</td>
+      <td>${u.failedAttempts||0}</td>
+      <td style="display:flex;gap:4px;flex-wrap:wrap">
+        ${isLocked ? `<button class="btn btn-secondary btn-sm" onclick="unlockUser('${u.id}')">Desbloquear</button>` : ''}
+        <button class="btn btn-secondary btn-sm" onclick="toggleUserActive('${u.id}')">${u.activo?'Desactivar':'Activar'}</button>
+        <button class="btn btn-secondary btn-sm" onclick="openChangeUserPwd('${u.id}','${u.username}')">Cambiar Pwd</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function unlockUser(id) {
+  const users = getUsers();
+  const u = users.find(u => u.id === id);
+  if (!u) return;
+  u.locked = false; u.lockUntil = null; u.failedAttempts = 0;
+  saveUsers(users);
+  renderUsers();
+  logAction('unlockUser','seguridad',`Usuario ${u.username} desbloqueado`,'success');
+  toast(`Usuario ${u.username} desbloqueado`, 'success');
+}
+
+function toggleUserActive(id) {
+  const users = getUsers();
+  const u = users.find(u => u.id === id);
+  if (!u) return;
+  const sess = getCurrentUser();
+  if (sess && sess.userId === id) { toast('No puedes desactivar tu propia cuenta', 'error'); return; }
+  u.activo = !u.activo;
+  saveUsers(users);
+  renderUsers();
+  logAction('toggleUser','seguridad',`Usuario ${u.username} ${u.activo?'activado':'desactivado'}`,'success');
+  toast(`Usuario ${u.username} ${u.activo?'activado':'desactivado'}`, 'success');
+}
+
+function openChangeUserPwd(id, username) {
+  const newPwd = prompt(`Nueva contraseña para ${username} (min. 8 caracteres):`);
+  if (!newPwd) return;
+  if (newPwd.length < 8) { toast('La contraseña debe tener al menos 8 caracteres', 'error'); return; }
+  const users = getUsers();
+  const u = users.find(u => u.id === id);
+  if (!u) return;
+  u.passwordHash = hashPwd(newPwd);
+  saveUsers(users);
+  logAction('changePassword','seguridad',`Contraseña de ${username} cambiada por admin`,'success');
+  toast(`Contraseña de ${username} actualizada`, 'success');
+}
+
+function openNewUserModal() {
+  document.getElementById('nu-username').value = '';
+  document.getElementById('nu-nombre').value = '';
+  document.getElementById('nu-pwd').value = '';
+  document.getElementById('nu-role').value = 'viewer';
+  openModal('modal-newuser');
+}
+
+function createUser() {
+  const username = document.getElementById('nu-username').value.trim();
+  const nombre = document.getElementById('nu-nombre').value.trim();
+  const pwd = document.getElementById('nu-pwd').value;
+  const role = document.getElementById('nu-role').value;
+  if (!username || !nombre || !pwd) { toast('Completa todos los campos', 'error'); return; }
+  if (pwd.length < 8) { toast('Contraseña mínimo 8 caracteres', 'error'); return; }
+  const users = getUsers();
+  if (users.find(u => u.username === username)) { toast('Username ya existe', 'error'); return; }
+  const nu = {id:'u-'+Date.now(), username, passwordHash:hashPwd(pwd), role, nombre, activo:true, failedAttempts:0, locked:false, lockUntil:null, created:new Date().toISOString()};
+  users.push(nu);
+  saveUsers(users);
+  closeModal('modal-newuser');
+  renderUsers();
+  logAction('createUser','seguridad',`Nuevo usuario creado: ${username} (${role})`,'success');
+  toast(`Usuario ${username} creado exitosamente`, 'success');
+}
+
+function changePassword() {
+  const current = document.getElementById('pwd-current').value;
+  const newPwd = document.getElementById('pwd-new').value;
+  const confirm = document.getElementById('pwd-confirm').value;
+  const sess = getCurrentUser();
+  if (!sess) return;
+  const users = getUsers();
+  const u = users.find(u => u.id === sess.userId);
+  if (!u) return;
+  if (u.passwordHash !== hashPwd(current)) { toast('Contraseña actual incorrecta', 'error'); return; }
+  if (newPwd.length < 8) { toast('Nueva contraseña mínimo 8 caracteres', 'error'); return; }
+  if (newPwd !== confirm) { toast('Las contraseñas no coinciden', 'error'); return; }
+  if (hashPwd(newPwd) === u.passwordHash) { toast('La nueva contraseña no puede ser igual a la actual', 'error'); return; }
+  u.passwordHash = hashPwd(newPwd);
+  saveUsers(users);
+  document.getElementById('pwd-current').value = '';
+  document.getElementById('pwd-new').value = '';
+  document.getElementById('pwd-confirm').value = '';
+  logAction('changePassword','seguridad','Contraseña cambiada por el usuario','success');
+  toast('Contraseña actualizada correctamente', 'success');
+}
+
+function renderAccessHistory() {
+  const logs = getLogs().filter(l => ['login','logout'].includes(l.action)).reverse().slice(0, 50);
+  const tbody = document.getElementById('access-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = logs.length === 0 ? '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:14px">Sin registros de acceso</td></tr>' :
+    logs.map(l => {
+      const c = l.result==='success'?'ok':l.result==='failed'||l.result==='blocked'?'err':'warn';
+      return `<tr>
+        <td style="font-size:11px">${fmtDateTime(l.timestamp)}</td>
+        <td>${l.username}</td>
+        <td>${l.action}</td>
+        <td><span class="status status-${c}">${l.result}</span></td>
+        <td style="font-size:12px">${l.detail||'—'}</td>
+      </tr>`;
+    }).join('');
+}
+
+/* ═══════════════════════════════════════════════
+   AUDITORÍA
+═══════════════════════════════════════════════ */
+function runAudit() {
+  const now = new Date();
+  const in30 = new Date(Date.now() + 30 * 86400000);
+  const results = {};
+
+  // Noticias
+  const nots = CMSDB.getAll('noticias');
+  const notsPub = nots.filter(n => n.publicada || n.estado === 'publicada');
+  const notsImg = nots.filter(n => !n.imagen && !n.img);
+  const notsAge = nots.length > 0 ? Math.round(nots.reduce((s,n) => s + (n.fecha ? (now - new Date(n.fecha)) / 86400000 : 0), 0) / nots.length) : 0;
+  results.noticias = {total:nots.length, publicadas:notsPub.length, sinImagen:notsImg.length, edadPromedioD:notsAge};
+
+  // Proyectos
+  const projs = CMSDB.getAll('proyectos');
+  const projByEstado = {};
+  projs.forEach(p => { projByEstado[p.estado||'sin estado'] = (projByEstado[p.estado||'sin estado']||0) + 1; });
+  const avgAvance = projs.length > 0 ? Math.round(projs.reduce((s,p) => s + (p.porcentaje_avance||p.avance||0), 0) / projs.length) : 0;
+  const overdue = projs.filter(p => p.fecha_fin && new Date(p.fecha_fin) < now && (p.porcentaje_avance||p.avance||0) < 100).length;
+  results.proyectos = {total:projs.length, byEstado:projByEstado, avgAvance, overdue};
+
+  // Eventos
+  const evs = CMSDB.getAll('eventos');
+  const evUpcoming = evs.filter(e => e.fecha && new Date(e.fecha) > now);
+  const evPast = evs.filter(e => e.fecha && new Date(e.fecha) < now && e.estado !== 'completado');
+  results.eventos = {total:evs.length, upcoming:evUpcoming.length, pastNotArchived:evPast.length};
+
+  // Empresas
+  const emps = CMSDB.getAll('empresas');
+  const empExpired = emps.filter(e => e.permiso_vencimiento && new Date(e.permiso_vencimiento) < now);
+  const empSoon = emps.filter(e => e.permiso_vencimiento && new Date(e.permiso_vencimiento) >= now && new Date(e.permiso_vencimiento) <= in30);
+  results.empresas = {total:emps.length, permisoVencido:empExpired.length, venceSoon:empSoon.length};
+
+  // Consejos
+  const cons = CMSDB.getAll('consejos');
+  const consActive = cons.filter(c => c.activo !== false);
+  const consMissingContact = cons.filter(c => !c.email && !c.telefono && !c.contacto);
+  results.consejos = {total:cons.length, activos:consActive.length, sinContacto:consMissingContact.length};
+
+  // Denuncias
+  const dens = CMSDB.getAll('denuncias');
+  const denPending = dens.filter(d => d.estado === 'pendiente' || !d.estado);
+  results.denuncias = {total:dens.length, pendientes:denPending.length};
+
+  // Indicadores
+  const inds = CMSDB.getAll('indicadores');
+  results.indicadores = {total:inds.length, completos:inds.length >= 6};
+
+  _auditData = results;
+
+  // Health score
+  let healthScore = 100;
+  if (nots.length === 0) healthScore -= 10;
+  if (notsImg.length > 0) healthScore -= 5;
+  if (overdue > 0) healthScore -= Math.min(15, overdue * 3);
+  if (evPast.length > 0) healthScore -= Math.min(10, evPast.length * 2);
+  if (empExpired.length > 0) healthScore -= Math.min(15, empExpired.length * 3);
+  if (inds.length < 6) healthScore -= 10;
+  if (denPending.length > 5) healthScore -= 5;
+  healthScore = Math.max(0, healthScore);
+  const hColor = healthScore >= 80 ? '#166534' : healthScore >= 50 ? '#92400e' : '#991b1b';
+  const hBg = healthScore >= 80 ? '#dcfce7' : healthScore >= 50 ? '#fef3c7' : '#fee2e2';
+
+  let html = `
+    <div class="card" style="margin-bottom:20px;background:${hBg};border-color:${hColor}">
+      <div style="display:flex;align-items:center;gap:16px">
+        <div style="font-size:42px;font-weight:700;font-family:'Poppins',sans-serif;color:${hColor}">${healthScore}%</div>
+        <div>
+          <div style="font-size:16px;font-weight:700;color:${hColor}">Índice de Salud del Portal</div>
+          <div class="progress-wrap" style="width:250px"><div class="health-bar" style="width:${healthScore}%;background:${hColor}">${healthScore}%</div></div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  const modules = [
+    {key:'noticias',label:'📰 Noticias',stats:[`Total: ${results.noticias.total}`,`Publicadas: ${results.noticias.publicadas}`,`Sin imagen: ${results.noticias.sinImagen}`,`Edad promedio: ${results.noticias.edadPromedioD} días`]},
+    {key:'proyectos',label:'🏗 Proyectos',stats:[`Total: ${results.proyectos.total}`,`Avance promedio: ${results.proyectos.avgAvance}%`,`Vencidos: ${results.proyectos.overdue}`,`Estados: ${Object.entries(results.proyectos.byEstado).map(([k,v])=>`${k}(${v})`).join(', ')||'—'}`]},
+    {key:'eventos',label:'📅 Eventos',stats:[`Total: ${results.eventos.total}`,`Próximos: ${results.eventos.upcoming}`,`Sin archivar: ${results.eventos.pastNotArchived}`]},
+    {key:'empresas',label:'🏢 Empresas',stats:[`Total: ${results.empresas.total}`,`Permisos vencidos: ${results.empresas.permisoVencido}`,`Vencen pronto: ${results.empresas.venceSoon}`]},
+    {key:'consejos',label:'🏛 Consejos',stats:[`Total: ${results.consejos.total}`,`Activos: ${results.consejos.activos}`,`Sin contacto: ${results.consejos.sinContacto}`]},
+    {key:'denuncias',label:'📝 Denuncias',stats:[`Total: ${results.denuncias.total}`,`Pendientes: ${results.denuncias.pendientes}`]},
+    {key:'indicadores',label:'📊 Indicadores',stats:[`Total: ${results.indicadores.total}/6`,`Completo: ${results.indicadores.completos?'✅':'❌'}`]},
+  ];
+
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">';
+  modules.forEach(m => {
+    html += `<div class="audit-module">
+      <div class="audit-module-title">${m.label}</div>
+      ${m.stats.map(s => `<span class="audit-stat">${s}</span>`).join('')}
+    </div>`;
+  });
+  html += '</div>';
+  document.getElementById('audit-content').innerHTML = html;
+  logAction('audit','sistema','Auditoría completa ejecutada',`health:${healthScore}%`);
+}
+
+function exportAudit() {
+  if (!_auditData) { runAudit(); }
+  const blob = new Blob([JSON.stringify({meta:{generado:new Date().toISOString(),version:'SIGAP v3.0'}, auditoria:_auditData}, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `iagami-auditoria-${new Date().toISOString().split('T')[0]}.json`; a.click();
+  URL.revokeObjectURL(url);
+  toast('Reporte de auditoría exportado', 'success');
+}
+
+/* ═══════════════════════════════════════════════
+   LIMPIEZA
+═══════════════════════════════════════════════ */
+function renderLimpieza() {
+  const actions = [
+    {icon:'🗑',title:'Eliminar Registros Incompletos',desc:'Remueve registros sin campos requeridos (id, titulo/nombre)',fn:'removeIncomplete'},
+    {icon:'🔄',title:'Eliminar Duplicados',desc:'Detecta y elimina registros duplicados por campos clave',fn:'removeDuplicates'},
+    {icon:'⏰',title:'Archivar Alertas Vencidas',desc:'Marca alertas expiradas como inactivas',fn:'archiveExpiredAlerts'},
+    {icon:'📅',title:'Archivar Eventos Pasados',desc:'Marca eventos pasados como estado completado',fn:'archivePastEvents'},
+    {icon:'🔧',title:'Reparar Registros Dañados',desc:'Corrige campos null/undefined en registros existentes',fn:'repairDamaged'},
+  ];
+  document.getElementById('clean-grid').innerHTML = actions.map(a => `
+    <div class="action-card">
+      <div class="ac-icon">${a.icon}</div>
+      <div class="ac-title">${a.title}</div>
+      <div class="ac-desc">${a.desc}</div>
+      <button class="btn btn-warn btn-sm" onclick="${a.fn}(this)">Ejecutar</button>
+      <div class="action-result" id="cres-${a.fn}"></div>
+    </div>`).join('');
+}
+
+function setCRes(fn, msg, type='ok') {
+  const el = document.getElementById('cres-'+fn);
+  if (!el) return;
+  const colors = {ok:'var(--ok)',warn:'var(--warn)',err:'var(--err)',info:'var(--info)'};
+  el.style.color = colors[type]||colors.info;
+  el.textContent = msg;
+}
+
+function scanSystem() {
+  let html = '<div class="card"><div class="card-title">🔎 Resultado del Escaneo</div><ul class="check-list">';
+  let issues = 0;
+  CMS_MODULES.forEach(k => {
+    const items = CMSDB.getAll(k);
+    const noId = items.filter(i => !i.id).length;
+    const noTitle = items.filter(i => !i.titulo && !i.nombre && !i.name).length;
+    if (noId > 0) { html += `<li class="check-item warn"><span class="icon">⚠️</span>${MODULE_LABELS[k]}: ${noId} sin ID</li>`; issues++; }
+    if (noTitle > 0) { html += `<li class="check-item warn"><span class="icon">⚠️</span>${MODULE_LABELS[k]}: ${noTitle} sin titulo/nombre</li>`; issues++; }
+    if (items.length === 0) { html += `<li class="check-item ok"><span class="icon">✅</span>${MODULE_LABELS[k]}: vacío (0 registros)</li>`; }
+    else if (noId === 0 && noTitle === 0) { html += `<li class="check-item ok"><span class="icon">✅</span>${MODULE_LABELS[k]}: ${items.length} registros OK</li>`; }
+  });
+  html += `</ul><div style="margin-top:12px;font-weight:600;color:${issues===0?'var(--ok)':'var(--warn)'}">Problemas encontrados: ${issues}</div></div>`;
+  document.getElementById('scan-result').innerHTML = html;
+  logAction('scan','sistema',`Escaneo completado: ${issues} problemas encontrados`,'success');
+}
+
+function removeIncomplete(btn) {
+  if (!confirm('¿Eliminar registros sin campos requeridos?')) return;
+  btn.disabled = true;
+  let total = 0;
+  CMS_MODULES.forEach(k => {
+    const items = CMSDB.getAll(k);
+    const toRemove = items.filter(i => !i.id || (!i.titulo && !i.nombre && !i.name && k !== 'org' && k !== 'media'));
+    toRemove.forEach(i => { if (i.id) CMSDB.remove(k, i.id); total++; });
+  });
+  setCRes('removeIncomplete', `${total} registros eliminados`);
+  logAction('removeIncomplete','sistema',`${total} registros incompletos eliminados`,'success');
+  toast(`${total} registros incompletos eliminados`, total > 0 ? 'success' : 'info');
+  btn.disabled = false;
+}
+
+function removeDuplicates(btn) {
+  if (!confirm('¿Eliminar registros duplicados?')) return;
+  btn.disabled = true;
+  let total = 0;
+  CMS_MODULES.forEach(k => {
+    const items = CMSDB.getAll(k);
+    const seen = new Set();
+    items.forEach(item => {
+      const key = `${item.titulo||item.nombre||item.name||''}|${item.fecha||''}`;
+      if (seen.has(key) && item.id) { CMSDB.remove(k, item.id); total++; }
+      else seen.add(key);
+    });
+  });
+  setCRes('removeDuplicates', `${total} duplicados eliminados`);
+  logAction('removeDuplicates','sistema',`${total} duplicados eliminados`,'success');
+  toast(`${total} registros duplicados eliminados`, 'success');
+  btn.disabled = false;
+}
+
+function archiveExpiredAlerts(btn) {
+  btn.disabled = true;
+  const now = new Date();
+  const all = CMSDB.getAll('alertas');
+  let count = 0;
+  all.forEach(a => {
+    if (a.activa !== false && a.fecha_expiracion && new Date(a.fecha_expiracion) < now) {
+      a.activa = false;
+      CMSDB.save('alertas', a);
+      count++;
+    }
+  });
+  setCRes('archiveExpiredAlerts', `${count} alertas archivadas`);
+  logAction('archiveExpiredAlerts','alertas',`${count} alertas vencidas archivadas`,'success');
+  toast(`${count} alertas vencidas archivadas`, 'success');
+  btn.disabled = false;
+}
+
+function archivePastEvents(btn) {
+  btn.disabled = true;
+  const now = new Date();
+  const all = CMSDB.getAll('eventos');
+  let count = 0;
+  all.forEach(e => {
+    if (e.fecha && new Date(e.fecha) < now && e.estado !== 'completado') {
+      e.estado = 'completado';
+      CMSDB.save('eventos', e);
+      count++;
+    }
+  });
+  setCRes('archivePastEvents', `${count} eventos archivados`);
+  logAction('archivePastEvents','eventos',`${count} eventos pasados marcados como completados`,'success');
+  toast(`${count} eventos archivados como completados`, 'success');
+  btn.disabled = false;
+}
+
+function repairDamaged(btn) {
+  btn.disabled = true;
+  let total = 0;
+  CMS_MODULES.forEach(k => {
+    const items = CMSDB.getAll(k);
+    items.forEach(item => {
+      let changed = false;
+      Object.keys(item).forEach(key => {
+        if (item[key] === null || item[key] === undefined) {
+          item[key] = '';
+          changed = true;
+        }
+      });
+      if (!item.id) { item.id = k.slice(0,2)+'-'+Date.now()+Math.random().toString(36).slice(2,5); changed = true; }
+      if (changed) { CMSDB.save(k, item); total++; }
+    });
+  });
+  setCRes('repairDamaged', `${total} registros reparados`);
+  logAction('repairDamaged','sistema',`${total} registros dañados reparados`,'success');
+  toast(`${total} registros reparados`, 'success');
+  btn.disabled = false;
+}
+
+/* ═══════════════════════════════════════════════
+   DOCUMENTACIÓN
+═══════════════════════════════════════════════ */
+function renderDocumentacion() {
+  const activeCount = CMS_MODULES.filter(k => CMSDB.getAll(k).length > 0).length;
+  const html = `
+    <div class="two-col" style="margin-bottom:20px">
+      <div class="card">
+        <div class="card-title">🏗 Arquitectura del Sistema</div>
+        <table class="tech-table">
+          <tr><td><strong>Sistema</strong></td><td>SIGAP v3.0</td></tr>
+          <tr><td><strong>Frontend</strong></td><td>HTML5, CSS3, JavaScript (Vanilla)</td></tr>
+          <tr><td><strong>Almacenamiento</strong></td><td>localStorage (CMSDB v1.0)</td></tr>
+          <tr><td><strong>Hosting</strong></td><td>GitHub Pages (Estático)</td></tr>
+          <tr><td><strong>Fuentes</strong></td><td>Inter + Poppins (Google Fonts)</td></tr>
+          <tr><td><strong>Build</strong></td><td>2026-06-03</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">📦 Versión del Sistema</div>
+        <div class="info-row"><span class="key">Versión</span><span class="val">SIGAP v3.0</span></div>
+        <div class="info-row"><span class="key">Build</span><span class="val">2026-06-03</span></div>
+        <div class="info-row"><span class="key">CMS</span><span class="val">CMSDB v1.0 (localStorage)</span></div>
+        <div class="info-row"><span class="key">Módulos</span><span class="val">${CMS_MODULES.length} definidos, ${activeCount} activos</span></div>
+        <div class="info-row"><span class="key">Mantenimiento</span><span class="val">Centro v1.0</span></div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-title">📁 Estructura de Archivos</div>
+      <div class="tree">iagami/
+├── index.html              ← Portal público principal
+├── admin/
+│   ├── index.html          ← Panel de administración
+│   └── mantenimiento.html  ← Centro de mantenimiento (este archivo)
+└── cms/
+    └── db.js               ← CMSDB: motor de base de datos localStorage</div>
+    </div>
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-title">📦 Módulos Instalados</div>
+      <table>
+        <thead><tr><th>Módulo</th><th>Clave localStorage</th><th>Registros</th><th>Estado</th></tr></thead>
+        <tbody>${CMS_MODULES.map(k => {
+          const count = CMSDB.getAll(k).length;
+          return `<tr><td>${MODULE_LABELS[k]}</td><td style="font-family:monospace;font-size:12px">iagami_cms_${k}</td><td>${count}</td><td>${count>0?'<span class="status status-ok">activo</span>':'<span class="status status-warn">vacío</span>'}</td></tr>`;
+        }).join('')}</tbody>
+      </table>
+    </div>
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-title">📋 Historial de Cambios</div>
+      <table class="changelog">
+        <thead><tr><th>Versión</th><th>Fecha</th><th>Cambios</th></tr></thead>
+        <tbody>
+          <tr><td>v3.0</td><td>2026-06-03</td><td>Centro de Mantenimiento completo, sistema de auth con bloqueo</td></tr>
+          <tr><td>v2.5</td><td>2026-04-15</td><td>CMS CMSDB v1.0, panel admin, módulos completos</td></tr>
+          <tr><td>v2.0</td><td>2026-01-10</td><td>Rediseño portal, nuevos módulos empresas y consejos</td></tr>
+          <tr><td>v1.0</td><td>2025-09-01</td><td>Lanzamiento inicial del portal IAGAMI</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-title">📖 Manual Rápido del Administrador</div>
+      ${[
+        ['Dashboard','Vista general del sistema. Muestra conteos, módulos activos y últimas actividades registradas.'],
+        ['Diagnóstico','Ejecuta 10 verificaciones del sistema. Genera una puntuación (0-100) y lista de recomendaciones.'],
+        ['Monitor','Estadísticas en tiempo real: uso de localStorage, estado de módulos, info de sesión y navegador.'],
+        ['Optimización','6 acciones de mantenimiento: limpiar caché, remover alertas vencidas, deduplicar denuncias, validar IDs, regenerar estadísticas y limpiar logs.'],
+        ['Respaldos','Crea respaldos completos o parciales (selección de módulos). Descarga como JSON. Restaura desde archivo.'],
+        ['Actividades','Log completo de acciones del sistema. Filtros por usuario, módulo y fecha. Exportar CSV.'],
+        ['Seguridad','Gestión de usuarios, cambio de contraseña, historial de accesos. Bloqueo automático tras 5 intentos fallidos.'],
+        ['Auditoría','Análisis de calidad por módulo: noticias, proyectos, eventos, empresas, consejos, denuncias, indicadores. Índice de salud del portal.'],
+        ['Limpieza','Escaneo del sistema. Acciones: eliminar incompletos, duplicados, archivar alertas/eventos, reparar dañados.'],
+        ['Documentación','Arquitectura, módulos, versión, changelog y este manual.'],
+      ].map(([t,d]) => `
+        <div class="accordion-item">
+          <div class="accordion-hdr" onclick="toggleAccordion(this)">${t} <span>▼</span></div>
+          <div class="accordion-body">${d}</div>
+        </div>`).join('')}
+    </div>
+  `;
+  document.getElementById('doc-content').innerHTML = html;
+}
+
+function toggleAccordion(hdr) {
+  const body = hdr.nextElementSibling;
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  hdr.querySelector('span').textContent = isOpen ? '▼' : '▲';
+}
+
+/* ═══════════════════════════════════════════════
+   HELPERS
+═══════════════════════════════════════════════ */
+function fmtDateTime(iso) {
+  if (!iso) return '—';
+  try {
+    const d = new Date(iso);
+    return d.toLocaleDateString('es-VE',{day:'2-digit',month:'2-digit',year:'2-digit'}) + ' ' +
+           d.toLocaleTimeString('es-VE',{hour:'2-digit',minute:'2-digit'});
+  } catch(e){ return iso; }
+}
+
+/* ═══════════════════════════════════════════════
+   KEYBOARD SHORTCUTS
+═══════════════════════════════════════════════ */
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('login-overlay').style.display !== 'none') {
+    doLogin();
+  }
+});
+
+/* ═══════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════ */
+(function init() {
+  const adminSess = sessionStorage.getItem('iagami_admin_session');
+  if (!adminSess) { window.location.replace('index.html'); return; }
+  const sess = getCurrentUser() || {username:'admin', role:'admin', nombre:'Administrador'};
+  startApp(sess);
+})();
+</script>
+</body>
+</html>
