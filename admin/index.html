@@ -748,6 +748,55 @@ input,select,textarea{font-family:inherit}
       </div>
       <div class="media-grid" id="media-grid"></div>
     </div>
+
+    <!-- CONSEJOS COMUNALES -->
+    <div class="section" id="sec-consejos">
+      <div class="page-header">
+        <div><div class="page-title">🏘️ Consejos Comunales</div><div class="page-subtitle">Registro y gestión de consejos comunales del Municipio Iribarren</div></div>
+        <button class="btn btn-primary" onclick="openConsejoForm()">+ Nuevo Consejo Comunal</button>
+      </div>
+      <div class="toolbar">
+        <input type="text" class="search-input" id="q-consejos" placeholder="Buscar por nombre, parroquia, comunidad..." oninput="renderConsejos()" style="flex:1;min-width:200px"/>
+        <select id="f-consejos-par" onchange="renderConsejos()" style="padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px">
+          <option value="">Todas las parroquias</option>
+        </select>
+        <select id="f-consejos-est" onchange="renderConsejos()" style="padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px">
+          <option value="">Todos los estatus</option>
+          <option value="Activo">Activo</option>
+          <option value="Inactivo">Inactivo</option>
+        </select>
+      </div>
+      <div id="tbl-consejos"></div>
+      <div id="pg-consejos" style="display:flex;gap:6px;justify-content:center;margin-top:14px;flex-wrap:wrap"></div>
+      <!-- FORM PANEL -->
+      <div id="form-consejos" style="display:none;background:#fff;border:1px solid var(--border);border-radius:12px;padding:24px;margin-top:16px">
+        <div style="font-family:'Poppins',sans-serif;font-size:16px;font-weight:700;color:var(--text);margin-bottom:20px" id="ftitle-consejos">🏘️ Nuevo Consejo Comunal</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">
+          <div style="display:flex;flex-direction:column;gap:5px"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Nombre *</label><input type="text" id="fc-nombre" placeholder="Nombre del consejo comunal" style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none"/></div>
+          <div style="display:flex;flex-direction:column;gap:5px"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Código</label><input type="text" id="fc-codigo" placeholder="CC-IRB-001" style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none"/></div>
+          <div style="display:flex;flex-direction:column;gap:5px"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Estatus</label><select id="fc-estatus" style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none"><option>Activo</option><option>Inactivo</option></select></div>
+          <div style="display:flex;flex-direction:column;gap:5px"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Estado</label><input type="text" id="fc-estado" value="Lara" style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none"/></div>
+          <div style="display:flex;flex-direction:column;gap:5px"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Municipio</label><input type="text" id="fc-municipio" value="Iribarren" style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none"/></div>
+          <div style="display:flex;flex-direction:column;gap:5px"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Parroquia *</label><input type="text" id="fc-parroquia" placeholder="Nombre de la parroquia" style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none"/></div>
+          <div style="display:flex;flex-direction:column;gap:5px"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Comunidad</label><input type="text" id="fc-comunidad" placeholder="Nombre de la comunidad" style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none"/></div>
+          <div style="display:flex;flex-direction:column;gap:5px;grid-column:span 2"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Dirección</label><input type="text" id="fc-direccion" placeholder="Dirección completa" style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none"/></div>
+          <div style="display:flex;flex-direction:column;gap:5px"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Fecha constitución</label><input type="date" id="fc-fecha_constitucion" style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none"/></div>
+          <div style="display:flex;flex-direction:column;gap:5px"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">N° Familias</label><input type="number" id="fc-num_familias" placeholder="0" style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none"/></div>
+          <div style="display:flex;flex-direction:column;gap:5px"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">N° Habitantes</label><input type="number" id="fc-num_habitantes" placeholder="0" style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none"/></div>
+          <div style="display:flex;flex-direction:column;gap:5px"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Responsable *</label><input type="text" id="fc-responsable" placeholder="Nombre completo" style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none"/></div>
+          <div style="display:flex;flex-direction:column;gap:5px"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Cédula</label><input type="text" id="fc-cedula" placeholder="V-12345678" style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none"/></div>
+          <div style="display:flex;flex-direction:column;gap:5px"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Teléfono</label><input type="text" id="fc-telefono" placeholder="+58 412 000-0000" style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none"/></div>
+          <div style="display:flex;flex-direction:column;gap:5px"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Correo electrónico</label><input type="email" id="fc-email" placeholder="consejo@gmail.com" style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none"/></div>
+          <div style="display:flex;flex-direction:column;gap:5px"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Coordenadas GPS</label><input type="text" id="fc-coordenadas" placeholder="10.0647,-69.3574" style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none"/></div>
+          <div style="display:flex;flex-direction:column;gap:5px;grid-column:1/-1"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Observaciones</label><textarea id="fc-observaciones" rows="3" placeholder="Notas adicionales..." style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none;resize:vertical;font-family:inherit"></textarea></div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:20px">
+          <button class="btn btn-primary" onclick="saveConsejo()">💾 Guardar</button>
+          <button class="btn btn-secondary" onclick="closeConsejoForm()">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -784,6 +833,7 @@ const NAV = [
   {id:'multas',        icon:'⚖️',  label:'Multas'},
   {id:'denuncias',     icon:'⚠️',  label:'Denuncias'},
   {id:'archivos',      icon:'📁', label:'Archivos'},
+  {id:'consejos',      icon:'🏘️', label:'Consejos Comunales'},
 ];
 
 let currentSection = 'dashboard';
@@ -831,6 +881,7 @@ function renderSection(name) {
     case 'multas':        renderMultas(); break;
     case 'denuncias':     renderDenuncias(); break;
     case 'archivos':      renderArchivos(); break;
+    case 'consejos':      renderConsejos(); break;
   }
 }
 
@@ -1657,6 +1708,112 @@ function deleteMedia(id) {
 
 function showMediaInfo() {
   toast('Los archivos se almacenan localmente en este navegador', 'warning');
+}
+
+/* ─── CONSEJOS COMUNALES ─── */
+let ccPage = 1;
+const CC_PER_PAGE = 10;
+let ccFormId = '';
+
+function renderConsejos() {
+  const search = (document.getElementById('q-consejos')||{}).value||'';
+  const parroquia = (document.getElementById('f-consejos-par')||{}).value||'';
+  const estatus = (document.getElementById('f-consejos-est')||{}).value||'';
+  let data = CMSDB.getAll('consejos');
+  if (search) {
+    const q = search.toLowerCase();
+    data = data.filter(c => c.nombre.toLowerCase().includes(q) || (c.codigo||'').toLowerCase().includes(q) || (c.responsable||'').toLowerCase().includes(q));
+  }
+  if (parroquia) data = data.filter(c => c.parroquia === parroquia);
+  if (estatus) data = data.filter(c => c.estatus === estatus);
+  const total = data.length;
+  const totalPages = Math.max(1, Math.ceil(total / CC_PER_PAGE));
+  if (ccPage > totalPages) ccPage = totalPages;
+  const slice = data.slice((ccPage-1)*CC_PER_PAGE, ccPage*CC_PER_PAGE);
+  const tbl = document.getElementById('tbl-consejos');
+  if (!tbl) return;
+  tbl.innerHTML = `<table class="data-table"><thead><tr>
+    <th>Código</th><th>Nombre</th><th>Parroquia</th><th>Comunidad</th>
+    <th>Estatus</th><th>Responsable</th><th>Teléfono</th><th>Acciones</th>
+  </tr></thead><tbody>${
+    slice.length ? slice.map(c => `<tr>
+      <td><span class="badge badge-secondary">${c.codigo||'-'}</span></td>
+      <td><strong>${c.nombre}</strong></td>
+      <td>${c.parroquia||'-'}</td>
+      <td>${c.comunidad||'-'}</td>
+      <td><span class="badge ${c.estatus==='Activo'?'badge-success':'badge-error'}">${c.estatus||'-'}</span></td>
+      <td>${c.responsable||'-'}</td>
+      <td>${c.telefono||'-'}</td>
+      <td style="display:flex;gap:4px">
+        <button class="btn btn-sm" onclick="openConsejoForm('${c.id}')">✏️</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteConsejo('${c.id}')">🗑️</button>
+      </td>
+    </tr>`).join('') : '<tr><td colspan="8" style="text-align:center;color:#888;padding:20px">Sin resultados</td></tr>'
+  }</tbody></table>`;
+  // pagination
+  const pg = document.getElementById('pg-consejos');
+  if (pg) {
+    let html = `<span style="font-size:12px;color:#888;align-self:center">Página ${ccPage} de ${totalPages} — ${total} registros</span>`;
+    if (totalPages > 1) {
+      html += `<button class="btn btn-sm" onclick="ccChangePage(${ccPage-1})" ${ccPage<=1?'disabled':''}>‹ Ant</button>`;
+      for (let i=1;i<=totalPages;i++) html += `<button class="btn btn-sm${i===ccPage?' btn-primary':''}" onclick="ccChangePage(${i})">${i}</button>`;
+      html += `<button class="btn btn-sm" onclick="ccChangePage(${ccPage+1})" ${ccPage>=totalPages?'disabled':''}>Sig ›</button>`;
+    }
+    pg.innerHTML = html;
+  }
+  // populate parroquia filter
+  const pfil = document.getElementById('f-consejos-par');
+  if (pfil && pfil.options.length <= 1) {
+    const all = CMSDB.getAll('consejos');
+    const parroquias = [...new Set(all.map(c=>c.parroquia).filter(Boolean))].sort();
+    parroquias.forEach(p => { const o = document.createElement('option'); o.value=p; o.textContent=p; pfil.appendChild(o); });
+  }
+}
+
+function ccChangePage(p) { ccPage = p; renderConsejos(); }
+
+function openConsejoForm(id) {
+  const form = document.getElementById('form-consejos');
+  if (!form) return;
+  form.style.display = 'block';
+  form.scrollIntoView({behavior:'smooth', block:'start'});
+  ccFormId = id||'';
+  const cc = id ? CMSDB.getOne('consejos', id) : null;
+  const fields = ['nombre','codigo','estatus','estado','municipio','parroquia','comunidad','direccion','fecha_constitucion','num_familias','num_habitantes','responsable','cedula','telefono','email','coordenadas','observaciones'];
+  fields.forEach(f => {
+    const el = document.getElementById('fc-'+f);
+    if (el) el.value = cc ? (cc[f]||'') : (f==='estado'?'Lara': f==='municipio'?'Iribarren': f==='estatus'?'Activo':'');
+  });
+  const title = document.getElementById('ftitle-consejos');
+  if (title) title.textContent = (id ? '✏️ Editar' : '🏘️ Nuevo') + ' Consejo Comunal';
+}
+
+function saveConsejo() {
+  const nombre = (document.getElementById('fc-nombre')||{}).value||'';
+  const codigo = (document.getElementById('fc-codigo')||{}).value||'';
+  if (!nombre.trim()) { toast('El nombre es obligatorio', 'error'); return; }
+  if (!codigo.trim()) { toast('El código es obligatorio', 'error'); return; }
+  const fields = ['nombre','codigo','estatus','estado','municipio','parroquia','comunidad','direccion','fecha_constitucion','num_familias','num_habitantes','responsable','cedula','telefono','email','coordenadas','observaciones'];
+  const item = { id: ccFormId||undefined };
+  fields.forEach(f => { const el = document.getElementById('fc-'+f); if (el) item[f] = el.value; });
+  CMSDB.save('consejos', item);
+  toast(ccFormId ? 'Consejo actualizado' : 'Consejo registrado');
+  closeConsejoForm();
+}
+
+function closeConsejoForm() {
+  const form = document.getElementById('form-consejos');
+  if (form) form.style.display = 'none';
+  ccFormId = '';
+  renderConsejos();
+}
+
+function deleteConsejo(id) {
+  confirmDelete(() => {
+    CMSDB.remove('consejos', id);
+    toast('Consejo eliminado');
+    renderConsejos();
+  });
 }
 
 /* ─── INIT ─── */

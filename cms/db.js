@@ -20,7 +20,8 @@ const CMSDB = (() => {
     alertas:     'iagami_cms_alertas',
     multas:      'iagami_cms_multas',
     denuncias:   'iagami_cms_denuncias',
-    media:       'iagami_cms_media'
+    media:       'iagami_cms_media',
+    consejos:    'iagami_cms_consejos'
   };
 
   /* ─────────────────────────────────────────
@@ -561,6 +562,14 @@ const CMSDB = (() => {
     _seed('multas',   []);
     _seed('denuncias',[]);
     _seed('media',    []);
+
+    /* ── CONSEJOS COMUNALES ── */
+    _seed('consejos', [
+      { id:'cc-001', nombre:'Consejo Comunal Simón Bolívar', codigo:'CC-IRB-001', estado:'Lara', municipio:'Iribarren', parroquia:'Catedral', comunidad:'Sector Centro', direccion:'Calle 27 entre Carreras 18 y 19, Barquisimeto', fecha_constitucion:'2008-03-15', num_familias:120, num_habitantes:480, responsable:'María González', cedula:'V-12345678', telefono:'+58 412 555-0001', email:'ccsimonbolivar@gmail.com', coordenadas:'10.0647,-69.3574', estatus:'Activo', observaciones:'Consejo comunal activo con proyectos de mejoras viales y alumbrado.', documentos:[] },
+      { id:'cc-002', nombre:'Consejo Comunal Los Jardines', codigo:'CC-IRB-002', estado:'Lara', municipio:'Iribarren', parroquia:'Concepción', comunidad:'Urbanización Los Jardines', direccion:'Av. Los Jardines, Sector B, Barquisimeto', fecha_constitucion:'2010-07-22', num_familias:85, num_habitantes:340, responsable:'Carlos Méndez', cedula:'V-15678901', telefono:'+58 414 555-0002', email:'cclosjardines@gmail.com', coordenadas:'10.0712,-69.3421', estatus:'Activo', observaciones:'Participan activamente en programas de reciclaje y reforestación.', documentos:[] },
+      { id:'cc-003', nombre:'Consejo Comunal Santa Rosa Norte', codigo:'CC-IRB-003', estado:'Lara', municipio:'Iribarren', parroquia:'Santa Rosa', comunidad:'Santa Rosa Norte', direccion:'Carrera 45, Santa Rosa, Barquisimeto', fecha_constitucion:'2012-11-05', num_familias:200, num_habitantes:820, responsable:'Ana Pérez', cedula:'V-18901234', telefono:'+58 416 555-0003', email:'ccsantarosanorte@gmail.com', coordenadas:'10.0589,-69.3298', estatus:'Activo', observaciones:'Uno de los consejos más activos de la parroquia Santa Rosa.', documentos:[] },
+      { id:'cc-004', nombre:'Consejo Comunal El Cují Verde', codigo:'CC-IRB-004', estado:'Lara', municipio:'Iribarren', parroquia:'Juan de Villegas', comunidad:'El Cují', direccion:'Sector El Cují, Zona Industrial, Barquisimeto', fecha_constitucion:'2015-04-18', num_familias:65, num_habitantes:260, responsable:'Luis Rodríguez', cedula:'V-20123456', telefono:'+58 426 555-0004', email:'ccelcuji@gmail.com', coordenadas:'10.0445,-69.3102', estatus:'Inactivo', observaciones:'En proceso de renovación de voceros.', documentos:[] }
+    ]);
   }
 
   /* ─────────────────────────────────────────
