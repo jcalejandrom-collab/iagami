@@ -558,8 +558,33 @@ const CMSDB = (() => {
       { id:'alerta-003', mensaje:'🌡 Calor extremo: Se recomienda hidratación y evitar exposición solar entre 12:00 y 15:00 horas',              tipo:'info',    activa:true, fecha:'2026-06-03' }
     ]);
 
-    /* ── Empty collections (seeded so they exist) ── */
-    _seed('multas',   []);
+    /* ── MULTAS ── */
+    _seed('multas', [
+      {
+        id: 'multa-001', expediente: 'EXP-2026-001',
+        documento: 'J-12345678-9', nombre: 'Inversiones La Verde C.A.',
+        tipo: 'Contaminación del Agua', descripcion: 'Vertido de efluentes industriales sin tratamiento al afluente La Quebrada.',
+        monto: 50000, fecha: '2026-04-10', estado: 'Pendiente',
+        observaciones: 'El infractor debe presentarse ante IAGAMI en un plazo de 15 días hábiles para acordar plan de pago.',
+        publicado: true
+      },
+      {
+        id: 'multa-002', expediente: 'EXP-2026-002',
+        documento: 'V-15678901', nombre: 'Carlos Méndez',
+        tipo: 'Quema Ilegal', descripcion: 'Quema no autorizada de vegetación en zona protegida Parroquia Santa Rosa.',
+        monto: 12000, fecha: '2026-03-22', estado: 'Pagada',
+        observaciones: 'Multa cancelada el 15/04/2026. Expediente cerrado.',
+        publicado: true
+      },
+      {
+        id: 'multa-003', expediente: 'EXP-2026-003',
+        documento: 'J-98765432-1', nombre: 'Constructora Iribarren S.A.',
+        tipo: 'Deforestación ilegal', descripcion: 'Tala de 3 hectáreas de árboles nativos sin permiso ambiental en zona de amortiguación.',
+        monto: 150000, fecha: '2026-05-05', estado: 'En Proceso',
+        observaciones: 'Expediente en revisión por el equipo jurídico de IAGAMI. Se está tramitando plan de restauración ecológica.',
+        publicado: true
+      }
+    ]);
     _seed('denuncias',[]);
     _seed('media',    []);
 

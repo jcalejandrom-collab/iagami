@@ -691,36 +691,77 @@ input,select,textarea{font-family:inherit}
     <!-- MULTAS -->
     <div class="section" id="sec-multas">
       <div class="page-header">
-        <div><div class="page-title">⚖️ Multas</div><div class="page-subtitle">Expedientes de multas e infracciones</div></div>
-        <button class="btn btn-primary" onclick="openForm('multas')">+ Nueva Multa</button>
+        <div><div class="page-title">⚖️ Multas Ambientales</div><div class="page-subtitle">Gestión de expedientes de infracciones y multas del Municipio Iribarren</div></div>
+        <button class="btn btn-primary" onclick="openMultaForm()">+ Nueva Multa</button>
       </div>
+      <!-- LISTA -->
       <div id="multas-list-view">
         <div class="toolbar">
-          <div class="toolbar-search"><input type="text" placeholder="Buscar expediente..." id="multas-search" oninput="renderMultas()"></div>
-          <select id="multas-estado" onchange="renderMultas()"><option value="">Todos los estados</option><option>Pendiente</option><option>En Proceso</option><option>Pagada</option><option>Anulada</option></select>
+          <div class="toolbar-search"><input type="text" placeholder="Buscar por cédula, RIF, nombre, infracción..." id="multas-search" oninput="renderMultas()"></div>
+          <select id="multas-estado" onchange="renderMultas()">
+            <option value="">Todos los estados</option>
+            <option>Pendiente</option><option>En Proceso</option><option>Pagada</option><option>Anulada</option>
+          </select>
+          <select id="multas-pub" onchange="renderMultas()">
+            <option value="">Publicadas y privadas</option>
+            <option value="1">Solo publicadas</option>
+            <option value="0">Solo privadas</option>
+          </select>
         </div>
-        <div class="table-wrap"><table><thead><tr><th>Expediente</th><th>Empresa/Persona</th><th>Infracción</th><th>Monto</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="multas-tbody"></tbody></table></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>Expediente</th><th>Documento</th><th>Nombre / Empresa</th>
+              <th>Infracción</th><th>Monto</th><th>Estado</th>
+              <th>Pública</th><th>Acciones</th>
+            </tr></thead>
+            <tbody id="multas-tbody"></tbody>
+          </table>
+        </div>
         <div id="multas-pagination" class="pagination"></div>
       </div>
+      <!-- FORMULARIO -->
       <div id="multas-form-view" style="display:none">
         <div class="form-panel">
           <div class="form-title" id="multas-form-title">Nueva Multa</div>
-          <form id="multas-form" onsubmit="saveMultas(event)">
-            <div class="form-grid">
-              <div class="form-group"><label>N° Expediente</label><input type="text" name="expediente"></div>
-              <div class="form-group"><label>Empresa / Persona</label><input type="text" name="empresa_persona"></div>
-              <div class="form-group"><label>Tipo de Infracción</label><select name="tipo_infraccion"><option>Contaminación agua</option><option>Contaminación aire</option><option>Deforestación</option><option>Residuos sólidos</option><option>Quema ilegal</option><option>Otro</option></select></div>
-              <div class="form-group"><label>Monto (Bs.)</label><input type="number" name="monto" step="0.01" min="0"></div>
-              <div class="form-group"><label>Estado</label><select name="estado"><option>Pendiente</option><option>En Proceso</option><option>Pagada</option><option>Anulada</option></select></div>
-              <div class="form-group"><label>Fecha</label><input type="date" name="fecha"></div>
-              <div class="form-group form-full"><label>Descripción</label><textarea name="descripcion" rows="4"></textarea></div>
+          <div class="form-grid">
+            <div class="form-group"><label>N° Expediente *</label><input type="text" id="mf-expediente" placeholder="EXP-2026-001"/></div>
+            <div class="form-group"><label>Cédula o RIF *</label><input type="text" id="mf-documento" placeholder="V-12345678 / J-87654321-0"/></div>
+            <div class="form-group"><label>Nombre / Empresa *</label><input type="text" id="mf-nombre" placeholder="Nombre completo o razón social"/></div>
+            <div class="form-group"><label>Tipo de Infracción *</label>
+              <select id="mf-tipo">
+                <option value="">Selecciona...</option>
+                <option>Contaminación del Agua</option>
+                <option>Contaminación del Aire</option>
+                <option>Deforestación ilegal</option>
+                <option>Residuos Sólidos</option>
+                <option>Quema Ilegal</option>
+                <option>Contaminación Sonora</option>
+                <option>Vertidos Ilegales</option>
+                <option>Otro</option>
+              </select>
             </div>
-            <input type="hidden" name="id">
-            <div class="form-actions">
-              <button type="submit" class="btn btn-primary">Guardar</button>
-              <button type="button" class="btn btn-secondary" onclick="cancelForm('multas')">Cancelar</button>
+            <div class="form-group"><label>Monto (Bs.) *</label><input type="number" id="mf-monto" placeholder="0.00" min="0" step="0.01"/></div>
+            <div class="form-group"><label>Fecha de la multa *</label><input type="date" id="mf-fecha"/></div>
+            <div class="form-group"><label>Estado</label>
+              <select id="mf-estado">
+                <option>Pendiente</option><option>En Proceso</option><option>Pagada</option><option>Anulada</option>
+              </select>
             </div>
-          </form>
+            <div class="form-group" style="display:flex;align-items:center;gap:10px;padding-top:22px">
+              <label style="margin:0;cursor:pointer;display:flex;align-items:center;gap:8px">
+                <input type="checkbox" id="mf-publicado" style="width:16px;height:16px;accent-color:#1d6b3e"/>
+                <span>Publicar en portal ciudadano</span>
+              </label>
+            </div>
+            <div class="form-group form-full"><label>Descripción de la infracción</label><textarea id="mf-descripcion" rows="3" placeholder="Detalle de los hechos que motivaron la multa..."></textarea></div>
+            <div class="form-group form-full"><label>Observaciones públicas</label><textarea id="mf-observaciones" rows="2" placeholder="Información visible al ciudadano al consultar esta multa..."></textarea></div>
+          </div>
+          <input type="hidden" id="mf-id"/>
+          <div class="form-actions">
+            <button class="btn btn-primary" onclick="saveMultas()">💾 Guardar Multa</button>
+            <button class="btn btn-secondary" onclick="closeMultaForm()">Cancelar</button>
+          </div>
         </div>
       </div>
     </div>
@@ -1527,35 +1568,118 @@ window.toggleEstado = function(key, id, field, val1, val2) {
 /* ════════════════════════════════════════
    MULTAS
 ════════════════════════════════════════ */
+/* ── MULTAS ── */
 function renderMultas() {
   let items = CMSDB.getAll('multas');
   const search = (document.getElementById('multas-search')||{}).value||'';
   const estado = (document.getElementById('multas-estado')||{}).value||'';
-  items = filterItems(items, search, ['expediente','empresa_persona','tipo_infraccion']);
-  if (estado) items = items.filter(i=>i.estado===estado);
+  const pub    = (document.getElementById('multas-pub')||{}).value||'';
+  if (search) {
+    const q = search.toLowerCase();
+    items = items.filter(m =>
+      (m.expediente||'').toLowerCase().includes(q) ||
+      (m.documento||'').toLowerCase().includes(q) ||
+      (m.nombre||'').toLowerCase().includes(q) ||
+      (m.tipo||'').toLowerCase().includes(q)
+    );
+  }
+  if (estado) items = items.filter(m => m.estado === estado);
+  if (pub === '1') items = items.filter(m => m.publicado);
+  if (pub === '0') items = items.filter(m => !m.publicado);
+  items.sort((a,b) => (b.fecha||'').localeCompare(a.fecha||''));
   const {items:page, total, current} = paginate(items,'multas');
   const tbody = document.getElementById('multas-tbody');
+  if (!tbody) return;
+  const pubBadge = v => v
+    ? '<span style="background:#dcfce7;color:#166534;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px">✓ Pública</span>'
+    : '<span style="background:#f1f5f9;color:#64748b;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px">Privada</span>';
   tbody.innerHTML = !page.length
-    ? emptyState('No hay multas registradas')
+    ? `<tr><td colspan="8" style="text-align:center;padding:28px;color:#888">${emptyState('No hay multas registradas')}</td></tr>`
     : page.map(m => `<tr>
-    <td style="font-family:monospace;font-size:12px">${escHtml(m.expediente||'—')}</td>
-    <td>${escHtml(m.empresa_persona||'—')}</td>
-    <td>${escHtml(m.tipo_infraccion||'—')}</td>
-    <td>${m.monto ? 'Bs. '+Number(m.monto).toLocaleString('es-VE') : '—'}</td>
-    <td>${estadoBadge(m.estado)}</td>
-    <td>${actionBtns('multas',m.id)}</td>
-  </tr>`).join('');
+      <td style="font-family:monospace;font-size:12px">${escHtml(m.expediente||'—')}</td>
+      <td style="font-size:12px">${escHtml(m.documento||'—')}</td>
+      <td>${escHtml(m.nombre||'—')}</td>
+      <td style="font-size:12px">${escHtml(m.tipo||'—')}</td>
+      <td style="font-weight:600">${m.monto ? 'Bs. '+Number(m.monto).toLocaleString('es-VE',{minimumFractionDigits:2}) : '—'}</td>
+      <td>${estadoBadge(m.estado)}</td>
+      <td>${pubBadge(m.publicado)}</td>
+      <td style="display:flex;gap:4px;flex-wrap:wrap">
+        <button class="btn btn-sm" onclick="openMultaForm('${m.id}')" title="Editar">✏️</button>
+        <button class="btn btn-sm" onclick="toggleMultaPublicado('${m.id}')" title="${m.publicado?'Despublicar':'Publicar'}">${m.publicado?'🔒':'📢'}</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteMulta('${m.id}')" title="Eliminar">🗑️</button>
+      </td>
+    </tr>`).join('');
   renderPagination('multas-pagination','multas',total,current,'renderMultas');
 }
 
-function saveMultas(e) {
-  e.preventDefault();
-  const data = collectForm(document.getElementById('multas-form'));
-  data.monto = parseFloat(data.monto)||0;
-  CMSDB.save('multas', data);
-  toast('Multa guardada');
-  cancelForm('multas');
+function openMultaForm(id) {
+  document.getElementById('multas-list-view').style.display = 'none';
+  document.getElementById('multas-form-view').style.display  = 'block';
+  const m = id ? CMSDB.getOne('multas', id) : null;
+  document.getElementById('mf-id').value           = m ? m.id : '';
+  document.getElementById('mf-expediente').value   = m ? (m.expediente||'') : '';
+  document.getElementById('mf-documento').value    = m ? (m.documento||'') : '';
+  document.getElementById('mf-nombre').value       = m ? (m.nombre||'') : '';
+  document.getElementById('mf-tipo').value         = m ? (m.tipo||'') : '';
+  document.getElementById('mf-monto').value        = m ? (m.monto||'') : '';
+  document.getElementById('mf-fecha').value        = m ? (m.fecha||'') : new Date().toISOString().slice(0,10);
+  document.getElementById('mf-estado').value       = m ? (m.estado||'Pendiente') : 'Pendiente';
+  document.getElementById('mf-publicado').checked  = m ? !!m.publicado : false;
+  document.getElementById('mf-descripcion').value  = m ? (m.descripcion||'') : '';
+  document.getElementById('mf-observaciones').value= m ? (m.observaciones||'') : '';
+  document.getElementById('multas-form-title').textContent = m ? '✏️ Editar Multa' : '+ Nueva Multa';
+}
+
+function closeMultaForm() {
+  document.getElementById('multas-list-view').style.display = 'block';
+  document.getElementById('multas-form-view').style.display  = 'none';
+}
+
+function saveMultas() {
+  const exp = document.getElementById('mf-expediente').value.trim();
+  const doc = document.getElementById('mf-documento').value.trim();
+  const nom = document.getElementById('mf-nombre').value.trim();
+  const tip = document.getElementById('mf-tipo').value;
+  const mon = parseFloat(document.getElementById('mf-monto').value)||0;
+  const fec = document.getElementById('mf-fecha').value;
+  if (!exp) { toast('El número de expediente es obligatorio','error'); return; }
+  if (!doc) { toast('La cédula o RIF es obligatorio','error'); return; }
+  if (!nom) { toast('El nombre o empresa es obligatorio','error'); return; }
+  if (!tip) { toast('Selecciona el tipo de infracción','error'); return; }
+  if (!fec) { toast('La fecha es obligatoria','error'); return; }
+  const item = {
+    id:           document.getElementById('mf-id').value || undefined,
+    expediente:   exp,
+    documento:    doc.toUpperCase(),
+    nombre:       nom,
+    tipo:         tip,
+    monto:        mon,
+    fecha:        fec,
+    estado:       document.getElementById('mf-estado').value,
+    publicado:    document.getElementById('mf-publicado').checked,
+    descripcion:  document.getElementById('mf-descripcion').value.trim(),
+    observaciones:document.getElementById('mf-observaciones').value.trim()
+  };
+  CMSDB.save('multas', item);
+  toast(item.id ? 'Multa actualizada' : 'Multa registrada');
+  closeMultaForm();
   renderMultas();
+}
+
+function toggleMultaPublicado(id) {
+  const m = CMSDB.getOne('multas', id);
+  if (!m) return;
+  CMSDB.save('multas', Object.assign({}, m, { publicado: !m.publicado }));
+  toast(m.publicado ? 'Multa despublicada — ya no visible al ciudadano' : 'Multa publicada — visible al ciudadano');
+  renderMultas();
+}
+
+function deleteMulta(id) {
+  confirmDelete(() => {
+    CMSDB.remove('multas', id);
+    toast('Multa eliminada');
+    renderMultas();
+  });
 }
 
 /* ════════════════════════════════════════
