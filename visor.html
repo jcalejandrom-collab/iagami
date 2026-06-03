@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Visor — Revista Digital IAGAMI</title>
+<meta name="theme-color" content="#1d6b3e"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:#1a1a1a;color:#1a3d2b;line-height:1.6;min-height:100vh}
+
+/* VIEWER NAV */
+.viewer-nav{background:#0d2d1a;color:#fff;padding:0 20px;height:54px;display:flex;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:0;z-index:100;box-shadow:0 2px 16px rgba(0,0,0,.5)}
+.nav-left{display:flex;align-items:center;gap:12px;flex:1;min-width:0}
+.nav-logo{display:flex;align-items:center;gap:8px;text-decoration:none;flex-shrink:0}
+.nav-logo-ico{width:32px;height:32px;background:#1d6b3e;border-radius:7px;display:flex;align-items:center;justify-content:center}
+.nav-logo-ico svg{width:16px;height:16px}
+.nav-title{font-family:'Poppins',sans-serif;font-size:13px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nav-right{display:flex;gap:8px;flex-shrink:0}
+.nav-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;transition:.2s;border:none;font-family:'Inter',sans-serif;white-space:nowrap}
+.btn-back{background:rgba(255,255,255,.1);color:rgba(255,255,255,.85)}
+.btn-back:hover{background:rgba(255,255,255,.18)}
+.btn-print{background:#1d6b3e;color:#fff}
+.btn-print:hover{background:#155c32}
+.btn-dl{background:#4ade80;color:#0d2d1a}
+.btn-dl:hover{background:#22c55e}
+
+/* CANVAS */
+.magazine-canvas{max-width:860px;margin:0 auto;padding:32px 20px 64px;display:flex;flex-direction:column;gap:0}
+
+/* LOADING / ERROR */
+.state-center{display:flex;align-items:center;justify-content:center;min-height:60vh;text-align:center;color:rgba(255,255,255,.7);padding:40px}
+.state-inner{max-width:400px}
+.state-ico{font-size:56px;margin-bottom:16px}
+.state-title{font-family:'Poppins',sans-serif;font-size:20px;font-weight:700;color:#fff;margin-bottom:8px}
+.state-msg{font-size:14px;color:rgba(255,255,255,.65);line-height:1.7}
+.spinner{width:40px;height:40px;border:4px solid rgba(255,255,255,.15);border-top-color:#4ade80;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ═══════ BLOCK STYLES ═══════ */
+
+/* PORTADA */
+.blk-portada{min-height:480px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;position:relative;overflow:hidden;border-radius:16px 16px 0 0;padding:60px 40px}
+.blk-portada .portada-img{position:absolute;inset:0;object-fit:cover;width:100%;height:100%;opacity:.35}
+.portada-inner{position:relative;z-index:1}
+.portada-logo{font-size:48px;margin-bottom:16px}
+.portada-sup{font-size:12px;font-weight:700;color:rgba(255,255,255,.7);letter-spacing:.12em;text-transform:uppercase;margin-bottom:12px}
+.portada-titulo{font-family:'Poppins',sans-serif;font-size:36px;font-weight:800;color:#fff;line-height:1.15;margin-bottom:10px}
+.portada-sub{font-size:15px;color:rgba(255,255,255,.78);line-height:1.6}
+.portada-line{width:60px;height:3px;background:#4ade80;border-radius:2px;margin:20px auto}
+
+/* ENCABEZADO */
+.blk-encabezado{background:#fff;padding:40px 48px 28px;border-left:5px solid #1d6b3e}
+.enc-titulo{font-family:'Poppins',sans-serif;font-size:26px;font-weight:800;color:#1a3d2b;line-height:1.2;margin-bottom:6px}
+.enc-sub{font-size:14px;color:#4a8a6a;font-weight:500}
+
+/* TEXTO */
+.blk-texto{background:#fff;padding:32px 48px}
+.blk-texto p{font-size:14.5px;color:#2d4a3e;line-height:1.85;margin-bottom:12px}
+
+/* ARTICULO */
+.blk-articulo{background:#fff;padding:36px 48px;display:grid;grid-template-columns:1fr;gap:20px}
+.blk-articulo.has-img{grid-template-columns:1fr 320px}
+.art-body{}
+.art-title{font-family:'Poppins',sans-serif;font-size:22px;font-weight:800;color:#1a3d2b;margin-bottom:6px;line-height:1.25}
+.art-author{font-size:12px;font-weight:700;color:#4a8a6a;text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px}
+.art-content{font-size:14px;color:#2d4a3e;line-height:1.8}
+.art-img{border-radius:10px;overflow:hidden}
+.art-img img{width:100%;height:220px;object-fit:cover;display:block}
+
+/* CITA */
+.blk-cita{background:#e8f5ee;border-left:6px solid #1d6b3e;padding:36px 48px;position:relative}
+.blk-cita::before{content:'"';position:absolute;top:16px;left:36px;font-family:'Poppins',sans-serif;font-size:72px;color:#a8dfc0;line-height:1;font-weight:800}
+.cita-text{font-family:'Poppins',sans-serif;font-size:20px;font-weight:600;color:#1a3d2b;line-height:1.5;position:relative;padding-top:32px;font-style:italic}
+.cita-author{font-size:12px;font-weight:700;color:#4a8a6a;margin-top:12px;text-transform:uppercase;letter-spacing:.06em}
+
+/* IMAGEN */
+.blk-imagen{background:#fff;padding:24px 48px}
+.blk-imagen.full .img-wrap{max-width:100%}
+.blk-imagen.half .img-wrap{max-width:50%;margin:0 auto}
+.img-wrap img{width:100%;border-radius:10px;display:block}
+.img-pie{font-size:12px;color:#4a8a6a;text-align:center;margin-top:8px;font-style:italic}
+
+/* GALERIA */
+.blk-galeria{background:#fff;padding:24px 48px}
+.galeria-grid{display:grid;gap:10px}
+.galeria-grid.cols-2{grid-template-columns:1fr 1fr}
+.galeria-grid.cols-3{grid-template-columns:1fr 1fr 1fr}
+.galeria-grid.cols-4{grid-template-columns:repeat(4,1fr)}
+.galeria-grid img{width:100%;height:160px;object-fit:cover;border-radius:8px;display:block}
+
+/* TABLA */
+.blk-tabla{background:#fff;padding:28px 48px}
+.tabla-titulo{font-family:'Poppins',sans-serif;font-size:14px;font-weight:700;color:#1a3d2b;margin-bottom:12px}
+.data-table{width:100%;border-collapse:collapse;font-size:13px}
+.data-table th{background:#1d6b3e;color:#fff;padding:10px 14px;text-align:left;font-weight:600;font-size:12px}
+.data-table td{padding:9px 14px;border-bottom:1px solid #e8f5ee;color:#1a3d2b}
+.data-table tr:nth-child(even) td{background:#f8fcfa}
+
+/* VIDEO */
+.blk-video{background:#fff;padding:28px 48px}
+.video-titulo{font-family:'Poppins',sans-serif;font-size:15px;font-weight:700;color:#1a3d2b;margin-bottom:8px}
+.video-desc{font-size:13px;color:#4a8a6a;margin-bottom:14px}
+.video-embed{position:relative;padding-bottom:56.25%;border-radius:10px;overflow:hidden;background:#1a1a1a}
+.video-embed iframe{position:absolute;inset:0;width:100%;height:100%;border:none}
+.video-link{display:inline-flex;align-items:center;gap:7px;padding:10px 18px;background:#1d6b3e;color:#fff;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none}
+
+/* ENLACE */
+.blk-enlace{background:#f0faf5;border:1px solid #d4edd8;padding:20px 48px;display:flex;align-items:center;gap:16px}
+.enlace-ico{width:44px;height:44px;background:#1d6b3e;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.enlace-ico svg{width:20px;height:20px}
+.enlace-body{flex:1}
+.enlace-text{font-weight:700;color:#1a3d2b;font-size:14px}
+.enlace-desc{font-size:12.5px;color:#4a8a6a;margin-top:2px}
+.enlace-btn{background:#1d6b3e;color:#fff;border:none;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;white-space:nowrap;font-family:'Inter',sans-serif}
+
+/* SEPARADOR */
+.blk-separador{background:#fff;padding:8px 48px}
+.sep-linea{height:2px;background:linear-gradient(90deg,transparent,#a8dfc0,transparent)}
+.sep-espacio{height:32px}
+.sep-decorativo{display:flex;align-items:center;gap:16px;padding:16px 0}
+.sep-decorativo::before,.sep-decorativo::after{content:'';flex:1;height:1px;background:#d4edd8}
+.sep-decorativo span{color:#a8dfc0;font-size:18px}
+
+/* NOTICIAS */
+.blk-noticias{background:#f8fcfa;padding:36px 48px;border-top:3px solid #1d6b3e}
+.noticias-titulo{font-family:'Poppins',sans-serif;font-size:18px;font-weight:800;color:#1a3d2b;margin-bottom:20px}
+.noticias-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
+.noticia-card{background:#fff;border:1px solid #d4edd8;border-radius:10px;overflow:hidden}
+.noticia-cat{font-size:10px;font-weight:700;color:#1d6b3e;text-transform:uppercase;padding:10px 12px 4px;letter-spacing:.05em}
+.noticia-titulo{font-family:'Poppins',sans-serif;font-size:13px;font-weight:700;color:#1a3d2b;padding:0 12px 10px;line-height:1.35}
+.noticia-fecha{font-size:11px;color:#4a8a6a;padding:0 12px 10px}
+
+/* PRINT STYLES */
+@media print {
+  .viewer-nav,.nav-right,.nav-btn{display:none!important}
+  body{background:#fff!important;color:#000}
+  .magazine-canvas{max-width:100%;padding:0}
+  .blk-portada{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .blk-encabezado,.blk-texto,.blk-articulo,.blk-cita,.blk-noticias,.blk-tabla,.blk-galeria,.blk-enlace{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .blk-portada,.blk-encabezado,.blk-texto{page-break-inside:avoid}
+  .blk-articulo{page-break-inside:avoid}
+}
+
+/* TOAST */
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);background:#1a3d2b;color:#fff;padding:11px 22px;border-radius:10px;font-size:13px;font-weight:500;z-index:9999;opacity:0;transition:.3s;pointer-events:none;white-space:nowrap;box-shadow:0 4px 24px rgba(0,0,0,.4)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media(max-width:700px){
+  .blk-portada .portada-titulo{font-size:26px}
+  .blk-encabezado,.blk-texto,.blk-articulo,.blk-cita,.blk-imagen,.blk-galeria,.blk-tabla,.blk-video,.blk-enlace,.blk-separador,.blk-noticias{padding-left:24px;padding-right:24px}
+  .blk-articulo.has-img{grid-template-columns:1fr}
+  .galeria-grid.cols-3,.galeria-grid.cols-4{grid-template-columns:1fr 1fr}
+  .nav-title{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- VIEWER NAV -->
+<nav class="viewer-nav">
+  <div class="nav-left">
+    <a class="nav-logo" href="../index.html">
+      <div class="nav-logo-ico">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+    </a>
+    <div class="nav-title" id="nav-title">Revista Digital IAGAMI</div>
+  </div>
+  <div class="nav-right">
+    <button class="nav-btn btn-back" onclick="history.back()">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      Volver
+    </button>
+    <button class="nav-btn btn-print" onclick="window.print()">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+      Imprimir
+    </button>
+    <button class="nav-btn btn-dl" id="btn-descargar" onclick="descargar()">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Descargar PDF
+    </button>
+  </div>
+</nav>
+
+<!-- MAGAZINE CONTENT -->
+<div id="viewer-root">
+  <div class="state-center" id="loading-state">
+    <div class="state-inner">
+      <div class="spinner"></div>
+      <div class="state-title">Cargando revista...</div>
+    </div>
+  </div>
+</div>
+
+<div id="app-toast" class="toast" role="status" aria-live="polite"></div>
+
+<script src="../cms/db.js"></script>
+<script>
+'use strict';
+
+let _revId   = null;
+let _revista = null;
+
+let _toastT;
+function toast(msg) {
+  const t = document.getElementById('app-toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(_toastT); _toastT = setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+function escHtml(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function getYoutubeId(url) {
+  if (!url) return null;
+  const m = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  return m ? m[1] : null;
+}
+
+/* ─── BLOCK RENDERERS ─── */
+const RENDERERS = {
+
+  portada(b) {
+    const bg = b.color_fondo || '#1d6b3e';
+    const imgTag = b.imagen_url ? `<img class="portada-img" src="${escHtml(b.imagen_url)}" alt="Portada" loading="eager"/>` : '';
+    return `<div class="blk-portada" style="background:linear-gradient(160deg,${bg},${shadeColor(bg,-50)})">
+      ${imgTag}
+      <div class="portada-inner">
+        <div class="portada-logo">🌿</div>
+        <div class="portada-sup">IAGAMI · Revista Digital</div>
+        <div class="portada-titulo">${escHtml(b.titulo||'Revista IAGAMI')}</div>
+        ${b.subtitulo ? `<div class="portada-sub">${escHtml(b.subtitulo)}</div>` : ''}
+        <div class="portada-line"></div>
+      </div>
+    </div>`;
+  },
+
+  encabezado(b) {
+    return `<div class="blk-encabezado">
+      <div class="enc-titulo">${escHtml(b.titulo||'')}</div>
+      ${b.subtitulo ? `<div class="enc-sub">${escHtml(b.subtitulo)}</div>` : ''}
+    </div>`;
+  },
+
+  texto(b) {
+    const paras = (b.contenido||'').split(/\n+/).filter(p => p.trim());
+    return `<div class="blk-texto">${paras.map(p => `<p>${escHtml(p)}</p>`).join('')}</div>`;
+  },
+
+  articulo(b) {
+    const hasImg = !!b.imagen_url;
+    const imgHtml = hasImg ? `<div class="art-img"><img src="${escHtml(b.imagen_url)}" alt="${escHtml(b.titulo)}" loading="lazy"/></div>` : '';
+    const paras = (b.contenido||'').split(/\n+/).filter(p => p.trim());
+    return `<div class="blk-articulo${hasImg?' has-img':''}">
+      <div class="art-body">
+        <div class="art-title">${escHtml(b.titulo||'')}</div>
+        ${b.autor ? `<div class="art-author">Por: ${escHtml(b.autor)}</div>` : ''}
+        <div class="art-content">${paras.map(p => `<p style="margin-bottom:10px">${escHtml(p)}</p>`).join('')}</div>
+      </div>
+      ${imgHtml}
+    </div>`;
+  },
+
+  cita(b) {
+    return `<div class="blk-cita">
+      <div class="cita-text">${escHtml(b.texto||'')}</div>
+      ${b.autor ? `<div class="cita-author">${escHtml(b.autor)}</div>` : ''}
+    </div>`;
+  },
+
+  imagen(b) {
+    if (!b.imagen_url) return `<div class="blk-imagen"><div style="padding:32px;text-align:center;background:#f0faf5;border-radius:10px;color:#4a8a6a;font-size:13px">🖼️ Imagen no configurada</div></div>`;
+    const cls = b.ancho === 'half' ? 'half' : 'full';
+    return `<div class="blk-imagen ${cls}">
+      <div class="img-wrap"><img src="${escHtml(b.imagen_url)}" alt="${escHtml(b.pie||'Imagen')}" loading="lazy"/></div>
+      ${b.pie ? `<div class="img-pie">${escHtml(b.pie)}</div>` : ''}
+    </div>`;
+  },
+
+  galeria(b) {
+    const urls = (b.imagenes_csv||'').split(',').map(s => s.trim()).filter(Boolean);
+    if (!urls.length) return `<div class="blk-galeria"><div style="padding:24px;text-align:center;background:#f0faf5;border-radius:10px;color:#4a8a6a">🗂️ Galería vacía</div></div>`;
+    const cols = Math.min(4, Math.max(1, parseInt(b.columnas)||3));
+    return `<div class="blk-galeria">
+      <div class="galeria-grid cols-${cols}">${urls.map(u => `<img src="${escHtml(u)}" alt="Imagen" loading="lazy"/>`).join('')}</div>
+    </div>`;
+  },
+
+  tabla(b) {
+    const headers = (b.cabecera_csv||'').split(',').map(h => h.trim());
+    let rows = [];
+    try { rows = JSON.parse(b.filas_json||'[]'); } catch(e){}
+    return `<div class="blk-tabla">
+      ${b.titulo ? `<div class="tabla-titulo">${escHtml(b.titulo)}</div>` : ''}
+      <table class="data-table">
+        <thead><tr>${headers.map(h => `<th>${escHtml(h)}</th>`).join('')}</tr></thead>
+        <tbody>${rows.map(row => `<tr>${(Array.isArray(row)?row:[row]).map(c => `<td>${escHtml(String(c))}</td>`).join('')}</tr>`).join('')}</tbody>
+      </table>
+    </div>`;
+  },
+
+  video(b) {
+    const ytId = getYoutubeId(b.url||'');
+    const embedHtml = ytId
+      ? `<div class="video-embed"><iframe src="https://www.youtube.com/embed/${ytId}" allowfullscreen loading="lazy"></iframe></div>`
+      : b.url ? `<a class="video-link" href="${escHtml(b.url)}" target="_blank" rel="noopener">🎬 Ver video</a>` : `<div style="padding:24px;text-align:center;background:#f0faf5;border-radius:10px;color:#4a8a6a">🎬 URL de video no configurada</div>`;
+    return `<div class="blk-video">
+      ${b.titulo ? `<div class="video-titulo">${escHtml(b.titulo)}</div>` : ''}
+      ${b.descripcion ? `<div class="video-desc">${escHtml(b.descripcion)}</div>` : ''}
+      ${embedHtml}
+    </div>`;
+  },
+
+  enlace(b) {
+    if (!b.url) return '';
+    return `<div class="blk-enlace">
+      <div class="enlace-ico"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></div>
+      <div class="enlace-body">
+        <div class="enlace-text">${escHtml(b.texto||b.url)}</div>
+        ${b.descripcion ? `<div class="enlace-desc">${escHtml(b.descripcion)}</div>` : ''}
+      </div>
+      <a class="enlace-btn" href="${escHtml(b.url)}" target="_blank" rel="noopener">Visitar →</a>
+    </div>`;
+  },
+
+  separador(b) {
+    const estilo = b.estilo || 'linea';
+    if (estilo === 'espacio') return `<div class="blk-separador"><div class="sep-espacio"></div></div>`;
+    if (estilo === 'decorativo') return `<div class="blk-separador"><div class="sep-decorativo"><span>🌿</span></div></div>`;
+    return `<div class="blk-separador"><div class="sep-linea"></div></div>`;
+  },
+
+  noticias(b) {
+    const n = parseInt(b.cantidad)||3;
+    const titulo = b.titulo_seccion || 'Noticias Destacadas';
+    const noticias = CMSDB.getAll('noticias').filter(n => n.publicado !== false).slice(-n).reverse();
+    const items = noticias.map(noticia => `<div class="noticia-card">
+      <div class="noticia-cat">${escHtml(noticia.categoria||'Noticias')}</div>
+      <div class="noticia-titulo">${escHtml(noticia.titulo||'Sin título')}</div>
+      <div class="noticia-fecha">📅 ${escHtml(noticia.fecha||'')}</div>
+    </div>`).join('') || '<div style="color:#4a8a6a;font-size:13px">No hay noticias disponibles.</div>';
+    return `<div class="blk-noticias">
+      <div class="noticias-titulo">${escHtml(titulo)}</div>
+      <div class="noticias-grid">${items}</div>
+    </div>`;
+  }
+};
+
+/* ─── RENDER MAGAZINE ─── */
+function renderMagazine(revista) {
+  const bloques = Array.isArray(revista.contenido_bloques) ? revista.contenido_bloques : [];
+  const html = bloques.map(b => {
+    const renderer = RENDERERS[b.tipo];
+    if (!renderer) return `<div style="padding:16px 48px;background:#fff;font-size:12px;color:#4a8a6a">Bloque tipo "${escHtml(b.tipo)}" no reconocido</div>`;
+    try { return renderer(b); } catch(e) { return ''; }
+  }).join('');
+
+  return `<div class="magazine-canvas">${html || '<div class="state-center"><div class="state-inner"><div class="state-ico">📄</div><div class="state-title" style="color:rgba(255,255,255,.8)">Revista sin contenido</div><div class="state-msg">Esta revista no tiene bloques de contenido aún.</div></div></div>'}</div>`;
+}
+
+/* ─── COLOR UTILITY ─── */
+function shadeColor(hex, pct) {
+  try {
+    const n = parseInt(hex.replace('#',''), 16);
+    const r = Math.max(0, Math.min(255, ((n>>16)&0xff) + pct));
+    const g = Math.max(0, Math.min(255, ((n>>8)&0xff) + pct));
+    const b = Math.max(0, Math.min(255, (n&0xff) + pct));
+    return '#'+((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1);
+  } catch(e) { return hex; }
+}
+
+/* ─── DOWNLOAD ─── */
+function descargar() {
+  if (!_revista) return;
+  CMSDB.save('revistas', Object.assign({}, _revista, {descargas: (_revista.descargas||0)+1}));
+  toast('⬇️ Descarga iniciada correctamente');
+  if (_revista.pdf_url) {
+    const a = document.createElement('a');
+    a.href = _revista.pdf_url;
+    a.download = `IAGAMI_Revista_${_revista.numero_edicion}.pdf`;
+    a.target = '_blank';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  } else {
+    setTimeout(() => window.print(), 300);
+  }
+}
+
+/* ─── INIT ─── */
+document.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(window.location.search);
+  _revId = params.get('id') || params.get('preview');
+  const isPrint = params.get('print') === '1';
+
+  const root = document.getElementById('viewer-root');
+
+  if (!_revId) {
+    root.innerHTML = `<div class="state-center"><div class="state-inner"><div class="state-ico">🔍</div><div class="state-title">Revista no encontrada</div><div class="state-msg">No se especificó el ID de la revista. <a href="index.html" style="color:#4ade80">Volver al catálogo</a></div></div></div>`;
+    return;
+  }
+
+  _revista = CMSDB.getOne('revistas', _revId);
+
+  if (!_revista) {
+    root.innerHTML = `<div class="state-center"><div class="state-inner"><div class="state-ico">📰</div><div class="state-title">Revista no disponible</div><div class="state-msg">La revista solicitada no existe o no está publicada. <a href="index.html" style="color:#4ade80">Ver todas las ediciones</a></div></div></div>`;
+    return;
+  }
+
+  // Update title
+  document.title = `${_revista.titulo} — Revista IAGAMI`;
+  document.getElementById('nav-title').textContent = `${_revista.titulo} · Edición ${_revista.numero_edicion}`;
+
+  // Increment views (only on real view, not print)
+  if (!isPrint) {
+    CMSDB.save('revistas', Object.assign({}, _revista, {visualizaciones: (_revista.visualizaciones||0)+1}));
+  }
+
+  // Render
+  root.innerHTML = renderMagazine(_revista);
+
+  // Auto-print if ?print=1
+  if (isPrint) setTimeout(() => window.print(), 800);
+});
+</script>
+</body>
+</html>
