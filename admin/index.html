@@ -859,9 +859,9 @@ input,select,textarea{font-family:inherit}
               ondragover="event.preventDefault();this.classList.add('dz-over')"
               ondragleave="this.classList.remove('dz-over')"
               ondrop="event.preventDefault();this.classList.remove('dz-over');bienvenidaHandleFile(event.dataTransfer.files[0])"
-              onclick="document.getElementById('fb-file-input').click()"
+              onclick="if(event.target===this||event.target.closest('#fb-dropzone-content'))document.getElementById('fb-file-input').click()"
               style="border:2px dashed var(--border);border-radius:10px;padding:20px;text-align:center;cursor:pointer;transition:.2s;background:#fafffe;position:relative">
-              <input type="file" id="fb-file-input" accept="image/*" style="display:none" onchange="bienvenidaHandleFile(this.files[0])"/>
+              <input type="file" id="fb-file-input" accept="image/*" style="display:none" onclick="event.stopPropagation()" onchange="bienvenidaHandleFile(this.files[0])"/>
               <div id="fb-dropzone-content">
                 <div style="font-size:28px;margin-bottom:6px">🖼️</div>
                 <div style="font-size:13px;font-weight:600;color:var(--text)">Arrastra tu imagen aquí o haz clic para seleccionar</div>
@@ -1168,7 +1168,7 @@ function renderPagination(containerId, key, totalPages, currentPage, onChangeCb)
   const el = document.getElementById(containerId);
   if (!el) return;
   if (totalPages <= 1) { el.innerHTML=''; return; }
-  let html = `<button onclick="changePage('${key}',${currentPage-1},${onChangeCb})" ${currentPage===1?'disabled':''}>‹</button>`;
+  let html = `<button onclick="changePage('${key}',${currentPage-1},'${onChangeCb}')" ${currentPage===1?'disabled':''}>‹</button>`;
   for (let i=1; i<=totalPages; i++) {
     html += `<button class="${i===currentPage?'active':''}" onclick="changePage('${key}',${i},'${onChangeCb}')">${i}</button>`;
   }
@@ -1468,11 +1468,17 @@ function saveNoticias(e) {
 }
 
 function toggleEstado(key, id, field, val1, val2) {
-  const item = CMSDB.getOne(key, id);
-  if (!item) return;
-  item[field] = item[field]===val1 ? val2 : val1;
-  CMSDB.save(key, item);
-  renderSection(currentSection);
+  try {
+    const item = CMSDB.getOne(key, id);
+    if (!item) return;
+    if (typeof item[field] === 'boolean') {
+      item[field] = !item[field];
+    } else {
+      item[field] = item[field] === val1 ? val2 : val1;
+    }
+    CMSDB.save(key, item);
+    renderSection(currentSection);
+  } catch(e) { console.error('toggleEstado error:', e); }
 }
 
 /* ════════════════════════════════════════
@@ -1740,19 +1746,7 @@ function saveAlertas(e) {
   renderAlertas();
 }
 
-// Override toggleEstado for boolean field
-const _origToggle = toggleEstado;
-window.toggleEstado = function(key, id, field, val1, val2) {
-  const item = CMSDB.getOne(key, id);
-  if (!item) return;
-  if (typeof item[field] === 'boolean') {
-    item[field] = !item[field];
-  } else {
-    item[field] = item[field]===val1 ? val2 : val1;
-  }
-  CMSDB.save(key, item);
-  renderSection(currentSection);
-};
+// toggleEstado handles boolean and string toggling — unified in original declaration above
 
 /* ════════════════════════════════════════
    MULTAS
@@ -2136,8 +2130,10 @@ function deleteConsejo(id) {
 let _editBienvenidaId = null;
 
 function renderBienvenida() {
-  const items = CMSDB.getAll('bienvenida');
+  let items;
+  try { items = CMSDB.getAll('bienvenida'); } catch(e) { items = []; console.error('CMSDB bienvenida error:', e); }
   const el = document.getElementById('tbl-bienvenida');
+  if (!el) return;
   if (!items.length) {
     el.innerHTML = '<div style="text-align:center;padding:32px;color:var(--muted);font-size:13px">No hay configuraciones de bienvenida. Crea una nueva.</div>';
     return;
@@ -2160,15 +2156,38 @@ function renderBienvenida() {
 function bienvenidaHandleFile(file) {
   if (!file) return;
   if (!file.type.startsWith('image/')) { showToast('Solo se permiten imágenes (JPG, PNG, WEBP)', 'error'); return; }
-  if (file.size > 5 * 1024 * 1024) { showToast('La imagen no puede superar 5 MB', 'error'); return; }
+  if (file.size > 8 * 1024 * 1024) { showToast('La imagen no puede superar 8 MB', 'error'); return; }
+
   const reader = new FileReader();
   reader.onload = e => {
-    const b64 = e.target.result;
-    document.getElementById('fb-imagen').value = b64;
-    document.getElementById('fb-img-preview-img').src = b64;
-    document.getElementById('fb-img-name').textContent = `📎 ${file.name} · ${(file.size/1024).toFixed(0)} KB`;
-    document.getElementById('fb-img-preview').style.display = 'block';
-    document.getElementById('fb-dropzone-content').style.display = 'none';
+    const img = new Image();
+    img.onload = () => {
+      // Compress to max 900px wide and ≤ 500 KB via Canvas
+      const MAX_PX = 900;
+      const MAX_BYTES = 500 * 1024;
+      let w = img.width, h = img.height;
+      if (w > MAX_PX) { h = Math.round(h * MAX_PX / w); w = MAX_PX; }
+
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+
+      let quality = 0.82;
+      let b64 = canvas.toDataURL('image/jpeg', quality);
+      // Reduce quality until under 500 KB
+      while (b64.length > MAX_BYTES * 1.37 && quality > 0.4) {
+        quality -= 0.08;
+        b64 = canvas.toDataURL('image/jpeg', quality);
+      }
+
+      const kb = Math.round(b64.length * 0.75 / 1024);
+      document.getElementById('fb-imagen').value = b64;
+      document.getElementById('fb-img-preview-img').src = b64;
+      document.getElementById('fb-img-name').textContent = `📎 ${file.name} · ${kb} KB comprimido (original: ${Math.round(file.size/1024)} KB)`;
+      document.getElementById('fb-img-preview').style.display = 'block';
+      document.getElementById('fb-dropzone-content').style.display = 'none';
+    };
+    img.src = e.target.result;
   };
   reader.readAsDataURL(file);
 }
@@ -2244,7 +2263,8 @@ function renderPlan() {
   const q = (document.getElementById('q-plan')?.value || '').toLowerCase();
   const fEst = document.getElementById('f-plan-estado')?.value || '';
   const fPri = document.getElementById('f-plan-prioridad')?.value || '';
-  let items = CMSDB.getAll('planificacion');
+  let items;
+  try { items = CMSDB.getAll('planificacion'); } catch(e) { items = []; console.error('CMSDB planificacion error:', e); }
   if (q) items = items.filter(p => (p.titulo+p.responsable+p.descripcion).toLowerCase().includes(q));
   if (fEst) items = items.filter(p => p.estado === fEst);
   if (fPri) items = items.filter(p => p.prioridad === fPri);
@@ -2335,7 +2355,8 @@ function renderRevistas() {
   const q    = (document.getElementById('q-revista')?.value || '').toLowerCase();
   const fEst = document.getElementById('f-revista-estado')?.value || '';
   const fCat = document.getElementById('f-revista-cat')?.value || '';
-  let items  = CMSDB.getAll('revistas');
+  let items;
+  try { items = CMSDB.getAll('revistas'); } catch(e) { items = []; console.error('CMSDB revistas error:', e); }
   if (q)    items = items.filter(r => (r.titulo+r.numero_edicion+r.descripcion).toLowerCase().includes(q));
   if (fEst) items = items.filter(r => r.estado === fEst);
   if (fCat) items = items.filter(r => r.categoria === fCat);
@@ -2562,7 +2583,7 @@ function renderBlocks() {
       const isLong = ['contenido','filas_json','imagenes_csv'].includes(f);
       const isColor = f === 'color_fondo';
       if (isColor) return `<div style="display:flex;flex-direction:column;gap:4px"><label style="font-size:10px;font-weight:600;color:#4a8a6a;text-transform:uppercase">${lbl}</label><input type="color" value="${val||'#1d6b3e'}" onchange="updateBlockField(${i},'${f}',this.value)" style="height:32px;border:1px solid #d4edd8;border-radius:6px;cursor:pointer;width:80px"/></div>`;
-      if (isLong) return `<div style="display:flex;flex-direction:column;gap:4px;grid-column:1/-1"><label style="font-size:10px;font-weight:600;color:#4a8a6a;text-transform:uppercase">${lbl}</label><textarea rows="4" onchange="updateBlockField(${i},'${f}',this.value)" style="padding:8px 10px;border:1px solid #d4edd8;border-radius:6px;font-size:12px;outline:none;resize:vertical;font-family:inherit">${val}</textarea></div>`;
+      if (isLong) return `<div style="display:flex;flex-direction:column;gap:4px;grid-column:1/-1"><label style="font-size:10px;font-weight:600;color:#4a8a6a;text-transform:uppercase">${lbl}</label><textarea rows="4" onchange="updateBlockField(${i},'${f}',this.value)" style="padding:8px 10px;border:1px solid #d4edd8;border-radius:6px;font-size:12px;outline:none;resize:vertical;font-family:inherit">${escHtml(String(val))}</textarea></div>`;
       return `<div style="display:flex;flex-direction:column;gap:4px"><label style="font-size:10px;font-weight:600;color:#4a8a6a;text-transform:uppercase">${lbl}</label><input type="text" value="${String(val).replace(/"/g,'&quot;')}" oninput="updateBlockField(${i},'${f}',this.value)" style="padding:7px 10px;border:1px solid #d4edd8;border-radius:6px;font-size:12px;outline:none"/></div>`;
     }).join('');
 
