@@ -284,6 +284,8 @@ input,select,textarea{font-family:inherit}
   .stats-grid{grid-template-columns:1fr 1fr}
   .page-header{flex-direction:column;align-items:flex-start}
 }
+#fb-dropzone.dz-over{border-color:var(--primary);background:#e8f5ee}
+#fb-dropzone:hover{border-color:#a8dfc0;background:#f0faf5}
 </style>
 </head>
 <body>
@@ -850,7 +852,31 @@ input,select,textarea{font-family:inherit}
           <div style="display:flex;flex-direction:column;gap:5px"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Título *</label><input type="text" id="fb-titulo" placeholder="Bienvenido a IAGAMI" style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none"/></div>
           <div style="display:flex;flex-direction:column;gap:5px"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Color de fondo</label><input type="color" id="fb-color_fondo" value="#1d6b3e" style="padding:4px 8px;border:1px solid var(--border);border-radius:8px;font-size:13px;height:38px;width:100%;cursor:pointer"/></div>
           <div style="display:flex;flex-direction:column;gap:5px;grid-column:1/-1"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Mensaje</label><textarea id="fb-mensaje" rows="3" placeholder="Mensaje institucional de bienvenida..." style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none;resize:vertical;font-family:inherit"></textarea></div>
-          <div style="display:flex;flex-direction:column;gap:5px;grid-column:1/-1"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">URL de imagen (opcional)</label><input type="url" id="fb-imagen" placeholder="https://..." style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none"/></div>
+          <div style="display:flex;flex-direction:column;gap:8px;grid-column:1/-1">
+            <label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Imagen de bienvenida (opcional)</label>
+            <!-- Drop zone -->
+            <div id="fb-dropzone"
+              ondragover="event.preventDefault();this.classList.add('dz-over')"
+              ondragleave="this.classList.remove('dz-over')"
+              ondrop="event.preventDefault();this.classList.remove('dz-over');bienvenidaHandleFile(event.dataTransfer.files[0])"
+              onclick="document.getElementById('fb-file-input').click()"
+              style="border:2px dashed var(--border);border-radius:10px;padding:20px;text-align:center;cursor:pointer;transition:.2s;background:#fafffe;position:relative">
+              <input type="file" id="fb-file-input" accept="image/*" style="display:none" onchange="bienvenidaHandleFile(this.files[0])"/>
+              <div id="fb-dropzone-content">
+                <div style="font-size:28px;margin-bottom:6px">🖼️</div>
+                <div style="font-size:13px;font-weight:600;color:var(--text)">Arrastra tu imagen aquí o haz clic para seleccionar</div>
+                <div style="font-size:11px;color:var(--muted);margin-top:4px">JPG, PNG, WEBP · Máx. 5 MB</div>
+              </div>
+            </div>
+            <!-- Preview -->
+            <div id="fb-img-preview" style="display:none;position:relative;border-radius:10px;overflow:hidden;border:1px solid var(--border)">
+              <img id="fb-img-preview-img" src="" alt="Vista previa" style="width:100%;max-height:220px;object-fit:cover;display:block"/>
+              <button onclick="bienvenidaRemoveImg()" style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:20px;padding:4px 11px;font-size:12px;cursor:pointer;font-weight:600">✕ Quitar</button>
+              <div style="padding:8px 12px;background:#f0faf5;font-size:11px;color:#4a8a6a" id="fb-img-name"></div>
+            </div>
+            <!-- Hidden field stores base64 or URL -->
+            <input type="hidden" id="fb-imagen"/>
+          </div>
           <div style="display:flex;align-items:center;gap:10px;margin-top:4px"><input type="checkbox" id="fb-activa" style="width:16px;height:16px;cursor:pointer"/><label for="fb-activa" style="font-size:13px;cursor:pointer">Activar pantalla de bienvenida</label></div>
           <div style="display:flex;align-items:center;gap:10px;margin-top:4px"><input type="checkbox" id="fb-mostrarSiempre" style="width:16px;height:16px;cursor:pointer"/><label for="fb-mostrarSiempre" style="font-size:13px;cursor:pointer">Mostrar en cada visita (no solo una vez)</label></div>
         </div>
@@ -2130,6 +2156,40 @@ function renderBienvenida() {
   </tbody></table>`;
 }
 
+/* ── Bienvenida image upload helpers ── */
+function bienvenidaHandleFile(file) {
+  if (!file) return;
+  if (!file.type.startsWith('image/')) { showToast('Solo se permiten imágenes (JPG, PNG, WEBP)', 'error'); return; }
+  if (file.size > 5 * 1024 * 1024) { showToast('La imagen no puede superar 5 MB', 'error'); return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    const b64 = e.target.result;
+    document.getElementById('fb-imagen').value = b64;
+    document.getElementById('fb-img-preview-img').src = b64;
+    document.getElementById('fb-img-name').textContent = `📎 ${file.name} · ${(file.size/1024).toFixed(0)} KB`;
+    document.getElementById('fb-img-preview').style.display = 'block';
+    document.getElementById('fb-dropzone-content').style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+
+function bienvenidaRemoveImg() {
+  document.getElementById('fb-imagen').value = '';
+  document.getElementById('fb-img-preview-img').src = '';
+  document.getElementById('fb-img-preview').style.display = 'none';
+  document.getElementById('fb-dropzone-content').style.display = 'block';
+  document.getElementById('fb-file-input').value = '';
+}
+
+function bienvenidaLoadPreview(src) {
+  if (!src) { bienvenidaRemoveImg(); return; }
+  document.getElementById('fb-imagen').value = src;
+  document.getElementById('fb-img-preview-img').src = src;
+  document.getElementById('fb-img-name').textContent = src.startsWith('data:') ? '📎 Imagen cargada' : `🔗 ${src.slice(0,60)}`;
+  document.getElementById('fb-img-preview').style.display = 'block';
+  document.getElementById('fb-dropzone-content').style.display = 'none';
+}
+
 function openBienvenidaForm(id) {
   _editBienvenidaId = id || null;
   const items = CMSDB.getAll('bienvenida');
@@ -2137,10 +2197,11 @@ function openBienvenidaForm(id) {
   document.getElementById('ftitle-bienvenida').textContent = id ? '✏️ Editar Bienvenida' : '🌟 Nueva Bienvenida';
   document.getElementById('fb-titulo').value = item ? item.titulo : '';
   document.getElementById('fb-mensaje').value = item ? item.mensaje : '';
-  document.getElementById('fb-imagen').value = item ? item.imagen||'' : '';
   document.getElementById('fb-color_fondo').value = item ? item.color_fondo||'#1d6b3e' : '#1d6b3e';
   document.getElementById('fb-activa').checked = item ? !!item.activa : false;
   document.getElementById('fb-mostrarSiempre').checked = item ? !!item.mostrarSiempre : false;
+  // Load image preview if exists
+  if (item && item.imagen) { bienvenidaLoadPreview(item.imagen); } else { bienvenidaRemoveImg(); }
   document.getElementById('form-bienvenida').style.display = 'block';
   document.getElementById('form-bienvenida').scrollIntoView({behavior:'smooth'});
 }
@@ -2161,8 +2222,8 @@ function saveBienvenida() {
     activa: document.getElementById('fb-activa').checked,
     mostrarSiempre: document.getElementById('fb-mostrarSiempre').checked
   };
-  if (_editBienvenidaId) { CMSDB.update('bienvenida', _editBienvenidaId, data); }
-  else { CMSDB.add('bienvenida', data); }
+  if (_editBienvenidaId) { CMSDB.save('bienvenida', Object.assign({}, data, {id: _editBienvenidaId})); }
+  else { CMSDB.save('bienvenida', data); }
   closeBienvenidaForm();
   renderBienvenida();
   showToast('Bienvenida guardada correctamente', 'success');
