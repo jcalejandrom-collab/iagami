@@ -330,6 +330,21 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 .empty-state{text-align:center;padding:32px 16px;color:#4a8a6a;font-size:13px}
 .empty-state .ico{font-size:32px;margin-bottom:10px}
 
+/* ===== DROP ZONE ===== */
+.drop-zone{border:2px dashed #a8dfc0;border-radius:10px;padding:22px 16px;text-align:center;cursor:pointer;transition:.2s;background:#f8fcfa;user-select:none}
+.drop-zone:hover,.drop-zone.over{border-color:#1d6b3e;background:#e8f5ee}
+.dz-icon{font-size:28px;margin-bottom:6px}
+.dz-text{font-size:13px;color:#1a3d2b;margin-bottom:3px}
+.dz-sub{font-size:11px;color:#4a8a6a}
+.adjuntos-preview{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+.adj-item{position:relative;border:1px solid #d4edd8;border-radius:8px;overflow:hidden;background:#fff;width:90px;flex-shrink:0}
+.adj-img{width:90px;height:70px;object-fit:cover;display:block}
+.adj-file{width:90px;height:70px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:10px;color:#4a8a6a;padding:4px}
+.adj-file-ico{font-size:26px}
+.adj-name{font-size:9px;color:#4a8a6a;text-align:center;padding:3px 4px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;max-width:88px}
+.adj-remove{position:absolute;top:2px;right:2px;width:18px;height:18px;background:rgba(220,38,38,.9);border:none;border-radius:50%;color:#fff;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1}
+.adj-size{font-size:9px;color:#4a8a6a;text-align:center;padding-bottom:3px}
+
 /* ===== RESPONSIVE ===== */
 @media(max-width:900px){
   .hero-content{grid-template-columns:1fr}
@@ -685,6 +700,17 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
               <input id="den-cedula" class="finput" placeholder="Cédula de identidad"/>
             </div>
           </div>
+          <!-- ADJUNTOS -->
+          <div class="fg">
+            <label class="flabel">Fotos o documentos adjuntos <span style="font-weight:400;color:#4a8a6a">(opcional)</span></label>
+            <div id="drop-zone" class="drop-zone" onclick="document.getElementById('den-archivos').click()" ondragover="dzOver(event)" ondragleave="dzLeave(event)" ondrop="dzDrop(event)" role="button" tabindex="0" aria-label="Zona para adjuntar archivos" onkeydown="if(event.key==='Enter')this.click()">
+              <div class="dz-icon">📎</div>
+              <div class="dz-text">Arrastra archivos aquí o <strong>haz clic para seleccionar</strong></div>
+              <div class="dz-sub">JPG, PNG, GIF, PDF, DOC, DOCX, MP4 · Máx. 5 archivos · 10 MB cada uno</div>
+              <input id="den-archivos" type="file" multiple accept="image/*,.pdf,.doc,.docx,.mp4,.mov" style="display:none" onchange="handleFiles(this.files)"/>
+            </div>
+            <div id="adjuntos-preview" class="adjuntos-preview"></div>
+          </div>
           <div class="fnote">🔒 Tu identidad es <strong>confidencial</strong>. La denuncia es analizada automáticamente por IAGAMI IA y asignada al área competente. Número de caso generado al enviar.</div>
           <button class="fsubmit" onclick="enviarDenuncia()">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
@@ -906,6 +932,78 @@ function getGPS() {
   );
 }
 
+/* ─── ADJUNTOS ─── */
+const MAX_FILES = 5;
+const MAX_SIZE  = 10 * 1024 * 1024; // 10 MB
+let adjuntosData = []; // { name, type, size, dataUrl }
+
+function dzOver(e) {
+  e.preventDefault();
+  document.getElementById('drop-zone').classList.add('over');
+}
+function dzLeave(e) {
+  document.getElementById('drop-zone').classList.remove('over');
+}
+function dzDrop(e) {
+  e.preventDefault();
+  document.getElementById('drop-zone').classList.remove('over');
+  handleFiles(e.dataTransfer.files);
+}
+
+function handleFiles(fileList) {
+  const files = Array.from(fileList);
+  const remaining = MAX_FILES - adjuntosData.length;
+  if (remaining <= 0) { toast('Máximo ' + MAX_FILES + ' archivos permitidos'); return; }
+  const toProcess = files.slice(0, remaining);
+  if (files.length > remaining) toast('Solo se agregaron ' + remaining + ' archivo(s) — límite de ' + MAX_FILES);
+
+  toProcess.forEach(file => {
+    if (file.size > MAX_SIZE) { toast('⚠ "' + file.name + '" supera 10 MB y no fue agregado'); return; }
+    const reader = new FileReader();
+    reader.onload = e => {
+      adjuntosData.push({ name: file.name, type: file.type, size: file.size, dataUrl: e.target.result });
+      renderAdjuntos();
+    };
+    reader.readAsDataURL(file);
+  });
+  // Reset input so same file can be re-selected
+  document.getElementById('den-archivos').value = '';
+}
+
+function renderAdjuntos() {
+  const container = document.getElementById('adjuntos-preview');
+  if (!container) return;
+  container.innerHTML = adjuntosData.map((f, i) => {
+    const isImg = f.type.startsWith('image/');
+    const sizeStr = f.size > 1024*1024 ? (f.size/1024/1024).toFixed(1)+' MB' : Math.round(f.size/1024)+' KB';
+    const fileIcon = f.type.includes('pdf') ? '📄' : f.type.includes('word') || f.type.includes('doc') ? '📝' : f.type.includes('video') ? '🎥' : '📎';
+    return `<div class="adj-item">
+      <button class="adj-remove" onclick="removeAdjunto(${i})" aria-label="Eliminar ${f.name}" title="Eliminar">×</button>
+      ${isImg
+        ? `<img class="adj-img" src="${f.dataUrl}" alt="${f.name}"/>`
+        : `<div class="adj-file"><span class="adj-file-ico">${fileIcon}</span><span style="font-size:9px;color:#4a8a6a;text-align:center;padding:2px 4px">${f.type.split('/')[1]?.toUpperCase()||'FILE'}</span></div>`
+      }
+      <div class="adj-name" title="${f.name}">${f.name}</div>
+      <div class="adj-size">${sizeStr}</div>
+    </div>`;
+  }).join('');
+
+  // Update drop zone label
+  const dz = document.getElementById('drop-zone');
+  if (dz) {
+    const left = MAX_FILES - adjuntosData.length;
+    dz.querySelector('.dz-sub').textContent =
+      adjuntosData.length > 0
+        ? `${adjuntosData.length} archivo(s) adjunto(s) · Puedes agregar ${left} más`
+        : 'JPG, PNG, GIF, PDF, DOC, DOCX, MP4 · Máx. 5 archivos · 10 MB cada uno';
+  }
+}
+
+function removeAdjunto(idx) {
+  adjuntosData.splice(idx, 1);
+  renderAdjuntos();
+}
+
 /* ─── ENVIAR DENUNCIA ─── */
 function enviarDenuncia() {
   const tipo   = document.getElementById('den-tipo').value;
@@ -924,16 +1022,19 @@ function enviarDenuncia() {
     cedula:    document.getElementById('den-cedula').value,
     ubicacion: document.getElementById('input-ubicacion').value,
     estado:    'pendiente',
-    fecha:     new Date().toISOString().slice(0, 10)
+    fecha:     new Date().toISOString().slice(0, 10),
+    adjuntos:  adjuntosData.map(f => ({ name: f.name, type: f.type, size: f.size, dataUrl: f.dataUrl }))
   };
   CMSDB.save('denuncias', item);
 
   const num = 'DEN-' + Date.now().toString().slice(-6);
   const el = document.getElementById('modal-caso-num');
   if (el) el.textContent = 'Número de caso: ' + num;
-  toast('✅ Denuncia enviada · Caso ' + num);
+  const adjMsg = adjuntosData.length ? ` · ${adjuntosData.length} archivo(s) adjunto(s)` : '';
+  toast('✅ Denuncia enviada · Caso ' + num + adjMsg);
   setTimeout(() => openModal('modal-denuncia-ok'), 400);
 
+  // Reset form
   document.getElementById('den-tipo').value    = '';
   document.getElementById('den-desc').value    = '';
   document.getElementById('den-nombre').value  = '';
@@ -942,6 +1043,8 @@ function enviarDenuncia() {
   document.getElementById('den-cedula').value  = '';
   document.getElementById('input-ubicacion').value = '';
   document.getElementById('ai-box').style.display  = 'none';
+  adjuntosData = [];
+  renderAdjuntos();
 }
 
 /* ═══════════════════════════════════════
