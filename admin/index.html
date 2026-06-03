@@ -905,6 +905,100 @@ input,select,textarea{font-family:inherit}
   </div>
 </div>
 
+    <!-- REVISTA SECTION -->
+    <div class="section" id="sec-revista">
+      <div class="page-header">
+        <div><div class="page-title">📰 Revista Digital</div><div class="page-subtitle">Crea y gestiona las ediciones de la Revista Digital IAGAMI</div></div>
+        <button class="btn btn-primary" onclick="openRevistaForm()">+ Nueva Revista</button>
+      </div>
+
+      <!-- LIST VIEW -->
+      <div id="revista-list-view">
+        <div class="toolbar">
+          <input type="text" class="search-input" id="q-revista" placeholder="Buscar por título, edición..." oninput="renderRevistas()" style="flex:1;min-width:200px"/>
+          <select id="f-revista-estado" onchange="renderRevistas()" style="padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px">
+            <option value="">Todos los estados</option>
+            <option value="borrador">Borrador</option>
+            <option value="publicada">Publicada</option>
+            <option value="archivada">Archivada</option>
+          </select>
+          <select id="f-revista-cat" onchange="renderRevistas()" style="padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px">
+            <option value="">Todas las categorías</option>
+            <option value="Ambiental">Ambiental</option>
+            <option value="Institucional">Institucional</option>
+            <option value="Educativa">Educativa</option>
+            <option value="Técnica">Técnica</option>
+            <option value="Especial">Especial</option>
+          </select>
+        </div>
+        <div id="tbl-revista"></div>
+      </div>
+
+      <!-- META FORM (create/edit metadata) -->
+      <div id="revista-meta-form" style="display:none;background:#fff;border:1px solid var(--border);border-radius:12px;padding:24px;margin-top:16px">
+        <div style="font-family:'Poppins',sans-serif;font-size:16px;font-weight:700;color:var(--text);margin-bottom:20px" id="revista-meta-title">📰 Nueva Revista</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">
+          <div style="display:flex;flex-direction:column;gap:5px;grid-column:1/-1"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Título *</label><input type="text" id="rv-titulo" placeholder="Ej: Revista IAGAMI Nº 1 — Gestión Ambiental 2026" style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none"/></div>
+          <div style="display:flex;flex-direction:column;gap:5px"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Número de edición *</label><input type="text" id="rv-numero" placeholder="Ej: 01" style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none"/></div>
+          <div style="display:flex;flex-direction:column;gap:5px"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Fecha de publicación</label><input type="date" id="rv-fecha" style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none"/></div>
+          <div style="display:flex;flex-direction:column;gap:5px"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Categoría</label><select id="rv-categoria" style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none"><option value="Ambiental">Ambiental</option><option value="Institucional">Institucional</option><option value="Educativa">Educativa</option><option value="Técnica">Técnica</option><option value="Especial">Especial</option></select></div>
+          <div style="display:flex;flex-direction:column;gap:5px"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Estado</label><select id="rv-estado" style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none"><option value="borrador">Borrador</option><option value="publicada">Publicada</option><option value="archivada">Archivada</option></select></div>
+          <div style="display:flex;flex-direction:column;gap:5px;grid-column:1/-1"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Descripción</label><textarea id="rv-descripcion" rows="3" placeholder="Descripción breve de esta edición..." style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none;resize:vertical;font-family:inherit"></textarea></div>
+          <div style="display:flex;flex-direction:column;gap:5px;grid-column:1/-1"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">URL de portada (imagen)</label><input type="url" id="rv-portada" placeholder="https://..." style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none"/></div>
+          <div style="display:flex;flex-direction:column;gap:5px;grid-column:1/-1"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">URL de PDF (opcional — si ya tienes el archivo en línea)</label><input type="url" id="rv-pdf" placeholder="https://..." style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none"/></div>
+          <div style="display:flex;align-items:center;gap:10px"><input type="checkbox" id="rv-destacada" style="width:16px;height:16px;cursor:pointer"/><label for="rv-destacada" style="font-size:13px;cursor:pointer">Marcar como revista destacada</label></div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:20px">
+          <button class="btn btn-primary" onclick="saveRevistaMeta()">💾 Guardar y continuar al editor</button>
+          <button class="btn btn-secondary" onclick="closeRevistaMetaForm()">Cancelar</button>
+        </div>
+      </div>
+
+      <!-- BLOCK EDITOR -->
+      <div id="revista-editor" style="display:none;margin-top:16px">
+        <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
+          <div>
+            <div style="font-family:'Poppins',sans-serif;font-size:15px;font-weight:700;color:var(--text)" id="editor-revista-title">Editor de Revista</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:2px">Añade y ordena bloques de contenido para construir la revista</div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-secondary" onclick="backToRevistaMeta()">✏️ Editar datos</button>
+            <button class="btn btn-secondary" onclick="previewRevista()">👁 Vista previa</button>
+            <button class="btn btn-primary" onclick="saveRevistaBlocks()">💾 Guardar revista</button>
+            <button class="btn" style="background:var(--border);color:var(--text)" onclick="closeEditor()">✕ Cerrar editor</button>
+          </div>
+        </div>
+
+        <!-- Block type buttons -->
+        <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:16px">
+          <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">Añadir bloque</div>
+          <div style="display:flex;flex-wrap:wrap;gap:7px" id="block-type-buttons">
+            <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px" onclick="addBlock('portada')">🎨 Portada</button>
+            <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px" onclick="addBlock('encabezado')">📌 Encabezado</button>
+            <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px" onclick="addBlock('texto')">📝 Texto</button>
+            <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px" onclick="addBlock('articulo')">📰 Artículo</button>
+            <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px" onclick="addBlock('cita')">💬 Cita</button>
+            <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px" onclick="addBlock('imagen')">🖼️ Imagen</button>
+            <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px" onclick="addBlock('galeria')">🗂️ Galería</button>
+            <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px" onclick="addBlock('tabla')">📊 Tabla</button>
+            <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px" onclick="addBlock('video')">🎬 Video</button>
+            <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px" onclick="addBlock('enlace')">🔗 Enlace</button>
+            <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px" onclick="addBlock('separador')">➖ Separador</button>
+            <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px" onclick="addBlock('noticias')">📣 Noticias</button>
+          </div>
+        </div>
+
+        <!-- Blocks canvas -->
+        <div id="blocks-canvas" style="display:flex;flex-direction:column;gap:10px;min-height:100px">
+          <!-- blocks rendered here -->
+        </div>
+        <div id="blocks-empty" style="text-align:center;padding:32px;background:#fff;border:2px dashed var(--border);border-radius:12px;display:none">
+          <div style="font-size:36px;margin-bottom:8px">📄</div>
+          <div style="font-size:13px;color:var(--muted)">La revista está vacía. Agrega bloques usando los botones de arriba.</div>
+        </div>
+      </div>
+    </div>
+
 <!-- DELETE MODAL -->
 <div id="modal-overlay">
   <div class="modal">
@@ -941,6 +1035,7 @@ const NAV = [
   {id:'consejos',      icon:'🏘️', label:'Consejos Comunales'},
   {id:'bienvenida',    icon:'🌟', label:'Pantalla de Bienvenida'},
   {id:'planificacion', icon:'📆', label:'Planificación'},
+  {id:'revista',       icon:'📰', label:'Revista Digital'},
 ];
 
 let currentSection = 'dashboard';
@@ -991,6 +1086,7 @@ function renderSection(name) {
     case 'consejos':      renderConsejos(); break;
     case 'bienvenida':    renderBienvenida(); break;
     case 'planificacion': renderPlan(); break;
+    case 'revista':       renderRevistas(); break;
   }
 }
 
@@ -2164,6 +2260,273 @@ function deletePlan(id) {
   CMSDB.delete('planificacion', id);
   renderPlan();
   showToast('Actividad eliminada', 'success');
+}
+
+/* ═══════════════════════════════════════════════
+   REVISTA DIGITAL — ADMIN MODULE
+═══════════════════════════════════════════════ */
+let _revistaEditId = null;
+let _revistaBlocks  = [];
+let _dragSrcIdx     = null;
+
+/* ── LIST VIEW ── */
+function renderRevistas() {
+  const q    = (document.getElementById('q-revista')?.value || '').toLowerCase();
+  const fEst = document.getElementById('f-revista-estado')?.value || '';
+  const fCat = document.getElementById('f-revista-cat')?.value || '';
+  let items  = CMSDB.getAll('revistas');
+  if (q)    items = items.filter(r => (r.titulo+r.numero_edicion+r.descripcion).toLowerCase().includes(q));
+  if (fEst) items = items.filter(r => r.estado === fEst);
+  if (fCat) items = items.filter(r => r.categoria === fCat);
+
+  const el = document.getElementById('tbl-revista');
+  if (!el) return;
+
+  if (!items.length) {
+    el.innerHTML = '<div style="text-align:center;padding:32px;color:var(--muted);font-size:13px">No hay revistas aún. Crea la primera edición.</div>';
+    return;
+  }
+
+  const estadoClr = {borrador:'#fef3c7;color:#92400e',publicada:'#dcfce7;color:#166534',archivada:'#f1f5f9;color:#475569'};
+  el.innerHTML = `<table class="table"><thead><tr><th>N°</th><th>Título</th><th>Categoría</th><th>Fecha</th><th>Estado</th><th>Destacada</th><th>Des.</th><th style="width:140px">Acciones</th></tr></thead><tbody>
+  ${items.map(r => `<tr>
+    <td style="font-weight:700;color:var(--primary)">${r.numero_edicion||'—'}</td>
+    <td style="font-weight:600;max-width:220px">${r.titulo||'—'}</td>
+    <td><span style="font-size:11px">${r.categoria||'—'}</span></td>
+    <td style="font-size:12px">${r.fecha||'—'}</td>
+    <td><span style="display:inline-block;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:700;background:${estadoClr[r.estado]||estadoClr.borrador}">${r.estado||'borrador'}</span></td>
+    <td style="text-align:center">${r.destacada?'⭐':'—'}</td>
+    <td style="font-size:12px">${r.descargas||0}</td>
+    <td style="display:flex;gap:5px;flex-wrap:wrap">
+      <button class="btn btn-secondary" style="padding:4px 8px;font-size:11px" onclick="openRevistaEditor('${r.id}')">✏️ Editor</button>
+      <button class="btn btn-danger"    style="padding:4px 8px;font-size:11px" onclick="confirmDelete(()=>deleteRevista('${r.id}'))">🗑️</button>
+    </td>
+  </tr>`).join('')}
+  </tbody></table>`;
+}
+
+function deleteRevista(id) {
+  CMSDB.remove('revistas', id);
+  renderRevistas();
+  showToast('Revista eliminada', 'success');
+}
+
+/* ── META FORM ── */
+function openRevistaForm(id) {
+  _revistaEditId = id || null;
+  const items = CMSDB.getAll('revistas');
+  const r = id ? items.find(i => i.id === id) : null;
+
+  document.getElementById('revista-meta-title').textContent = id ? '✏️ Editar datos de revista' : '📰 Nueva Revista';
+  document.getElementById('rv-titulo').value      = r ? r.titulo      : '';
+  document.getElementById('rv-numero').value      = r ? r.numero_edicion : '';
+  document.getElementById('rv-fecha').value       = r ? r.fecha       : new Date().toISOString().slice(0,10);
+  document.getElementById('rv-categoria').value   = r ? r.categoria   : 'Ambiental';
+  document.getElementById('rv-estado').value      = r ? r.estado      : 'borrador';
+  document.getElementById('rv-descripcion').value = r ? r.descripcion : '';
+  document.getElementById('rv-portada').value     = r ? r.portada_url||'' : '';
+  document.getElementById('rv-pdf').value         = r ? r.pdf_url||''     : '';
+  document.getElementById('rv-destacada').checked = r ? !!r.destacada      : false;
+
+  document.getElementById('revista-list-view').style.display  = 'none';
+  document.getElementById('revista-meta-form').style.display  = 'block';
+  document.getElementById('revista-editor').style.display     = 'none';
+}
+
+function closeRevistaMetaForm() {
+  _revistaEditId = null;
+  document.getElementById('revista-list-view').style.display  = 'block';
+  document.getElementById('revista-meta-form').style.display  = 'none';
+  document.getElementById('revista-editor').style.display     = 'none';
+  renderRevistas();
+}
+
+function backToRevistaMeta() {
+  document.getElementById('revista-list-view').style.display  = 'none';
+  document.getElementById('revista-meta-form').style.display  = 'block';
+  document.getElementById('revista-editor').style.display     = 'none';
+}
+
+function saveRevistaMeta() {
+  const titulo  = document.getElementById('rv-titulo').value.trim();
+  const numero  = document.getElementById('rv-numero').value.trim();
+  if (!titulo || !numero) { showToast('Título y número de edición son obligatorios', 'error'); return; }
+
+  const data = {
+    titulo,
+    numero_edicion: numero,
+    fecha:          document.getElementById('rv-fecha').value,
+    categoria:      document.getElementById('rv-categoria').value,
+    estado:         document.getElementById('rv-estado').value,
+    descripcion:    document.getElementById('rv-descripcion').value.trim(),
+    portada_url:    document.getElementById('rv-portada').value.trim(),
+    pdf_url:        document.getElementById('rv-pdf').value.trim(),
+    destacada:      document.getElementById('rv-destacada').checked,
+    visualizaciones: 0,
+    descargas:       0
+  };
+
+  let saved;
+  if (_revistaEditId) {
+    const existing = CMSDB.getOne('revistas', _revistaEditId);
+    saved = CMSDB.save('revistas', Object.assign({}, existing, data, {id: _revistaEditId}));
+  } else {
+    saved = CMSDB.save('revistas', data);
+    _revistaEditId = saved.id;
+  }
+
+  showToast('Datos guardados. Abre el editor de bloques.', 'success');
+  openRevistaEditor(_revistaEditId);
+}
+
+/* ── BLOCK EDITOR ── */
+function openRevistaEditor(id) {
+  _revistaEditId = id;
+  const r = CMSDB.getOne('revistas', id);
+  if (!r) return;
+
+  _revistaBlocks = Array.isArray(r.contenido_bloques) ? JSON.parse(JSON.stringify(r.contenido_bloques)) : [];
+
+  document.getElementById('editor-revista-title').textContent = `📰 ${r.titulo} — Edición ${r.numero_edicion}`;
+  document.getElementById('revista-list-view').style.display  = 'none';
+  document.getElementById('revista-meta-form').style.display  = 'none';
+  document.getElementById('revista-editor').style.display     = 'block';
+
+  renderBlocks();
+}
+
+function closeEditor() {
+  _revistaEditId = null;
+  _revistaBlocks  = [];
+  document.getElementById('revista-list-view').style.display  = 'block';
+  document.getElementById('revista-meta-form').style.display  = 'none';
+  document.getElementById('revista-editor').style.display     = 'none';
+  renderRevistas();
+}
+
+function saveRevistaBlocks() {
+  if (!_revistaEditId) return;
+  const existing = CMSDB.getOne('revistas', _revistaEditId);
+  CMSDB.save('revistas', Object.assign({}, existing, { contenido_bloques: _revistaBlocks }));
+  showToast('Revista guardada correctamente', 'success');
+}
+
+function previewRevista() {
+  if (_revistaEditId) {
+    saveRevistaBlocks();
+    window.open(`../revista/index.html?preview=${_revistaEditId}`, '_blank');
+  }
+}
+
+/* ── BLOCK DEFINITIONS ── */
+const BLOCK_DEFS = {
+  portada:    { label:'🎨 Portada',       fields:['titulo','subtitulo','color_fondo','imagen_url'] },
+  encabezado: { label:'📌 Encabezado',    fields:['titulo','subtitulo'] },
+  texto:      { label:'📝 Texto',         fields:['contenido'] },
+  articulo:   { label:'📰 Artículo',      fields:['titulo','autor','contenido','imagen_url'] },
+  cita:       { label:'💬 Cita',          fields:['texto','autor'] },
+  imagen:     { label:'🖼️ Imagen',        fields:['imagen_url','pie','ancho'] },
+  galeria:    { label:'🗂️ Galería',       fields:['imagenes_csv','columnas'] },
+  tabla:      { label:'📊 Tabla',         fields:['cabecera_csv','filas_json','titulo'] },
+  video:      { label:'🎬 Video',         fields:['url','titulo','descripcion'] },
+  enlace:     { label:'🔗 Enlace',        fields:['url','texto','descripcion'] },
+  separador:  { label:'➖ Separador',     fields:['estilo'] },
+  noticias:   { label:'📣 Noticias',      fields:['cantidad','titulo_seccion'] }
+};
+
+const FIELD_LABELS = {
+  titulo:'Título', subtitulo:'Subtítulo', color_fondo:'Color de fondo',
+  imagen_url:'URL de imagen', contenido:'Contenido (texto)', autor:'Autor',
+  texto:'Texto de la cita', pie:'Pie de imagen', ancho:'Ancho (full/half/auto)',
+  imagenes_csv:'URLs de imágenes (separadas por coma)', columnas:'Columnas (2-4)',
+  cabecera_csv:'Encabezados (separados por coma)', filas_json:'Filas en JSON [["a","b"],["c","d"]]',
+  url:'URL', descripcion:'Descripción', estilo:'Estilo (linea/espacio/decorativo)',
+  cantidad:'Cantidad de noticias', titulo_seccion:'Título de la sección'
+};
+
+function addBlock(tipo) {
+  const defaults = {
+    portada: { titulo:'Bienvenida', subtitulo:'Revista IAGAMI', color_fondo:'#1d6b3e', imagen_url:'' },
+    encabezado: { titulo:'Nueva sección', subtitulo:'' },
+    texto: { contenido:'Escribe aquí el contenido de esta sección...' },
+    articulo: { titulo:'Título del artículo', autor:'', contenido:'Contenido del artículo...', imagen_url:'' },
+    cita: { texto:'Una frase o cita inspiradora sobre medio ambiente.', autor:'— IAGAMI' },
+    imagen: { imagen_url:'', pie:'', ancho:'full' },
+    galeria: { imagenes_csv:'', columnas:'3' },
+    tabla: { cabecera_csv:'Columna 1,Columna 2,Columna 3', filas_json:'[["Dato 1","Dato 2","Dato 3"]]', titulo:'Tabla de datos' },
+    video: { url:'', titulo:'', descripcion:'' },
+    enlace: { url:'', texto:'Ver más', descripcion:'' },
+    separador: { estilo:'linea' },
+    noticias: { cantidad:'3', titulo_seccion:'Noticias Destacadas' }
+  };
+  const block = { id: Date.now().toString(36)+Math.random().toString(36).slice(2,6), tipo, ...defaults[tipo] };
+  _revistaBlocks.push(block);
+  renderBlocks();
+}
+
+function deleteBlock(idx) {
+  _revistaBlocks.splice(idx, 1);
+  renderBlocks();
+}
+
+function moveBlock(idx, dir) {
+  const newIdx = idx + dir;
+  if (newIdx < 0 || newIdx >= _revistaBlocks.length) return;
+  [_revistaBlocks[idx], _revistaBlocks[newIdx]] = [_revistaBlocks[newIdx], _revistaBlocks[idx]];
+  renderBlocks();
+}
+
+function updateBlockField(idx, field, value) {
+  if (_revistaBlocks[idx]) _revistaBlocks[idx][field] = value;
+}
+
+function renderBlocks() {
+  const canvas = document.getElementById('blocks-canvas');
+  const empty  = document.getElementById('blocks-empty');
+  if (!canvas) return;
+
+  if (!_revistaBlocks.length) {
+    canvas.style.display = 'none';
+    empty.style.display  = 'block';
+    return;
+  }
+  canvas.style.display = 'flex';
+  empty.style.display  = 'none';
+
+  canvas.innerHTML = _revistaBlocks.map((b, i) => {
+    const def    = BLOCK_DEFS[b.tipo] || { label: b.tipo, fields:[] };
+    const fields = def.fields.map(f => {
+      const lbl = FIELD_LABELS[f] || f;
+      const val = (b[f] !== undefined ? b[f] : '');
+      const isLong = ['contenido','filas_json','imagenes_csv'].includes(f);
+      const isColor = f === 'color_fondo';
+      if (isColor) return `<div style="display:flex;flex-direction:column;gap:4px"><label style="font-size:10px;font-weight:600;color:#4a8a6a;text-transform:uppercase">${lbl}</label><input type="color" value="${val||'#1d6b3e'}" onchange="updateBlockField(${i},'${f}',this.value)" style="height:32px;border:1px solid #d4edd8;border-radius:6px;cursor:pointer;width:80px"/></div>`;
+      if (isLong) return `<div style="display:flex;flex-direction:column;gap:4px;grid-column:1/-1"><label style="font-size:10px;font-weight:600;color:#4a8a6a;text-transform:uppercase">${lbl}</label><textarea rows="4" onchange="updateBlockField(${i},'${f}',this.value)" style="padding:8px 10px;border:1px solid #d4edd8;border-radius:6px;font-size:12px;outline:none;resize:vertical;font-family:inherit">${val}</textarea></div>`;
+      return `<div style="display:flex;flex-direction:column;gap:4px"><label style="font-size:10px;font-weight:600;color:#4a8a6a;text-transform:uppercase">${lbl}</label><input type="text" value="${String(val).replace(/"/g,'&quot;')}" oninput="updateBlockField(${i},'${f}',this.value)" style="padding:7px 10px;border:1px solid #d4edd8;border-radius:6px;font-size:12px;outline:none"/></div>`;
+    }).join('');
+
+    return `<div class="block-item" draggable="true"
+      ondragstart="_dragSrcIdx=${i};event.dataTransfer.effectAllowed='move'"
+      ondragover="event.preventDefault();event.dataTransfer.dropEffect='move'"
+      ondrop="event.preventDefault();if(_dragSrcIdx!==null&&_dragSrcIdx!==${i}){const t=_revistaBlocks.splice(_dragSrcIdx,1)[0];_revistaBlocks.splice(${i},0,t);_dragSrcIdx=null;renderBlocks()}"
+      style="background:#fff;border:1px solid var(--border);border-radius:10px;overflow:hidden;cursor:grab">
+      <div style="background:#f8fcfa;border-bottom:1px solid #e8f5ee;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:10px;color:#a8c0b0;cursor:grab">⠿⠿</span>
+          <span style="font-size:12px;font-weight:700;color:#1a3d2b">${def.label}</span>
+          <span style="font-size:10px;color:#4a8a6a;background:#e8f5ee;border-radius:10px;padding:1px 7px">#${i+1}</span>
+        </div>
+        <div style="display:flex;gap:5px">
+          <button onclick="moveBlock(${i},-1)" style="background:none;border:1px solid #d4edd8;border-radius:5px;padding:2px 7px;font-size:11px;cursor:pointer" title="Subir">▲</button>
+          <button onclick="moveBlock(${i},1)"  style="background:none;border:1px solid #d4edd8;border-radius:5px;padding:2px 7px;font-size:11px;cursor:pointer" title="Bajar">▼</button>
+          <button onclick="deleteBlock(${i})"  style="background:#fee2e2;border:1px solid #fca5a5;border-radius:5px;padding:2px 7px;font-size:11px;cursor:pointer;color:#991b1b">✕</button>
+        </div>
+      </div>
+      <div style="padding:14px;display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        ${fields}
+      </div>
+    </div>`;
+  }).join('');
 }
 
 /* ─── INIT ─── */

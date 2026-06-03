@@ -23,7 +23,8 @@ const CMSDB = (() => {
     media:       'iagami_cms_media',
     consejos:    'iagami_cms_consejos',
     bienvenida:   'iagami_cms_bienvenida',
-    planificacion:'iagami_cms_planificacion'
+    planificacion:'iagami_cms_planificacion',
+    revistas:     'iagami_cms_revistas'
   };
 
   /* ─────────────────────────────────────────
@@ -678,6 +679,36 @@ const CMSDB = (() => {
         prioridad: 'alta',
         estado: 'completado',
         avance: 100
+      }
+    ]);
+
+    /* ── REVISTAS ── */
+    _seed('revistas', [
+      {
+        id: 'rev-001',
+        titulo: 'Revista IAGAMI — Gestión Ambiental 2026',
+        numero_edicion: '01',
+        fecha: '2026-06-01',
+        categoria: 'Ambiental',
+        descripcion: 'Primera edición de la Revista Digital IAGAMI. Especial de medio ambiente, logros institucionales y proyectos de gestión ambiental del Municipio Iribarren.',
+        portada_url: '',
+        pdf_url: '',
+        estado: 'publicada',
+        destacada: true,
+        visualizaciones: 0,
+        descargas: 0,
+        contenido_bloques: [
+          { id:'blk-001', tipo:'portada', titulo:'Revista IAGAMI', subtitulo:'Gestión Ambiental — Edición 01 · 2026', color_fondo:'#1d6b3e', imagen_url:'' },
+          { id:'blk-002', tipo:'encabezado', titulo:'Mensaje del Director', subtitulo:'IAGAMI — Municipio Iribarren' },
+          { id:'blk-003', tipo:'texto', contenido:'Estimados ciudadanos del Municipio Iribarren, con gran satisfacción presentamos la primera edición de nuestra Revista Digital IAGAMI, un espacio institucional dedicado a informar, educar y promover la conciencia ambiental en nuestra comunidad. A lo largo de estas páginas encontrarán los avances en materia de gestión ambiental, los proyectos en ejecución y las acciones que juntos hemos logrado para preservar nuestro entorno natural.' },
+          { id:'blk-004', tipo:'cita', texto:'Proteger el ambiente es proteger nuestra identidad como pueblo. Iribarren verde para la vida.', autor:'— Dirección IAGAMI' },
+          { id:'blk-005', tipo:'encabezado', titulo:'Logros del Primer Semestre', subtitulo:'Enero – Junio 2026' },
+          { id:'blk-006', tipo:'articulo', titulo:'Monitoreo de Calidad del Agua', autor:'Dirección de Calidad Ambiental', contenido:'Durante el primer semestre de 2026, se completó el monitoreo de 18 cuerpos de agua del municipio, incluyendo ríos, quebradas y embalses. Los resultados muestran una mejora del 23% en los índices de calidad comparados con el período anterior.', imagen_url:'' },
+          { id:'blk-007', tipo:'separador', estilo:'decorativo' },
+          { id:'blk-008', tipo:'noticias', titulo_seccion:'Noticias Ambientales', cantidad:'3' }
+        ],
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       }
     ]);
   }
