@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Editor Canva — Revista Digital IAGAMI</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet"/>
+<script src="../cms/db.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --primary:#1d6b3e;--primary-dark:#0d2d1a;--primary-light:#e8f5ee;
+  --border:#d4edd8;--text:#1a3d2b;--muted:#4a8a6a;--white:#fff;
+  --danger:#dc2626;--sel:#1d6b3e;
+  --left-w:260px;--right-w:280px;--top-h:52px;
+}
+html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;color:var(--text);background:#f0f4f0}
+a{color:inherit;text-decoration:none}
+button{cursor:pointer;font-family:inherit}
+input,select,textarea{font-family:inherit;color:var(--text)}
+input[type=color]{padding:2px;border-radius:4px;cursor:pointer}
+
+/* ── TOPBAR ── */
+#topbar{
+  position:fixed;top:0;left:0;right:0;height:var(--top-h);
+  background:var(--primary-dark);color:#fff;
+  display:flex;align-items:center;padding:0 16px;gap:12px;z-index:200;
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+.tb-logo{display:flex;align-items:center;gap:8px;padding-right:12px;border-right:1px solid rgba(255,255,255,.15);flex-shrink:0}
+.tb-logo svg{flex-shrink:0}
+.tb-logo-text{font-family:'Poppins',sans-serif;font-size:13px;font-weight:700;color:#fff;line-height:1.1}
+.tb-logo-text small{font-size:10px;font-weight:400;opacity:.65;display:block}
+.tb-title{flex:1;font-size:13.5px;font-weight:600;color:rgba(255,255,255,.9);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tb-actions{display:flex;gap:6px;flex-shrink:0}
+.tb-btn{display:inline-flex;align-items:center;gap:5px;padding:6px 13px;border-radius:7px;font-size:12.5px;font-weight:600;border:none;transition:all .15s;cursor:pointer}
+.tb-btn-ghost{background:rgba(255,255,255,.1);color:rgba(255,255,255,.9)}
+.tb-btn-ghost:hover{background:rgba(255,255,255,.2)}
+.tb-btn-save{background:#1d6b3e;color:#fff}
+.tb-btn-save:hover{background:#155c32}
+.tb-btn-preview{background:rgba(255,255,255,.1);color:rgba(255,255,255,.9);border:1px solid rgba(255,255,255,.2)}
+.tb-btn-preview:hover{background:rgba(255,255,255,.2)}
+.tb-btn-publish{background:#4ade80;color:#0d2d1a}
+.tb-btn-publish:hover{background:#22c55e}
+
+/* ── LAYOUT ── */
+#layout{display:flex;height:100vh;padding-top:var(--top-h)}
+
+/* ── LEFT PANEL ── */
+#left-panel{
+  width:var(--left-w);flex-shrink:0;background:#fff;border-right:1px solid var(--border);
+  display:flex;flex-direction:column;overflow:hidden;
+}
+.panel-section{padding:12px;border-bottom:1px solid var(--border)}
+.panel-section-title{font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+
+/* Palette */
+.palette-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.palette-btn{
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  padding:8px 4px;border-radius:7px;border:1px solid var(--border);
+  background:#fafdfb;font-size:10px;font-weight:500;color:var(--text);
+  transition:.15s;cursor:pointer;
+}
+.palette-btn:hover{background:var(--primary-light);border-color:var(--primary);color:var(--primary)}
+.palette-btn .pb-ico{font-size:18px;line-height:1}
+.palette-btn .pb-lbl{font-size:10px;text-align:center;line-height:1.2}
+
+/* Templates */
+.tmpl-btn{
+  display:flex;align-items:center;gap:8px;width:100%;
+  padding:8px 10px;border-radius:7px;border:1px solid var(--border);
+  background:#fafdfb;font-size:12px;font-weight:500;color:var(--text);
+  margin-bottom:5px;transition:.15s;
+}
+.tmpl-btn:hover{background:var(--primary-light);border-color:var(--primary);color:var(--primary)}
+.tmpl-btn .ti{font-size:15px}
+.tmpl-btn .tl{flex:1;text-align:left}
+.tmpl-btn .tdesc{font-size:10px;color:var(--muted);display:block;line-height:1.3}
+
+/* ── CENTER CANVAS ── */
+#canvas-area{
+  flex:1;overflow-y:auto;overflow-x:hidden;
+  background:#dde5de;padding:24px;
+  display:flex;flex-direction:column;align-items:center;
+}
+#canvas-inner{width:100%;max-width:780px;display:flex;flex-direction:column;gap:0}
+
+.canvas-drop-zone{
+  height:8px;border-radius:4px;margin:2px 0;transition:.2s;
+  border:2px dashed transparent;
+}
+.canvas-drop-zone.drag-over{
+  height:32px;border-color:var(--primary);background:var(--primary-light);
+}
+
+.canvas-block{
+  position:relative;margin:0;border-radius:6px;
+  border:2px solid transparent;cursor:pointer;
+  transition:border-color .15s,box-shadow .15s;
+  background:#fff;
+}
+.canvas-block:hover{border-color:#a8dfc0}
+.canvas-block.selected{border-color:var(--sel);box-shadow:0 0 0 3px rgba(29,107,62,.12)}
+.canvas-block.drag-src{opacity:.4}
+
+.block-controls{
+  display:none;position:absolute;top:6px;right:6px;z-index:20;
+  background:#fff;border-radius:7px;box-shadow:0 2px 8px rgba(0,0,0,.15);
+  padding:3px;gap:2px;align-items:center;
+}
+.canvas-block:hover .block-controls,
+.canvas-block.selected .block-controls{display:flex}
+.block-controls button{
+  border:none;background:none;cursor:pointer;padding:4px 6px;
+  border-radius:5px;font-size:12px;color:var(--muted);transition:.1s;
+}
+.block-controls button:hover{background:#f0f0f0;color:var(--text)}
+.block-controls .btn-del:hover{background:#fee2e2;color:var(--danger)}
+.block-type-label{
+  display:none;position:absolute;top:6px;left:6px;
+  background:rgba(29,107,62,.9);color:#fff;font-size:9px;font-weight:700;
+  padding:2px 6px;border-radius:4px;letter-spacing:.05em;text-transform:uppercase;z-index:20;
+}
+.canvas-block:hover .block-type-label,
+.canvas-block.selected .block-type-label{display:block}
+
+/* ── RIGHT PANEL ── */
+#right-panel{
+  width:var(--right-w);flex-shrink:0;background:#fff;border-left:1px solid var(--border);
+  display:flex;flex-direction:column;overflow:hidden;
+}
+#right-panel-content{flex:1;overflow-y:auto;padding:14px}
+.rp-empty{text-align:center;padding:40px 20px;color:var(--muted)}
+.rp-empty .rp-ico{font-size:32px;margin-bottom:10px}
+.rp-empty p{font-size:12.5px;line-height:1.6}
+.rp-title{font-family:'Poppins',sans-serif;font-size:14px;font-weight:700;color:var(--text);margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+
+.field-group{margin-bottom:12px}
+.field-label{font-size:11px;font-weight:600;color:var(--muted);margin-bottom:4px;display:block;text-transform:uppercase;letter-spacing:.06em}
+.field-input{
+  width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:6px;
+  font-size:13px;outline:none;background:#fff;
+}
+.field-input:focus{border-color:var(--primary)}
+.field-textarea{resize:vertical;min-height:72px}
+.field-row{display:flex;gap:6px}
+.field-row .field-group{flex:1;margin-bottom:0}
+
+.seg-btn-group{display:flex;gap:4px;flex-wrap:wrap}
+.seg-btn{
+  padding:4px 10px;border-radius:5px;border:1px solid var(--border);
+  font-size:11.5px;font-weight:600;background:#fafdfb;color:var(--muted);cursor:pointer;transition:.1s;
+}
+.seg-btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.seg-btn:hover:not(.active){background:var(--primary-light);color:var(--primary);border-color:var(--primary)}
+
+.field-divider{border:none;border-top:1px solid var(--border);margin:12px 0}
+
+.bar-row{display:flex;gap:4px;align-items:center;margin-bottom:6px;background:#fafdfb;border:1px solid var(--border);border-radius:6px;padding:6px}
+.bar-row input[type=text]{flex:1;padding:4px 6px;border:1px solid var(--border);border-radius:4px;font-size:11.5px;outline:none}
+.bar-row input[type=number]{width:56px;padding:4px 6px;border:1px solid var(--border);border-radius:4px;font-size:11.5px;outline:none}
+.bar-row input[type=color]{width:28px;height:24px;border:1px solid var(--border);border-radius:4px;padding:1px}
+.bar-row button{background:none;border:1px solid #fca5a5;border-radius:4px;padding:3px 6px;color:var(--danger);cursor:pointer;font-size:11px}
+.bar-row button:hover{background:#fee2e2}
+.add-bar-btn{width:100%;padding:5px;background:none;border:1px dashed var(--border);border-radius:6px;font-size:11.5px;color:var(--muted);cursor:pointer;margin-bottom:8px}
+.add-bar-btn:hover{background:var(--primary-light);border-color:var(--primary);color:var(--primary)}
+
+/* ── BLOCK VISUAL STYLES ── */
+/* portada */
+.bv-portada{
+  min-height:340px;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;text-align:center;position:relative;overflow:hidden;
+  border-radius:4px 4px 0 0;padding:48px 40px;
+}
+.bv-portada .p-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.35}
+.bv-portada .p-inner{position:relative;z-index:1}
+.bv-portada .p-logo{font-size:40px;margin-bottom:12px}
+.bv-portada .p-sup{font-size:11px;font-weight:700;color:rgba(255,255,255,.7);letter-spacing:.12em;text-transform:uppercase;margin-bottom:10px}
+.bv-portada .p-titulo{font-family:'Poppins',sans-serif;font-size:28px;font-weight:800;color:#fff;line-height:1.15;margin-bottom:8px}
+.bv-portada .p-sub{font-size:13.5px;color:rgba(255,255,255,.78)}
+.bv-portada .p-line{width:48px;height:3px;background:#4ade80;border-radius:2px;margin:16px auto}
+
+/* encabezado */
+.bv-encabezado{background:#fff;padding:28px 36px 20px;border-left:5px solid #1d6b3e}
+.bv-encabezado .e-titulo{font-family:'Poppins',sans-serif;font-size:20px;font-weight:800;color:#1a3d2b;line-height:1.2;margin-bottom:4px}
+.bv-encabezado .e-sub{font-size:13px;color:#4a8a6a;font-weight:500}
+
+/* texto */
+.bv-texto{background:#fff;padding:24px 36px}
+.bv-texto p{font-size:13.5px;color:#2d4a3e;line-height:1.85;margin-bottom:10px}
+
+/* articulo */
+.bv-articulo{background:#fff;padding:28px 36px;display:grid;gap:16px}
+.bv-articulo.has-img{grid-template-columns:1fr 240px}
+.bv-articulo .a-title{font-family:'Poppins',sans-serif;font-size:18px;font-weight:800;color:#1a3d2b;margin-bottom:4px}
+.bv-articulo .a-author{font-size:11px;font-weight:700;color:#4a8a6a;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px}
+.bv-articulo .a-content{font-size:13px;color:#2d4a3e;line-height:1.75}
+.bv-articulo .a-img{border-radius:8px;overflow:hidden}
+.bv-articulo .a-img img{width:100%;height:180px;object-fit:cover;display:block}
+
+/* cita */
+.bv-cita{background:#e8f5ee;border-left:6px solid #1d6b3e;padding:28px 36px;position:relative}
+.bv-cita::before{content:'"';position:absolute;top:12px;left:28px;font-family:'Poppins',sans-serif;font-size:60px;color:#a8dfc0;line-height:1;font-weight:800}
+.bv-cita .c-text{font-family:'Poppins',sans-serif;font-size:17px;font-weight:600;color:#1a3d2b;line-height:1.5;position:relative;padding-top:24px;font-style:italic}
+.bv-cita .c-author{font-size:11px;font-weight:700;color:#4a8a6a;margin-top:10px;text-transform:uppercase;letter-spacing:.06em}
+
+/* imagen */
+.bv-imagen{background:#fff;padding:20px 36px}
+.bv-imagen.half .bv-imgwrap{max-width:50%;margin:0 auto}
+.bv-imagen.third .bv-imgwrap{max-width:33%;margin:0 auto}
+.bv-imgwrap img{width:100%;border-radius:8px;display:block}
+.bv-imgwrap .placeholder{padding:40px;text-align:center;background:#f0faf5;border-radius:8px;color:#4a8a6a;font-size:13px;border:2px dashed var(--border)}
+.bv-pie{font-size:11.5px;color:#4a8a6a;text-align:center;margin-top:6px;font-style:italic}
+
+/* galeria */
+.bv-galeria{background:#fff;padding:20px 36px}
+.bv-galeria-grid{display:grid;gap:8px}
+.bv-galeria-grid.c2{grid-template-columns:1fr 1fr}
+.bv-galeria-grid.c3{grid-template-columns:1fr 1fr 1fr}
+.bv-galeria-grid.c4{grid-template-columns:repeat(4,1fr)}
+.bv-galeria-grid img{width:100%;height:130px;object-fit:cover;border-radius:6px;display:block}
+.bv-galeria-grid .placeholder{height:130px;background:#f0faf5;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#4a8a6a}
+
+/* kpi */
+.bv-kpi{background:#fff;padding:24px;text-align:center;border-radius:10px;margin:16px 36px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.bv-kpi .k-ico{font-size:32px;margin-bottom:8px}
+.bv-kpi .k-num{font-size:30px;font-weight:800;line-height:1}
+.bv-kpi .k-label{font-size:12px;color:var(--muted);margin-top:4px}
+.bv-kpi .k-trend{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:700;margin-top:6px;padding:2px 8px;border-radius:20px}
+.trend-up{background:#dcfce7;color:#166534}
+.trend-down{background:#fee2e2;color:#991b1b}
+.trend-neutral{background:#f1f5f9;color:#475569}
+
+/* infografia */
+.bv-infografia{background:#fff;padding:24px 36px}
+.bv-infografia .inf-title{font-family:'Poppins',sans-serif;font-size:16px;font-weight:700;color:#1a3d2b;margin-bottom:16px}
+.inf-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.inf-bar-label{width:110px;font-size:12px;font-weight:500;color:var(--text);flex-shrink:0}
+.inf-bar-track{flex:1;background:#f0faf5;border-radius:20px;height:18px;overflow:hidden}
+.inf-bar-fill{height:100%;border-radius:20px;transition:width .4s}
+.inf-bar-val{width:36px;font-size:12px;font-weight:700;color:var(--text);text-align:right;flex-shrink:0}
+
+/* separador */
+.bv-separador{background:#fff;padding:6px 36px}
+.sep-linea{height:2px;background:linear-gradient(90deg,transparent,#a8dfc0,transparent)}
+.sep-espacio{height:28px}
+.sep-decorativo{display:flex;align-items:center;gap:14px;padding:14px 0}
+.sep-decorativo::before,.sep-decorativo::after{content:'';flex:1;height:1px;background:#d4edd8}
+.sep-decorativo span{color:#a8dfc0;font-size:16px}
+
+/* noticias */
+.bv-noticias{background:#f8fcfa;padding:28px 36px;border-top:3px solid #1d6b3e}
+.bv-noticias .n-title{font-family:'Poppins',sans-serif;font-size:16px;font-weight:800;color:#1a3d2b;margin-bottom:16px}
+.bv-noticias-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.bv-noticias-grid .nc{background:#fff;border:1px solid #d4edd8;border-radius:8px;overflow:hidden;padding:12px}
+.bv-noticias-grid .nc-cat{font-size:9px;font-weight:700;color:#1d6b3e;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+.bv-noticias-grid .nc-titulo{font-family:'Poppins',sans-serif;font-size:12px;font-weight:700;color:#1a3d2b;line-height:1.35;margin-bottom:4px}
+.bv-noticias-grid .nc-fecha{font-size:10px;color:#4a8a6a}
+
+/* canvas empty */
+.canvas-empty{
+  text-align:center;padding:64px 32px;background:#fff;border-radius:12px;
+  border:2px dashed var(--border);color:var(--muted);margin-top:24px;
+}
+.canvas-empty .ce-ico{font-size:48px;margin-bottom:12px}
+.canvas-empty h3{font-family:'Poppins',sans-serif;font-size:18px;font-weight:700;margin-bottom:8px;color:var(--text)}
+.canvas-empty p{font-size:13px;line-height:1.6}
+
+/* ── TOAST ── */
+#toast-area{position:fixed;bottom:20px;right:20px;z-index:1000;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{
+  padding:10px 18px;border-radius:8px;font-size:13.5px;font-weight:500;
+  color:#fff;box-shadow:0 4px 16px rgba(0,0,0,.2);min-width:180px;
+  animation:toastIn .25s ease;pointer-events:none;
+}
+.toast-success{background:#1d6b3e}
+.toast-info{background:#1e40af}
+.toast-error{background:#dc2626}
+@keyframes toastIn{from{transform:translateX(80px);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes toastOut{to{transform:translateX(80px);opacity:0}}
+
+/* ── SCROLLBAR ── */
+#canvas-area::-webkit-scrollbar{width:6px}
+#canvas-area::-webkit-scrollbar-track{background:transparent}
+#canvas-area::-webkit-scrollbar-thumb{background:rgba(0,0,0,.15);border-radius:3px}
+#right-panel-content::-webkit-scrollbar{width:5px}
+#right-panel-content::-webkit-scrollbar-thumb{background:rgba(0,0,0,.1);border-radius:3px}
+#left-panel::-webkit-scrollbar{width:5px}
+#left-panel::-webkit-scrollbar-thumb{background:rgba(0,0,0,.1);border-radius:3px}
+
+/* ── DRAG ── */
+.canvas-block[draggable]{cursor:grab}
+.canvas-block[draggable]:active{cursor:grabbing}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<header id="topbar">
+  <div class="tb-logo">
+    <svg width="28" height="28" viewBox="0 0 34 34" fill="none">
+      <path d="M17 2L4 8v9c0 7.73 5.58 14.96 13 16.93C24.42 31.96 30 24.73 30 17V8L17 2z" fill="#1d6b3e"/>
+      <path d="M17 6L8 11v6c0 5.14 3.72 9.96 9 11.31C22.28 26.96 26 22.14 26 17v-6L17 6z" fill="#5ddb8f" opacity=".45"/>
+      <path d="M13 17l3 3 5-5" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div class="tb-logo-text">IAGAMI<small>Editor Canva</small></div>
+  </div>
+  <div class="tb-actions" style="margin-right:8px">
+    <button class="tb-btn tb-btn-ghost" onclick="goBack()">← Volver</button>
+  </div>
+  <div class="tb-title" id="editor-title">Cargando...</div>
+  <div class="tb-actions">
+    <button class="tb-btn tb-btn-save" onclick="save()">💾 Guardar</button>
+    <button class="tb-btn tb-btn-preview" onclick="preview()">👁 Vista Previa</button>
+    <button class="tb-btn tb-btn-publish" onclick="publish()">🚀 Publicar</button>
+  </div>
+</header>
+
+<!-- LAYOUT -->
+<div id="layout">
+
+  <!-- LEFT PANEL -->
+  <div id="left-panel" style="overflow-y:auto">
+    <div class="panel-section">
+      <div class="panel-section-title">Bloques</div>
+      <div class="palette-grid" id="palette-grid"></div>
+    </div>
+    <div class="panel-section">
+      <div class="panel-section-title">Plantillas</div>
+      <div id="templates-list"></div>
+    </div>
+  </div>
+
+  <!-- CENTER CANVAS -->
+  <div id="canvas-area" onclick="handleCanvasClick(event)">
+    <div id="canvas-inner"></div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div id="right-panel">
+    <div style="padding:12px 14px;border-bottom:1px solid var(--border);font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;flex-shrink:0">Propiedades</div>
+    <div id="right-panel-content">
+      <div class="rp-empty">
+        <div class="rp-ico">🖱️</div>
+        <p>Selecciona un bloque en el canvas para editar sus propiedades</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- TOAST AREA -->
+<div id="toast-area"></div>
+
+<script>
+'use strict';
+
+/* ═══════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════ */
+const urlParams  = new URLSearchParams(location.search);
+const REVISTA_ID = urlParams.get('id');
+let _blocks      = [];
+let _selectedIdx = null;
+let _dragSrcIdx  = null;
+
+/* ═══════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════ */
+window.addEventListener('DOMContentLoaded', () => {
+  if (!REVISTA_ID) { alert('No se especificó una revista'); return; }
+  const r = CMSDB.getOne('revistas', REVISTA_ID);
+  if (!r) { alert('Revista no encontrada'); return; }
+  document.getElementById('editor-title').textContent = r.titulo;
+  _blocks = Array.isArray(r.contenido_bloques) ? JSON.parse(JSON.stringify(r.contenido_bloques)) : [];
+  renderCanvas();
+  renderPalette();
+  renderTemplates();
+});
+
+/* ═══════════════════════════════════════════
+   NAVIGATION
+═══════════════════════════════════════════ */
+function goBack() {
+  history.back();
+}
+
+function preview() {
+  save();
+  window.open('../revista/visor.html?id=' + REVISTA_ID, '_blank');
+}
+
+/* ═══════════════════════════════════════════
+   SAVE / PUBLISH
+═══════════════════════════════════════════ */
+function save() {
+  const r = CMSDB.getOne('revistas', REVISTA_ID);
+  if (!r) { showToast('Error: revista no encontrada', 'error'); return; }
+  CMSDB.save('revistas', Object.assign({}, r, { contenido_bloques: _blocks }));
+  showToast('Guardado ✓');
+}
+
+function publish() {
+  const r = CMSDB.getOne('revistas', REVISTA_ID);
+  if (!r) return;
+  CMSDB.save('revistas', Object.assign({}, r, { contenido_bloques: _blocks, estado: 'publicada' }));
+  showToast('Publicada ✓', 'success');
+}
+
+/* ═══════════════════════════════════════════
+   BLOCK OPERATIONS
+═══════════════════════════════════════════ */
+function selectBlock(idx) {
+  _selectedIdx = idx;
+  renderCanvas();
+  renderProperties();
+}
+
+function addBlock(tipo) {
+  const b = newBlock(tipo);
+  if (_selectedIdx !== null && _selectedIdx >= 0 && _selectedIdx < _blocks.length) {
+    _blocks.splice(_selectedIdx + 1, 0, b);
+    _selectedIdx = _selectedIdx + 1;
+  } else {
+    _blocks.push(b);
+    _selectedIdx = _blocks.length - 1;
+  }
+  renderCanvas();
+  renderProperties();
+  scrollToSelected();
+}
+
+function deleteBlock(idx) {
+  _blocks.splice(idx, 1);
+  if (_selectedIdx >= _blocks.length) _selectedIdx = _blocks.length - 1;
+  if (_blocks.length === 0) _selectedIdx = null;
+  renderCanvas();
+  renderProperties();
+}
+
+function moveBlock(idx, dir) {
+  const newIdx = idx + dir;
+  if (newIdx < 0 || newIdx >= _blocks.length) return;
+  [_blocks[idx], _blocks[newIdx]] = [_blocks[newIdx], _blocks[idx]];
+  _selectedIdx = newIdx;
+  renderCanvas();
+  scrollToSelected();
+}
+
+function duplicateBlock(idx) {
+  const b = JSON.parse(JSON.stringify(_blocks[idx]));
+  b.id = 'blk-' + CMSDB.uid();
+  _blocks.splice(idx + 1, 0, b);
+  _selectedIdx = idx + 1;
+  renderCanvas();
+  renderProperties();
+}
+
+function applyTemplate(name) {
+  if (_blocks.length && !confirm('¿Reemplazar contenido actual con la plantilla?')) return;
+  _blocks = getTemplate(name);
+  _selectedIdx = null;
+  renderCanvas();
+  renderProperties();
+  showToast('Plantilla aplicada');
+}
+
+function scrollToSelected() {
+  setTimeout(() => {
+    const el = document.querySelector('.canvas-block.selected');
+    if (el) el.scrollIntoView({ behavior:'smooth', block:'nearest' });
+  }, 60);
+}
+
+/* ═══════════════════════════════════════════
+   UPDATE BLOCK FIELD
+═══════════════════════════════════════════ */
+function updateField(field, value) {
+  if (_selectedIdx === null || !_blocks[_selectedIdx]) return;
+  _blocks[_selectedIdx][field] = value;
+  // re-render block visual only
+  const els = document.querySelectorAll('.canvas-block');
+  if (els[_selectedIdx]) {
+    const inner = els[_selectedIdx].querySelector('.block-visual');
+    if (inner) inner.innerHTML = renderBlockVisual(_blocks[_selectedIdx]);
+  }
+}
+
+function updateBarField(barIdx, field, value) {
+  if (_selectedIdx === null) return;
+  const b = _blocks[_selectedIdx];
+  let barras = [];
+  try { barras = JSON.parse(b.barras_json || '[]'); } catch(e){}
+  if (barras[barIdx]) {
+    barras[barIdx][field] = field === 'valor' ? parseInt(value)||0 : value;
+    _blocks[_selectedIdx].barras_json = JSON.stringify(barras);
+    updateField('barras_json', _blocks[_selectedIdx].barras_json);
+  }
+}
+
+function addBar() {
+  if (_selectedIdx === null) return;
+  const b = _blocks[_selectedIdx];
+  let barras = [];
+  try { barras = JSON.parse(b.barras_json || '[]'); } catch(e){}
+  barras.push({ label:'Ítem', valor:50, color:'#1d6b3e' });
+  _blocks[_selectedIdx].barras_json = JSON.stringify(barras);
+  renderProperties();
+  updateField('barras_json', _blocks[_selectedIdx].barras_json);
+}
+
+function removeBar(barIdx) {
+  if (_selectedIdx === null) return;
+  const b = _blocks[_selectedIdx];
+  let barras = [];
+  try { barras = JSON.parse(b.barras_json || '[]'); } catch(e){}
+  barras.splice(barIdx, 1);
+  _blocks[_selectedIdx].barras_json = JSON.stringify(barras);
+  renderProperties();
+  updateField('barras_json', _blocks[_selectedIdx].barras_json);
+}
+
+/* ═══════════════════════════════════════════
+   NEW BLOCK DEFAULTS
+═══════════════════════════════════════════ */
+function newBlock(tipo) {
+  const id = 'blk-' + CMSDB.uid();
+  const defaults = {
+    portada:    { titulo:'Revista IAGAMI', subtitulo:'Gestión Ambiental · 2026', color_fondo:'#1d6b3e', imagen_url:'' },
+    encabezado: { titulo:'Título de Sección', subtitulo:'Subtítulo descriptivo' },
+    texto:      { contenido:'Escriba aquí el contenido del párrafo. Puede incluir múltiples líneas de texto con información relevante para los lectores.' },
+    articulo:   { titulo:'Título del Artículo', autor:'Dirección IAGAMI', contenido:'Contenido del artículo. Ingrese el texto completo aquí.', imagen_url:'' },
+    cita:       { texto:'Una cita inspiradora o destacada va aquí.', autor:'— Fuente' },
+    imagen:     { imagen_url:'', pie:'', ancho:'full' },
+    galeria:    { imagenes_csv:'', columnas:'3' },
+    kpi:        { icono:'🌿', numero:'87%', label:'Calidad del Aire', tendencia:'+', color_fondo:'#1d6b3e' },
+    infografia: { titulo:'Estadísticas IAGAMI', barras_json:'[{"label":"Proyectos","valor":71,"color":"#1d6b3e"},{"label":"Reciclaje","valor":43,"color":"#4a8a6a"},{"label":"Reforestación","valor":68,"color":"#a8dfc0"}]' },
+    separador:  { estilo:'linea' },
+    noticias:   { cantidad:'3', categoria:'' },
+  };
+  return Object.assign({ id, tipo, bg_color:'', padding:'md', font_size:'md', text_align:'left', text_color:'' }, defaults[tipo] || {});
+}
+
+/* ═══════════════════════════════════════════
+   TEMPLATES
+═══════════════════════════════════════════ */
+function getTemplate(name) {
+  const uid = () => 'blk-' + CMSDB.uid();
+  const templates = {
+    'estructura': [
+      { id:uid(), tipo:'portada', titulo:'Revista IAGAMI', subtitulo:'El Pulso de Iribarren · Edición 2026', color_fondo:'#1d6b3e', imagen_url:'' },
+      { id:uid(), tipo:'encabezado', titulo:'El Pulso de Iribarren', subtitulo:'Boletín Institucional de Gestión Ambiental' },
+      { id:uid(), tipo:'kpi', icono:'💨', numero:'87%', label:'Calidad del Aire', tendencia:'+', color_fondo:'#1d6b3e' },
+      { id:uid(), tipo:'kpi', icono:'💧', numero:'72%', label:'Calidad del Agua', tendencia:'~', color_fondo:'#1565a0' },
+      { id:uid(), tipo:'kpi', icono:'🌳', numero:'1200', label:'Ha Áreas Verdes', tendencia:'+', color_fondo:'#4a8a6a' },
+      { id:uid(), tipo:'separador', estilo:'decorativo' },
+      { id:uid(), tipo:'encabezado', titulo:'Infraestructura', subtitulo:'Avances y Obras del Período' },
+      { id:uid(), tipo:'articulo', titulo:'Proyectos en Ejecución', autor:'Dirección de Proyectos', contenido:'Descripción de los principales proyectos en curso durante este período.', imagen_url:'' },
+      { id:uid(), tipo:'encabezado', titulo:'Acción en Terreno', subtitulo:'Actividades Comunitarias' },
+      { id:uid(), tipo:'galeria', imagenes_csv:'', columnas:'3' },
+      { id:uid(), tipo:'cita', texto:'Proteger el ambiente es proteger nuestra identidad como pueblo.', autor:'— Dirección IAGAMI' },
+      { id:uid(), tipo:'noticias', cantidad:'3', categoria:'' },
+    ],
+    'simple': [
+      { id:uid(), tipo:'portada', titulo:'Revista IAGAMI', subtitulo:'Edición Simple · 2026', color_fondo:'#1d6b3e', imagen_url:'' },
+      { id:uid(), tipo:'encabezado', titulo:'Bienvenida', subtitulo:'Mensaje editorial' },
+      { id:uid(), tipo:'texto', contenido:'Ingrese aquí el contenido principal de esta edición.' },
+      { id:uid(), tipo:'imagen', imagen_url:'', pie:'Imagen institucional', ancho:'full' },
+      { id:uid(), tipo:'cita', texto:'Una cita inspiradora aquí.', autor:'— Dirección IAGAMI' },
+      { id:uid(), tipo:'separador', estilo:'linea' },
+      { id:uid(), tipo:'noticias', cantidad:'3', categoria:'' },
+    ],
+    'tecnico': [
+      { id:uid(), tipo:'encabezado', titulo:'Informe Técnico', subtitulo:'Período de Gestión 2026' },
+      { id:uid(), tipo:'texto', contenido:'Resumen ejecutivo del informe técnico. Incluya aquí los aspectos más relevantes del período evaluado.' },
+      { id:uid(), tipo:'infografia', titulo:'Indicadores Clave', barras_json:'[{"label":"Proyectos","valor":71,"color":"#1d6b3e"},{"label":"Reciclaje","valor":43,"color":"#4a8a6a"},{"label":"Reforestación","valor":68,"color":"#a8dfc0"},{"label":"Denuncias","valor":89,"color":"#1565a0"}]' },
+      { id:uid(), tipo:'separador', estilo:'decorativo' },
+      { id:uid(), tipo:'cita', texto:'Los datos reflejan el compromiso institucional con la transparencia y la gestión ambiental de calidad.', autor:'— Equipo Técnico IAGAMI' },
+    ],
+  };
+  return templates[name] || [];
+}
+
+/* ═══════════════════════════════════════════
+   CANVAS RENDERING
+═══════════════════════════════════════════ */
+function renderCanvas() {
+  const inner = document.getElementById('canvas-inner');
+  if (!inner) return;
+
+  if (!_blocks.length) {
+    inner.innerHTML = `<div class="canvas-empty">
+      <div class="ce-ico">📄</div>
+      <h3>Canvas vacío</h3>
+      <p>Agrega bloques desde el panel izquierdo o selecciona una plantilla para comenzar.</p>
+    </div>`;
+    return;
+  }
+
+  inner.innerHTML = _blocks.map((b, idx) => {
+    const sel = _selectedIdx === idx;
+    return `
+    <div class="canvas-drop-zone" data-drop-idx="${idx}" ondragover="handleDragOver(event,${idx})" ondrop="handleDrop(event,${idx})" ondragleave="handleDragLeave(event)"></div>
+    <div class="canvas-block${sel?' selected':''}"
+         data-idx="${idx}"
+         draggable="true"
+         onclick="handleBlockClick(event,${idx})"
+         ondragstart="handleDragStart(event,${idx})"
+         ondragend="handleDragEnd(event)">
+      <div class="block-type-label">${b.tipo}</div>
+      <div class="block-controls">
+        <button title="Mover arriba" onclick="event.stopPropagation();moveBlock(${idx},-1)">▲</button>
+        <button title="Mover abajo" onclick="event.stopPropagation();moveBlock(${idx},1)">▼</button>
+        <button title="Duplicar" onclick="event.stopPropagation();duplicateBlock(${idx})">⧉</button>
+        <button class="btn-del" title="Eliminar" onclick="event.stopPropagation();deleteBlock(${idx})">🗑</button>
+      </div>
+      <div class="block-visual">${renderBlockVisual(b)}</div>
+    </div>`;
+  }).join('') + `<div class="canvas-drop-zone" data-drop-idx="${_blocks.length}" ondragover="handleDragOver(event,${_blocks.length})" ondrop="handleDrop(event,${_blocks.length})" ondragleave="handleDragLeave(event)"></div>`;
+}
+
+function handleBlockClick(e, idx) {
+  e.stopPropagation();
+  selectBlock(idx);
+}
+
+function handleCanvasClick(e) {
+  // Clicked on canvas background — deselect
+  if (e.target.id === 'canvas-area' || e.target.id === 'canvas-inner') {
+    _selectedIdx = null;
+    document.querySelectorAll('.canvas-block').forEach(el => el.classList.remove('selected'));
+    renderProperties();
+  }
+}
+
+/* ═══════════════════════════════════════════
+   BLOCK VISUAL RENDERERS
+═══════════════════════════════════════════ */
+function esc(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function shadeColor(hex, pct) {
+  try {
+    const n = parseInt((hex||'#1d6b3e').replace('#',''), 16);
+    const r = Math.max(0, Math.min(255, ((n>>16)&0xff) + pct));
+    const g = Math.max(0, Math.min(255, ((n>>8)&0xff) + pct));
+    const bv = Math.max(0, Math.min(255, (n&0xff) + pct));
+    return '#'+((1<<24)+(r<<16)+(g<<8)+bv).toString(16).slice(1);
+  } catch(e) { return hex||'#1d6b3e'; }
+}
+
+function renderBlockVisual(b) {
+  const pad = b.padding === 'sm' ? '0' : b.padding === 'lg' ? '8px 0' : '0';
+  const bgStyle = b.bg_color ? `background:${b.bg_color}!important;` : '';
+  const wrapStyle = bgStyle || pad ? `style="${bgStyle}padding:${pad}"` : '';
+
+  const renderers = {
+    portada() {
+      const bg = b.color_fondo || '#1d6b3e';
+      const imgTag = b.imagen_url ? `<img class="p-img" src="${esc(b.imagen_url)}" alt="Portada"/>` : '';
+      return `<div class="bv-portada" style="background:linear-gradient(155deg,${bg},${shadeColor(bg,-45)})">
+        ${imgTag}
+        <div class="p-inner">
+          <div class="p-logo">🌿</div>
+          <div class="p-sup">IAGAMI · Revista Digital</div>
+          <div class="p-titulo">${esc(b.titulo||'Revista IAGAMI')}</div>
+          ${b.subtitulo ? `<div class="p-sub">${esc(b.subtitulo)}</div>` : ''}
+          <div class="p-line"></div>
+        </div>
+      </div>`;
+    },
+    encabezado() {
+      const style = b.bg_color ? `style="background:${b.bg_color}"` : '';
+      return `<div class="bv-encabezado" ${style}>
+        <div class="e-titulo" style="${b.text_color?'color:'+b.text_color:''}">${esc(b.titulo||'')}</div>
+        ${b.subtitulo ? `<div class="e-sub">${esc(b.subtitulo)}</div>` : ''}
+      </div>`;
+    },
+    texto() {
+      const paras = (b.contenido||'').split(/\n+/).filter(p=>p.trim());
+      const style = `${b.text_color?'color:'+b.text_color+';':''} ${b.text_align?'text-align:'+b.text_align+';':''}`;
+      return `<div class="bv-texto" ${wrapStyle}>
+        ${paras.map(p => `<p style="${style}">${esc(p)}</p>`).join('')}
+      </div>`;
+    },
+    articulo() {
+      const hasImg = !!b.imagen_url;
+      const imgHtml = hasImg ? `<div class="a-img"><img src="${esc(b.imagen_url)}" alt="${esc(b.titulo)}"/></div>` : '';
+      const paras = (b.contenido||'').split(/\n+/).filter(p=>p.trim());
+      return `<div class="bv-articulo${hasImg?' has-img':''}" ${wrapStyle}>
+        <div>
+          <div class="a-title">${esc(b.titulo||'')}</div>
+          ${b.autor ? `<div class="a-author">Por: ${esc(b.autor)}</div>` : ''}
+          <div class="a-content">${paras.map(p=>`<p style="margin-bottom:8px">${esc(p)}</p>`).join('')}</div>
+        </div>
+        ${imgHtml}
+      </div>`;
+    },
+    cita() {
+      return `<div class="bv-cita" ${wrapStyle}>
+        <div class="c-text" style="${b.text_color?'color:'+b.text_color:''}">${esc(b.texto||'')}</div>
+        ${b.autor ? `<div class="c-author">${esc(b.autor)}</div>` : ''}
+      </div>`;
+    },
+    imagen() {
+      const cls = b.ancho === 'half' ? 'half' : b.ancho === 'third' ? 'third' : '';
+      const imgContent = b.imagen_url
+        ? `<img src="${esc(b.imagen_url)}" alt="${esc(b.pie||'Imagen')}"/>`
+        : `<div class="placeholder">🖼️ Sin imagen — ingresa una URL</div>`;
+      return `<div class="bv-imagen ${cls}" ${wrapStyle}>
+        <div class="bv-imgwrap">${imgContent}</div>
+        ${b.pie ? `<div class="bv-pie">${esc(b.pie)}</div>` : ''}
+      </div>`;
+    },
+    galeria() {
+      const urls = (b.imagenes_csv||'').split('\n').flatMap(l=>l.split(',')).map(s=>s.trim()).filter(Boolean);
+      const cols = Math.min(4, Math.max(2, parseInt(b.columnas)||3));
+      const items = urls.length
+        ? urls.map(u=>`<img src="${esc(u)}" alt="Imagen" loading="lazy"/>`)
+        : Array(cols).fill(`<div class="placeholder">🖼️</div>`);
+      return `<div class="bv-galeria" ${wrapStyle}>
+        <div class="bv-galeria-grid c${cols}">${items.join('')}</div>
+      </div>`;
+    },
+    kpi() {
+      const tClass = b.tendencia==='+' ? 'trend-up' : b.tendencia==='-' ? 'trend-down' : 'trend-neutral';
+      const tLabel = b.tendencia==='+' ? '↑ Mejora' : b.tendencia==='-' ? '↓ Baja' : '→ Estable';
+      const numColor = b.color_fondo || '#1d6b3e';
+      return `<div class="bv-kpi" ${wrapStyle}>
+        <div class="k-ico">${esc(b.icono||'🌿')}</div>
+        <div class="k-num" style="color:${numColor}">${esc(b.numero||'—')}</div>
+        <div class="k-label">${esc(b.label||'')}</div>
+        <div class="k-trend ${tClass}">${tLabel}</div>
+      </div>`;
+    },
+    infografia() {
+      let barras = [];
+      try { barras = JSON.parse(b.barras_json||'[]'); } catch(e){}
+      const maxVal = Math.max(...barras.map(bar=>bar.valor||0), 1);
+      const barsHtml = barras.map(bar=>`
+        <div class="inf-bar-row">
+          <div class="inf-bar-label">${esc(bar.label||'')}</div>
+          <div class="inf-bar-track">
+            <div class="inf-bar-fill" style="width:${Math.round((bar.valor/maxVal)*100)}%;background:${bar.color||'#1d6b3e'}"></div>
+          </div>
+          <div class="inf-bar-val">${bar.valor||0}</div>
+        </div>`).join('');
+      return `<div class="bv-infografia" ${wrapStyle}>
+        ${b.titulo ? `<div class="inf-title">${esc(b.titulo)}</div>` : ''}
+        ${barsHtml}
+      </div>`;
+    },
+    separador() {
+      const estilo = b.estilo || 'linea';
+      let inner = '';
+      if (estilo==='espacio') inner = `<div class="sep-espacio"></div>`;
+      else if (estilo==='decorativo') inner = `<div class="sep-decorativo"><span>🌿</span></div>`;
+      else inner = `<div class="sep-linea"></div>`;
+      return `<div class="bv-separador">${inner}</div>`;
+    },
+    noticias() {
+      const n = Math.min(6, parseInt(b.cantidad)||3);
+      const cat = b.categoria||'';
+      let noticias = CMSDB.getAll('noticias');
+      if (cat) noticias = noticias.filter(x=>x.categoria===cat);
+      noticias = noticias.slice(0, n);
+      const cards = noticias.map(noticia=>`<div class="nc">
+        <div class="nc-cat">${esc(noticia.categoria||'Noticias')}</div>
+        <div class="nc-titulo">${esc(noticia.titulo||'Sin título')}</div>
+        <div class="nc-fecha">📅 ${esc(noticia.fecha||'')}</div>
+      </div>`).join('') || '<div style="color:#4a8a6a;font-size:12px;padding:12px">No hay noticias disponibles.</div>';
+      return `<div class="bv-noticias" ${wrapStyle}>
+        <div class="n-title">Noticias Recientes</div>
+        <div class="bv-noticias-grid">${cards}</div>
+      </div>`;
+    },
+  };
+
+  const fn = renderers[b.tipo];
+  if (!fn) return `<div style="padding:16px 36px;background:#fff;font-size:12px;color:#4a8a6a">Tipo de bloque desconocido: ${esc(b.tipo)}</div>`;
+  try { return fn(); } catch(e) { console.error(e); return '<div style="padding:16px;color:red;font-size:12px">Error al renderizar bloque</div>'; }
+}
+
+/* ═══════════════════════════════════════════
+   PALETTE
+═══════════════════════════════════════════ */
+const PALETTE_BLOCKS = [
+  { tipo:'portada',    ico:'🖼️', lbl:'Portada' },
+  { tipo:'encabezado', ico:'📌', lbl:'Encabezado' },
+  { tipo:'texto',      ico:'📝', lbl:'Texto' },
+  { tipo:'articulo',   ico:'📰', lbl:'Artículo' },
+  { tipo:'cita',       ico:'💬', lbl:'Cita' },
+  { tipo:'imagen',     ico:'🖼️', lbl:'Imagen' },
+  { tipo:'galeria',    ico:'🗂️', lbl:'Galería' },
+  { tipo:'kpi',        ico:'📊', lbl:'KPI' },
+  { tipo:'infografia', ico:'📈', lbl:'Infografía' },
+  { tipo:'separador',  ico:'➖', lbl:'Separador' },
+  { tipo:'noticias',   ico:'📡', lbl:'Noticias' },
+];
+
+function renderPalette() {
+  const grid = document.getElementById('palette-grid');
+  grid.innerHTML = PALETTE_BLOCKS.map(p => `
+    <button class="palette-btn" onclick="addBlock('${p.tipo}')">
+      <span class="pb-ico">${p.ico}</span>
+      <span class="pb-lbl">${p.lbl}</span>
+    </button>`).join('');
+}
+
+/* ═══════════════════════════════════════════
+   TEMPLATES
+═══════════════════════════════════════════ */
+const TEMPLATE_LIST = [
+  { name:'estructura', ico:'🏛️', lbl:'Estructura IAGAMI', desc:'Portada + KPIs + Artículos + Noticias' },
+  { name:'simple',     ico:'📄', lbl:'Edición Simple', desc:'Estructura básica editorial' },
+  { name:'tecnico',    ico:'📋', lbl:'Informe Técnico', desc:'Encabezado + Texto + Infografía' },
+];
+
+function renderTemplates() {
+  const list = document.getElementById('templates-list');
+  list.innerHTML = TEMPLATE_LIST.map(t => `
+    <button class="tmpl-btn" onclick="applyTemplate('${t.name}')">
+      <span class="ti">${t.ico}</span>
+      <span class="tl">${t.lbl}<span class="tdesc">${t.desc}</span></span>
+    </button>`).join('');
+}
+
+/* ═══════════════════════════════════════════
+   RIGHT PANEL PROPERTIES
+═══════════════════════════════════════════ */
+function renderProperties() {
+  const cont = document.getElementById('right-panel-content');
+  if (_selectedIdx === null || !_blocks[_selectedIdx]) {
+    cont.innerHTML = `<div class="rp-empty"><div class="rp-ico">🖱️</div><p>Selecciona un bloque en el canvas para editar sus propiedades</p></div>`;
+    return;
+  }
+  const b = _blocks[_selectedIdx];
+  const tipo = b.tipo;
+
+  let html = `<div class="rp-title">${getBlockIcon(tipo)} ${capitalizeFirst(tipo)}</div>`;
+
+  // Common style fields for all blocks
+  html += commonStyleFields(b);
+  html += `<hr class="field-divider">`;
+
+  // Type-specific fields
+  html += typeSpecificFields(b, tipo);
+
+  cont.innerHTML = html;
+}
+
+function getBlockIcon(tipo) {
+  const icons = { portada:'🖼️', encabezado:'📌', texto:'📝', articulo:'📰', cita:'💬', imagen:'🖼️', galeria:'🗂️', kpi:'📊', infografia:'📈', separador:'➖', noticias:'📡' };
+  return icons[tipo] || '🔲';
+}
+
+function capitalizeFirst(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
+
+function commonStyleFields(b) {
+  return `
+  <div class="field-group">
+    <label class="field-label">Color de Fondo del Bloque</label>
+    <div class="field-row">
+      <div class="field-group" style="flex-direction:row;align-items:center;gap:6px">
+        <input type="color" class="field-input" style="width:40px;height:32px;padding:2px"
+          value="${b.bg_color||'#ffffff'}" oninput="updateField('bg_color',this.value)"/>
+        <input type="text" class="field-input" style="flex:1" placeholder="#ffffff o vacío"
+          value="${b.bg_color||''}" oninput="updateField('bg_color',this.value)"/>
+      </div>
+    </div>
+  </div>
+  <div class="field-group">
+    <label class="field-label">Padding</label>
+    <div class="seg-btn-group">
+      ${['sm','md','lg'].map(v=>`<button class="seg-btn${b.padding===v?' active':''}" onclick="updateField('padding','${v}');this.closest('.seg-btn-group').querySelectorAll('.seg-btn').forEach(el=>el.classList.remove('active'));this.classList.add('active')">${v==='sm'?'Pequeño':v==='md'?'Normal':'Grande'}</button>`).join('')}
+    </div>
+  </div>`;
+}
+
+function typeSpecificFields(b, tipo) {
+  let html = '';
+
+  if (tipo === 'portada') {
+    html += fieldText('Título', b.titulo||'', `updateField('titulo',this.value)`);
+    html += fieldText('Subtítulo', b.subtitulo||'', `updateField('subtitulo',this.value)`);
+    html += fieldText('URL de Imagen', b.imagen_url||'', `updateField('imagen_url',this.value)`, 'https://...');
+    html += fieldColor('Color de Fondo', b.color_fondo||'#1d6b3e', `updateField('color_fondo',this.value)`);
+  }
+
+  else if (tipo === 'encabezado') {
+    html += fieldText('Título', b.titulo||'', `updateField('titulo',this.value)`);
+    html += fieldText('Subtítulo', b.subtitulo||'', `updateField('subtitulo',this.value)`);
+    html += fontAndAlignFields(b);
+  }
+
+  else if (tipo === 'texto') {
+    html += fieldTextarea('Contenido', b.contenido||'', `updateField('contenido',this.value)`);
+    html += fontAndAlignFields(b);
+  }
+
+  else if (tipo === 'articulo') {
+    html += fieldText('Título', b.titulo||'', `updateField('titulo',this.value)`);
+    html += fieldText('Autor', b.autor||'', `updateField('autor',this.value)`);
+    html += fieldTextarea('Contenido', b.contenido||'', `updateField('contenido',this.value)`);
+    html += fieldText('URL Imagen', b.imagen_url||'', `updateField('imagen_url',this.value)`, 'https://...');
+    html += fontAndAlignFields(b);
+  }
+
+  else if (tipo === 'cita') {
+    html += fieldTextarea('Texto de la Cita', b.texto||'', `updateField('texto',this.value)`);
+    html += fieldText('Autor / Fuente', b.autor||'', `updateField('autor',this.value)`);
+    html += fontAndAlignFields(b);
+  }
+
+  else if (tipo === 'imagen') {
+    html += fieldText('URL de Imagen', b.imagen_url||'', `updateField('imagen_url',this.value)`, 'https://...');
+    html += fieldText('Leyenda / Pie de foto', b.pie||'', `updateField('pie',this.value)`);
+    html += `<div class="field-group">
+      <label class="field-label">Ancho</label>
+      <div class="seg-btn-group">
+        ${[['full','Completo'],['half','Mitad'],['third','Tercio']].map(([v,l])=>`<button class="seg-btn${(b.ancho||'full')===v?' active':''}" onclick="updateField('ancho','${v}');this.closest('.seg-btn-group').querySelectorAll('.seg-btn').forEach(el=>el.classList.remove('active'));this.classList.add('active')">${l}</button>`).join('')}
+      </div>
+    </div>`;
+  }
+
+  else if (tipo === 'galeria') {
+    html += fieldTextarea('URLs de Imágenes\n(una por línea)', b.imagenes_csv||'', `updateField('imagenes_csv',this.value)`, 'https://imagen1.jpg\nhttps://imagen2.jpg');
+    html += `<div class="field-group">
+      <label class="field-label">Columnas</label>
+      <div class="seg-btn-group">
+        ${['2','3','4'].map(v=>`<button class="seg-btn${(b.columnas||'3')===v?' active':''}" onclick="updateField('columnas','${v}');this.closest('.seg-btn-group').querySelectorAll('.seg-btn').forEach(el=>el.classList.remove('active'));this.classList.add('active')">${v}</button>`).join('')}
+      </div>
+    </div>`;
+  }
+
+  else if (tipo === 'kpi') {
+    html += fieldText('Ícono (emoji)', b.icono||'🌿', `updateField('icono',this.value)`);
+    html += fieldText('Número / Valor', b.numero||'', `updateField('numero',this.value)`);
+    html += fieldText('Etiqueta', b.label||'', `updateField('label',this.value)`);
+    html += `<div class="field-group">
+      <label class="field-label">Tendencia</label>
+      <div class="seg-btn-group">
+        ${[['+','↑ Sube'],['~','→ Estable'],['-','↓ Baja']].map(([v,l])=>`<button class="seg-btn${(b.tendencia||'+')===v?' active':''}" onclick="updateField('tendencia','${v}');this.closest('.seg-btn-group').querySelectorAll('.seg-btn').forEach(el=>el.classList.remove('active'));this.classList.add('active')">${l}</button>`).join('')}
+      </div>
+    </div>`;
+    html += fieldColor('Color del Número', b.color_fondo||'#1d6b3e', `updateField('color_fondo',this.value)`);
+  }
+
+  else if (tipo === 'infografia') {
+    html += fieldText('Título', b.titulo||'', `updateField('titulo',this.value)`);
+    let barras = [];
+    try { barras = JSON.parse(b.barras_json||'[]'); } catch(e){}
+    html += `<div class="field-group"><label class="field-label">Barras</label>`;
+    barras.forEach((bar, i) => {
+      html += `<div class="bar-row">
+        <input type="text" value="${esc(bar.label||'')}" placeholder="Etiqueta" oninput="updateBarField(${i},'label',this.value)"/>
+        <input type="number" value="${bar.valor||0}" min="0" max="999" oninput="updateBarField(${i},'valor',this.value)"/>
+        <input type="color" value="${bar.color||'#1d6b3e'}" oninput="updateBarField(${i},'color',this.value)"/>
+        <button onclick="removeBar(${i})">✕</button>
+      </div>`;
+    });
+    html += `<button class="add-bar-btn" onclick="addBar()">+ Agregar barra</button></div>`;
+  }
+
+  else if (tipo === 'separador') {
+    html += `<div class="field-group">
+      <label class="field-label">Estilo</label>
+      <div class="seg-btn-group">
+        ${[['linea','Línea'],['decorativo','Decorativo'],['espacio','Espacio']].map(([v,l])=>`<button class="seg-btn${(b.estilo||'linea')===v?' active':''}" onclick="updateField('estilo','${v}');this.closest('.seg-btn-group').querySelectorAll('.seg-btn').forEach(el=>el.classList.remove('active'));this.classList.add('active')">${l}</button>`).join('')}
+      </div>
+    </div>`;
+  }
+
+  else if (tipo === 'noticias') {
+    html += `<div class="field-group">
+      <label class="field-label">Cantidad a mostrar</label>
+      <div class="seg-btn-group">
+        ${['3','6'].map(v=>`<button class="seg-btn${(b.cantidad||'3')===v?' active':''}" onclick="updateField('cantidad','${v}');this.closest('.seg-btn-group').querySelectorAll('.seg-btn').forEach(el=>el.classList.remove('active'));this.classList.add('active')">${v} noticias</button>`).join('')}
+      </div>
+    </div>`;
+    html += `<div class="field-group">
+      <label class="field-label">Filtrar por categoría</label>
+      <select class="field-input" onchange="updateField('categoria',this.value)">
+        <option value="" ${!b.categoria?'selected':''}>Todas las categorías</option>
+        ${['Medio Ambiente','Comunidad','Normativa','Educación','Institucional'].map(c=>`<option value="${c}" ${b.categoria===c?'selected':''}>${c}</option>`).join('')}
+      </select>
+    </div>`;
+  }
+
+  return html;
+}
+
+function fontAndAlignFields(b) {
+  return `
+  <div class="field-group">
+    <label class="field-label">Tamaño de Fuente</label>
+    <div class="seg-btn-group">
+      ${[['sm','Peq'],['md','Normal'],['lg','Grande'],['xl','XL']].map(([v,l])=>`<button class="seg-btn${(b.font_size||'md')===v?' active':''}" onclick="updateField('font_size','${v}');this.closest('.seg-btn-group').querySelectorAll('.seg-btn').forEach(el=>el.classList.remove('active'));this.classList.add('active')">${l}</button>`).join('')}
+    </div>
+  </div>
+  <div class="field-group">
+    <label class="field-label">Alineación</label>
+    <div class="seg-btn-group">
+      ${[['left','◀'],['center','●'],['right','▶'],['justify','≡']].map(([v,l])=>`<button class="seg-btn${(b.text_align||'left')===v?' active':''}" onclick="updateField('text_align','${v}');this.closest('.seg-btn-group').querySelectorAll('.seg-btn').forEach(el=>el.classList.remove('active'));this.classList.add('active')">${l}</button>`).join('')}
+    </div>
+  </div>
+  <div class="field-group">
+    <label class="field-label">Color de Texto</label>
+    <div class="field-row">
+      <div class="field-group" style="flex-direction:row;align-items:center;gap:6px;margin-bottom:0">
+        <input type="color" style="width:40px;height:32px;padding:2px;border:1px solid var(--border);border-radius:4px;cursor:pointer"
+          value="${b.text_color||'#1a3d2b'}" oninput="updateField('text_color',this.value)"/>
+        <input type="text" class="field-input" style="flex:1" placeholder="#1a3d2b o vacío"
+          value="${b.text_color||''}" oninput="updateField('text_color',this.value)"/>
+      </div>
+    </div>
+  </div>`;
+}
+
+function fieldText(label, value, oninput, placeholder='') {
+  return `<div class="field-group">
+    <label class="field-label">${label}</label>
+    <input type="text" class="field-input" value="${esc(value)}" placeholder="${esc(placeholder)}" oninput="${oninput}"/>
+  </div>`;
+}
+
+function fieldTextarea(label, value, oninput, placeholder='') {
+  return `<div class="field-group">
+    <label class="field-label">${label}</label>
+    <textarea class="field-input field-textarea" oninput="${oninput}" placeholder="${esc(placeholder)}">${esc(value)}</textarea>
+  </div>`;
+}
+
+function fieldColor(label, value, oninput) {
+  return `<div class="field-group">
+    <label class="field-label">${label}</label>
+    <div style="display:flex;align-items:center;gap:6px">
+      <input type="color" style="width:40px;height:32px;padding:2px;border:1px solid var(--border);border-radius:4px;cursor:pointer"
+        value="${value}" oninput="${oninput}"/>
+      <input type="text" class="field-input" style="flex:1" value="${value}" oninput="${oninput}"/>
+    </div>
+  </div>`;
+}
+
+/* ═══════════════════════════════════════════
+   DRAG & DROP
+═══════════════════════════════════════════ */
+function handleDragStart(e, idx) {
+  _dragSrcIdx = idx;
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', idx);
+  setTimeout(() => {
+    const els = document.querySelectorAll('.canvas-block');
+    if (els[idx]) els[idx].classList.add('drag-src');
+  }, 0);
+}
+
+function handleDragEnd(e) {
+  document.querySelectorAll('.canvas-block').forEach(el => el.classList.remove('drag-src'));
+  document.querySelectorAll('.canvas-drop-zone').forEach(el => el.classList.remove('drag-over'));
+  _dragSrcIdx = null;
+}
+
+function handleDragOver(e, idx) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  document.querySelectorAll('.canvas-drop-zone').forEach(el => el.classList.remove('drag-over'));
+  e.currentTarget.classList.add('drag-over');
+}
+
+function handleDragLeave(e) {
+  e.currentTarget.classList.remove('drag-over');
+}
+
+function handleDrop(e, dropIdx) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-over');
+  if (_dragSrcIdx === null || _dragSrcIdx === dropIdx) return;
+
+  const block = _blocks.splice(_dragSrcIdx, 1)[0];
+  const adjustedIdx = dropIdx > _dragSrcIdx ? dropIdx - 1 : dropIdx;
+  _blocks.splice(adjustedIdx, 0, block);
+  _selectedIdx = adjustedIdx;
+  _dragSrcIdx = null;
+  renderCanvas();
+  renderProperties();
+}
+
+/* ═══════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════ */
+function showToast(msg, type='success') {
+  const area = document.getElementById('toast-area');
+  const el = document.createElement('div');
+  el.className = `toast toast-${type}`;
+  el.textContent = msg;
+  area.appendChild(el);
+  setTimeout(() => {
+    el.style.animation = 'toastOut .3s ease forwards';
+    setTimeout(() => el.remove(), 300);
+  }, 2500);
+}
+</script>
+</body>
+</html>

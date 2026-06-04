@@ -2790,7 +2790,7 @@ function renderRevistas() {
     <td style="text-align:center">${r.destacada?'⭐':'—'}</td>
     <td style="font-size:12px">${r.descargas||0}</td>
     <td><div style="display:flex;gap:5px;flex-wrap:wrap">
-      <button class="btn btn-secondary" style="padding:4px 8px;font-size:11px" onclick="openRevistaEditor('${r.id}')">✏️ Editor</button>
+      <button class="btn btn-secondary" style="padding:4px 8px;font-size:11px" onclick="openRevistaEditor('${r.id}')">🎨 Editor Canva</button>
       <button class="btn btn-danger"    style="padding:4px 8px;font-size:11px" onclick="confirmDelete(()=>deleteRevista('${r.id}'))">🗑️</button>
     </div></td>
   </tr>`).join('')}
@@ -2873,18 +2873,13 @@ function saveRevistaMeta() {
 
 /* ── BLOCK EDITOR ── */
 function openRevistaEditor(id) {
-  _revistaEditId = id;
-  const r = CMSDB.getOne('revistas', id);
-  if (!r) return;
-
-  _revistaBlocks = Array.isArray(r.contenido_bloques) ? JSON.parse(JSON.stringify(r.contenido_bloques)) : [];
-
-  document.getElementById('editor-revista-title').textContent = `📰 ${r.titulo} — Edición ${r.numero_edicion}`;
-  document.getElementById('revista-list-view').style.display  = 'none';
-  document.getElementById('revista-meta-form').style.display  = 'none';
-  document.getElementById('revista-editor').style.display     = 'block';
-
-  renderBlocks();
+  // Save any pending blocks for the currently open revista
+  if (_revistaEditId && _revistaBlocks.length) {
+    const existing = CMSDB.getOne('revistas', _revistaEditId);
+    if (existing) CMSDB.save('revistas', Object.assign({}, existing, { contenido_bloques: _revistaBlocks }));
+  }
+  // Navigate to the new Canva-style editor
+  window.location = '../revista/editor.html?id=' + id;
 }
 
 function closeEditor() {

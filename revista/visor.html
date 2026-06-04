@@ -7,159 +7,234 @@
 <meta name="theme-color" content="#1d6b3e"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
-body{font-family:'Inter',sans-serif;background:#1a1a1a;color:#1a3d2b;line-height:1.6;min-height:100vh}
+body{font-family:'Inter',sans-serif;background:#111814;color:#1a3d2b;line-height:1.6;min-height:100vh}
 
-/* VIEWER NAV */
-.viewer-nav{background:#0d2d1a;color:#fff;padding:0 20px;height:54px;display:flex;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:0;z-index:100;box-shadow:0 2px 16px rgba(0,0,0,.5)}
+/* ══ TOP NAV ══ */
+.viewer-nav{
+  background:rgba(13,29,26,.97);backdrop-filter:blur(12px);
+  color:#fff;padding:0 20px;height:56px;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  position:sticky;top:0;z-index:300;border-bottom:1px solid rgba(255,255,255,.07);
+  box-shadow:0 4px 24px rgba(0,0,0,.5);
+}
 .nav-left{display:flex;align-items:center;gap:12px;flex:1;min-width:0}
 .nav-logo{display:flex;align-items:center;gap:8px;text-decoration:none;flex-shrink:0}
-.nav-logo-ico{width:32px;height:32px;background:#1d6b3e;border-radius:7px;display:flex;align-items:center;justify-content:center}
-.nav-logo-ico svg{width:16px;height:16px}
-.nav-title{font-family:'Poppins',sans-serif;font-size:13px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.nav-right{display:flex;gap:8px;flex-shrink:0}
-.nav-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;transition:.2s;border:none;font-family:'Inter',sans-serif;white-space:nowrap}
-.btn-back{background:rgba(255,255,255,.1);color:rgba(255,255,255,.85)}
-.btn-back:hover{background:rgba(255,255,255,.18)}
+.nav-logo-ico{width:34px;height:34px;background:#1d6b3e;border-radius:8px;display:flex;align-items:center;justify-content:center}
+.nav-logo-ico svg{width:18px;height:18px}
+.nav-brand{font-family:'Poppins',sans-serif;font-size:12px;font-weight:700;color:#fff;line-height:1.2}
+.nav-brand small{font-size:10px;font-weight:400;opacity:.6;display:block}
+.nav-sep{width:1px;height:28px;background:rgba(255,255,255,.15);flex-shrink:0}
+.nav-title{font-size:13px;font-weight:600;color:rgba(255,255,255,.88);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nav-right{display:flex;gap:6px;flex-shrink:0;align-items:center}
+.nav-btn{
+  display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:8px;
+  font-size:12px;font-weight:600;cursor:pointer;transition:.2s;border:none;
+  font-family:'Inter',sans-serif;white-space:nowrap;
+}
+.btn-back{background:rgba(255,255,255,.08);color:rgba(255,255,255,.85);border:1px solid rgba(255,255,255,.12)}
+.btn-back:hover{background:rgba(255,255,255,.15)}
+.btn-toc{background:rgba(255,255,255,.08);color:rgba(255,255,255,.85);border:1px solid rgba(255,255,255,.12)}
+.btn-toc:hover{background:rgba(255,255,255,.15)}
 .btn-print{background:#1d6b3e;color:#fff}
 .btn-print:hover{background:#155c32}
-.btn-dl{background:#4ade80;color:#0d2d1a}
+.btn-dl{background:#4ade80;color:#0d2d1a;font-weight:700}
 .btn-dl:hover{background:#22c55e}
 
-/* CANVAS */
-.magazine-canvas{max-width:860px;margin:0 auto;padding:32px 20px 64px;display:flex;flex-direction:column;gap:0}
+/* ══ HERO PORTADA BANNER ══ */
+.portada-hero{
+  min-height:440px;display:flex;align-items:flex-end;justify-content:flex-start;
+  position:relative;overflow:hidden;
+  background:linear-gradient(155deg,#1d6b3e,#0d2d1a);
+}
+.portada-hero .ph-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.28}
+.portada-hero .ph-overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(0,0,0,.85) 0%,rgba(0,0,0,.3) 50%,transparent 100%);
+}
+.portada-hero .ph-content{
+  position:relative;z-index:2;
+  padding:40px 60px;max-width:860px;margin:0 auto;width:100%;
+}
+.ph-sup{font-size:11px;font-weight:700;color:rgba(255,255,255,.6);letter-spacing:.14em;text-transform:uppercase;margin-bottom:10px}
+.ph-titulo{font-family:'Poppins',sans-serif;font-size:42px;font-weight:800;color:#fff;line-height:1.1;margin-bottom:10px}
+.ph-sub{font-size:15px;color:rgba(255,255,255,.75);max-width:560px;line-height:1.6;margin-bottom:20px}
+.ph-meta{display:flex;gap:20px;flex-wrap:wrap}
+.ph-meta span{font-size:12px;color:rgba(255,255,255,.55);display:flex;align-items:center;gap:5px}
+.ph-line{width:56px;height:3px;background:#4ade80;border-radius:2px;margin-bottom:20px}
 
-/* LOADING / ERROR */
-.state-center{display:flex;align-items:center;justify-content:center;min-height:60vh;text-align:center;color:rgba(255,255,255,.7);padding:40px}
-.state-inner{max-width:400px}
-.state-ico{font-size:56px;margin-bottom:16px}
-.state-title{font-family:'Poppins',sans-serif;font-size:20px;font-weight:700;color:#fff;margin-bottom:8px}
-.state-msg{font-size:14px;color:rgba(255,255,255,.65);line-height:1.7}
-.spinner{width:40px;height:40px;border:4px solid rgba(255,255,255,.15);border-top-color:#4ade80;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
-@keyframes spin{to{transform:rotate(360deg)}}
+/* ══ LAYOUT SHELL ══ */
+.shell{display:flex;max-width:1140px;margin:0 auto;padding:32px 20px 80px;gap:32px;align-items:flex-start}
 
-/* ═══════ BLOCK STYLES ═══════ */
+/* ══ TABLE OF CONTENTS ══ */
+#toc-panel{
+  width:220px;flex-shrink:0;position:sticky;top:72px;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
+  border-radius:12px;padding:16px;max-height:calc(100vh - 100px);overflow-y:auto;
+  transition:transform .3s ease;
+}
+#toc-panel.hidden{display:none}
+.toc-title{font-family:'Poppins',sans-serif;font-size:11px;font-weight:700;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px}
+.toc-item{
+  display:block;padding:6px 8px;border-radius:6px;
+  font-size:12px;color:rgba(255,255,255,.6);cursor:pointer;
+  transition:.15s;border-left:2px solid transparent;text-decoration:none;
+  line-height:1.35;margin-bottom:2px;
+}
+.toc-item:hover,.toc-item.active{color:#4ade80;border-left-color:#4ade80;background:rgba(74,222,128,.08)}
+#toc-panel::-webkit-scrollbar{width:4px}
+#toc-panel::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:2px}
 
-/* PORTADA */
-.blk-portada{min-height:480px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;position:relative;overflow:hidden;border-radius:16px 16px 0 0;padding:60px 40px}
+/* ══ MAGAZINE CANVAS ══ */
+.magazine-canvas{flex:1;display:flex;flex-direction:column;gap:0;min-width:0}
+
+/* ══ BLOCK STYLES ══ */
+
+/* portada-embedded */
+.blk-portada{min-height:420px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;position:relative;overflow:hidden;border-radius:12px 12px 0 0;padding:56px 40px}
 .blk-portada .portada-img{position:absolute;inset:0;object-fit:cover;width:100%;height:100%;opacity:.35}
 .portada-inner{position:relative;z-index:1}
-.portada-logo{font-size:48px;margin-bottom:16px}
-.portada-sup{font-size:12px;font-weight:700;color:rgba(255,255,255,.7);letter-spacing:.12em;text-transform:uppercase;margin-bottom:12px}
-.portada-titulo{font-family:'Poppins',sans-serif;font-size:36px;font-weight:800;color:#fff;line-height:1.15;margin-bottom:10px}
-.portada-sub{font-size:15px;color:rgba(255,255,255,.78);line-height:1.6}
-.portada-line{width:60px;height:3px;background:#4ade80;border-radius:2px;margin:20px auto}
+.portada-logo{font-size:44px;margin-bottom:14px}
+.portada-sup{font-size:11px;font-weight:700;color:rgba(255,255,255,.7);letter-spacing:.12em;text-transform:uppercase;margin-bottom:10px}
+.portada-titulo{font-family:'Poppins',sans-serif;font-size:34px;font-weight:800;color:#fff;line-height:1.15;margin-bottom:8px}
+.portada-sub{font-size:14px;color:rgba(255,255,255,.78);line-height:1.6}
+.portada-line{width:56px;height:3px;background:#4ade80;border-radius:2px;margin:18px auto}
 
-/* ENCABEZADO */
-.blk-encabezado{background:#fff;padding:40px 48px 28px;border-left:5px solid #1d6b3e}
+/* encabezado */
+.blk-encabezado{background:#fff;padding:44px 56px 30px;border-left:5px solid #1d6b3e}
 .enc-titulo{font-family:'Poppins',sans-serif;font-size:26px;font-weight:800;color:#1a3d2b;line-height:1.2;margin-bottom:6px}
-.enc-sub{font-size:14px;color:#4a8a6a;font-weight:500}
+.enc-sub{font-size:13.5px;color:#4a8a6a;font-weight:500}
 
-/* TEXTO */
-.blk-texto{background:#fff;padding:32px 48px}
-.blk-texto p{font-size:14.5px;color:#2d4a3e;line-height:1.85;margin-bottom:12px}
+/* texto */
+.blk-texto{background:#fff;padding:32px 56px}
+.blk-texto p{font-size:14.5px;color:#2d4a3e;line-height:1.9;margin-bottom:12px}
 
-/* ARTICULO */
-.blk-articulo{background:#fff;padding:36px 48px;display:grid;grid-template-columns:1fr;gap:20px}
-.blk-articulo.has-img{grid-template-columns:1fr 320px}
-.art-body{}
-.art-title{font-family:'Poppins',sans-serif;font-size:22px;font-weight:800;color:#1a3d2b;margin-bottom:6px;line-height:1.25}
-.art-author{font-size:12px;font-weight:700;color:#4a8a6a;text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px}
-.art-content{font-size:14px;color:#2d4a3e;line-height:1.8}
+/* articulo */
+.blk-articulo{background:#fff;padding:36px 56px;display:grid;grid-template-columns:1fr;gap:20px}
+.blk-articulo.has-img{grid-template-columns:1fr 300px}
+.art-title{font-family:'Poppins',sans-serif;font-size:22px;font-weight:800;color:#1a3d2b;margin-bottom:5px;line-height:1.25}
+.art-author{font-size:11.5px;font-weight:700;color:#4a8a6a;text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px}
+.art-content{font-size:14px;color:#2d4a3e;line-height:1.85}
 .art-img{border-radius:10px;overflow:hidden}
 .art-img img{width:100%;height:220px;object-fit:cover;display:block}
 
-/* CITA */
-.blk-cita{background:#e8f5ee;border-left:6px solid #1d6b3e;padding:36px 48px;position:relative}
-.blk-cita::before{content:'"';position:absolute;top:16px;left:36px;font-family:'Poppins',sans-serif;font-size:72px;color:#a8dfc0;line-height:1;font-weight:800}
-.cita-text{font-family:'Poppins',sans-serif;font-size:20px;font-weight:600;color:#1a3d2b;line-height:1.5;position:relative;padding-top:32px;font-style:italic}
-.cita-author{font-size:12px;font-weight:700;color:#4a8a6a;margin-top:12px;text-transform:uppercase;letter-spacing:.06em}
+/* cita */
+.blk-cita{background:#e8f5ee;border-left:6px solid #1d6b3e;padding:36px 56px;position:relative}
+.blk-cita::before{content:'"';position:absolute;top:14px;left:40px;font-family:'Poppins',sans-serif;font-size:80px;color:#a8dfc0;line-height:1;font-weight:800}
+.cita-text{font-family:'Poppins',sans-serif;font-size:20px;font-weight:600;color:#1a3d2b;line-height:1.5;position:relative;padding-top:36px;font-style:italic}
+.cita-author{font-size:11.5px;font-weight:700;color:#4a8a6a;margin-top:12px;text-transform:uppercase;letter-spacing:.06em}
 
-/* IMAGEN */
-.blk-imagen{background:#fff;padding:24px 48px}
-.blk-imagen.full .img-wrap{max-width:100%}
+/* imagen */
+.blk-imagen{background:#fff;padding:24px 56px}
 .blk-imagen.half .img-wrap{max-width:50%;margin:0 auto}
+.blk-imagen.third .img-wrap{max-width:33%;margin:0 auto}
 .img-wrap img{width:100%;border-radius:10px;display:block}
+.img-placeholder{padding:40px;text-align:center;background:#f0faf5;border-radius:10px;color:#4a8a6a;font-size:13px;border:2px dashed #d4edd8}
 .img-pie{font-size:12px;color:#4a8a6a;text-align:center;margin-top:8px;font-style:italic}
 
-/* GALERIA */
-.blk-galeria{background:#fff;padding:24px 48px}
+/* galeria */
+.blk-galeria{background:#fff;padding:24px 56px}
 .galeria-grid{display:grid;gap:10px}
 .galeria-grid.cols-2{grid-template-columns:1fr 1fr}
 .galeria-grid.cols-3{grid-template-columns:1fr 1fr 1fr}
 .galeria-grid.cols-4{grid-template-columns:repeat(4,1fr)}
-.galeria-grid img{width:100%;height:160px;object-fit:cover;border-radius:8px;display:block}
+.galeria-grid img{width:100%;height:180px;object-fit:cover;border-radius:8px;display:block;transition:.2s}
+.galeria-grid img:hover{transform:scale(1.02);box-shadow:0 4px 16px rgba(0,0,0,.15)}
 
-/* TABLA */
-.blk-tabla{background:#fff;padding:28px 48px}
-.tabla-titulo{font-family:'Poppins',sans-serif;font-size:14px;font-weight:700;color:#1a3d2b;margin-bottom:12px}
-.data-table{width:100%;border-collapse:collapse;font-size:13px}
-.data-table th{background:#1d6b3e;color:#fff;padding:10px 14px;text-align:left;font-weight:600;font-size:12px}
-.data-table td{padding:9px 14px;border-bottom:1px solid #e8f5ee;color:#1a3d2b}
-.data-table tr:nth-child(even) td{background:#f8fcfa}
+/* kpi */
+.blk-kpi-wrap{background:#f8fcfa;padding:16px 56px}
+.kpi-card{background:#fff;border-radius:12px;padding:28px 24px;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,.06);border:1px solid #e8f5ee}
+.kpi-ico{font-size:40px;margin-bottom:10px}
+.kpi-num{font-size:38px;font-weight:800;line-height:1;margin-bottom:4px}
+.kpi-label{font-size:13px;color:#4a8a6a;margin-top:2px}
+.kpi-trend{display:inline-flex;align-items:center;gap:3px;font-size:11.5px;font-weight:700;margin-top:8px;padding:3px 10px;border-radius:20px}
+.t-up{background:#dcfce7;color:#166534}
+.t-down{background:#fee2e2;color:#991b1b}
+.t-flat{background:#f1f5f9;color:#475569}
 
-/* VIDEO */
-.blk-video{background:#fff;padding:28px 48px}
-.video-titulo{font-family:'Poppins',sans-serif;font-size:15px;font-weight:700;color:#1a3d2b;margin-bottom:8px}
-.video-desc{font-size:13px;color:#4a8a6a;margin-bottom:14px}
-.video-embed{position:relative;padding-bottom:56.25%;border-radius:10px;overflow:hidden;background:#1a1a1a}
-.video-embed iframe{position:absolute;inset:0;width:100%;height:100%;border:none}
-.video-link{display:inline-flex;align-items:center;gap:7px;padding:10px 18px;background:#1d6b3e;color:#fff;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none}
+/* infografia */
+.blk-infografia{background:#fff;padding:28px 56px}
+.inf-title{font-family:'Poppins',sans-serif;font-size:17px;font-weight:700;color:#1a3d2b;margin-bottom:20px}
+.inf-row{display:flex;align-items:center;gap:14px;margin-bottom:12px}
+.inf-row-label{width:130px;font-size:13px;font-weight:500;color:#1a3d2b;flex-shrink:0}
+.inf-track{flex:1;background:#f0faf5;border-radius:20px;height:20px;overflow:hidden}
+.inf-fill{height:100%;border-radius:20px;transition:width .6s ease}
+.inf-val{width:40px;font-size:13px;font-weight:700;color:#1a3d2b;text-align:right;flex-shrink:0}
 
-/* ENLACE */
-.blk-enlace{background:#f0faf5;border:1px solid #d4edd8;padding:20px 48px;display:flex;align-items:center;gap:16px}
-.enlace-ico{width:44px;height:44px;background:#1d6b3e;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.enlace-ico svg{width:20px;height:20px}
-.enlace-body{flex:1}
-.enlace-text{font-weight:700;color:#1a3d2b;font-size:14px}
-.enlace-desc{font-size:12.5px;color:#4a8a6a;margin-top:2px}
-.enlace-btn{background:#1d6b3e;color:#fff;border:none;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;white-space:nowrap;font-family:'Inter',sans-serif}
-
-/* SEPARADOR */
-.blk-separador{background:#fff;padding:8px 48px}
+/* separador */
+.blk-separador{background:#fff;padding:8px 56px}
 .sep-linea{height:2px;background:linear-gradient(90deg,transparent,#a8dfc0,transparent)}
-.sep-espacio{height:32px}
-.sep-decorativo{display:flex;align-items:center;gap:16px;padding:16px 0}
+.sep-espacio{height:36px}
+.sep-decorativo{display:flex;align-items:center;gap:18px;padding:20px 0}
 .sep-decorativo::before,.sep-decorativo::after{content:'';flex:1;height:1px;background:#d4edd8}
-.sep-decorativo span{color:#a8dfc0;font-size:18px}
+.sep-decorativo span{color:#a8dfc0;font-size:20px}
 
-/* NOTICIAS */
-.blk-noticias{background:#f8fcfa;padding:36px 48px;border-top:3px solid #1d6b3e}
-.noticias-titulo{font-family:'Poppins',sans-serif;font-size:18px;font-weight:800;color:#1a3d2b;margin-bottom:20px}
+/* noticias */
+.blk-noticias{background:#f8fcfa;padding:40px 56px;border-top:3px solid #1d6b3e}
+.noticias-titulo{font-family:'Poppins',sans-serif;font-size:20px;font-weight:800;color:#1a3d2b;margin-bottom:20px}
 .noticias-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
-.noticia-card{background:#fff;border:1px solid #d4edd8;border-radius:10px;overflow:hidden}
-.noticia-cat{font-size:10px;font-weight:700;color:#1d6b3e;text-transform:uppercase;padding:10px 12px 4px;letter-spacing:.05em}
-.noticia-titulo{font-family:'Poppins',sans-serif;font-size:13px;font-weight:700;color:#1a3d2b;padding:0 12px 10px;line-height:1.35}
-.noticia-fecha{font-size:11px;color:#4a8a6a;padding:0 12px 10px}
+.noticia-card{background:#fff;border:1px solid #d4edd8;border-radius:10px;overflow:hidden;transition:.2s;cursor:default}
+.noticia-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.08);transform:translateY(-2px)}
+.noticia-cat{font-size:10px;font-weight:700;color:#1d6b3e;text-transform:uppercase;padding:12px 14px 4px;letter-spacing:.05em}
+.noticia-titulo{font-family:'Poppins',sans-serif;font-size:13px;font-weight:700;color:#1a3d2b;padding:0 14px 10px;line-height:1.35}
+.noticia-fecha{font-size:11px;color:#4a8a6a;padding:0 14px 12px}
 
-/* PRINT STYLES */
-@media print {
-  .viewer-nav,.nav-right,.nav-btn{display:none!important}
-  body{background:#fff!important;color:#000}
-  .magazine-canvas{max-width:100%;padding:0}
-  .blk-portada{-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  .blk-encabezado,.blk-texto,.blk-articulo,.blk-cita,.blk-noticias,.blk-tabla,.blk-galeria,.blk-enlace{-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  .blk-portada,.blk-encabezado,.blk-texto{page-break-inside:avoid}
-  .blk-articulo{page-break-inside:avoid}
+/* ══ LOADING / ERROR STATES ══ */
+.state-center{display:flex;align-items:center;justify-content:center;min-height:60vh;text-align:center;color:rgba(255,255,255,.7);padding:40px}
+.state-inner{max-width:400px}
+.state-ico{font-size:56px;margin-bottom:16px}
+.state-title{font-family:'Poppins',sans-serif;font-size:20px;font-weight:700;color:#fff;margin-bottom:8px}
+.state-msg{font-size:14px;color:rgba(255,255,255,.6);line-height:1.7}
+.spinner{width:40px;height:40px;border:4px solid rgba(255,255,255,.12);border-top-color:#4ade80;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ══ SCROLL PROGRESS ══ */
+#scroll-progress{
+  position:fixed;top:56px;left:0;right:0;height:3px;z-index:299;
+  background:linear-gradient(90deg,#4ade80,#1d6b3e);
+  transform-origin:left;transform:scaleX(0);transition:transform .1s linear;
 }
 
-/* TOAST */
+/* ══ TOAST ══ */
 .toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);background:#1a3d2b;color:#fff;padding:11px 22px;border-radius:10px;font-size:13px;font-weight:500;z-index:9999;opacity:0;transition:.3s;pointer-events:none;white-space:nowrap;box-shadow:0 4px 24px rgba(0,0,0,.4)}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
+/* ══ PRINT ══ */
+@media print {
+  .viewer-nav,#scroll-progress,#toc-panel,.nav-right{display:none!important}
+  body{background:#fff!important;color:#000}
+  .shell{display:block;padding:0;max-width:100%}
+  .magazine-canvas{display:block}
+  .portada-hero{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .blk-encabezado,.blk-texto,.blk-articulo,.blk-cita{-webkit-print-color-adjust:exact;print-color-adjust:exact;page-break-inside:avoid}
+}
+
+/* ══ RESPONSIVE ══ */
+@media(max-width:900px){
+  #toc-panel{display:none!important}
+  .shell{padding:20px 12px 60px}
+}
 @media(max-width:700px){
-  .blk-portada .portada-titulo{font-size:26px}
-  .blk-encabezado,.blk-texto,.blk-articulo,.blk-cita,.blk-imagen,.blk-galeria,.blk-tabla,.blk-video,.blk-enlace,.blk-separador,.blk-noticias{padding-left:24px;padding-right:24px}
+  .ph-titulo{font-size:28px}
+  .ph-content{padding:28px 20px}
+  .blk-encabezado,.blk-texto,.blk-articulo,.blk-cita,.blk-imagen,.blk-galeria,.blk-separador,.blk-noticias,.blk-infografia,.blk-kpi-wrap{padding-left:24px;padding-right:24px}
   .blk-articulo.has-img{grid-template-columns:1fr}
   .galeria-grid.cols-3,.galeria-grid.cols-4{grid-template-columns:1fr 1fr}
-  .nav-title{display:none}
+  .nav-brand,.nav-sep,.nav-title{display:none}
+  .btn-toc{display:none}
 }
+
+/* ══ BLOCK ANIMATION ══ */
+.blk-animate{opacity:0;transform:translateY(20px);transition:opacity .5s ease,transform .5s ease}
+.blk-animate.visible{opacity:1;transform:translateY(0)}
 </style>
 </head>
 <body>
+
+<div id="scroll-progress"></div>
 
 <!-- VIEWER NAV -->
 <nav class="viewer-nav">
@@ -169,12 +244,18 @@ body{font-family:'Inter',sans-serif;background:#1a1a1a;color:#1a3d2b;line-height
         <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
       </div>
     </a>
-    <div class="nav-title" id="nav-title">Revista Digital IAGAMI</div>
+    <div class="nav-brand">IAGAMI<small>Revista Digital</small></div>
+    <div class="nav-sep"></div>
+    <div class="nav-title" id="nav-title">Cargando...</div>
   </div>
   <div class="nav-right">
     <button class="nav-btn btn-back" onclick="history.back()">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
       Volver
+    </button>
+    <button class="nav-btn btn-toc" id="btn-toc" onclick="toggleTOC()">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="15" y2="12"/><line x1="3" y1="18" x2="18" y2="18"/></svg>
+      Índice
     </button>
     <button class="nav-btn btn-print" onclick="window.print()">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
@@ -182,17 +263,17 @@ body{font-family:'Inter',sans-serif;background:#1a1a1a;color:#1a3d2b;line-height
     </button>
     <button class="nav-btn btn-dl" id="btn-descargar" onclick="descargar()">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-      Descargar PDF
+      PDF
     </button>
   </div>
 </nav>
 
-<!-- MAGAZINE CONTENT -->
+<!-- MAIN CONTENT -->
 <div id="viewer-root">
   <div class="state-center" id="loading-state">
     <div class="state-inner">
       <div class="spinner"></div>
-      <div class="state-title">Cargando revista...</div>
+      <div class="state-title" style="color:#fff">Cargando revista...</div>
     </div>
   </div>
 </div>
@@ -205,7 +286,9 @@ body{font-family:'Inter',sans-serif;background:#1a1a1a;color:#1a3d2b;line-height
 
 let _revId   = null;
 let _revista = null;
+let _tocOpen = true;
 
+/* ── TOAST ── */
 let _toastT;
 function toast(msg) {
   const t = document.getElementById('app-toast');
@@ -213,24 +296,63 @@ function toast(msg) {
   clearTimeout(_toastT); _toastT = setTimeout(() => t.classList.remove('show'), 3200);
 }
 
+/* ── SCROLL PROGRESS ── */
+window.addEventListener('scroll', () => {
+  const bar = document.getElementById('scroll-progress');
+  if (!bar) return;
+  const scrolled = window.scrollY;
+  const total = document.documentElement.scrollHeight - window.innerHeight;
+  bar.style.transform = `scaleX(${total > 0 ? scrolled / total : 0})`;
+
+  // Update active TOC item
+  const sections = document.querySelectorAll('.enc-anchor');
+  let active = null;
+  sections.forEach(s => {
+    if (s.getBoundingClientRect().top < 120) active = s.dataset.id;
+  });
+  if (active) {
+    document.querySelectorAll('.toc-item').forEach(el => {
+      el.classList.toggle('active', el.dataset.id === active);
+    });
+  }
+});
+
+/* ── ESCAPE ── */
 function escHtml(s) {
   if (!s) return '';
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-function getYoutubeId(url) {
-  if (!url) return null;
-  const m = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-  return m ? m[1] : null;
+/* ── COLOR UTIL ── */
+function shadeColor(hex, pct) {
+  try {
+    const n = parseInt((hex||'#1d6b3e').replace('#',''), 16);
+    const r = Math.max(0, Math.min(255, ((n>>16)&0xff) + pct));
+    const g = Math.max(0, Math.min(255, ((n>>8)&0xff) + pct));
+    const b = Math.max(0, Math.min(255, (n&0xff) + pct));
+    return '#'+((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1);
+  } catch(e) { return hex||'#1d6b3e'; }
 }
 
-/* ─── BLOCK RENDERERS ─── */
+/* ── TOC ── */
+function toggleTOC() {
+  _tocOpen = !_tocOpen;
+  const panel = document.getElementById('toc-panel');
+  if (panel) panel.classList.toggle('hidden', !_tocOpen);
+}
+
+function scrollToSection(id) {
+  const el = document.getElementById('sec-' + id);
+  if (el) { el.scrollIntoView({ behavior:'smooth', block:'start' }); }
+}
+
+/* ── BLOCK RENDERERS ── */
 const RENDERERS = {
 
   portada(b) {
     const bg = b.color_fondo || '#1d6b3e';
     const imgTag = b.imagen_url ? `<img class="portada-img" src="${escHtml(b.imagen_url)}" alt="Portada" loading="eager"/>` : '';
-    return `<div class="blk-portada" style="background:linear-gradient(160deg,${bg},${shadeColor(bg,-50)})">
+    return `<div class="blk-portada blk-animate" style="background:linear-gradient(155deg,${bg},${shadeColor(bg,-50)})">
       ${imgTag}
       <div class="portada-inner">
         <div class="portada-logo">🌿</div>
@@ -242,149 +364,205 @@ const RENDERERS = {
     </div>`;
   },
 
-  encabezado(b) {
-    return `<div class="blk-encabezado">
-      <div class="enc-titulo">${escHtml(b.titulo||'')}</div>
+  encabezado(b, idx) {
+    const anId = 'enc-' + idx;
+    return `<div class="blk-encabezado blk-animate" style="${b.bg_color?'background:'+b.bg_color:''}">
+      <span class="enc-anchor" id="sec-${anId}" data-id="${anId}" style="display:block;margin-top:-72px;padding-top:72px;pointer-events:none"></span>
+      <div class="enc-titulo" style="${b.text_color?'color:'+b.text_color:''}">${escHtml(b.titulo||'')}</div>
       ${b.subtitulo ? `<div class="enc-sub">${escHtml(b.subtitulo)}</div>` : ''}
     </div>`;
   },
 
   texto(b) {
     const paras = (b.contenido||'').split(/\n+/).filter(p => p.trim());
-    return `<div class="blk-texto">${paras.map(p => `<p>${escHtml(p)}</p>`).join('')}</div>`;
+    const style = [
+      b.text_color ? 'color:'+b.text_color : '',
+      b.text_align ? 'text-align:'+b.text_align : ''
+    ].filter(Boolean).join(';');
+    return `<div class="blk-texto blk-animate" style="${b.bg_color?'background:'+b.bg_color:''}">
+      ${paras.map(p => `<p style="${style}">${escHtml(p)}</p>`).join('')}
+    </div>`;
   },
 
   articulo(b) {
     const hasImg = !!b.imagen_url;
     const imgHtml = hasImg ? `<div class="art-img"><img src="${escHtml(b.imagen_url)}" alt="${escHtml(b.titulo)}" loading="lazy"/></div>` : '';
     const paras = (b.contenido||'').split(/\n+/).filter(p => p.trim());
-    return `<div class="blk-articulo${hasImg?' has-img':''}">
+    const style = b.text_align ? 'text-align:'+b.text_align : '';
+    return `<div class="blk-articulo${hasImg?' has-img':''} blk-animate" style="${b.bg_color?'background:'+b.bg_color:''}">
       <div class="art-body">
-        <div class="art-title">${escHtml(b.titulo||'')}</div>
+        <div class="art-title" style="${b.text_color?'color:'+b.text_color:''}">${escHtml(b.titulo||'')}</div>
         ${b.autor ? `<div class="art-author">Por: ${escHtml(b.autor)}</div>` : ''}
-        <div class="art-content">${paras.map(p => `<p style="margin-bottom:10px">${escHtml(p)}</p>`).join('')}</div>
+        <div class="art-content" style="${style}">${paras.map(p => `<p style="margin-bottom:10px">${escHtml(p)}</p>`).join('')}</div>
       </div>
       ${imgHtml}
     </div>`;
   },
 
   cita(b) {
-    return `<div class="blk-cita">
-      <div class="cita-text">${escHtml(b.texto||'')}</div>
+    const style = b.text_color ? 'color:'+b.text_color : '';
+    return `<div class="blk-cita blk-animate" style="${b.bg_color?'background:'+b.bg_color+';border-left-color:'+b.bg_color:''}">
+      <div class="cita-text" style="${style}">${escHtml(b.texto||'')}</div>
       ${b.autor ? `<div class="cita-author">${escHtml(b.autor)}</div>` : ''}
     </div>`;
   },
 
   imagen(b) {
-    if (!b.imagen_url) return `<div class="blk-imagen"><div style="padding:32px;text-align:center;background:#f0faf5;border-radius:10px;color:#4a8a6a;font-size:13px">🖼️ Imagen no configurada</div></div>`;
-    const cls = b.ancho === 'half' ? 'half' : 'full';
-    return `<div class="blk-imagen ${cls}">
+    if (!b.imagen_url) return `<div class="blk-imagen blk-animate"><div class="img-placeholder">🖼️ Imagen no configurada</div></div>`;
+    const cls = b.ancho === 'half' ? 'half' : b.ancho === 'third' ? 'third' : '';
+    return `<div class="blk-imagen ${cls} blk-animate" style="${b.bg_color?'background:'+b.bg_color:''}">
       <div class="img-wrap"><img src="${escHtml(b.imagen_url)}" alt="${escHtml(b.pie||'Imagen')}" loading="lazy"/></div>
       ${b.pie ? `<div class="img-pie">${escHtml(b.pie)}</div>` : ''}
     </div>`;
   },
 
   galeria(b) {
-    const urls = (b.imagenes_csv||'').split(',').map(s => s.trim()).filter(Boolean);
-    if (!urls.length) return `<div class="blk-galeria"><div style="padding:24px;text-align:center;background:#f0faf5;border-radius:10px;color:#4a8a6a">🗂️ Galería vacía</div></div>`;
-    const cols = Math.min(4, Math.max(1, parseInt(b.columnas)||3));
-    return `<div class="blk-galeria">
+    const urls = (b.imagenes_csv||'').split('\n').flatMap(l=>l.split(',')).map(s=>s.trim()).filter(Boolean);
+    if (!urls.length) return `<div class="blk-galeria blk-animate"><div class="img-placeholder">🗂️ Galería vacía</div></div>`;
+    const cols = Math.min(4, Math.max(2, parseInt(b.columnas)||3));
+    return `<div class="blk-galeria blk-animate" style="${b.bg_color?'background:'+b.bg_color:''}">
       <div class="galeria-grid cols-${cols}">${urls.map(u => `<img src="${escHtml(u)}" alt="Imagen" loading="lazy"/>`).join('')}</div>
     </div>`;
   },
 
-  tabla(b) {
-    const headers = (b.cabecera_csv||'').split(',').map(h => h.trim());
-    let rows = [];
-    try { rows = JSON.parse(b.filas_json||'[]'); } catch(e){}
-    return `<div class="blk-tabla">
-      ${b.titulo ? `<div class="tabla-titulo">${escHtml(b.titulo)}</div>` : ''}
-      <table class="data-table">
-        <thead><tr>${headers.map(h => `<th>${escHtml(h)}</th>`).join('')}</tr></thead>
-        <tbody>${rows.map(row => `<tr>${(Array.isArray(row)?row:[row]).map(c => `<td>${escHtml(String(c))}</td>`).join('')}</tr>`).join('')}</tbody>
-      </table>
-    </div>`;
-  },
-
-  video(b) {
-    const ytId = getYoutubeId(b.url||'');
-    const embedHtml = ytId
-      ? `<div class="video-embed"><iframe src="https://www.youtube.com/embed/${ytId}" allowfullscreen loading="lazy"></iframe></div>`
-      : b.url ? `<a class="video-link" href="${escHtml(b.url)}" target="_blank" rel="noopener">🎬 Ver video</a>` : `<div style="padding:24px;text-align:center;background:#f0faf5;border-radius:10px;color:#4a8a6a">🎬 URL de video no configurada</div>`;
-    return `<div class="blk-video">
-      ${b.titulo ? `<div class="video-titulo">${escHtml(b.titulo)}</div>` : ''}
-      ${b.descripcion ? `<div class="video-desc">${escHtml(b.descripcion)}</div>` : ''}
-      ${embedHtml}
-    </div>`;
-  },
-
-  enlace(b) {
-    if (!b.url) return '';
-    return `<div class="blk-enlace">
-      <div class="enlace-ico"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></div>
-      <div class="enlace-body">
-        <div class="enlace-text">${escHtml(b.texto||b.url)}</div>
-        ${b.descripcion ? `<div class="enlace-desc">${escHtml(b.descripcion)}</div>` : ''}
+  kpi(b) {
+    const tClass = b.tendencia==='+' ? 't-up' : b.tendencia==='-' ? 't-down' : 't-flat';
+    const tLabel = b.tendencia==='+' ? '↑ Mejora' : b.tendencia==='-' ? '↓ Baja' : '→ Estable';
+    const numColor = b.color_fondo || '#1d6b3e';
+    return `<div class="blk-kpi-wrap blk-animate" style="${b.bg_color?'background:'+b.bg_color:''}">
+      <div class="kpi-card">
+        <div class="kpi-ico">${escHtml(b.icono||'🌿')}</div>
+        <div class="kpi-num" style="color:${numColor}">${escHtml(b.numero||'—')}</div>
+        <div class="kpi-label">${escHtml(b.label||'')}</div>
+        <div class="kpi-trend ${tClass}">${tLabel}</div>
       </div>
-      <a class="enlace-btn" href="${escHtml(b.url)}" target="_blank" rel="noopener">Visitar →</a>
+    </div>`;
+  },
+
+  infografia(b) {
+    let barras = [];
+    try { barras = JSON.parse(b.barras_json||'[]'); } catch(e){}
+    const maxVal = Math.max(...barras.map(bar=>bar.valor||0), 1);
+    const barsHtml = barras.map(bar=>`
+      <div class="inf-row">
+        <div class="inf-row-label">${escHtml(bar.label||'')}</div>
+        <div class="inf-track">
+          <div class="inf-fill" style="width:${Math.round((bar.valor/maxVal)*100)}%;background:${bar.color||'#1d6b3e'}"></div>
+        </div>
+        <div class="inf-val">${bar.valor||0}</div>
+      </div>`).join('');
+    return `<div class="blk-infografia blk-animate" style="${b.bg_color?'background:'+b.bg_color:''}">
+      ${b.titulo ? `<div class="inf-title">${escHtml(b.titulo)}</div>` : ''}
+      ${barsHtml}
     </div>`;
   },
 
   separador(b) {
     const estilo = b.estilo || 'linea';
-    if (estilo === 'espacio') return `<div class="blk-separador"><div class="sep-espacio"></div></div>`;
-    if (estilo === 'decorativo') return `<div class="blk-separador"><div class="sep-decorativo"><span>🌿</span></div></div>`;
-    return `<div class="blk-separador"><div class="sep-linea"></div></div>`;
+    let inner = '';
+    if (estilo==='espacio') inner = `<div class="sep-espacio"></div>`;
+    else if (estilo==='decorativo') inner = `<div class="sep-decorativo"><span>🌿</span></div>`;
+    else inner = `<div class="sep-linea"></div>`;
+    return `<div class="blk-separador blk-animate" style="${b.bg_color?'background:'+b.bg_color:''}">${inner}</div>`;
   },
 
   noticias(b) {
-    const n = parseInt(b.cantidad)||3;
-    const titulo = b.titulo_seccion || 'Noticias Destacadas';
-    const noticias = CMSDB.getAll('noticias').filter(n => n.publicado !== false).slice(-n).reverse();
+    const n = Math.min(6, parseInt(b.cantidad)||3);
+    const cat = b.categoria||'';
+    let noticias = CMSDB.getAll('noticias');
+    if (cat) noticias = noticias.filter(x=>x.categoria===cat);
+    noticias = noticias.slice(0, n);
     const items = noticias.map(noticia => `<div class="noticia-card">
       <div class="noticia-cat">${escHtml(noticia.categoria||'Noticias')}</div>
       <div class="noticia-titulo">${escHtml(noticia.titulo||'Sin título')}</div>
       <div class="noticia-fecha">📅 ${escHtml(noticia.fecha||'')}</div>
     </div>`).join('') || '<div style="color:#4a8a6a;font-size:13px">No hay noticias disponibles.</div>';
-    return `<div class="blk-noticias">
-      <div class="noticias-titulo">${escHtml(titulo)}</div>
+    return `<div class="blk-noticias blk-animate" style="${b.bg_color?'background:'+b.bg_color:''}">
+      <div class="noticias-titulo">Noticias Recientes</div>
       <div class="noticias-grid">${items}</div>
     </div>`;
   }
 };
 
-/* ─── RENDER MAGAZINE ─── */
+/* ── BUILD TOC ── */
+function buildTOC(bloques) {
+  const encabezados = bloques
+    .map((b, idx) => ({ b, idx }))
+    .filter(({ b }) => b.tipo === 'encabezado' && b.titulo);
+
+  if (!encabezados.length) return '';
+
+  const items = encabezados.map(({ b, idx }) =>
+    `<a class="toc-item" data-id="enc-${idx}" onclick="scrollToSection('enc-${idx}')">${escHtml(b.titulo)}</a>`
+  ).join('');
+
+  return `<div id="toc-panel">
+    <div class="toc-title">📋 Índice</div>
+    ${items}
+  </div>`;
+}
+
+/* ── RENDER MAGAZINE ── */
 function renderMagazine(revista) {
   const bloques = Array.isArray(revista.contenido_bloques) ? revista.contenido_bloques : [];
-  const html = bloques.map(b => {
+
+  if (!bloques.length) {
+    return `<div class="state-center"><div class="state-inner">
+      <div class="state-ico">📄</div>
+      <div class="state-title">Revista sin contenido</div>
+      <div class="state-msg">Esta revista no tiene bloques de contenido aún.</div>
+    </div></div>`;
+  }
+
+  // Find first portada block for hero
+  const portadaBlock = bloques.find(b => b.tipo === 'portada');
+  const nonPortadaBlocks = portadaBlock ? bloques.filter(b => b !== portadaBlock) : bloques;
+
+  // Build hero banner from portada
+  let heroHtml = '';
+  if (portadaBlock) {
+    const bg = portadaBlock.color_fondo || '#1d6b3e';
+    const imgTag = portadaBlock.imagen_url ? `<img class="ph-img" src="${escHtml(portadaBlock.imagen_url)}" alt="Portada">` : '';
+    heroHtml = `<div class="portada-hero" style="background:linear-gradient(155deg,${bg},${shadeColor(bg,-50)})">
+      ${imgTag}
+      <div class="ph-overlay"></div>
+      <div class="ph-content">
+        <div class="ph-sup">IAGAMI · Revista Digital · Edición ${escHtml(revista.numero_edicion||'')}</div>
+        <div class="ph-titulo">${escHtml(portadaBlock.titulo||revista.titulo||'Revista IAGAMI')}</div>
+        ${portadaBlock.subtitulo ? `<div class="ph-line"></div><div class="ph-sub">${escHtml(portadaBlock.subtitulo)}</div>` : ''}
+        <div class="ph-meta">
+          ${revista.fecha ? `<span>📅 ${escHtml(revista.fecha)}</span>` : ''}
+          ${revista.categoria ? `<span>🏷️ ${escHtml(revista.categoria)}</span>` : ''}
+          <span>👁️ ${revista.visualizaciones||0} visualizaciones</span>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  const tocHtml = buildTOC(bloques);
+  const canvasHtml = (portadaBlock ? nonPortadaBlocks : bloques).map((b, idx) => {
     const renderer = RENDERERS[b.tipo];
-    if (!renderer) return `<div style="padding:16px 48px;background:#fff;font-size:12px;color:#4a8a6a">Bloque tipo "${escHtml(b.tipo)}" no reconocido</div>`;
-    try { return renderer(b); } catch(e) { return ''; }
+    if (!renderer) return `<div style="padding:16px 56px;background:#fff;font-size:12px;color:#4a8a6a">Bloque tipo "${escHtml(b.tipo)}" no reconocido</div>`;
+    try { return renderer(b, idx); } catch(e) { console.error(e); return ''; }
   }).join('');
 
-  return `<div class="magazine-canvas">${html || '<div class="state-center"><div class="state-inner"><div class="state-ico">📄</div><div class="state-title" style="color:rgba(255,255,255,.8)">Revista sin contenido</div><div class="state-msg">Esta revista no tiene bloques de contenido aún.</div></div></div>'}</div>`;
+  return `
+    ${heroHtml}
+    <div class="shell">
+      ${tocHtml}
+      <div class="magazine-canvas">${canvasHtml}</div>
+    </div>`;
 }
 
-/* ─── COLOR UTILITY ─── */
-function shadeColor(hex, pct) {
-  try {
-    const n = parseInt(hex.replace('#',''), 16);
-    const r = Math.max(0, Math.min(255, ((n>>16)&0xff) + pct));
-    const g = Math.max(0, Math.min(255, ((n>>8)&0xff) + pct));
-    const b = Math.max(0, Math.min(255, (n&0xff) + pct));
-    return '#'+((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1);
-  } catch(e) { return hex; }
-}
-
-/* ─── DOWNLOAD ─── */
+/* ── DOWNLOAD ── */
 function descargar() {
   if (!_revista) return;
   CMSDB.save('revistas', Object.assign({}, _revista, {descargas: (_revista.descargas||0)+1}));
-  toast('⬇️ Descarga iniciada correctamente');
+  toast('⬇️ Descarga iniciada');
   if (_revista.pdf_url) {
     const a = document.createElement('a');
     a.href = _revista.pdf_url;
-    a.download = `IAGAMI_Revista_${_revista.numero_edicion}.pdf`;
+    a.download = `IAGAMI_Revista_${_revista.numero_edicion||'1'}.pdf`;
     a.target = '_blank';
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
   } else {
@@ -392,7 +570,15 @@ function descargar() {
   }
 }
 
-/* ─── INIT ─── */
+/* ── SCROLL ANIMATIONS ── */
+function initAnimations() {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+  }, { threshold: 0.05, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('.blk-animate').forEach(el => observer.observe(el));
+}
+
+/* ── INIT ── */
 document.addEventListener('DOMContentLoaded', () => {
   const params = new URLSearchParams(window.location.search);
   _revId = params.get('id') || params.get('preview');
@@ -401,31 +587,36 @@ document.addEventListener('DOMContentLoaded', () => {
   const root = document.getElementById('viewer-root');
 
   if (!_revId) {
-    root.innerHTML = `<div class="state-center"><div class="state-inner"><div class="state-ico">🔍</div><div class="state-title">Revista no encontrada</div><div class="state-msg">No se especificó el ID de la revista. <a href="index.html" style="color:#4ade80">Volver al catálogo</a></div></div></div>`;
+    root.innerHTML = `<div class="state-center"><div class="state-inner">
+      <div class="state-ico">🔍</div>
+      <div class="state-title">Revista no encontrada</div>
+      <div class="state-msg">No se especificó el ID de la revista. <a href="index.html" style="color:#4ade80">Ver catálogo</a></div>
+    </div></div>`;
     return;
   }
 
   _revista = CMSDB.getOne('revistas', _revId);
 
   if (!_revista) {
-    root.innerHTML = `<div class="state-center"><div class="state-inner"><div class="state-ico">📰</div><div class="state-title">Revista no disponible</div><div class="state-msg">La revista solicitada no existe o no está publicada. <a href="index.html" style="color:#4ade80">Ver todas las ediciones</a></div></div></div>`;
+    root.innerHTML = `<div class="state-center"><div class="state-inner">
+      <div class="state-ico">📰</div>
+      <div class="state-title">Revista no disponible</div>
+      <div class="state-msg">La revista solicitada no existe. <a href="index.html" style="color:#4ade80">Ver todas las ediciones</a></div>
+    </div></div>`;
     return;
   }
 
-  // Update title
   document.title = `${_revista.titulo} — Revista IAGAMI`;
-  document.getElementById('nav-title').textContent = `${_revista.titulo} · Edición ${_revista.numero_edicion}`;
+  document.getElementById('nav-title').textContent = `${_revista.titulo} · Nº${_revista.numero_edicion||'1'}`;
 
-  // Increment views (only on real view, not print)
   if (!isPrint) {
     CMSDB.save('revistas', Object.assign({}, _revista, {visualizaciones: (_revista.visualizaciones||0)+1}));
   }
 
-  // Render
   root.innerHTML = renderMagazine(_revista);
+  setTimeout(initAnimations, 100);
 
-  // Auto-print if ?print=1
-  if (isPrint) setTimeout(() => window.print(), 800);
+  if (isPrint) setTimeout(() => window.print(), 900);
 });
 </script>
 </body>
