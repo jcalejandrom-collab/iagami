@@ -3,248 +3,500 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Planificación Institucional — IAGAMI SIGAP</title>
-<meta name="description" content="Planificación y proyectos institucionales del IAGAMI, Municipio Iribarren."/>
+<title>Planificación SIGAP — IAGAMI</title>
+<meta name="description" content="Planificación estratégica y seguimiento de actividades programadas del Sistema Integral de Gestión Ambiental del Municipio Iribarren."/>
 <meta name="theme-color" content="#1d6b3e"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet"/>
 <style>
+/* ===== RESET & BASE ===== */
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
 body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height:1.6}
+
+/* ===== TOPBAR ===== */
 .topbar{background:#1d6b3e;color:rgba(255,255,255,.88);text-align:center;font-size:11px;padding:6px 16px;letter-spacing:.06em;font-weight:500}
+
+/* ===== NAV ===== */
 .nav{background:#fff;border-bottom:1px solid #c8ead8;position:sticky;top:0;z-index:200;box-shadow:0 1px 12px rgba(29,107,62,.06)}
-.navinner{max-width:1100px;margin:0 auto;padding:0 24px;height:58px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.navinner{max-width:1200px;margin:0 auto;padding:0 24px;height:58px;display:flex;align-items:center;justify-content:space-between;gap:16px}
 .logo{display:flex;align-items:center;gap:10px;flex-shrink:0;text-decoration:none}
-.logo-img{width:42px;height:42px;background:#1d6b3e;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo-img{width:48px;height:48px;background:#fff;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;border:1px solid #d4edd8}
+.logo-img img{width:44px;height:44px;object-fit:contain}
 .logo-img svg{width:22px;height:22px}
 .logo-text{font-family:'Poppins',sans-serif;font-size:15px;font-weight:700;color:#1a3d2b;line-height:1.1}
 .logo-sub{font-size:10px;color:#4a8a6a;font-weight:400}
-.navbtn{font-size:12px;padding:7px 16px;border-radius:8px;background:#1d6b3e;color:#fff;border:none;cursor:pointer;font-weight:600;transition:.15s;text-decoration:none}
+.navlinks{display:flex;gap:2px;align-items:center}
+.nl{font-size:12px;padding:6px 10px;border-radius:7px;color:#4a6a5a;cursor:pointer;transition:.15s;white-space:nowrap;text-decoration:none;border:none;background:none}
+.nl:hover,.nl.active{background:#e8f5ee;color:#1d6b3e}
+.navr{display:flex;gap:8px;flex-shrink:0}
+.navbtn{font-size:12px;padding:7px 16px;border-radius:8px;background:#1d6b3e;color:#fff;border:none;cursor:pointer;font-weight:600;transition:.15s}
 .navbtn:hover{background:#155c32}
-.navlinks{display:flex;gap:2px}
-.nl{font-size:12px;padding:6px 10px;border-radius:7px;color:#4a6a5a;text-decoration:none;transition:.15s}
-.nl:hover{background:#e8f5ee;color:#1d6b3e}
+.navbtn-o{font-size:12px;padding:6px 14px;border-radius:8px;background:transparent;color:#1d6b3e;border:1.5px solid #a8dfc0;cursor:pointer;font-weight:500;transition:.15s}
+.navbtn-o:hover{background:#e8f5ee}
 
-.hero{background:linear-gradient(135deg,#0d2d1a 0%,#1d6b3e 100%);padding:44px 24px;color:#fff;text-align:center;position:relative;overflow:hidden}
-.hero::before{content:'';position:absolute;width:340px;height:340px;border-radius:50%;background:rgba(74,222,128,.06);top:-80px;right:-70px}
-.hero-tag{display:inline-block;font-size:11px;font-weight:700;background:rgba(74,222,128,.14);color:#a8f0c8;border:1px solid rgba(74,222,128,.35);border-radius:20px;padding:4px 14px;margin-bottom:12px;letter-spacing:.05em;position:relative}
-.hero h1{font-family:'Poppins',sans-serif;font-size:26px;font-weight:800;line-height:1.2;margin-bottom:10px;position:relative}
-.hero p{font-size:13.5px;color:rgba(255,255,255,.78);max-width:520px;margin:0 auto;position:relative}
+/* ===== HERO COMPACTO ===== */
+.hero-compact{background:linear-gradient(135deg,#0a1f0e 0%,#1d6b3e 60%,#155c32 100%);padding:52px 24px 44px;position:relative;overflow:hidden}
+.hero-compact::before{content:'';position:absolute;inset:0;background:url('../hero-iagami.png') center/cover no-repeat;opacity:.12}
+.hero-compact-inner{max-width:1200px;margin:0 auto;position:relative;z-index:1}
+.hero-badge{display:inline-flex;align-items:center;gap:7px;background:rgba(74,222,128,.14);color:#a8f0c8;border:1px solid rgba(74,222,128,.35);border-radius:20px;font-size:11px;font-weight:600;padding:5px 14px;margin-bottom:12px;letter-spacing:.05em}
+.pulse{width:7px;height:7px;background:#4ade80;border-radius:50%;display:inline-block;animation:pulse 2s infinite;flex-shrink:0}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.hero-compact h1{font-family:'Poppins',sans-serif;font-size:28px;font-weight:800;color:#fff;margin-bottom:8px;text-shadow:0 2px 16px rgba(0,0,0,.4)}
+.hero-compact p{font-size:13.5px;color:rgba(255,255,255,.78);max-width:580px;line-height:1.75}
+.hero-stats-row{display:flex;gap:24px;margin-top:22px;flex-wrap:wrap}
+.hstat{text-align:center}
+.hstat-v{font-family:'Poppins',sans-serif;font-size:22px;font-weight:800;color:#4ade80}
+.hstat-l{font-size:10px;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
 
-.stats-bar{background:#fff;border-bottom:1px solid #d4edd8}
-.stats-inner{max-width:1100px;margin:0 auto;padding:16px 24px;display:flex;gap:20px;flex-wrap:wrap}
-.stat-pill{display:flex;align-items:center;gap:9px;font-size:13px;color:#1a3d2b}
-.stat-num{font-family:'Poppins',sans-serif;font-size:18px;font-weight:800;color:#1d6b3e}
+/* ===== LAYOUT ===== */
+.sec-wrap{background:#f8fcfa}
+.section{padding:40px 24px;max-width:1200px;margin:0 auto}
+.sec-head{text-align:center;margin-bottom:26px}
+.sec-head h2{font-family:'Poppins',sans-serif;font-size:22px;font-weight:700;color:#1a3d2b;margin-bottom:5px}
+.sec-head p{font-size:13px;color:#4a8a6a}
+.sec-tag{display:inline-block;font-size:11px;font-weight:700;color:#1d6b3e;background:#e8f5ee;border:1px solid #a8dfc0;border-radius:20px;padding:3px 13px;margin-bottom:9px;letter-spacing:.05em}
 
-.main-wrap{max-width:1100px;margin:0 auto;padding:32px 24px}
-.toolbar{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}
-.search-input{flex:1;min-width:200px;padding:10px 14px;border:1.5px solid #d4edd8;border-radius:9px;font-size:13px;color:#1a3d2b;outline:none;font-family:'Inter',sans-serif;transition:.15s}
-.search-input:focus{border-color:#1d6b3e;box-shadow:0 0 0 3px rgba(29,107,62,.08)}
-.filter-select{padding:10px 14px;border:1.5px solid #d4edd8;border-radius:9px;font-size:13px;color:#1a3d2b;outline:none;background:#fff;cursor:pointer;transition:.15s}
-.filter-select:focus{border-color:#1d6b3e}
+/* ===== TOOLBAR ===== */
+.toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:20px}
+.tab-btn{font-size:12px;padding:7px 16px;border-radius:8px;border:1.5px solid #d4edd8;background:#fff;color:#4a6a5a;cursor:pointer;font-weight:500;transition:.15s;font-family:'Inter',sans-serif}
+.tab-btn:hover{background:#e8f5ee;border-color:#a8dfc0;color:#1d6b3e}
+.tab-btn.active{background:#1d6b3e;color:#fff;border-color:#1d6b3e}
+.filter-select{font-size:12px;padding:7px 12px;border-radius:8px;border:1.5px solid #d4edd8;background:#fff;color:#4a6a5a;cursor:pointer;outline:none;font-family:'Inter',sans-serif}
+.filter-select:focus{border-color:#a8dfc0}
+.spacer{flex:1}
+.count-badge{font-size:11px;color:#4a8a6a;padding:5px 12px;background:#e8f5ee;border-radius:20px;font-weight:500}
 
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
-.plan-card{background:#fff;border:1px solid #d4edd8;border-radius:13px;padding:20px;transition:.15s;display:flex;flex-direction:column;gap:12px}
-.plan-card:hover{box-shadow:0 4px 20px rgba(29,107,62,.1)}
-.plan-header{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
-.plan-titulo{font-family:'Poppins',sans-serif;font-size:14px;font-weight:700;color:#1a3d2b;line-height:1.3}
-.plan-desc{font-size:12.5px;color:#4a8a6a;line-height:1.6}
-.plan-meta{display:flex;flex-wrap:wrap;gap:8px;font-size:11.5px;color:#4a8a6a}
-.meta-item{display:flex;align-items:center;gap:4px}
-.progress-wrap{display:flex;align-items:center;gap:9px}
-.progress-bar{flex:1;height:7px;border-radius:4px;background:#e8f5ee;overflow:hidden}
-.progress-fill{height:100%;background:#1d6b3e;border-radius:4px;transition:.4s}
-.progress-pct{font-size:11px;font-weight:700;color:#1d6b3e;white-space:nowrap}
-.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;white-space:nowrap}
-.badge-pendiente{background:#f1f5f9;color:#475569}
-.badge-progreso{background:#dbeafe;color:#1e40af}
-.badge-completado{background:#dcfce7;color:#166534}
-.badge-cancelado{background:#fee2e2;color:#991b1b}
-.pri-alta{background:#fee2e2;color:#991b1b}
-.pri-media{background:#fef3c7;color:#92400e}
-.pri-baja{background:#dcfce7;color:#166534}
+/* ===== VISTA LISTA ===== */
+.plan-list{display:flex;flex-direction:column;gap:14px}
+.plan-card{background:#fff;border:1px solid #d4edd8;border-radius:14px;padding:18px 20px;transition:.2s;animation:slideUp .3s ease}
+.plan-card:hover{box-shadow:0 4px 20px rgba(29,107,62,.1);transform:translateY(-1px)}
+.plan-card-top{display:flex;align-items:flex-start;gap:14px}
+.plan-icon{width:44px;height:44px;border-radius:10px;background:#e8f5ee;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.plan-info{flex:1;min-width:0}
+.plan-name{font-family:'Poppins',sans-serif;font-size:14px;font-weight:700;color:#1a3d2b;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.plan-meta{display:flex;gap:10px;flex-wrap:wrap;font-size:11px;color:#4a8a6a;margin-bottom:8px}
+.ps-badge{display:inline-block;font-size:10.5px;font-weight:700;border-radius:20px;padding:3px 11px;letter-spacing:.03em}
+.ps-planificado{background:#fef3c7;color:#92400e}
+.ps-ejecucion{background:#dbeafe;color:#1e40af}
+.ps-completado{background:#dcfce7;color:#166534}
+.ps-pausado{background:#fce7f3;color:#9d174d}
+.ps-cancelado{background:#f1f5f9;color:#475569}
+.plan-desc{font-size:12px;color:#4a8a6a;line-height:1.6;margin-bottom:10px}
+.plan-progress-row{display:flex;align-items:center;gap:10px;margin-top:8px}
+.plan-bar-track{flex:1;height:6px;background:#e8f5ee;border-radius:3px;overflow:hidden}
+.plan-bar-fill{height:100%;border-radius:3px;transition:width .5s ease}
+.plan-bar-pct{font-size:11px;font-weight:700;color:#1d6b3e;min-width:32px;text-align:right}
+.plan-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.plan-tag{font-size:10px;padding:2px 9px;border-radius:20px;background:#e8f5ee;color:#1d6b3e;font-weight:500}
 
-.empty-state{text-align:center;padding:56px 24px;background:#fff;border:1px solid #d4edd8;border-radius:13px}
-.empty-state .ico{font-size:48px;margin-bottom:12px}
-.empty-state h3{font-family:'Poppins',sans-serif;font-size:17px;font-weight:700;color:#1a3d2b;margin-bottom:7px}
-.empty-state p{font-size:13px;color:#4a8a6a}
+/* ===== VISTA CALENDARIO ===== */
+.cal-nav{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.cal-nav h3{font-family:'Poppins',sans-serif;font-size:15px;font-weight:700;color:#1a3d2b;flex:1;text-align:center;text-transform:capitalize}
+.cal-nav-btn{width:32px;height:32px;border-radius:8px;border:1.5px solid #d4edd8;background:#fff;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:.15s;flex-shrink:0}
+.cal-nav-btn:hover{background:#e8f5ee;border-color:#a8dfc0}
+.cal-grid-wrap{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cal-header-cell{font-size:10px;font-weight:700;color:#4a8a6a;text-align:center;padding:8px 4px;text-transform:uppercase;letter-spacing:.04em}
+.cal-cell{background:#fff;border:1px solid #e8f5ee;border-radius:8px;min-height:80px;padding:6px;transition:.15s}
+.cal-cell.other-month{background:#f8fcfa;opacity:.5}
+.cal-cell.today{border-color:#1d6b3e;background:#e8f5ee}
+.cal-day{font-size:11px;font-weight:600;color:#4a8a6a;margin-bottom:4px}
+.cal-cell.today .cal-day{color:#1d6b3e;font-weight:700}
+.cal-pill{font-size:9.5px;font-weight:600;border-radius:4px;padding:2px 5px;margin-bottom:2px;cursor:default;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.cal-pill-planificado{background:#fef3c7;color:#92400e}
+.cal-pill-ejecucion{background:#dbeafe;color:#1e40af}
+.cal-pill-completado{background:#dcfce7;color:#166534}
+.cal-pill-pausado{background:#fce7f3;color:#9d174d}
+.cal-pill-cancelado{background:#f1f5f9;color:#475569}
+.cal-more{font-size:9px;color:#4a8a6a;font-style:italic;margin-top:2px}
 
-.footer{background:#0a1f0e;color:rgba(255,255,255,.7);padding:28px 24px 20px}
-.footer-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
-.footer-brand{font-family:'Poppins',sans-serif;font-size:13px;font-weight:700;color:#fff}
-.footer-links{display:flex;gap:16px}
-.footer-links a{font-size:11.5px;color:rgba(255,255,255,.6);text-decoration:none;transition:.15s}
-.footer-links a:hover{color:#fff}
-.footer-copy{width:100%;text-align:center;font-size:10.5px;opacity:.35;margin-top:12px}
+/* ===== VISTA KANBAN ===== */
+.kanban{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;align-items:start}
+.kanban-col{background:#f8fcfa;border:1px solid #d4edd8;border-radius:14px;overflow:hidden}
+.kanban-col-head{padding:12px 16px;font-family:'Poppins',sans-serif;font-size:12px;font-weight:700;letter-spacing:.04em;display:flex;align-items:center;justify-content:space-between}
+.kanban-col-head .kcount{font-size:11px;background:rgba(255,255,255,.7);padding:2px 8px;border-radius:12px;font-family:'Inter',sans-serif;font-weight:600}
+.kanban-items{padding:10px;display:flex;flex-direction:column;gap:8px;min-height:60px}
+.kanban-item{background:#fff;border:1px solid #e8f5ee;border-radius:10px;padding:12px 13px;transition:.2s;cursor:default}
+.kanban-item:hover{box-shadow:0 2px 12px rgba(29,107,62,.1);transform:translateY(-1px)}
+.kanban-item-name{font-size:12px;font-weight:600;color:#1a3d2b;margin-bottom:6px;line-height:1.35}
+.kanban-item-meta{font-size:10.5px;color:#4a8a6a;margin-bottom:6px}
+.kanban-item-bar{height:4px;background:#e8f5ee;border-radius:2px;overflow:hidden}
+.kanban-item-fill{height:100%;border-radius:2px;transition:width .4s}
+.kh-planificado{background:linear-gradient(90deg,#fef3c7,#fde68a);color:#78350f}
+.kh-ejecucion{background:linear-gradient(90deg,#dbeafe,#bfdbfe);color:#1e3a8a}
+.kh-completado{background:linear-gradient(90deg,#dcfce7,#bbf7d0);color:#14532d}
+.kh-pausado{background:linear-gradient(90deg,#fce7f3,#fbcfe8);color:#831843}
+.kh-cancelado{background:linear-gradient(90deg,#f1f5f9,#e2e8f0);color:#334155}
 
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#1a3d2b;color:#fff;padding:10px 20px;border-radius:9px;font-size:13px;z-index:9999;opacity:0;transition:.3s;pointer-events:none;white-space:nowrap}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+/* ===== EMPTY STATE ===== */
+.empty-state{text-align:center;padding:48px 24px;color:#4a8a6a}
+.empty-state .ico{font-size:40px;margin-bottom:12px}
+.empty-state p{font-size:13px}
 
-@media(max-width:640px){
-  .hero h1{font-size:20px}
-  .stats-inner{gap:12px}
-  .toolbar{flex-direction:column}
+/* ===== FOOTER ===== */
+.footer{background:#0a1f0e;color:rgba(255,255,255,.7);padding:40px 24px 24px}
+.footer-inner{max-width:1200px;margin:0 auto}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:28px;margin-bottom:28px}
+.footer-brand h3{color:#fff;font-family:'Poppins',sans-serif;font-size:14px;font-weight:700;margin-bottom:8px}
+.footer-brand p{font-size:11.5px;line-height:1.75;color:rgba(255,255,255,.65)}
+.footer-col h4{color:#a8dfc0;font-size:11px;font-weight:700;margin-bottom:10px;letter-spacing:.06em;text-transform:uppercase}
+.footer-col ul{list-style:none}
+.footer-col li,.footer-col a{font-size:11.5px;padding:3px 0;cursor:pointer;transition:.15s;color:rgba(255,255,255,.65);display:block;text-decoration:none}
+.footer-col li:hover,.footer-col a:hover{color:#fff;padding-left:4px}
+.footer-col .contact-item{font-size:11.5px;padding:3px 0;display:flex;align-items:center;gap:7px;color:rgba(255,255,255,.65)}
+.footer-bottom{border-top:1px solid rgba(255,255,255,.08);padding-top:18px;text-align:center;font-size:10.5px;opacity:.4}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:900px){
+  .navlinks{display:none}
+  .hero-compact h1{font-size:22px}
+  .footer-grid{grid-template-columns:1fr 1fr}
+  .kanban{grid-template-columns:1fr 1fr}
+}
+@media(max-width:600px){
+  .footer-grid{grid-template-columns:1fr}
+  .cal-grid-wrap{gap:1px}
+  .cal-cell{min-height:60px;padding:4px}
+  .toolbar{gap:6px}
+  .kanban{grid-template-columns:1fr}
 }
 </style>
 </head>
 <body>
 
-<div class="topbar">Instituto Autónomo de Gestión Ambiental — Municipio Iribarren · Estado Lara · Venezuela &nbsp;|&nbsp; SIGAP v3.0</div>
+<!-- TOPBAR -->
+<div class="topbar">Instituto Autónomo de Gestión Ambiental — Municipio Iribarren · Estado Lara · Venezuela</div>
 
+<!-- NAV -->
 <nav class="nav">
   <div class="navinner">
     <a class="logo" href="../index.html">
       <div class="logo-img">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <img src="../logo-iagami.png" alt="Logo IAGAMI" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"/>
+        <svg style="display:none" viewBox="0 0 24 24" fill="none" stroke="#1d6b3e" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
       </div>
-      <div>
-        <div class="logo-text">IAGAMI</div>
-        <div class="logo-sub">Gestión Ambiental · Iribarren</div>
-      </div>
+      <div><div class="logo-text">IAGAMI</div><div class="logo-sub">Gestión Ambiental · Iribarren</div></div>
     </a>
     <div class="navlinks">
-      <a class="nl" href="../index.html">← Portal</a>
-      <a class="nl" href="../noticias/index.html">Noticias</a>
-      <a class="nl" href="../proyectos/index.html">Proyectos</a>
+      <a class="nl" href="../index.html">Inicio</a>
+      <a class="nl" href="../tramites/index.html">Trámites</a>
+      <a class="nl" href="../agenda/index.html">Agenda</a>
+      <a class="nl active" href="#">Planificación</a>
+      <a class="nl" href="../transparencia/index.html">Transparencia</a>
+      <a class="nl" href="../organizacion/index.html">Organización</a>
     </div>
-    <a class="navbtn" href="../admin/index.html">Admin</a>
+    <div class="navr">
+      <button class="navbtn-o" onclick="window.location='../admin/index.html'">Admin</button>
+      <button class="navbtn" onclick="window.location='../index.html'">Acceder</button>
+    </div>
   </div>
 </nav>
 
-<div class="hero">
-  <div class="hero-tag">GESTIÓN INSTITUCIONAL</div>
-  <h1>Planificación Institucional SIGAP</h1>
-  <p>Consulta el plan de actividades y proyectos del Instituto Autónomo de Gestión Ambiental del Municipio Iribarren.</p>
-</div>
-
-<div class="stats-bar">
-  <div class="stats-inner" id="stats-bar">
-    <div class="stat-pill"><span class="stat-num" id="stat-total">0</span><span>actividades totales</span></div>
-    <div class="stat-pill"><span class="stat-num" id="stat-progreso">0</span><span>en progreso</span></div>
-    <div class="stat-pill"><span class="stat-num" id="stat-completados">0</span><span>completadas</span></div>
-    <div class="stat-pill"><span class="stat-num" id="stat-pendientes">0</span><span>pendientes</span></div>
+<!-- HERO COMPACTO -->
+<div class="hero-compact">
+  <div class="hero-compact-inner">
+    <div class="hero-badge"><span class="pulse"></span> SIGAP · Planificación Estratégica</div>
+    <h1>Planificación SIGAP</h1>
+    <p>Seguimiento de actividades programadas, proyectos y metas institucionales del Instituto Autónomo de Gestión Ambiental del Municipio Iribarren. Transparencia y rendición de cuentas en tiempo real.</p>
+    <div class="hero-stats-row">
+      <div class="hstat"><div class="hstat-v" id="stat-total">—</div><div class="hstat-l">Planes totales</div></div>
+      <div class="hstat"><div class="hstat-v" id="stat-ejecucion">—</div><div class="hstat-l">En ejecución</div></div>
+      <div class="hstat"><div class="hstat-v" id="stat-completado">—</div><div class="hstat-l">Completados</div></div>
+      <div class="hstat"><div class="hstat-v" id="stat-avance">—</div><div class="hstat-l">Avance promedio</div></div>
+    </div>
   </div>
 </div>
 
-<div class="main-wrap">
-  <div class="toolbar">
-    <input class="search-input" type="text" id="q-input" placeholder="Buscar por título, responsable..." oninput="renderItems()"/>
-    <select class="filter-select" id="f-estado" onchange="renderItems()">
-      <option value="">Todos los estados</option>
-      <option value="Pendiente">Pendiente</option>
-      <option value="En Progreso">En Progreso</option>
-      <option value="Completado">Completado</option>
-      <option value="Cancelado">Cancelado</option>
-    </select>
-    <select class="filter-select" id="f-prioridad" onchange="renderItems()">
-      <option value="">Todas las prioridades</option>
-      <option value="Alta">Alta</option>
-      <option value="Media">Media</option>
-      <option value="Baja">Baja</option>
-    </select>
-  </div>
+<!-- CONTENIDO PRINCIPAL -->
+<div class="sec-wrap">
+  <div class="section">
+    <div class="sec-head">
+      <div class="sec-tag">PLANIFICACIÓN INSTITUCIONAL</div>
+      <h2>Actividades y Metas SIGAP</h2>
+      <p>Visualiza el estado, avance y cronograma de todos los planes y programas del municipio</p>
+    </div>
 
-  <div id="grid-container"></div>
+    <!-- TOOLBAR -->
+    <div class="toolbar">
+      <button class="tab-btn active" id="btn-lista" onclick="setVista('lista')">📋 Lista</button>
+      <button class="tab-btn" id="btn-calendario" onclick="setVista('calendario')">📅 Calendario</button>
+      <button class="tab-btn" id="btn-kanban" onclick="setVista('kanban')">🗂 Tablero</button>
+      <div class="spacer"></div>
+      <select class="filter-select" id="filter-tipo" onchange="applyFilters()">
+        <option value="">Todos los tipos</option>
+        <option value="Operativo">Operativo</option>
+        <option value="Estratégico">Estratégico</option>
+        <option value="Proyecto">Proyecto</option>
+        <option value="Campaña">Campaña</option>
+        <option value="Evento">Evento</option>
+      </select>
+      <select class="filter-select" id="filter-estado" onchange="applyFilters()">
+        <option value="">Todos los estados</option>
+        <option value="Planificado">Planificado</option>
+        <option value="En Ejecución">En Ejecución</option>
+        <option value="Completado">Completado</option>
+        <option value="Pausado">Pausado</option>
+        <option value="Cancelado">Cancelado</option>
+      </select>
+      <span class="count-badge" id="count-badge">0 planes</span>
+    </div>
+
+    <!-- VISTA LISTA -->
+    <div id="vista-lista">
+      <div class="plan-list" id="plan-list-container">
+        <div class="empty-state"><div class="ico">⏳</div><p>Cargando planes...</p></div>
+      </div>
+    </div>
+
+    <!-- VISTA CALENDARIO -->
+    <div id="vista-calendario" style="display:none">
+      <div class="cal-nav">
+        <button class="cal-nav-btn" onclick="calNav(-1)">‹</button>
+        <h3 id="cal-title"></h3>
+        <button class="cal-nav-btn" onclick="calNav(1)">›</button>
+      </div>
+      <div class="cal-grid-wrap" id="cal-grid"></div>
+    </div>
+
+    <!-- VISTA KANBAN -->
+    <div id="vista-kanban" style="display:none">
+      <div class="kanban" id="kanban-container"></div>
+    </div>
+  </div>
 </div>
 
+<!-- FOOTER -->
 <footer class="footer">
   <div class="footer-inner">
-    <div class="footer-brand">🌿 IAGAMI · SIGAP</div>
-    <div class="footer-links">
-      <a href="../index.html">Portal</a>
-      <a href="../transparencia/index.html">Transparencia</a>
-      <a href="../noticias/index.html">Noticias</a>
-      <a href="../admin/index.html">Administración</a>
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <h3>IAGAMI · SIGAP</h3>
+        <p>Instituto Autónomo de Gestión Ambiental del Municipio Iribarren. Sistema Integral de Gestión de Actividades Programadas.<br><em style="color:#a8dfc0;font-style:italic">Iribarren Verde para la vida.</em></p>
+      </div>
+      <div class="footer-col">
+        <h4>Servicios</h4>
+        <ul>
+          <li><a href="../tramites/index.html">Trámites en Línea</a></li>
+          <li><a href="../multas/index.html">Consulta de Multas</a></li>
+          <li><a href="../agenda/index.html">Agenda SIGAP</a></li>
+          <li><a href="../index.html">Atención Ciudadana</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Institución</h4>
+        <ul>
+          <li><a href="../organizacion/index.html">Organización</a></li>
+          <li><a href="../transparencia/index.html">Transparencia</a></li>
+          <li><a href="../noticias/index.html">Noticias</a></li>
+          <li><a href="../proyectos/index.html">Proyectos</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Contacto</h4>
+        <div class="contact-item">📍 Barquisimeto, Estado Lara</div>
+        <div class="contact-item">📞 +58 (251) 000-0000</div>
+        <div class="contact-item">✉️ contacto@iagami.gob.ve</div>
+        <div class="contact-item">🕐 Lun–Vie 8:00–16:00</div>
+      </div>
     </div>
-    <div class="footer-copy">© 2026 IAGAMI — Municipio Iribarren, Estado Lara, Venezuela. Todos los derechos reservados.</div>
+    <div class="footer-bottom">© 2026 IAGAMI — Municipio Iribarren, Estado Lara, Venezuela. Todos los derechos reservados.</div>
   </div>
 </footer>
 
-<div id="app-toast" class="toast"></div>
-
-<script src="../cms/db.js"></script>
+<script src="../cms/pb.js"></script>
 <script>
 'use strict';
 
+const MESES      = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 const MESES_CORTO = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
 
+let _allPlanes = [];
+let _filtered  = [];
+let _vista     = 'lista';
+let _calYear   = new Date().getFullYear();
+let _calMonth  = new Date().getMonth();
+
+/* ─── HELPERS ─── */
 function fmtFecha(iso) {
   if (!iso) return '—';
-  try {
-    const d = new Date(iso + 'T12:00:00');
-    return d.getDate() + ' ' + MESES_CORTO[d.getMonth()] + ' ' + d.getFullYear();
-  } catch(e) { return iso; }
+  const d = new Date(iso + 'T12:00:00');
+  return d.getDate() + ' ' + MESES_CORTO[d.getMonth()] + ' ' + d.getFullYear();
 }
 
-function renderStats(items) {
-  document.getElementById('stat-total').textContent = items.length;
-  document.getElementById('stat-progreso').textContent = items.filter(p => p.estado === 'En Progreso').length;
-  document.getElementById('stat-completados').textContent = items.filter(p => p.estado === 'Completado').length;
-  document.getElementById('stat-pendientes').textContent = items.filter(p => p.estado === 'Pendiente').length;
+function estadoClass(estado) {
+  return ({ 'Planificado':'ps-planificado','En Ejecución':'ps-ejecucion','Completado':'ps-completado','Pausado':'ps-pausado','Cancelado':'ps-cancelado' })[estado] || 'ps-planificado';
 }
 
-function badgeClass(estado) {
-  const m = {Pendiente:'badge-pendiente','En Progreso':'badge-progreso',Completado:'badge-completado',Cancelado:'badge-cancelado'};
-  return m[estado] || 'badge-pendiente';
+function kanbanHeadClass(estado) {
+  return ({ 'Planificado':'kh-planificado','En Ejecución':'kh-ejecucion','Completado':'kh-completado','Pausado':'kh-pausado','Cancelado':'kh-cancelado' })[estado] || 'kh-planificado';
 }
 
-function priClass(p) {
-  const m = {Alta:'pri-alta',Media:'pri-media',Baja:'pri-baja'};
-  return m[p] || 'pri-media';
+function calPillClass(estado) {
+  return ({ 'Planificado':'cal-pill-planificado','En Ejecución':'cal-pill-ejecucion','Completado':'cal-pill-completado','Pausado':'cal-pill-pausado','Cancelado':'cal-pill-cancelado' })[estado] || 'cal-pill-planificado';
 }
 
-function renderItems() {
-  const q = (document.getElementById('q-input').value || '').toLowerCase();
-  const fEst = document.getElementById('f-estado').value;
-  const fPri = document.getElementById('f-prioridad').value;
+function fillColor(estado) {
+  return ({ 'Planificado':'#d97706','En Ejecución':'#1d6b3e','Completado':'#16a34a','Pausado':'#db2777','Cancelado':'#64748b' })[estado] || '#1d6b3e';
+}
 
-  let items = CMSDB.getAll('planificacion');
-  renderStats(items);
+function tipoIcon(tipo) {
+  return ({ 'Operativo':'⚙️','Estratégico':'🎯','Proyecto':'🌳','Campaña':'📣','Evento':'📅' })[tipo] || '📋';
+}
 
-  if (q) items = items.filter(p => (p.titulo+' '+p.responsable+' '+(p.descripcion||'')).toLowerCase().includes(q));
-  if (fEst) items = items.filter(p => p.estado === fEst);
-  if (fPri) items = items.filter(p => p.prioridad === fPri);
+/* ─── STATS ─── */
+function renderStats(planes) {
+  document.getElementById('stat-total').textContent      = planes.length;
+  document.getElementById('stat-ejecucion').textContent  = planes.filter(p => p.estado === 'En Ejecución').length;
+  document.getElementById('stat-completado').textContent = planes.filter(p => p.estado === 'Completado').length;
+  const avg = planes.length ? Math.round(planes.reduce((s,p) => s + (p.porcentaje_avance || 0), 0) / planes.length) : 0;
+  document.getElementById('stat-avance').textContent = avg + '%';
+}
 
-  const container = document.getElementById('grid-container');
+/* ─── FILTERS ─── */
+function applyFilters() {
+  const tipo   = document.getElementById('filter-tipo').value;
+  const estado = document.getElementById('filter-estado').value;
+  _filtered = _allPlanes.filter(p => {
+    if (tipo   && p.tipo   !== tipo)   return false;
+    if (estado && p.estado !== estado) return false;
+    return true;
+  });
+  document.getElementById('count-badge').textContent = _filtered.length + ' plan' + (_filtered.length !== 1 ? 'es' : '');
+  renderVista();
+}
 
-  if (!items.length) {
-    container.innerHTML = `<div class="empty-state">
-      <div class="ico">📆</div>
-      <h3>No se encontraron actividades</h3>
-      <p>${q || fEst || fPri ? 'Prueba con otros filtros o términos de búsqueda.' : 'No hay actividades de planificación registradas aún.'}</p>
-    </div>`;
+/* ─── VISTA SWITCH ─── */
+function setVista(v) {
+  _vista = v;
+  ['lista','calendario','kanban'].forEach(name => {
+    document.getElementById('vista-' + name).style.display  = name === v ? 'block' : 'none';
+    document.getElementById('btn-'   + name).classList.toggle('active', name === v);
+  });
+  renderVista();
+}
+
+function renderVista() {
+  if      (_vista === 'lista')      renderLista();
+  else if (_vista === 'calendario') renderCalendario();
+  else if (_vista === 'kanban')     renderKanban();
+}
+
+/* ─── LISTA ─── */
+function renderLista() {
+  const c = document.getElementById('plan-list-container');
+  if (!_filtered.length) {
+    c.innerHTML = '<div class="empty-state"><div class="ico">📋</div><p>No hay planes que coincidan con los filtros seleccionados.</p></div>';
     return;
   }
-
-  container.innerHTML = `<div class="grid">${items.map(p => {
-    const avance = Math.min(100, Math.max(0, parseInt(p.avance)||0));
+  c.innerHTML = '<div class="plan-list">' + _filtered.map(p => {
+    const pct  = Math.min(100, Math.max(0, p.porcentaje_avance || 0));
+    const fill = fillColor(p.estado);
+    const tags = [p.tipo, p.responsable, p.area].filter(Boolean);
     return `<div class="plan-card">
-      <div class="plan-header">
-        <div class="plan-titulo">${escHtml(p.titulo||'Sin título')}</div>
-        <span class="badge ${badgeClass(p.estado)}">${p.estado||'—'}</span>
+      <div class="plan-card-top">
+        <div class="plan-icon">${tipoIcon(p.tipo)}</div>
+        <div class="plan-info">
+          <div class="plan-name" title="${p.nombre || ''}">${p.nombre || 'Sin nombre'}</div>
+          <div class="plan-meta">
+            ${p.fecha_inicio ? `<span>📅 ${fmtFecha(p.fecha_inicio)}${p.fecha_fin ? ' – ' + fmtFecha(p.fecha_fin) : ''}</span>` : ''}
+            ${p.responsable  ? `<span>👤 ${p.responsable}</span>` : ''}
+            ${p.prioridad    ? `<span>🔺 ${p.prioridad}</span>` : ''}
+          </div>
+        </div>
+        <span class="ps-badge ${estadoClass(p.estado)}">${p.estado || 'Planificado'}</span>
       </div>
-      ${p.descripcion ? `<div class="plan-desc">${escHtml(p.descripcion)}</div>` : ''}
-      <div class="plan-meta">
-        ${p.responsable ? `<div class="meta-item">👤 ${escHtml(p.responsable)}</div>` : ''}
-        ${p.fecha ? `<div class="meta-item">📅 ${fmtFecha(p.fecha)}</div>` : ''}
-        ${p.prioridad ? `<span class="badge ${priClass(p.prioridad)}">${p.prioridad}</span>` : ''}
+      ${p.descripcion ? `<div class="plan-desc">${p.descripcion}</div>` : ''}
+      <div class="plan-progress-row">
+        <div class="plan-bar-track"><div class="plan-bar-fill" style="width:${pct}%;background:${fill}"></div></div>
+        <div class="plan-bar-pct">${pct}%</div>
       </div>
-      <div class="progress-wrap">
-        <div class="progress-bar"><div class="progress-fill" style="width:${avance}%"></div></div>
-        <span class="progress-pct">${avance}%</span>
-      </div>
+      ${tags.length ? `<div class="plan-tags">${tags.map(t => `<span class="plan-tag">${t}</span>`).join('')}</div>` : ''}
     </div>`;
-  }).join('')}</div>`;
+  }).join('') + '</div>';
 }
 
-function escHtml(str) {
-  if (!str) return '';
-  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+/* ─── CALENDARIO ─── */
+function calNav(dir) {
+  _calMonth += dir;
+  if (_calMonth > 11) { _calMonth = 0; _calYear++; }
+  if (_calMonth < 0)  { _calMonth = 11; _calYear--; }
+  renderCalendario();
 }
 
-document.addEventListener('DOMContentLoaded', renderItems);
+function renderCalendario() {
+  document.getElementById('cal-title').textContent = MESES[_calMonth] + ' ' + _calYear;
+
+  const today       = new Date().toISOString().slice(0, 10);
+  const daysInMonth = new Date(_calYear, _calMonth + 1, 0).getDate();
+  const pad         = (new Date(_calYear, _calMonth, 1).getDay() + 6) % 7;
+
+  const dayMap = {};
+  _filtered.forEach(p => {
+    if (!p.fecha_inicio) return;
+    const start = new Date(p.fecha_inicio + 'T12:00:00');
+    const end   = p.fecha_fin ? new Date(p.fecha_fin + 'T12:00:00') : start;
+    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+      if (d.getFullYear() === _calYear && d.getMonth() === _calMonth) {
+        const k = d.getDate();
+        (dayMap[k] = dayMap[k] || []).push(p);
+      }
+    }
+  });
+
+  const DIAS = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+  let html = DIAS.map(d => `<div class="cal-header-cell">${d}</div>`).join('');
+  for (let i = 0; i < pad; i++) html += '<div class="cal-cell other-month"></div>';
+  for (let d = 1; d <= daysInMonth; d++) {
+    const iso     = `${_calYear}-${String(_calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday = iso === today;
+    const items   = dayMap[d] || [];
+    const show    = items.slice(0, 2);
+    const extra   = items.length - show.length;
+    html += `<div class="cal-cell${isToday ? ' today' : ''}">
+      <div class="cal-day">${d}</div>
+      ${show.map(p => `<span class="cal-pill ${calPillClass(p.estado)}" title="${p.nombre || ''}">${p.nombre || '—'}</span>`).join('')}
+      ${extra > 0 ? `<div class="cal-more">+${extra} más</div>` : ''}
+    </div>`;
+  }
+  document.getElementById('cal-grid').innerHTML = html;
+}
+
+/* ─── KANBAN ─── */
+function renderKanban() {
+  const cols = ['Planificado','En Ejecución','Completado','Pausado','Cancelado'];
+  document.getElementById('kanban-container').innerHTML = cols.map(estado => {
+    const items = _filtered.filter(p => (p.estado || 'Planificado') === estado);
+    const cards = items.length
+      ? items.map(p => {
+          const pct  = Math.min(100, Math.max(0, p.porcentaje_avance || 0));
+          const fill = fillColor(p.estado);
+          return `<div class="kanban-item">
+            <div class="kanban-item-name">${p.nombre || 'Sin nombre'}</div>
+            <div class="kanban-item-meta">${p.responsable ? '👤 ' + p.responsable : ''}${p.fecha_inicio ? (p.responsable ? ' · ' : '') + '📅 ' + fmtFecha(p.fecha_inicio) : ''}</div>
+            <div class="kanban-item-bar"><div class="kanban-item-fill" style="width:${pct}%;background:${fill}"></div></div>
+          </div>`;
+        }).join('')
+      : '<div style="font-size:11px;color:#4a8a6a;text-align:center;padding:12px 0">Sin planes</div>';
+    return `<div class="kanban-col">
+      <div class="kanban-col-head ${kanbanHeadClass(estado)}">${estado}<span class="kcount">${items.length}</span></div>
+      <div class="kanban-items">${cards}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ─── INIT ─── */
+async function init() {
+  const planes = await CMSDB.getAll('planificacion');
+  _allPlanes = planes.sort((a,b) => (b.fecha_inicio || '').localeCompare(a.fecha_inicio || ''));
+  _filtered  = [..._allPlanes];
+  renderStats(_allPlanes);
+  document.getElementById('count-badge').textContent = _filtered.length + ' plan' + (_filtered.length !== 1 ? 'es' : '');
+  renderLista();
+}
+
+init();
 </script>
 </body>
 </html>
