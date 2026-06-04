@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Editor Canva — Revista Digital IAGAMI</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet"/>
-<script src="../cms/db.js"></script>
+<script src="../cms/pb.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -368,12 +368,23 @@ let _dragSrcIdx  = null;
 /* ═══════════════════════════════════════════
    INIT
 ═══════════════════════════════════════════ */
-window.addEventListener('DOMContentLoaded', () => {
-  if (!REVISTA_ID) { alert('No se especificó una revista'); return; }
-  const r = CMSDB.getOne('revistas', REVISTA_ID);
-  if (!r) { alert('Revista no encontrada'); return; }
+window.addEventListener('DOMContentLoaded', async () => {
+  if (!REVISTA_ID) {
+    const titleEl = document.getElementById('editor-title');
+    if (titleEl) titleEl.textContent = 'Error: sin ID de revista';
+    console.warn('[SIGAP] Editor: No se especificó una revista');
+    return;
+  }
+  const r = await CMSDB.getOne('revistas', REVISTA_ID);
+  if (!r) {
+    const titleEl = document.getElementById('editor-title');
+    if (titleEl) titleEl.textContent = 'Revista no encontrada';
+    console.warn('[SIGAP] Editor: Revista no encontrada:', REVISTA_ID);
+    return;
+  }
   document.getElementById('editor-title').textContent = r.titulo;
   _blocks = Array.isArray(r.contenido_bloques) ? JSON.parse(JSON.stringify(r.contenido_bloques)) : [];
+  window._editorNoticias = await CMSDB.getAll('noticias');
   renderCanvas();
   renderPalette();
   renderTemplates();
@@ -394,17 +405,17 @@ function preview() {
 /* ═══════════════════════════════════════════
    SAVE / PUBLISH
 ═══════════════════════════════════════════ */
-function save() {
-  const r = CMSDB.getOne('revistas', REVISTA_ID);
+async function save() {
+  const r = await CMSDB.getOne('revistas', REVISTA_ID);
   if (!r) { showToast('Error: revista no encontrada', 'error'); return; }
-  CMSDB.save('revistas', Object.assign({}, r, { contenido_bloques: _blocks }));
+  await CMSDB.save('revistas', Object.assign({}, r, { contenido_bloques: _blocks }));
   showToast('Guardado ✓');
 }
 
-function publish() {
-  const r = CMSDB.getOne('revistas', REVISTA_ID);
+async function publish() {
+  const r = await CMSDB.getOne('revistas', REVISTA_ID);
   if (!r) return;
-  CMSDB.save('revistas', Object.assign({}, r, { contenido_bloques: _blocks, estado: 'publicada' }));
+  await CMSDB.save('revistas', Object.assign({}, r, { contenido_bloques: _blocks, estado: 'publicada' }));
   showToast('Publicada ✓', 'success');
 }
 
@@ -764,7 +775,7 @@ function renderBlockVisual(b) {
     noticias() {
       const n = Math.min(6, parseInt(b.cantidad)||3);
       const cat = b.categoria||'';
-      let noticias = CMSDB.getAll('noticias');
+      let noticias = window._editorNoticias || [];
       if (cat) noticias = noticias.filter(x=>x.categoria===cat);
       noticias = noticias.slice(0, n);
       const cards = noticias.map(noticia=>`<div class="nc">

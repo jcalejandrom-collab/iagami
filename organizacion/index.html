@@ -247,12 +247,12 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
   <p>© 2026 IAGAMI — Instituto Autónomo de Gestión Ambiental del Municipio Iribarren. Barquisimeto, Lara, Venezuela.</p>
 </footer>
 
-<script src="../cms/db.js"></script>
+<script src="../cms/pb.js"></script>
 <script>
 // ── State ──
 let currentTab = 'organigrama';
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   buildOrgTree();
   renderDirectory();
 });
@@ -267,8 +267,8 @@ function switchTab(tab) {
 }
 
 // ── Build Org Tree ──
-function buildOrgTree() {
-  const units = CMSDB.getAll('org');
+async function buildOrgTree() {
+  const units = await CMSDB.getAll('org');
   const root = units.find(u => u.padre === null);
   if (!root) return;
   const children = units.filter(u => u.padre === root.id);
@@ -316,8 +316,8 @@ function buildOrgTree() {
 }
 
 // ── Open unit detail ──
-function openUnit(id) {
-  const unit = (CMSDB.getAll('org')).find(u => u.id === id);
+async function openUnit(id) {
+  const unit = (await CMSDB.getAll('org')).find(u => u.id === id);
   if (!unit) return;
 
   document.getElementById('panel-title').textContent = unit.nombre;
@@ -351,8 +351,8 @@ function closePanel() {
 }
 
 // ── Directory ──
-function renderDirectory(search = '', tipo = '') {
-  const units = CMSDB.getAll('org');
+async function renderDirectory(search = '', tipo = '') {
+  const units = await CMSDB.getAll('org');
   const filtered = units.filter(u => {
     const matchSearch = !search ||
       u.nombre.toLowerCase().includes(search) ||
@@ -391,7 +391,7 @@ function dirCardHTML(u) {
     </div>`;
 }
 
-function searchDirectory() {
+async function searchDirectory() {
   const search = document.getElementById('dir-search').value.toLowerCase();
   const tipo = document.getElementById('tipo-filter').value;
   renderDirectory(search, tipo);

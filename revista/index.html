@@ -240,7 +240,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 
 <div id="app-toast" class="toast" role="status" aria-live="polite"></div>
 
-<script src="../cms/db.js"></script>
+<script src="../cms/pb.js"></script>
 <script>
 'use strict';
 
@@ -398,16 +398,15 @@ function escHtml(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-function incrementVistas(id) {
-  const r = CMSDB.getOne('revistas', id);
+async function incrementVistas(id) {
+  const r = await CMSDB.getOne('revistas', id);
   if (r) CMSDB.save('revistas', Object.assign({}, r, {visualizaciones: (r.visualizaciones||0)+1}));
 }
 
-function descargarRevista(id) {
-  const r = CMSDB.getOne('revistas', id);
+async function descargarRevista(id) {
+  const r = await CMSDB.getOne('revistas', id);
   if (!r) return;
 
-  // Increment download counter
   CMSDB.save('revistas', Object.assign({}, r, {descargas: (r.descargas||0)+1}));
   toast('⬇️ Descarga iniciada correctamente');
 
@@ -428,8 +427,8 @@ function descargarRevista(id) {
 }
 
 /* ─── MAIN RENDER ─── */
-function renderPage() {
-  const all = CMSDB.getAll('revistas');
+async function renderPage() {
+  const all = await CMSDB.getAll('revistas');
   renderStats(all);
   buildFilters(all);
   renderFeatured(all);

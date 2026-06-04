@@ -374,7 +374,7 @@ tr:hover td{background:#f8fef9}
 <!-- TOAST CONTAINER -->
 <div id="toast-container"></div>
 
-<script src="../cms/db.js"></script>
+<script src="../cms/pb.js"></script>
 <script>
 'use strict';
 
@@ -474,11 +474,11 @@ function renderDashboard() {
   let totalRecords = 0;
   let activeModules = 0;
   CMS_MODULES.forEach(k => {
-    const arr = CMSDB.getAll(k);
+    const arr = await CMSDB.getAll(k);
     totalRecords += arr.length;
     if (arr.length > 0) activeModules++;
   });
-  const alertas = CMSDB.getAll('alertas').filter(a => a.activa !== false).length;
+  const alertas = await CMSDB.getAll('alertas').filter(a => a.activa !== false).length;
 
   const stats = [
     {label:'Sistema',val:lsOk?'OK':'ERROR',status:lsOk?'ok':'err'},
@@ -497,7 +497,7 @@ function renderDashboard() {
   // Modules table
   const tbody = document.querySelector('#dash-modules-table tbody');
   tbody.innerHTML = CMS_MODULES.map(k => {
-    const items = CMSDB.getAll(k);
+    const items = await CMSDB.getAll(k);
     const status = items.length === 0 ? '<span class="status status-warn">vacío</span>' : '<span class="status status-ok">activo</span>';
     return `<tr><td>${MODULE_LABELS[k]}</td><td>${items.length}</td><td>${status}</td></tr>`;
   }).join('');
@@ -519,44 +519,44 @@ function runDiagnostic() {
   checks.push({text:'localStorage disponible', status: lsOk ? 'ok' : 'err'});
 
   // 2. Noticias
-  const noticias = CMSDB.getAll('noticias');
+  const noticias = await CMSDB.getAll('noticias');
   const notsPublicadas = noticias.filter(n => n.publicada || n.estado === 'publicada').length;
   const notsMissingFields = noticias.filter(n => !n.titulo || !n.fecha).length;
   checks.push({text:`Noticias: ${noticias.length} registros, ${notsPublicadas} publicadas`, status: noticias.length > 0 ? 'ok' : 'warn'});
   if (notsMissingFields > 0) checks.push({text:`Noticias: ${notsMissingFields} con campos faltantes (titulo/fecha)`, status:'warn'});
 
   // 3. Proyectos
-  const proyectos = CMSDB.getAll('proyectos');
+  const proyectos = await CMSDB.getAll('proyectos');
   const projMissingAvance = proyectos.filter(p => p.porcentaje_avance === undefined && p.avance === undefined).length;
   checks.push({text:`Proyectos: ${proyectos.length} registros${projMissingAvance > 0 ? `, ${projMissingAvance} sin porcentaje_avance` : ''}`, status: proyectos.length > 0 ? (projMissingAvance > 0 ? 'warn' : 'ok') : 'warn'});
 
   // 4. Eventos
-  const eventos = CMSDB.getAll('eventos');
+  const eventos = await CMSDB.getAll('eventos');
   const now = new Date();
   const upcoming = eventos.filter(e => e.fecha && new Date(e.fecha) > now).length;
   checks.push({text:`Eventos: ${eventos.length} registros, ${upcoming} próximos`, status: eventos.length > 0 ? 'ok' : 'warn'});
 
   // 5. Alertas vencidas
-  const alertas = CMSDB.getAll('alertas');
+  const alertas = await CMSDB.getAll('alertas');
   const expiredActive = alertas.filter(a => a.activa !== false && a.fecha_expiracion && new Date(a.fecha_expiracion) < now).length;
   checks.push({text:`Alertas: ${alertas.length} total${expiredActive > 0 ? `, ${expiredActive} activas vencidas` : ', ninguna vencida activa'}`, status: expiredActive > 0 ? 'warn' : 'ok'});
 
   // 6. Empresas permisos
-  const empresas = CMSDB.getAll('empresas');
+  const empresas = await CMSDB.getAll('empresas');
   const expiredPermisos = empresas.filter(e => e.permiso_vencimiento && new Date(e.permiso_vencimiento) < now).length;
   checks.push({text:`Empresas: ${empresas.length} registros${expiredPermisos > 0 ? `, ${expiredPermisos} con permisos vencidos` : ''}`, status: expiredPermisos > 0 ? 'warn' : 'ok'});
 
   // 7. Consejos
-  const consejos = CMSDB.getAll('consejos');
+  const consejos = await CMSDB.getAll('consejos');
   const activeConsejos = consejos.filter(c => c.activo !== false).length;
   checks.push({text:`Consejos: ${consejos.length} total, ${activeConsejos} activos`, status: consejos.length > 0 ? 'ok' : 'warn'});
 
   // 8. Indicadores
-  const indicadores = CMSDB.getAll('indicadores');
+  const indicadores = await CMSDB.getAll('indicadores');
   checks.push({text:`Indicadores: ${indicadores.length}/6 registros`, status: indicadores.length >= 6 ? 'ok' : (indicadores.length > 0 ? 'warn' : 'err')});
 
   // 9. Trámites
-  const tramites = CMSDB.getAll('tramites');
+  const tramites = await CMSDB.getAll('tramites');
   checks.push({text:`Trámites: ${tramites.length} registros`, status: tramites.length > 0 ? 'ok' : 'warn'});
 
   // 10. localStorage quota
@@ -650,7 +650,7 @@ function renderMonitor() {
       <div class="card">
         <div class="card-title">📦 Estado de Módulos CMS</div>
         ${CMS_MODULES.map(k => {
-          const items = CMSDB.getAll(k);
+          const items = await CMSDB.getAll(k);
           const badge = items.length === 0 ? '<span class="status status-warn">vacío</span>' : `<span class="status status-ok">${items.length} reg.</span>`;
           return `<div class="mod-row"><span>${MODULE_LABELS[k]}</span>${badge}</div>`;
         }).join('')}
@@ -726,10 +726,10 @@ function removeExpiredAlerts(btn) {
   if (!confirm('¿Eliminar alertas inactivas con más de 30 días?')) return;
   btn.disabled = true;
   const cutoff = new Date(Date.now() - 30 * 86400000);
-  const all = CMSDB.getAll('alertas');
+  const all = await CMSDB.getAll('alertas');
   const toKeep = all.filter(a => !(a.activa === false && a.fecha && new Date(a.fecha) < cutoff));
   const removed = all.length - toKeep.length;
-  CMSDB.getAll('alertas').forEach(a => { if (!toKeep.find(t => t.id === a.id)) CMSDB.remove('alertas', a.id); });
+  await CMSDB.getAll('alertas').forEach(a => { if (!toKeep.find(t => t.id === a.id)) await CMSDB.remove('alertas', a.id); });
   setActionResult('removeExpiredAlerts', `${removed} alertas eliminadas`);
   logAction('removeExpiredAlerts','alertas',`${removed} alertas vencidas eliminadas`,'success');
   toast(`${removed} alertas vencidas eliminadas`, 'success');
@@ -739,12 +739,12 @@ function removeExpiredAlerts(btn) {
 function deduplicateDenuncias(btn) {
   if (!confirm('¿Eliminar denuncias duplicadas?')) return;
   btn.disabled = true;
-  const all = CMSDB.getAll('denuncias');
+  const all = await CMSDB.getAll('denuncias');
   const seen = new Set();
   let removed = 0;
   all.forEach(d => {
     const key = `${d.tipo||''}|${d.nombre||''}|${d.fecha||''}`;
-    if (seen.has(key)) { CMSDB.remove('denuncias', d.id); removed++; }
+    if (seen.has(key)) { await CMSDB.remove('denuncias', d.id); removed++; }
     else seen.add(key);
   });
   setActionResult('deduplicateDenuncias', `${removed} duplicados eliminados`);
@@ -757,10 +757,10 @@ function validateIDs(btn) {
   btn.disabled = true;
   let total = 0, fixed = 0;
   CMS_MODULES.forEach(k => {
-    const items = CMSDB.getAll(k);
+    const items = await CMSDB.getAll(k);
     items.forEach(item => {
       total++;
-      if (!item.id) { item.id = k.slice(0,2)+'-'+Date.now()+Math.random().toString(36).slice(2,5); CMSDB.save(k, item); fixed++; }
+      if (!item.id) { item.id = k.slice(0,2)+'-'+Date.now()+Math.random().toString(36).slice(2,5); await CMSDB.save(k, item); fixed++; }
     });
   });
   setActionResult('validateIDs', `${total} registros revisados, ${fixed} corregidos`);
@@ -773,10 +773,10 @@ function regenStats(btn) {
   btn.disabled = true;
   let html = '<div style="font-size:12px;text-align:left">';
   CMS_MODULES.forEach(k => {
-    html += `${MODULE_LABELS[k]}: ${CMSDB.getAll(k).length} | `;
+    html += `${MODULE_LABELS[k]}: ${await CMSDB.getAll(k).length} | `;
   });
   html += '</div>';
-  const result = CMS_MODULES.map(k => `${MODULE_LABELS[k]}:${CMSDB.getAll(k).length}`).join(', ');
+  const result = CMS_MODULES.map(k => `${MODULE_LABELS[k]}:${await CMSDB.getAll(k).length}`).join(', ');
   setActionResult('regenStats', 'Estadísticas actualizadas ✓');
   logAction('regenStats','sistema','Estadísticas regeneradas: '+result,'success');
   toast('Estadísticas regeneradas correctamente', 'success');
@@ -824,7 +824,7 @@ function createBackup(tipo) {
   } else {
     modules = CMS_MODULES;
   }
-  modules.forEach(k => { data[k] = CMSDB.getAll(k); });
+  modules.forEach(k => { data[k] = await CMSDB.getAll(k); });
   const meta = {version:'SIGAP v3.0', created: new Date().toISOString(), tipo, modules};
   const blob = new Blob([JSON.stringify({__meta:meta, ...data}, null, 2)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
@@ -1113,14 +1113,14 @@ function runAudit() {
   const results = {};
 
   // Noticias
-  const nots = CMSDB.getAll('noticias');
+  const nots = await CMSDB.getAll('noticias');
   const notsPub = nots.filter(n => n.publicada || n.estado === 'publicada');
   const notsImg = nots.filter(n => !n.imagen && !n.img);
   const notsAge = nots.length > 0 ? Math.round(nots.reduce((s,n) => s + (n.fecha ? (now - new Date(n.fecha)) / 86400000 : 0), 0) / nots.length) : 0;
   results.noticias = {total:nots.length, publicadas:notsPub.length, sinImagen:notsImg.length, edadPromedioD:notsAge};
 
   // Proyectos
-  const projs = CMSDB.getAll('proyectos');
+  const projs = await CMSDB.getAll('proyectos');
   const projByEstado = {};
   projs.forEach(p => { projByEstado[p.estado||'sin estado'] = (projByEstado[p.estado||'sin estado']||0) + 1; });
   const avgAvance = projs.length > 0 ? Math.round(projs.reduce((s,p) => s + (p.porcentaje_avance||p.avance||0), 0) / projs.length) : 0;
@@ -1128,30 +1128,30 @@ function runAudit() {
   results.proyectos = {total:projs.length, byEstado:projByEstado, avgAvance, overdue};
 
   // Eventos
-  const evs = CMSDB.getAll('eventos');
+  const evs = await CMSDB.getAll('eventos');
   const evUpcoming = evs.filter(e => e.fecha && new Date(e.fecha) > now);
   const evPast = evs.filter(e => e.fecha && new Date(e.fecha) < now && e.estado !== 'completado');
   results.eventos = {total:evs.length, upcoming:evUpcoming.length, pastNotArchived:evPast.length};
 
   // Empresas
-  const emps = CMSDB.getAll('empresas');
+  const emps = await CMSDB.getAll('empresas');
   const empExpired = emps.filter(e => e.permiso_vencimiento && new Date(e.permiso_vencimiento) < now);
   const empSoon = emps.filter(e => e.permiso_vencimiento && new Date(e.permiso_vencimiento) >= now && new Date(e.permiso_vencimiento) <= in30);
   results.empresas = {total:emps.length, permisoVencido:empExpired.length, venceSoon:empSoon.length};
 
   // Consejos
-  const cons = CMSDB.getAll('consejos');
+  const cons = await CMSDB.getAll('consejos');
   const consActive = cons.filter(c => c.activo !== false);
   const consMissingContact = cons.filter(c => !c.email && !c.telefono && !c.contacto);
   results.consejos = {total:cons.length, activos:consActive.length, sinContacto:consMissingContact.length};
 
   // Denuncias
-  const dens = CMSDB.getAll('denuncias');
+  const dens = await CMSDB.getAll('denuncias');
   const denPending = dens.filter(d => d.estado === 'pendiente' || !d.estado);
   results.denuncias = {total:dens.length, pendientes:denPending.length};
 
   // Indicadores
-  const inds = CMSDB.getAll('indicadores');
+  const inds = await CMSDB.getAll('indicadores');
   results.indicadores = {total:inds.length, completos:inds.length >= 6};
 
   _auditData = results;
@@ -1246,7 +1246,7 @@ function scanSystem() {
   let html = '<div class="card"><div class="card-title">🔎 Resultado del Escaneo</div><ul class="check-list">';
   let issues = 0;
   CMS_MODULES.forEach(k => {
-    const items = CMSDB.getAll(k);
+    const items = await CMSDB.getAll(k);
     const noId = items.filter(i => !i.id).length;
     const noTitle = items.filter(i => !i.titulo && !i.nombre && !i.name).length;
     if (noId > 0) { html += `<li class="check-item warn"><span class="icon">⚠️</span>${MODULE_LABELS[k]}: ${noId} sin ID</li>`; issues++; }
@@ -1264,9 +1264,9 @@ function removeIncomplete(btn) {
   btn.disabled = true;
   let total = 0;
   CMS_MODULES.forEach(k => {
-    const items = CMSDB.getAll(k);
+    const items = await CMSDB.getAll(k);
     const toRemove = items.filter(i => !i.id || (!i.titulo && !i.nombre && !i.name && k !== 'org' && k !== 'media'));
-    toRemove.forEach(i => { if (i.id) CMSDB.remove(k, i.id); total++; });
+    toRemove.forEach(i => { if (i.id) await CMSDB.remove(k, i.id); total++; });
   });
   setCRes('removeIncomplete', `${total} registros eliminados`);
   logAction('removeIncomplete','sistema',`${total} registros incompletos eliminados`,'success');
@@ -1279,11 +1279,11 @@ function removeDuplicates(btn) {
   btn.disabled = true;
   let total = 0;
   CMS_MODULES.forEach(k => {
-    const items = CMSDB.getAll(k);
+    const items = await CMSDB.getAll(k);
     const seen = new Set();
     items.forEach(item => {
       const key = `${item.titulo||item.nombre||item.name||''}|${item.fecha||''}`;
-      if (seen.has(key) && item.id) { CMSDB.remove(k, item.id); total++; }
+      if (seen.has(key) && item.id) { await CMSDB.remove(k, item.id); total++; }
       else seen.add(key);
     });
   });
@@ -1296,12 +1296,12 @@ function removeDuplicates(btn) {
 function archiveExpiredAlerts(btn) {
   btn.disabled = true;
   const now = new Date();
-  const all = CMSDB.getAll('alertas');
+  const all = await CMSDB.getAll('alertas');
   let count = 0;
   all.forEach(a => {
     if (a.activa !== false && a.fecha_expiracion && new Date(a.fecha_expiracion) < now) {
       a.activa = false;
-      CMSDB.save('alertas', a);
+      await CMSDB.save('alertas', a);
       count++;
     }
   });
@@ -1314,12 +1314,12 @@ function archiveExpiredAlerts(btn) {
 function archivePastEvents(btn) {
   btn.disabled = true;
   const now = new Date();
-  const all = CMSDB.getAll('eventos');
+  const all = await CMSDB.getAll('eventos');
   let count = 0;
   all.forEach(e => {
     if (e.fecha && new Date(e.fecha) < now && e.estado !== 'completado') {
       e.estado = 'completado';
-      CMSDB.save('eventos', e);
+      await CMSDB.save('eventos', e);
       count++;
     }
   });
@@ -1333,7 +1333,7 @@ function repairDamaged(btn) {
   btn.disabled = true;
   let total = 0;
   CMS_MODULES.forEach(k => {
-    const items = CMSDB.getAll(k);
+    const items = await CMSDB.getAll(k);
     items.forEach(item => {
       let changed = false;
       Object.keys(item).forEach(key => {
@@ -1343,7 +1343,7 @@ function repairDamaged(btn) {
         }
       });
       if (!item.id) { item.id = k.slice(0,2)+'-'+Date.now()+Math.random().toString(36).slice(2,5); changed = true; }
-      if (changed) { CMSDB.save(k, item); total++; }
+      if (changed) { await CMSDB.save(k, item); total++; }
     });
   });
   setCRes('repairDamaged', `${total} registros reparados`);
@@ -1356,7 +1356,7 @@ function repairDamaged(btn) {
    DOCUMENTACIÓN
 ═══════════════════════════════════════════════ */
 function renderDocumentacion() {
-  const activeCount = CMS_MODULES.filter(k => CMSDB.getAll(k).length > 0).length;
+  const activeCount = CMS_MODULES.filter(k => await CMSDB.getAll(k).length > 0).length;
   const html = `
     <div class="two-col" style="margin-bottom:20px">
       <div class="card">
@@ -1394,7 +1394,7 @@ function renderDocumentacion() {
       <table>
         <thead><tr><th>Módulo</th><th>Clave localStorage</th><th>Registros</th><th>Estado</th></tr></thead>
         <tbody>${CMS_MODULES.map(k => {
-          const count = CMSDB.getAll(k).length;
+          const count = await CMSDB.getAll(k).length;
           return `<tr><td>${MODULE_LABELS[k]}</td><td style="font-family:monospace;font-size:12px">iagami_cms_${k}</td><td>${count}</td><td>${count>0?'<span class="status status-ok">activo</span>':'<span class="status status-warn">vacío</span>'}</td></tr>`;
         }).join('')}</tbody>
       </table>

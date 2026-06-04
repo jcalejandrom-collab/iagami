@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet"/>
-<script src="../cms/db.js"></script>
+<script src="../cms/pb.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b}
@@ -170,7 +170,7 @@ function getFiltered() {
   });
 }
 
-function render() {
+async function render() {
   const data = getFiltered();
   const total = data.length;
   const pages = Math.ceil(total / PER_PAGE) || 1;
@@ -210,10 +210,10 @@ function render() {
   pgEl.innerHTML = ph;
 }
 
-function goPage(p) { currentPage = p; render(); window.scrollTo({top:300,behavior:'smooth'}); }
+function goPage(p) { currentPage = p; render().catch(console.error); window.scrollTo({top:300,behavior:'smooth'}); }
 
-function openModal(id) {
-  const c = CMSDB.getOne('consejos', id);
+async function openModal(id) {
+  const c = await CMSDB.getOne('consejos', id);
   if (!c) return;
   document.getElementById('modal-header').innerHTML = `
     <div style="font-size:10px;background:rgba(255,255,255,.2);border-radius:20px;padding:2px 10px;display:inline-block;margin-bottom:8px;font-family:monospace">${c.codigo||'—'}</div>
@@ -251,8 +251,8 @@ function toast(msg) {
   setTimeout(() => t.classList.remove('show'), 2800);
 }
 
-function init() {
-  const all = CMSDB.getAll('consejos');
+async function init() {
+  const all = await CMSDB.getAll('consejos');
   const activos = all.filter(c => c.estatus === 'Activo');
   document.getElementById('stat-total').textContent = all.length;
   document.getElementById('stat-activos').textContent = activos.length;

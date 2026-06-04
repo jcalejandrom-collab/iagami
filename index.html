@@ -397,6 +397,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
         <a class="nl" href="agenda/index.html">Agenda</a>
         <a class="nl" href="transparencia/index.html">Transparencia</a>
         <a class="nl" href="organizacion/index.html">Organización</a>
+        <a class="nl" href="planificacion/index.html">Planificación</a>
       </div>
       <div class="navr">
         <button class="navbtn-o" onclick="window.location='admin/index.html'">Admin</button>
@@ -918,6 +919,8 @@ function showPage(name) {
 
 /* ─── TOAST ─── */
 let toastTimer;
+let adjuntosData = [];
+let _enviandoDenuncia = false;
 function toast(msg) {
   const t = document.getElementById('app-toast');
   t.textContent = msg;
@@ -1014,14 +1017,25 @@ function getGPS() {
       document.getElementById('input-ubicacion').value = coords;
       toast('📍 Ubicación capturada');
     },
-    () => toast('No se pudo obtener la ubicación GPS')
+    err => {
+      const _gpsInput = document.getElementById('input-ubicacion');
+      if (_gpsInput && !_gpsInput.value) {
+        _gpsInput.placeholder = 'Dirección, coordenadas o referencia del lugar';
+      }
+      toast('No se pudo obtener la ubicación GPS');
+    }
   );
 }
 
 /* ─── ADJUNTOS ─── */
 const MAX_FILES = 5;
 const MAX_SIZE  = 10 * 1024 * 1024; // 10 MB
-let adjuntosData = []; // { name, type, size, dataUrl }
+const MIME_PERMITIDOS = [
+  'image/jpeg','image/png','image/gif','image/webp',
+  'application/pdf','application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'video/mp4','video/quicktime'
+];
 
 function dzOver(e) {
   e.preventDefault();
@@ -1044,6 +1058,7 @@ function handleFiles(fileList) {
   if (files.length > remaining) toast('Solo se agregaron ' + remaining + ' archivo(s) — límite de ' + MAX_FILES);
 
   toProcess.forEach(file => {
+    if (file.type && !MIME_PERMITIDOS.includes(file.type)) { toast(`⚠ Tipo de archivo no permitido: ${file.name}`); return; }
     if (file.size > MAX_SIZE) { toast('⚠ "' + file.name + '" supera 10 MB y no fue agregado'); return; }
     const reader = new FileReader();
     reader.onload = e => {
@@ -1091,7 +1106,6 @@ function removeAdjunto(idx) {
 }
 
 /* ─── ENVIAR DENUNCIA ─── */
-let _enviandoDenuncia = false;
 async function enviarDenuncia() {
   if (_enviandoDenuncia) return;
   const tipo   = document.getElementById('den-tipo').value;
@@ -1461,7 +1475,12 @@ async function checkBienvenida() {
     if (imgEl) imgEl.style.display = 'none';
     if (wrap)  wrap.style.background = activa.color_fondo || '#1d6b3e';
   }
-  if (modal) { modal.style.display = 'flex'; document.body.style.overflow = 'hidden'; }
+  if (modal) {
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
+  }
 }
 
 async function cerrarBienvenida() {
@@ -1469,7 +1488,12 @@ async function cerrarBienvenida() {
   const activa = items.find(b => b.activa);
   if (activa) _bvMarkShown(activa);
   const modal = document.getElementById('bienvenida-modal');
-  if (modal) { modal.style.display = 'none'; document.body.style.overflow = ''; }
+  if (modal) {
+    modal.style.display = 'none';
+    document.body.style.overflow = '';
+    document.body.style.position = '';
+    document.body.style.width = '';
+  }
 }
 
 /* ─── INIT ─── */

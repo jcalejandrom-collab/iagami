@@ -280,7 +280,7 @@ body{font-family:'Inter',sans-serif;background:#111814;color:#1a3d2b;line-height
 
 <div id="app-toast" class="toast" role="status" aria-live="polite"></div>
 
-<script src="../cms/db.js"></script>
+<script src="../cms/pb.js"></script>
 <script>
 'use strict';
 
@@ -469,7 +469,7 @@ const RENDERERS = {
   noticias(b) {
     const n = Math.min(6, parseInt(b.cantidad)||3);
     const cat = b.categoria||'';
-    let noticias = CMSDB.getAll('noticias');
+    let noticias = window._visorNoticias || [];
     if (cat) noticias = noticias.filter(x=>x.categoria===cat);
     noticias = noticias.slice(0, n);
     const items = noticias.map(noticia => `<div class="noticia-card">
@@ -579,7 +579,7 @@ function initAnimations() {
 }
 
 /* ── INIT ── */
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   const params = new URLSearchParams(window.location.search);
   _revId = params.get('id') || params.get('preview');
   const isPrint = params.get('print') === '1';
@@ -595,7 +595,8 @@ document.addEventListener('DOMContentLoaded', () => {
     return;
   }
 
-  _revista = CMSDB.getOne('revistas', _revId);
+  window._visorNoticias = await CMSDB.getAll('noticias');
+  _revista = await CMSDB.getOne('revistas', _revId);
 
   if (!_revista) {
     root.innerHTML = `<div class="state-center"><div class="state-inner">

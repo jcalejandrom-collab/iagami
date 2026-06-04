@@ -212,7 +212,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
   <p>© 2026 IAGAMI — Instituto Autónomo de Gestión Ambiental del Municipio Iribarren. Barquisimeto, Lara, Venezuela.</p>
 </footer>
 
-<script src="../cms/db.js"></script>
+<script src="../cms/pb.js"></script>
 <script>
 let currentCat = '';
 let currentSearch = '';
@@ -226,8 +226,8 @@ const CAT_CLASS = {
   'Documentos Legales': 'documentos-legales'
 };
 
-document.addEventListener('DOMContentLoaded', () => {
-  const docs = CMSDB.getAll('documentos');
+document.addEventListener('DOMContentLoaded', async () => {
+  const docs = await CMSDB.getAll('documentos');
 
   // Populate stats
   document.getElementById('stat-total').textContent = docs.length;
@@ -259,14 +259,14 @@ function switchTab(el) {
   filterDocs();
 }
 
-function filterDocs() {
+async function filterDocs() {
   currentSearch = document.getElementById('search-input').value.toLowerCase();
   currentYear = document.getElementById('year-select').value;
   renderDocs();
 }
 
 function renderDocs() {
-  const docs = CMSDB.getAll('documentos');
+  const docs = await CMSDB.getAll('documentos');
   let filtered = docs.filter(d => {
     const matchCat = !currentCat || d.categoria === currentCat;
     const matchYear = !currentYear || String(d.anio) === String(currentYear);

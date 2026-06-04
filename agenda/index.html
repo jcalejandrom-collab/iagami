@@ -272,7 +272,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
   <p>© 2026 IAGAMI — Instituto Autónomo de Gestión Ambiental del Municipio Iribarren. Barquisimeto, Lara, Venezuela.</p>
 </footer>
 
-<script src="../cms/db.js"></script>
+<script src="../cms/pb.js"></script>
 <script>
 // ── State ──
 let currentView = 'lista';
@@ -286,12 +286,12 @@ const MONTHS_ES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Ago
 const MONTHS_SHORT = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 
 // ── Init ──
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   const today = new Date();
   calYear = today.getFullYear();
   calMonth = today.getMonth();
 
-  allEvents = (CMSDB.getAll('eventos') || [])
+  allEvents = (await CMSDB.getAll('eventos') || [])
     .filter(e => {
       const d = new Date(e.fecha + 'T00:00:00');
       const t = new Date();
@@ -369,7 +369,7 @@ function eventCardHTML(e) {
 }
 
 // ── Render Calendar ──
-function renderCalendar() {
+async function renderCalendar() {
   const label = `${MONTHS_ES[calMonth]} ${calYear}`;
   document.getElementById('cal-month-label').textContent = label;
 
@@ -402,7 +402,7 @@ function renderCalendar() {
 
   cells.forEach(cell => {
     const dateStr = formatDate(cell.date);
-    const dayEvents = CMSDB.getAll('eventos').filter(e => e.fecha === dateStr);
+    const dayEvents = (await CMSDB.getAll('eventos')).filter(e => e.fecha === dateStr);
     const isToday = cell.date.getTime() === today.getTime();
     const hasEvents = dayEvents.length > 0;
     const isSelected = selectedDay === dateStr;
@@ -463,8 +463,8 @@ function nextMonth() {
 }
 
 // ── Detail Modal ──
-function openDetail(id) {
-  const e = CMSDB.getAll('eventos').find(ev => ev.id === id);
+async function openDetail(id) {
+  const e = (await CMSDB.getAll('eventos')).find(ev => ev.id === id);
   if (!e) return;
 
   const d = new Date(e.fecha + 'T00:00:00');

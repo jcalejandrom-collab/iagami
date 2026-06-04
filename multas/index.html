@@ -278,7 +278,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 
 <div id="toast" role="status" aria-live="polite"></div>
 
-<script src="../cms/db.js"></script>
+<script src="../cms/pb.js"></script>
 <script>
 'use strict';
 
@@ -333,7 +333,7 @@ function normalizarDoc(tipo, valor) {
 }
 
 /* ── BUSCAR MULTA ── */
-function buscarMulta() {
+async function buscarMulta() {
   const tipo  = document.getElementById('tipo-doc').value;
   const raw   = document.getElementById('num-doc').value.trim();
   if (!raw) { toast('Ingresa tu número de cédula o RIF'); return; }
@@ -347,7 +347,7 @@ function buscarMulta() {
     btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Consultar`;
 
     const busqueda = normalizarDoc(tipo, raw);
-    const todas = CMSDB.getAll('multas').filter(m => m.publicado);
+    const todas = (await CMSDB.getAll('multas')).filter(m => m.publicado);
     const resultados = todas.filter(m => {
       if (!m.documento) return false;
       const docNorm = m.documento.toUpperCase().replace(/\s+/g,'').replace(/-/g,'').replace(/^[VEJGC]/,'');
@@ -429,7 +429,7 @@ function mostrarResultados(resultados, docBuscado) {
 
 /* ── STATS DEL HERO ── */
 function renderStats() {
-  const multas = CMSDB.getAll('multas').filter(m => m.publicado);
+  const multas = (await CMSDB.getAll('multas')).filter(m => m.publicado);
   const activos    = multas.filter(m => m.estado !== 'Anulada').length;
   const pendientes = multas.filter(m => m.estado === 'Pendiente' || m.estado === 'En Proceso').length;
   const pagadas    = multas.filter(m => m.estado === 'Pagada').length;

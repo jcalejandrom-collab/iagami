@@ -207,7 +207,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 <!-- TOAST -->
 <div class="toast-container" id="toastContainer"></div>
 
-<script src="../cms/db.js"></script>
+<script src="../cms/pb.js"></script>
 <script>
 'use strict';
 
@@ -426,9 +426,9 @@ function escHtml(str) {
 }
 
 /* ── Init ── */
-function init() {
+async function init() {
   try {
-    allProyectos = CMSDB.getAll('proyectos') || [];
+    allProyectos = await CMSDB.getAll('proyectos') || [];
   } catch(e) {
     console.error('Error loading proyectos:', e);
     allProyectos = [];

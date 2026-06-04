@@ -177,6 +177,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="15 18 9 12 15 6"/></svg>
         Volver al Inicio
       </a>
+      <a href="../planificacion/index.html" class="nl">Planificación</a>
     </div>
     <div class="navr">
       <a class="navbtn" href="../admin/index.html">Admin</a>
@@ -345,7 +346,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 <div id="app-toast" class="toast" role="status" aria-live="polite"></div>
 
 <!-- CMS Database -->
-<script src="../cms/db.js"></script>
+<script src="../cms/pb.js"></script>
 
 <script>
 'use strict';
@@ -377,7 +378,7 @@ const STEPS_DEF = [
 ];
 
 /* ─── SEARCH ─── */
-function buscarDenuncia() {
+async function buscarDenuncia() {
   const rawInput = document.getElementById('search-input').value.trim();
   if (!rawInput) {
     toast('⚠ Ingresa un número de caso para consultar');
@@ -394,7 +395,7 @@ function buscarDenuncia() {
     variants.add('DEN-' + upper);
   }
 
-  const todas = CMSDB.getAll('denuncias');
+  const todas = await CMSDB.getAll('denuncias');
   const publicas = todas.filter(d => d.publicado === true || d.publicado === undefined);
 
   let found = null;

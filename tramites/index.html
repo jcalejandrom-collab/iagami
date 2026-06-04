@@ -178,6 +178,7 @@ footer p{margin-bottom:4px}
       <a href="../tramites/index.html" class="nl">Trámites</a>
       <a href="../transparencia/" class="nl">Transparencia</a>
       <a href="../organizacion/" class="nl">Organización</a>
+      <a href="../planificacion/index.html" class="nl">Planificación</a>
     </div>
     <div class="navr">
       <a href="../index.html" class="navbtn-o">← Portal</a>
@@ -250,7 +251,7 @@ footer p{margin-bottom:4px}
 </footer>
 
 <!-- DATABASE -->
-<script src="../cms/db.js"></script>
+<script src="../cms/pb.js"></script>
 
 <script>
 'use strict';
@@ -278,8 +279,8 @@ let filtered    = [];
 /* ═══════════════════════════════
    INIT
 ═══════════════════════════════ */
-document.addEventListener('DOMContentLoaded', () => {
-  allTramites = CMSDB.getAll('tramites').filter(t => t.estado === 'activo');
+document.addEventListener('DOMContentLoaded', async () => {
+  allTramites = (await CMSDB.getAll('tramites')).filter(t => t.estado === 'activo');
   applyFilters();
   bindEvents();
 });
@@ -360,7 +361,7 @@ function renderCards() {
    DETAIL MODAL
 ═══════════════════════════════ */
 function openDetail(id) {
-  const t = CMSDB.getOne('tramites', id);
+  const t = await CMSDB.getOne('tramites', id);
   if (!t) return;
 
   const s      = catStyle(t.categoria);

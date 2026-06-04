@@ -221,7 +221,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 <!-- TOAST -->
 <div class="toast-container" id="toastContainer"></div>
 
-<script src="../cms/db.js"></script>
+<script src="../cms/pb.js"></script>
 <script>
 'use strict';
 
@@ -430,9 +430,9 @@ function escHtml(str) {
 }
 
 /* ── Init ── */
-function init() {
+async function init() {
   try {
-    allEmpresas = CMSDB.getAll('empresas') || [];
+    allEmpresas = await CMSDB.getAll('empresas') || [];
   } catch(e) {
     console.error('Error loading empresas:', e);
     allEmpresas = [];

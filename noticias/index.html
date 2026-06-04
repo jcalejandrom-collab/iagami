@@ -159,6 +159,7 @@ footer p{margin-bottom:4px}
       <a href="../tramites/index.html" class="nl">Trámites</a>
       <a href="../transparencia/" class="nl">Transparencia</a>
       <a href="../organizacion/" class="nl">Organización</a>
+      <a href="../planificacion/index.html" class="nl">Planificación</a>
     </div>
     <div class="navr">
       <a href="../index.html" class="navbtn-o">← Portal</a>
@@ -238,7 +239,7 @@ footer p{margin-bottom:4px}
 </footer>
 
 <!-- DATABASE -->
-<script src="../cms/db.js"></script>
+<script src="../cms/pb.js"></script>
 
 <script>
 'use strict';
@@ -270,8 +271,8 @@ let currentPage = 1;
 /* ═══════════════════════════════
    INIT
 ═══════════════════════════════ */
-document.addEventListener('DOMContentLoaded', () => {
-  allNoticias = CMSDB.getAll('noticias')
+document.addEventListener('DOMContentLoaded', async () => {
+  allNoticias = await CMSDB.getAll('noticias')
     .filter(n => n.estado === 'publicado')
     .sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
 
@@ -434,7 +435,7 @@ function goPage(n) {
    DETAIL MODAL
 ═══════════════════════════════ */
 function openDetail(id) {
-  const n = CMSDB.getOne('noticias', id);
+  const n = await CMSDB.getOne('noticias', id);
   if (!n) return;
 
   const s = catStyle(n.categoria);
