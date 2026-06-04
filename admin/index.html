@@ -130,6 +130,13 @@ input,select,textarea{font-family:inherit}
 .table-wrap td{padding:10px 14px;border-bottom:1px solid var(--primary-lighter);vertical-align:middle}
 .table-wrap tr:last-child td{border-bottom:none}
 .table-wrap tr:hover td{background:var(--primary-lighter)}
+/* standalone .table (used in dynamic renders) */
+.table{width:100%;border-collapse:collapse;font-size:13.5px;background:#fff;border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.table th{background:var(--primary-light);color:var(--text);font-weight:600;padding:10px 14px;text-align:left;font-size:12.5px;border-bottom:1px solid var(--border)}
+.table td{padding:10px 14px;border-bottom:1px solid var(--primary-lighter);vertical-align:middle}
+.table td > .flex-actions{display:flex;gap:6px;flex-wrap:wrap}
+.table tr:last-child td{border-bottom:none}
+.table tbody tr:hover td{background:var(--primary-lighter)}
 .empty-state{text-align:center;padding:48px 24px;color:var(--muted);font-size:14px}
 .empty-state .empty-icon{font-size:36px;margin-bottom:8px}
 
@@ -1786,11 +1793,11 @@ function renderMultas() {
       <td style="font-weight:600">${m.monto ? 'Bs. '+Number(m.monto).toLocaleString('es-VE',{minimumFractionDigits:2}) : '—'}</td>
       <td>${estadoBadge(m.estado)}</td>
       <td>${pubBadge(m.publicado)}</td>
-      <td style="display:flex;gap:4px;flex-wrap:wrap">
+      <td><div style="display:flex;gap:4px;flex-wrap:wrap">
         <button class="btn btn-sm" onclick="openMultaForm('${m.id}')" title="Editar">✏️</button>
         <button class="btn btn-sm" onclick="toggleMultaPublicado('${m.id}')" title="${m.publicado?'Despublicar':'Publicar'}">${m.publicado?'🔒':'📢'}</button>
         <button class="btn btn-sm btn-danger" onclick="deleteMulta('${m.id}')" title="Eliminar">🗑️</button>
-      </td>
+      </div></td>
     </tr>`).join('');
   renderPagination('multas-pagination','multas',total,current,'renderMultas');
 }
@@ -2052,10 +2059,10 @@ function renderConsejos() {
       <td><span class="badge ${c.estatus==='Activo'?'badge-success':'badge-error'}">${c.estatus||'-'}</span></td>
       <td>${c.responsable||'-'}</td>
       <td>${c.telefono||'-'}</td>
-      <td style="display:flex;gap:4px">
+      <td><div style="display:flex;gap:4px">
         <button class="btn btn-sm" onclick="openConsejoForm('${c.id}')">✏️</button>
         <button class="btn btn-sm btn-danger" onclick="deleteConsejo('${c.id}')">🗑️</button>
-      </td>
+      </div></td>
     </tr>`).join('') : '<tr><td colspan="8" style="text-align:center;color:#888;padding:20px">Sin resultados</td></tr>'
   }</tbody></table>`;
   // pagination
@@ -2144,10 +2151,10 @@ function renderBienvenida() {
       <td style="font-size:12px;color:var(--muted);max-width:260px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${b.mensaje || '—'}</td>
       <td><span style="display:inline-block;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:700;background:${b.activa?'#dcfce7':'#f1f5f9'};color:${b.activa?'#166534':'#475569'}">${b.activa ? '✅ Activa' : '⚪ Inactiva'}</span></td>
       <td style="font-size:12px">${b.mostrarSiempre ? '🔁 Siempre' : '1️⃣ Una vez'}</td>
-      <td style="display:flex;gap:6px">
+      <td><div style="display:flex;gap:6px">
         <button class="btn btn-secondary" style="padding:4px 10px;font-size:12px" onclick="openBienvenidaForm('${b.id}')">✏️</button>
         <button class="btn btn-danger" style="padding:4px 10px;font-size:12px" onclick="confirmDelete(()=>deleteBienvenida('${b.id}'))">🗑️</button>
-      </td>
+      </div></td>
     </tr>`).join('')}
   </tbody></table>`;
 }
@@ -2288,10 +2295,10 @@ function renderPlan() {
           <span style="font-size:11px;font-weight:600;color:#1d6b3e;white-space:nowrap">${p.avance||0}%</span>
         </div>
       </td>
-      <td style="display:flex;gap:6px">
+      <td><div style="display:flex;gap:6px">
         <button class="btn btn-secondary" style="padding:4px 10px;font-size:12px" onclick="openPlanForm('${p.id}')">✏️</button>
         <button class="btn btn-danger" style="padding:4px 10px;font-size:12px" onclick="confirmDelete(()=>deletePlan('${p.id}'))">🗑️</button>
-      </td>
+      </div></td>
     </tr>`).join('')}
   </tbody></table>`;
 }
@@ -2379,10 +2386,10 @@ function renderRevistas() {
     <td><span style="display:inline-block;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:700;background:${estadoClr[r.estado]||estadoClr.borrador}">${r.estado||'borrador'}</span></td>
     <td style="text-align:center">${r.destacada?'⭐':'—'}</td>
     <td style="font-size:12px">${r.descargas||0}</td>
-    <td style="display:flex;gap:5px;flex-wrap:wrap">
+    <td><div style="display:flex;gap:5px;flex-wrap:wrap">
       <button class="btn btn-secondary" style="padding:4px 8px;font-size:11px" onclick="openRevistaEditor('${r.id}')">✏️ Editor</button>
       <button class="btn btn-danger"    style="padding:4px 8px;font-size:11px" onclick="confirmDelete(()=>deleteRevista('${r.id}'))">🗑️</button>
-    </td>
+    </div></td>
   </tr>`).join('')}
   </tbody></table>`;
 }
