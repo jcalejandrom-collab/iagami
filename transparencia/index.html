@@ -227,7 +227,7 @@ const CAT_CLASS = {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-  const docs = CMSDB.documentos || [];
+  const docs = CMSDB.getAll('documentos');
 
   // Populate stats
   document.getElementById('stat-total').textContent = docs.length;
@@ -266,7 +266,7 @@ function filterDocs() {
 }
 
 function renderDocs() {
-  const docs = CMSDB.documentos || [];
+  const docs = CMSDB.getAll('documentos');
   let filtered = docs.filter(d => {
     const matchCat = !currentCat || d.categoria === currentCat;
     const matchYear = !currentYear || String(d.anio) === String(currentYear);
@@ -300,8 +300,8 @@ function docCardHTML(d) {
       </div>
       <div class="doc-info-row">
         <span>📅 ${fechaFmt}</span>
-        <span>📄 ${d.paginas} páginas</span>
-        <span>💾 ${d.tamano}</span>
+        ${d.paginas ? `<span>📄 ${d.paginas} páginas</span>` : ''}
+        ${d.tamano ? `<span>💾 ${d.tamano}</span>` : ''}
       </div>
       <div class="doc-desc">${desc}</div>
       <div class="doc-footer">

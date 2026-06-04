@@ -268,10 +268,10 @@ function switchTab(tab) {
 
 // ── Build Org Tree ──
 function buildOrgTree() {
-  const units = CMSDB.unidades || [];
-  const root = units.find(u => u.parent === null);
+  const units = CMSDB.getAll('org');
+  const root = units.find(u => u.padre === null);
   if (!root) return;
-  const children = units.filter(u => u.parent === root.id);
+  const children = units.filter(u => u.padre === root.id);
 
   const tree = document.getElementById('org-tree');
 
@@ -317,7 +317,7 @@ function buildOrgTree() {
 
 // ── Open unit detail ──
 function openUnit(id) {
-  const unit = (CMSDB.unidades || []).find(u => u.id === id);
+  const unit = (CMSDB.getAll('org')).find(u => u.id === id);
   if (!unit) return;
 
   document.getElementById('panel-title').textContent = unit.nombre;
@@ -329,10 +329,15 @@ function openUnit(id) {
   document.getElementById('panel-responsable').textContent = unit.responsable;
 
   const funcs = document.getElementById('panel-funcs');
-  funcs.innerHTML = (unit.funciones || []).map(f => `<li>${f}</li>`).join('');
+  const funcionesVal = unit.funciones || '';
+  funcs.innerHTML = Array.isArray(funcionesVal)
+    ? funcionesVal.map(f => `<li>${f}</li>`).join('')
+    : `<li>${funcionesVal}</li>`;
 
-  document.getElementById('panel-telefono').innerHTML = `📞 <a href="tel:${unit.telefono}">${unit.telefono}</a>`;
-  document.getElementById('panel-email').innerHTML = `✉️ <a href="mailto:${unit.email}">${unit.email}</a>`;
+  const tel = unit.telefono || '';
+  const email = unit.email || '';
+  document.getElementById('panel-telefono').innerHTML = tel ? `📞 <a href="tel:${tel}">${tel}</a>` : '📞 No disponible';
+  document.getElementById('panel-email').innerHTML = email ? `✉️ <a href="mailto:${email}">${email}</a>` : '✉️ No disponible';
 
   document.getElementById('panel-overlay').classList.add('open');
   document.getElementById('side-panel').classList.add('open');
@@ -347,7 +352,7 @@ function closePanel() {
 
 // ── Directory ──
 function renderDirectory(search = '', tipo = '') {
-  const units = CMSDB.unidades || [];
+  const units = CMSDB.getAll('org');
   const filtered = units.filter(u => {
     const matchSearch = !search ||
       u.nombre.toLowerCase().includes(search) ||

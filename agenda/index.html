@@ -291,7 +291,7 @@ document.addEventListener('DOMContentLoaded', () => {
   calYear = today.getFullYear();
   calMonth = today.getMonth();
 
-  allEvents = (CMSDB.eventos || [])
+  allEvents = (CMSDB.getAll('eventos') || [])
     .filter(e => {
       const d = new Date(e.fecha + 'T00:00:00');
       const t = new Date();
@@ -358,9 +358,9 @@ function eventCardHTML(e) {
           </div>
           <div class="event-title">${e.titulo}</div>
           <div class="event-meta">
-            <span>🕐 ${e.hora}</span>
+            <span>🕐 ${e.hora_inicio||e.hora||''}</span>
             <span>📍 ${e.lugar}</span>
-            <span>👤 ${e.responsable}</span>
+            <span>👤 ${e.responsable||e.ponente||''}</span>
           </div>
           <div class="event-desc">${desc}</div>
         </div>
@@ -402,7 +402,7 @@ function renderCalendar() {
 
   cells.forEach(cell => {
     const dateStr = formatDate(cell.date);
-    const dayEvents = CMSDB.eventos.filter(e => e.fecha === dateStr);
+    const dayEvents = CMSDB.getAll('eventos').filter(e => e.fecha === dateStr);
     const isToday = cell.date.getTime() === today.getTime();
     const hasEvents = dayEvents.length > 0;
     const isSelected = selectedDay === dateStr;
@@ -464,17 +464,17 @@ function nextMonth() {
 
 // ── Detail Modal ──
 function openDetail(id) {
-  const e = CMSDB.eventos.find(ev => ev.id === id);
+  const e = CMSDB.getAll('eventos').find(ev => ev.id === id);
   if (!e) return;
 
   const d = new Date(e.fecha + 'T00:00:00');
-  const fechaFmt = `${d.getDate()} de ${MONTHS_ES[d.getMonth()]} de ${d.getFullYear()}, ${e.hora} hrs`;
+  const fechaFmt = `${d.getDate()} de ${MONTHS_ES[d.getMonth()]} de ${d.getFullYear()}, ${e.hora_inicio||e.hora||''} hrs`;
 
   document.getElementById('modal-title').textContent = e.titulo;
   document.getElementById('modal-tipo-badge').innerHTML = `<span class="tipo-badge ${e.tipo.toLowerCase()}" style="margin-bottom:8px;display:inline-block">${e.tipo}</span>`;
   document.getElementById('modal-fecha').textContent = fechaFmt;
   document.getElementById('modal-lugar').textContent = e.lugar;
-  document.getElementById('modal-responsable').textContent = e.responsable;
+  document.getElementById('modal-responsable').textContent = e.responsable||e.ponente||'';
   document.getElementById('modal-desc').textContent = e.descripcion;
 
   document.getElementById('modal-overlay').classList.add('open');

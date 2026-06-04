@@ -993,11 +993,11 @@ function renderUsers() {
       <td><span class="status status-info">${u.role}</span></td>
       <td>${statusBadge}</td>
       <td>${u.failedAttempts||0}</td>
-      <td style="display:flex;gap:4px;flex-wrap:wrap">
+      <td><div style="display:flex;gap:4px;flex-wrap:wrap">
         ${isLocked ? `<button class="btn btn-secondary btn-sm" onclick="unlockUser('${u.id}')">Desbloquear</button>` : ''}
         <button class="btn btn-secondary btn-sm" onclick="toggleUserActive('${u.id}')">${u.activo?'Desactivar':'Activar'}</button>
         <button class="btn btn-secondary btn-sm" onclick="openChangeUserPwd('${u.id}','${u.username}')">Cambiar Pwd</button>
-      </td>
+      </div></td>
     </tr>`;
   }).join('');
 }
