@@ -1152,7 +1152,7 @@ async function enviarDenuncia() {
 }
 
 /* ═══════════════════════════════════════
-   PORTAL DINÁMICO — SECCIONES CMS
+   PORTAL DINÁMICO — SECCIONES CMS (ASYNC)
 ═══════════════════════════════════════ */
 
 async function renderAlertBar() {
@@ -1168,33 +1168,42 @@ async function renderAlertBar() {
   if (!alertas.length) { bar.style.display = 'none'; return; }
   bar.style.display = 'flex';
   const ticker = document.getElementById('alert-ticker-inner');
-  if (ticker) {
-    const items = alertas.map(a => `<span class="alert-pill">${a.mensaje}</span>`).join('<span style="color:#4a8a6a;padding:0 8px">·</span>');
-    ticker.innerHTML = items + '<span style="color:#4a8a6a;padding:0 24px">·</span>' + items;
-  }
+  if (!ticker) return;
+  const items = alertas
+    .map(a => `<span class="alert-pill">${a.mensaje}</span>`)
+    .join('<span style="color:#4a8a6a;padding:0 8px">·</span>');
+  ticker.innerHTML = alertas.length > 1
+    ? items + '<span style="padding:0 24px">·</span>' + items
+    : items;
 }
 
 async function renderHeroPanel() {
   const body = document.getElementById('hero-panel-body');
   if (!body) return;
-  const inds = await CMSDB.getAll('indicadores');
-  const aire  = inds.find(i => i.nombre && i.nombre.toLowerCase().includes('aire'));
-  const agua  = inds.find(i => i.nombre && i.nombre.toLowerCase().includes('agua'));
-  const dens  = (await CMSDB.getAll('denuncias')).filter(d => d.estado === 'pendiente' || !d.estado).length;
-  const trams = (await CMSDB.getAll('tramites')).length;
-
-  const proySeed = await CMSDB.getAll('proyectos');
-  const execPct  = proySeed.length ? Math.round(proySeed.reduce((s,p) => s + (p.porcentaje_avance||0), 0) / proySeed.length) : 0;
+  const [inds, denuncias, tramites, proyectos, alertas] = await Promise.all([
+    CMSDB.getAll('indicadores'),
+    CMSDB.getAll('denuncias'),
+    CMSDB.getAll('tramites'),
+    CMSDB.getAll('proyectos'),
+    CMSDB.getAll('alertas')
+  ]);
+  const aire = inds.find(i => i.nombre?.toLowerCase().includes('aire'));
+  const agua = inds.find(i => i.nombre?.toLowerCase().includes('agua'));
+  const dens = denuncias.filter(d => !d.estado || d.estado === 'pendiente').length;
+  const execPct = proyectos.length
+    ? Math.round(proyectos.reduce((s, p) => s + (p.porcentaje_avance || 0), 0) / proyectos.length)
+    : 0;
+  const alertasActivas = alertas.filter(a => a.activa).length;
 
   body.innerHTML = `
     <div class="mc">
       <div class="mc-lbl">CALIDAD AIRE</div>
-      <div class="mc-val">${aire ? aire.valor_actual : '—'}<span class="mc-unit">${aire ? aire.unidad : ''}</span></div>
+      <div class="mc-val">${aire?.valor_actual ?? '—'}<span class="mc-unit">${aire?.unidad ?? ''}</span></div>
       <div class="mc-sub" style="color:#4ade80">↑ mejora continua</div>
     </div>
     <div class="mc">
       <div class="mc-lbl">CALIDAD AGUA</div>
-      <div class="mc-val">${agua ? agua.valor_actual : '—'}<span class="mc-unit">${agua ? agua.unidad : ''}</span></div>
+      <div class="mc-val">${agua?.valor_actual ?? '—'}<span class="mc-unit">${agua?.unidad ?? ''}</span></div>
       <div class="mc-sub" style="color:#64748b">— monitoreo activo</div>
     </div>
     <div class="mc mc-blue">
@@ -1204,7 +1213,7 @@ async function renderHeroPanel() {
     </div>
     <div class="mc mc-blue">
       <div class="mc-lbl">TRÁMITES VIGENTES</div>
-      <div class="mc-val">${trams}<span class="mc-unit"> tipos</span></div>
+      <div class="mc-val">${tramites.length}<span class="mc-unit"> tipos</span></div>
       <div class="mc-sub">→ disponibles</div>
     </div>
     <div class="bar-sec">
@@ -1216,13 +1225,13 @@ async function renderHeroPanel() {
       </div>
       <div class="bar-row">
         <span class="bar-name">Agua</span>
-        <div class="bar-track"><div class="bar-fill" style="width:${agua ? agua.valor_actual : 72}%;background:#60b8f0"></div></div>
-        <span class="bar-pct" style="color:#60b8f0">${agua ? agua.valor_actual : 72}%</span>
+        <div class="bar-track"><div class="bar-fill" style="width:${agua?.valor_actual ?? 72}%;background:#60b8f0"></div></div>
+        <span class="bar-pct" style="color:#60b8f0">${agua?.valor_actual ?? 72}%</span>
       </div>
       <div class="bar-row">
         <span class="bar-name">Aire</span>
-        <div class="bar-track"><div class="bar-fill" style="width:${aire ? aire.valor_actual : 87}%;background:#eea82a"></div></div>
-        <span class="bar-pct" style="color:#eea82a">${aire ? aire.valor_actual : 87}%</span>
+        <div class="bar-track"><div class="bar-fill" style="width:${aire?.valor_actual ?? 87}%;background:#eea82a"></div></div>
+        <span class="bar-pct" style="color:#eea82a">${aire?.valor_actual ?? 87}%</span>
       </div>
     </div>
     <div class="sys-row">
@@ -1232,17 +1241,19 @@ async function renderHeroPanel() {
         <span style="width:5px;height:5px;background:#4ade80;border-radius:50%;margin-left:auto;animation:pulse 2s infinite;display:inline-block"></span>
       </div>
       <div class="sys-line">SYS.ENV › status: ONLINE · uptime: 99.97% · CPU: 23%</div>
-      <div class="sys-line2">ENV_INDEX: 0.87 · SIGAP: running · ALERTS: ${(await CMSDB.getAll('alertas')).filter(a=>a.activa).length} activas</div>
+      <div class="sys-line2">ENV_INDEX: 0.87 · SIGAP: running · ALERTS: ${alertasActivas} activas</div>
     </div>`;
 }
 
 async function renderHeroStats() {
-  const consejos = (await CMSDB.getAll('consejos')).filter(c => c.estatus === 'Activo').length;
-  const empresas = (await CMSDB.getAll('empresas')).length;
+  const [consejos, empresas] = await Promise.all([
+    CMSDB.getAll('consejos'),
+    CMSDB.getAll('empresas')
+  ]);
   const sc = document.getElementById('stat-consejos');
   const se = document.getElementById('stat-empresas');
-  if (sc) sc.textContent = consejos;
-  if (se) se.textContent = empresas;
+  if (sc) sc.textContent = consejos.filter(c => c.estatus === 'Activo').length;
+  if (se) se.textContent = empresas.length;
 }
 
 async function renderHomeIndicadores() {
@@ -1255,10 +1266,9 @@ async function renderHomeIndicadores() {
   }
   grid.innerHTML = inds.map(ind => {
     const t = tendIcon(ind.tendencia);
-    const val = ind.valor_actual !== undefined ? ind.valor_actual : '—';
     return `<div class="ind-card">
       <div class="ind-ico">${ind.icono || '📊'}</div>
-      <div class="ind-val">${val}<span class="ind-unit">${ind.unidad || ''}</span></div>
+      <div class="ind-val">${ind.valor_actual ?? '—'}<span class="ind-unit">${ind.unidad || ''}</span></div>
       <div class="ind-name">${ind.nombre}</div>
       <div class="ind-t" style="color:${t.color}">${t.icon} ${ind.tendencia || ''}</div>
     </div>`;
@@ -1280,15 +1290,11 @@ async function renderHomeNoticias() {
     const icon = catIcon(n.categoria);
     const cc   = catColor(n.categoria);
     const bgMap = {
-      'Medio Ambiente':'#e8f5ee',
-      'Comunidad':     '#eff6ff',
-      'Normativa':     '#fefce8',
-      'Educación':     '#faf5ff',
-      'Institucional': '#f8fafc'
+      'Medio Ambiente': '#e8f5ee', 'Comunidad': '#eff6ff',
+      'Normativa': '#fefce8', 'Educación': '#faf5ff', 'Institucional': '#f8fafc'
     };
-    const bg = bgMap[n.categoria] || '#e8f5ee';
     return `<a class="news-card" href="noticias/index.html">
-      <div class="news-img" style="background:${bg}">
+      <div class="news-img" style="background:${bgMap[n.categoria] || '#e8f5ee'}">
         ${n.imagen ? `<img src="${n.imagen}" alt="${n.titulo}" loading="lazy"/>` : ''}
         ${icon}
       </div>
@@ -1314,16 +1320,16 @@ async function renderHomeProyectos() {
   grid.innerHTML = proyectos.map(p => {
     const { cls, label } = estadoProy(p.estado);
     const pct  = Math.min(100, Math.max(0, p.porcentaje_avance || 0));
-    const fill = p.estado === 'Completado' ? '#16a34a' : '#1d6b3e';
-    const icon = proyIcon(p.nombre);
-    const gradMap = { 'En Ejecución':'linear-gradient(135deg,#dbeafe,#bfdbfe)', 'Completado':'linear-gradient(135deg,#dcfce7,#bbf7d0)' };
-    const bg = gradMap[p.estado] || 'linear-gradient(135deg,#f1f5f9,#e2e8f0)';
+    const gradMap = {
+      'En Ejecución': 'linear-gradient(135deg,#dbeafe,#bfdbfe)',
+      'Completado':   'linear-gradient(135deg,#dcfce7,#bbf7d0)'
+    };
     return `<a class="proj-card" href="proyectos/index.html">
-      <div class="proj-img" style="background:${bg}">${icon}</div>
+      <div class="proj-img" style="background:${gradMap[p.estado] || 'linear-gradient(135deg,#f1f5f9,#e2e8f0)'}">${proyIcon(p.nombre)}</div>
       <div class="proj-body">
         <span class="ps ${cls}">${label}</span>
         <div class="proj-name">${p.nombre}</div>
-        <div class="proj-bar"><div class="proj-fill" style="width:${pct}%;background:${fill}"></div></div>
+        <div class="proj-bar"><div class="proj-fill" style="width:${pct}%;background:${p.estado === 'Completado' ? '#16a34a' : '#1d6b3e'}"></div></div>
         <div class="proj-pct">${pct}%${p.beneficiados ? ' · ' + p.beneficiados + ' beneficiados' : ''}</div>
       </div>
     </a>`;
@@ -1333,17 +1339,13 @@ async function renderHomeProyectos() {
 async function renderHomeAgenda() {
   const container = document.getElementById('home-agenda-grid');
   if (!container) return;
-  const today  = new Date().toISOString().slice(0, 10);
-  let eventos  = (await CMSDB.getAll('eventos'))
-    .filter(e => e.fecha >= today && e.estado !== 'cancelado')
+  const today = new Date().toISOString().slice(0, 10);
+  const todos = await CMSDB.getAll('eventos');
+  const futuros = todos.filter(e => e.fecha >= today && e.estado !== 'cancelado');
+  const eventos = (futuros.length ? futuros : todos)
     .sort((a, b) => a.fecha.localeCompare(b.fecha))
     .slice(0, 20);
 
-  if (!eventos.length) {
-    eventos = (await CMSDB.getAll('eventos'))
-      .sort((a, b) => a.fecha.localeCompare(b.fecha))
-      .slice(0, 20);
-  }
   if (!eventos.length) {
     container.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="ico">📅</div>No hay eventos programados. Agrega actividades desde el panel de administración.</div>';
     return;
@@ -1378,7 +1380,8 @@ async function renderHomeRevista() {
     return;
   }
   grid.innerHTML = revistas.map(r => {
-    const firstBlock = Array.isArray(r.contenido_bloques) ? r.contenido_bloques.find(b => b.tipo === 'portada') : null;
+    const firstBlock = Array.isArray(r.contenido_bloques)
+      ? r.contenido_bloques.find(b => b.tipo === 'portada') : null;
     const bg = firstBlock?.color_fondo || '#1d6b3e';
     const coverHtml = r.portada_url
       ? `<img src="${r.portada_url}" alt="${r.titulo}" style="width:100%;height:100%;object-fit:cover;display:block" loading="lazy"/>`
@@ -1386,8 +1389,13 @@ async function renderHomeRevista() {
            <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.6);letter-spacing:.1em;margin-bottom:6px">EDICIÓN Nº ${r.numero_edicion}</div>
            <div style="font-family:'Poppins',sans-serif;font-size:14px;font-weight:800;color:#fff;line-height:1.25">${r.titulo}</div>
          </div>`;
-    return `<div style="background:#fff;border:1px solid #d4edd8;border-radius:14px;overflow:hidden;transition:.2s;display:flex;flex-direction:column" onmouseover="this.style.boxShadow='0 6px 24px rgba(29,107,62,.12)';this.style.transform='translateY(-2px)'" onmouseout="this.style.boxShadow='none';this.style.transform='none'">
-      <div style="height:180px;background:linear-gradient(160deg,${bg},${bg}cc);position:relative;overflow:hidden">${coverHtml}${r.destacada?'<span style="position:absolute;top:8px;right:8px;background:#4ade80;color:#0d2d1a;font-size:10px;font-weight:800;border-radius:20px;padding:2px 9px">⭐ Destacada</span>':''}</div>
+    return `<div style="background:#fff;border:1px solid #d4edd8;border-radius:14px;overflow:hidden;transition:.2s;display:flex;flex-direction:column"
+        onmouseover="this.style.boxShadow='0 6px 24px rgba(29,107,62,.12)';this.style.transform='translateY(-2px)'"
+        onmouseout="this.style.boxShadow='none';this.style.transform='none'">
+      <div style="height:180px;background:linear-gradient(160deg,${bg},${bg}cc);position:relative;overflow:hidden">
+        ${coverHtml}
+        ${r.destacada ? '<span style="position:absolute;top:8px;right:8px;background:#4ade80;color:#0d2d1a;font-size:10px;font-weight:800;border-radius:20px;padding:2px 9px">⭐ Destacada</span>' : ''}
+      </div>
       <div style="padding:14px;flex:1;display:flex;flex-direction:column;gap:6px">
         <div style="font-size:10px;font-weight:700;color:#1d6b3e;text-transform:uppercase;letter-spacing:.06em">${r.categoria || 'Institucional'}</div>
         <div style="font-family:'Poppins',sans-serif;font-size:13px;font-weight:700;color:#1a3d2b;line-height:1.3;flex:1">${r.titulo}</div>
@@ -1436,22 +1444,22 @@ function _bvMarkShown(activa) {
 async function checkBienvenida() {
   const items = await CMSDB.getAll('bienvenida');
   const activa = items.find(b => b.activa);
-  if (!activa) return;
-  if (!_bvShouldShow(activa)) return;
-  const modal = document.getElementById('bienvenida-modal');
+  if (!activa || !_bvShouldShow(activa)) return;
+  const modal  = document.getElementById('bienvenida-modal');
   const titulo = document.getElementById('bienvenida-titulo');
   const mensaje = document.getElementById('bienvenida-mensaje');
-  const wrap = document.getElementById('bienvenida-img-wrap');
-  const imgEl = document.getElementById('bienvenida-img');
-  if (titulo) titulo.textContent = activa.titulo || '';
+  const wrap   = document.getElementById('bienvenida-img-wrap');
+  const imgEl  = document.getElementById('bienvenida-img');
+  if (titulo)  titulo.textContent  = activa.titulo  || '';
   if (mensaje) mensaje.textContent = activa.mensaje || '';
   if (activa.imagen && imgEl) {
     imgEl.src = activa.imagen;
     imgEl.style.display = 'block';
-    if (wrap) { const inner = document.getElementById('bienvenida-img-inner'); if(inner) inner.style.background='rgba(0,0,0,0.45)'; inner && (inner.style.borderRadius='0'); }
+    const inner = document.getElementById('bienvenida-img-inner');
+    if (inner) { inner.style.background = 'rgba(0,0,0,0.45)'; inner.style.borderRadius = '0'; }
   } else {
     if (imgEl) imgEl.style.display = 'none';
-    if (wrap) wrap.style.background = activa.color_fondo || '#1d6b3e';
+    if (wrap)  wrap.style.background = activa.color_fondo || '#1d6b3e';
   }
   if (modal) { modal.style.display = 'flex'; document.body.style.overflow = 'hidden'; }
 }

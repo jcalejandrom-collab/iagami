@@ -1,64 +1,168 @@
-/* cms/pb.js — PocketBase data layer (replaces cms/db.js) */
-(function () {
-  'use strict';
+'use strict';
 
-  const BASE = 'http://127.0.0.1:8090';
+const CMSDB = (function () {
+  const PB_URL = 'http://127.0.0.1:8090';
 
-  async function _get(col) {
-    const res = await fetch(`${BASE}/api/collections/${col}/records?perPage=200`);
-    if (!res.ok) throw new Error(`PB getAll ${col}: ${res.status}`);
-    const data = await res.json();
-    return data.items || [];
+  /* ─── CACHÉ EN MEMORIA ─── */
+  const _cache = {};
+
+  function clearCache(coleccion) {
+    if (coleccion) {
+      delete _cache[coleccion];
+    } else {
+      Object.keys(_cache).forEach(k => delete _cache[k]);
+    }
   }
 
-  async function _post(col, item) {
-    const res = await fetch(`${BASE}/api/collections/${col}/records`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(item)
-    });
-    if (!res.ok) throw new Error(`PB save(POST) ${col}: ${res.status}`);
-    return res.json();
+  /* ─── GET ALL (con paginación automática) ─── */
+  async function getAll(coleccion) {
+    if (_cache[coleccion]) return _cache[coleccion];
+
+    try {
+      let page = 1;
+      const perPage = 200;
+      let allItems = [];
+      let totalPages = 1;
+
+      do {
+        const res = await fetch(
+          `${PB_URL}/api/collections/${coleccion}/records?page=${page}&perPage=${perPage}&sort=-created`
+        );
+
+        if (res.status === 404) {
+          console.warn(`[SIGAP] Colección "${coleccion}" no existe en PocketBase`);
+          return [];
+        }
+
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+        const data = await res.json();
+        allItems = allItems.concat(data.items || []);
+        totalPages = data.totalPages || 1;
+        page++;
+      } while (page <= totalPages);
+
+      _cache[coleccion] = allItems;
+      return allItems;
+
+    } catch (err) {
+      console.error(`[SIGAP] getAll("${coleccion}") falló:`, err.message);
+      return [];
+    }
   }
 
-  async function _patch(col, id, item) {
-    const res = await fetch(`${BASE}/api/collections/${col}/records/${id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(item)
-    });
-    if (!res.ok) throw new Error(`PB save(PATCH) ${col}: ${res.status}`);
-    return res.json();
+  /* ─── SAVE (POST / PATCH — JSON o multipart) ─── */
+  async function save(coleccion, item) {
+    try {
+      const isUpdate = !!item.id;
+      const endpoint = isUpdate
+        ? `${PB_URL}/api/collections/${coleccion}/records/${item.id}`
+        : `${PB_URL}/api/collections/${coleccion}/records`;
+
+      /* Detectar si hay archivos File/Blob en el item */
+      const tieneArchivos = Object.values(item).some(
+        v => v instanceof File || v instanceof Blob ||
+          (Array.isArray(v) && v.some(f => f instanceof File || f instanceof Blob))
+      );
+
+      let body, headers = {};
+
+      if (tieneArchivos) {
+        const fd = new FormData();
+        Object.entries(item).forEach(([key, val]) => {
+          if (Array.isArray(val)) {
+            val.forEach(v => fd.append(key, v));
+          } else if (val !== undefined && val !== null) {
+            fd.append(key, val instanceof File || val instanceof Blob
+              ? val
+              : typeof val === 'object' ? JSON.stringify(val) : String(val)
+            );
+          }
+        });
+        body = fd;
+      } else {
+        const payload = { ...item };
+        ['historial', 'adjuntos', 'requisitos', 'pasos', 'hitos',
+          'contenido_bloques'].forEach(k => {
+          if (payload[k] && typeof payload[k] !== 'string') {
+            payload[k] = JSON.stringify(payload[k]);
+          }
+        });
+        body = JSON.stringify(payload);
+        headers['Content-Type'] = 'application/json';
+      }
+
+      const res = await fetch(endpoint, {
+        method: isUpdate ? 'PATCH' : 'POST',
+        headers,
+        body
+      });
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(
+          `HTTP ${res.status}: ${errData.message || JSON.stringify(errData.data || {})}`
+        );
+      }
+
+      clearCache(coleccion);
+      return await res.json();
+
+    } catch (err) {
+      console.error(`[SIGAP] save("${coleccion}") falló:`, err.message);
+      throw err;
+    }
   }
 
-  async function _delete(col, id) {
-    const res = await fetch(`${BASE}/api/collections/${col}/records/${id}`, {
-      method: 'DELETE'
-    });
-    if (!res.ok) throw new Error(`PB remove ${col}/${id}: ${res.status}`);
+  /* ─── DELETE ─── */
+  async function deleteRecord(coleccion, id) {
+    try {
+      const res = await fetch(
+        `${PB_URL}/api/collections/${coleccion}/records/${id}`,
+        { method: 'DELETE' }
+      );
+      if (!res.ok && res.status !== 204)
+        throw new Error(`HTTP ${res.status}`);
+      clearCache(coleccion);
+      return true;
+    } catch (err) {
+      console.error(`[SIGAP] deleteRecord("${coleccion}", "${id}") falló:`, err.message);
+      throw err;
+    }
   }
 
-  window.CMSDB = {
-    async getAll(col) {
-      try { return await _get(col); } catch (e) { console.error(e); return []; }
-    },
-    async getOne(col, id) {
-      try {
-        const res = await fetch(`${BASE}/api/collections/${col}/records/${id}`);
-        if (!res.ok) return null;
-        return res.json();
-      } catch (e) { console.error(e); return null; }
-    },
-    async save(col, item) {
-      try {
-        if (item.id) return await _patch(col, item.id, item);
-        return await _post(col, item);
-      } catch (e) { console.error(e); return null; }
-    },
-    async remove(col, id) {
-      try { await _delete(col, id); return true; } catch (e) { console.error(e); return false; }
-    },
-    uid() { return Math.random().toString(36).slice(2, 10) + Date.now().toString(36); },
-    now() { return new Date().toISOString(); }
-  };
+  /* Alias para compatibilidad con código existente que usa CMSDB.remove() */
+  async function remove(coleccion, id) {
+    return deleteRecord(coleccion, id);
+  }
+
+  /* ─── GET ONE ─── */
+  async function getOne(coleccion, id) {
+    try {
+      const res = await fetch(
+        `${PB_URL}/api/collections/${coleccion}/records/${id}`
+      );
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.json();
+    } catch (err) {
+      console.error(`[SIGAP] getOne("${coleccion}", "${id}") falló:`, err.message);
+      return null;
+    }
+  }
+
+  /* ─── HEALTH CHECK ─── */
+  async function ping() {
+    try {
+      const res = await fetch(`${PB_URL}/api/health`, { signal: AbortSignal.timeout(3000) });
+      return res.ok;
+    } catch {
+      return false;
+    }
+  }
+
+  /* ─── HELPERS (compatibilidad con código que los usa) ─── */
+  function uid() { return Math.random().toString(36).slice(2, 10) + Date.now().toString(36); }
+  function now() { return new Date().toISOString(); }
+
+  return { getAll, save, deleteRecord, remove, getOne, clearCache, ping, uid, now };
 })();
