@@ -657,8 +657,8 @@ const CMSDB = (() => {
         descripcion: 'Plan integral de reforestación en las parroquias de mayor déficit de cobertura verde del municipio Iribarren.',
         responsable: 'Dirección de Proyectos',
         fecha: '2026-06-30',
-        prioridad: 'alta',
-        estado: 'en_proceso',
+        prioridad: 'Alta',
+        estado: 'En Progreso',
         avance: 45
       },
       {
@@ -667,8 +667,8 @@ const CMSDB = (() => {
         descripcion: 'Talleres y actividades de educación ambiental en 20 instituciones educativas del municipio.',
         responsable: 'Dirección de Comunicaciones',
         fecha: '2026-07-15',
-        prioridad: 'media',
-        estado: 'pendiente',
+        prioridad: 'Media',
+        estado: 'Pendiente',
         avance: 0
       },
       {
@@ -677,8 +677,8 @@ const CMSDB = (() => {
         descripcion: 'Monitoreo sistemático de los cuerpos de agua del municipio con las nuevas estaciones instaladas.',
         responsable: 'Dirección de Calidad Ambiental',
         fecha: '2026-06-20',
-        prioridad: 'alta',
-        estado: 'completado',
+        prioridad: 'Alta',
+        estado: 'Completado',
         avance: 100
       }
     ]);
