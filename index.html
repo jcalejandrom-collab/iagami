@@ -844,7 +844,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 </div>
 
 <!-- CMS Database -->
-<script src="cms/db.js"></script>
+<script src="cms/pb.js"></script>
 
 <script>
 'use strict';
@@ -1092,7 +1092,7 @@ function removeAdjunto(idx) {
 
 /* ─── ENVIAR DENUNCIA ─── */
 let _enviandoDenuncia = false;
-function enviarDenuncia() {
+async function enviarDenuncia() {
   if (_enviandoDenuncia) return;
   const tipo   = document.getElementById('den-tipo').value;
   const desc   = document.getElementById('den-desc').value.trim();
@@ -1107,7 +1107,7 @@ function enviarDenuncia() {
   const originalText = submitBtn ? submitBtn.textContent : '';
   if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = '⏳ Enviando...'; }
 
-  setTimeout(() => {
+  setTimeout(async () => {
     try {
       const num = 'DEN-' + Date.now().toString().slice(-6);
       const item = {
@@ -1125,7 +1125,7 @@ function enviarDenuncia() {
         historial: [{ estado:'recibida', fecha: new Date().toISOString().slice(0,10), comentario:'Denuncia registrada en el sistema SIGAP.' }],
         adjuntos:  adjuntosData.map(f => ({ name: f.name, type: f.type, size: f.size, dataUrl: f.dataUrl }))
       };
-      CMSDB.save('denuncias', item);
+      await CMSDB.save('denuncias', item);
 
       const el = document.getElementById('modal-caso-num');
       if (el) el.textContent = 'Número de caso: ' + num;
@@ -1155,11 +1155,11 @@ function enviarDenuncia() {
    PORTAL DINÁMICO — SECCIONES CMS
 ═══════════════════════════════════════ */
 
-function renderAlertBar() {
+async function renderAlertBar() {
   const bar = document.getElementById('alert-bar');
   if (!bar) return;
   const today = new Date().toISOString().slice(0, 10);
-  const alertas = CMSDB.getAll('alertas').filter(a => {
+  const alertas = (await CMSDB.getAll('alertas')).filter(a => {
     if (!a.activa) return false;
     if (a.fecha_fin && a.fecha_fin < today) return false;
     if (a.fecha_inicio && a.fecha_inicio > today) return false;
@@ -1174,16 +1174,16 @@ function renderAlertBar() {
   }
 }
 
-function renderHeroPanel() {
+async function renderHeroPanel() {
   const body = document.getElementById('hero-panel-body');
   if (!body) return;
-  const inds = CMSDB.getAll('indicadores');
+  const inds = await CMSDB.getAll('indicadores');
   const aire  = inds.find(i => i.nombre && i.nombre.toLowerCase().includes('aire'));
   const agua  = inds.find(i => i.nombre && i.nombre.toLowerCase().includes('agua'));
-  const dens  = CMSDB.getAll('denuncias').filter(d => d.estado === 'pendiente' || !d.estado).length;
-  const trams = CMSDB.getAll('tramites').length;
+  const dens  = (await CMSDB.getAll('denuncias')).filter(d => d.estado === 'pendiente' || !d.estado).length;
+  const trams = (await CMSDB.getAll('tramites')).length;
 
-  const proySeed = CMSDB.getAll('proyectos');
+  const proySeed = await CMSDB.getAll('proyectos');
   const execPct  = proySeed.length ? Math.round(proySeed.reduce((s,p) => s + (p.porcentaje_avance||0), 0) / proySeed.length) : 0;
 
   body.innerHTML = `
@@ -1232,23 +1232,23 @@ function renderHeroPanel() {
         <span style="width:5px;height:5px;background:#4ade80;border-radius:50%;margin-left:auto;animation:pulse 2s infinite;display:inline-block"></span>
       </div>
       <div class="sys-line">SYS.ENV › status: ONLINE · uptime: 99.97% · CPU: 23%</div>
-      <div class="sys-line2">ENV_INDEX: 0.87 · SIGAP: running · ALERTS: ${CMSDB.getAll('alertas').filter(a=>a.activa).length} activas</div>
+      <div class="sys-line2">ENV_INDEX: 0.87 · SIGAP: running · ALERTS: ${(await CMSDB.getAll('alertas')).filter(a=>a.activa).length} activas</div>
     </div>`;
 }
 
-function renderHeroStats() {
-  const consejos = CMSDB.getAll('consejos').filter(c => c.estatus === 'Activo').length;
-  const empresas = CMSDB.getAll('empresas').length;
+async function renderHeroStats() {
+  const consejos = (await CMSDB.getAll('consejos')).filter(c => c.estatus === 'Activo').length;
+  const empresas = (await CMSDB.getAll('empresas')).length;
   const sc = document.getElementById('stat-consejos');
   const se = document.getElementById('stat-empresas');
   if (sc) sc.textContent = consejos;
   if (se) se.textContent = empresas;
 }
 
-function renderHomeIndicadores() {
+async function renderHomeIndicadores() {
   const grid = document.getElementById('home-indicadores-grid');
   if (!grid) return;
-  const inds = CMSDB.getAll('indicadores');
+  const inds = await CMSDB.getAll('indicadores');
   if (!inds.length) {
     grid.innerHTML = '<div class="empty-state"><div class="ico">📊</div>No hay indicadores configurados.</div>';
     return;
@@ -1265,10 +1265,10 @@ function renderHomeIndicadores() {
   }).join('');
 }
 
-function renderHomeNoticias() {
+async function renderHomeNoticias() {
   const grid = document.getElementById('home-noticias-grid');
   if (!grid) return;
-  const noticias = CMSDB.getAll('noticias')
+  const noticias = (await CMSDB.getAll('noticias'))
     .filter(n => n.publicado !== false && n.estado !== 'borrador')
     .sort((a, b) => (b.fecha || '').localeCompare(a.fecha || ''))
     .slice(0, 40);
@@ -1301,10 +1301,10 @@ function renderHomeNoticias() {
   }).join('');
 }
 
-function renderHomeProyectos() {
+async function renderHomeProyectos() {
   const grid = document.getElementById('home-proyectos-grid');
   if (!grid) return;
-  const proyectos = CMSDB.getAll('proyectos')
+  const proyectos = (await CMSDB.getAll('proyectos'))
     .filter(p => p.publicado !== false)
     .slice(0, 15);
   if (!proyectos.length) {
@@ -1330,17 +1330,17 @@ function renderHomeProyectos() {
   }).join('');
 }
 
-function renderHomeAgenda() {
+async function renderHomeAgenda() {
   const container = document.getElementById('home-agenda-grid');
   if (!container) return;
   const today  = new Date().toISOString().slice(0, 10);
-  let eventos  = CMSDB.getAll('eventos')
+  let eventos  = (await CMSDB.getAll('eventos'))
     .filter(e => e.fecha >= today && e.estado !== 'cancelado')
     .sort((a, b) => a.fecha.localeCompare(b.fecha))
     .slice(0, 20);
 
   if (!eventos.length) {
-    eventos = CMSDB.getAll('eventos')
+    eventos = (await CMSDB.getAll('eventos'))
       .sort((a, b) => a.fecha.localeCompare(b.fecha))
       .slice(0, 20);
   }
@@ -1366,10 +1366,10 @@ function renderHomeAgenda() {
 }
 
 /* ─── REVISTA ─── */
-function renderHomeRevista() {
+async function renderHomeRevista() {
   const grid = document.getElementById('home-revista-grid');
   if (!grid) return;
-  const revistas = CMSDB.getAll('revistas')
+  const revistas = (await CMSDB.getAll('revistas'))
     .filter(r => r.estado === 'publicada')
     .sort((a, b) => (b.fecha || '').localeCompare(a.fecha || ''))
     .slice(0, 4);
@@ -1433,8 +1433,8 @@ function _bvMarkShown(activa) {
   }
 }
 
-function checkBienvenida() {
-  const items = CMSDB.getAll('bienvenida');
+async function checkBienvenida() {
+  const items = await CMSDB.getAll('bienvenida');
   const activa = items.find(b => b.activa);
   if (!activa) return;
   if (!_bvShouldShow(activa)) return;
@@ -1456,8 +1456,8 @@ function checkBienvenida() {
   if (modal) { modal.style.display = 'flex'; document.body.style.overflow = 'hidden'; }
 }
 
-function cerrarBienvenida() {
-  const items = CMSDB.getAll('bienvenida');
+async function cerrarBienvenida() {
+  const items = await CMSDB.getAll('bienvenida');
   const activa = items.find(b => b.activa);
   if (activa) _bvMarkShown(activa);
   const modal = document.getElementById('bienvenida-modal');
