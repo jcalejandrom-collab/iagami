@@ -928,9 +928,6 @@ input,select,textarea{font-family:inherit}
       </div>
     </div>
 
-  </div>
-</div>
-
     <!-- REVISTA SECTION -->
     <div class="section" id="sec-revista">
       <div class="page-header">
@@ -1024,6 +1021,9 @@ input,select,textarea{font-family:inherit}
         </div>
       </div>
     </div>
+
+  </div>
+</div>
 
 <!-- DELETE MODAL -->
 <div id="modal-overlay">
@@ -2135,7 +2135,7 @@ function renderBienvenida() {
   const el = document.getElementById('tbl-bienvenida');
   if (!el) return;
   if (!items.length) {
-    el.innerHTML = '<div style="text-align:center;padding:32px;color:var(--muted);font-size:13px">No hay configuraciones de bienvenida. Crea una nueva.</div>';
+    el.innerHTML = '<div style="text-align:center;padding:40px 32px;background:#f8fdfb;border:1px dashed var(--border);border-radius:12px;color:var(--muted);font-size:14px"><div style="font-size:32px;margin-bottom:10px">🌟</div><div style="font-weight:600;color:var(--text);margin-bottom:6px">Sin configuración de bienvenida</div><div>Haz clic en <strong>+ Nueva configuración</strong> para crear el modal de bienvenida del portal.</div></div>';
     return;
   }
   el.innerHTML = `<table class="table"><thead><tr><th>Título</th><th>Mensaje</th><th>Estado</th><th>Modo</th><th style="width:100px">Acciones</th></tr></thead><tbody>
