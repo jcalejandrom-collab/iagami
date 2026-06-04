@@ -37,8 +37,14 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 .navbtn-o:hover{background:#e8f5ee}
 
 /* ===== ALERT BAR ===== */
-.alert-bar{background:#fffbeb;border-bottom:1.5px solid #fcd34d;padding:7px 24px;display:flex;align-items:center;gap:8px;font-size:11px;color:#92400e;overflow:hidden;flex-wrap:wrap}
-.alert-pill{background:#fef3c7;border:1px solid #fcd34d;border-radius:20px;padding:3px 10px;white-space:nowrap;font-size:10px;font-weight:600;flex-shrink:0}
+.alert-bar{background:#1a3d2b;border-bottom:1px solid #2d6a45;height:32px;display:flex;align-items:center;gap:0;font-size:11px;color:#fff;overflow:hidden}
+.alert-bar-label{background:#d97706;color:#fff;padding:0 12px;height:100%;display:flex;align-items:center;gap:5px;font-size:10px;font-weight:700;letter-spacing:.05em;white-space:nowrap;flex-shrink:0}
+.alert-ticker{flex:1;overflow:hidden;position:relative;height:100%}
+.alert-ticker-inner{display:flex;align-items:center;height:100%;gap:32px;white-space:nowrap;animation:ticker 30s linear infinite}
+.alert-ticker-inner:hover{animation-play-state:paused}
+.alert-pill{color:#fde68a;font-size:11px;white-space:nowrap;padding:0 4px}
+.alert-pill::before{content:'⚠ ';font-size:10px;opacity:.8}
+@keyframes ticker{0%{transform:translateX(100%)}100%{transform:translateX(-100%)}}
 
 /* ===== HERO ===== */
 .hero-wrap{position:relative}
@@ -400,7 +406,10 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
   </nav>
 
   <!-- ALERTAS DINÁMICAS -->
-  <div id="alert-bar" class="alert-bar" style="display:none" role="alert" aria-live="polite"></div>
+  <div id="alert-bar" class="alert-bar" style="display:none" role="alert" aria-live="polite">
+    <div class="alert-bar-label">🔔 ALERTAS</div>
+    <div class="alert-ticker"><div class="alert-ticker-inner" id="alert-ticker-inner"></div></div>
+  </div>
 
   <div class="hero-wrap">
     <div class="hero">
@@ -1157,9 +1166,11 @@ function renderAlertBar() {
   });
   if (!alertas.length) { bar.style.display = 'none'; return; }
   bar.style.display = 'flex';
-  const svgBell = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>`;
-  bar.innerHTML = svgBell + '<strong style="margin-right:4px;flex-shrink:0">ALERTAS ACTIVAS:</strong>' +
-    alertas.map(a => `<span class="alert-pill">${a.mensaje}</span>`).join('');
+  const ticker = document.getElementById('alert-ticker-inner');
+  if (ticker) {
+    const items = alertas.map(a => `<span class="alert-pill">${a.mensaje}</span>`).join('<span style="color:#4a8a6a;padding:0 8px">·</span>');
+    ticker.innerHTML = items + '<span style="color:#4a8a6a;padding:0 24px">·</span>' + items;
+  }
 }
 
 function renderHeroPanel() {
