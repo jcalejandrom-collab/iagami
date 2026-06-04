@@ -2256,7 +2256,7 @@ function saveBienvenida() {
 }
 
 function deleteBienvenida(id) {
-  CMSDB.delete('bienvenida', id);
+  CMSDB.remove('bienvenida', id);
   renderBienvenida();
   showToast('Configuración eliminada', 'success');
 }
@@ -2337,15 +2337,15 @@ function savePlan() {
     estado: document.getElementById('fp-estado').value,
     avance: parseInt(document.getElementById('fp-avance').value)||0
   };
-  if (_editPlanId) { CMSDB.update('planificacion', _editPlanId, data); }
-  else { CMSDB.add('planificacion', data); }
+  if (_editPlanId) { CMSDB.save('planificacion', Object.assign({}, data, {id: _editPlanId})); }
+  else { CMSDB.save('planificacion', data); }
   closePlanForm();
   renderPlan();
   showToast('Actividad guardada correctamente', 'success');
 }
 
 function deletePlan(id) {
-  CMSDB.delete('planificacion', id);
+  CMSDB.remove('planificacion', id);
   renderPlan();
   showToast('Actividad eliminada', 'success');
 }
