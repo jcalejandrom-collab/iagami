@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Reporte de Pago de Multa — IAGAMI · Municipio Iribarren</title>
+<meta name="description" content="Registra el comprobante de pago de tu multa ambiental. Ingresa los datos de tu transferencia o depósito bancario."/>
+<meta name="theme-color" content="#1d6b3e"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height:1.6;min-height:100vh;display:flex;flex-direction:column}
+
+.topbar{background:#1d6b3e;color:rgba(255,255,255,.85);text-align:center;font-size:11px;padding:6px 16px;letter-spacing:.06em;font-weight:500}
+.nav{background:#fff;border-bottom:1px solid #c8ead8;position:sticky;top:0;z-index:100;box-shadow:0 1px 12px rgba(29,107,62,.06)}
+.navinner{max-width:1100px;margin:0 auto;padding:0 20px;height:58px;display:flex;align-items:center;justify-content:space-between;gap:14px}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0}
+.logo-box{width:40px;height:40px;background:#1d6b3e;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo-box svg{width:22px;height:22px}
+.logo-text{font-family:'Poppins',sans-serif;font-size:14px;font-weight:700;color:#1a3d2b;line-height:1.1}
+.logo-sub{font-size:10px;color:#4a8a6a;font-weight:400}
+.nav-back{font-size:12px;padding:7px 14px;border-radius:8px;background:#e8f5ee;color:#1d6b3e;border:none;cursor:pointer;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:.15s}
+.nav-back:hover{background:#d0ebdb}
+
+.hero{background:linear-gradient(135deg,#0d2d1a 0%,#1d6b3e 60%,#2d7a4f 100%);padding:44px 20px 36px;text-align:center;color:#fff;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")}
+.hero-tag{display:inline-block;font-size:10px;font-weight:700;background:rgba(74,222,128,.18);color:#a8f0c8;border:1px solid rgba(74,222,128,.3);border-radius:20px;padding:3px 13px;letter-spacing:.06em;margin-bottom:12px}
+.hero h1{font-family:'Poppins',sans-serif;font-size:28px;font-weight:800;line-height:1.2;margin-bottom:10px}
+.hero h1 span{color:#4ade80}
+.hero p{font-size:13.5px;opacity:.82;max-width:520px;margin:0 auto;line-height:1.7}
+
+.main-wrap{max-width:1100px;margin:0 auto;padding:32px 20px 60px;display:grid;grid-template-columns:1fr 320px;gap:28px;align-items:start}
+
+/* FORM CARD */
+.form-card{background:#fff;border:1px solid #d4edd8;border-radius:16px;overflow:hidden}
+.form-card-header{background:linear-gradient(135deg,#e8f5ee,#d4edd8);padding:20px 24px;border-bottom:1px solid #d4edd8}
+.form-card-header h2{font-family:'Poppins',sans-serif;font-size:16px;font-weight:700;color:#1a3d2b;display:flex;align-items:center;gap:8px}
+.form-card-header p{font-size:12.5px;color:#4a8a6a;margin-top:4px}
+.form-body{padding:24px}
+
+.form-section{margin-bottom:24px}
+.form-section-title{font-size:12px;font-weight:700;color:#1d6b3e;text-transform:uppercase;letter-spacing:.07em;margin-bottom:14px;padding-bottom:7px;border-bottom:1px solid #e8f5ee;display:flex;align-items:center;gap:6px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.form-row.single{grid-template-columns:1fr}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-group label{font-size:12px;font-weight:600;color:#4a8a6a}
+.form-group label span.req{color:#dc2626;margin-left:2px}
+.form-group input,
+.form-group select,
+.form-group textarea{padding:10px 13px;border:1px solid #d4edd8;border-radius:9px;font-size:13px;color:#1a3d2b;outline:none;font-family:'Inter',sans-serif;transition:.15s;background:#fff;width:100%}
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus{border-color:#1d6b3e;box-shadow:0 0 0 3px rgba(29,107,62,.09)}
+.form-group input[readonly]{background:#f8fcfa;color:#4a8a6a;cursor:default}
+.form-group .hint{font-size:11px;color:#4a8a6a;margin-top:3px}
+
+.ref-input-wrap{position:relative}
+.ref-input-wrap input{padding-right:80px}
+.ref-suffix{position:absolute;right:13px;top:50%;transform:translateY(-50%);font-size:11px;color:#4a8a6a;font-weight:600;pointer-events:none}
+
+.monto-prefix{position:relative}
+.monto-prefix input{padding-left:42px}
+.monto-prefix::before{content:'Bs.';position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:13px;font-weight:600;color:#4a8a6a;pointer-events:none}
+
+.info-banner{background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:12px 16px;font-size:12.5px;color:#1e40af;display:flex;gap:9px;align-items:flex-start;margin-bottom:20px}
+.info-banner svg{flex-shrink:0;margin-top:1px}
+.warn-banner{background:#fef3c7;border:1px solid #fcd34d;border-radius:10px;padding:12px 16px;font-size:12.5px;color:#92400e;display:flex;gap:9px;align-items:flex-start;margin-bottom:20px}
+
+.submit-btn{width:100%;background:#1d6b3e;color:#fff;border:none;border-radius:11px;padding:14px 24px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;transition:.15s;display:flex;align-items:center;justify-content:center;gap:9px}
+.submit-btn:hover{background:#155c32}
+.submit-btn:disabled{opacity:.6;cursor:not-allowed}
+.submit-note{text-align:center;font-size:11.5px;color:#4a8a6a;margin-top:10px}
+
+/* SUCCESS */
+.success-panel{display:none;text-align:center;padding:40px 24px}
+.success-icon{width:72px;height:72px;background:#dcfce7;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:36px}
+.success-panel h3{font-family:'Poppins',sans-serif;font-size:20px;font-weight:700;color:#166534;margin-bottom:8px}
+.success-panel p{font-size:13px;color:#4a8a6a;line-height:1.7;max-width:380px;margin:0 auto 20px}
+.success-code{display:inline-block;font-family:monospace;font-size:18px;font-weight:700;background:#e8f5ee;border:1px dashed #a8dfc0;color:#1d6b3e;padding:8px 22px;border-radius:8px;letter-spacing:.08em;margin-bottom:24px}
+.back-btn{display:inline-flex;align-items:center;gap:7px;background:#e8f5ee;color:#1d6b3e;border:none;border-radius:9px;padding:10px 20px;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;font-family:'Inter',sans-serif}
+.back-btn:hover{background:#d0ebdb}
+
+/* SIDEBAR */
+.sidebar-card{background:#fff;border:1px solid #d4edd8;border-radius:13px;padding:20px;margin-bottom:16px}
+.sidebar-card h4{font-size:13px;font-weight:700;color:#1a3d2b;margin-bottom:14px;display:flex;align-items:center;gap:7px;padding-bottom:8px;border-bottom:1px solid #e8f5ee}
+.cuenta-item{background:#f0faf5;border:1px solid #d4edd8;border-radius:9px;padding:12px 14px;margin-bottom:10px}
+.cuenta-banco{font-size:12px;font-weight:700;color:#1d6b3e;margin-bottom:4px}
+.cuenta-datos{font-size:12px;color:#4a6a5a;line-height:1.8}
+.cuenta-datos strong{color:#1a3d2b}
+.copy-btn{font-size:11px;color:#1d6b3e;background:none;border:none;cursor:pointer;font-weight:600;padding:0;text-decoration:underline;margin-left:4px}
+
+.steps-list{list-style:none}
+.steps-list li{display:flex;gap:10px;margin-bottom:10px;align-items:flex-start;font-size:12px;color:#4a6a5a;line-height:1.5}
+.step-n{width:22px;height:22px;background:#1d6b3e;color:#fff;border-radius:50%;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+
+.contact-row{display:flex;gap:8px;align-items:flex-start;margin-bottom:9px;font-size:12px;color:#4a8a6a}
+.contact-ico{font-size:15px;flex-shrink:0}
+
+.footer{background:#0a1f0e;color:rgba(255,255,255,.65);text-align:center;padding:24px 20px;font-size:11.5px;margin-top:auto}
+.footer a{color:#a8dfc0;text-decoration:none}
+.footer a:hover{color:#fff}
+
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#1a3d2b;color:#fff;padding:10px 22px;border-radius:10px;font-size:13px;font-weight:500;z-index:9999;opacity:0;transition:.3s;pointer-events:none;white-space:nowrap;box-shadow:0 4px 24px rgba(0,0,0,.25)}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media(max-width:860px){
+  .main-wrap{grid-template-columns:1fr}
+  .sidebar-col{order:-1}
+}
+@media(max-width:520px){
+  .form-row{grid-template-columns:1fr}
+  .hero h1{font-size:22px}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">Instituto Autónomo de Gestión Ambiental — Municipio Iribarren · Estado Lara · Venezuela</div>
+
+<nav class="nav">
+  <div class="navinner">
+    <a class="logo" href="../index.html">
+      <div class="logo-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <div>
+        <div class="logo-text">IAGAMI</div>
+        <div class="logo-sub">Gestión Ambiental · Iribarren</div>
+      </div>
+    </a>
+    <a class="nav-back" href="index.html">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+      Consultar multas
+    </a>
+  </div>
+</nav>
+
+<div class="hero">
+  <div style="position:relative;z-index:1">
+    <div class="hero-tag">💳 REPORTE DE PAGO</div>
+    <h1>Registra el pago de tu<br><span>multa ambiental</span></h1>
+    <p>Completa el formulario con los datos de tu transferencia o depósito bancario. IAGAMI verificará y actualizará el estado de tu expediente.</p>
+  </div>
+</div>
+
+<div class="main-wrap">
+
+  <!-- FORMULARIO -->
+  <div>
+    <div class="form-card">
+      <div class="form-card-header">
+        <h2>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+          Formulario de reporte de pago
+        </h2>
+        <p>Todos los campos marcados con <span style="color:#dc2626">*</span> son obligatorios</p>
+      </div>
+
+      <!-- FORM PANEL -->
+      <div class="form-body" id="form-panel">
+        <div class="info-banner">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <span>Este formulario <strong>no reemplaza</strong> la consignación del comprobante físico. Debes presentarte en la sede de IAGAMI con el original para el cierre del expediente.</span>
+        </div>
+
+        <!-- DATOS DEL EXPEDIENTE -->
+        <div class="form-section">
+          <div class="form-section-title">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Datos del expediente
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Número de expediente<span class="req">*</span></label>
+              <input type="text" id="f-expediente" placeholder="Ej: EXP-2026-00123" maxlength="30"
+                oninput="autoFillExpediente(this.value)"/>
+              <span class="hint">Encuéntralo en la notificación oficial de IAGAMI</span>
+            </div>
+            <div class="form-group">
+              <label>Estado del expediente</label>
+              <input type="text" id="f-estado-exp" readonly placeholder="Se carga automáticamente"/>
+            </div>
+          </div>
+        </div>
+
+        <!-- DATOS DEL INFRACTOR -->
+        <div class="form-section">
+          <div class="form-section-title">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            Datos del infractor / responsable
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Nombre completo o razón social<span class="req">*</span></label>
+              <input type="text" id="f-nombre" placeholder="Ej: Juan Pérez González" maxlength="100"/>
+            </div>
+            <div class="form-group">
+              <label>Cédula o RIF<span class="req">*</span></label>
+              <input type="text" id="f-cedula" placeholder="Ej: V-12345678 o J-123456789" maxlength="20"/>
+            </div>
+          </div>
+          <div class="form-row single">
+            <div class="form-group">
+              <label>Teléfono de contacto</label>
+              <input type="tel" id="f-telefono" placeholder="Ej: 0414-1234567" maxlength="20"/>
+            </div>
+          </div>
+        </div>
+
+        <!-- DATOS DEL PAGO -->
+        <div class="form-section">
+          <div class="form-section-title">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+            Datos del pago bancario
+          </div>
+
+          <div class="warn-banner">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <span>Solo se aceptan pagos realizados a las cuentas oficiales de IAGAMI indicadas en esta página. Verifica los datos antes de reportar.</span>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Banco emisor (banco desde donde pagaste)<span class="req">*</span></label>
+              <select id="f-banco">
+                <option value="">— Selecciona tu banco —</option>
+                <optgroup label="Banca Pública">
+                  <option value="0102">Banco de Venezuela (0102)</option>
+                  <option value="0163">Banco del Tesoro (0163)</option>
+                  <option value="0166">Banco Agrícola de Venezuela (0166)</option>
+                  <option value="0175">Bicentenario Banco Universal (0175)</option>
+                  <option value="0151">Banco Fondo Común (0151)</option>
+                </optgroup>
+                <optgroup label="Banca Privada">
+                  <option value="0104">Venezolano de Crédito (0104)</option>
+                  <option value="0105">Mercantil (0105)</option>
+                  <option value="0108">BBVA Provincial (0108)</option>
+                  <option value="0114">Bancaribe (0114)</option>
+                  <option value="0115">Exterior (0115)</option>
+                  <option value="0116">Occidental de Descuento (0116)</option>
+                  <option value="0128">Banco Caroní (0128)</option>
+                  <option value="0134">Banesco (0134)</option>
+                  <option value="0137">Sofitasa (0137)</option>
+                  <option value="0138">Banco Plaza (0138)</option>
+                  <option value="0146">Bangente (0146)</option>
+                  <option value="0156">100% Banco (0156)</option>
+                  <option value="0157">DelSur (0157)</option>
+                  <option value="0169">Mi Banco (0169)</option>
+                  <option value="0171">Activo (0171)</option>
+                  <option value="0172">Bancamiga (0172)</option>
+                  <option value="0173">Banco Internacional de Desarrollo (0173)</option>
+                  <option value="0174">Banplus (0174)</option>
+                  <option value="0176">Banco Espirito Santo (0176)</option>
+                  <option value="0177">Banfanb (0177)</option>
+                  <option value="0178">N58 Banco Digital (0178)</option>
+                  <option value="0191">BFC Banco Fondo Común (0191)</option>
+                </optgroup>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Tipo de operación<span class="req">*</span></label>
+              <select id="f-tipo-op">
+                <option value="">— Selecciona —</option>
+                <option value="transferencia">Transferencia bancaria</option>
+                <option value="deposito">Depósito en efectivo</option>
+                <option value="pago-movil">Pago Móvil</option>
+                <option value="punto-venta">Punto de venta presencial</option>
+                <option value="zelle">Zelle</option>
+                <option value="otros">Otros</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Número de referencia (últimos 6 dígitos)<span class="req">*</span></label>
+              <div class="ref-input-wrap">
+                <input type="text" id="f-referencia" placeholder="Ej: 847291" maxlength="6"
+                  inputmode="numeric" pattern="[0-9]{6}"
+                  oninput="this.value=this.value.replace(/[^0-9]/g,'').substring(0,6)"/>
+                <span class="ref-suffix">últimos 6</span>
+              </div>
+              <span class="hint">Solo ingresa los últimos 6 dígitos del número de comprobante</span>
+            </div>
+            <div class="form-group">
+              <label>Fecha del pago<span class="req">*</span></label>
+              <input type="date" id="f-fecha-pago" max=""/>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Monto pagado (Bs.)<span class="req">*</span></label>
+              <div class="monto-prefix">
+                <input type="number" id="f-monto" placeholder="0.00" min="0" step="0.01"
+                  style="appearance:textfield"/>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Cuenta destino (IAGAMI)</label>
+              <select id="f-cuenta-destino">
+                <option value="">— Selecciona la cuenta a la que pagaste —</option>
+                <option value="bdv-0102">Banco de Venezuela · 0102-0000-00-0000000000</option>
+                <option value="mercantil-0105">Mercantil · 0105-0000-00-0000000000</option>
+                <option value="banesco-0134">Banesco · 0134-0000-00-0000000000</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row single">
+            <div class="form-group">
+              <label>Observaciones adicionales</label>
+              <textarea id="f-obs" rows="3" placeholder="Cualquier información relevante sobre el pago..." maxlength="400" style="resize:vertical"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <button class="submit-btn" id="btn-enviar" onclick="enviarReporte()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="20 6 9 17 4 12"/></svg>
+          Enviar reporte de pago
+        </button>
+        <p class="submit-note">Al enviar, IAGAMI recibirá tu reporte y verificará los datos en un plazo de 2 a 5 días hábiles.</p>
+      </div>
+
+      <!-- SUCCESS PANEL -->
+      <div class="success-panel" id="success-panel">
+        <div class="success-icon">✅</div>
+        <h3>¡Reporte enviado con éxito!</h3>
+        <p>Tu reporte de pago fue registrado. Guarda este código de seguimiento. IAGAMI verificará tu transferencia y actualizará el estado de tu expediente en 2 a 5 días hábiles.</p>
+        <div class="success-code" id="success-code">—</div>
+        <p style="font-size:12px;color:#4a8a6a;margin-bottom:20px">
+          Recuerda presentar el <strong>comprobante físico original</strong> en la sede de IAGAMI para el cierre definitivo del expediente.
+        </p>
+        <a href="index.html" class="back-btn">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+          Consultar otro expediente
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar-col">
+
+    <!-- CUENTAS OFICIALES -->
+    <div class="sidebar-card">
+      <h4>🏦 Cuentas oficiales IAGAMI</h4>
+      <div class="cuenta-item">
+        <div class="cuenta-banco">Banco de Venezuela (BDV) · 0102</div>
+        <div class="cuenta-datos">
+          <strong>Cuenta corriente:</strong> 0102-0000-00-0000000000<br>
+          <strong>RIF:</strong> G-200000000-0<br>
+          <strong>Titular:</strong> IAGAMI
+          <button class="copy-btn" onclick="copiar('0102-0000-00-0000000000')">copiar</button>
+        </div>
+      </div>
+      <div class="cuenta-item">
+        <div class="cuenta-banco">Mercantil · 0105</div>
+        <div class="cuenta-datos">
+          <strong>Cuenta corriente:</strong> 0105-0000-00-0000000000<br>
+          <strong>RIF:</strong> G-200000000-0<br>
+          <strong>Titular:</strong> IAGAMI
+          <button class="copy-btn" onclick="copiar('0105-0000-00-0000000000')">copiar</button>
+        </div>
+      </div>
+      <div class="cuenta-item">
+        <div class="cuenta-banco">Banesco · 0134</div>
+        <div class="cuenta-datos">
+          <strong>Cuenta corriente:</strong> 0134-0000-00-0000000000<br>
+          <strong>RIF:</strong> G-200000000-0<br>
+          <strong>Titular:</strong> IAGAMI
+          <button class="copy-btn" onclick="copiar('0134-0000-00-0000000000')">copiar</button>
+        </div>
+      </div>
+      <div style="font-size:11px;color:#4a8a6a;margin-top:8px">
+        ⚠️ Actualiza los números de cuenta con los datos reales de IAGAMI antes de publicar.
+      </div>
+    </div>
+
+    <!-- PASOS -->
+    <div class="sidebar-card">
+      <h4>📋 ¿Cómo funciona?</h4>
+      <ul class="steps-list">
+        <li><div class="step-n">1</div><span>Realiza la transferencia o depósito a una de las cuentas oficiales de IAGAMI.</span></li>
+        <li><div class="step-n">2</div><span>Completa este formulario con los datos del pago y tu número de expediente.</span></li>
+        <li><div class="step-n">3</div><span>IAGAMI verificará la operación en 2 a 5 días hábiles.</span></li>
+        <li><div class="step-n">4</div><span>Presenta el comprobante físico original en la sede para el cierre definitivo.</span></li>
+      </ul>
+    </div>
+
+    <!-- CONTACTO -->
+    <div class="sidebar-card">
+      <h4>📞 ¿Necesitas ayuda?</h4>
+      <div class="contact-row"><span class="contact-ico">📍</span><span>Av. Principal, sede IAGAMI<br><strong>Barquisimeto, Estado Lara</strong></span></div>
+      <div class="contact-row"><span class="contact-ico">📞</span><span>+58 (251) 000-0000<br>Taquilla de Multas Ambientales</span></div>
+      <div class="contact-row"><span class="contact-ico">✉️</span><span>multas@iagami.gob.ve</span></div>
+      <div class="contact-row"><span class="contact-ico">🕐</span><span>Lun–Vie · <strong>8:00 AM – 4:00 PM</strong></span></div>
+    </div>
+  </div>
+</div>
+
+<footer class="footer">
+  © 2026 <strong style="color:#a8dfc0">IAGAMI</strong> — Instituto Autónomo de Gestión Ambiental del Municipio Iribarren ·
+  <a href="../index.html">Portal Principal</a> ·
+  <a href="index.html">Consultar multas</a> ·
+  <a href="../admin/index.html">Administración</a>
+</footer>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script src="../cms/db.js"></script>
+<script>
+'use strict';
+
+let _enviandoReporte = false;
+
+/* ── TOAST ── */
+let toastT;
+function toast(msg, dur) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastT);
+  toastT = setTimeout(() => t.classList.remove('show'), dur || 3200);
+}
+
+/* ── HELPERS ── */
+function escHtml(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function genCodigo() {
+  const d = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  return `RPG-${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}-${Math.random().toString(36).slice(2,7).toUpperCase()}`;
+}
+
+/* ── AUTO-FILL desde expediente ── */
+function autoFillExpediente(val) {
+  const input = document.getElementById('f-estado-exp');
+  if (!val || val.length < 5) { input.value = ''; return; }
+  try {
+    const multas = CMSDB.getAll('multas');
+    const found = multas.find(m => (m.expediente || '').toUpperCase() === val.toUpperCase().trim());
+    if (found) {
+      input.value = found.estado || 'Pendiente';
+      if (found.nombre && !document.getElementById('f-nombre').value)
+        document.getElementById('f-nombre').value = found.nombre;
+      if (found.documento && !document.getElementById('f-cedula').value)
+        document.getElementById('f-cedula').value = found.documento;
+    } else {
+      input.value = '';
+    }
+  } catch(e) { /* silencio */ }
+}
+
+/* ── COPIAR AL PORTAPAPELES ── */
+function copiar(txt) {
+  navigator.clipboard.writeText(txt).then(() => toast('Número copiado al portapapeles ✓')).catch(() => {
+    toast('No se pudo copiar automáticamente');
+  });
+}
+
+/* ── VALIDAR ── */
+function validar() {
+  const campos = [
+    { id: 'f-expediente', label: 'número de expediente' },
+    { id: 'f-nombre',     label: 'nombre completo' },
+    { id: 'f-cedula',     label: 'cédula o RIF' },
+    { id: 'f-banco',      label: 'banco emisor' },
+    { id: 'f-tipo-op',    label: 'tipo de operación' },
+    { id: 'f-referencia', label: 'número de referencia' },
+    { id: 'f-fecha-pago', label: 'fecha del pago' },
+    { id: 'f-monto',      label: 'monto pagado' },
+  ];
+  for (const c of campos) {
+    const el = document.getElementById(c.id);
+    if (!el || !el.value.trim()) {
+      toast(`Por favor completa: ${c.label}`);
+      el && el.focus();
+      return false;
+    }
+  }
+  const ref = document.getElementById('f-referencia').value.trim();
+  if (!/^\d{6}$/.test(ref)) {
+    toast('La referencia debe tener exactamente 6 dígitos');
+    document.getElementById('f-referencia').focus();
+    return false;
+  }
+  const monto = parseFloat(document.getElementById('f-monto').value);
+  if (!monto || monto <= 0) {
+    toast('Ingresa un monto válido mayor a cero');
+    document.getElementById('f-monto').focus();
+    return false;
+  }
+  return true;
+}
+
+/* ── ENVIAR REPORTE ── */
+function enviarReporte() {
+  if (_enviandoReporte) return;
+  if (!validar()) return;
+
+  _enviandoReporte = true;
+  const btn = document.getElementById('btn-enviar');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Enviando...';
+
+  setTimeout(() => {
+    try {
+      const codigo = genCodigo();
+      const reporte = {
+        codigo,
+        expediente:    document.getElementById('f-expediente').value.trim().toUpperCase(),
+        nombre:        document.getElementById('f-nombre').value.trim(),
+        cedula:        document.getElementById('f-cedula').value.trim().toUpperCase(),
+        telefono:      document.getElementById('f-telefono').value.trim(),
+        banco:         document.getElementById('f-banco').value,
+        tipo_operacion:document.getElementById('f-tipo-op').value,
+        referencia:    document.getElementById('f-referencia').value.trim(),
+        fecha_pago:    document.getElementById('f-fecha-pago').value,
+        monto:         parseFloat(document.getElementById('f-monto').value),
+        cuenta_destino:document.getElementById('f-cuenta-destino').value,
+        observaciones: document.getElementById('f-obs').value.trim(),
+        estado:        'pendiente_verificacion',
+        created_at:    new Date().toISOString(),
+      };
+
+      CMSDB.save('reportes_pago', reporte);
+
+      /* Mostrar panel de éxito */
+      document.getElementById('form-panel').style.display = 'none';
+      const sp = document.getElementById('success-panel');
+      sp.style.display = 'block';
+      document.getElementById('success-code').textContent = codigo;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    } catch(e) {
+      toast('Error al guardar el reporte. Intenta nuevamente.');
+      btn.disabled = false;
+      btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="20 6 9 17 4 12"/></svg> Enviar reporte de pago`;
+    } finally {
+      _enviandoReporte = false;
+    }
+  }, 1000);
+}
+
+/* ── INIT ── */
+document.addEventListener('DOMContentLoaded', () => {
+  /* Limitar fecha máxima a hoy */
+  const hoy = new Date().toISOString().split('T')[0];
+  document.getElementById('f-fecha-pago').max = hoy;
+
+  /* Prellenar expediente desde URL param */
+  const params = new URLSearchParams(location.search);
+  const expParam = params.get('exp') || params.get('expediente');
+  if (expParam) {
+    const el = document.getElementById('f-expediente');
+    el.value = expParam.toUpperCase();
+    autoFillExpediente(expParam);
+  }
+});
+</script>
+</body>
+</html>

@@ -24,7 +24,8 @@ const CMSDB = (() => {
     consejos:    'iagami_cms_consejos',
     bienvenida:   'iagami_cms_bienvenida',
     planificacion:'iagami_cms_planificacion',
-    revistas:     'iagami_cms_revistas'
+    revistas:       'iagami_cms_revistas',
+    reportes_pago:  'iagami_cms_reportes_pago'
   };
 
   /* ─────────────────────────────────────────
