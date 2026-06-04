@@ -822,21 +822,22 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 <div id="app-toast" class="toast" role="status" aria-live="polite"></div>
 
 <!-- BIENVENIDA MODAL -->
-<div id="bienvenida-modal" style="position:fixed;inset:0;z-index:2000;display:none;align-items:center;justify-content:center;animation:fadeIn .4s ease">
-  <div id="bienvenida-overlay" style="position:absolute;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px)"></div>
-  <div id="bienvenida-box" style="position:relative;z-index:1;max-width:680px;width:90%;border-radius:20px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.5);animation:slideUp .4s ease">
-    <div id="bienvenida-img-wrap" style="min-height:200px;display:flex;align-items:center;justify-content:center;background:#1d6b3e;padding:40px 32px;text-align:center">
-      <div>
-        <div id="bienvenida-logo" style="font-size:64px;margin-bottom:16px">🌿</div>
-        <div id="bienvenida-titulo" style="font-family:'Poppins',sans-serif;font-size:26px;font-weight:800;color:#fff;line-height:1.2;margin-bottom:12px"></div>
-        <div id="bienvenida-mensaje" style="font-size:14px;color:rgba(255,255,255,.82);line-height:1.7;max-width:420px;margin:0 auto"></div>
+<div id="bienvenida-modal" style="position:fixed;inset:0;z-index:2000;display:none;align-items:center;justify-content:center">
+  <div style="position:absolute;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(4px)" onclick="cerrarBienvenida()"></div>
+  <div id="bienvenida-box" style="position:relative;z-index:1;max-width:560px;width:92%;border-radius:18px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.55);animation:slideUp .35s ease;background:#fff">
+    <button onclick="cerrarBienvenida()" style="position:absolute;top:12px;right:14px;z-index:2;background:rgba(0,0,0,.35);color:#fff;border:none;border-radius:50%;width:30px;height:30px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1">✕</button>
+    <div id="bienvenida-img-wrap" style="min-height:220px;background:#1d6b3e;display:flex;align-items:center;justify-content:center;position:relative">
+      <img id="bienvenida-img" src="" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none"/>
+      <div id="bienvenida-img-inner" style="position:relative;z-index:1;padding:36px 32px;text-align:center">
+        <div id="bienvenida-titulo" style="font-family:'Poppins',sans-serif;font-size:24px;font-weight:800;color:#fff;line-height:1.2;margin-bottom:10px"></div>
+        <div id="bienvenida-mensaje" style="font-size:14px;color:rgba(255,255,255,.85);line-height:1.7;max-width:400px;margin:0 auto"></div>
       </div>
     </div>
-    <div style="background:#fff;padding:20px 32px;display:flex;align-items:center;justify-content:space-between;gap:12px">
-      <div style="font-size:12px;color:#4a8a6a">Portal Institucional IAGAMI · Municipio Iribarren</div>
-      <button id="bienvenida-btn" onclick="cerrarBienvenida()" style="background:#1d6b3e;color:#fff;border:none;border-radius:10px;padding:12px 28px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;display:inline-flex;align-items:center;gap:8px;transition:.2s;white-space:nowrap">
-        Entrar al Sistema
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+    <div style="background:#fff;padding:18px 28px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid #e8f5ee">
+      <div style="font-size:11px;color:#4a8a6a;font-weight:500">Portal Institucional IAGAMI · Municipio Iribarren</div>
+      <button onclick="cerrarBienvenida()" style="background:#1d6b3e;color:#fff;border:none;border-radius:10px;padding:10px 24px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;display:inline-flex;align-items:center;gap:8px;transition:.2s;white-space:nowrap">
+        Continuar
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
       </button>
     </div>
   </div>
@@ -1401,28 +1402,56 @@ function renderHomeRevista() {
 }
 
 /* ─── BIENVENIDA ─── */
+function _bvShouldShow(activa) {
+  const freq = activa.frecuencia || 'siempre';
+  const key = 'iagami_bv_shown';
+  if (freq === 'siempre') return true;
+  if (freq === 'una_vez') return !localStorage.getItem(key + '_' + activa.id);
+  if (freq === 'diaria') {
+    const stored = localStorage.getItem(key + '_d_' + activa.id);
+    const today = new Date().toISOString().slice(0,10);
+    return stored !== today;
+  }
+  if (freq === 'semanal') {
+    const stored = localStorage.getItem(key + '_w_' + activa.id);
+    const now = new Date();
+    const week = `${now.getFullYear()}-W${Math.ceil((now.getDate()-now.getDay()+6)/7)}`;
+    return stored !== week;
+  }
+  return true;
+}
+
+function _bvMarkShown(activa) {
+  const freq = activa.frecuencia || 'siempre';
+  const key = 'iagami_bv_shown';
+  if (freq === 'una_vez') localStorage.setItem(key + '_' + activa.id, '1');
+  if (freq === 'diaria') localStorage.setItem(key + '_d_' + activa.id, new Date().toISOString().slice(0,10));
+  if (freq === 'semanal') {
+    const now = new Date();
+    const week = `${now.getFullYear()}-W${Math.ceil((now.getDate()-now.getDay()+6)/7)}`;
+    localStorage.setItem(key + '_w_' + activa.id, week);
+  }
+}
+
 function checkBienvenida() {
   const items = CMSDB.getAll('bienvenida');
   const activa = items.find(b => b.activa);
   if (!activa) return;
-  // Check if should show (mostrarSiempre or not seen this session)
-  if (!activa.mostrarSiempre) {
-    const seen = sessionStorage.getItem('iagami_bienvenida_' + activa.id);
-    if (seen) return;
-  }
+  if (!_bvShouldShow(activa)) return;
   const modal = document.getElementById('bienvenida-modal');
   const titulo = document.getElementById('bienvenida-titulo');
   const mensaje = document.getElementById('bienvenida-mensaje');
   const wrap = document.getElementById('bienvenida-img-wrap');
+  const imgEl = document.getElementById('bienvenida-img');
   if (titulo) titulo.textContent = activa.titulo || '';
   if (mensaje) mensaje.textContent = activa.mensaje || '';
-  if (activa.imagen && wrap) {
-    wrap.style.backgroundImage = `url('${activa.imagen}')`;
-    wrap.style.backgroundSize = 'cover';
-    wrap.style.backgroundPosition = 'center';
-  }
-  if (activa.color_fondo && wrap && !activa.imagen) {
-    wrap.style.background = activa.color_fondo;
+  if (activa.imagen && imgEl) {
+    imgEl.src = activa.imagen;
+    imgEl.style.display = 'block';
+    if (wrap) { const inner = document.getElementById('bienvenida-img-inner'); if(inner) inner.style.background='rgba(0,0,0,0.45)'; inner && (inner.style.borderRadius='0'); }
+  } else {
+    if (imgEl) imgEl.style.display = 'none';
+    if (wrap) wrap.style.background = activa.color_fondo || '#1d6b3e';
   }
   if (modal) { modal.style.display = 'flex'; document.body.style.overflow = 'hidden'; }
 }
@@ -1430,9 +1459,7 @@ function checkBienvenida() {
 function cerrarBienvenida() {
   const items = CMSDB.getAll('bienvenida');
   const activa = items.find(b => b.activa);
-  if (activa && !activa.mostrarSiempre) {
-    sessionStorage.setItem('iagami_bienvenida_' + activa.id, '1');
-  }
+  if (activa) _bvMarkShown(activa);
   const modal = document.getElementById('bienvenida-modal');
   if (modal) { modal.style.display = 'none'; document.body.style.overflow = ''; }
 }

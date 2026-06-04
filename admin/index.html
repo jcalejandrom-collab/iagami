@@ -962,37 +962,134 @@ input,select,textarea{font-family:inherit}
         <div><div class="page-title">📆 Planificación</div><div class="page-subtitle">Gestión de actividades y proyectos de planificación institucional</div></div>
         <button class="btn btn-primary" onclick="openPlanForm()">+ Nueva actividad</button>
       </div>
-      <div class="toolbar">
-        <input type="text" class="search-input" id="q-plan" placeholder="Buscar por título, responsable..." oninput="renderPlan()" style="flex:1;min-width:200px"/>
-        <select id="f-plan-estado" onchange="renderPlan()" style="padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px">
-          <option value="">Todos los estados</option>
-          <option value="Pendiente">Pendiente</option>
-          <option value="En Progreso">En Progreso</option>
-          <option value="Completado">Completado</option>
-          <option value="Cancelado">Cancelado</option>
-        </select>
-        <select id="f-plan-prioridad" onchange="renderPlan()" style="padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px">
-          <option value="">Todas las prioridades</option>
-          <option value="Alta">Alta</option>
-          <option value="Media">Media</option>
-          <option value="Baja">Baja</option>
-        </select>
+
+      <!-- Dashboard strip -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px" id="plan-stats-strip">
+        <div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px 18px">
+          <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;margin-bottom:4px">Programadas</div>
+          <div id="ps-programadas" style="font-family:'Poppins',sans-serif;font-size:26px;font-weight:800;color:#1e40af">0</div>
+        </div>
+        <div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px 18px">
+          <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;margin-bottom:4px">En Ejecución</div>
+          <div id="ps-ejecucion" style="font-family:'Poppins',sans-serif;font-size:26px;font-weight:800;color:#6d28d9">0</div>
+        </div>
+        <div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px 18px">
+          <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;margin-bottom:4px">Finalizadas</div>
+          <div id="ps-finalizadas" style="font-family:'Poppins',sans-serif;font-size:26px;font-weight:800;color:#166534">0</div>
+        </div>
+        <div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px 18px">
+          <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;margin-bottom:4px">Suspendidas</div>
+          <div id="ps-suspendidas" style="font-family:'Poppins',sans-serif;font-size:26px;font-weight:800;color:#d97706">0</div>
+        </div>
       </div>
-      <div id="tbl-plan"></div>
+
+      <!-- Tab bar -->
+      <div style="display:flex;gap:4px;margin-bottom:16px;border-bottom:2px solid var(--border);padding-bottom:0">
+        <button id="plan-tab-lista" onclick="switchPlanTab('lista')" style="padding:8px 18px;border:none;background:none;font-size:13px;font-weight:600;color:#1d6b3e;border-bottom:2px solid #1d6b3e;margin-bottom:-2px;cursor:pointer;font-family:inherit">📋 Lista</button>
+        <button id="plan-tab-calendario" onclick="switchPlanTab('calendario')" style="padding:8px 18px;border:none;background:none;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;font-family:inherit">📅 Calendario</button>
+        <button id="plan-tab-tablero" onclick="switchPlanTab('tablero')" style="padding:8px 18px;border:none;background:none;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;font-family:inherit">📊 Tablero</button>
+      </div>
+
+      <!-- Lista view -->
+      <div id="plan-view-lista">
+        <div class="toolbar">
+          <input type="text" class="search-input" id="q-plan" placeholder="Buscar por título, responsable, lugar..." oninput="renderPlan()" style="flex:1;min-width:200px"/>
+          <select id="f-plan-estado" onchange="renderPlan()" style="padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px">
+            <option value="">Todos los estados</option>
+            <option>Borrador</option><option>Programada</option><option>Aprobada</option><option>Publicada</option>
+            <option>En Ejecución</option><option>Finalizada</option><option>Suspendida</option><option>Cancelada</option>
+          </select>
+          <select id="f-plan-prioridad" onchange="renderPlan()" style="padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px">
+            <option value="">Todas las prioridades</option>
+            <option>Baja</option><option>Media</option><option>Alta</option><option>Crítica</option>
+          </select>
+          <select id="f-plan-tipo" onchange="renderPlan()" style="padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px">
+            <option value="">Todos los tipos</option>
+            <option>Jornada Ambiental</option><option>Inspección</option><option>Reunión</option><option>Formación</option>
+            <option>Taller</option><option>Operativo Especial</option><option>Actividad Comunitaria</option>
+            <option>Actividad Institucional</option><option>Evento Especial</option><option>Otro</option>
+          </select>
+        </div>
+        <div id="tbl-plan"></div>
+      </div>
+
+      <!-- Calendario view -->
+      <div id="plan-view-calendario" style="display:none;background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+          <button onclick="planCalNav(-1)" style="padding:6px 14px;border:1px solid var(--border);border-radius:8px;background:#fff;cursor:pointer;font-size:13px">‹ Anterior</button>
+          <div id="plan-cal-title" style="font-family:'Poppins',sans-serif;font-size:15px;font-weight:700;color:var(--text)"></div>
+          <button onclick="planCalNav(1)" style="padding:6px 14px;border:1px solid var(--border);border-radius:8px;background:#fff;cursor:pointer;font-size:13px">Siguiente ›</button>
+        </div>
+        <div id="plan-cal-grid"></div>
+      </div>
+
+      <!-- Tablero view -->
+      <div id="plan-view-tablero" style="display:none">
+        <div id="plan-tablero-content"></div>
+      </div>
+
+      <!-- Form -->
       <div id="form-plan" style="display:none;background:#fff;border:1px solid var(--border);border-radius:12px;padding:24px;margin-top:16px">
         <div style="font-family:'Poppins',sans-serif;font-size:16px;font-weight:700;color:var(--text);margin-bottom:20px" id="ftitle-plan">📆 Nueva Actividad</div>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">
-          <div style="display:flex;flex-direction:column;gap:5px;grid-column:1/-1"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Título *</label><input type="text" id="fp-titulo" placeholder="Título de la actividad o proyecto" style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none"/></div>
-          <div style="display:flex;flex-direction:column;gap:5px"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Responsable *</label><input type="text" id="fp-responsable" placeholder="Nombre del responsable" style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none"/></div>
-          <div style="display:flex;flex-direction:column;gap:5px"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Fecha límite</label><input type="date" id="fp-fecha" style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none"/></div>
-          <div style="display:flex;flex-direction:column;gap:5px"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Prioridad</label><select id="fp-prioridad" style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none"><option>Alta</option><option selected>Media</option><option>Baja</option></select></div>
-          <div style="display:flex;flex-direction:column;gap:5px"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Estado</label><select id="fp-estado" style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none"><option selected>Pendiente</option><option>En Progreso</option><option>Completado</option><option>Cancelado</option></select></div>
-          <div style="display:flex;flex-direction:column;gap:5px"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Avance (%)</label><input type="number" id="fp-avance" placeholder="0" min="0" max="100" style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none"/></div>
+          <div style="display:flex;flex-direction:column;gap:5px;grid-column:1/-1"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Título *</label><input type="text" id="fp-titulo" placeholder="Título de la actividad" style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none"/></div>
+          <div style="display:flex;flex-direction:column;gap:5px"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Tipo de actividad</label><select id="fp-tipo" style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none"><option value="">Seleccionar...</option><option>Jornada Ambiental</option><option>Inspección</option><option>Reunión</option><option>Formación</option><option>Taller</option><option>Operativo Especial</option><option>Actividad Comunitaria</option><option>Actividad Institucional</option><option>Evento Especial</option><option>Otro</option></select></div>
+          <div style="display:flex;flex-direction:column;gap:5px"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Código interno</label><input type="text" id="fp-codigo" placeholder="Ej: IAG-2026-001" style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none"/></div>
+          <div style="display:flex;flex-direction:column;gap:5px"></div>
+          <div style="display:flex;flex-direction:column;gap:5px"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Fecha</label><input type="date" id="fp-fecha" style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none"/></div>
+          <div style="display:flex;flex-direction:column;gap:5px"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Hora inicio</label><input type="time" id="fp-hora_inicio" style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none"/></div>
+          <div style="display:flex;flex-direction:column;gap:5px"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Hora fin</label><input type="time" id="fp-hora_fin" style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none"/></div>
+          <div style="display:flex;flex-direction:column;gap:5px"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Lugar</label><input type="text" id="fp-lugar" placeholder="Lugar o dirección" style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none"/></div>
+          <div style="display:flex;flex-direction:column;gap:5px"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Departamento</label><input type="text" id="fp-departamento" placeholder="Departamento responsable" style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none"/></div>
+          <div style="display:flex;flex-direction:column;gap:5px"></div>
+          <div style="display:flex;flex-direction:column;gap:5px"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Responsable</label><input type="text" id="fp-responsable" placeholder="Nombre del responsable" style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none"/></div>
+          <div style="display:flex;flex-direction:column;gap:5px"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Prioridad</label><select id="fp-prioridad" style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none"><option>Baja</option><option selected>Media</option><option>Alta</option><option>Crítica</option></select></div>
+          <div style="display:flex;flex-direction:column;gap:5px"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Estado</label><select id="fp-estado" style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none"><option>Borrador</option><option>Programada</option><option>Aprobada</option><option>Publicada</option><option>En Ejecución</option><option>Finalizada</option><option>Suspendida</option><option>Cancelada</option></select></div>
           <div style="display:flex;flex-direction:column;gap:5px;grid-column:1/-1"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Descripción</label><textarea id="fp-descripcion" rows="3" placeholder="Descripción detallada..." style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none;resize:vertical;font-family:inherit"></textarea></div>
+          <div style="display:flex;flex-direction:column;gap:5px;grid-column:1/-1"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Observaciones</label><textarea id="fp-observaciones" rows="2" placeholder="Observaciones adicionales..." style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none;resize:vertical;font-family:inherit"></textarea></div>
+          <div style="display:flex;flex-direction:column;gap:8px;grid-column:1/-1">
+            <label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Avance: <span id="fp-avance-val">0</span>%</label>
+            <input type="range" id="fp-avance" min="0" max="100" value="0" oninput="document.getElementById('fp-avance-val').textContent=this.value" style="width:100%;accent-color:#1d6b3e"/>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;grid-column:1/-1;padding:12px;background:#f8fdfb;border-radius:8px;border:1px solid var(--border)">
+            <input type="checkbox" id="fp-publicar" style="width:16px;height:16px;cursor:pointer"/>
+            <label for="fp-publicar" style="font-size:13px;cursor:pointer;font-weight:500">☑ Publicar en Portal</label>
+          </div>
         </div>
         <div style="display:flex;gap:10px;margin-top:20px">
           <button class="btn btn-primary" onclick="savePlan()">💾 Guardar</button>
           <button class="btn btn-secondary" onclick="closePlanForm()">Cancelar</button>
+        </div>
+      </div>
+
+      <!-- Seguimiento panel -->
+      <div id="plan-seguimiento" style="display:none;background:#fff;border:1px solid var(--border);border-radius:12px;padding:24px;margin-top:16px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+          <div style="font-family:'Poppins',sans-serif;font-size:16px;font-weight:700;color:var(--text)">📋 Seguimiento de Actividad</div>
+          <button onclick="document.getElementById('plan-seguimiento').style.display='none'" style="padding:6px 14px;border:1px solid var(--border);border-radius:8px;background:#fff;cursor:pointer;font-size:12px">✕ Cerrar</button>
+        </div>
+        <div id="plan-seg-detail" style="background:#f8fdfb;border-radius:8px;padding:14px;margin-bottom:16px;font-size:13px;border:1px solid var(--border)"></div>
+        <div style="font-weight:600;font-size:13px;color:var(--text);margin-bottom:10px">📅 Historial de actualizaciones</div>
+        <div id="plan-seg-timeline" style="margin-bottom:20px"></div>
+        <div style="border-top:1px solid var(--border);padding-top:16px">
+          <div style="font-weight:600;font-size:13px;color:var(--text);margin-bottom:12px">➕ Registrar Actualización</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Avance: <span id="seg-avance-val">0</span>%</label>
+              <input type="range" id="seg-avance" min="0" max="100" value="0" oninput="document.getElementById('seg-avance-val').textContent=this.value" style="accent-color:#1d6b3e"/>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Tipo</label>
+              <select id="seg-tipo" style="padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none">
+                <option>Avance</option><option>Incidencia</option><option>Observación</option>
+              </select>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px;grid-column:1/-1">
+              <label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Comentario</label>
+              <textarea id="seg-comentario" rows="2" placeholder="Descripción del avance o incidencia..." style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none;resize:vertical;font-family:inherit"></textarea>
+            </div>
+          </div>
+          <button onclick="addPlanUpdate(_currentPlanSegId)" style="margin-top:12px;padding:9px 22px;border-radius:9px;border:none;background:#1d6b3e;color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">➕ Registrar Actualización</button>
         </div>
       </div>
     </div>
@@ -2196,29 +2293,63 @@ function deleteConsejo(id) {
 /* ═══════════════════════════════════════════════
    BIENVENIDA CRUD
 ═══════════════════════════════════════════════ */
-let _editBienvenidaId = null;
+
+function _bvGetCurrent() {
+  const items = CMSDB.getAll('bienvenida');
+  return items.find(b => b.activa) || items[0] || null;
+}
 
 function renderBienvenida() {
-  let items;
-  try { items = CMSDB.getAll('bienvenida'); } catch(e) { items = []; console.error('CMSDB bienvenida error:', e); }
-  const el = document.getElementById('tbl-bienvenida');
-  if (!el) return;
-  if (!items.length) {
-    el.innerHTML = '<div style="text-align:center;padding:40px 32px;background:#f8fdfb;border:1px dashed var(--border);border-radius:12px;color:var(--muted);font-size:14px"><div style="font-size:32px;margin-bottom:10px">🌟</div><div style="font-weight:600;color:var(--text);margin-bottom:6px">Sin configuración de bienvenida</div><div>Haz clic en <strong>+ Nueva configuración</strong> para crear el modal de bienvenida del portal.</div></div>';
-    return;
+  const current = _bvGetCurrent();
+  // Status card
+  const badge = document.getElementById('bv-estado-badge');
+  const fechaPub = document.getElementById('bv-fecha-pub');
+  const fechaUpd = document.getElementById('bv-fecha-upd');
+  const btnDesactivar = document.getElementById('bv-btn-desactivar');
+  if (badge) {
+    if (!current) {
+      badge.textContent = 'Sin configurar'; badge.style.background = '#f1f5f9'; badge.style.color = '#475569';
+    } else if (current.estado === 'publicada') {
+      badge.textContent = 'Publicada'; badge.style.background = '#dcfce7'; badge.style.color = '#166534';
+    } else if (current.estado === 'borrador') {
+      badge.textContent = 'Borrador'; badge.style.background = '#fef3c7'; badge.style.color = '#92400e';
+    } else {
+      badge.textContent = 'Desactivada'; badge.style.background = '#f1f5f9'; badge.style.color = '#475569';
+    }
   }
-  el.innerHTML = `<table class="table"><thead><tr><th>Título</th><th>Mensaje</th><th>Estado</th><th>Modo</th><th style="width:100px">Acciones</th></tr></thead><tbody>
-    ${items.map(b => `<tr>
-      <td style="font-weight:600">${b.titulo || '—'}</td>
-      <td style="font-size:12px;color:var(--muted);max-width:260px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${b.mensaje || '—'}</td>
-      <td><span style="display:inline-block;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:700;background:${b.activa?'#dcfce7':'#f1f5f9'};color:${b.activa?'#166534':'#475569'}">${b.activa ? '✅ Activa' : '⚪ Inactiva'}</span></td>
-      <td style="font-size:12px">${b.mostrarSiempre ? '🔁 Siempre' : '1️⃣ Una vez'}</td>
-      <td><div style="display:flex;gap:6px">
-        <button class="btn btn-secondary" style="padding:4px 10px;font-size:12px" onclick="openBienvenidaForm('${b.id}')">✏️</button>
-        <button class="btn btn-danger" style="padding:4px 10px;font-size:12px" onclick="confirmDelete(()=>deleteBienvenida('${b.id}'))">🗑️</button>
-      </div></td>
-    </tr>`).join('')}
-  </tbody></table>`;
+  if (fechaPub) fechaPub.textContent = (current && current.fecha_publicacion) ? current.fecha_publicacion : '—';
+  if (fechaUpd) fechaUpd.textContent = (current && current.fecha_actualizacion) ? current.fecha_actualizacion : '—';
+  if (btnDesactivar) btnDesactivar.style.display = (current && current.activa) ? 'inline-block' : 'none';
+  // Load form fields
+  if (current) {
+    const titulo = document.getElementById('fb-titulo');
+    const mensaje = document.getElementById('fb-mensaje');
+    const color = document.getElementById('fb-color_fondo');
+    const check = document.getElementById('fb-activar-portal');
+    if (titulo) titulo.value = current.titulo || '';
+    if (mensaje) mensaje.value = current.mensaje || '';
+    if (color) color.value = current.color_fondo || '#1d6b3e';
+    if (check) check.checked = !!current.activa;
+    const freq = current.frecuencia || 'siempre';
+    const radios = document.querySelectorAll('input[name="fb-frecuencia"]');
+    radios.forEach(r => { r.checked = r.value === freq; });
+    if (current.imagen) { bienvenidaLoadPreview(current.imagen); } else { bienvenidaRemoveImg(); }
+  }
+  // Historial
+  const hist = document.getElementById('bv-historial');
+  if (hist) {
+    const items = CMSDB.getAll('bienvenida');
+    const allHist = [];
+    items.forEach(b => { if (b.historial) b.historial.forEach(h => allHist.push(h)); });
+    allHist.sort((a,b) => (b.fecha||'').localeCompare(a.fecha||''));
+    if (!allHist.length) {
+      hist.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px">Sin historial de cambios</div>';
+    } else {
+      hist.innerHTML = `<table class="table"><thead><tr><th>Fecha</th><th>Acción</th><th>Usuario</th></tr></thead><tbody>
+        ${allHist.slice(0,20).map(h => `<tr><td style="font-size:12px">${h.fecha||'—'}</td><td>${h.accion||'—'}</td><td style="font-size:12px;color:var(--muted)">${h.usuario||'Admin'}</td></tr>`).join('')}
+      </tbody></table>`;
+    }
+  }
 }
 
 /* ── Bienvenida image upload helpers ── */
@@ -2226,29 +2357,19 @@ function bienvenidaHandleFile(file) {
   if (!file) return;
   if (!file.type.startsWith('image/')) { showToast('Solo se permiten imágenes (JPG, PNG, WEBP)', 'error'); return; }
   if (file.size > 8 * 1024 * 1024) { showToast('La imagen no puede superar 8 MB', 'error'); return; }
-
   const reader = new FileReader();
   reader.onload = e => {
     const img = new Image();
     img.onload = () => {
-      // Compress to max 900px wide and ≤ 500 KB via Canvas
-      const MAX_PX = 900;
-      const MAX_BYTES = 500 * 1024;
+      const MAX_PX = 900, MAX_BYTES = 500 * 1024;
       let w = img.width, h = img.height;
       if (w > MAX_PX) { h = Math.round(h * MAX_PX / w); w = MAX_PX; }
-
       const canvas = document.createElement('canvas');
       canvas.width = w; canvas.height = h;
       canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-
       let quality = 0.82;
       let b64 = canvas.toDataURL('image/jpeg', quality);
-      // Reduce quality until under 500 KB
-      while (b64.length > MAX_BYTES * 1.37 && quality > 0.4) {
-        quality -= 0.08;
-        b64 = canvas.toDataURL('image/jpeg', quality);
-      }
-
+      while (b64.length > MAX_BYTES * 1.37 && quality > 0.4) { quality -= 0.08; b64 = canvas.toDataURL('image/jpeg', quality); }
       const kb = Math.round(b64.length * 0.75 / 1024);
       document.getElementById('fb-imagen').value = b64;
       document.getElementById('fb-img-preview-img').src = b64;
@@ -2278,43 +2399,59 @@ function bienvenidaLoadPreview(src) {
   document.getElementById('fb-dropzone-content').style.display = 'none';
 }
 
-function openBienvenidaForm(id) {
-  _editBienvenidaId = id || null;
-  const items = CMSDB.getAll('bienvenida');
-  const item = id ? items.find(i => i.id === id) : null;
-  document.getElementById('ftitle-bienvenida').textContent = id ? '✏️ Editar Bienvenida' : '🌟 Nueva Bienvenida';
-  document.getElementById('fb-titulo').value = item ? item.titulo : '';
-  document.getElementById('fb-mensaje').value = item ? item.mensaje : '';
-  document.getElementById('fb-color_fondo').value = item ? item.color_fondo||'#1d6b3e' : '#1d6b3e';
-  document.getElementById('fb-activa').checked = item ? !!item.activa : false;
-  document.getElementById('fb-mostrarSiempre').checked = item ? !!item.mostrarSiempre : false;
-  // Load image preview if exists
-  if (item && item.imagen) { bienvenidaLoadPreview(item.imagen); } else { bienvenidaRemoveImg(); }
-  document.getElementById('form-bienvenida').style.display = 'block';
-  document.getElementById('form-bienvenida').scrollIntoView({behavior:'smooth'});
-}
-
-function closeBienvenidaForm() {
-  _editBienvenidaId = null;
-  document.getElementById('form-bienvenida').style.display = 'none';
-}
-
-function saveBienvenida() {
-  const titulo = document.getElementById('fb-titulo').value.trim();
-  if (!titulo) { showToast('El título es obligatorio', 'error'); return; }
-  const data = {
-    titulo,
-    mensaje: document.getElementById('fb-mensaje').value.trim(),
-    imagen: document.getElementById('fb-imagen').value.trim(),
-    color_fondo: document.getElementById('fb-color_fondo').value,
-    activa: document.getElementById('fb-activa').checked,
-    mostrarSiempre: document.getElementById('fb-mostrarSiempre').checked
+function _bvBuildData(estado, activa) {
+  const titulo = (document.getElementById('fb-titulo')||{}).value||'';
+  if (!titulo.trim()) { showToast('El título es obligatorio', 'error'); return null; }
+  const radios = document.querySelectorAll('input[name="fb-frecuencia"]');
+  let frecuencia = 'siempre';
+  radios.forEach(r => { if (r.checked) frecuencia = r.value; });
+  const now = new Date().toISOString().slice(0,10);
+  const current = _bvGetCurrent();
+  const histEntry = { fecha: new Date().toLocaleString('es-VE'), accion: estado === 'publicada' ? '🚀 Publicada' : estado === 'borrador' ? '💾 Borrador guardado' : '⏹ Desactivada', usuario: 'Admin' };
+  const hist = (current && current.historial) ? [...current.historial, histEntry] : [histEntry];
+  return {
+    id: current ? current.id : undefined,
+    titulo: titulo.trim(),
+    mensaje: (document.getElementById('fb-mensaje')||{}).value||'',
+    imagen: (document.getElementById('fb-imagen')||{}).value||'',
+    color_fondo: (document.getElementById('fb-color_fondo')||{}).value||'#1d6b3e',
+    frecuencia,
+    activa,
+    estado,
+    fecha_publicacion: (activa && estado === 'publicada') ? (current && current.fecha_publicacion ? current.fecha_publicacion : now) : (current ? current.fecha_publicacion : ''),
+    fecha_actualizacion: now,
+    historial: hist
   };
-  if (_editBienvenidaId) { CMSDB.save('bienvenida', Object.assign({}, data, {id: _editBienvenidaId})); }
-  else { CMSDB.save('bienvenida', data); }
-  closeBienvenidaForm();
+}
+
+function publicarBienvenida() {
+  const data = _bvBuildData('publicada', true);
+  if (!data) return;
+  // Deactivate all others
+  CMSDB.getAll('bienvenida').forEach(b => {
+    if (b.id !== data.id && b.activa) { CMSDB.save('bienvenida', Object.assign({}, b, {activa: false, estado: 'desactivada'})); }
+  });
+  CMSDB.save('bienvenida', data);
+  showToast('¡Bienvenida publicada correctamente!', 'success');
   renderBienvenida();
-  showToast('Bienvenida guardada correctamente', 'success');
+}
+
+function guardarBorrador() {
+  const data = _bvBuildData('borrador', false);
+  if (!data) return;
+  CMSDB.save('bienvenida', data);
+  showToast('Borrador guardado', 'success');
+  renderBienvenida();
+}
+
+function desactivarBienvenida() {
+  const current = _bvGetCurrent();
+  if (!current) return;
+  const histEntry = { fecha: new Date().toLocaleString('es-VE'), accion: '⏹ Desactivada', usuario: 'Admin' };
+  const hist = current.historial ? [...current.historial, histEntry] : [histEntry];
+  CMSDB.save('bienvenida', Object.assign({}, current, { activa: false, estado: 'desactivada', fecha_actualizacion: new Date().toISOString().slice(0,10), historial: hist }));
+  showToast('Bienvenida desactivada', 'success');
+  renderBienvenida();
 }
 
 function deleteBienvenida(id) {
@@ -2327,42 +2464,171 @@ function deleteBienvenida(id) {
    PLANIFICACION CRUD
 ═══════════════════════════════════════════════ */
 let _editPlanId = null;
+let _currentPlanSegId = null;
+let _planCalYear = new Date().getFullYear();
+let _planCalMonth = new Date().getMonth();
+let _planTab = 'lista';
+
+const _planPriColors = {
+  'Baja': {bg:'#dcfce7',color:'#166534'},
+  'Media': {bg:'#fef3c7',color:'#92400e'},
+  'Alta': {bg:'#fee2e2',color:'#991b1b'},
+  'Crítica': {bg:'#7f1d1d',color:'#fff'}
+};
+const _planEstColors = {
+  'Borrador': {bg:'#f1f5f9',color:'#475569'},
+  'Programada': {bg:'#dbeafe',color:'#1e40af'},
+  'Aprobada': {bg:'#ccfbf1',color:'#134e4a'},
+  'Publicada': {bg:'#dcfce7',color:'#166534'},
+  'En Ejecución': {bg:'#ede9fe',color:'#4c1d95'},
+  'Finalizada': {bg:'#166534',color:'#fff'},
+  'Suspendida': {bg:'#fef3c7',color:'#92400e'},
+  'Cancelada': {bg:'#fee2e2',color:'#991b1b'}
+};
+
+function _planBadge(val, map) {
+  const c = map[val] || {bg:'#f1f5f9',color:'#475569'};
+  return `<span style="display:inline-block;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:700;background:${c.bg};color:${c.color}">${val||'—'}</span>`;
+}
+
+function _planUpdateStats() {
+  let items; try { items = CMSDB.getAll('planificacion'); } catch(e) { items=[]; }
+  const get = (v) => items.filter(p => p.estado === v).length;
+  const s = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = v; };
+  s('ps-programadas', get('Programada') + get('Aprobada'));
+  s('ps-ejecucion', get('En Ejecución'));
+  s('ps-finalizadas', get('Finalizada'));
+  s('ps-suspendidas', get('Suspendida') + get('Cancelada'));
+}
+
+function switchPlanTab(tab) {
+  _planTab = tab;
+  ['lista','calendario','tablero'].forEach(t => {
+    const view = document.getElementById('plan-view-'+t);
+    const btn = document.getElementById('plan-tab-'+t);
+    if (view) view.style.display = t === tab ? 'block' : 'none';
+    if (btn) { btn.style.color = t===tab ? '#1d6b3e' : 'var(--muted)'; btn.style.borderBottomColor = t===tab ? '#1d6b3e' : 'transparent'; }
+  });
+  if (tab === 'lista') renderPlan();
+  if (tab === 'calendario') renderPlanCalendario();
+  if (tab === 'tablero') renderPlanTablero();
+}
 
 function renderPlan() {
+  _planUpdateStats();
   const q = (document.getElementById('q-plan')?.value || '').toLowerCase();
   const fEst = document.getElementById('f-plan-estado')?.value || '';
   const fPri = document.getElementById('f-plan-prioridad')?.value || '';
+  const fTipo = document.getElementById('f-plan-tipo')?.value || '';
   let items;
-  try { items = CMSDB.getAll('planificacion'); } catch(e) { items = []; console.error('CMSDB planificacion error:', e); }
-  if (q) items = items.filter(p => (p.titulo+p.responsable+p.descripcion).toLowerCase().includes(q));
+  try { items = CMSDB.getAll('planificacion'); } catch(e) { items = []; }
+  if (q) items = items.filter(p => ((p.titulo||'')+(p.responsable||'')+(p.descripcion||'')+(p.lugar||'')).toLowerCase().includes(q));
   if (fEst) items = items.filter(p => p.estado === fEst);
   if (fPri) items = items.filter(p => p.prioridad === fPri);
+  if (fTipo) items = items.filter(p => p.tipo === fTipo);
   const el = document.getElementById('tbl-plan');
+  if (!el) return;
   if (!items.length) {
     el.innerHTML = '<div style="text-align:center;padding:32px;color:var(--muted);font-size:13px">No hay actividades. Crea una nueva.</div>';
     return;
   }
-  const priColors = {Alta:'#fee2e2;color:#991b1b', Media:'#fef3c7;color:#92400e', Baja:'#dcfce7;color:#166534'};
-  const estColors = {Pendiente:'#f1f5f9;color:#475569', 'En Progreso':'#dbeafe;color:#1e40af', Completado:'#dcfce7;color:#166534', Cancelado:'#fee2e2;color:#991b1b'};
-  el.innerHTML = `<table class="table"><thead><tr><th>Título</th><th>Responsable</th><th>Fecha</th><th>Prioridad</th><th>Estado</th><th>Avance</th><th style="width:100px">Acciones</th></tr></thead><tbody>
+  el.innerHTML = `<table class="table"><thead><tr><th>Tipo</th><th>Título</th><th>Fecha</th><th>Hora</th><th>Lugar</th><th>Responsable</th><th>Prioridad</th><th>Estado</th><th>Portal</th><th style="width:120px">Acciones</th></tr></thead><tbody>
     ${items.map(p => `<tr>
-      <td style="font-weight:600">${p.titulo||'—'}</td>
+      <td style="font-size:11px;color:var(--muted)">${p.tipo||'—'}</td>
+      <td style="font-weight:600;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.titulo||'—'}</td>
+      <td style="font-size:12px;white-space:nowrap">${p.fecha||'—'}</td>
+      <td style="font-size:12px;white-space:nowrap">${p.hora_inicio||'—'}${p.hora_fin?'–'+p.hora_fin:''}</td>
+      <td style="font-size:12px;max-width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.lugar||'—'}</td>
       <td style="font-size:12px">${p.responsable||'—'}</td>
-      <td style="font-size:12px">${p.fecha||'—'}</td>
-      <td><span style="display:inline-block;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:700;background:${priColors[p.prioridad]||'#f1f5f9;color:#475569'}">${p.prioridad||'—'}</span></td>
-      <td><span style="display:inline-block;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:700;background:${estColors[p.estado]||'#f1f5f9;color:#475569'}">${p.estado||'—'}</span></td>
-      <td>
-        <div style="display:flex;align-items:center;gap:7px">
-          <div style="flex:1;height:6px;border-radius:3px;background:#e8f5ee;overflow:hidden"><div style="height:100%;background:#1d6b3e;width:${p.avance||0}%"></div></div>
-          <span style="font-size:11px;font-weight:600;color:#1d6b3e;white-space:nowrap">${p.avance||0}%</span>
-        </div>
-      </td>
-      <td><div style="display:flex;gap:6px">
-        <button class="btn btn-secondary" style="padding:4px 10px;font-size:12px" onclick="openPlanForm('${p.id}')">✏️</button>
-        <button class="btn btn-danger" style="padding:4px 10px;font-size:12px" onclick="confirmDelete(()=>deletePlan('${p.id}'))">🗑️</button>
+      <td>${_planBadge(p.prioridad, _planPriColors)}</td>
+      <td>${_planBadge(p.estado, _planEstColors)}</td>
+      <td style="text-align:center">${p.publicar ? '<span style="color:#1d6b3e;font-size:14px">✓</span>' : '<span style="color:#ccc">—</span>'}</td>
+      <td><div style="display:flex;gap:4px">
+        <button class="btn btn-secondary" style="padding:4px 8px;font-size:12px" onclick="openPlanForm('${p.id}')">✏️</button>
+        <button class="btn btn-secondary" style="padding:4px 8px;font-size:12px" onclick="openPlanSeguimiento('${p.id}')">📋</button>
+        <button class="btn btn-danger" style="padding:4px 8px;font-size:12px" onclick="deletePlan('${p.id}')">🗑️</button>
       </div></td>
     </tr>`).join('')}
   </tbody></table>`;
+}
+
+function renderPlanCalendario() {
+  _planUpdateStats();
+  const title = document.getElementById('plan-cal-title');
+  const grid = document.getElementById('plan-cal-grid');
+  if (!title || !grid) return;
+  const months = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  title.textContent = `${months[_planCalMonth]} ${_planCalYear}`;
+  let items; try { items = CMSDB.getAll('planificacion'); } catch(e) { items=[]; }
+  const first = new Date(_planCalYear, _planCalMonth, 1);
+  const last = new Date(_planCalYear, _planCalMonth+1, 0);
+  const startDay = first.getDay();
+  const days = last.getDate();
+  const priC = {Baja:'#dcfce7',Media:'#fef3c7',Alta:'#fee2e2','Crítica':'#7f1d1d'};
+  let html = '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px">';
+  ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'].forEach(d => {
+    html += `<div style="padding:6px;text-align:center;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase">${d}</div>`;
+  });
+  for (let i=0; i<startDay; i++) html += '<div></div>';
+  for (let d=1; d<=days; d++) {
+    const dateStr = `${_planCalYear}-${String(_planCalMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const dayItems = items.filter(p => p.fecha === dateStr);
+    html += `<div style="min-height:72px;border:1px solid var(--border);border-radius:6px;padding:4px;background:#fff">
+      <div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:2px">${d}</div>
+      ${dayItems.map(p => `<div style="font-size:10px;padding:2px 4px;border-radius:4px;margin-bottom:2px;background:${priC[p.prioridad]||'#f1f5f9'};overflow:hidden;white-space:nowrap;text-overflow:ellipsis;cursor:pointer" onclick="openPlanForm('${p.id}')" title="${p.titulo}">${p.titulo}</div>`).join('')}
+    </div>`;
+  }
+  html += '</div>';
+  grid.innerHTML = html;
+}
+
+function planCalNav(dir) {
+  _planCalMonth += dir;
+  if (_planCalMonth > 11) { _planCalMonth = 0; _planCalYear++; }
+  if (_planCalMonth < 0) { _planCalMonth = 11; _planCalYear--; }
+  renderPlanCalendario();
+}
+
+function renderPlanTablero() {
+  _planUpdateStats();
+  const el = document.getElementById('plan-tablero-content');
+  if (!el) return;
+  let items; try { items = CMSDB.getAll('planificacion'); } catch(e) { items=[]; }
+  const total = items.length || 1;
+  const countBy = (arr, key) => {
+    const m = {};
+    arr.forEach(i => { const v = i[key]||'Sin definir'; m[v] = (m[v]||0)+1; });
+    return m;
+  };
+  const estC = countBy(items,'estado');
+  const priC = countBy(items,'prioridad');
+  const recent = [...items].sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||'')).slice(0,5);
+  const bar = (label, count, color, bg) =>
+    `<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+      <div style="width:120px;font-size:12px;color:var(--text)">${label}</div>
+      <div style="flex:1;height:14px;background:#f1f5f9;border-radius:7px;overflow:hidden">
+        <div style="height:100%;background:${color};width:${Math.round(count/total*100)}%;border-radius:7px;transition:.3s"></div>
+      </div>
+      <div style="width:32px;text-align:right;font-size:12px;font-weight:700;color:${color}">${count}</div>
+    </div>`;
+  el.innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+      <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px">
+        <div style="font-family:'Poppins',sans-serif;font-size:14px;font-weight:700;color:var(--text);margin-bottom:14px">Por Estado</div>
+        ${Object.entries(estC).map(([k,v]) => bar(k,v,(_planEstColors[k]||{bg:'#94a3b8'}).bg==='#f1f5f9'?'#94a3b8':(_planEstColors[k]||{}).bg||'#94a3b8', '')).join('')}
+      </div>
+      <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px">
+        <div style="font-family:'Poppins',sans-serif;font-size:14px;font-weight:700;color:var(--text);margin-bottom:14px">Por Prioridad</div>
+        ${Object.entries(priC).map(([k,v]) => bar(k,v,(_planPriColors[k]||{}).color||'#475569','')).join('')}
+      </div>
+    </div>
+    <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px">
+      <div style="font-family:'Poppins',sans-serif;font-size:14px;font-weight:700;color:var(--text);margin-bottom:14px">Actividades Recientes</div>
+      ${!recent.length ? '<div style="color:var(--muted);font-size:13px">Sin actividades</div>' :
+        `<table class="table"><thead><tr><th>Título</th><th>Fecha</th><th>Estado</th><th>Prioridad</th></tr></thead><tbody>
+          ${recent.map(p=>`<tr><td style="font-weight:600">${p.titulo||'—'}</td><td style="font-size:12px">${p.fecha||'—'}</td><td>${_planBadge(p.estado,_planEstColors)}</td><td>${_planBadge(p.prioridad,_planPriColors)}</td></tr>`).join('')}
+        </tbody></table>`}
+    </div>`;
 }
 
 function openPlanForm(id) {
@@ -2370,13 +2636,23 @@ function openPlanForm(id) {
   const items = CMSDB.getAll('planificacion');
   const item = id ? items.find(i => i.id === id) : null;
   document.getElementById('ftitle-plan').textContent = id ? '✏️ Editar Actividad' : '📆 Nueva Actividad';
-  document.getElementById('fp-titulo').value = item ? item.titulo : '';
-  document.getElementById('fp-responsable').value = item ? item.responsable : '';
-  document.getElementById('fp-fecha').value = item ? item.fecha||'' : '';
-  document.getElementById('fp-prioridad').value = item ? item.prioridad||'Media' : 'Media';
-  document.getElementById('fp-estado').value = item ? item.estado||'Pendiente' : 'Pendiente';
-  document.getElementById('fp-avance').value = item ? item.avance||0 : 0;
-  document.getElementById('fp-descripcion').value = item ? item.descripcion||'' : '';
+  const fv = (fid, val) => { const el = document.getElementById(fid); if(el) el.value = val||''; };
+  fv('fp-titulo', item ? item.titulo : '');
+  fv('fp-tipo', item ? item.tipo : '');
+  fv('fp-codigo', item ? item.codigo : '');
+  fv('fp-fecha', item ? item.fecha : '');
+  fv('fp-hora_inicio', item ? item.hora_inicio : '');
+  fv('fp-hora_fin', item ? item.hora_fin : '');
+  fv('fp-lugar', item ? item.lugar : '');
+  fv('fp-departamento', item ? item.departamento : '');
+  fv('fp-responsable', item ? item.responsable : '');
+  fv('fp-prioridad', item ? item.prioridad||'Media' : 'Media');
+  fv('fp-estado', item ? item.estado||'Borrador' : 'Borrador');
+  fv('fp-descripcion', item ? item.descripcion : '');
+  fv('fp-observaciones', item ? item.observaciones : '');
+  const avEl = document.getElementById('fp-avance'); if(avEl) { avEl.value = item ? item.avance||0 : 0; }
+  const avVal = document.getElementById('fp-avance-val'); if(avVal) avVal.textContent = item ? item.avance||0 : 0;
+  const pub = document.getElementById('fp-publicar'); if(pub) pub.checked = item ? !!item.publicar : false;
   document.getElementById('form-plan').style.display = 'block';
   document.getElementById('form-plan').scrollIntoView({behavior:'smooth'});
 }
@@ -2387,17 +2663,25 @@ function closePlanForm() {
 }
 
 function savePlan() {
-  const titulo = document.getElementById('fp-titulo').value.trim();
-  const responsable = document.getElementById('fp-responsable').value.trim();
-  if (!titulo || !responsable) { showToast('Título y responsable son obligatorios', 'error'); return; }
+  const titulo = (document.getElementById('fp-titulo')||{}).value||'';
+  if (!titulo.trim()) { showToast('El título es obligatorio', 'error'); return; }
+  const gv = id => (document.getElementById(id)||{}).value||'';
   const data = {
-    titulo,
-    responsable,
-    descripcion: document.getElementById('fp-descripcion').value.trim(),
-    fecha: document.getElementById('fp-fecha').value,
-    prioridad: document.getElementById('fp-prioridad').value,
-    estado: document.getElementById('fp-estado').value,
-    avance: parseInt(document.getElementById('fp-avance').value)||0
+    titulo: titulo.trim(),
+    tipo: gv('fp-tipo'),
+    codigo: gv('fp-codigo'),
+    fecha: gv('fp-fecha'),
+    hora_inicio: gv('fp-hora_inicio'),
+    hora_fin: gv('fp-hora_fin'),
+    lugar: gv('fp-lugar'),
+    departamento: gv('fp-departamento'),
+    responsable: gv('fp-responsable'),
+    prioridad: gv('fp-prioridad'),
+    estado: gv('fp-estado'),
+    descripcion: gv('fp-descripcion'),
+    observaciones: gv('fp-observaciones'),
+    avance: parseInt((document.getElementById('fp-avance')||{}).value)||0,
+    publicar: !!(document.getElementById('fp-publicar')||{}).checked
   };
   if (_editPlanId) { CMSDB.save('planificacion', Object.assign({}, data, {id: _editPlanId})); }
   else { CMSDB.save('planificacion', data); }
@@ -2407,9 +2691,66 @@ function savePlan() {
 }
 
 function deletePlan(id) {
-  CMSDB.remove('planificacion', id);
+  confirmDelete(() => {
+    CMSDB.remove('planificacion', id);
+    renderPlan();
+    showToast('Actividad eliminada', 'success');
+  });
+}
+
+function openPlanSeguimiento(id) {
+  _currentPlanSegId = id;
+  const item = CMSDB.getOne('planificacion', id);
+  if (!item) return;
+  const panel = document.getElementById('plan-seguimiento');
+  const detail = document.getElementById('plan-seg-detail');
+  const timeline = document.getElementById('plan-seg-timeline');
+  if (detail) detail.innerHTML = `
+    <div style="display:flex;flex-wrap:wrap;gap:16px">
+      <div><strong>Título:</strong> ${item.titulo||'—'}</div>
+      <div><strong>Tipo:</strong> ${item.tipo||'—'}</div>
+      <div><strong>Fecha:</strong> ${item.fecha||'—'}</div>
+      <div><strong>Responsable:</strong> ${item.responsable||'—'}</div>
+      <div><strong>Estado:</strong> ${_planBadge(item.estado,_planEstColors)}</div>
+      <div><strong>Avance:</strong> <span style="font-weight:700;color:#1d6b3e">${item.avance||0}%</span></div>
+    </div>`;
+  const hist = item.historial || [];
+  if (timeline) {
+    if (!hist.length) {
+      timeline.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px 0">Sin actualizaciones registradas</div>';
+    } else {
+      timeline.innerHTML = hist.slice().reverse().map(h => `
+        <div style="border-left:3px solid #d4edd8;padding:8px 14px;margin-bottom:8px;background:#f8fdfb;border-radius:0 8px 8px 0">
+          <div style="display:flex;gap:10px;align-items:center;margin-bottom:4px">
+            <span style="font-size:11px;font-weight:700;color:#1d6b3e">${h.tipo||'Avance'}</span>
+            <span style="font-size:11px;color:var(--muted)">${h.fecha||'—'}</span>
+            <span style="font-size:11px;font-weight:600;color:#1d6b3e">${h.avance!=null?h.avance+'%':''}</span>
+          </div>
+          <div style="font-size:13px;color:var(--text)">${h.comentario||'—'}</div>
+        </div>`).join('');
+    }
+  }
+  const segAv = document.getElementById('seg-avance');
+  const segVal = document.getElementById('seg-avance-val');
+  if (segAv) { segAv.value = item.avance||0; }
+  if (segVal) segVal.textContent = item.avance||0;
+  const segCom = document.getElementById('seg-comentario'); if(segCom) segCom.value='';
+  if (panel) { panel.style.display='block'; panel.scrollIntoView({behavior:'smooth'}); }
+}
+
+function addPlanUpdate(id) {
+  if (!id) return;
+  const item = CMSDB.getOne('planificacion', id);
+  if (!item) return;
+  const avance = parseInt((document.getElementById('seg-avance')||{}).value)||0;
+  const tipo = (document.getElementById('seg-tipo')||{}).value||'Avance';
+  const comentario = ((document.getElementById('seg-comentario')||{}).value||'').trim();
+  const entry = { fecha: new Date().toLocaleString('es-VE'), tipo, avance, comentario };
+  const hist = item.historial ? [...item.historial, entry] : [entry];
+  CMSDB.save('planificacion', Object.assign({}, item, { avance, historial: hist }));
+  showToast('Actualización registrada', 'success');
+  openPlanSeguimiento(id);
   renderPlan();
-  showToast('Actividad eliminada', 'success');
 }
 
 /* ═══════════════════════════════════════════════
