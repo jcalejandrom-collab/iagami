@@ -227,13 +227,13 @@ const CAT_CLASS = {
 };
 
 document.addEventListener('DOMContentLoaded', async () => {
-  const docs = await CMSDB.getAll('documentos');
+  const docs = (await CMSDB.getAll('documentos')) || [];
 
   // Populate stats
   document.getElementById('stat-total').textContent = docs.length;
 
   // Get unique years
-  const years = [...new Set(docs.map(d => d.anio))].sort((a,b) => b - a);
+  const years = [...new Set(docs.map(d => d.anio).filter(Boolean))].sort((a,b) => b - a);
   const yearSel = document.getElementById('year-select');
   years.forEach(y => {
     const opt = document.createElement('option');
@@ -243,7 +243,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   // Latest update
-  const dates = docs.map(d => d.fecha).sort().reverse();
+  const dates = docs.map(d => d.fecha).filter(Boolean).sort().reverse();
   if (dates.length) {
     const d = new Date(dates[0] + 'T00:00:00');
     document.getElementById('stat-year').textContent = d.toLocaleDateString('es-VE', { month: 'short', year: 'numeric' }).replace('.','');
@@ -259,20 +259,22 @@ function switchTab(el) {
   filterDocs();
 }
 
-async function filterDocs() {
+function filterDocs() {
   currentSearch = document.getElementById('search-input').value.toLowerCase();
   currentYear = document.getElementById('year-select').value;
   renderDocs();
 }
 
 async function renderDocs() {
-  const docs = await CMSDB.getAll('documentos');
+  const docs = (await CMSDB.getAll('documentos')) || [];
   let filtered = docs.filter(d => {
     const matchCat = !currentCat || d.categoria === currentCat;
     const matchYear = !currentYear || String(d.anio) === String(currentYear);
+    const titulo = (d.titulo || '').toLowerCase();
+    const descripcion = (d.descripcion || '').toLowerCase();
     const matchSearch = !currentSearch ||
-      d.titulo.toLowerCase().includes(currentSearch) ||
-      d.descripcion.toLowerCase().includes(currentSearch);
+      titulo.includes(currentSearch) ||
+      descripcion.includes(currentSearch);
     return matchCat && matchYear && matchSearch;
   });
 
@@ -287,8 +289,9 @@ async function renderDocs() {
 
 function docCardHTML(d) {
   const catClass = CAT_CLASS[d.categoria] || 'informes';
-  const desc = d.descripcion.length > 140 ? d.descripcion.slice(0, 140) + '…' : d.descripcion;
-  const fechaFmt = new Date(d.fecha + 'T00:00:00').toLocaleDateString('es-VE', { day:'2-digit', month:'short', year:'numeric' });
+  const descripcion = d.descripcion || '';
+  const desc = descripcion.length > 140 ? descripcion.slice(0, 140) + '…' : descripcion;
+  const fechaFmt = d.fecha ? new Date(d.fecha + 'T00:00:00').toLocaleDateString('es-VE', { day:'2-digit', month:'short', year:'numeric' }) : '—';
   return `
     <div class="doc-card">
       <div class="doc-pdf-icon">
