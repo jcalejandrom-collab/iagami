@@ -291,14 +291,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   calYear = today.getFullYear();
   calMonth = today.getMonth();
 
-  allEvents = (await CMSDB.getAll('eventos') || [])
+  allEvents = ((await CMSDB.getAll('eventos')) || [])
     .filter(e => {
+      if (!e.fecha) return false;
       const d = new Date(e.fecha + 'T00:00:00');
       const t = new Date();
       t.setHours(0,0,0,0);
       return d >= t;
     })
-    .sort((a, b) => a.fecha.localeCompare(b.fecha));
+    .sort((a, b) => (a.fecha || '').localeCompare(b.fecha || ''));
 
   filteredEvents = [...allEvents];
   renderList();
@@ -338,11 +339,12 @@ function renderList() {
 }
 
 function eventCardHTML(e) {
-  const d = new Date(e.fecha + 'T00:00:00');
+  const d = new Date((e.fecha || '2000-01-01') + 'T00:00:00');
   const day = d.getDate();
   const month = MONTHS_SHORT[d.getMonth()];
-  const tipoClass = e.tipo.toLowerCase();
-  const desc = e.descripcion.length > 120 ? e.descripcion.slice(0, 120) + '…' : e.descripcion;
+  const tipoClass = (e.tipo || 'otro').toLowerCase();
+  const descripcion = e.descripcion || '';
+  const desc = descripcion.length > 120 ? descripcion.slice(0, 120) + '…' : descripcion;
   return `
     <div class="event-card" onclick="openDetail(${e.id})">
       <div class="event-card-border border-${tipoClass}"></div>
@@ -400,7 +402,7 @@ async function renderCalendar() {
     cells.push({ date: new Date(calYear, calMonth + 1, d), thisMonth: false });
   }
 
-  const todosEventos = await CMSDB.getAll('eventos');
+  const todosEventos = (await CMSDB.getAll('eventos')) || [];
   for (const cell of cells) {
     const dateStr = formatDate(cell.date);
     const dayEvents = todosEventos.filter(e => e.fecha === dateStr);
@@ -420,7 +422,7 @@ async function renderCalendar() {
     }
 
     const pillsHTML = dayEvents.slice(0, 2).map(e =>
-      `<div class="cal-pill ${e.tipo.toLowerCase()}">${e.titulo}</div>`
+      `<div class="cal-pill ${(e.tipo || 'otro').toLowerCase()}">${e.titulo || ''}</div>`
     ).join('') + (dayEvents.length > 2 ? `<div class="cal-pill otro">+${dayEvents.length - 2} más</div>` : '');
 
     el.innerHTML = `<div class="cal-day-num">${cell.date.getDate()}</div><div class="cal-pills">${pillsHTML}</div>`;
@@ -465,14 +467,15 @@ function nextMonth() {
 
 // ── Detail Modal ──
 async function openDetail(id) {
-  const e = (await CMSDB.getAll('eventos')).find(ev => ev.id === id);
+  const todos = (await CMSDB.getAll('eventos')) || [];
+  const e = todos.find(ev => ev.id === id);
   if (!e) return;
 
-  const d = new Date(e.fecha + 'T00:00:00');
+  const d = new Date((e.fecha || '2000-01-01') + 'T00:00:00');
   const fechaFmt = `${d.getDate()} de ${MONTHS_ES[d.getMonth()]} de ${d.getFullYear()}, ${e.hora_inicio||e.hora||''} hrs`;
 
-  document.getElementById('modal-title').textContent = e.titulo;
-  document.getElementById('modal-tipo-badge').innerHTML = `<span class="tipo-badge ${e.tipo.toLowerCase()}" style="margin-bottom:8px;display:inline-block">${e.tipo}</span>`;
+  document.getElementById('modal-title').textContent = e.titulo || '';
+  document.getElementById('modal-tipo-badge').innerHTML = `<span class="tipo-badge ${(e.tipo || 'otro').toLowerCase()}" style="margin-bottom:8px;display:inline-block">${e.tipo || ''}</span>`;
   document.getElementById('modal-fecha').textContent = fechaFmt;
   document.getElementById('modal-lugar').textContent = e.lugar;
   document.getElementById('modal-responsable').textContent = e.responsable||e.ponente||'';
