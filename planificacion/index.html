@@ -350,7 +350,7 @@ function renderStats(planes) {
   document.getElementById('stat-total').textContent      = planes.length;
   document.getElementById('stat-ejecucion').textContent  = planes.filter(p => p.estado === 'En Ejecución').length;
   document.getElementById('stat-completado').textContent = planes.filter(p => p.estado === 'Completado').length;
-  const avg = planes.length ? Math.round(planes.reduce((s,p) => s + (p.porcentaje_avance || 0), 0) / planes.length) : 0;
+  const avg = planes.length ? Math.round(planes.reduce((s,p) => s + (Number(p.porcentaje_avance) || 0), 0) / planes.length) : 0;
   document.getElementById('stat-avance').textContent = avg + '%';
 }
 
@@ -391,7 +391,7 @@ function renderLista() {
     return;
   }
   c.innerHTML = '<div class="plan-list">' + _filtered.map(p => {
-    const pct  = Math.min(100, Math.max(0, p.porcentaje_avance || 0));
+    const pct  = Math.min(100, Math.max(0, Number(p.porcentaje_avance) || 0));
     const fill = fillColor(p.estado);
     const tags = [p.tipo, p.responsable, p.area].filter(Boolean);
     return `<div class="plan-card">
@@ -475,7 +475,7 @@ function renderKanban() {
     const items = _filtered.filter(p => (p.estado || 'Planificado') === estado);
     const cards = items.length
       ? items.map(p => {
-          const pct  = Math.min(100, Math.max(0, p.porcentaje_avance || 0));
+          const pct  = Math.min(100, Math.max(0, Number(p.porcentaje_avance) || 0));
           const fill = fillColor(p.estado);
           return `<div class="kanban-item">
             <div class="kanban-item-name">${p.nombre || 'Sin nombre'}</div>
@@ -495,13 +495,16 @@ function renderKanban() {
 async function init() {
   try {
     const planes = await CMSDB.getAll('planificacion');
-    _allPlanes = (planes || []).sort((a,b) => (b.fecha_inicio || '').localeCompare(a.fecha_inicio || ''));
+    _allPlanes = (Array.isArray(planes) ? planes : []).sort((a,b) => (b.fecha_inicio || '').localeCompare(a.fecha_inicio || ''));
     _filtered  = [..._allPlanes];
     renderStats(_allPlanes);
     document.getElementById('count-badge').textContent = _filtered.length + ' plan' + (_filtered.length !== 1 ? 'es' : '');
     renderLista();
   } catch (err) {
     console.error('[SIGAP] init() falló:', err);
+    _allPlanes = [];
+    _filtered  = [];
+    renderStats([]);
     document.getElementById('plan-list-container').innerHTML =
       '<div class="empty-state"><div class="ico">⚠️</div><p>Error al cargar los planes. Por favor recarga la página.</p></div>';
     document.getElementById('count-badge').textContent = '0 planes';
