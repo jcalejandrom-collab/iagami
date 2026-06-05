@@ -397,8 +397,8 @@ function goBack() {
   history.back();
 }
 
-function preview() {
-  save();
+async function preview() {
+  await save();
   window.open('../revista/visor.html?id=' + REVISTA_ID, '_blank');
 }
 
@@ -408,14 +408,21 @@ function preview() {
 async function save() {
   const r = await CMSDB.getOne('revistas', REVISTA_ID);
   if (!r) { showToast('Error: revista no encontrada', 'error'); return; }
-  await CMSDB.save('revistas', Object.assign({}, r, { contenido_bloques: _blocks }));
+  // Strip blocks that are missing their required tipo field to avoid corrupt data
+  const safeBlocks = _blocks.filter(b => b && b.tipo);
+  await CMSDB.save('revistas', Object.assign({}, r, { contenido_bloques: safeBlocks }));
+  _blocks = safeBlocks;
   showToast('Guardado ✓');
 }
 
 async function publish() {
   const r = await CMSDB.getOne('revistas', REVISTA_ID);
-  if (!r) return;
-  await CMSDB.save('revistas', Object.assign({}, r, { contenido_bloques: _blocks, estado: 'publicada' }));
+  if (!r) { showToast('Error: revista no encontrada', 'error'); return; }
+  if (!r.titulo || !r.titulo.trim()) { showToast('La revista necesita un título antes de publicar', 'error'); return; }
+  if (!r.numero_edicion || !String(r.numero_edicion).trim()) { showToast('La revista necesita un número de edición antes de publicar', 'error'); return; }
+  const safeBlocks = _blocks.filter(b => b && b.tipo);
+  await CMSDB.save('revistas', Object.assign({}, r, { contenido_bloques: safeBlocks, estado: 'publicada' }));
+  _blocks = safeBlocks;
   showToast('Publicada ✓', 'success');
 }
 
