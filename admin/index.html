@@ -2429,9 +2429,9 @@ async function publicarBienvenida() {
   const data = _bvBuildData('publicada', true);
   if (!data) return;
   // Deactivate all others
-  (await CMSDB.getAll('bienvenida')).forEach(b => {
+  for (const b of await CMSDB.getAll('bienvenida')) {
     if (b.id !== data.id && b.activa) { await CMSDB.save('bienvenida', Object.assign({}, b, {activa: false, estado: 'desactivada'})); }
-  });
+  }
   await CMSDB.save('bienvenida', data);
   showToast('¡Bienvenida publicada correctamente!', 'success');
   renderBienvenida();

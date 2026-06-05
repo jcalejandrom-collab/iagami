@@ -400,9 +400,10 @@ async function renderCalendar() {
     cells.push({ date: new Date(calYear, calMonth + 1, d), thisMonth: false });
   }
 
-  cells.forEach(cell => {
+  const todosEventos = await CMSDB.getAll('eventos');
+  for (const cell of cells) {
     const dateStr = formatDate(cell.date);
-    const dayEvents = (await CMSDB.getAll('eventos')).filter(e => e.fecha === dateStr);
+    const dayEvents = todosEventos.filter(e => e.fecha === dateStr);
     const isToday = cell.date.getTime() === today.getTime();
     const hasEvents = dayEvents.length > 0;
     const isSelected = selectedDay === dateStr;
@@ -424,7 +425,7 @@ async function renderCalendar() {
 
     el.innerHTML = `<div class="cal-day-num">${cell.date.getDate()}</div><div class="cal-pills">${pillsHTML}</div>`;
     grid.appendChild(el);
-  });
+  }
 }
 
 function formatDate(d) {

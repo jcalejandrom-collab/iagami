@@ -555,9 +555,9 @@ function renderMagazine(revista) {
 }
 
 /* ── DOWNLOAD ── */
-function descargar() {
+async function descargar() {
   if (!_revista) return;
-  CMSDB.save('revistas', Object.assign({}, _revista, {descargas: (_revista.descargas||0)+1}));
+  await CMSDB.save('revistas', Object.assign({}, _revista, {descargas: (_revista.descargas||0)+1}));
   toast('⬇️ Descarga iniciada');
   if (_revista.pdf_url) {
     const a = document.createElement('a');
@@ -611,7 +611,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('nav-title').textContent = `${_revista.titulo} · Nº${_revista.numero_edicion||'1'}`;
 
   if (!isPrint) {
-    CMSDB.save('revistas', Object.assign({}, _revista, {visualizaciones: (_revista.visualizaciones||0)+1}));
+    await CMSDB.save('revistas', Object.assign({}, _revista, {visualizaciones: (_revista.visualizaciones||0)+1}));
   }
 
   root.innerHTML = renderMagazine(_revista);

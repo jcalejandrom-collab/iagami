@@ -729,7 +729,7 @@ async function removeExpiredAlerts(btn) {
   const all = await CMSDB.getAll('alertas');
   const toKeep = all.filter(a => !(a.activa === false && a.fecha && new Date(a.fecha) < cutoff));
   const removed = all.length - toKeep.length;
-  (await CMSDB.getAll('alertas')).forEach(a => { if (!toKeep.find(t => t.id === a.id)) await CMSDB.remove('alertas', a.id); });
+  for (const a of await CMSDB.getAll('alertas')) { if (!toKeep.find(t => t.id === a.id)) await CMSDB.remove('alertas', a.id); }
   setActionResult('removeExpiredAlerts', `${removed} alertas eliminadas`);
   logAction('removeExpiredAlerts','alertas',`${removed} alertas vencidas eliminadas`,'success');
   toast(`${removed} alertas vencidas eliminadas`, 'success');
@@ -742,11 +742,11 @@ async function deduplicateDenuncias(btn) {
   const all = await CMSDB.getAll('denuncias');
   const seen = new Set();
   let removed = 0;
-  all.forEach(d => {
+  for (const d of all) {
     const key = `${d.tipo||''}|${d.nombre||''}|${d.fecha||''}`;
     if (seen.has(key)) { await CMSDB.remove('denuncias', d.id); removed++; }
     else seen.add(key);
-  });
+  }
   setActionResult('deduplicateDenuncias', `${removed} duplicados eliminados`);
   logAction('deduplicateDenuncias','denuncias',`${removed} duplicados eliminados`,'success');
   toast(`${removed} denuncias duplicadas eliminadas`, 'success');
@@ -756,13 +756,13 @@ async function deduplicateDenuncias(btn) {
 async function validateIDs(btn) {
   btn.disabled = true;
   let total = 0, fixed = 0;
-  CMS_MODULES.forEach(k => {
+  for (const k of CMS_MODULES) {
     const items = await CMSDB.getAll(k);
-    items.forEach(item => {
+    for (const item of items) {
       total++;
       if (!item.id) { item.id = k.slice(0,2)+'-'+Date.now()+Math.random().toString(36).slice(2,5); await CMSDB.save(k, item); fixed++; }
-    });
-  });
+    }
+  }
   setActionResult('validateIDs', `${total} registros revisados, ${fixed} corregidos`);
   logAction('validateIDs','sistema',`${fixed} IDs asignados de ${total} registros`,'success');
   toast(`Validación completa: ${fixed} IDs asignados`, 'success');
@@ -772,11 +772,13 @@ async function validateIDs(btn) {
 async function regenStats(btn) {
   btn.disabled = true;
   let html = '<div style="font-size:12px;text-align:left">';
-  CMS_MODULES.forEach(k => {
+  for (const k of CMS_MODULES) {
     html += `${MODULE_LABELS[k]}: ${(await CMSDB.getAll(k)).length} | `;
-  });
+  }
   html += '</div>';
-  const result = CMS_MODULES.map(k => `${MODULE_LABELS[k]}:${(await CMSDB.getAll(k)).length}`).join(', ');
+  const counts = [];
+  for (const k of CMS_MODULES) counts.push(`${MODULE_LABELS[k]}:${(await CMSDB.getAll(k)).length}`);
+  const result = counts.join(', ');
   setActionResult('regenStats', 'Estadísticas actualizadas ✓');
   logAction('regenStats','sistema','Estadísticas regeneradas: '+result,'success');
   toast('Estadísticas regeneradas correctamente', 'success');
@@ -824,7 +826,7 @@ async function createBackup(tipo) {
   } else {
     modules = CMS_MODULES;
   }
-  modules.forEach(k => { data[k] = await CMSDB.getAll(k); });
+  for (const k of modules) { data[k] = await CMSDB.getAll(k); }
   const meta = {version:'SIGAP v3.0', created: new Date().toISOString(), tipo, modules};
   const blob = new Blob([JSON.stringify({__meta:meta, ...data}, null, 2)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
@@ -1263,11 +1265,11 @@ async function removeIncomplete(btn) {
   if (!confirm('¿Eliminar registros sin campos requeridos?')) return;
   btn.disabled = true;
   let total = 0;
-  CMS_MODULES.forEach(k => {
+  for (const k of CMS_MODULES) {
     const items = await CMSDB.getAll(k);
     const toRemove = items.filter(i => !i.id || (!i.titulo && !i.nombre && !i.name && k !== 'org' && k !== 'media'));
-    toRemove.forEach(i => { if (i.id) await CMSDB.remove(k, i.id); total++; });
-  });
+    for (const i of toRemove) { if (i.id) await CMSDB.remove(k, i.id); total++; }
+  }
   setCRes('removeIncomplete', `${total} registros eliminados`);
   logAction('removeIncomplete','sistema',`${total} registros incompletos eliminados`,'success');
   toast(`${total} registros incompletos eliminados`, total > 0 ? 'success' : 'info');
@@ -1278,15 +1280,15 @@ async function removeDuplicates(btn) {
   if (!confirm('¿Eliminar registros duplicados?')) return;
   btn.disabled = true;
   let total = 0;
-  CMS_MODULES.forEach(k => {
+  for (const k of CMS_MODULES) {
     const items = await CMSDB.getAll(k);
     const seen = new Set();
-    items.forEach(item => {
+    for (const item of items) {
       const key = `${item.titulo||item.nombre||item.name||''}|${item.fecha||''}`;
       if (seen.has(key) && item.id) { await CMSDB.remove(k, item.id); total++; }
       else seen.add(key);
-    });
-  });
+    }
+  }
   setCRes('removeDuplicates', `${total} duplicados eliminados`);
   logAction('removeDuplicates','sistema',`${total} duplicados eliminados`,'success');
   toast(`${total} registros duplicados eliminados`, 'success');
@@ -1298,13 +1300,13 @@ async function archiveExpiredAlerts(btn) {
   const now = new Date();
   const all = await CMSDB.getAll('alertas');
   let count = 0;
-  all.forEach(a => {
+  for (const a of all) {
     if (a.activa !== false && a.fecha_expiracion && new Date(a.fecha_expiracion) < now) {
       a.activa = false;
       await CMSDB.save('alertas', a);
       count++;
     }
-  });
+  }
   setCRes('archiveExpiredAlerts', `${count} alertas archivadas`);
   logAction('archiveExpiredAlerts','alertas',`${count} alertas vencidas archivadas`,'success');
   toast(`${count} alertas vencidas archivadas`, 'success');
@@ -1316,13 +1318,13 @@ async function archivePastEvents(btn) {
   const now = new Date();
   const all = await CMSDB.getAll('eventos');
   let count = 0;
-  all.forEach(e => {
+  for (const e of all) {
     if (e.fecha && new Date(e.fecha) < now && e.estado !== 'completado') {
       e.estado = 'completado';
       await CMSDB.save('eventos', e);
       count++;
     }
-  });
+  }
   setCRes('archivePastEvents', `${count} eventos archivados`);
   logAction('archivePastEvents','eventos',`${count} eventos pasados marcados como completados`,'success');
   toast(`${count} eventos archivados como completados`, 'success');
@@ -1332,9 +1334,9 @@ async function archivePastEvents(btn) {
 async function repairDamaged(btn) {
   btn.disabled = true;
   let total = 0;
-  CMS_MODULES.forEach(k => {
+  for (const k of CMS_MODULES) {
     const items = await CMSDB.getAll(k);
-    items.forEach(item => {
+    for (const item of items) {
       let changed = false;
       Object.keys(item).forEach(key => {
         if (item[key] === null || item[key] === undefined) {
@@ -1344,8 +1346,8 @@ async function repairDamaged(btn) {
       });
       if (!item.id) { item.id = k.slice(0,2)+'-'+Date.now()+Math.random().toString(36).slice(2,5); changed = true; }
       if (changed) { await CMSDB.save(k, item); total++; }
-    });
-  });
+    }
+  }
   setCRes('repairDamaged', `${total} registros reparados`);
   logAction('repairDamaged','sistema',`${total} registros dañados reparados`,'success');
   toast(`${total} registros reparados`, 'success');
@@ -1356,7 +1358,8 @@ async function repairDamaged(btn) {
    DOCUMENTACIÓN
 ═══════════════════════════════════════════════ */
 async function renderDocumentacion() {
-  const activeCount = CMS_MODULES.filter(k => (await CMSDB.getAll(k)).length > 0).length;
+  const counts2 = await Promise.all(CMS_MODULES.map(k => CMSDB.getAll(k)));
+  const activeCount = counts2.filter(arr => arr.length > 0).length;
   const html = `
     <div class="two-col" style="margin-bottom:20px">
       <div class="card">

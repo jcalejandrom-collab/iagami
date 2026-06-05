@@ -400,14 +400,14 @@ function escHtml(s) {
 
 async function incrementVistas(id) {
   const r = await CMSDB.getOne('revistas', id);
-  if (r) CMSDB.save('revistas', Object.assign({}, r, {visualizaciones: (r.visualizaciones||0)+1}));
+  if (r) await CMSDB.save('revistas', Object.assign({}, r, {visualizaciones: (r.visualizaciones||0)+1}));
 }
 
 async function descargarRevista(id) {
   const r = await CMSDB.getOne('revistas', id);
   if (!r) return;
 
-  CMSDB.save('revistas', Object.assign({}, r, {descargas: (r.descargas||0)+1}));
+  await CMSDB.save('revistas', Object.assign({}, r, {descargas: (r.descargas||0)+1}));
   toast('⬇️ Descarga iniciada correctamente');
 
   if (r.pdf_url) {
