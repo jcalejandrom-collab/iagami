@@ -1184,7 +1184,7 @@ async function renderAlertBar() {
   const ticker = document.getElementById('alert-ticker-inner');
   if (!ticker) return;
   const items = alertas
-    .map(a => `<span class="alert-pill">${a.mensaje}</span>`)
+    .map(a => `<span class="alert-pill">${a.mensaje || ''}</span>`)
     .join('<span style="color:#4a8a6a;padding:0 8px">·</span>');
   ticker.innerHTML = alertas.length > 1
     ? items + '<span style="padding:0 24px">·</span>' + items
@@ -1355,9 +1355,9 @@ async function renderHomeAgenda() {
   if (!container) return;
   const today = new Date().toISOString().slice(0, 10);
   const todos = await CMSDB.getAll('eventos');
-  const futuros = todos.filter(e => e.fecha >= today && e.estado !== 'cancelado');
+  const futuros = todos.filter(e => e.fecha && e.fecha >= today && e.estado !== 'cancelado');
   const eventos = (futuros.length ? futuros : todos)
-    .sort((a, b) => a.fecha.localeCompare(b.fecha))
+    .sort((a, b) => (a.fecha || '').localeCompare(b.fecha || ''))
     .slice(0, 20);
 
   if (!eventos.length) {
