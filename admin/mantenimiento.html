@@ -419,6 +419,14 @@ function startApp(session) {
 ═══════════════════════════════════════════════ */
 function getLogs() { try { return JSON.parse(localStorage.getItem(SYS_LOGS)||'[]'); } catch(e){return[];} }
 function saveLogs(l) { localStorage.setItem(SYS_LOGS, JSON.stringify(l)); }
+function getUsers() { try { return JSON.parse(localStorage.getItem(SYS_USERS)||'[]'); } catch(e){return[];} }
+function saveUsers(u) { localStorage.setItem(SYS_USERS, JSON.stringify(u)); }
+function hashPwd(pwd) {
+  // Simple deterministic hash for password storage (not cryptographic — localStorage only)
+  let h = 0x811c9dc5;
+  for (let i = 0; i < pwd.length; i++) { h ^= pwd.charCodeAt(i); h = (h * 0x01000193) >>> 0; }
+  return h.toString(16).padStart(8,'0') + '-' + btoa(pwd.split('').reverse().join('')).slice(0,12);
+}
 
 function logRawAction(username, role, action, module, detail, result) {
   const logs = getLogs();
@@ -473,11 +481,11 @@ async function renderDashboard() {
   const lsOk = (() => { try { localStorage.setItem('_t','1'); localStorage.removeItem('_t'); return true; } catch(e){return false;} })();
   let totalRecords = 0;
   let activeModules = 0;
-  CMS_MODULES.forEach(k => {
+  for (const k of CMS_MODULES) {
     const arr = await CMSDB.getAll(k);
     totalRecords += arr.length;
     if (arr.length > 0) activeModules++;
-  });
+  }
   const alertas = (await CMSDB.getAll('alertas')).filter(a => a.activa !== false).length;
 
   const stats = [
@@ -496,11 +504,13 @@ async function renderDashboard() {
 
   // Modules table
   const tbody = document.querySelector('#dash-modules-table tbody');
-  tbody.innerHTML = CMS_MODULES.map(k => {
+  let moduleRows = '';
+  for (const k of CMS_MODULES) {
     const items = await CMSDB.getAll(k);
     const status = items.length === 0 ? '<span class="status status-warn">vacío</span>' : '<span class="status status-ok">activo</span>';
-    return `<tr><td>${MODULE_LABELS[k]}</td><td>${items.length}</td><td>${status}</td></tr>`;
-  }).join('');
+    moduleRows += `<tr><td>${MODULE_LABELS[k]}</td><td>${items.length}</td><td>${status}</td></tr>`;
+  }
+  tbody.innerHTML = moduleRows;
 
   // Recent logs
   const logs = getLogs().slice(-10).reverse();
@@ -627,6 +637,13 @@ async function renderMonitor() {
   const loginTime = sess ? new Date(sess.loginTime) : null;
   const dur = loginTime ? Math.round((Date.now() - loginTime) / 60000) : 0;
 
+  // Pre-fetch module counts before building HTML (await cannot be used inside .map())
+  const moduleCounts = {};
+  for (const k of CMS_MODULES) {
+    const items = await CMSDB.getAll(k);
+    moduleCounts[k] = items.length;
+  }
+
   const html = `
     <div class="two-col" style="margin-bottom:20px">
       <div class="card">
@@ -650,8 +667,8 @@ async function renderMonitor() {
       <div class="card">
         <div class="card-title">📦 Estado de Módulos CMS</div>
         ${CMS_MODULES.map(k => {
-          const items = await CMSDB.getAll(k);
-          const badge = items.length === 0 ? '<span class="status status-warn">vacío</span>' : `<span class="status status-ok">${items.length} reg.</span>`;
+          const count = moduleCounts[k];
+          const badge = count === 0 ? '<span class="status status-warn">vacío</span>' : `<span class="status status-ok">${count} reg.</span>`;
           return `<div class="mod-row"><span>${MODULE_LABELS[k]}</span>${badge}</div>`;
         }).join('')}
       </div>
@@ -1205,8 +1222,8 @@ async function runAudit() {
   logAction('audit','sistema','Auditoría completa ejecutada',`health:${healthScore}%`);
 }
 
-function exportAudit() {
-  if (!_auditData) { runAudit(); }
+async function exportAudit() {
+  if (!_auditData) { await runAudit(); }
   const blob = new Blob([JSON.stringify({meta:{generado:new Date().toISOString(),version:'SIGAP v3.0'}, auditoria:_auditData}, null, 2)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -1247,7 +1264,7 @@ function setCRes(fn, msg, type='ok') {
 async function scanSystem() {
   let html = '<div class="card"><div class="card-title">🔎 Resultado del Escaneo</div><ul class="check-list">';
   let issues = 0;
-  CMS_MODULES.forEach(k => {
+  for (const k of CMS_MODULES) {
     const items = await CMSDB.getAll(k);
     const noId = items.filter(i => !i.id).length;
     const noTitle = items.filter(i => !i.titulo && !i.nombre && !i.name).length;
@@ -1255,7 +1272,7 @@ async function scanSystem() {
     if (noTitle > 0) { html += `<li class="check-item warn"><span class="icon">⚠️</span>${MODULE_LABELS[k]}: ${noTitle} sin titulo/nombre</li>`; issues++; }
     if (items.length === 0) { html += `<li class="check-item ok"><span class="icon">✅</span>${MODULE_LABELS[k]}: vacío (0 registros)</li>`; }
     else if (noId === 0 && noTitle === 0) { html += `<li class="check-item ok"><span class="icon">✅</span>${MODULE_LABELS[k]}: ${items.length} registros OK</li>`; }
-  });
+  }
   html += `</ul><div style="margin-top:12px;font-weight:600;color:${issues===0?'var(--ok)':'var(--warn)'}">Problemas encontrados: ${issues}</div></div>`;
   document.getElementById('scan-result').innerHTML = html;
   logAction('scan','sistema',`Escaneo completado: ${issues} problemas encontrados`,'success');
@@ -1360,6 +1377,9 @@ async function repairDamaged(btn) {
 async function renderDocumentacion() {
   const counts2 = await Promise.all(CMS_MODULES.map(k => CMSDB.getAll(k)));
   const activeCount = counts2.filter(arr => arr.length > 0).length;
+  // Build module counts map for use in template (await cannot be used inside .map())
+  const moduleCounts = {};
+  CMS_MODULES.forEach((k, i) => { moduleCounts[k] = counts2[i].length; });
   const html = `
     <div class="two-col" style="margin-bottom:20px">
       <div class="card">
@@ -1397,7 +1417,7 @@ async function renderDocumentacion() {
       <table>
         <thead><tr><th>Módulo</th><th>Clave localStorage</th><th>Registros</th><th>Estado</th></tr></thead>
         <tbody>${CMS_MODULES.map(k => {
-          const count = (await CMSDB.getAll(k)).length;
+          const count = moduleCounts[k];
           return `<tr><td>${MODULE_LABELS[k]}</td><td style="font-family:monospace;font-size:12px">iagami_cms_${k}</td><td>${count}</td><td>${count>0?'<span class="status status-ok">activo</span>':'<span class="status status-warn">vacío</span>'}</td></tr>`;
         }).join('')}</tbody>
       </table>
@@ -1459,11 +1479,7 @@ function fmtDateTime(iso) {
 /* ═══════════════════════════════════════════════
    KEYBOARD SHORTCUTS
 ═══════════════════════════════════════════════ */
-document.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && document.getElementById('login-overlay').style.display !== 'none') {
-    doLogin();
-  }
-});
+// No login overlay in this page — keyboard shortcut removed to avoid null-reference error
 
 /* ═══════════════════════════════════════════════
    INIT

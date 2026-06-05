@@ -1262,23 +1262,23 @@ function showSection(name) {
 
 async function renderSection(name) {
   switch(name) {
-    case 'dashboard':     renderDashboard(); break;
-    case 'noticias':      renderNoticias(); break;
-    case 'tramites':      renderTramites(); break;
-    case 'agenda':        renderAgenda(); break;
-    case 'transparencia': renderTransparencia(); break;
-    case 'organizacion':  renderOrganizacion(); break;
-    case 'proyectos':     renderProyectos(); break;
-    case 'indicadores':   renderIndicadores(); break;
-    case 'empresas':      renderEmpresas(); break;
-    case 'alertas':       renderAlertas(); break;
-    case 'multas':        renderMultas(); break;
-    case 'denuncias':     renderDenuncias(); break;
-    case 'archivos':      renderArchivos(); break;
-    case 'consejos':      renderConsejos(); break;
-    case 'bienvenida':    renderBienvenida(); break;
-    case 'planificacion': renderPlan(); break;
-    case 'revista':       renderRevistas(); break;
+    case 'dashboard':     await renderDashboard(); break;
+    case 'noticias':      await renderNoticias(); break;
+    case 'tramites':      await renderTramites(); break;
+    case 'agenda':        await renderAgenda(); break;
+    case 'transparencia': await renderTransparencia(); break;
+    case 'organizacion':  await renderOrganizacion(); break;
+    case 'proyectos':     await renderProyectos(); break;
+    case 'indicadores':   await renderIndicadores(); break;
+    case 'empresas':      await renderEmpresas(); break;
+    case 'alertas':       await renderAlertas(); break;
+    case 'multas':        await renderMultas(); break;
+    case 'denuncias':     await renderDenuncias(); break;
+    case 'archivos':      await renderArchivos(); break;
+    case 'consejos':      await renderConsejos(); break;
+    case 'bienvenida':    await renderBienvenida(); break;
+    case 'planificacion': await renderPlan(); break;
+    case 'revista':       await renderRevistas(); break;
   }
 }
 
@@ -1294,6 +1294,7 @@ function closeSidebar() {
 document.getElementById('overlay').addEventListener('click', closeSidebar);
 
 /* ─── TOAST ─── */
+function showToast(msg, type='success') { toast(msg, type); }
 function toast(msg, type='success') {
   const tc = document.getElementById('toast-container');
   const t = document.createElement('div');
@@ -1512,7 +1513,7 @@ function actionBtns(section, id) {
 }
 
 async function deleteRecord(section, id) {
-  confirmDelete(() => {
+  confirmDelete(async () => {
     const keyMap = {agenda:'eventos', transparencia:'documentos', organizacion:'org'};
     const dbKey = keyMap[section] || section;
     await CMSDB.remove(dbKey, id);
@@ -2025,7 +2026,7 @@ async function toggleMultaPublicado(id) {
 }
 
 async function deleteMulta(id) {
-  confirmDelete(() => {
+  confirmDelete(async () => {
     await CMSDB.remove('multas', id);
     toast('Multa eliminada');
     renderMultas();
@@ -2158,7 +2159,7 @@ async function handleFileUpload(e) {
   if (!file) return;
   if (file.size > 2*1024*1024) { toast('El archivo supera el límite de 2MB', 'error'); e.target.value=''; return; }
   const reader = new FileReader();
-  reader.onload = evt => {
+  reader.onload = async evt => {
     await CMSDB.save('media', {
       nombre: file.name,
       tipo: file.type,
@@ -2174,7 +2175,7 @@ async function handleFileUpload(e) {
 }
 
 async function deleteMedia(id) {
-  confirmDelete(() => {
+  confirmDelete(async () => {
     await CMSDB.remove('media', id);
     toast('Archivo eliminado');
     renderArchivos();
@@ -2197,7 +2198,7 @@ async function renderConsejos() {
   let data = await CMSDB.getAll('consejos');
   if (search) {
     const q = search.toLowerCase();
-    data = data.filter(c => c.nombre.toLowerCase().includes(q) || (c.codigo||'').toLowerCase().includes(q) || (c.responsable||'').toLowerCase().includes(q));
+    data = data.filter(c => (c.nombre||'').toLowerCase().includes(q) || (c.codigo||'').toLowerCase().includes(q) || (c.responsable||'').toLowerCase().includes(q));
   }
   if (parroquia) data = data.filter(c => c.parroquia === parroquia);
   if (estatus) data = data.filter(c => c.estatus === estatus);
@@ -2284,7 +2285,7 @@ function closeConsejoForm() {
 }
 
 async function deleteConsejo(id) {
-  confirmDelete(() => {
+  confirmDelete(async () => {
     await CMSDB.remove('consejos', id);
     toast('Consejo eliminado');
     renderConsejos();
@@ -2301,7 +2302,7 @@ async function _bvGetCurrent() {
 }
 
 async function renderBienvenida() {
-  const current = _bvGetCurrent();
+  const current = await _bvGetCurrent();
   // Status card
   const badge = document.getElementById('bv-estado-badge');
   const fechaPub = document.getElementById('bv-fecha-pub');
@@ -2400,14 +2401,14 @@ function bienvenidaLoadPreview(src) {
   document.getElementById('fb-dropzone-content').style.display = 'none';
 }
 
-function _bvBuildData(estado, activa) {
+async function _bvBuildData(estado, activa) {
   const titulo = (document.getElementById('fb-titulo')||{}).value||'';
   if (!titulo.trim()) { showToast('El título es obligatorio', 'error'); return null; }
   const radios = document.querySelectorAll('input[name="fb-frecuencia"]');
   let frecuencia = 'siempre';
   radios.forEach(r => { if (r.checked) frecuencia = r.value; });
   const now = new Date().toISOString().slice(0,10);
-  const current = _bvGetCurrent();
+  const current = await _bvGetCurrent();
   const histEntry = { fecha: new Date().toLocaleString('es-VE'), accion: estado === 'publicada' ? '🚀 Publicada' : estado === 'borrador' ? '💾 Borrador guardado' : '⏹ Desactivada', usuario: 'Admin' };
   const hist = (current && current.historial) ? [...current.historial, histEntry] : [histEntry];
   return {
@@ -2426,7 +2427,7 @@ function _bvBuildData(estado, activa) {
 }
 
 async function publicarBienvenida() {
-  const data = _bvBuildData('publicada', true);
+  const data = await _bvBuildData('publicada', true);
   if (!data) return;
   // Deactivate all others
   for (const b of await CMSDB.getAll('bienvenida')) {
@@ -2438,7 +2439,7 @@ async function publicarBienvenida() {
 }
 
 async function guardarBorrador() {
-  const data = _bvBuildData('borrador', false);
+  const data = await _bvBuildData('borrador', false);
   if (!data) return;
   await CMSDB.save('bienvenida', data);
   showToast('Borrador guardado', 'success');
@@ -2446,7 +2447,7 @@ async function guardarBorrador() {
 }
 
 async function desactivarBienvenida() {
-  const current = _bvGetCurrent();
+  const current = await _bvGetCurrent();
   if (!current) return;
   const histEntry = { fecha: new Date().toLocaleString('es-VE'), accion: '⏹ Desactivada', usuario: 'Admin' };
   const hist = current.historial ? [...current.historial, histEntry] : [histEntry];
@@ -2692,7 +2693,7 @@ async function savePlan() {
 }
 
 async function deletePlan(id) {
-  confirmDelete(() => {
+  confirmDelete(async () => {
     await CMSDB.remove('planificacion', id);
     renderPlan();
     showToast('Actividad eliminada', 'success');
@@ -2768,7 +2769,7 @@ async function renderRevistas() {
   const fCat = document.getElementById('f-revista-cat')?.value || '';
   let items;
   try { items = await CMSDB.getAll('revistas'); } catch(e) { items = []; console.error('CMSDB revistas error:', e); }
-  if (q)    items = items.filter(r => (r.titulo+r.numero_edicion+r.descripcion).toLowerCase().includes(q));
+  if (q)    items = items.filter(r => ((r.titulo||'')+(r.numero_edicion||'')+(r.descripcion||'')).toLowerCase().includes(q));
   if (fEst) items = items.filter(r => r.estado === fEst);
   if (fCat) items = items.filter(r => r.categoria === fCat);
 
