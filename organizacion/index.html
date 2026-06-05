@@ -253,8 +253,8 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 let currentTab = 'organigrama';
 
 document.addEventListener('DOMContentLoaded', async () => {
-  buildOrgTree();
-  renderDirectory();
+  await buildOrgTree();
+  await renderDirectory();
 });
 
 // ── Tab switch ──
@@ -269,7 +269,8 @@ function switchTab(tab) {
 // ── Build Org Tree ──
 async function buildOrgTree() {
   const units = await CMSDB.getAll('org');
-  const root = units.find(u => u.padre === null);
+  if (!units || units.length === 0) return;
+  const root = units.find(u => u.padre === null || u.padre === undefined || u.padre === '');
   if (!root) return;
   const children = units.filter(u => u.padre === root.id);
 
@@ -355,8 +356,8 @@ async function renderDirectory(search = '', tipo = '') {
   const units = await CMSDB.getAll('org');
   const filtered = units.filter(u => {
     const matchSearch = !search ||
-      u.nombre.toLowerCase().includes(search) ||
-      u.responsable.toLowerCase().includes(search);
+      (u.nombre || '').toLowerCase().includes(search) ||
+      (u.responsable || '').toLowerCase().includes(search);
     const matchTipo = !tipo || u.tipo === tipo;
     return matchSearch && matchTipo;
   });
@@ -383,9 +384,9 @@ function dirCardHTML(u) {
         </div>
       </div>
       <div class="dir-card-info">
-        <div class="info-row"><span>👤</span><span>${u.responsable}</span></div>
-        <div class="info-row"><span>📞</span><span>${u.telefono}</span></div>
-        <div class="info-row"><span>✉️</span><span>${u.email}</span></div>
+        <div class="info-row"><span>👤</span><span>${u.responsable || '—'}</span></div>
+        <div class="info-row"><span>📞</span><span>${u.telefono || 'No disponible'}</span></div>
+        <div class="info-row"><span>✉️</span><span>${u.email || 'No disponible'}</span></div>
       </div>
       <div class="dir-card-cta">Ver funciones y detalle →</div>
     </div>`;
@@ -394,7 +395,7 @@ function dirCardHTML(u) {
 async function searchDirectory() {
   const search = document.getElementById('dir-search').value.toLowerCase();
   const tipo = document.getElementById('tipo-filter').value;
-  renderDirectory(search, tipo);
+  await renderDirectory(search, tipo);
 }
 
 // ── Toast ──
