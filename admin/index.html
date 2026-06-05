@@ -1371,7 +1371,7 @@ function populateList(listId, values=[]) {
 }
 
 /* ─── FORM PANEL HELPERS ─── */
-function openForm(section, id=null) {
+async function openForm(section, id=null) {
   const lv = document.getElementById(section+'-list-view');
   const fv = document.getElementById(section+'-form-view');
   if (lv) lv.style.display = 'none';
@@ -1511,7 +1511,7 @@ function actionBtns(section, id) {
   </div>`;
 }
 
-function deleteRecord(section, id) {
+async function deleteRecord(section, id) {
   confirmDelete(() => {
     const keyMap = {agenda:'eventos', transparencia:'documentos', organizacion:'org'};
     const dbKey = keyMap[section] || section;
@@ -1622,7 +1622,7 @@ async function renderNoticias() {
   renderPagination('noticias-pagination','noticias',total,current,'renderNoticias');
 }
 
-function saveNoticias(e) {
+async function saveNoticias(e) {
   e.preventDefault();
   const form = document.getElementById('noticias-form');
   const data = collectForm(form);
@@ -1633,7 +1633,7 @@ function saveNoticias(e) {
   renderNoticias();
 }
 
-function toggleEstado(key, id, field, val1, val2) {
+async function toggleEstado(key, id, field, val1, val2) {
   try {
     const item = await CMSDB.getOne(key, id);
     if (!item) return;
@@ -1669,7 +1669,7 @@ async function renderTramites() {
   renderPagination('tramites-pagination','tramites',total,current,'renderTramites');
 }
 
-function saveTramites(e) {
+async function saveTramites(e) {
   e.preventDefault();
   const form = document.getElementById('tramites-form');
   const data = collectForm(form);
@@ -1684,7 +1684,7 @@ function saveTramites(e) {
 /* ════════════════════════════════════════
    AGENDA
 ════════════════════════════════════════ */
-function renderAgenda() {
+async function renderAgenda() {
   let items = await CMSDB.getAll('eventos');
   const search = (document.getElementById('agenda-search')||{}).value||'';
   const tipo = (document.getElementById('agenda-tipo')||{}).value||'';
@@ -1704,7 +1704,7 @@ function renderAgenda() {
   renderPagination('agenda-pagination','agenda',total,current,'renderAgenda');
 }
 
-function saveAgenda(e) {
+async function saveAgenda(e) {
   e.preventDefault();
   const form = document.getElementById('agenda-form');
   const data = collectForm(form);
@@ -1718,7 +1718,7 @@ function saveAgenda(e) {
 /* ════════════════════════════════════════
    TRANSPARENCIA
 ════════════════════════════════════════ */
-function renderTransparencia() {
+async function renderTransparencia() {
   let items = await CMSDB.getAll('documentos');
   const search = (document.getElementById('transparencia-search')||{}).value||'';
   const cat = (document.getElementById('transparencia-cat')||{}).value||'';
@@ -1736,7 +1736,7 @@ function renderTransparencia() {
   renderPagination('transparencia-pagination','transparencia',total,current,'renderTransparencia');
 }
 
-function saveTransparencia(e) {
+async function saveTransparencia(e) {
   e.preventDefault();
   const form = document.getElementById('transparencia-form');
   const data = collectForm(form);
@@ -1749,7 +1749,7 @@ function saveTransparencia(e) {
 /* ════════════════════════════════════════
    ORGANIZACIÓN
 ════════════════════════════════════════ */
-function populateOrgParentSelect(currentId=null, selectedPadre=null) {
+async function populateOrgParentSelect(currentId=null, selectedPadre=null) {
   const sel = document.getElementById('org-padre-select');
   if (!sel) return;
   const units = await CMSDB.getAll('org').filter(u => u.id !== currentId);
@@ -1776,7 +1776,7 @@ async function renderOrganizacion() {
   renderPagination('organizacion-pagination','organizacion',total,current,'renderOrganizacion');
 }
 
-function saveOrganizacion(e) {
+async function saveOrganizacion(e) {
   e.preventDefault();
   const form = document.getElementById('organizacion-form');
   const data = collectForm(form);
@@ -1808,7 +1808,7 @@ async function renderProyectos() {
   renderPagination('proyectos-pagination','proyectos',total,current,'renderProyectos');
 }
 
-function saveProyectos(e) {
+async function saveProyectos(e) {
   e.preventDefault();
   const form = document.getElementById('proyectos-form');
   const data = collectForm(form);
@@ -1838,7 +1838,7 @@ async function renderIndicadores() {
   renderPagination('indicadores-pagination','indicadores',total,current,'renderIndicadores');
 }
 
-function saveIndicadores(e) {
+async function saveIndicadores(e) {
   e.preventDefault();
   const data = collectForm(document.getElementById('indicadores-form'));
   data.valor_actual = parseFloat(data.valor_actual)||0;
@@ -1870,7 +1870,7 @@ async function renderEmpresas() {
   renderPagination('empresas-pagination','empresas',total,current,'renderEmpresas');
 }
 
-function saveEmpresas(e) {
+async function saveEmpresas(e) {
   e.preventDefault();
   const data = collectForm(document.getElementById('empresas-form'));
   await CMSDB.save('empresas', data);
@@ -1901,7 +1901,7 @@ async function renderAlertas() {
   renderPagination('alertas-pagination','alertas',total,current,'renderAlertas');
 }
 
-function saveAlertas(e) {
+async function saveAlertas(e) {
   e.preventDefault();
   const form = document.getElementById('alertas-form');
   const data = collectForm(form);
@@ -1961,7 +1961,7 @@ async function renderMultas() {
   renderPagination('multas-pagination','multas',total,current,'renderMultas');
 }
 
-function openMultaForm(id) {
+async function openMultaForm(id) {
   document.getElementById('multas-list-view').style.display = 'none';
   document.getElementById('multas-form-view').style.display  = 'block';
   const m = id ? await CMSDB.getOne('multas', id) : null;
@@ -1984,7 +1984,7 @@ function closeMultaForm() {
   document.getElementById('multas-form-view').style.display  = 'none';
 }
 
-function saveMultas() {
+async function saveMultas() {
   const exp = document.getElementById('mf-expediente').value.trim();
   const doc = document.getElementById('mf-documento').value.trim();
   const nom = document.getElementById('mf-nombre').value.trim();
@@ -2015,7 +2015,7 @@ function saveMultas() {
   renderMultas();
 }
 
-function toggleMultaPublicado(id) {
+async function toggleMultaPublicado(id) {
   const m = await CMSDB.getOne('multas', id);
   if (!m) return;
   await CMSDB.save('multas', Object.assign({}, m, { publicado: !m.publicado }));
@@ -2023,7 +2023,7 @@ function toggleMultaPublicado(id) {
   renderMultas();
 }
 
-function deleteMulta(id) {
+async function deleteMulta(id) {
   confirmDelete(() => {
     await CMSDB.remove('multas', id);
     toast('Multa eliminada');
@@ -2078,7 +2078,7 @@ function toggleNota(id) {
   if (row) row.style.display = row.style.display==='none' ? '' : 'none';
 }
 
-function updateDenunciaStatus(id, estado) {
+async function updateDenunciaStatus(id, estado) {
   let item = await CMSDB.getOne('denuncias', id);
   if (!item) {
     // try alternate key
@@ -2092,7 +2092,7 @@ function updateDenunciaStatus(id, estado) {
   if (item) { item.estado = estado; await CMSDB.save('denuncias', item); toast('Estado actualizado'); }
 }
 
-function saveDenunciaNota(id, notas) {
+async function saveDenunciaNota(id, notas) {
   let item = await CMSDB.getOne('denuncias', id);
   if (!item) {
     try {
@@ -2118,7 +2118,7 @@ function setMediaFilter(f) {
   renderArchivos();
 }
 
-function renderArchivos() {
+async function renderArchivos() {
   let items = await CMSDB.getAll('media');
   if (mediaFilter === 'image') items = items.filter(i => i.tipo && i.tipo.startsWith('image'));
   if (mediaFilter === 'pdf') items = items.filter(i => i.tipo === 'application/pdf');
@@ -2152,7 +2152,7 @@ function formatSize(bytes) {
   return (bytes/1048576).toFixed(1)+'MB';
 }
 
-function handleFileUpload(e) {
+async function handleFileUpload(e) {
   const file = e.target.files[0];
   if (!file) return;
   if (file.size > 2*1024*1024) { toast('El archivo supera el límite de 2MB', 'error'); e.target.value=''; return; }
@@ -2172,7 +2172,7 @@ function handleFileUpload(e) {
   e.target.value='';
 }
 
-function deleteMedia(id) {
+async function deleteMedia(id) {
   confirmDelete(() => {
     await CMSDB.remove('media', id);
     toast('Archivo eliminado');
@@ -2246,7 +2246,7 @@ async function renderConsejos() {
 
 function ccChangePage(p) { ccPage = p; renderConsejos(); }
 
-function openConsejoForm(id) {
+async function openConsejoForm(id) {
   const form = document.getElementById('form-consejos');
   if (!form) return;
   form.style.display = 'block';
@@ -2262,7 +2262,7 @@ function openConsejoForm(id) {
   if (title) title.textContent = (id ? '✏️ Editar' : '🏘️ Nuevo') + ' Consejo Comunal';
 }
 
-function saveConsejo() {
+async function saveConsejo() {
   const nombre = (document.getElementById('fc-nombre')||{}).value||'';
   const codigo = (document.getElementById('fc-codigo')||{}).value||'';
   if (!nombre.trim()) { toast('El nombre es obligatorio', 'error'); return; }
@@ -2282,7 +2282,7 @@ function closeConsejoForm() {
   renderConsejos();
 }
 
-function deleteConsejo(id) {
+async function deleteConsejo(id) {
   confirmDelete(() => {
     await CMSDB.remove('consejos', id);
     toast('Consejo eliminado');
@@ -2294,7 +2294,7 @@ function deleteConsejo(id) {
    BIENVENIDA CRUD
 ═══════════════════════════════════════════════ */
 
-function _bvGetCurrent() {
+async function _bvGetCurrent() {
   const items = await CMSDB.getAll('bienvenida');
   return items.find(b => b.activa) || items[0] || null;
 }
@@ -2454,7 +2454,7 @@ async function desactivarBienvenida() {
   renderBienvenida();
 }
 
-function deleteBienvenida(id) {
+async function deleteBienvenida(id) {
   await CMSDB.remove('bienvenida', id);
   renderBienvenida();
   showToast('Configuración eliminada', 'success');
@@ -2491,7 +2491,7 @@ function _planBadge(val, map) {
   return `<span style="display:inline-block;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:700;background:${c.bg};color:${c.color}">${val||'—'}</span>`;
 }
 
-function _planUpdateStats() {
+async function _planUpdateStats() {
   let items; try { items = await CMSDB.getAll('planificacion'); } catch(e) { items=[]; }
   const get = (v) => items.filter(p => p.estado === v).length;
   const s = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = v; };
@@ -2631,7 +2631,7 @@ async function renderPlanTablero() {
     </div>`;
 }
 
-function openPlanForm(id) {
+async function openPlanForm(id) {
   _editPlanId = id || null;
   const items = await CMSDB.getAll('planificacion');
   const item = id ? items.find(i => i.id === id) : null;
@@ -2662,7 +2662,7 @@ function closePlanForm() {
   document.getElementById('form-plan').style.display = 'none';
 }
 
-function savePlan() {
+async function savePlan() {
   const titulo = (document.getElementById('fp-titulo')||{}).value||'';
   if (!titulo.trim()) { showToast('El título es obligatorio', 'error'); return; }
   const gv = id => (document.getElementById(id)||{}).value||'';
@@ -2690,7 +2690,7 @@ function savePlan() {
   showToast('Actividad guardada correctamente', 'success');
 }
 
-function deletePlan(id) {
+async function deletePlan(id) {
   confirmDelete(() => {
     await CMSDB.remove('planificacion', id);
     renderPlan();
@@ -2797,14 +2797,14 @@ async function renderRevistas() {
   </tbody></table>`;
 }
 
-function deleteRevista(id) {
+async function deleteRevista(id) {
   await CMSDB.remove('revistas', id);
   renderRevistas();
   showToast('Revista eliminada', 'success');
 }
 
 /* ── META FORM ── */
-function openRevistaForm(id) {
+async function openRevistaForm(id) {
   _revistaEditId = id || null;
   const items = await CMSDB.getAll('revistas');
   const r = id ? items.find(i => i.id === id) : null;
@@ -2839,7 +2839,7 @@ function backToRevistaMeta() {
   document.getElementById('revista-editor').style.display     = 'none';
 }
 
-function saveRevistaMeta() {
+async function saveRevistaMeta() {
   const titulo  = document.getElementById('rv-titulo').value.trim();
   const numero  = document.getElementById('rv-numero').value.trim();
   if (!titulo || !numero) { showToast('Título y número de edición son obligatorios', 'error'); return; }
@@ -2891,7 +2891,7 @@ function closeEditor() {
   renderRevistas();
 }
 
-function saveRevistaBlocks() {
+async function saveRevistaBlocks() {
   if (!_revistaEditId) return;
   const existing = await CMSDB.getOne('revistas', _revistaEditId);
   await CMSDB.save('revistas', Object.assign({}, existing, { contenido_bloques: _revistaBlocks }));

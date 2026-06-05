@@ -468,7 +468,7 @@ function closeModal(id) { document.getElementById(id).classList.remove('open'); 
 /* ═══════════════════════════════════════════════
    DASHBOARD
 ═══════════════════════════════════════════════ */
-function renderDashboard() {
+async function renderDashboard() {
   // Stat cards
   const lsOk = (() => { try { localStorage.setItem('_t','1'); localStorage.removeItem('_t'); return true; } catch(e){return false;} })();
   let totalRecords = 0;
@@ -512,7 +512,7 @@ function renderDashboard() {
 /* ═══════════════════════════════════════════════
    DIAGNÓSTICO
 ═══════════════════════════════════════════════ */
-function runDiagnostic() {
+async function runDiagnostic() {
   const checks = [];
   // 1. localStorage
   const lsOk = (() => { try { localStorage.setItem('_t','1'); localStorage.removeItem('_t'); return true; } catch(e){return false;} })();
@@ -610,7 +610,7 @@ function runDiagnostic() {
 /* ═══════════════════════════════════════════════
    MONITOR
 ═══════════════════════════════════════════════ */
-function renderMonitor() {
+async function renderMonitor() {
   let usedBytes = 0;
   const lsData = {};
   for (let i = 0; i < localStorage.length; i++) {
@@ -722,7 +722,7 @@ function cleanCache(btn) {
   btn.disabled = false;
 }
 
-function removeExpiredAlerts(btn) {
+async function removeExpiredAlerts(btn) {
   if (!confirm('¿Eliminar alertas inactivas con más de 30 días?')) return;
   btn.disabled = true;
   const cutoff = new Date(Date.now() - 30 * 86400000);
@@ -736,7 +736,7 @@ function removeExpiredAlerts(btn) {
   btn.disabled = false;
 }
 
-function deduplicateDenuncias(btn) {
+async function deduplicateDenuncias(btn) {
   if (!confirm('¿Eliminar denuncias duplicadas?')) return;
   btn.disabled = true;
   const all = await CMSDB.getAll('denuncias');
@@ -753,7 +753,7 @@ function deduplicateDenuncias(btn) {
   btn.disabled = false;
 }
 
-function validateIDs(btn) {
+async function validateIDs(btn) {
   btn.disabled = true;
   let total = 0, fixed = 0;
   CMS_MODULES.forEach(k => {
@@ -769,7 +769,7 @@ function validateIDs(btn) {
   btn.disabled = false;
 }
 
-function regenStats(btn) {
+async function regenStats(btn) {
   btn.disabled = true;
   let html = '<div style="font-size:12px;text-align:left">';
   CMS_MODULES.forEach(k => {
@@ -815,7 +815,7 @@ function openPartialBackup() {
   bm.style.display = bm.style.display === 'none' ? 'block' : 'none';
 }
 
-function createBackup(tipo) {
+async function createBackup(tipo) {
   const data = {};
   let modules;
   if (tipo === 'parcial') {
@@ -1107,7 +1107,7 @@ function renderAccessHistory() {
 /* ═══════════════════════════════════════════════
    AUDITORÍA
 ═══════════════════════════════════════════════ */
-function runAudit() {
+async function runAudit() {
   const now = new Date();
   const in30 = new Date(Date.now() + 30 * 86400000);
   const results = {};
@@ -1242,7 +1242,7 @@ function setCRes(fn, msg, type='ok') {
   el.textContent = msg;
 }
 
-function scanSystem() {
+async function scanSystem() {
   let html = '<div class="card"><div class="card-title">🔎 Resultado del Escaneo</div><ul class="check-list">';
   let issues = 0;
   CMS_MODULES.forEach(k => {
@@ -1259,7 +1259,7 @@ function scanSystem() {
   logAction('scan','sistema',`Escaneo completado: ${issues} problemas encontrados`,'success');
 }
 
-function removeIncomplete(btn) {
+async function removeIncomplete(btn) {
   if (!confirm('¿Eliminar registros sin campos requeridos?')) return;
   btn.disabled = true;
   let total = 0;
@@ -1274,7 +1274,7 @@ function removeIncomplete(btn) {
   btn.disabled = false;
 }
 
-function removeDuplicates(btn) {
+async function removeDuplicates(btn) {
   if (!confirm('¿Eliminar registros duplicados?')) return;
   btn.disabled = true;
   let total = 0;
@@ -1293,7 +1293,7 @@ function removeDuplicates(btn) {
   btn.disabled = false;
 }
 
-function archiveExpiredAlerts(btn) {
+async function archiveExpiredAlerts(btn) {
   btn.disabled = true;
   const now = new Date();
   const all = await CMSDB.getAll('alertas');
@@ -1311,7 +1311,7 @@ function archiveExpiredAlerts(btn) {
   btn.disabled = false;
 }
 
-function archivePastEvents(btn) {
+async function archivePastEvents(btn) {
   btn.disabled = true;
   const now = new Date();
   const all = await CMSDB.getAll('eventos');
@@ -1329,7 +1329,7 @@ function archivePastEvents(btn) {
   btn.disabled = false;
 }
 
-function repairDamaged(btn) {
+async function repairDamaged(btn) {
   btn.disabled = true;
   let total = 0;
   CMS_MODULES.forEach(k => {
@@ -1355,7 +1355,7 @@ function repairDamaged(btn) {
 /* ═══════════════════════════════════════════════
    DOCUMENTACIÓN
 ═══════════════════════════════════════════════ */
-function renderDocumentacion() {
+async function renderDocumentacion() {
   const activeCount = CMS_MODULES.filter(k => await CMSDB.getAll(k).length > 0).length;
   const html = `
     <div class="two-col" style="margin-bottom:20px">
