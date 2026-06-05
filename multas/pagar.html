@@ -438,7 +438,9 @@ function escHtml(s) {
 function genCodigo() {
   const d = new Date();
   const pad = n => String(n).padStart(2,'0');
-  return `RPG-${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}-${Math.random().toString(36).slice(2,7).toUpperCase()}`;
+  // Use a fixed-length random hex suffix to avoid short/colliding codes
+  const rnd = Math.floor(Math.random() * 0xFFFFF).toString(16).padStart(5,'0').toUpperCase();
+  return `RPG-${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}-${rnd}`;
 }
 
 /* ── AUTO-FILL desde expediente ── */
@@ -512,7 +514,7 @@ async function enviarReporte() {
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span> Enviando...';
 
-  setTimeout(() => {
+  setTimeout(async () => {
     try {
       const codigo = genCodigo();
       const reporte = {
