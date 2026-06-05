@@ -25,8 +25,13 @@ const CMSDB = (function () {
       let totalPages = 1;
 
       do {
+        const token = getToken();
+        const headers = {};
+        if (token) headers['Authorization'] = token;
+
         const res = await fetch(
-          `${PB_URL}/api/collections/${coleccion}/records?page=${page}&perPage=${perPage}&sort=-created`
+          `${PB_URL}/api/collections/${coleccion}/records?page=${page}&perPage=${perPage}&sort=-created`,
+          { headers }
         );
 
         if (res.status === 404) {
@@ -66,6 +71,8 @@ const CMSDB = (function () {
       );
 
       let body, headers = {};
+      const token = getToken();
+      if (token) headers['Authorization'] = token;
 
       if (tieneArchivos) {
         const fd = new FormData();
@@ -117,9 +124,12 @@ const CMSDB = (function () {
   /* ─── DELETE ─── */
   async function deleteRecord(coleccion, id) {
     try {
+      const token = getToken();
+      const headers = {};
+      if (token) headers['Authorization'] = token;
       const res = await fetch(
         `${PB_URL}/api/collections/${coleccion}/records/${id}`,
-        { method: 'DELETE' }
+        { method: 'DELETE', headers }
       );
       if (!res.ok && res.status !== 204)
         throw new Error(`HTTP ${res.status}`);
@@ -139,8 +149,12 @@ const CMSDB = (function () {
   /* ─── GET ONE ─── */
   async function getOne(coleccion, id) {
     try {
+      const token = getToken();
+      const headers = {};
+      if (token) headers['Authorization'] = token;
       const res = await fetch(
-        `${PB_URL}/api/collections/${coleccion}/records/${id}`
+        `${PB_URL}/api/collections/${coleccion}/records/${id}`,
+        { headers }
       );
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       return await res.json();
@@ -160,9 +174,62 @@ const CMSDB = (function () {
     }
   }
 
+  /* ─── AUTH ─── */
+  async function login(email, password) {
+    try {
+      const res = await fetch(`${PB_URL}/api/collections/_superusers/auth-with-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ identity: email, password })
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      sessionStorage.setItem('pb_token', data.token);
+      sessionStorage.setItem('pb_user', JSON.stringify(data.record || {}));
+      return data;
+    } catch (err) {
+      console.error('[SIGAP] login falló:', err.message);
+      throw err;
+    }
+  }
+
+  function logout() {
+    sessionStorage.removeItem('pb_token');
+    sessionStorage.removeItem('pb_user');
+  }
+
+  function getToken() {
+    return sessionStorage.getItem('pb_token');
+  }
+
+  function isAuthenticated() {
+    return !!sessionStorage.getItem('pb_token');
+  }
+
+  async function verifyToken() {
+    const token = getToken();
+    if (!token) return false;
+    try {
+      const res = await fetch(`${PB_URL}/api/collections/_superusers/auth-refresh`, {
+        method: 'POST',
+        headers: { 'Authorization': token }
+      });
+      if (!res.ok) {
+        logout();
+        return false;
+      }
+      const data = await res.json();
+      sessionStorage.setItem('pb_token', data.token);
+      return true;
+    } catch {
+      logout();
+      return false;
+    }
+  }
+
   /* ─── HELPERS (compatibilidad con código que los usa) ─── */
   function uid() { return Math.random().toString(36).slice(2, 10) + Date.now().toString(36); }
   function now() { return new Date().toISOString(); }
 
-  return { getAll, save, deleteRecord, remove, getOne, clearCache, ping, uid, now };
+  return { getAll, save, deleteRecord, remove, getOne, clearCache, ping, uid, now, login, logout, getToken, isAuthenticated, verifyToken };
 })();
