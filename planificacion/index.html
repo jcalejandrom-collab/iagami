@@ -433,15 +433,20 @@ function renderCalendario() {
   const pad         = (new Date(_calYear, _calMonth, 1).getDay() + 6) % 7;
 
   const dayMap = {};
+  // Límites del mes actual para acotar la iteración
+  const monthStart = new Date(_calYear, _calMonth, 1);
+  const monthEnd   = new Date(_calYear, _calMonth + 1, 0, 23, 59, 59);
   _filtered.forEach(p => {
     if (!p.fecha_inicio) return;
     const start = new Date(p.fecha_inicio + 'T12:00:00');
-    const end   = p.fecha_fin ? new Date(p.fecha_fin + 'T12:00:00') : start;
-    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-      if (d.getFullYear() === _calYear && d.getMonth() === _calMonth) {
-        const k = d.getDate();
-        (dayMap[k] = dayMap[k] || []).push(p);
-      }
+    const end   = p.fecha_fin ? new Date(p.fecha_fin + 'T12:00:00') : new Date(start);
+    if (isNaN(start.getTime())) return;
+    // Iterar solo dentro del rango que intersecta el mes visible
+    const iterStart = start < monthStart ? new Date(monthStart) : new Date(start);
+    const iterEnd   = end > monthEnd ? new Date(monthEnd) : new Date(end);
+    for (let d = new Date(iterStart); d <= iterEnd; d.setDate(d.getDate() + 1)) {
+      const k = d.getDate();
+      (dayMap[k] = dayMap[k] || []).push(p);
     }
   });
 
@@ -488,12 +493,19 @@ function renderKanban() {
 
 /* ─── INIT ─── */
 async function init() {
-  const planes = await CMSDB.getAll('planificacion');
-  _allPlanes = planes.sort((a,b) => (b.fecha_inicio || '').localeCompare(a.fecha_inicio || ''));
-  _filtered  = [..._allPlanes];
-  renderStats(_allPlanes);
-  document.getElementById('count-badge').textContent = _filtered.length + ' plan' + (_filtered.length !== 1 ? 'es' : '');
-  renderLista();
+  try {
+    const planes = await CMSDB.getAll('planificacion');
+    _allPlanes = (planes || []).sort((a,b) => (b.fecha_inicio || '').localeCompare(a.fecha_inicio || ''));
+    _filtered  = [..._allPlanes];
+    renderStats(_allPlanes);
+    document.getElementById('count-badge').textContent = _filtered.length + ' plan' + (_filtered.length !== 1 ? 'es' : '');
+    renderLista();
+  } catch (err) {
+    console.error('[SIGAP] init() falló:', err);
+    document.getElementById('plan-list-container').innerHTML =
+      '<div class="empty-state"><div class="ico">⚠️</div><p>Error al cargar los planes. Por favor recarga la página.</p></div>';
+    document.getElementById('count-badge').textContent = '0 planes';
+  }
 }
 
 init();
