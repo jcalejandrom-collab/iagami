@@ -307,7 +307,7 @@ function renderChart(data) {
       <div class="chart-label">${escHtml(ind.nombre || 'Indicador')}</div>
       <div class="chart-bar-wrap">
         <div class="chart-bar ${barClass}" style="width:${pct}%">
-          ${pct > 15 ? `<span class="chart-bar-label">${ind.valor_actual} ${ind.unidad||''}</span>` : ''}
+          ${pct > 15 ? `<span class="chart-bar-label">${ind.valor_actual ?? ''} ${ind.unidad||''}</span>` : ''}
         </div>
       </div>
       <div class="chart-pct">${pct}%</div>

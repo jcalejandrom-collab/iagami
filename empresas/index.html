@@ -262,9 +262,9 @@ function updateStats(data) {
 /* ── Render cards ── */
 function renderEmpresas(data) {
   const grid = document.getElementById('companiesGrid');
-  document.getElementById('resultsCount').textContent = `${data.length} empresa${data.length !== 1 ? 's' : ''} encontrada${data.length !== 1 ? 's' : ''}`;
 
   if (!data || data.length === 0) {
+    document.getElementById('resultsCount').textContent = '0 empresas encontradas';
     grid.innerHTML = `<div class="empty-state">
       <span class="icon">🔍</span>
       <h3>Sin resultados</h3>
@@ -274,6 +274,7 @@ function renderEmpresas(data) {
     return;
   }
 
+  document.getElementById('resultsCount').textContent = `${data.length} empresa${data.length !== 1 ? 's' : ''} encontrada${data.length !== 1 ? 's' : ''}`;
   const catClass    = getCatClass;
   const permisoClass= getPermisoClass;
 
