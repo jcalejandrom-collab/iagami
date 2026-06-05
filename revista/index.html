@@ -334,7 +334,7 @@ function renderFeatured(all) {
         <span>👁 ${featured.visualizaciones||0} vistas</span>
       </div>
       <div class="featured-actions">
-        <a class="btn-ver" href="visor.html?id=${featured.id}" onclick="incrementVistas('${featured.id}')">
+        <a class="btn-ver" href="visor.html?id=${featured.id}">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
           Ver revista
         </a>
@@ -370,7 +370,7 @@ function renderGrid(all) {
         ${r.descripcion ? `<div class="rev-desc">${escHtml(r.descripcion)}</div>` : ''}
         <div class="rev-date">📅 ${fmtFecha(r.fecha)} · Nº ${escHtml(r.numero_edicion)}</div>
         <div class="rev-actions">
-          <a class="btn-sm-ver" href="visor.html?id=${r.id}" onclick="incrementVistas('${r.id}')">
+          <a class="btn-sm-ver" href="visor.html?id=${r.id}">
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
             Ver revista
           </a>
@@ -398,22 +398,19 @@ function escHtml(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-async function incrementVistas(id) {
-  const r = await CMSDB.getOne('revistas', id);
-  if (r) await CMSDB.save('revistas', Object.assign({}, r, {visualizaciones: (r.visualizaciones||0)+1}));
-}
-
 async function descargarRevista(id) {
   const r = await CMSDB.getOne('revistas', id);
   if (!r) return;
 
-  await CMSDB.save('revistas', Object.assign({}, r, {descargas: (r.descargas||0)+1}));
+  const updated = Object.assign({}, r, {descargas: (r.descargas||0)+1});
+  await CMSDB.save('revistas', updated);
   toast('⬇️ Descarga iniciada correctamente');
 
+  const titulo = r.titulo || 'Revista';
   if (r.pdf_url) {
     const a = document.createElement('a');
     a.href = r.pdf_url;
-    a.download = `IAGAMI_Revista_${r.numero_edicion}_${r.titulo.replace(/\s+/g,'_').slice(0,40)}.pdf`;
+    a.download = `IAGAMI_Revista_${r.numero_edicion}_${titulo.replace(/\s+/g,'_').slice(0,40)}.pdf`;
     a.target = '_blank';
     document.body.appendChild(a);
     a.click();
