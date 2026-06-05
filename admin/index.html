@@ -310,7 +310,7 @@ input,select,textarea{font-family:inherit}
   <div class="sidebar-nav" id="sidebar-nav"></div>
   <div class="sidebar-bottom">
     <a href="mantenimiento.html" style="background:rgba(255,200,50,.12);border:1px solid rgba(255,200,50,.25);border-radius:8px;padding:8px 12px;margin-bottom:8px;color:#fde68a;font-weight:600;font-size:12px">🔧 Centro de Mantenimiento</a>
-    <a href="../index.html">← Ver Portal</a>
+    <a href="../index.html" onclick="event.preventDefault();doLogout()">← Ver Portal</a>
   </div>
 </nav>
 
@@ -1517,6 +1517,7 @@ async function deleteRecord(section, id) {
     const keyMap = {agenda:'eventos', transparencia:'documentos', organizacion:'org'};
     const dbKey = keyMap[section] || section;
     await CMSDB.remove(dbKey, id);
+    await CMSDB.logAudit('delete', section, id);
     toast('Eliminado correctamente', 'success');
     renderSection(section);
   });
@@ -1629,7 +1630,8 @@ async function saveNoticias(e) {
   const form = document.getElementById('noticias-form');
   const data = collectForm(form);
   data.destacada = form.querySelector('[name="destacada"]').checked;
-  await CMSDB.save('noticias', data);
+  const item = await CMSDB.save('noticias', data);
+  await CMSDB.logAudit('save', 'noticias', item.titulo || '');
   toast('Noticia guardada');
   cancelForm('noticias');
   renderNoticias();
@@ -3018,7 +3020,20 @@ function renderBlocks() {
   }).join('');
 }
 
+/* ─── LOGOUT ─── */
+async function doLogout() {
+  await CMSDB.logAudit('logout', 'admin', 'sesion cerrada');
+  sessionStorage.removeItem('iagami_admin_session');
+  window.location.href = '../index.html';
+}
+
 /* ─── INIT ─── */
+(function checkAuth() {
+  const session = sessionStorage.getItem('iagami_admin_session');
+  if (!session) {
+    CMSDB.logAudit('auth_fail', 'admin', 'token invalido', 'warning');
+  }
+})();
 sessionStorage.setItem('iagami_admin_session', JSON.stringify({loggedIn:true, time: Date.now()}));
 showSection('dashboard');
 setMediaFilter('all');

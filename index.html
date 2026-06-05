@@ -1140,6 +1140,7 @@ async function enviarDenuncia() {
         adjuntos:  adjuntosData.map(f => ({ name: f.name, type: f.type, size: f.size, dataUrl: f.dataUrl }))
       };
       await CMSDB.save('denuncias', item);
+      await CMSDB.logAudit('create', 'denuncias', 'denuncia publica enviada - caso: ' + num, 'info');
 
       const el = document.getElementById('modal-caso-num');
       if (el) el.textContent = 'Número de caso: ' + num;

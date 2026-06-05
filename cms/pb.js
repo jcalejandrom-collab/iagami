@@ -164,5 +164,32 @@ const CMSDB = (function () {
   function uid() { return Math.random().toString(36).slice(2, 10) + Date.now().toString(36); }
   function now() { return new Date().toISOString(); }
 
-  return { getAll, save, deleteRecord, remove, getOne, clearCache, ping, uid, now };
+  /* ─── AUDITORÍA ─── */
+  async function logAudit(accion, modulo, detalle = '', nivel = 'info') {
+    try {
+      const token = typeof getToken === 'function' ? getToken() : null;
+      const user = sessionStorage.getItem('pb_user');
+      const userData = user ? JSON.parse(user) : {};
+      await fetch(`${PB_URL}/api/collections/iagami_sys_logs/records`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': token } : {})
+        },
+        body: JSON.stringify({
+          accion,
+          modulo,
+          detalle: String(detalle).slice(0, 500),
+          usuario: userData.email || 'anonimo',
+          nivel,
+          ip: '',
+          fecha: new Date().toISOString()
+        })
+      });
+    } catch {
+      // El log nunca debe romper el flujo principal
+    }
+  }
+
+  return { getAll, save, deleteRecord, remove, getOne, clearCache, ping, uid, now, logAudit };
 })();
