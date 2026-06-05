@@ -272,7 +272,7 @@ let currentPage = 1;
    INIT
 ═══════════════════════════════ */
 document.addEventListener('DOMContentLoaded', async () => {
-  allNoticias = await CMSDB.getAll('noticias')
+  allNoticias = (await CMSDB.getAll('noticias'))
     .filter(n => n.estado === 'publicado')
     .sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
 
