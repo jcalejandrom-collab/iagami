@@ -360,7 +360,7 @@ function renderCards() {
 /* ═══════════════════════════════
    DETAIL MODAL
 ═══════════════════════════════ */
-function openDetail(id) {
+async function openDetail(id) {
   const t = await CMSDB.getOne('tramites', id);
   if (!t) return;
 

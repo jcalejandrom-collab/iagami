@@ -434,7 +434,7 @@ function goPage(n) {
 /* ═══════════════════════════════
    DETAIL MODAL
 ═══════════════════════════════ */
-function openDetail(id) {
+async function openDetail(id) {
   const n = await CMSDB.getOne('noticias', id);
   if (!n) return;
 

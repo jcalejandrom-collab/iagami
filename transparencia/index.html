@@ -265,7 +265,7 @@ async function filterDocs() {
   renderDocs();
 }
 
-function renderDocs() {
+async function renderDocs() {
   const docs = await CMSDB.getAll('documentos');
   let filtered = docs.filter(d => {
     const matchCat = !currentCat || d.categoria === currentCat;
