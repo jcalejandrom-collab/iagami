@@ -157,11 +157,12 @@ footer{background:#0a1f0e;color:rgba(255,255,255,.6);text-align:center;padding:2
 let currentPage = 1;
 const PER_PAGE = 9;
 
-function getFiltered() {
+async function getFiltered() {
   const q = document.getElementById('q').value.toLowerCase();
   const par = document.getElementById('f-parroquia').value;
   const est = document.getElementById('f-estatus').value;
-  return CMSDB.getAll('consejos').filter(c => {
+  const all = await CMSDB.getAll('consejos');
+  return all.filter(c => {
     if (c.estatus === 'Inactivo' && !est) return false; // público solo ve activos por defecto
     const matchQ = !q || [c.nombre,c.parroquia,c.comunidad,c.codigo].some(v => (v||'').toLowerCase().includes(q));
     const matchPar = !par || c.parroquia === par;
@@ -171,7 +172,7 @@ function getFiltered() {
 }
 
 async function render() {
-  const data = getFiltered();
+  const data = await getFiltered();
   const total = data.length;
   const pages = Math.ceil(total / PER_PAGE) || 1;
   if (currentPage > pages) currentPage = 1;
@@ -261,7 +262,7 @@ async function init() {
   document.getElementById('stat-parroquias').textContent = parroquias.length;
   const sel = document.getElementById('f-parroquia');
   parroquias.sort().forEach(p => sel.innerHTML += `<option value="${p}">${p}</option>`);
-  render();
+  await render();
 }
 
 init();
