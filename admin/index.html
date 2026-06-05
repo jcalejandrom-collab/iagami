@@ -311,6 +311,7 @@ input,select,textarea{font-family:inherit}
   <div class="sidebar-bottom">
     <a href="mantenimiento.html" style="background:rgba(255,200,50,.12);border:1px solid rgba(255,200,50,.25);border-radius:8px;padding:8px 12px;margin-bottom:8px;color:#fde68a;font-weight:600;font-size:12px">🔧 Centro de Mantenimiento</a>
     <a href="../index.html">← Ver Portal</a>
+    <a href="#" onclick="CMSDB.logout(); window.location.replace('../index.html');">🔒 Cerrar sesión</a>
   </div>
 </nav>
 
@@ -1208,6 +1209,15 @@ input,select,textarea{font-family:inherit}
 
 <script>
 'use strict';
+
+// Verificación de autenticación al cargar
+(async function checkAuth() {
+  const ok = await CMSDB.verifyToken();
+  if (!ok) {
+    // Redirigir al portal con hash para abrir login
+    window.location.replace('../index.html#login');
+  }
+})();
 
 /* ─── NAVIGATION ─── */
 const NAV = [

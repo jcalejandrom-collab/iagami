@@ -784,9 +784,10 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
     <h3 id="login-title">Acceder</h3>
     <p>Acceso para funcionarios y personal autorizado de IAGAMI</p>
     <div class="fg"><label class="flabel" for="login-user">Usuario</label><input id="login-user" class="finput" placeholder="usuario@iagami.gob.ve" autocomplete="username"/></div>
-    <div class="fg"><label class="flabel" for="login-pass">Contraseña</label><input id="login-pass" class="finput" type="password" placeholder="••••••••" autocomplete="current-password"/></div>
+    <div class="fg"><label class="flabel" for="login-pass">Contraseña</label><input id="login-pass" class="finput" type="password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"/></div>
+    <div id="login-modal-error" style="display:none;color:#dc2626;font-size:12px;margin-bottom:8px"></div>
     <div class="modal-footer">
-      <button class="fsubmit" style="flex:1" onclick="window.location='admin/index.html'">Iniciar sesión</button>
+      <button class="fsubmit" style="flex:1" onclick="doLogin()">Iniciar sesión</button>
     </div>
   </div>
 </div>
@@ -1509,7 +1510,31 @@ function initPortal() {
   renderHomeRevista();
 }
 
-document.addEventListener('DOMContentLoaded', initPortal);
+document.addEventListener('DOMContentLoaded', function() {
+  initPortal();
+  // Abrir modal de login si se llega con #login en la URL
+  if (window.location.hash === '#login') {
+    openModal('modal-login');
+    history.replaceState(null, '', window.location.pathname);
+  }
+});
+
+async function doLogin() {
+  const email = document.getElementById('login-user').value;
+  const pwd = document.getElementById('login-pass').value;
+  const errEl = document.getElementById('login-modal-error');
+  if (errEl) { errEl.style.display = 'none'; errEl.textContent = ''; }
+  if (!email || !pwd) {
+    if (errEl) { errEl.textContent = 'Por favor ingresa usuario y contraseña'; errEl.style.display = 'block'; }
+    return;
+  }
+  try {
+    await CMSDB.login(email, pwd);
+    window.location.href = 'admin/index.html';
+  } catch (err) {
+    if (errEl) { errEl.textContent = 'Credenciales incorrectas'; errEl.style.display = 'block'; }
+  }
+}
 </script>
 </body>
 </html>
