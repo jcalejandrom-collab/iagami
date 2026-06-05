@@ -478,7 +478,7 @@ async function renderDashboard() {
     totalRecords += arr.length;
     if (arr.length > 0) activeModules++;
   });
-  const alertas = await CMSDB.getAll('alertas').filter(a => a.activa !== false).length;
+  const alertas = (await CMSDB.getAll('alertas')).filter(a => a.activa !== false).length;
 
   const stats = [
     {label:'Sistema',val:lsOk?'OK':'ERROR',status:lsOk?'ok':'err'},
@@ -729,7 +729,7 @@ async function removeExpiredAlerts(btn) {
   const all = await CMSDB.getAll('alertas');
   const toKeep = all.filter(a => !(a.activa === false && a.fecha && new Date(a.fecha) < cutoff));
   const removed = all.length - toKeep.length;
-  await CMSDB.getAll('alertas').forEach(a => { if (!toKeep.find(t => t.id === a.id)) await CMSDB.remove('alertas', a.id); });
+  (await CMSDB.getAll('alertas')).forEach(a => { if (!toKeep.find(t => t.id === a.id)) await CMSDB.remove('alertas', a.id); });
   setActionResult('removeExpiredAlerts', `${removed} alertas eliminadas`);
   logAction('removeExpiredAlerts','alertas',`${removed} alertas vencidas eliminadas`,'success');
   toast(`${removed} alertas vencidas eliminadas`, 'success');
@@ -773,10 +773,10 @@ async function regenStats(btn) {
   btn.disabled = true;
   let html = '<div style="font-size:12px;text-align:left">';
   CMS_MODULES.forEach(k => {
-    html += `${MODULE_LABELS[k]}: ${await CMSDB.getAll(k).length} | `;
+    html += `${MODULE_LABELS[k]}: ${(await CMSDB.getAll(k)).length} | `;
   });
   html += '</div>';
-  const result = CMS_MODULES.map(k => `${MODULE_LABELS[k]}:${await CMSDB.getAll(k).length}`).join(', ');
+  const result = CMS_MODULES.map(k => `${MODULE_LABELS[k]}:${(await CMSDB.getAll(k)).length}`).join(', ');
   setActionResult('regenStats', 'Estadísticas actualizadas ✓');
   logAction('regenStats','sistema','Estadísticas regeneradas: '+result,'success');
   toast('Estadísticas regeneradas correctamente', 'success');
@@ -1356,7 +1356,7 @@ async function repairDamaged(btn) {
    DOCUMENTACIÓN
 ═══════════════════════════════════════════════ */
 async function renderDocumentacion() {
-  const activeCount = CMS_MODULES.filter(k => await CMSDB.getAll(k).length > 0).length;
+  const activeCount = CMS_MODULES.filter(k => (await CMSDB.getAll(k)).length > 0).length;
   const html = `
     <div class="two-col" style="margin-bottom:20px">
       <div class="card">
@@ -1394,7 +1394,7 @@ async function renderDocumentacion() {
       <table>
         <thead><tr><th>Módulo</th><th>Clave localStorage</th><th>Registros</th><th>Estado</th></tr></thead>
         <tbody>${CMS_MODULES.map(k => {
-          const count = await CMSDB.getAll(k).length;
+          const count = (await CMSDB.getAll(k)).length;
           return `<tr><td>${MODULE_LABELS[k]}</td><td style="font-family:monospace;font-size:12px">iagami_cms_${k}</td><td>${count}</td><td>${count>0?'<span class="status status-ok">activo</span>':'<span class="status status-warn">vacío</span>'}</td></tr>`;
         }).join('')}</tbody>
       </table>

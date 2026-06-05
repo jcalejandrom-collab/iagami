@@ -1537,15 +1537,15 @@ function filterItems(items, search, fields) {
    DASHBOARD
 ════════════════════════════════════════ */
 async function renderDashboard() {
-  const alertas = await CMSDB.getAll('alertas').filter(a=>a.activa).length;
-  const multasPend = await CMSDB.getAll('multas').filter(m=>m.estado==='Pendiente').length;
+  const alertas = (await CMSDB.getAll('alertas')).filter(a=>a.activa).length;
+  const multasPend = (await CMSDB.getAll('multas')).filter(m=>m.estado==='Pendiente').length;
   const stats = [
-    {icon:'📰', label:'Noticias', val: await CMSDB.getAll('noticias').length, sec:'noticias'},
-    {icon:'📋', label:'Trámites', val: await CMSDB.getAll('tramites').length, sec:'tramites'},
-    {icon:'📅', label:'Eventos', val: await CMSDB.getAll('eventos').length, sec:'agenda'},
-    {icon:'🏛️', label:'Documentos', val: await CMSDB.getAll('documentos').length, sec:'transparencia'},
-    {icon:'🌳', label:'Proyectos', val: await CMSDB.getAll('proyectos').length, sec:'proyectos'},
-    {icon:'🏭', label:'Empresas', val: await CMSDB.getAll('empresas').length, sec:'empresas'},
+    {icon:'📰', label:'Noticias', val: (await CMSDB.getAll('noticias')).length, sec:'noticias'},
+    {icon:'📋', label:'Trámites', val: (await CMSDB.getAll('tramites')).length, sec:'tramites'},
+    {icon:'📅', label:'Eventos', val: (await CMSDB.getAll('eventos')).length, sec:'agenda'},
+    {icon:'🏛️', label:'Documentos', val: (await CMSDB.getAll('documentos')).length, sec:'transparencia'},
+    {icon:'🌳', label:'Proyectos', val: (await CMSDB.getAll('proyectos')).length, sec:'proyectos'},
+    {icon:'🏭', label:'Empresas', val: (await CMSDB.getAll('empresas')).length, sec:'empresas'},
     {icon:'🚨', label:'Alertas Activas', val: alertas, sec:'alertas'},
     {icon:'⚖️', label:'Multas Pendientes', val: multasPend, sec:'multas'},
   ];
@@ -1569,11 +1569,12 @@ async function renderDashboard() {
     {key:'alertas',label:'Alerta',field:'mensaje'},
     {key:'multas',label:'Multa',field:'expediente'},
   ];
-  sources.forEach(s => {
-    await CMSDB.getAll(s.key).forEach(it => {
-      allItems.push({label:s.label, name:(it[s.field]||'Sin nombre').slice(0,50), date:it.updated_at||it.created_at||''});
+  for (const s of sources) {
+    const rows = await CMSDB.getAll(s.key);
+    rows.forEach(it => {
+      allItems.push({label:s.label, name:(it[s.field]||'Sin nombre').slice(0,50), date:it.updated||it.created||''});
     });
-  });
+  }
   allItems.sort((a,b) => b.date.localeCompare(a.date));
   const recent = allItems.slice(0,5);
   document.getElementById('recent-list').innerHTML = recent.length
@@ -1752,7 +1753,7 @@ async function saveTransparencia(e) {
 async function populateOrgParentSelect(currentId=null, selectedPadre=null) {
   const sel = document.getElementById('org-padre-select');
   if (!sel) return;
-  const units = await CMSDB.getAll('org').filter(u => u.id !== currentId);
+  const units = (await CMSDB.getAll('org')).filter(u => u.id !== currentId);
   sel.innerHTML = '<option value="">Ninguno</option>';
   units.forEach(u => {
     const opt = document.createElement('option');
@@ -2428,7 +2429,7 @@ async function publicarBienvenida() {
   const data = _bvBuildData('publicada', true);
   if (!data) return;
   // Deactivate all others
-  await CMSDB.getAll('bienvenida').forEach(b => {
+  (await CMSDB.getAll('bienvenida')).forEach(b => {
     if (b.id !== data.id && b.activa) { await CMSDB.save('bienvenida', Object.assign({}, b, {activa: false, estado: 'desactivada'})); }
   });
   await CMSDB.save('bienvenida', data);
