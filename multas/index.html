@@ -343,18 +343,21 @@ async function buscarMulta() {
   btn.innerHTML = '<span class="spinner"></span> Consultando...';
 
   setTimeout(async () => {
-    btn.disabled = false;
-    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Consultar`;
-
-    const busqueda = normalizarDoc(tipo, raw);
-    const todas = (await CMSDB.getAll('multas')).filter(m => m.publicado);
-    const resultados = todas.filter(m => {
-      if (!m.documento) return false;
-      const docNorm = m.documento.toUpperCase().replace(/\s+/g,'').replace(/-/g,'').replace(/^[VEJGC]/,'');
-      return docNorm === busqueda;
-    });
-
-    mostrarResultados(resultados, raw.toUpperCase());
+    try {
+      const busqueda = normalizarDoc(tipo, raw);
+      const todas = (await CMSDB.getAll('multas')).filter(m => m.publicado);
+      const resultados = todas.filter(m => {
+        if (!m.documento) return false;
+        const docNorm = m.documento.toUpperCase().replace(/\s+/g,'').replace(/-/g,'').replace(/^[VEJGC]/,'');
+        return docNorm === busqueda;
+      });
+      mostrarResultados(resultados, raw.toUpperCase());
+    } catch(e) {
+      toast('Error al consultar expedientes. Intenta nuevamente.');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Consultar`;
+    }
   }, 600); // pequeño delay para UX
 }
 
@@ -429,16 +432,18 @@ function mostrarResultados(resultados, docBuscado) {
 
 /* ── STATS DEL HERO ── */
 async function renderStats() {
-  const multas = (await CMSDB.getAll('multas')).filter(m => m.publicado);
-  const activos    = multas.filter(m => m.estado !== 'Anulada').length;
-  const pendientes = multas.filter(m => m.estado === 'Pendiente' || m.estado === 'En Proceso').length;
-  const pagadas    = multas.filter(m => m.estado === 'Pagada').length;
-  const st = document.getElementById('stat-total');
-  const sp = document.getElementById('stat-pendientes');
-  const sk = document.getElementById('stat-pagadas');
-  if (st) st.textContent = activos;
-  if (sp) sp.textContent = pendientes;
-  if (sk) sk.textContent = pagadas;
+  try {
+    const multas = (await CMSDB.getAll('multas')).filter(m => m.publicado);
+    const activos    = multas.filter(m => m.estado !== 'Anulada').length;
+    const pendientes = multas.filter(m => m.estado === 'Pendiente' || m.estado === 'En Proceso').length;
+    const pagadas    = multas.filter(m => m.estado === 'Pagada').length;
+    const st = document.getElementById('stat-total');
+    const sp = document.getElementById('stat-pendientes');
+    const sk = document.getElementById('stat-pagadas');
+    if (st) st.textContent = activos;
+    if (sp) sp.textContent = pendientes;
+    if (sk) sk.textContent = pagadas;
+  } catch(e) { /* stats no críticos, fallar silenciosamente */ }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
