@@ -1,7 +1,17 @@
 'use strict';
 
 const CMSDB = (function () {
-  const PB_URL = 'http://127.0.0.1:8090';
+  /* La URL de PocketBase se inyecta desde el HTML mediante
+     window.__IAGAMI_CONFIG__ (ver ejemplo abajo) para permitir distintos
+     valores por entorno (local / staging / producción) sin tocar este
+     archivo ni hardcodear endpoints en el bundle público:
+
+       <script>window.__IAGAMI_CONFIG__ = { PB_URL: 'https://pb.iagami.gob.ve' };</script>
+       <script src="cms/pb.js"></script>
+
+     El valor por defecto solo aplica para desarrollo local. */
+  const PB_URL = (typeof window !== 'undefined' && window.__IAGAMI_CONFIG__ && window.__IAGAMI_CONFIG__.PB_URL)
+    || 'http://127.0.0.1:8090';
 
   /* ─── CACHÉ EN MEMORIA ─── */
   const _cache = {};
@@ -84,7 +94,10 @@ const CMSDB = (function () {
         return [];
       }
       if (res.status === 401 || res.status === 403) {
-        console.warn(`[SIGAP] Acceso denegado a "${coleccion}" (filtro: ${filtro})`);
+        // No se interpola el filtro: puede contener tokens (TUC), números
+        // de caso u otros valores ingresados por el usuario que no deben
+        // quedar visibles en la consola del navegador.
+        console.warn(`[SIGAP] Acceso denegado a "${coleccion}" (consulta rechazada por API Rules)`);
         return [];
       }
       if (!res.ok) throw new Error(`HTTP ${res.status}`);

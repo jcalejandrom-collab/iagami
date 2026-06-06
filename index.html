@@ -846,6 +846,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 </div>
 
 <!-- CMS Database -->
+<script src="cms/config.js"></script>
 <script src="cms/pb.js"></script>
 
 <script>
@@ -922,6 +923,19 @@ function showPage(name) {
 let toastTimer;
 let adjuntosData = [];
 let _enviandoDenuncia = false;
+
+/* Genera un número de caso público no secuencial y de alta entropía.
+   Antes se usaba Date.now().toString().slice(-6): predecible y de baja
+   entropía (~10^6 combinaciones agrupadas por ventana de tiempo), lo que
+   permitía enumerar denuncias de terceros y ver su nombre/descripción/
+   ubicación. Mismo principio que el TUC de multas: la "credencial" de
+   consulta pública debe ser inadivinable, no derivada de un timestamp. */
+function generarNumeroCaso() {
+  const hex = (window.crypto && crypto.randomUUID)
+    ? crypto.randomUUID().replace(/-/g, '').slice(0, 10)
+    : Math.random().toString(36).slice(2, 12);
+  return `DEN-${new Date().getFullYear()}-${hex.toUpperCase()}`;
+}
 function toast(msg) {
   const t = document.getElementById('app-toast');
   t.textContent = msg;
@@ -1124,7 +1138,7 @@ async function enviarDenuncia() {
 
   setTimeout(async () => {
     try {
-      const num = 'DEN-' + Date.now().toString().slice(-6);
+      const num = generarNumeroCaso();
       const item = {
         caso:      num,
         tipo,
