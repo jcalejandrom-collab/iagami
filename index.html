@@ -1487,7 +1487,7 @@ async function checkBienvenida() {
   if (mensaje) mensaje.textContent = activa.mensaje || '';
   if (activa.imagen && imgEl) {
     const PB = (typeof window !== 'undefined' && window.__IAGAMI_CONFIG__ && window.__IAGAMI_CONFIG__.PB_URL) || 'http://127.0.0.1:8090';
-    imgEl.src = `${PB}/api/files/bienvenida/${activa.id}/${activa.imagen}`;
+    imgEl.src = `${PB}/api/files/${activa.collectionName || activa.collectionId}/${activa.id}/${activa.imagen}`;
     imgEl.style.display = 'block';
     const inner = document.getElementById('bienvenida-img-inner');
     if (inner) inner.style.display = 'none';
