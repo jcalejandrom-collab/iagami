@@ -1475,6 +1475,49 @@ function cancelForm(section) {
   if (fv) fv.style.display = 'none';
 }
 
+/* ─── CAPA DE VALIDACIÓN INSTITUCIONAL ─── */
+function validarContenido(data) {
+  const str = v => (v == null ? '' : String(v));
+
+  // 1. XSS básico
+  const xss = /<script\b[^>]*>[\s\S]*?<\/script>|onerror\s*=|onload\s*=/gi;
+  for (const campo of ['titulo','contenido','descripcion','mensaje','nombre']) {
+    if (xss.test(str(data[campo]))) {
+      return { isValid: false, error: `Campo "${campo}" contiene contenido no permitido (riesgo XSS).` };
+    }
+  }
+
+  // 2. Datos sensibles (cédulas V/E/J/G, RIFs, teléfonos venezolanos)
+  const pii = /\b[VEGJvegj]-?\d{6,8}\b|0(412|414|416|424|426)-?\d{7}\b/g;
+  for (const campo of ['contenido','descripcion','mensaje','observaciones']) {
+    if (pii.test(str(data[campo]))) {
+      return { isValid: false, error: `Campo "${campo}" contiene datos personales sensibles (Cédula/RIF/Teléfono). Use TUCs o correos institucionales.` };
+    }
+  }
+
+  // 3. Campos obligatorios y rangos
+  if (data.titulo !== undefined && str(data.titulo).trim().length < 3) {
+    return { isValid: false, error: 'El título es demasiado corto (mínimo 3 caracteres).' };
+  }
+  if (data.porcentaje_avance !== undefined) {
+    const pct = Number(data.porcentaje_avance);
+    if (pct < 0 || pct > 100) return { isValid: false, error: 'El porcentaje de avance debe estar entre 0 y 100.' };
+  }
+
+  // 4. URLs internas prohibidas
+  for (const campo of ['link','url','pdf_url','video_url']) {
+    const val = str(data[campo]);
+    if (val && (val.includes('/admin') || val.includes('/_/'))) {
+      return { isValid: false, error: `El campo "${campo}" no puede apuntar a rutas administrativas.` };
+    }
+    if (val && val.startsWith('http://') && !val.includes('127.0.0.1') && !val.includes('localhost')) {
+      return { isValid: false, error: `El campo "${campo}" debe usar HTTPS.` };
+    }
+  }
+
+  return { isValid: true };
+}
+
 function collectForm(form) {
   const data = {};
   Array.from(form.elements).forEach(el => {
@@ -1652,6 +1695,7 @@ async function saveNoticias(e) {
   const form = document.getElementById('noticias-form');
   const data = collectForm(form);
   data.destacada = form.querySelector('[name="destacada"]').checked;
+  const vn = validarContenido(data); if (!vn.isValid) { toast('❌ ' + vn.error, 'error'); return; }
   const item = await CMSDB.save('noticias', data);
   await CMSDB.logAudit('save', 'noticias', item.titulo || '');
   toast('Noticia guardada');
@@ -1701,6 +1745,7 @@ async function saveTramites(e) {
   const data = collectForm(form);
   data.requisitos = getListValues('req-list');
   data.pasos = getListValues('pasos-list');
+  const vt = validarContenido(data); if (!vt.isValid) { toast('❌ ' + vt.error, 'error'); return; }
   await CMSDB.save('tramites', data);
   toast('Trámite guardado');
   cancelForm('tramites');
@@ -1735,6 +1780,7 @@ async function saveAgenda(e) {
   const form = document.getElementById('agenda-form');
   const data = collectForm(form);
   data.destacado = form.querySelector('[name="destacado"]').checked;
+  const ve = validarContenido(data); if (!ve.isValid) { toast('❌ ' + ve.error, 'error'); return; }
   await CMSDB.save('eventos', data);
   toast('Evento guardado');
   cancelForm('agenda');
@@ -1840,6 +1886,7 @@ async function saveProyectos(e) {
   const data = collectForm(form);
   data.hitos = getListValues('hitos-list');
   data.porcentaje_avance = parseInt(data.porcentaje_avance)||0;
+  const vp = validarContenido(data); if (!vp.isValid) { toast('❌ ' + vp.error, 'error'); return; }
   await CMSDB.save('proyectos', data);
   toast('Proyecto guardado');
   cancelForm('proyectos');
@@ -1932,6 +1979,7 @@ async function saveAlertas(e) {
   const form = document.getElementById('alertas-form');
   const data = collectForm(form);
   data.activa = form.querySelector('[name="activa"]').checked;
+  const va = validarContenido(data); if (!va.isValid) { toast('❌ ' + va.error, 'error'); return; }
   await CMSDB.save('alertas', data);
   toast('Alerta guardada');
   cancelForm('alertas');
