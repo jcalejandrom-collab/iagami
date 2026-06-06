@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Multas Ambientales — IAGAMI · Municipio Iribarren</title>
-<meta name="description" content="Consulta el estado de multas ambientales del Municipio Iribarren. Ingresa tu cédula o RIF para verificar expedientes."/>
+<meta name="description" content="Consulta el estado de tu multa ambiental del Municipio Iribarren ingresando tu código de consulta (token de referencia)."/>
 <meta name="theme-color" content="#1d6b3e"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -146,7 +146,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
   <div style="position:relative;z-index:1">
     <div class="hero-tag">⚖️ MULTAS AMBIENTALES</div>
     <h1>Consulta tu <span>expediente de multa</span><br>ambiental</h1>
-    <p>Ingresa tu número de cédula o RIF para verificar si tienes multas ambientales registradas por IAGAMI en el Municipio Iribarren.</p>
+    <p>Ingresa tu código de consulta (token de referencia) para verificar el estado de tu expediente de multa ambiental ante IAGAMI en el Municipio Iribarren.</p>
     <div class="hero-stats" id="hero-stats">
       <div class="hstat"><div class="hstat-v" id="stat-total">—</div><div class="hstat-l">Expedientes activos</div></div>
       <div class="hstat"><div class="hstat-v" id="stat-pendientes">—</div><div class="hstat-l">Pendientes de pago</div></div>
@@ -160,16 +160,12 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
   <div class="search-wrap">
     <div class="search-inner">
       <h2>🔍 Consultar expediente de multa</h2>
-      <p>Puedes buscar por cédula de identidad (persona natural) o RIF (empresa). Ingresa el número sin prefijo o con él (V-, J-, E-).</p>
+      <p>Ingresa el <strong>código de consulta (token de referencia)</strong> que aparece en tu notificación oficial de IAGAMI para verificar el estado de tu expediente.</p>
       <div class="search-row">
-        <select id="tipo-doc" aria-label="Tipo de documento">
-          <option value="cedula">Cédula (V/E)</option>
-          <option value="rif">RIF (J/G/C)</option>
-        </select>
-        <input id="num-doc" type="text" placeholder="Ej: 12345678 o V-12345678"
-          maxlength="20" inputmode="text"
+        <input id="num-doc" type="text" placeholder="Ej: a1b2c3d4-e5f6-47a8-9b0c-d1e2f3a4b5c6"
+          maxlength="60" inputmode="text" autocomplete="off" spellcheck="false"
           onkeydown="if(event.key==='Enter')buscarMulta()"
-          aria-label="Número de documento"/>
+          aria-label="Código de consulta (token de referencia)"/>
         <button class="search-btn" id="btn-buscar" onclick="buscarMulta()">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           Consultar
@@ -177,7 +173,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
       </div>
       <div class="search-note">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        Solo se muestran multas publicadas oficialmente por IAGAMI. Para reclamos comunícate con la Dirección de Multas.
+        El código de consulta es único y confidencial — aparece impreso en tu notificación oficial o fue enviado a tu correo registrado. No compartas tu código con terceros.
       </div>
       <div style="margin-top:14px;padding-top:14px;border-top:1px solid #e8f5ee;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
         <span style="font-size:12px;color:#4a8a6a">¿Ya realizaste el pago de tu multa?</span>
@@ -319,24 +315,46 @@ function estadoBadge(est) {
   return `<span class="estado-badge ${e.cls}"><span class="estado-dot" style="background:${e.dot}"></span>${e.label}</span>`;
 }
 
-/* ── NORMALIZAR DOCUMENTO ── */
-function normalizarDoc(tipo, valor) {
-  // strip spaces and hyphens, uppercase, remove leading letter prefix if user typed it
-  let v = valor.trim().toUpperCase().replace(/\s+/g, '').replace(/-/g, '');
-  // Remove leading type prefix if repeated
-  if (tipo === 'cedula') {
-    v = v.replace(/^[VE]/,'');
-  } else {
-    v = v.replace(/^[JGC]/,'');
-  }
-  return v;
+/* ── NORMALIZAR TOKEN (TUC) ── */
+function normalizarToken(valor) {
+  // El TUC es un UUID v4: solo recortamos espacios y normalizamos a minúsculas.
+  // No removemos guiones (son parte del formato UUID) ni prefijos.
+  return valor.trim().toLowerCase();
 }
 
-/* ── BUSCAR MULTA ── */
+/* ── LÍMITE DE INTENTOS (anti fuerza-bruta del lado cliente) ──
+   Esto es solo una primera barrera de UX; la protección real contra
+   enumeración de tokens debe aplicarse server-side (rate limit por IP
+   en PocketBase/proxy), ya que un atacante puede saltarse el cliente. */
+const TUC_MAX_INTENTOS = 5;
+const TUC_VENTANA_MS   = 10 * 60 * 1000; // 10 minutos
+function intentosExcedidos() {
+  try {
+    const data = JSON.parse(sessionStorage.getItem('tuc_intentos') || '{"count":0,"start":0}');
+    const now = Date.now();
+    if (now - data.start > TUC_VENTANA_MS) return false;
+    return data.count >= TUC_MAX_INTENTOS;
+  } catch { return false; }
+}
+function registrarIntento() {
+  try {
+    const now = Date.now();
+    let data = JSON.parse(sessionStorage.getItem('tuc_intentos') || '{"count":0,"start":0}');
+    if (now - data.start > TUC_VENTANA_MS) data = { count: 0, start: now };
+    data.count += 1;
+    sessionStorage.setItem('tuc_intentos', JSON.stringify(data));
+  } catch { /* sessionStorage no disponible: ignorar */ }
+}
+
+/* ── BUSCAR MULTA POR TOKEN (TUC) ── */
 async function buscarMulta() {
-  const tipo  = document.getElementById('tipo-doc').value;
-  const raw   = document.getElementById('num-doc').value.trim();
-  if (!raw) { toast('Ingresa tu número de cédula o RIF'); return; }
+  const raw = document.getElementById('num-doc').value.trim();
+  if (!raw) { toast('Ingresa tu código de consulta (token de referencia)'); return; }
+
+  if (intentosExcedidos()) {
+    toast('Demasiados intentos. Espera unos minutos antes de volver a consultar.');
+    return;
+  }
 
   const btn = document.getElementById('btn-buscar');
   btn.disabled = true;
@@ -344,18 +362,15 @@ async function buscarMulta() {
 
   setTimeout(async () => {
     try {
-      const busqueda = normalizarDoc(tipo, raw);
-      // Consulta filtrada server-side por documento exacto: nunca se descarga la colección completa
-      const safeDoc = busqueda.replace(/['"\\]/g, '');
-      const candidatos = await CMSDB.getFiltered('multas', `documento~"${safeDoc}" && publicado=true`, { perPage: 20 });
-      const resultados = candidatos.filter(m => {
-        if (!m.documento) return false;
-        const docNorm = m.documento.toUpperCase().replace(/\s+/g,'').replace(/-/g,'').replace(/^[VEJGC]/,'');
-        return docNorm === busqueda;
-      });
-      mostrarResultados(resultados, raw.toUpperCase());
+      registrarIntento();
+      const token = normalizarToken(raw);
+      const safeToken = token.replace(/['"\\]/g, '');
+      // Búsqueda exacta por token único: nunca se lista ni descarga la colección completa.
+      // El token actúa como credencial de acceso — quien lo posee, posee el expediente.
+      const encontrados = await CMSDB.getFiltered('multas', `token_tuc="${safeToken}" && publicado=true`, { perPage: 1 });
+      mostrarResultados(encontrados, raw);
     } catch(e) {
-      toast('Error al consultar expedientes. Intenta nuevamente.');
+      toast('Error al consultar el expediente. Intenta nuevamente.');
     } finally {
       btn.disabled = false;
       btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Consultar`;
@@ -364,27 +379,29 @@ async function buscarMulta() {
 }
 
 /* ── MOSTRAR RESULTADOS ── */
-function mostrarResultados(resultados, docBuscado) {
+function mostrarResultados(resultados, _tokenBuscado) {
   const area = document.getElementById('results-area');
 
   if (!resultados.length) {
     area.innerHTML = `
       <div class="result-placeholder">
-        <div class="ico">✅</div>
-        <h3>Sin multas encontradas</h3>
-        <p>No se encontraron multas registradas para el documento <strong>${escHtml(docBuscado)}</strong>.<br>
-        Si crees que es un error, contacta a la Dirección de Multas de IAGAMI.</p>
+        <div class="ico">🔍</div>
+        <h3>Código no encontrado</h3>
+        <p>No se encontró ningún expediente asociado a ese código de consulta.<br>
+        Verifica que lo hayas copiado correctamente, o contacta a la Dirección de Multas de IAGAMI.</p>
       </div>`;
     return;
   }
 
+  // No se muestra el documento de identidad (cédula/RIF): el token ya
+  // identifica de forma exclusiva al titular del expediente, por lo
+  // que no es necesario exponer ese dato adicional en la respuesta.
   const cards = resultados.map(m => `
     <div class="multa-card">
       <div class="multa-header">
         <div>
           <div class="multa-exp">Expediente: ${escHtml(m.expediente || '—')}</div>
           <div class="multa-nombre">${escHtml(m.nombre || '—')}</div>
-          <div class="multa-doc">Documento: ${escHtml(m.documento || '—')}</div>
         </div>
         ${estadoBadge(m.estado)}
       </div>
@@ -422,8 +439,8 @@ function mostrarResultados(resultados, docBuscado) {
 
   area.innerHTML = `
     <div class="result-header">
-      <h3>Resultados para: <strong>${escHtml(docBuscado)}</strong></h3>
-      <span class="result-count">${resultados.length} expediente(s) encontrado(s)</span>
+      <h3>Expediente encontrado</h3>
+      <span class="result-count">${resultados.length} resultado(s)</span>
     </div>
     ${aviso}
     ${cards}

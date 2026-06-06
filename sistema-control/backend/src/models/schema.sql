@@ -100,6 +100,38 @@ CREATE TABLE IF NOT EXISTS audit_logs (
 CREATE INDEX IF NOT EXISTS idx_audit_logs_action     ON audit_logs(action);
 CREATE INDEX IF NOT EXISTS idx_audit_logs_created_at ON audit_logs(created_at DESC);
 
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Blindaje "append-only" de audit_logs (WORM real a nivel de privilegios)
+--
+-- Un trigger NO logra esto: el dueño de la tabla siempre puede deshabilitar
+-- triggers o usar session_replication_role. La protección real es revocar
+-- UPDATE/DELETE al rol que usa la aplicación, dejándole solo INSERT/SELECT,
+-- y dejar un rol de auditoría aparte solo con SELECT.
+--
+-- EJECUTAR UNA SOLA VEZ, como superusuario/owner de la base de datos
+-- (no como parte del arranque normal de la app):
+--
+--   CREATE ROLE app_writer LOGIN PASSWORD '<contraseña-fuerte>';
+--   GRANT CONNECT ON DATABASE iagami_forms TO app_writer;
+--   GRANT USAGE ON SCHEMA public TO app_writer;
+--   GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO app_writer;
+--   -- Igualar privilegios futuros (nuevas tablas) a los anteriores...
+--   ALTER DEFAULT PRIVILEGES IN SCHEMA public
+--     GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO app_writer;
+--   -- ...y luego retirar específicamente UPDATE/DELETE solo sobre audit_logs:
+--   REVOKE UPDATE, DELETE ON TABLE audit_logs FROM app_writer;
+--
+--   CREATE ROLE audit_reader LOGIN PASSWORD '<contraseña-fuerte>';
+--   GRANT CONNECT ON DATABASE iagami_forms TO audit_reader;
+--   GRANT USAGE ON SCHEMA public TO audit_reader;
+--   GRANT SELECT ON audit_logs TO audit_reader;
+--
+-- Después: actualizar DATABASE_URL del backend para conectar como `app_writer`
+-- (no como el owner/superuser). Así, aunque se inyecte código en la app,
+-- el proceso no tendrá privilegio de UPDATE/DELETE sobre audit_logs —
+-- la restricción está en PostgreSQL, no en el código de la aplicación.
+-- ─────────────────────────────────────────────────────────────────────────────
+
 -- ─────────────────────────────────────────────
 -- Indexes
 -- ─────────────────────────────────────────────

@@ -400,7 +400,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
         <a class="nl" href="planificacion/index.html">Planificación</a>
       </div>
       <div class="navr">
-        <button class="navbtn-o" onclick="window.location='admin/index.html'">Admin</button>
+        <button class="navbtn-o nav-admin-btn" style="display:none" onclick="window.location='admin/index.html'">Admin</button>
         <button class="navbtn" onclick="openModal('modal-login')">Acceder</button>
       </div>
     </div>
@@ -677,7 +677,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
         <a class="nl" href="#" onclick="showPage('home');return false">← Volver al Inicio</a>
       </div>
       <div class="navr">
-        <button class="navbtn-o" onclick="window.location='admin/index.html'">Admin</button>
+        <button class="navbtn-o nav-admin-btn" style="display:none" onclick="window.location='admin/index.html'">Admin</button>
         <button class="navbtn" onclick="openModal('modal-login')">Acceder</button>
       </div>
     </div>
@@ -1502,7 +1502,18 @@ async function cerrarBienvenida() {
 }
 
 /* ─── INIT ─── */
+/* Oculta el botón "Admin" del DOM cuando no hay sesión activa: evita
+   exponer la ruta administrativa a usuarios anónimos (limpieza de
+   acceso / least-exposure, sin requerir cambios de hosting). */
+function actualizarBotonAdmin() {
+  const visible = CMSDB.isAuthenticated();
+  document.querySelectorAll('.nav-admin-btn').forEach(btn => {
+    btn.style.display = visible ? '' : 'none';
+  });
+}
+
 function initPortal() {
+  actualizarBotonAdmin();
   checkBienvenida();
   renderAlertBar();
   renderHeroPanel();
