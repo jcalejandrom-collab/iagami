@@ -36,7 +36,7 @@ const CMSDB = (function () {
 
       do {
         const token = getToken();
-        const headers = {};
+        const headers = { 'ngrok-skip-browser-warning': '1' };
         if (token) headers['Authorization'] = token;
 
         const res = await fetch(
@@ -70,7 +70,7 @@ const CMSDB = (function () {
   async function getFiltered(coleccion, filtro, opciones = {}) {
     try {
       const token = getToken();
-      const headers = {};
+      const headers = { 'ngrok-skip-browser-warning': '1' };
       if (token) headers['Authorization'] = token;
 
       const perPage = opciones.perPage || 50;
@@ -133,7 +133,7 @@ const CMSDB = (function () {
           (Array.isArray(v) && v.some(f => f instanceof File || f instanceof Blob))
       );
 
-      let body, headers = {};
+      let body, headers = { 'ngrok-skip-browser-warning': '1' };
       const token = getToken();
       if (token) headers['Authorization'] = token;
 
@@ -188,7 +188,7 @@ const CMSDB = (function () {
   async function deleteRecord(coleccion, id) {
     try {
       const token = getToken();
-      const headers = {};
+      const headers = { 'ngrok-skip-browser-warning': '1' };
       if (token) headers['Authorization'] = token;
       const res = await fetch(
         `${PB_URL}/api/collections/${coleccion}/records/${id}`,
@@ -213,7 +213,7 @@ const CMSDB = (function () {
   async function getOne(coleccion, id) {
     try {
       const token = getToken();
-      const headers = {};
+      const headers = { 'ngrok-skip-browser-warning': '1' };
       if (token) headers['Authorization'] = token;
       const res = await fetch(
         `${PB_URL}/api/collections/${coleccion}/records/${id}`,
@@ -251,7 +251,7 @@ const CMSDB = (function () {
     try {
       const res = await fetch(`${PB_URL}/api/collections/admins/auth-with-password`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': '1' },
         body: JSON.stringify({ identity: email, password })
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -301,7 +301,7 @@ const CMSDB = (function () {
     try {
       const res = await fetch(`${PB_URL}/api/collections/admins/auth-refresh`, {
         method: 'POST',
-        headers: { 'Authorization': token }
+        headers: { 'Authorization': token, 'ngrok-skip-browser-warning': '1' }
       });
       if (!res.ok) {
         logout();
