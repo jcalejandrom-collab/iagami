@@ -285,11 +285,12 @@ function filterRevistas(cat) {
 
 /* ─── COVER HTML ─── */
 function coverHTML(r, size) {
-  if (r.portada_url) {
-    return `<img src="${r.portada_url}" alt="Portada ${r.titulo}" loading="lazy" onerror="this.parentElement.innerHTML=coverPlaceholder('${escHtml(r.titulo)}','${escHtml(r.numero_edicion)}')"/>`;
+  const safePortada = safeImageUrl(r.portada_url);
+  if (safePortada) {
+    return `<img src="${escHtml(safePortada)}" alt="Portada ${escHtml(r.titulo)}" loading="lazy" onerror="this.parentElement.innerHTML=coverPlaceholder('${escHtml(r.titulo)}','${escHtml(r.numero_edicion)}')"/>`;
   }
   const firstBlock = Array.isArray(r.contenido_bloques) ? r.contenido_bloques.find(b => b.tipo === 'portada') : null;
-  const bg = firstBlock?.color_fondo || '#1d6b3e';
+  const bg = safeColor(firstBlock?.color_fondo);
   if (size === 'large') {
     return `<div class="featured-cover-placeholder" style="background:linear-gradient(160deg,${bg},${bg}99)">
       <div class="cover-number">EDICIÓN Nº ${escHtml(r.numero_edicion)}</div>
@@ -395,7 +396,17 @@ function getCoverColor(r) {
 
 function escHtml(s) {
   if (!s) return '';
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+/* Lista blanca para colores/URLs provenientes del CMS, igual que en el visor */
+function safeColor(c) {
+  const v = String(c || '').trim();
+  return /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(v) ? v : '#1d6b3e';
+}
+function safeImageUrl(u) {
+  const v = String(u || '').trim();
+  return /^https:\/\/[a-zA-Z0-9._~:/?#[\]@!$&'()*+,;=%-]+$/.test(v) ? v : '';
 }
 
 async function descargarRevista(id) {

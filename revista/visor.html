@@ -320,7 +320,23 @@ window.addEventListener('scroll', () => {
 /* ── ESCAPE ── */
 function escHtml(s) {
   if (!s) return '';
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+/* ── SANITIZACIÓN DE ESTILOS/URLS ──
+   Los bloques de la revista vienen del CMS (editor); sus colores y URLs
+   de imagen se insertan directamente en atributos `style`/`src`. Sin
+   lista blanca, un valor como `red;background:url(javascript:...)` o
+   `expression(...)` permitiría inyectar CSS/markup arbitrario. Solo se
+   aceptan colores hex (#rgb/#rrggbb) y URLs http(s); cualquier otra
+   cosa cae al valor por defecto. */
+function safeColor(c) {
+  const v = String(c || '').trim();
+  return /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(v) ? v : '#1d6b3e';
+}
+function safeImageUrl(u) {
+  const v = String(u || '').trim();
+  return /^https:\/\/[a-zA-Z0-9._~:/?#[\]@!$&'()*+,;=%-]+$/.test(v) ? v : '';
 }
 
 /* ── COLOR UTIL ── */
@@ -350,8 +366,9 @@ function scrollToSection(id) {
 const RENDERERS = {
 
   portada(b) {
-    const bg = b.color_fondo || '#1d6b3e';
-    const imgTag = b.imagen_url ? `<img class="portada-img" src="${escHtml(b.imagen_url)}" alt="Portada" loading="eager"/>` : '';
+    const bg = safeColor(b.color_fondo);
+    const safeImg = safeImageUrl(b.imagen_url);
+    const imgTag = safeImg ? `<img class="portada-img" src="${escHtml(safeImg)}" alt="Portada" loading="eager"/>` : '';
     return `<div class="blk-portada blk-animate" style="background:linear-gradient(155deg,${bg},${shadeColor(bg,-50)})">
       ${imgTag}
       <div class="portada-inner">
@@ -376,22 +393,23 @@ const RENDERERS = {
   texto(b) {
     const paras = (b.contenido||'').split(/\n+/).filter(p => p.trim());
     const style = [
-      b.text_color ? 'color:'+b.text_color : '',
-      b.text_align ? 'text-align:'+b.text_align : ''
+      b.text_color ? 'color:'+safeColor(b.text_color) : '',
+      ['left','center','right','justify'].includes(b.text_align) ? 'text-align:'+b.text_align : ''
     ].filter(Boolean).join(';');
-    return `<div class="blk-texto blk-animate" style="${b.bg_color?'background:'+b.bg_color:''}">
+    return `<div class="blk-texto blk-animate" style="${b.bg_color?'background:'+safeColor(b.bg_color):''}">
       ${paras.map(p => `<p style="${style}">${escHtml(p)}</p>`).join('')}
     </div>`;
   },
 
   articulo(b) {
-    const hasImg = !!b.imagen_url;
-    const imgHtml = hasImg ? `<div class="art-img"><img src="${escHtml(b.imagen_url)}" alt="${escHtml(b.titulo)}" loading="lazy"/></div>` : '';
+    const safeArtImg = safeImageUrl(b.imagen_url);
+    const hasImg = !!safeArtImg;
+    const imgHtml = hasImg ? `<div class="art-img"><img src="${escHtml(safeArtImg)}" alt="${escHtml(b.titulo)}" loading="lazy"/></div>` : '';
     const paras = (b.contenido||'').split(/\n+/).filter(p => p.trim());
-    const style = b.text_align ? 'text-align:'+b.text_align : '';
-    return `<div class="blk-articulo${hasImg?' has-img':''} blk-animate" style="${b.bg_color?'background:'+b.bg_color:''}">
+    const style = ['left','center','right','justify'].includes(b.text_align) ? 'text-align:'+b.text_align : '';
+    return `<div class="blk-articulo${hasImg?' has-img':''} blk-animate" style="${b.bg_color?'background:'+safeColor(b.bg_color):''}">
       <div class="art-body">
-        <div class="art-title" style="${b.text_color?'color:'+b.text_color:''}">${escHtml(b.titulo||'')}</div>
+        <div class="art-title" style="${b.text_color?'color:'+safeColor(b.text_color):''}">${escHtml(b.titulo||'')}</div>
         ${b.autor ? `<div class="art-author">Por: ${escHtml(b.autor)}</div>` : ''}
         <div class="art-content" style="${style}">${paras.map(p => `<p style="margin-bottom:10px">${escHtml(p)}</p>`).join('')}</div>
       </div>
@@ -400,27 +418,28 @@ const RENDERERS = {
   },
 
   cita(b) {
-    const style = b.text_color ? 'color:'+b.text_color : '';
-    return `<div class="blk-cita blk-animate" style="${b.bg_color?'background:'+b.bg_color+';border-left-color:'+b.bg_color:''}">
+    const style = b.text_color ? 'color:'+safeColor(b.text_color) : '';
+    return `<div class="blk-cita blk-animate" style="${b.bg_color?'background:'+safeColor(b.bg_color)+';border-left-color:'+safeColor(b.bg_color):''}">
       <div class="cita-text" style="${style}">${escHtml(b.texto||'')}</div>
       ${b.autor ? `<div class="cita-author">${escHtml(b.autor)}</div>` : ''}
     </div>`;
   },
 
   imagen(b) {
-    if (!b.imagen_url) return `<div class="blk-imagen blk-animate"><div class="img-placeholder">🖼️ Imagen no configurada</div></div>`;
+    const safeImgBlock = safeImageUrl(b.imagen_url);
+    if (!safeImgBlock) return `<div class="blk-imagen blk-animate"><div class="img-placeholder">🖼️ Imagen no configurada</div></div>`;
     const cls = b.ancho === 'half' ? 'half' : b.ancho === 'third' ? 'third' : '';
-    return `<div class="blk-imagen ${cls} blk-animate" style="${b.bg_color?'background:'+b.bg_color:''}">
-      <div class="img-wrap"><img src="${escHtml(b.imagen_url)}" alt="${escHtml(b.pie||'Imagen')}" loading="lazy"/></div>
+    return `<div class="blk-imagen ${cls} blk-animate" style="${b.bg_color?'background:'+safeColor(b.bg_color):''}">
+      <div class="img-wrap"><img src="${escHtml(safeImgBlock)}" alt="${escHtml(b.pie||'Imagen')}" loading="lazy"/></div>
       ${b.pie ? `<div class="img-pie">${escHtml(b.pie)}</div>` : ''}
     </div>`;
   },
 
   galeria(b) {
-    const urls = (b.imagenes_csv||'').split('\n').flatMap(l=>l.split(',')).map(s=>s.trim()).filter(Boolean);
+    const urls = (b.imagenes_csv||'').split('\n').flatMap(l=>l.split(',')).map(s=>s.trim()).filter(Boolean).map(safeImageUrl).filter(Boolean);
     if (!urls.length) return `<div class="blk-galeria blk-animate"><div class="img-placeholder">🗂️ Galería vacía</div></div>`;
     const cols = Math.min(4, Math.max(2, parseInt(b.columnas)||3));
-    return `<div class="blk-galeria blk-animate" style="${b.bg_color?'background:'+b.bg_color:''}">
+    return `<div class="blk-galeria blk-animate" style="${b.bg_color?'background:'+safeColor(b.bg_color):''}">
       <div class="galeria-grid cols-${cols}">${urls.map(u => `<img src="${escHtml(u)}" alt="Imagen" loading="lazy"/>`).join('')}</div>
     </div>`;
   },
@@ -447,11 +466,11 @@ const RENDERERS = {
       <div class="inf-row">
         <div class="inf-row-label">${escHtml(bar.label||'')}</div>
         <div class="inf-track">
-          <div class="inf-fill" style="width:${Math.round((bar.valor/maxVal)*100)}%;background:${bar.color||'#1d6b3e'}"></div>
+          <div class="inf-fill" style="width:${Math.round((bar.valor/maxVal)*100)}%;background:${safeColor(bar.color)}"></div>
         </div>
         <div class="inf-val">${bar.valor||0}</div>
       </div>`).join('');
-    return `<div class="blk-infografia blk-animate" style="${b.bg_color?'background:'+b.bg_color:''}">
+    return `<div class="blk-infografia blk-animate" style="${b.bg_color?'background:'+safeColor(b.bg_color):''}">
       ${b.titulo ? `<div class="inf-title">${escHtml(b.titulo)}</div>` : ''}
       ${barsHtml}
     </div>`;
@@ -463,7 +482,7 @@ const RENDERERS = {
     if (estilo==='espacio') inner = `<div class="sep-espacio"></div>`;
     else if (estilo==='decorativo') inner = `<div class="sep-decorativo"><span>🌿</span></div>`;
     else inner = `<div class="sep-linea"></div>`;
-    return `<div class="blk-separador blk-animate" style="${b.bg_color?'background:'+b.bg_color:''}">${inner}</div>`;
+    return `<div class="blk-separador blk-animate" style="${b.bg_color?'background:'+safeColor(b.bg_color):''}">${inner}</div>`;
   },
 
   noticias(b) {
@@ -521,8 +540,9 @@ function renderMagazine(revista) {
   // Build hero banner from portada
   let heroHtml = '';
   if (portadaBlock) {
-    const bg = portadaBlock.color_fondo || '#1d6b3e';
-    const imgTag = portadaBlock.imagen_url ? `<img class="ph-img" src="${escHtml(portadaBlock.imagen_url)}" alt="Portada">` : '';
+    const bg = safeColor(portadaBlock.color_fondo);
+    const safeHeroImg = safeImageUrl(portadaBlock.imagen_url);
+    const imgTag = safeHeroImg ? `<img class="ph-img" src="${escHtml(safeHeroImg)}" alt="Portada">` : '';
     heroHtml = `<div class="portada-hero" style="background:linear-gradient(155deg,${bg},${shadeColor(bg,-50)})">
       ${imgTag}
       <div class="ph-overlay"></div>

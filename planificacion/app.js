@@ -85,7 +85,7 @@ function fileSize(bytes) {
 }
 
 function escHtml(s) {
-  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 
 /* ══════════════════════════════════════════════
@@ -541,12 +541,32 @@ function openEvidencia(idx, reportId) {
   if (!report?.evidencias?.[idx]) return;
   const ev = report.evidencias[idx];
   const win = window.open();
-  win.document.write(`<title>${ev.name}</title>
-    <body style="margin:0;background:#111;display:flex;justify-content:center;align-items:center;min-height:100vh">
-    ${ev.type.startsWith('image/')
-      ? `<img src="${ev.dataUrl}" style="max-width:100%;max-height:100vh"/>`
-      : `<embed src="${ev.dataUrl}" type="${ev.type}" width="100%" height="100%" style="min-height:100vh"/>`}
-    </body>`);
+  if (!win) return;
+  // Se construye el documento con DOM seguro (sin document.write sobre datos
+  // del usuario): nombre/tipo/dataUrl de la evidencia provienen de un archivo
+  // subido y nunca deben interpretarse como HTML.
+  win.document.title = ev.name || 'Evidencia';
+  const body = win.document.body;
+  body.style.margin = '0';
+  body.style.background = '#111';
+  body.style.display = 'flex';
+  body.style.justifyContent = 'center';
+  body.style.alignItems = 'center';
+  body.style.minHeight = '100vh';
+
+  const isImage = String(ev.type || '').startsWith('image/');
+  const media = win.document.createElement(isImage ? 'img' : 'embed');
+  media.src = ev.dataUrl;
+  if (isImage) {
+    media.style.maxWidth = '100%';
+    media.style.maxHeight = '100vh';
+  } else {
+    media.type = ev.type;
+    media.width = '100%';
+    media.height = '100%';
+    media.style.minHeight = '100vh';
+  }
+  body.appendChild(media);
 }
 
 /* ══════════════════════════════════════════════
