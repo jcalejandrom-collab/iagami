@@ -12,5 +12,5 @@
  * variable de entorno, hazlo ahí en lugar de editarlo a mano.
  */
 window.__IAGAMI_CONFIG__ = {
-  PB_URL: 'http://127.0.0.1:8090',
+  PB_URL: 'https://crewmate-reps-fidgety.ngrok-free.dev',
 };
