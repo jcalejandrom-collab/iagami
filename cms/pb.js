@@ -56,6 +56,48 @@ const CMSDB = (function () {
     }
   }
 
+  /* ─── GET FILTERED (consulta server-side, sin descargar la colección completa) ─── */
+  async function getFiltered(coleccion, filtro, opciones = {}) {
+    try {
+      const token = getToken();
+      const headers = {};
+      if (token) headers['Authorization'] = token;
+
+      const perPage = opciones.perPage || 50;
+      const page = opciones.page || 1;
+      const sort = opciones.sort || '-created';
+
+      const params = new URLSearchParams({
+        page: String(page),
+        perPage: String(perPage),
+        sort
+      });
+      if (filtro) params.set('filter', filtro);
+
+      const res = await fetch(
+        `${PB_URL}/api/collections/${coleccion}/records?${params.toString()}`,
+        { headers }
+      );
+
+      if (res.status === 404) {
+        console.warn(`[SIGAP] Colección "${coleccion}" no existe en PocketBase`);
+        return [];
+      }
+      if (res.status === 401 || res.status === 403) {
+        console.warn(`[SIGAP] Acceso denegado a "${coleccion}" (filtro: ${filtro})`);
+        return [];
+      }
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+      const data = await res.json();
+      return data.items || [];
+
+    } catch (err) {
+      console.error(`[SIGAP] getFiltered("${coleccion}") falló:`, err.message);
+      return [];
+    }
+  }
+
   /* ─── SAVE (POST / PATCH — JSON o multipart) ─── */
   async function save(coleccion, item) {
     try {
@@ -258,5 +300,5 @@ const CMSDB = (function () {
     }
   }
 
-  return { getAll, save, deleteRecord, remove, getOne, clearCache, ping, uid, now, login, logout, getToken, isAuthenticated, verifyToken, logAudit };
+  return { getAll, getFiltered, save, deleteRecord, remove, getOne, clearCache, ping, uid, now, login, logout, getToken, isAuthenticated, verifyToken, logAudit };
 })();

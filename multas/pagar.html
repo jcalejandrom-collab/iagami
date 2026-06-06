@@ -444,22 +444,21 @@ function genCodigo() {
 }
 
 /* ── AUTO-FILL desde expediente ── */
+let _autoFillTimer = null;
 async function autoFillExpediente(val) {
   const input = document.getElementById('f-estado-exp');
   if (!val || val.length < 5) { input.value = ''; return; }
-  try {
-    const multas = await CMSDB.getAll('multas');
-    const found = multas.find(m => (m.expediente || '').toUpperCase() === val.toUpperCase().trim());
-    if (found) {
-      input.value = found.estado || 'Pendiente';
-      if (found.nombre && !document.getElementById('f-nombre').value)
-        document.getElementById('f-nombre').value = found.nombre;
-      if (found.documento && !document.getElementById('f-cedula').value)
-        document.getElementById('f-cedula').value = found.documento;
-    } else {
-      input.value = '';
-    }
-  } catch(e) { /* silencio */ }
+  clearTimeout(_autoFillTimer);
+  _autoFillTimer = setTimeout(async () => {
+    try {
+      const safeVal = val.toUpperCase().trim().replace(/['"\\]/g, '');
+      // Consulta filtrada por expediente exacto: nunca se descarga la colección completa.
+      // No se auto-rellenan nombre/cédula: hacerlo permitiría obtener datos personales
+      // de terceros con solo adivinar un número de expediente.
+      const found = await CMSDB.getFiltered('multas', `expediente="${safeVal}"`, { perPage: 1 });
+      input.value = found.length ? (found[0].estado || 'Pendiente') : '';
+    } catch(e) { /* silencio */ }
+  }, 400);
 }
 
 /* ── COPIAR AL PORTAPAPELES ── */

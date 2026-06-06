@@ -345,8 +345,10 @@ async function buscarMulta() {
   setTimeout(async () => {
     try {
       const busqueda = normalizarDoc(tipo, raw);
-      const todas = (await CMSDB.getAll('multas')).filter(m => m.publicado);
-      const resultados = todas.filter(m => {
+      // Consulta filtrada server-side por documento exacto: nunca se descarga la colección completa
+      const safeDoc = busqueda.replace(/['"\\]/g, '');
+      const candidatos = await CMSDB.getFiltered('multas', `documento~"${safeDoc}" && publicado=true`, { perPage: 20 });
+      const resultados = candidatos.filter(m => {
         if (!m.documento) return false;
         const docNorm = m.documento.toUpperCase().replace(/\s+/g,'').replace(/-/g,'').replace(/^[VEJGC]/,'');
         return docNorm === busqueda;
@@ -431,9 +433,21 @@ function mostrarResultados(resultados, docBuscado) {
 }
 
 /* ── STATS DEL HERO ── */
+/* Las estadísticas globales de multas requieren listar la colección completa,
+   lo cual está bloqueado para usuarios anónimos por las API Rules (multas
+   contiene PII y solo es legible autenticado). Estas cifras deben publicarse
+   como un agregado desde el panel admin (autenticado), no calculadas en el
+   cliente público. Se ocultan los contadores del hero si no hay sesión. */
 async function renderStats() {
+  if (!CMSDB.isAuthenticated()) {
+    ['stat-total','stat-pendientes','stat-pagadas'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = '—';
+    });
+    return;
+  }
   try {
-    const multas = (await CMSDB.getAll('multas')).filter(m => m.publicado);
+    const multas = await CMSDB.getFiltered('multas', 'publicado=true', { perPage: 200 });
     const activos    = multas.filter(m => m.estado !== 'Anulada').length;
     const pendientes = multas.filter(m => m.estado === 'Pendiente' || m.estado === 'En Proceso').length;
     const pagadas    = multas.filter(m => m.estado === 'Pagada').length;

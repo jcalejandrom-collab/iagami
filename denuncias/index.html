@@ -395,13 +395,12 @@ async function buscarDenuncia() {
     variants.add('DEN-' + upper);
   }
 
-  const todas = await CMSDB.getAll('denuncias');
-  const publicas = todas.filter(d => d.publicado === true || d.publicado === undefined);
-
+  // Consulta filtrada server-side: nunca se descarga la colección completa
   let found = null;
   for (const v of variants) {
-    found = publicas.find(d => d.caso && d.caso.toUpperCase() === v);
-    if (found) break;
+    const safe = v.replace(/['"\\]/g, '');
+    const resultados = await CMSDB.getFiltered('denuncias', `caso="${safe}" && publicado=true`, { perPage: 1 });
+    if (resultados.length) { found = resultados[0]; break; }
   }
 
   // Hide initial state
