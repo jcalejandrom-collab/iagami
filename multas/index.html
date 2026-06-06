@@ -368,7 +368,14 @@ async function buscarMulta() {
       const safeToken = token.replace(/['"\\]/g, '');
       // Búsqueda exacta por token único: nunca se lista ni descarga la colección completa.
       // El token actúa como credencial de acceso — quien lo posee, posee el expediente.
-      const encontrados = await CMSDB.getFiltered('multas', `token_tuc="${safeToken}" && publicado=true`, { perPage: 1 });
+      // Se envía también como ?token= (parámetro de consulta independiente del
+      // `filter`) porque la API Rule de la colección lo referencia explícitamente
+      // vía @request.query.token — el filtro por sí solo no es de fiar como
+      // mecanismo de autorización (el cliente lo controla por completo).
+      const encontrados = await CMSDB.getFiltered('multas', `token_tuc="${safeToken}" && publicado=true`, {
+        perPage: 1,
+        params: { token: safeToken }
+      });
       mostrarResultados(encontrados, raw);
     } catch(e) {
       toast('Error al consultar el expediente. Intenta nuevamente.');

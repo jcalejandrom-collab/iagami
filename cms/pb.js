@@ -84,6 +84,14 @@ const CMSDB = (function () {
       });
       if (filtro) params.set('filter', filtro);
 
+      // Parámetros adicionales que algunas API Rules necesitan referenciar
+      // explícitamente (ej. ?token=... evaluado vía @request.query.token en
+      // la regla, para validar consultas públicas por token sin exponer
+      // listados — ver listRule de `multas`/`denuncias`).
+      if (opciones.params) {
+        Object.entries(opciones.params).forEach(([k, v]) => params.set(k, v));
+      }
+
       const res = await fetch(
         `${PB_URL}/api/collections/${coleccion}/records?${params.toString()}`,
         { headers }
