@@ -461,6 +461,7 @@ input,select,textarea{font-family:inherit}
               <div class="form-group"><label>Responsable</label><input type="text" name="responsable"></div>
               <div class="form-group"><label>Estado</label><select name="estado"><option value="publicado">Publicado</option><option value="borrador">Borrador</option><option value="programado">Programado</option><option value="cancelado">Cancelado</option></select></div>
               <div class="form-group form-full"><label>Descripción</label><textarea name="descripcion" rows="4"></textarea></div>
+              <div class="form-group"><label>Imagen del Evento</label><input type="file" name="imagen" accept="image/*" style="padding:6px"></div>
               <div class="form-group"><label class="form-check"><input type="checkbox" name="destacado"> Evento Destacado</label></div>
             </div>
             <input type="hidden" name="id">
@@ -578,6 +579,7 @@ input,select,textarea{font-family:inherit}
               <div class="form-group"><label>Beneficiados</label><input type="text" name="beneficiados"></div>
               <div class="form-group form-full"><label>Presupuesto</label><input type="text" name="presupuesto"></div>
               <div class="form-group form-full"><label>Descripción</label><textarea name="descripcion" rows="4"></textarea></div>
+              <div class="form-group"><label>Imagen</label><input type="file" name="imagen" accept="image/*" style="padding:6px"></div>
               <div class="form-group form-full">
                 <label>Hitos</label>
                 <div class="dynamic-list" id="hitos-list"></div>
@@ -1143,8 +1145,8 @@ input,select,textarea{font-family:inherit}
           <div style="display:flex;flex-direction:column;gap:5px"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Categoría</label><select id="rv-categoria" style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none"><option value="Ambiental">Ambiental</option><option value="Institucional">Institucional</option><option value="Educativa">Educativa</option><option value="Técnica">Técnica</option><option value="Especial">Especial</option></select></div>
           <div style="display:flex;flex-direction:column;gap:5px"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Estado</label><select id="rv-estado" style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none"><option value="borrador">Borrador</option><option value="publicada">Publicada</option><option value="archivada">Archivada</option></select></div>
           <div style="display:flex;flex-direction:column;gap:5px;grid-column:1/-1"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Descripción</label><textarea id="rv-descripcion" rows="3" placeholder="Descripción breve de esta edición..." style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none;resize:vertical;font-family:inherit"></textarea></div>
-          <div style="display:flex;flex-direction:column;gap:5px;grid-column:1/-1"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">URL de portada (imagen)</label><input type="url" id="rv-portada" placeholder="https://..." style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none"/></div>
-          <div style="display:flex;flex-direction:column;gap:5px;grid-column:1/-1"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">URL de PDF (opcional — si ya tienes el archivo en línea)</label><input type="url" id="rv-pdf" placeholder="https://..." style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none"/></div>
+          <div style="display:flex;flex-direction:column;gap:5px;grid-column:1/-1"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Portada (imagen)</label><input type="file" id="rv-portada-file" accept="image/*" style="padding:6px;border:1px solid var(--border);border-radius:8px;font-size:13px"/></div>
+          <div style="display:flex;flex-direction:column;gap:5px;grid-column:1/-1"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Archivo PDF</label><input type="file" id="rv-pdf-file" accept="application/pdf" style="padding:6px;border:1px solid var(--border);border-radius:8px;font-size:13px"/></div>
           <div style="display:flex;align-items:center;gap:10px"><input type="checkbox" id="rv-destacada" style="width:16px;height:16px;cursor:pointer"/><label for="rv-destacada" style="font-size:13px;cursor:pointer">Marcar como revista destacada</label></div>
         </div>
         <div style="display:flex;gap:10px;margin-top:20px">
@@ -2869,8 +2871,8 @@ async function openRevistaForm(id) {
   document.getElementById('rv-categoria').value   = r ? r.categoria   : 'Ambiental';
   document.getElementById('rv-estado').value      = r ? r.estado      : 'borrador';
   document.getElementById('rv-descripcion').value = r ? r.descripcion : '';
-  document.getElementById('rv-portada').value     = r ? r.portada_url||'' : '';
-  document.getElementById('rv-pdf').value         = r ? r.pdf_url||''     : '';
+  if (document.getElementById('rv-portada-file')) document.getElementById('rv-portada-file').value = '';
+  if (document.getElementById('rv-pdf-file')) document.getElementById('rv-pdf-file').value = '';
   document.getElementById('rv-destacada').checked = r ? !!r.destacada      : false;
 
   document.getElementById('revista-list-view').style.display  = 'none';
@@ -2904,8 +2906,8 @@ async function saveRevistaMeta() {
     categoria:      document.getElementById('rv-categoria').value,
     estado:         document.getElementById('rv-estado').value,
     descripcion:    document.getElementById('rv-descripcion').value.trim(),
-    portada_url:    document.getElementById('rv-portada').value.trim(),
-    pdf_url:        document.getElementById('rv-pdf').value.trim(),
+    portada:        (document.getElementById('rv-portada-file')?.files?.[0]) || undefined,
+    pdf:            (document.getElementById('rv-pdf-file')?.files?.[0]) || undefined,
     destacada:      document.getElementById('rv-destacada').checked,
     visualizaciones: 0,
     descargas:       0
