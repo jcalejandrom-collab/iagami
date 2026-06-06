@@ -35,6 +35,25 @@ app.use(
   })
 );
 
+// ─── Security headers ─────────────────────────────────────────────────────────
+// Estas cabeceras solo protegen lo que sirve ESTE backend (API + /uploads);
+// el frontend estático en GitHub Pages no puede recibir cabeceras HTTP
+// personalizadas y necesitaría su propia infraestructura (proxy/CDN) para
+// CSP/HSTS reales.
+app.use((_req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Permissions-Policy', 'geolocation=(), camera=(), microphone=()');
+  res.setHeader(
+    'Content-Security-Policy',
+    "default-src 'none'; img-src 'self' data:; frame-ancestors 'none'; base-uri 'none'"
+  );
+  if (process.env.NODE_ENV === 'production') {
+    res.setHeader('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
+  }
+  next();
+});
+
 // ─── Body parsers ─────────────────────────────────────────────────────────────
 
 app.use(express.json({ limit: '10mb' }));

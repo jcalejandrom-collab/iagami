@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
 const { query } = require('../config/db');
+const { recordAuditLog } = require('../utils/auditLog');
 
 // ─── Validation rules ────────────────────────────────────────────────────────
 
@@ -42,6 +43,7 @@ const login = async (req, res) => {
     );
 
     if (result.rows.length === 0) {
+      await recordAuditLog(req, 'login_failed', { email, detail: 'usuario no encontrado' });
       return res.status(401).json({
         error: 'Credenciales incorrectas',
         message: 'El correo o la contraseña son incorrectos.',
@@ -53,6 +55,9 @@ const login = async (req, res) => {
     // Compare plain password with stored hash
     const passwordMatch = await bcrypt.compare(password, user.password_hash);
     if (!passwordMatch) {
+      await recordAuditLog(req, 'login_failed', {
+        userId: user.id, email: user.email, role: user.role, detail: 'contraseña incorrecta',
+      });
       return res.status(401).json({
         error: 'Credenciales incorrectas',
         message: 'El correo o la contraseña son incorrectos.',
@@ -70,6 +75,8 @@ const login = async (req, res) => {
     const token = jwt.sign(payload, process.env.JWT_SECRET, {
       expiresIn: process.env.JWT_EXPIRES_IN || '8h',
     });
+
+    await recordAuditLog(req, 'login_success', { userId: user.id, email: user.email, role: user.role });
 
     return res.status(200).json({
       token,
@@ -100,4 +107,19 @@ const me = (req, res) => {
   });
 };
 
-module.exports = { login, me, loginValidation };
+/**
+ * POST /api/auth/logout
+ * Stateless JWT: no server-side session to invalidate, pero se registra
+ * el evento para mantener una auditoría completa de accesos. El cliente
+ * es responsable de descartar el token.
+ */
+const logout = async (req, res) => {
+  await recordAuditLog(req, 'logout', {
+    userId: req.user?.id ?? null,
+    email: req.user?.email ?? null,
+    role: req.user?.role ?? null,
+  });
+  return res.status(200).json({ message: 'Sesión cerrada.' });
+};
+
+module.exports = { login, logout, me, loginValidation };

@@ -80,6 +80,27 @@ CREATE TABLE IF NOT EXISTS evidences (
 );
 
 -- ─────────────────────────────────────────────
+-- Table: audit_logs
+-- Auditoría server-side de eventos de seguridad
+-- (login, logout, denegaciones de permiso, etc).
+-- Nunca debe ser editable/borrable vía API pública.
+-- ─────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS audit_logs (
+  id          BIGSERIAL    PRIMARY KEY,
+  action      VARCHAR(50)  NOT NULL,
+  user_id     INT          REFERENCES users(id) ON DELETE SET NULL,
+  email       VARCHAR(255),
+  role        VARCHAR(50),
+  ip          VARCHAR(64),
+  user_agent  VARCHAR(512),
+  detail      VARCHAR(500),
+  created_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_audit_logs_action     ON audit_logs(action);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_created_at ON audit_logs(created_at DESC);
+
+-- ─────────────────────────────────────────────
 -- Indexes
 -- ─────────────────────────────────────────────
 CREATE INDEX IF NOT EXISTS idx_submissions_form_type   ON form_submissions(form_type);

@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const { recordAuditLog } = require('../utils/auditLog');
 
 /**
  * requireAuth
@@ -49,6 +50,12 @@ const requireAuth = (req, res, next) => {
  */
 const requireAdmin = (req, res, next) => {
   if (!req.user || req.user.role !== 'admin') {
+    recordAuditLog(req, 'permission_denied', {
+      userId: req.user?.id ?? null,
+      email: req.user?.email ?? null,
+      role: req.user?.role ?? null,
+      detail: `${req.method} ${req.originalUrl}`,
+    });
     return res.status(403).json({
       error: 'Acceso denegado',
       message: 'Se requieren permisos de administrador para realizar esta acción.',

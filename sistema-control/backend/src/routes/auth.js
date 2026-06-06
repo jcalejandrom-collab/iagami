@@ -1,5 +1,5 @@
 const { Router } = require('express');
-const { login, me, loginValidation } = require('../controllers/authController');
+const { login, logout, me, loginValidation } = require('../controllers/authController');
 const { requireAuth } = require('../middleware/auth');
 const { loginLimiter } = require('../middleware/rateLimit');
 
@@ -18,5 +18,11 @@ router.post('/login', loginLimiter, loginValidation, login);
  * Requires: Bearer token
  */
 router.get('/me', requireAuth, me);
+
+/**
+ * POST /api/auth/logout
+ * Registers the logout event in the server-side audit trail.
+ */
+router.post('/logout', requireAuth, logout);
 
 module.exports = router;

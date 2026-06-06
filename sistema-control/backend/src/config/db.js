@@ -1,9 +1,17 @@
 const { Pool } = require('pg');
 require('dotenv').config();
 
+/* `rejectUnauthorized: false` aceptaría cualquier certificado TLS del
+   servidor PostgreSQL —incluido el de un atacante en posición MITM—
+   anulando la protección que SSL debería ofrecer. Se exige verificación
+   real por defecto; solo puede desactivarse explícitamente vía
+   DB_SSL_REJECT_UNAUTHORIZED=false para entornos de desarrollo con
+   certificados autofirmados conocidos. */
+const sslRejectUnauthorized = process.env.DB_SSL_REJECT_UNAUTHORIZED !== 'false';
+
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: sslRejectUnauthorized } : false,
 });
 
 pool.on('connect', () => {
