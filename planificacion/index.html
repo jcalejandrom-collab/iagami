@@ -449,7 +449,7 @@ function renderCalendario() {
     // Iterar solo dentro del rango que intersecta el mes visible
     const iterStart = start < monthStart ? new Date(monthStart) : new Date(start);
     const iterEnd   = end > monthEnd ? new Date(monthEnd) : new Date(end);
-    for (let d = new Date(iterStart); d <= iterEnd; d.setDate(d.getDate() + 1)) {
+    for (let d = new Date(iterStart); d <= iterEnd; d = new Date(d.getTime() + 86400000)) {
       const k = d.getDate();
       (dayMap[k] = dayMap[k] || []).push(p);
     }

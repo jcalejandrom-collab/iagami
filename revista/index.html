@@ -288,7 +288,7 @@ function filterRevistas(cat) {
 function coverHTML(r, size) {
   const safePortada = safeImageUrl(r.portada_url);
   if (safePortada) {
-    return `<img src="${escHtml(safePortada)}" alt="Portada ${escHtml(r.titulo)}" loading="lazy" onerror="this.parentElement.innerHTML=coverPlaceholder('${escHtml(r.titulo)}','${escHtml(r.numero_edicion)}')"/>`;
+    return `<img src="${escHtml(safePortada)}" alt="Portada ${escHtml(r.titulo)}" loading="lazy" onerror="this.style.display='none'"/>`;
   }
   const firstBlock = Array.isArray(r.contenido_bloques) ? r.contenido_bloques.find(b => b.tipo === 'portada') : null;
   const bg = safeColor(firstBlock?.color_fondo);

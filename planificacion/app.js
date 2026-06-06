@@ -315,9 +315,9 @@ function viewPlan(id) {
     <div class="form-footer">
       <button class="btn-cancel" onclick="renderDashboard()">← Volver</button>
       <div class="spacer"></div>
-      <button class="btn-draft" onclick="openFormPlan('${plan.id}')">✏️ Editar</button>
+      <button class="btn-draft" onclick="openFormPlan('${escHtml(plan.id)}')">✏️ Editar</button>
       ${plan.estado === 'borrador'
-        ? `<button class="btn-submit" onclick="sendPlan('${plan.id}');renderDashboard()">📤 Enviar</button>`
+        ? `<button class="btn-submit" onclick="sendPlan('${escHtml(plan.id)}');renderDashboard()">📤 Enviar</button>`
         : ''}
     </div>`;
 
@@ -486,7 +486,7 @@ function viewReport(id) {
         <div><strong>Institución:</strong> ${escHtml(report.institucion)}</div>
         <div><strong>Responsable:</strong> ${escHtml(report.responsable)}</div>
         ${plan ? `<div style="grid-column:1/-1"><strong>Planificación:</strong> ${weekLabel(plan.semana)}
-          <button class="btn-icon" style="margin-left:8px" onclick="viewPlan('${plan.id}')">👁 Ver</button></div>` : ''}
+          <button class="btn-icon" style="margin-left:8px" onclick="viewPlan('${escHtml(plan.id)}')">👁 Ver</button></div>` : ''}
       </div>
     </div>
 
