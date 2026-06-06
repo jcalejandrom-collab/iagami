@@ -216,10 +216,19 @@ const CMSDB = (function () {
     }
   }
 
-  /* ─── AUTH ─── */
+  /* ─── AUTH ───
+     Se autentica contra la colección `admins` (auth collection dedicada
+     para el panel institucional), NO contra `_superusers`. Un token de
+     _superusers ignora TODAS las API Rules del resto de colecciones, así
+     que usarlo desde el frontend público convierte cualquier fuga de ese
+     token en acceso administrativo total a la base de datos completa.
+     `admins` es una colección de autenticación normal: sus tokens solo
+     dan los permisos que las API Rules de cada colección le concedan
+     explícitamente a `@request.auth.collectionName = "admins"` (o por
+     campo `role`), permitiendo RBAC mínimo sin exponer el superusuario. */
   async function login(email, password) {
     try {
-      const res = await fetch(`${PB_URL}/api/collections/_superusers/auth-with-password`, {
+      const res = await fetch(`${PB_URL}/api/collections/admins/auth-with-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ identity: email, password })
@@ -248,11 +257,28 @@ const CMSDB = (function () {
     return !!sessionStorage.getItem('pb_token');
   }
 
+  function getCurrentUser() {
+    try {
+      return JSON.parse(sessionStorage.getItem('pb_user') || 'null');
+    } catch {
+      return null;
+    }
+  }
+
+  /* RBAC mínimo: la colección `admins` debe tener un campo `role`
+     (ej. "superadmin", "editor", "soporte"). Las vistas del panel
+     consultan hasRole() para mostrar/ocultar acciones; la autorización
+     real sigue residiendo en las API Rules de PocketBase. */
+  function hasRole(...roles) {
+    const user = getCurrentUser();
+    return !!user && roles.includes(user.role);
+  }
+
   async function verifyToken() {
     const token = getToken();
     if (!token) return false;
     try {
-      const res = await fetch(`${PB_URL}/api/collections/_superusers/auth-refresh`, {
+      const res = await fetch(`${PB_URL}/api/collections/admins/auth-refresh`, {
         method: 'POST',
         headers: { 'Authorization': token }
       });
@@ -300,5 +326,5 @@ const CMSDB = (function () {
     }
   }
 
-  return { getAll, getFiltered, save, deleteRecord, remove, getOne, clearCache, ping, uid, now, login, logout, getToken, isAuthenticated, verifyToken, logAudit };
+  return { getAll, getFiltered, save, deleteRecord, remove, getOne, clearCache, ping, uid, now, login, logout, getToken, isAuthenticated, getCurrentUser, hasRole, verifyToken, logAudit };
 })();
