@@ -396,6 +396,10 @@ let _scanData = null;
 /* ═══════════════════════════════════════════════
    HASH
 ═══════════════════════════════════════════════ */
+function escHtml(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
 function getCurrentUser() {
   try { return JSON.parse(sessionStorage.getItem(SYS_SESSION)||'null'); } catch(e){return null;}
 }
@@ -1007,9 +1011,9 @@ function renderUsers() {
     const statusBadge = !u.activo ? '<span class="status status-err">inactivo</span>' :
       isLocked ? '<span class="status status-warn">bloqueado</span>' : '<span class="status status-ok">activo</span>';
     return `<tr>
-      <td><strong>${u.username}</strong></td>
-      <td>${u.nombre}</td>
-      <td><span class="status status-info">${u.role}</span></td>
+      <td><strong>${escHtml(u.username)}</strong></td>
+      <td>${escHtml(u.nombre)}</td>
+      <td><span class="status status-info">${escHtml(u.role)}</span></td>
       <td>${statusBadge}</td>
       <td>${u.failedAttempts||0}</td>
       <td><div style="display:flex;gap:4px;flex-wrap:wrap">
@@ -1115,9 +1119,9 @@ function renderAccessHistory() {
       const c = l.result==='success'?'ok':l.result==='failed'||l.result==='blocked'?'err':'warn';
       return `<tr>
         <td style="font-size:11px">${fmtDateTime(l.timestamp)}</td>
-        <td>${l.username}</td>
-        <td>${l.action}</td>
-        <td><span class="status status-${c}">${l.result}</span></td>
+        <td>${escHtml(l.username)}</td>
+        <td>${escHtml(l.action)}</td>
+        <td><span class="status status-${c}">${escHtml(l.result)}</span></td>
         <td style="font-size:12px">${l.detail||'—'}</td>
       </tr>`;
     }).join('');

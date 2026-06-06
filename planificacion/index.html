@@ -319,6 +319,10 @@ let _calYear   = new Date().getFullYear();
 let _calMonth  = new Date().getMonth();
 
 /* ─── HELPERS ─── */
+function escHtml(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
 function fmtFecha(iso) {
   if (!iso) return '—';
   const d = new Date(iso + 'T12:00:00');
@@ -398,16 +402,16 @@ function renderLista() {
       <div class="plan-card-top">
         <div class="plan-icon">${tipoIcon(p.tipo)}</div>
         <div class="plan-info">
-          <div class="plan-name" title="${p.nombre || ''}">${p.nombre || 'Sin nombre'}</div>
+          <div class="plan-name" title="${escHtml(p.nombre || '')}">${escHtml(p.nombre || 'Sin nombre')}</div>
           <div class="plan-meta">
             ${p.fecha_inicio ? `<span>📅 ${fmtFecha(p.fecha_inicio)}${p.fecha_fin ? ' – ' + fmtFecha(p.fecha_fin) : ''}</span>` : ''}
-            ${p.responsable  ? `<span>👤 ${p.responsable}</span>` : ''}
-            ${p.prioridad    ? `<span>🔺 ${p.prioridad}</span>` : ''}
+            ${p.responsable  ? `<span>👤 ${escHtml(p.responsable)}</span>` : ''}
+            ${p.prioridad    ? `<span>🔺 ${escHtml(p.prioridad)}</span>` : ''}
           </div>
         </div>
-        <span class="ps-badge ${estadoClass(p.estado)}">${p.estado || 'Planificado'}</span>
+        <span class="ps-badge ${estadoClass(p.estado)}">${escHtml(p.estado || 'Planificado')}</span>
       </div>
-      ${p.descripcion ? `<div class="plan-desc">${p.descripcion}</div>` : ''}
+      ${p.descripcion ? `<div class="plan-desc">${escHtml(p.descripcion)}</div>` : ''}
       <div class="plan-progress-row">
         <div class="plan-bar-track"><div class="plan-bar-fill" style="width:${pct}%;background:${fill}"></div></div>
         <div class="plan-bar-pct">${pct}%</div>
@@ -461,7 +465,7 @@ function renderCalendario() {
     const extra   = items.length - show.length;
     html += `<div class="cal-cell${isToday ? ' today' : ''}">
       <div class="cal-day">${d}</div>
-      ${show.map(p => `<span class="cal-pill ${calPillClass(p.estado)}" title="${p.nombre || ''}">${p.nombre || '—'}</span>`).join('')}
+      ${show.map(p => `<span class="cal-pill ${calPillClass(p.estado)}" title="${escHtml(p.nombre || '')}">${escHtml(p.nombre || '—')}</span>`).join('')}
       ${extra > 0 ? `<div class="cal-more">+${extra} más</div>` : ''}
     </div>`;
   }
@@ -478,14 +482,14 @@ function renderKanban() {
           const pct  = Math.min(100, Math.max(0, Number(p.porcentaje_avance) || 0));
           const fill = fillColor(p.estado);
           return `<div class="kanban-item">
-            <div class="kanban-item-name">${p.nombre || 'Sin nombre'}</div>
-            <div class="kanban-item-meta">${p.responsable ? '👤 ' + p.responsable : ''}${p.fecha_inicio ? (p.responsable ? ' · ' : '') + '📅 ' + fmtFecha(p.fecha_inicio) : ''}</div>
+            <div class="kanban-item-name">${escHtml(p.nombre || 'Sin nombre')}</div>
+            <div class="kanban-item-meta">${p.responsable ? '👤 ' + escHtml(p.responsable) : ''}${p.fecha_inicio ? (p.responsable ? ' · ' : '') + '📅 ' + fmtFecha(p.fecha_inicio) : ''}</div>
             <div class="kanban-item-bar"><div class="kanban-item-fill" style="width:${pct}%;background:${fill}"></div></div>
           </div>`;
         }).join('')
       : '<div style="font-size:11px;color:#4a8a6a;text-align:center;padding:12px 0">Sin planes</div>';
     return `<div class="kanban-col">
-      <div class="kanban-col-head ${kanbanHeadClass(estado)}">${estado}<span class="kcount">${items.length}</span></div>
+      <div class="kanban-col-head ${kanbanHeadClass(estado)}">${escHtml(estado)}<span class="kcount">${items.length}</span></div>
       <div class="kanban-items">${cards}</div>
     </div>`;
   }).join('');
