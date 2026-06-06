@@ -1196,16 +1196,19 @@ async function renderAlertBar() {
 async function renderHeroPanel() {
   const body = document.getElementById('hero-panel-body');
   if (!body) return;
-  const [inds, denuncias, tramites, proyectos, alertas] = await Promise.all([
+  // `denuncias` requiere autenticación bajo las nuevas API Rules (contiene
+  // PII de denunciantes); un visitante anónimo no puede listarla ni contar
+  // casos pendientes. Esa cifra debe publicarse como agregado desde el panel
+  // admin (autenticado), nunca calculada descargando la colección completa.
+  const [inds, tramites, proyectos, alertas] = await Promise.all([
     CMSDB.getAll('indicadores'),
-    CMSDB.getAll('denuncias'),
     CMSDB.getAll('tramites'),
     CMSDB.getAll('proyectos'),
     CMSDB.getAll('alertas')
   ]);
   const aire = inds.find(i => i.nombre?.toLowerCase().includes('aire'));
   const agua = inds.find(i => i.nombre?.toLowerCase().includes('agua'));
-  const dens = denuncias.filter(d => !d.estado || d.estado === 'pendiente').length;
+  const dens = '—';
   const execPct = proyectos.length
     ? Math.round(proyectos.reduce((s, p) => s + (p.porcentaje_avance || 0), 0) / proyectos.length)
     : 0;
