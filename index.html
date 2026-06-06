@@ -1311,6 +1311,7 @@ async function renderHomeIndicadores() {
 async function renderHomeNoticias() {
   const grid = document.getElementById('home-noticias-grid');
   if (!grid) return;
+  const PB = (window.__IAGAMI_CONFIG__ && window.__IAGAMI_CONFIG__.PB_URL) || 'http://127.0.0.1:8090';
   const noticias = (await CMSDB.getAll('noticias'))
     .filter(n => n.publicado !== false && n.estado !== 'borrador')
     .sort((a, b) => (b.fecha || '').localeCompare(a.fecha || ''))
@@ -1326,9 +1327,10 @@ async function renderHomeNoticias() {
       'Medio Ambiente': '#e8f5ee', 'Comunidad': '#eff6ff',
       'Normativa': '#fefce8', 'Educación': '#faf5ff', 'Institucional': '#f8fafc'
     };
+    const imgUrl = n.imagen ? `${PB}/api/files/${n.collectionName||n.collectionId}/${n.id}/${n.imagen}` : '';
     return `<a class="news-card" href="noticias/index.html">
       <div class="news-img" style="background:${bgMap[n.categoria] || '#e8f5ee'}">
-        ${n.imagen ? `<img src="${n.imagen}" alt="${n.titulo}" loading="lazy"/>` : ''}
+        ${imgUrl ? `<img src="${imgUrl}" alt="${n.titulo}" loading="lazy" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0"/>` : ''}
         ${icon}
       </div>
       <div class="news-body">
@@ -1343,6 +1345,7 @@ async function renderHomeNoticias() {
 async function renderHomeProyectos() {
   const grid = document.getElementById('home-proyectos-grid');
   if (!grid) return;
+  const PB = (window.__IAGAMI_CONFIG__ && window.__IAGAMI_CONFIG__.PB_URL) || 'http://127.0.0.1:8090';
   const proyectos = (await CMSDB.getAll('proyectos'))
     .filter(p => p.publicado !== false)
     .slice(0, 15);
@@ -1357,8 +1360,11 @@ async function renderHomeProyectos() {
       'En Ejecución': 'linear-gradient(135deg,#dbeafe,#bfdbfe)',
       'Completado':   'linear-gradient(135deg,#dcfce7,#bbf7d0)'
     };
+    const imgUrl = p.imagen ? `${PB}/api/files/${p.collectionName||p.collectionId}/${p.id}/${p.imagen}` : '';
     return `<a class="proj-card" href="proyectos/index.html">
-      <div class="proj-img" style="background:${gradMap[p.estado] || 'linear-gradient(135deg,#f1f5f9,#e2e8f0)'}">${proyIcon(p.nombre)}</div>
+      <div class="proj-img" style="background:${gradMap[p.estado] || 'linear-gradient(135deg,#f1f5f9,#e2e8f0)';position:relative;overflow:hidden}">
+        ${imgUrl ? `<img src="${imgUrl}" alt="${p.nombre}" loading="lazy" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0"/>` : proyIcon(p.nombre)}
+      </div>
       <div class="proj-body">
         <span class="ps ${cls}">${label}</span>
         <div class="proj-name">${p.nombre}</div>
