@@ -1362,7 +1362,7 @@ async function renderHomeProyectos() {
     };
     const imgUrl = p.imagen ? `${PB}/api/files/${p.collectionName||p.collectionId}/${p.id}/${p.imagen}` : '';
     return `<a class="proj-card" href="proyectos/index.html">
-      <div class="proj-img" style="background:${gradMap[p.estado] || 'linear-gradient(135deg,#f1f5f9,#e2e8f0)';position:relative;overflow:hidden}">
+      <div class="proj-img" style="background:${gradMap[p.estado] || 'linear-gradient(135deg,#f1f5f9,#e2e8f0)'};position:relative;overflow:hidden">
         ${imgUrl ? `<img src="${imgUrl}" alt="${p.nombre}" loading="lazy" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0"/>` : proyIcon(p.nombre)}
       </div>
       <div class="proj-body">
