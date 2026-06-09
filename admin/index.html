@@ -3020,16 +3020,16 @@ async function saveRevistaMeta() {
 
   const data = {
     titulo,
-    numero_edicion: numero,
+    edicion:        numero,
     fecha:          document.getElementById('rv-fecha').value,
     categoria:      document.getElementById('rv-categoria').value,
-    estado:         document.getElementById('rv-estado').value,
+    publicado:      document.getElementById('rv-estado').value === 'publicado',
     descripcion:    document.getElementById('rv-descripcion').value.trim(),
     portada:        (document.getElementById('rv-portada-file')?.files?.[0]) || undefined,
     pdf:            (document.getElementById('rv-pdf-file')?.files?.[0]) || undefined,
     destacada:      document.getElementById('rv-destacada').checked,
-    visualizaciones: 0,
-    descargas:       0
+    vistas:         0,
+    descargas:      0
   };
 
   let saved;
