@@ -1227,10 +1227,13 @@ input,select,textarea{font-family:inherit}
 (async function checkAuth() {
   const ok = await CMSDB.verifyToken();
   if (!ok) {
-    // Redirigir al portal con hash para abrir login
     window.location.replace('../index.html#login');
   }
 })();
+
+window.addEventListener('sigap:session-expired', () => {
+  window.location.replace('../index.html#login');
+});
 
 /* ─── NAVIGATION ─── */
 const NAV = [

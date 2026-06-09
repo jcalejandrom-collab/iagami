@@ -45,12 +45,25 @@ const CMSDB = (function () {
     return _controllers[key].signal;
   }
 
+  function _abortDone(key) {
+    delete _controllers[key];
+  }
+
+  /* ─── Interceptor global de errores de auth ─── */
+  function _handleAuthError(status) {
+    if (status === 401 || status === 403) {
+      logout();
+      window.dispatchEvent(new CustomEvent('sigap:session-expired'));
+    }
+  }
+
   /* ─── GET ALL (con paginación automática) ─── */
   async function getAll(coleccion) {
     const cached = _cacheGet(coleccion);
     if (cached) return cached;
 
-    const signal = _abort('getAll_' + coleccion);
+    const _key = 'getAll_' + coleccion;
+    const signal = _abort(_key);
     try {
       let page = 1;
       const perPage = 200;
@@ -71,7 +84,7 @@ const CMSDB = (function () {
           console.warn(`[SIGAP] Colección "${coleccion}" no existe en PocketBase`);
           return [];
         }
-
+        _handleAuthError(res.status);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
         const data = await res.json();
@@ -87,6 +100,8 @@ const CMSDB = (function () {
       if (err.name === 'AbortError') return [];
       console.error(`[SIGAP] getAll("${coleccion}") falló:`, err.message);
       return [];
+    } finally {
+      _abortDone(_key);
     }
   }
 
@@ -140,10 +155,8 @@ const CMSDB = (function () {
         return [];
       }
       if (res.status === 401 || res.status === 403) {
-        // No se interpola el filtro: puede contener tokens (TUC), números
-        // de caso u otros valores ingresados por el usuario que no deben
-        // quedar visibles en la consola del navegador.
         console.warn(`[SIGAP] Acceso denegado a "${coleccion}" (consulta rechazada por API Rules)`);
+        _handleAuthError(res.status);
         return [];
       }
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -374,7 +387,7 @@ const CMSDB = (function () {
         body: JSON.stringify({
           accion,
           modulo,
-          detalle: String(detalle).slice(0, 500),
+          detalle: String(detalle).replace(/[<>"'&]/g, '').slice(0, 500),
           usuario: userData.email || 'anonimo',
           nivel,
           ip: '',
