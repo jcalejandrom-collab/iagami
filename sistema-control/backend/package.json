@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node src/app.js",
     "dev": "nodemon src/app.js",
+    "lint": "eslint src/",
     "db:init": "psql $DATABASE_URL -f src/models/schema.sql"
   },
   "engines": {

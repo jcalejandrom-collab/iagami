@@ -38,21 +38,6 @@ const PDFS_DIR = path.join(UPLOAD_BASE, 'revistas', 'pdfs');
   }
 });
 
-// ─── Multer storage engines ───────────────────────────────────────────────────
-
-function makeStorage(dest) {
-  return multer.diskStorage({
-    destination: (_req, _file, cb) => cb(null, dest),
-    filename: (_req, file, cb) => {
-      const ext = path.extname(file.originalname).toLowerCase();
-      cb(null, `${uuidv4()}${ext}`);
-    },
-  });
-}
-
-const portadaStorage = makeStorage(PORTADAS_DIR);
-const pdfStorage = makeStorage(PDFS_DIR);
-
 // multer.fields requires a single storage; we use a combined diskStorage that
 // routes to the correct directory based on the field name.
 const combinedStorage = multer.diskStorage({
@@ -128,7 +113,7 @@ const parseRevistaFiles = [
     const unlinkAll = () => {
       for (const field of ['portada', 'pdf']) {
         const f = req.files?.[field]?.[0];
-        if (f) try { fs.unlinkSync(f.path); } catch (_) {}
+        if (f) try { fs.unlinkSync(f.path); } catch (_err) { /* best-effort cleanup */ }
       }
     };
 
@@ -137,7 +122,7 @@ const parseRevistaFiles = [
         const file = req.files.portada[0];
         // Enforce 5 MB limit for portada
         if (file.size > 5 * 1024 * 1024) {
-          try { fs.unlinkSync(file.path); } catch (_) {}
+          try { fs.unlinkSync(file.path); } catch (_err) { /* best-effort cleanup */ }
           return res.status(400).json({ error: 'La portada no debe superar 5 MB' });
         }
         // Validate magic bytes

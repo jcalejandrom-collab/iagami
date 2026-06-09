@@ -1189,7 +1189,8 @@ async function renderAlertBar() {
   const bar = document.getElementById('alert-bar');
   if (!bar) return;
   const today = new Date().toISOString().slice(0, 10);
-  const alertas = (await CMSDB.getAll('alertas')).filter(a => {
+  const _alertasRaw = await CMSDB.getAll('alertas');
+  const alertas = (Array.isArray(_alertasRaw) ? _alertasRaw : []).filter(a => {
     if (!a.activa) return false;
     if (a.fecha_fin && a.fecha_fin < today) return false;
     if (a.fecha_inicio && a.fecha_inicio > today) return false;
@@ -1200,7 +1201,7 @@ async function renderAlertBar() {
   const ticker = document.getElementById('alert-ticker-inner');
   if (!ticker) return;
   const items = alertas
-    .map(a => `<span class="alert-pill">${a.mensaje || ''}</span>`)
+    .map(a => `<span class="alert-pill">${escHtml(a.mensaje)}</span>`)
     .join('<span style="color:#4a8a6a;padding:0 8px">·</span>');
   ticker.innerHTML = alertas.length > 1
     ? items + '<span style="padding:0 24px">·</span>' + items
@@ -1214,12 +1215,16 @@ async function renderHeroPanel() {
   // PII de denunciantes); un visitante anónimo no puede listarla ni contar
   // casos pendientes. Esa cifra debe publicarse como agregado desde el panel
   // admin (autenticado), nunca calculada descargando la colección completa.
-  const [inds, tramites, proyectos, alertas] = await Promise.all([
+  const [_indsR, _tramitesR, _proyectosR, _alertasR] = await Promise.all([
     CMSDB.getAll('indicadores'),
     CMSDB.getAll('tramites'),
     CMSDB.getAll('proyectos'),
     CMSDB.getAll('alertas')
   ]);
+  const inds = Array.isArray(_indsR) ? _indsR : [];
+  const tramites = Array.isArray(_tramitesR) ? _tramitesR : [];
+  const proyectos = Array.isArray(_proyectosR) ? _proyectosR : [];
+  const alertas = Array.isArray(_alertasR) ? _alertasR : [];
   const aire = inds.find(i => i.nombre?.toLowerCase().includes('aire'));
   const agua = inds.find(i => i.nombre?.toLowerCase().includes('agua'));
   const dens = '—';
@@ -1279,10 +1284,12 @@ async function renderHeroPanel() {
 }
 
 async function renderHeroStats() {
-  const [consejos, empresas] = await Promise.all([
+  const [_consejosR, _empresasR] = await Promise.all([
     CMSDB.getAll('consejos'),
     CMSDB.getAll('empresas')
   ]);
+  const consejos = Array.isArray(_consejosR) ? _consejosR : [];
+  const empresas = Array.isArray(_empresasR) ? _empresasR : [];
   const sc = document.getElementById('stat-consejos');
   const se = document.getElementById('stat-empresas');
   if (sc) sc.textContent = consejos.filter(c => c.estatus === 'Activo').length;
@@ -1292,7 +1299,8 @@ async function renderHeroStats() {
 async function renderHomeIndicadores() {
   const grid = document.getElementById('home-indicadores-grid');
   if (!grid) return;
-  const inds = await CMSDB.getAll('indicadores');
+  const _inds = await CMSDB.getAll('indicadores');
+  const inds = Array.isArray(_inds) ? _inds : [];
   if (!inds.length) {
     grid.innerHTML = '<div class="empty-state"><div class="ico">📊</div>No hay indicadores configurados.</div>';
     return;
@@ -1300,10 +1308,10 @@ async function renderHomeIndicadores() {
   grid.innerHTML = inds.map(ind => {
     const t = tendIcon(ind.tendencia);
     return `<div class="ind-card">
-      <div class="ind-ico">${ind.icono || '📊'}</div>
-      <div class="ind-val">${ind.valor_actual ?? '—'}<span class="ind-unit">${ind.unidad || ''}</span></div>
-      <div class="ind-name">${ind.nombre}</div>
-      <div class="ind-t" style="color:${t.color}">${t.icon} ${ind.tendencia || ''}</div>
+      <div class="ind-ico">${escHtml(ind.icono) || '📊'}</div>
+      <div class="ind-val">${escHtml(ind.valor_actual ?? '—')}<span class="ind-unit">${escHtml(ind.unidad)}</span></div>
+      <div class="ind-name">${escHtml(ind.nombre)}</div>
+      <div class="ind-t" style="color:${escHtml(t.color)}">${t.icon} ${escHtml(ind.tendencia)}</div>
     </div>`;
   }).join('');
 }
@@ -1312,7 +1320,8 @@ async function renderHomeNoticias() {
   const grid = document.getElementById('home-noticias-grid');
   if (!grid) return;
   const PB = (window.__IAGAMI_CONFIG__ && window.__IAGAMI_CONFIG__.PB_URL) || 'http://127.0.0.1:8090';
-  const noticias = (await CMSDB.getAll('noticias'))
+  const _noticias = await CMSDB.getAll('noticias');
+  const noticias = (Array.isArray(_noticias) ? _noticias : [])
     .filter(n => n.publicado !== false && n.estado !== 'borrador')
     .sort((a, b) => (b.fecha || '').localeCompare(a.fecha || ''))
     .slice(0, 40);
@@ -1334,9 +1343,9 @@ async function renderHomeNoticias() {
         ${icon}
       </div>
       <div class="news-body">
-        <span class="news-cat" style="${cc}">${n.categoria || 'General'}</span>
-        <div class="news-title">${n.titulo}</div>
-        <div class="news-date">${fmtFecha(n.fecha)}</div>
+        <span class="news-cat" style="${escHtml(cc)}">${escHtml(n.categoria) || 'General'}</span>
+        <div class="news-title">${escHtml(n.titulo)}</div>
+        <div class="news-date">${escHtml(fmtFecha(n.fecha))}</div>
       </div>
     </a>`;
   }).join('');
@@ -1346,7 +1355,8 @@ async function renderHomeProyectos() {
   const grid = document.getElementById('home-proyectos-grid');
   if (!grid) return;
   const PB = (window.__IAGAMI_CONFIG__ && window.__IAGAMI_CONFIG__.PB_URL) || 'http://127.0.0.1:8090';
-  const proyectos = (await CMSDB.getAll('proyectos'))
+  const _proy = await CMSDB.getAll('proyectos');
+  const proyectos = (Array.isArray(_proy) ? _proy : [])
     .filter(p => p.publicado !== false)
     .slice(0, 15);
   if (!proyectos.length) {
@@ -1366,10 +1376,10 @@ async function renderHomeProyectos() {
         ${imgUrl ? `<img src="${imgUrl}" alt="${p.nombre}" loading="lazy" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0"/>` : proyIcon(p.nombre)}
       </div>
       <div class="proj-body">
-        <span class="ps ${cls}">${label}</span>
-        <div class="proj-name">${p.nombre}</div>
+        <span class="ps ${escHtml(cls)}">${escHtml(label)}</span>
+        <div class="proj-name">${escHtml(p.nombre)}</div>
         <div class="proj-bar"><div class="proj-fill" style="width:${pct}%;background:${p.estado === 'Completado' ? '#16a34a' : '#1d6b3e'}"></div></div>
-        <div class="proj-pct">${pct}%${p.beneficiados ? ' · ' + p.beneficiados + ' beneficiados' : ''}</div>
+        <div class="proj-pct">${pct}%${p.beneficiados ? ' · ' + escHtml(p.beneficiados) + ' beneficiados' : ''}</div>
       </div>
     </a>`;
   }).join('');
@@ -1379,7 +1389,8 @@ async function renderHomeAgenda() {
   const container = document.getElementById('home-agenda-grid');
   if (!container) return;
   const today = new Date().toISOString().slice(0, 10);
-  const todos = await CMSDB.getAll('eventos');
+  const _eventos = await CMSDB.getAll('eventos');
+  const todos = Array.isArray(_eventos) ? _eventos : [];
   const futuros = todos.filter(e => e.fecha && e.fecha >= today && e.estado !== 'cancelado');
   const eventos = (futuros.length ? futuros : todos)
     .sort((a, b) => (a.fecha || '').localeCompare(b.fecha || ''))
@@ -1398,9 +1409,9 @@ async function renderHomeAgenda() {
         <div class="ev-mon">${mes}</div>
       </div>
       <div>
-        <span class="ev-tipo">${e.tipo || 'Evento'}</span>
-        <div class="ev-title">${e.titulo}</div>
-        <div class="ev-place">📍 ${e.lugar || ''}${hora ? ' · ' + hora : ''}</div>
+        <span class="ev-tipo">${escHtml(e.tipo) || 'Evento'}</span>
+        <div class="ev-title">${escHtml(e.titulo)}</div>
+        <div class="ev-place">📍 ${escHtml(e.lugar)}${hora ? ' · ' + escHtml(hora) : ''}</div>
       </div>
     </div>`;
   }).join('');
@@ -1410,7 +1421,8 @@ async function renderHomeAgenda() {
 async function renderHomeRevista() {
   const grid = document.getElementById('home-revista-grid');
   if (!grid) return;
-  const revistas = (await CMSDB.getAll('revistas'))
+  const _revistas = await CMSDB.getAll('revistas');
+  const revistas = (Array.isArray(_revistas) ? _revistas : [])
     .filter(r => r.estado === 'publicada')
     .sort((a, b) => (b.fecha || '').localeCompare(a.fecha || ''))
     .slice(0, 4);
@@ -1436,9 +1448,9 @@ async function renderHomeRevista() {
         ${r.destacada ? '<span style="position:absolute;top:8px;right:8px;background:#4ade80;color:#0d2d1a;font-size:10px;font-weight:800;border-radius:20px;padding:2px 9px">⭐ Destacada</span>' : ''}
       </div>
       <div style="padding:14px;flex:1;display:flex;flex-direction:column;gap:6px">
-        <div style="font-size:10px;font-weight:700;color:#1d6b3e;text-transform:uppercase;letter-spacing:.06em">${r.categoria || 'Institucional'}</div>
-        <div style="font-family:'Poppins',sans-serif;font-size:13px;font-weight:700;color:#1a3d2b;line-height:1.3;flex:1">${r.titulo}</div>
-        <div style="font-size:11px;color:#4a8a6a">📅 ${r.fecha || '—'} · Edición Nº ${r.numero_edicion}</div>
+        <div style="font-size:10px;font-weight:700;color:#1d6b3e;text-transform:uppercase;letter-spacing:.06em">${escHtml(r.categoria) || 'Institucional'}</div>
+        <div style="font-family:'Poppins',sans-serif;font-size:13px;font-weight:700;color:#1a3d2b;line-height:1.3;flex:1">${escHtml(r.titulo)}</div>
+        <div style="font-size:11px;color:#4a8a6a">📅 ${escHtml(r.fecha) || '—'} · Edición Nº ${escHtml(r.numero_edicion)}</div>
         <div style="display:flex;gap:7px;margin-top:6px">
           <a href="revista/visor.html?id=${r.id}" style="flex:1;padding:7px;background:#1d6b3e;color:#fff;border-radius:7px;font-size:11px;font-weight:700;text-align:center;text-decoration:none;font-family:'Poppins',sans-serif">👁 Ver</a>
           <a href="revista/index.html" style="flex:1;padding:7px;background:#fff;color:#1d6b3e;border:1.5px solid #1d6b3e;border-radius:7px;font-size:11px;font-weight:700;text-align:center;text-decoration:none;font-family:'Poppins',sans-serif">⬇ PDF</a>
@@ -1481,7 +1493,8 @@ function _bvMarkShown(activa) {
 }
 
 async function checkBienvenida() {
-  const items = await CMSDB.getAll('bienvenida');
+  const _bvItems = await CMSDB.getAll('bienvenida');
+  const items = Array.isArray(_bvItems) ? _bvItems : [];
   const activa = items.find(b => b.activa);
   if (!activa || !_bvShouldShow(activa)) return;
   const modal  = document.getElementById('bienvenida-modal');
@@ -1513,7 +1526,8 @@ async function checkBienvenida() {
 }
 
 async function cerrarBienvenida() {
-  const items = await CMSDB.getAll('bienvenida');
+  const _bvClose = await CMSDB.getAll('bienvenida');
+  const items = Array.isArray(_bvClose) ? _bvClose : [];
   const activa = items.find(b => b.activa);
   if (activa) _bvMarkShown(activa);
   const modal = document.getElementById('bienvenida-modal');
@@ -1536,17 +1550,37 @@ function actualizarBotonAdmin() {
   });
 }
 
-function initPortal() {
+function escHtml(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+window.onerror = function(msg, src, line, col, err) {
+  console.error('[IAGAMI] Error global:', msg, src + ':' + line);
+};
+window.addEventListener('unhandledrejection', function(e) {
+  console.error('[IAGAMI] Promesa rechazada sin capturar:', e.reason);
+});
+
+async function initPortal() {
+  if (typeof CMSDB === 'undefined') {
+    console.error('[IAGAMI] CMSDB no definido — verifica cms/config.js y cms/pb.js');
+    return;
+  }
   actualizarBotonAdmin();
-  checkBienvenida();
-  renderAlertBar();
-  renderHeroPanel();
-  renderHeroStats();
-  renderHomeIndicadores();
-  renderHomeNoticias();
-  renderHomeProyectos();
-  renderHomeAgenda();
-  renderHomeRevista();
+  const tasks = [
+    checkBienvenida,
+    renderAlertBar,
+    renderHeroPanel,
+    renderHeroStats,
+    renderHomeIndicadores,
+    renderHomeNoticias,
+    renderHomeProyectos,
+    renderHomeAgenda,
+    renderHomeRevista,
+  ];
+  for (const task of tasks) {
+    try { await task(); } catch (e) { console.error('[IAGAMI] Fallo en ' + task.name + ':', e); }
+  }
 }
 
 document.addEventListener('DOMContentLoaded', function() {
