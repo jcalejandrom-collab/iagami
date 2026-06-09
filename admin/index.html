@@ -367,6 +367,7 @@ input,select,textarea{font-family:inherit}
           <form id="noticias-form" onsubmit="saveNoticias(event)">
             <div class="form-grid">
               <div class="form-group form-full"><label>Título *</label><input type="text" name="titulo" required></div>
+              <div class="form-group form-full"><label>Resumen</label><input type="text" name="resumen" placeholder="Breve descripción..."></div>
               <div class="form-group"><label>Categoría</label><select name="categoria"><option>Medio Ambiente</option><option>Comunidad</option><option>Normativa</option><option>Educación</option><option>Institucional</option></select></div>
               <div class="form-group"><label>Autor</label><input type="text" name="autor"></div>
               <div class="form-group"><label>Fecha de Publicación</label><input type="date" name="fecha_publicacion"></div>
@@ -1693,8 +1694,22 @@ async function renderNoticias() {
 async function saveNoticias(e) {
   e.preventDefault();
   const form = document.getElementById('noticias-form');
-  const data = collectForm(form);
-  data.destacada = form.querySelector('[name="destacada"]').checked;
+  const raw = collectForm(form);
+  const data = {
+    id: raw.id,
+    titulo: raw.titulo,
+    resumen: raw.resumen || '',
+    cuerpo: raw.contenido,
+    imagen: raw.imagen,
+    categoria: raw.categoria,
+    fecha: raw.fecha_publicacion,
+    publicado: raw.estado === 'publicado',
+    destacado: form.querySelector('[name="destacada"]').checked,
+    autor: raw.autor,
+    video_url: raw.video_url,
+    tags: raw.tags,
+  };
+  if (!data.id) delete data.id;
   const vn = validarContenido(data); if (!vn.isValid) { toast('❌ ' + vn.error, 'error'); return; }
   const item = await CMSDB.save('noticias', data);
   await CMSDB.logAudit('save', 'noticias', item.titulo || '');
