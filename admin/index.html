@@ -1891,8 +1891,19 @@ async function renderOrganizacion() {
 async function saveOrganizacion(e) {
   e.preventDefault();
   const form = document.getElementById('organizacion-form');
-  const data = collectForm(form);
-  if (!data.padre) data.padre = null;
+  const raw = collectForm(form);
+  const data = {
+    id: raw.id,
+    nombre: raw.nombre,
+    tipo: raw.tipo,
+    parent: raw.padre || null,
+    responsable: raw.responsable,
+    telefono: raw.telefono,
+    email: raw.email,
+    estado: raw.estado,
+    funciones: raw.funciones,
+  };
+  if (!data.id) delete data.id;
   await CMSDB.save('org', data);
   toast('Unidad organizacional guardada');
   cancelForm('organizacion');
