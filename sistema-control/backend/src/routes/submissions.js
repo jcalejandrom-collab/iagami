@@ -4,7 +4,7 @@ const fs = require('fs');
 const multer = require('multer');
 const { v4: uuidv4 } = require('uuid');
 const { requireAuth, requireAdmin } = require('../middleware/auth');
-const { submissionLimiter } = require('../middleware/rateLimit');
+const { submissionLimiter, evidenceLimiter } = require('../middleware/rateLimit');
 const { isValidFileSignature } = require('../utils/fileSignature');
 const {
   createReporteDiario,
@@ -156,11 +156,12 @@ router.post('/planificacion-semanal', submissionLimiter, planificacionValidation
  * POST /api/submissions/:id/evidences
  * Upload evidence files for an existing submission.
  * Accepts: images (jpeg, png, gif, webp) and PDF. Max 5 MB per file, up to 10 files.
- * Rate limited: 5 envíos por IP cada 5 minutos. El contenido real del
- * archivo se valida por magic-bytes en handleUpload (no solo el MIME
- * declarado por el cliente, que es trivialmente falsificable).
+ * Rate limited: submissionLimiter (5/5min) + evidenceLimiter (10/1h).
+ * Doble capa: submissionLimiter bloquea ráfagas cortas, evidenceLimiter
+ * bloquea agotamiento de disco sostenido. Magic-bytes valida el contenido
+ * binario real (no el MIME declarado por el cliente, trivialmente falsificable).
  */
-router.post('/:id/evidences', submissionLimiter, handleUpload, verifyFileSignatures, uploadEvidences);
+router.post('/:id/evidences', submissionLimiter, evidenceLimiter, handleUpload, verifyFileSignatures, uploadEvidences);
 
 // Admin-protected routes
 
