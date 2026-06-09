@@ -22,8 +22,10 @@ pool.on('connect', () => {
 });
 
 pool.on('error', (err) => {
+  // Log the error but do not kill the process — transient network errors
+  // (TCP timeouts, PG restart) are recoverable; the pool will reconnect.
+  // process.exit here would cause full downtime on any blip.
   console.error('[DB] Unexpected error on idle client:', err.message);
-  process.exit(-1);
 });
 
 /**
