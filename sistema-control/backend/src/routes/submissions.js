@@ -119,8 +119,8 @@ const verifyFileSignatures = (req, res, next) => {
           message: `El contenido de "${file.originalname}" no coincide con el tipo de archivo declarado.`,
         });
       }
-    } catch (e) {
-      if (fd !== undefined) { try { fs.closeSync(fd); } catch {} }
+    } catch (_err) {
+      if (fd !== undefined) { try { fs.closeSync(fd); } catch (_e) { /* best-effort */ } }
       for (const f of req.files) {
         fs.unlink(f.path, () => {});
       }
