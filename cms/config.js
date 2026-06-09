@@ -12,11 +12,13 @@
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
     pbUrl = 'http://127.0.0.1:8090';
   } else {
-    // En staging/producción la URL del backend se inyecta como meta tag:
-    // <meta name="pb-url" content="https://api.iagami.gob.ve">
-    // Si no existe el meta tag, se usa el dominio oficial como fallback.
-    const metaPbUrl = document.querySelector('meta[name="pb-url"]')?.content;
-    pbUrl = metaPbUrl || 'https://api.iagami.gob.ve';
+    // En producción: leer meta tag pb-url solo si no está vacío.
+    // Fallback: window.__PB_URL__ (inyectable en build) o localhost.
+    // Para PC fija: poner la IP del servidor en el meta tag.
+    const metaContent = document.querySelector('meta[name="pb-url"]')?.content?.trim();
+    pbUrl = (metaContent && metaContent !== '')
+      ? metaContent
+      : (window.__PB_URL__ || 'http://127.0.0.1:8090');
   }
 
   const config = Object.freeze({
