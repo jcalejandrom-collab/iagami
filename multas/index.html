@@ -320,7 +320,7 @@ function estadoBadge(est) {
 function normalizarToken(valor) {
   // El TUC es un UUID v4: solo recortamos espacios y normalizamos a minúsculas.
   // No removemos guiones (son parte del formato UUID) ni prefijos.
-  return valor.trim().toLowerCase();
+  return valor.replace(/\s+/g, '').toLowerCase();
 }
 
 /* ── LÍMITE DE INTENTOS (anti fuerza-bruta del lado cliente) ──

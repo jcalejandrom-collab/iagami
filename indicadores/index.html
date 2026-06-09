@@ -67,6 +67,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 .ind-meta{font-size:11px;color:#4a8a6a;margin-bottom:10px}
 .ind-meta strong{color:#1a3d2b}
 .ind-desc{font-size:12px;color:#6b9e80;line-height:1.6;border-top:1px solid #e8f5ee;padding-top:10px}
+.ind-fecha{font-size:11px;color:#a8c0b0;margin-top:6px;text-align:right}
 
 /* ===== SUMMARY SECTION ===== */
 .summary-section{background:#fff;border-radius:16px;border:1.5px solid #d4edd8;padding:32px;margin-bottom:40px}
@@ -200,9 +201,16 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 let allIndicadores = [];
 
 /* ── Progress calculation ── */
-function calcProgress(valorActual, meta) {
-  if (!meta || meta === 0) return 0;
-  const pct = (valorActual / meta) * 100;
+function calcProgress(valorActual, meta, tipo) {
+  const val = parseFloat(valorActual);
+  const m   = parseFloat(meta);
+  if (!m || isNaN(m) || isNaN(val)) return 0;
+  let pct;
+  if (tipo === 'decreciente') {
+    pct = Math.max(0, ((m - val) / m) * 100);
+  } else {
+    pct = (val / m) * 100;
+  }
   return Math.min(Math.round(pct), 100);
 }
 
@@ -240,9 +248,15 @@ function renderIndicadores(data) {
     const meta   = ind.meta ?? 100;
     const unidad = ind.unidad || '';
     const tend   = getTendenciaInfo(ind.tendencia);
-    const pct    = calcProgress(val, meta);
+    const tipo   = ind.tipo || 'creciente';
+    const pct    = calcProgress(val, meta, tipo);
+    const safePct = isNaN(pct) ? 0 : pct;
     const desc   = ind.descripcion || '';
     const nombre = ind.nombre || 'Indicador';
+    const fechaMed = ind.ultima_medicion || ind.updated || ind.updated_at || '';
+    const fechaLabel = fechaMed
+      ? `<div class="ind-fecha">Medición: ${new Date(fechaMed).toLocaleDateString('es-VE', {day:'2-digit',month:'2-digit',year:'numeric'})}</div>`
+      : '';
 
     return `<div class="ind-card">
       <span class="ind-icon">${emoji}</span>
@@ -252,9 +266,10 @@ function renderIndicadores(data) {
         <span class="ind-unit">${escHtml(unidad)}</span>
       </div>
       <div class="ind-trend ${tend.class}">${tend.icon} ${tend.label}</div>
-      <div class="ind-track"><div class="ind-fill" style="width:${pct}%"></div></div>
-      <div class="ind-meta">Meta: <strong>${escHtml(fmtVal(meta))} ${escHtml(unidad)}</strong> — Cumplimiento: <strong>${pct}%</strong></div>
+      <div class="ind-track"><div class="ind-fill" style="width:${safePct}%"></div></div>
+      <div class="ind-meta">Meta: <strong>${escHtml(fmtVal(meta))} ${escHtml(unidad)}</strong> — Cumplimiento: <strong>${safePct}%</strong></div>
       ${desc ? `<div class="ind-desc">${escHtml(desc)}</div>` : ''}
+      ${fechaLabel}
     </div>`;
   }).join('');
 }
