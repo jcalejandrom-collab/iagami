@@ -8,6 +8,7 @@ const multer = require('multer');
 const { v4: uuidv4 } = require('uuid');
 
 const { requireAuth, requireAdmin } = require('../middleware/auth');
+const { isValidFileSignature } = require('../utils/fileSignature');
 const {
   getRevistasPublicas,
   getRevistaPublica,
@@ -121,26 +122,42 @@ const parseRevistaFiles = [
       next();
     });
   },
-  (req, _res, next) => {
+  (req, res, next) => {
     req.uploadedFiles = {};
+
+    const unlinkAll = () => {
+      for (const field of ['portada', 'pdf']) {
+        const f = req.files?.[field]?.[0];
+        if (f) try { fs.unlinkSync(f.path); } catch (_) {}
+      }
+    };
 
     if (req.files) {
       if (req.files.portada && req.files.portada[0]) {
         const file = req.files.portada[0];
         // Enforce 5 MB limit for portada
         if (file.size > 5 * 1024 * 1024) {
-          // Delete the uploaded file and reject
           try { fs.unlinkSync(file.path); } catch (_) {}
-          return _res.status(400).json({ error: 'La portada no debe superar 5 MB' });
+          return res.status(400).json({ error: 'La portada no debe superar 5 MB' });
         }
-        // Build URL relative to /uploads
+        // Validate magic bytes
+        const buf = fs.readFileSync(file.path);
+        if (!isValidFileSignature(buf, file.mimetype)) {
+          unlinkAll();
+          return res.status(400).json({ error: 'La portada tiene un formato de imagen inválido' });
+        }
         const relative = path.relative(UPLOAD_BASE, file.path).replace(/\\/g, '/');
         req.uploadedFiles.portada_url = `/uploads/${relative}`;
       }
 
       if (req.files.pdf && req.files.pdf[0]) {
         const file = req.files.pdf[0];
-        // 50 MB already enforced by multer limits; just build URL
+        // Validate magic bytes
+        const buf = fs.readFileSync(file.path);
+        if (!isValidFileSignature(buf, file.mimetype)) {
+          unlinkAll();
+          return res.status(400).json({ error: 'El PDF tiene un formato de archivo inválido' });
+        }
         const relative = path.relative(UPLOAD_BASE, file.path).replace(/\\/g, '/');
         req.uploadedFiles.pdf_url = `/uploads/${relative}`;
       }

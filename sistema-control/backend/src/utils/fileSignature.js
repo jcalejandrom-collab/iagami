@@ -30,6 +30,7 @@ function matchesSignature(buffer, signature) {
  * está soportado o si ninguna firma coincide.
  */
 function isValidFileSignature(buffer, declaredMimetype) {
+  if (!buffer || buffer.length === 0) return false;
   const signatures = SIGNATURES[declaredMimetype];
   if (!signatures) return false;
 

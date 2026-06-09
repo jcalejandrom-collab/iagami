@@ -43,7 +43,7 @@ const login = async (req, res) => {
     );
 
     if (result.rows.length === 0) {
-      await recordAuditLog(req, 'login_failed', { email, detail: 'usuario no encontrado' });
+      await recordAuditLog(req, 'login_failed', { email, detail: 'usuario no encontrado', severity: 'WARNING' });
       return res.status(401).json({
         error: 'Credenciales incorrectas',
         message: 'El correo o la contraseña son incorrectos.',
@@ -56,7 +56,7 @@ const login = async (req, res) => {
     const passwordMatch = await bcrypt.compare(password, user.password_hash);
     if (!passwordMatch) {
       await recordAuditLog(req, 'login_failed', {
-        userId: user.id, email: user.email, role: user.role, detail: 'contraseña incorrecta',
+        userId: user.id, email: user.email, role: user.role, detail: 'contraseña incorrecta', severity: 'WARNING',
       });
       return res.status(401).json({
         error: 'Credenciales incorrectas',

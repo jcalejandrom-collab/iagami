@@ -20,8 +20,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 .navinner{max-width:1200px;margin:0 auto;padding:0 24px;height:58px;display:flex;align-items:center;justify-content:space-between;gap:16px}
 .logo{display:flex;align-items:center;gap:10px;flex-shrink:0;text-decoration:none}
 .logo-img{width:42px;height:42px;background:#1d6b3e;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.logo-img svg{width:22px;height:22px}
-.logo-text{font-family:'Poppins',sans-serif;font-size:15px;font-weight:700;color:#1a3d2b;line-height:1.1}
+.logo-img svg{width:22px;height:22px}.logo-text{font-family:'Poppins',sans-serif;font-size:15px;font-weight:700;color:#1a3d2b;line-height:1.1}
 .logo-sub{font-size:10px;color:#4a8a6a;font-weight:400}
 .navlinks{display:flex;gap:2px;align-items:center}
 .nl{font-size:12px;padding:6px 10px;border-radius:7px;color:#4a6a5a;cursor:pointer;transition:.15s;white-space:nowrap;text-decoration:none;border:none;background:none}
@@ -158,7 +157,7 @@ footer p{margin-bottom:4px}
   <div class="navinner">
     <a href="../index.html" class="logo">
       <div class="logo-img">
-        <svg viewBox="0 0 100 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg viewBox="0 0 100 110" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
           <path d="M50 4L94 22V54C94 76 74 96 50 106C26 96 6 76 6 54V22L50 4Z" fill="white" fill-opacity="0.18"/>
           <path d="M50 14L84 28V54C84 72 68 90 50 100C32 90 16 72 16 54V28L50 14Z" stroke="white" stroke-width="3" fill="none"/>
           <path d="M38 55C38 55 42 44 50 44C58 44 62 55 62 55" stroke="white" stroke-width="3.5" stroke-linecap="round"/>
@@ -276,6 +275,7 @@ function catStyle(cat) {
 ═══════════════════════════════ */
 let allTramites = [];
 let filtered    = [];
+let lastFocusedElement = null;
 
 /* ═══════════════════════════════
    INIT
@@ -362,6 +362,8 @@ function renderCards() {
    DETAIL MODAL
 ═══════════════════════════════ */
 async function openDetail(id) {
+  lastFocusedElement = document.activeElement;
+  history.pushState(null, '', '?tramite=' + encodeURIComponent(id));
   const t = await CMSDB.getOne('tramites', id);
   if (!t) return;
 
@@ -421,7 +423,7 @@ async function openDetail(id) {
     </div>
 
     <div class="modal-actions">
-      <button class="btn-download" onclick="handleDownload()" disabled>
+      <button class="btn-download" onclick="handleDownload()">
         ⬇ Descargar Formulario
       </button>
       <button class="btn-close-modal" onclick="closeDetail()">Cerrar</button>
@@ -436,6 +438,8 @@ async function openDetail(id) {
 function closeDetail() {
   document.getElementById('modalOverlay').classList.remove('open');
   document.body.style.overflow = '';
+  history.pushState(null, '', location.pathname);
+  if (lastFocusedElement) { lastFocusedElement.focus(); lastFocusedElement = null; }
 }
 
 function handleDownload() {
