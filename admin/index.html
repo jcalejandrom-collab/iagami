@@ -2827,10 +2827,10 @@ async function savePlan() {
   if (!titulo.trim()) { showToast('El título es obligatorio', 'error'); return; }
   const gv = id => (document.getElementById(id)||{}).value||'';
   const data = {
-    titulo: titulo.trim(),
+    nombre: titulo.trim(),
     tipo: gv('fp-tipo'),
     codigo: gv('fp-codigo'),
-    fecha: gv('fp-fecha'),
+    fecha_inicio: gv('fp-fecha'),
     hora_inicio: gv('fp-hora_inicio'),
     hora_fin: gv('fp-hora_fin'),
     lugar: gv('fp-lugar'),
@@ -2841,7 +2841,7 @@ async function savePlan() {
     descripcion: gv('fp-descripcion'),
     observaciones: gv('fp-observaciones'),
     avance: parseInt((document.getElementById('fp-avance')||{}).value)||0,
-    publicar: !!(document.getElementById('fp-publicar')||{}).checked
+    publicado: !!(document.getElementById('fp-publicar')||{}).checked
   };
   if (_editPlanId) { await CMSDB.save('planificacion', Object.assign({}, data, {id: _editPlanId})); }
   else { await CMSDB.save('planificacion', data); }
