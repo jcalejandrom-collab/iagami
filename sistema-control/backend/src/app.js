@@ -15,6 +15,10 @@ const revistasRouter = require('./routes/revistas');
 
 const app = express();
 
+// Trust the first proxy hop so req.ip reflects the real client IP behind
+// a reverse-proxy / load-balancer (required for rate-limit accuracy).
+app.set('trust proxy', 1);
+
 // ─── CORS ─────────────────────────────────────────────────────────────────────
 
 const allowedOrigins = [

@@ -1,6 +1,7 @@
 'use strict';
 
 const rateLimit = require('express-rate-limit');
+const { recordAuditLog } = require('../utils/auditLog');
 
 /* Límite de intentos de login: 10 por IP por minuto.
    Mitiga fuerza bruta de credenciales sin bloquear el uso normal. */
@@ -12,6 +13,13 @@ const loginLimiter = rateLimit({
   message: {
     error: 'Demasiados intentos',
     message: 'Demasiados intentos de inicio de sesión. Intente nuevamente en un minuto.',
+  },
+  handler: async (req, res, next, options) => {
+    await recordAuditLog(req, 'rate_limit_hit', {
+      detail: `login rate limit exceeded from ${req.ip}`,
+      severity: 'CRITICAL',
+    });
+    res.status(options.statusCode).json(options.message);
   },
 });
 
@@ -26,6 +34,13 @@ const submissionLimiter = rateLimit({
   message: {
     error: 'Demasiadas solicitudes',
     message: 'Ha alcanzado el límite de envíos. Intente nuevamente en unos minutos.',
+  },
+  handler: async (req, res, next, options) => {
+    await recordAuditLog(req, 'rate_limit_hit', {
+      detail: `submission rate limit exceeded from ${req.ip}`,
+      severity: 'CRITICAL',
+    });
+    res.status(options.statusCode).json(options.message);
   },
 });
 

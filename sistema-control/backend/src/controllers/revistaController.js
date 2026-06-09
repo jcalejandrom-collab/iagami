@@ -16,15 +16,13 @@ const { recordAuditLog } = require('../utils/auditLog');
 function deleteFile(fileUrl) {
   if (!fileUrl) return;
   try {
-    // fileUrl may be something like /uploads/revistas/portadas/uuid.jpg
-    // Strip the leading /uploads so we can join against UPLOAD_DIR
+    const UPLOAD_BASE = process.env.UPLOAD_DIR || path.resolve(__dirname, '..', 'uploads');
     const relative = fileUrl.replace(/^\/uploads\//, '');
-    const absPath = path.join(
-      process.env.UPLOAD_DIR || path.resolve(__dirname, '..', 'uploads'),
-      relative
-    );
-    if (fs.existsSync(absPath)) {
-      fs.unlinkSync(absPath);
+    const safePath = path.normalize(path.join(UPLOAD_BASE, relative));
+    if (!safePath.startsWith(path.normalize(UPLOAD_BASE) + path.sep) &&
+        safePath !== path.normalize(UPLOAD_BASE)) return;
+    if (fs.existsSync(safePath)) {
+      fs.unlinkSync(safePath);
     }
   } catch (err) {
     console.error('[revistaController] deleteFile error:', err.message);

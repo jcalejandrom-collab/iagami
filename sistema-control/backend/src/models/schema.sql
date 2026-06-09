@@ -104,6 +104,7 @@ ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS severity VARCHAR(20) NOT NULL DE
 CREATE INDEX IF NOT EXISTS idx_audit_logs_action     ON audit_logs(action);
 CREATE INDEX IF NOT EXISTS idx_audit_logs_created_at ON audit_logs(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_audit_logs_severity   ON audit_logs(severity);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_action_created ON audit_logs(action, created_at DESC);
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- Blindaje "append-only" de audit_logs (WORM real a nivel de privilegios)

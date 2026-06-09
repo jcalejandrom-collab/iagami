@@ -1,5 +1,5 @@
 const { body, param, validationResult } = require('express-validator');
-const { query } = require('../config/db');
+const { pool, query } = require('../config/db');
 const { recordAuditLog } = require('../utils/auditLog');
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -86,8 +86,11 @@ const createReporteDiario = async (req, res) => {
     form_id,
   } = req.body;
 
+  const client = await pool.connect();
   try {
-    const result = await query(
+    await client.query('BEGIN');
+
+    const result = await client.query(
       `INSERT INTO form_submissions
          (form_id, form_type, institucion, responsable, fecha, hora_inicio, hora_fin, observaciones)
        VALUES ($1, 'reporte_diario', $2, $3, $4, $5, $6, $7)
@@ -106,19 +109,24 @@ const createReporteDiario = async (req, res) => {
     const submissionId = result.rows[0].id;
 
     if (actividades && actividades.length > 0) {
-      await insertActivities(submissionId, actividades, { query });
+      await insertActivities(submissionId, actividades, client);
     }
+
+    await client.query('COMMIT');
 
     return res.status(201).json({
       id: submissionId,
       message: 'Reporte diario enviado exitosamente.',
     });
   } catch (err) {
+    await client.query('ROLLBACK');
     console.error('[submissionController.createReporteDiario]', err);
     return res.status(500).json({
       error: 'Error interno',
       message: 'No se pudo guardar el reporte diario.',
     });
+  } finally {
+    client.release();
   }
 };
 
@@ -137,8 +145,11 @@ const createPlanificacion = async (req, res) => {
     form_id,
   } = req.body;
 
+  const client = await pool.connect();
   try {
-    const result = await query(
+    await client.query('BEGIN');
+
+    const result = await client.query(
       `INSERT INTO form_submissions
          (form_id, form_type, institucion, responsable, semana, observaciones)
        VALUES ($1, 'planificacion_semanal', $2, $3, $4, $5)
@@ -155,19 +166,24 @@ const createPlanificacion = async (req, res) => {
     const submissionId = result.rows[0].id;
 
     if (actividades && actividades.length > 0) {
-      await insertActivities(submissionId, actividades, { query });
+      await insertActivities(submissionId, actividades, client);
     }
+
+    await client.query('COMMIT');
 
     return res.status(201).json({
       id: submissionId,
       message: 'Planificación semanal enviada exitosamente.',
     });
   } catch (err) {
+    await client.query('ROLLBACK');
     console.error('[submissionController.createPlanificacion]', err);
     return res.status(500).json({
       error: 'Error interno',
       message: 'No se pudo guardar la planificación semanal.',
     });
+  } finally {
+    client.release();
   }
 };
 
