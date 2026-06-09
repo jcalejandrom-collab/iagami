@@ -1827,7 +1827,17 @@ async function renderTransparencia() {
 async function saveTransparencia(e) {
   e.preventDefault();
   const form = document.getElementById('transparencia-form');
-  const data = collectForm(form);
+  const raw = collectForm(form);
+  const data = {
+    id: raw.id,
+    titulo: raw.titulo,
+    descripcion: raw.descripcion,
+    categoria: raw.categoria,
+    year: raw.año ? parseInt(raw.año) : null,
+    publicado: raw.estado === 'publicado',
+    pdf_url: raw.pdf_url,
+  };
+  if (!data.id) delete data.id;
   await CMSDB.save('documentos', data);
   toast('Documento guardado');
   cancelForm('transparencia');
