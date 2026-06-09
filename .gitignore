@@ -1,4 +1,29 @@
+# OS
 .DS_Store
 Thumbs.db
+ehthumbs.db
+
+# Dependencies
+node_modules/
+
+# Logs & Debug
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment (NUNCA subir al repositorio)
+.env
+.env.local
+.env.*.local
+
+# IDEs & Editors
+.vscode/
+.idea/
+
+# Claude Code session context
 .claude/
+
+# Uploads (archivos subidos por usuarios — no pertenecen al repo)
+sistema-control/backend/src/uploads/*
+!sistema-control/backend/src/uploads/.gitkeep
