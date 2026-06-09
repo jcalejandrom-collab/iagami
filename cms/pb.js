@@ -184,6 +184,7 @@ const CMSDB = (function () {
 
       if (!res.ok) {
         const errData = await res.json().catch(() => ({}));
+        console.error('[SIGAP] PocketBase error data:', JSON.stringify(errData));
         throw new Error(
           `HTTP ${res.status}: ${errData.message || JSON.stringify(errData.data || {})}`
         );
