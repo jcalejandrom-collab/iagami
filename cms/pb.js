@@ -51,6 +51,9 @@ const CMSDB = (function () {
     delete _controllers[key];
   }
 
+  /* ─── Promesas en vuelo para deduplicar peticiones concurrentes ─── */
+  const _inflight = {};
+
   /* ─── Interceptor global de errores de auth ─── */
   function _handleAuthError(status) {
     if (status === 401 || status === 403) {
@@ -64,9 +67,12 @@ const CMSDB = (function () {
     const cached = _cacheGet(coleccion);
     if (cached) return cached;
 
+    /* Si ya hay una petición en vuelo para esta colección, reutilizarla */
+    if (_inflight[coleccion]) return _inflight[coleccion];
+
     const _key = 'getAll_' + coleccion;
     const signal = _abort(_key);
-    try {
+    _inflight[coleccion] = (async () => { try {
       let page = 1;
       const perPage = 200;
       const MAX_ITEMS = 1000;
@@ -106,7 +112,10 @@ const CMSDB = (function () {
       return [];
     } finally {
       _abortDone(_key);
+      delete _inflight[coleccion];
     }
+    })();
+    return _inflight[coleccion];
   }
 
   /* ─── GET FILTERED (consulta server-side, sin descargar la colección completa) ─── */
@@ -198,9 +207,13 @@ const CMSDB = (function () {
       const token = getToken();
       if (token) headers['Authorization'] = token;
 
+      /* Campos de sistema que PocketBase rechaza en el body de PATCH */
+      const PB_READONLY = new Set(['id', 'created', 'updated', 'collectionId', 'collectionName', 'expand']);
+
       if (tieneArchivos) {
         const fd = new FormData();
         Object.entries(item).forEach(([key, val]) => {
+          if (isUpdate && PB_READONLY.has(key)) return;
           if (Array.isArray(val)) {
             val.forEach(v => {
               if ((v instanceof File || v instanceof Blob) && v.size > MAX_FILE_SIZE) {
@@ -214,6 +227,7 @@ const CMSDB = (function () {
             }
             fd.append(key, val instanceof File || val instanceof Blob
               ? val
+              : val instanceof Date ? val.toISOString()
               : typeof val === 'object' ? JSON.stringify(val) : String(val)
             );
           }
@@ -221,9 +235,13 @@ const CMSDB = (function () {
         body = fd;
       } else {
         const payload = { ...item };
+        if (isUpdate) PB_READONLY.forEach(k => delete payload[k]);
         Object.keys(payload).forEach(k => {
-          if (typeof payload[k] === 'object' && payload[k] !== null && !(payload[k] instanceof File) && !(payload[k] instanceof Blob)) {
-            payload[k] = JSON.stringify(payload[k]);
+          const v = payload[k];
+          if (v instanceof Date) {
+            payload[k] = v.toISOString();
+          } else if (typeof v === 'object' && v !== null && !(v instanceof File) && !(v instanceof Blob)) {
+            payload[k] = JSON.stringify(v);
           }
         });
         body = JSON.stringify(payload);
