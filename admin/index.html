@@ -1953,9 +1953,19 @@ async function renderIndicadores() {
 
 async function saveIndicadores(e) {
   e.preventDefault();
-  const data = collectForm(document.getElementById('indicadores-form'));
-  data.valor_actual = parseFloat(data.valor_actual)||0;
-  data.meta = parseFloat(data.meta)||0;
+  const raw = collectForm(document.getElementById('indicadores-form'));
+  const data = {
+    id: raw.id,
+    nombre: raw.nombre,
+    icono: raw.icono,
+    categoria: raw.categoria,
+    valor: parseFloat(raw.valor_actual)||0,
+    unidad: raw.unidad,
+    meta: parseFloat(raw.meta)||0,
+    tendencia: raw.tendencia,
+    descripcion: raw.descripcion,
+  };
+  if (!data.id) delete data.id;
   await CMSDB.save('indicadores', data);
   toast('Indicador guardado');
   cancelForm('indicadores');
