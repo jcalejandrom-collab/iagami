@@ -229,28 +229,27 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 let allEmpresas = [];
 let filtered    = [];
 
-/* ── Category CSS class ── */
-function getCatClass(cat) {
-  const map = {
-    'Industrial':   'industrial',
-    'Construcción': 'construcción',
-    'Comercial':    'comercial',
-    'Servicios':    'servicios',
-    'Agrícola':     'agrícola'
-  };
-  return map[cat] || 'otro';
-}
+const normalize = str => (str || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+
+/* ── Badge class maps — declarados una sola vez en memoria ── */
+const CAT_CLASS_MAP = {
+  'Industrial':   'industrial',
+  'Construcción': 'construcción',
+  'Comercial':    'comercial',
+  'Servicios':    'servicios',
+  'Agrícola':     'agrícola'
+};
+const PERMISO_CLASS_MAP = {
+  'Vigente':    'vigente',
+  'En Proceso': 'en-proceso',
+  'Vencido':    'vencido',
+  'Suspendido': 'suspendido'
+};
+
+function getCatClass(cat)     { return CAT_CLASS_MAP[cat]    || 'otro'; }
+function getPermisoClass(est) { return PERMISO_CLASS_MAP[est] || 'en-proceso'; }
 
 /* ── Permit CSS class ── */
-function getPermisoClass(estado) {
-  const map = {
-    'Vigente':    'vigente',
-    'En Proceso': 'en-proceso',
-    'Vencido':    'vencido',
-    'Suspendido': 'suspendido'
-  };
-  return map[estado] || 'en-proceso';
-}
 
 /* ── Stats ── */
 function updateStats(data) {
@@ -287,7 +286,7 @@ function renderEmpresas(data) {
     const rif       = e.rif || '—';
     const actividad = e.actividad || e.descripcion || '';
 
-    return `<div class="company-card" onclick="openDetail(${JSON.stringify(e.id).replace(/"/g,'&quot;')})">
+    return `<div class="company-card" data-id="${escHtml(String(e.id))}">
       <div class="card-header">
         <div class="company-name">${escHtml(nombre)}</div>
         <div class="card-badges">
@@ -308,19 +307,20 @@ function renderEmpresas(data) {
           Registro: ${escHtml(registro)}
         </div>
       </div>
-      <div class="card-btn" onclick="event.stopPropagation();openDetail(${JSON.stringify(e.id).replace(/"/g,'&quot;')})">Ver Detalles →</div>
+      <div class="card-btn">Ver Detalles →</div>
     </div>`;
   }).join('');
 }
 
 /* ── Apply filters ── */
 function applyFilters() {
-  const q       = document.getElementById('searchInput').value.trim().toLowerCase();
+  const q       = document.getElementById('searchInput').value.trim();
+  const nq      = normalize(q);
   const cat     = document.getElementById('catFilter').value;
   const permiso = document.getElementById('permisoFilter').value;
 
   filtered = allEmpresas.filter(e => {
-    const matchQ = !q || (e.nombre||'').toLowerCase().includes(q) || (e.rif||'').toLowerCase().includes(q) || (e.actividad||'').toLowerCase().includes(q);
+    const matchQ = !q || normalize(e.nombre).includes(nq) || normalize(e.rif).includes(nq) || normalize(e.actividad).includes(nq);
     const matchC = !cat || e.categoria === cat;
     const matchP = !permiso || e.estado_permiso === permiso;
     return matchQ && matchC && matchP;
@@ -446,7 +446,14 @@ async function init() {
   renderEmpresas(filtered);
 }
 
-document.addEventListener('DOMContentLoaded', init);
+document.addEventListener('DOMContentLoaded', () => {
+  init();
+  /* Event delegation — evita inyectar IDs en atributos onclick */
+  document.getElementById('companiesGrid').addEventListener('click', ev => {
+    const card = ev.target.closest('.company-card[data-id]');
+    if (card) openDetail(card.dataset.id);
+  });
+});
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 </script>
 </body>
