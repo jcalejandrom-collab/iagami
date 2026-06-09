@@ -13,8 +13,9 @@ const CMSDB = (function () {
   const PB_URL = (typeof window !== 'undefined' && window.__IAGAMI_CONFIG__ && window.__IAGAMI_CONFIG__.PB_URL)
     || 'http://127.0.0.1:8090';
 
-  /* ─── CACHÉ EN MEMORIA ─── */
+  /* ─── CACHÉ EN MEMORIA con TTL de 2 minutos ─── */
   const _cache = {};
+  const _cacheTTL = 2 * 60 * 1000;
 
   function clearCache(coleccion) {
     if (coleccion) {
@@ -24,10 +25,32 @@ const CMSDB = (function () {
     }
   }
 
+  function _cacheGet(key) {
+    const entry = _cache[key];
+    if (!entry) return null;
+    if (Date.now() - entry.ts > _cacheTTL) { delete _cache[key]; return null; }
+    return entry.data;
+  }
+
+  function _cacheSet(key, data) {
+    _cache[key] = { data, ts: Date.now() };
+  }
+
+  /* ─── AbortController por colección ─── */
+  const _controllers = {};
+
+  function _abort(key) {
+    if (_controllers[key]) { _controllers[key].abort(); }
+    _controllers[key] = new AbortController();
+    return _controllers[key].signal;
+  }
+
   /* ─── GET ALL (con paginación automática) ─── */
   async function getAll(coleccion) {
-    if (_cache[coleccion]) return _cache[coleccion];
+    const cached = _cacheGet(coleccion);
+    if (cached) return cached;
 
+    const signal = _abort('getAll_' + coleccion);
     try {
       let page = 1;
       const perPage = 200;
@@ -41,7 +64,7 @@ const CMSDB = (function () {
 
         const res = await fetch(
           `${PB_URL}/api/collections/${coleccion}/records?page=${page}&perPage=${perPage}&sort=-created`,
-          { headers }
+          { headers, signal }
         );
 
         if (res.status === 404) {
@@ -57,10 +80,11 @@ const CMSDB = (function () {
         page++;
       } while (page <= totalPages);
 
-      _cache[coleccion] = allItems;
+      _cacheSet(coleccion, allItems);
       return allItems;
 
     } catch (err) {
+      if (err.name === 'AbortError') return [];
       console.error(`[SIGAP] getAll("${coleccion}") falló:`, err.message);
       return [];
     }
@@ -357,8 +381,8 @@ const CMSDB = (function () {
           fecha: new Date().toISOString()
         })
       });
-    } catch {
-      // El log nunca debe romper el flujo principal
+    } catch (err) {
+      console.error('[SIGAP] logAudit falló:', err.message);
     }
   }
 
