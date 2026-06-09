@@ -686,6 +686,7 @@ input,select,textarea{font-family:inherit}
           <div class="form-title" id="alertas-form-title">Nueva Alerta</div>
           <form id="alertas-form" onsubmit="saveAlertas(event)">
             <div class="form-grid">
+              <div class="form-group form-full"><label>Título *</label><input type="text" name="titulo" required></div>
               <div class="form-group form-full"><label>Mensaje *</label><input type="text" name="mensaje" required></div>
               <div class="form-group"><label>Tipo</label><select name="tipo"><option value="warning">Warning (amarillo)</option><option value="info">Info (azul)</option><option value="danger">Danger (rojo)</option></select></div>
               <div class="form-group"><label>Fecha Inicio</label><input type="date" name="fecha_inicio"></div>
