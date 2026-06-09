@@ -243,6 +243,8 @@ const getSubmissions = async (req, res) => {
     const total = parseInt(countResult.rows[0].total, 10);
 
     // Main query with activity count
+    const limitIdx = paramIndex++;
+    const offsetIdx = paramIndex++;
     const dataParams = [...params, limitNum, offset];
     const dataResult = await query(
       `SELECT
@@ -268,7 +270,7 @@ const getSubmissions = async (req, res) => {
        ${whereClause}
        GROUP BY s.id, u.name
        ORDER BY s.submitted_at DESC
-       LIMIT $${paramIndex++} OFFSET $${paramIndex++}`,
+       LIMIT $${limitIdx} OFFSET $${offsetIdx}`,
       dataParams
     );
 
@@ -412,9 +414,10 @@ const uploadEvidences = async (req, res) => {
     });
   }
 
+  const client = await pool.connect();
   try {
     // Verify submission exists
-    const check = await query('SELECT id FROM form_submissions WHERE id = $1', [id]);
+    const check = await client.query('SELECT id FROM form_submissions WHERE id = $1', [id]);
     if (check.rows.length === 0) {
       return res.status(404).json({
         error: 'No encontrado',
@@ -422,10 +425,11 @@ const uploadEvidences = async (req, res) => {
       });
     }
 
+    await client.query('BEGIN');
     const inserted = [];
 
     for (const file of req.files) {
-      const result = await query(
+      const result = await client.query(
         `INSERT INTO evidences (submission_id, filename, original_name, mimetype, size_bytes)
          VALUES ($1, $2, $3, $4, $5)
          RETURNING id, filename, original_name, mimetype, size_bytes, uploaded_at`,
@@ -434,16 +438,21 @@ const uploadEvidences = async (req, res) => {
       inserted.push(result.rows[0]);
     }
 
+    await client.query('COMMIT');
+
     return res.status(201).json({
       message: `${inserted.length} archivo(s) subido(s) exitosamente.`,
       files: inserted,
     });
   } catch (err) {
+    await client.query('ROLLBACK');
     console.error('[submissionController.uploadEvidences]', err);
     return res.status(500).json({
       error: 'Error interno',
       message: 'No se pudieron guardar los archivos.',
     });
+  } finally {
+    client.release();
   }
 };
 

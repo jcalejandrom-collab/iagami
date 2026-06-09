@@ -2412,13 +2412,13 @@ async function renderConsejos() {
     <th>Estatus</th><th>Responsable</th><th>Teléfono</th><th>Acciones</th>
   </tr></thead><tbody>${
     slice.length ? slice.map(c => `<tr>
-      <td><span class="badge badge-secondary">${c.codigo||'-'}</span></td>
-      <td><strong>${c.nombre}</strong></td>
-      <td>${c.parroquia||'-'}</td>
-      <td>${c.comunidad||'-'}</td>
-      <td><span class="badge ${c.estatus==='Activo'?'badge-success':'badge-error'}">${c.estatus||'-'}</span></td>
-      <td>${c.responsable||'-'}</td>
-      <td>${c.telefono||'-'}</td>
+      <td><span class="badge badge-secondary">${escHtml(c.codigo||'-')}</span></td>
+      <td><strong>${escHtml(c.nombre||'')}</strong></td>
+      <td>${escHtml(c.parroquia||'-')}</td>
+      <td>${escHtml(c.comunidad||'-')}</td>
+      <td><span class="badge ${c.estatus==='Activo'?'badge-success':'badge-error'}">${escHtml(c.estatus||'-')}</span></td>
+      <td>${escHtml(c.responsable||'-')}</td>
+      <td>${escHtml(c.telefono||'-')}</td>
       <td><div style="display:flex;gap:4px">
         <button class="btn btn-sm" onclick="openConsejoForm('${c.id}')">✏️</button>
         <button class="btn btn-sm btn-danger" onclick="deleteConsejo('${c.id}')">🗑️</button>

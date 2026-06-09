@@ -125,9 +125,12 @@ const parseRevistaFiles = [
           try { fs.unlinkSync(file.path); } catch (_err) { /* best-effort cleanup */ }
           return res.status(400).json({ error: 'La portada no debe superar 5 MB' });
         }
-        // Validate magic bytes
-        const buf = fs.readFileSync(file.path);
-        if (!isValidFileSignature(buf, file.mimetype)) {
+        // Validate magic bytes — read only first 12 bytes, never full file
+        const portadaBuf = Buffer.alloc(12);
+        const portadaFd = fs.openSync(file.path, 'r');
+        fs.readSync(portadaFd, portadaBuf, 0, 12, 0);
+        fs.closeSync(portadaFd);
+        if (!isValidFileSignature(portadaBuf, file.mimetype)) {
           unlinkAll();
           return res.status(400).json({ error: 'La portada tiene un formato de imagen inválido' });
         }
@@ -137,9 +140,12 @@ const parseRevistaFiles = [
 
       if (req.files.pdf && req.files.pdf[0]) {
         const file = req.files.pdf[0];
-        // Validate magic bytes
-        const buf = fs.readFileSync(file.path);
-        if (!isValidFileSignature(buf, file.mimetype)) {
+        // Validate magic bytes — read only first 12 bytes, never full file
+        const pdfBuf = Buffer.alloc(12);
+        const pdfFd = fs.openSync(file.path, 'r');
+        fs.readSync(pdfFd, pdfBuf, 0, 12, 0);
+        fs.closeSync(pdfFd);
+        if (!isValidFileSignature(pdfBuf, file.mimetype)) {
           unlinkAll();
           return res.status(400).json({ error: 'El PDF tiene un formato de archivo inválido' });
         }

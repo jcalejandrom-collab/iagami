@@ -11,10 +11,12 @@
 
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
     pbUrl = 'http://127.0.0.1:8090';
-  } else if (hostname.includes('ngrok-free.dev')) {
-    pbUrl = 'https://crewmate-reps-fidgety.ngrok-free.dev';
   } else {
-    pbUrl = 'https://api.iagami.gob.ve';
+    // En staging/producción la URL del backend se inyecta como meta tag:
+    // <meta name="pb-url" content="https://api.iagami.gob.ve">
+    // Si no existe el meta tag, se usa el dominio oficial como fallback.
+    const metaPbUrl = document.querySelector('meta[name="pb-url"]')?.content;
+    pbUrl = metaPbUrl || 'https://api.iagami.gob.ve';
   }
 
   const config = Object.freeze({
