@@ -1,5 +1,6 @@
 const { body, param, validationResult } = require('express-validator');
 const { query } = require('../config/db');
+const { recordAuditLog } = require('../utils/auditLog');
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -361,6 +362,12 @@ const updateStatus = async (req, res) => {
         message: 'No se encontró la entrega solicitada.',
       });
     }
+
+    await recordAuditLog(req, 'submission_status_changed', {
+      userId: req.user.id, email: req.user.email, role: req.user.role,
+      detail: `id=${id} estado→${estado}`,
+      severity: estado === 'rechazado' ? 'WARNING' : 'INFO',
+    });
 
     return res.status(200).json({
       message: 'Estado actualizado correctamente.',
