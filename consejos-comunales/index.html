@@ -125,9 +125,9 @@ footer{background:#0a1f0e;color:rgba(255,255,255,.6);text-align:center;padding:2
 
 <div class="content">
   <div class="toolbar">
-    <input type="text" id="q" placeholder="🔍 Buscar por nombre, parroquia o comunidad..." oninput="render()"/>
-    <select id="f-parroquia" onchange="render()"><option value="">Todas las parroquias</option></select>
-    <select id="f-estatus" onchange="render()">
+    <input type="text" id="q" placeholder="🔍 Buscar por nombre, parroquia o comunidad..." oninput="applyFilters()"/>
+    <select id="f-parroquia" onchange="applyFilters()"><option value="">Todas las parroquias</option></select>
+    <select id="f-estatus" onchange="applyFilters()">
       <option value="">Todos los estatus</option>
       <option value="Activo">Activo</option>
       <option value="Inactivo">Inactivo</option>
@@ -159,17 +159,34 @@ let currentPage = 1;
 const PER_PAGE = 9;
 
 async function getFiltered() {
-  const q = document.getElementById('q').value.toLowerCase();
+  const q = document.getElementById('q').value.toLowerCase().trim();
   const par = document.getElementById('f-parroquia').value;
   const est = document.getElementById('f-estatus').value;
   const all = await CMSDB.getAll('consejos');
   return all.filter(c => {
-    if (c.estatus === 'Inactivo' && !est) return false; // público solo ve activos por defecto
     const matchQ = !q || [c.nombre,c.parroquia,c.comunidad,c.codigo].some(v => (v||'').toLowerCase().includes(q));
     const matchPar = !par || c.parroquia === par;
     const matchEst = !est || c.estatus === est;
-    return matchQ && matchPar && matchEst;
+    /* Sin búsqueda y sin filtro de estatus: ocultar inactivos por defecto.
+       Con búsqueda activa: mostrar todos los estatus para no ocultar resultados. */
+    const visibleByDefault = q ? true : (est ? true : c.estatus !== 'Inactivo');
+    return matchQ && matchPar && matchEst && visibleByDefault;
   });
+}
+
+function applyFilters() {
+  currentPage = 1;
+  /* Persistir filtros en la URL para compartir búsquedas */
+  const params = new URLSearchParams();
+  const q = document.getElementById('q').value.trim();
+  const par = document.getElementById('f-parroquia').value;
+  const est = document.getElementById('f-estatus').value;
+  if (q)   params.set('q', q);
+  if (par) params.set('parroquia', par);
+  if (est) params.set('estatus', est);
+  const qs = params.toString();
+  history.replaceState(null, '', qs ? '?' + qs : location.pathname);
+  render().catch(console.error);
 }
 
 async function render() {
@@ -215,7 +232,14 @@ async function render() {
 function goPage(p) { currentPage = p; render().catch(console.error); window.scrollTo({top:300,behavior:'smooth'}); }
 
 async function openModal(id) {
-  const c = await CMSDB.getOne('consejos', id);
+  let c;
+  try {
+    c = await CMSDB.getOne('consejos', id);
+  } catch (err) {
+    const t = document.getElementById('toast');
+    if (t) { t.textContent = 'Error al cargar el consejo comunal. Intente de nuevo.'; t.className = 'toast show error'; setTimeout(() => t.className = 'toast', 3000); }
+    return;
+  }
   if (!c) return;
   document.getElementById('modal-header').innerHTML = `
     <div style="font-size:10px;background:rgba(255,255,255,.2);border-radius:20px;padding:2px 10px;display:inline-block;margin-bottom:8px;font-family:monospace">${c.codigo||'—'}</div>
@@ -263,6 +287,13 @@ async function init() {
   document.getElementById('stat-parroquias').textContent = parroquias.length;
   const sel = document.getElementById('f-parroquia');
   parroquias.sort().forEach(p => sel.innerHTML += `<option value="${p}">${p}</option>`);
+
+  /* Restaurar filtros desde URLSearchParams (links compartidos) */
+  const params = new URLSearchParams(location.search);
+  if (params.get('q'))         document.getElementById('q').value = params.get('q');
+  if (params.get('parroquia')) document.getElementById('f-parroquia').value = params.get('parroquia');
+  if (params.get('estatus'))   document.getElementById('f-estatus').value = params.get('estatus');
+
   await render();
 }
 

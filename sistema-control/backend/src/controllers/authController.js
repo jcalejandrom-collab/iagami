@@ -42,12 +42,13 @@ const login = async (req, res) => {
       [email]
     );
 
+    const genericError = { error: 'Credenciales incorrectas', message: 'El correo o la contraseña son incorrectos.' };
+
     if (result.rows.length === 0) {
-      await recordAuditLog(req, 'login_failed', { email, detail: 'usuario no encontrado' });
-      return res.status(401).json({
-        error: 'Credenciales incorrectas',
-        message: 'El correo o la contraseña son incorrectos.',
-      });
+      // Dummy compare to prevent timing-based user enumeration
+      await bcrypt.compare(password, '$2a$10$dummyhashdummyhashdummyhashdummyhashdummyhashdummy.X');
+      await recordAuditLog(req, 'login_failed', { email, detail: 'usuario no encontrado', severity: 'WARNING' });
+      return res.status(401).json(genericError);
     }
 
     const user = result.rows[0];
@@ -56,12 +57,9 @@ const login = async (req, res) => {
     const passwordMatch = await bcrypt.compare(password, user.password_hash);
     if (!passwordMatch) {
       await recordAuditLog(req, 'login_failed', {
-        userId: user.id, email: user.email, role: user.role, detail: 'contraseña incorrecta',
+        userId: user.id, email: user.email, role: user.role, detail: 'contraseña incorrecta', severity: 'WARNING',
       });
-      return res.status(401).json({
-        error: 'Credenciales incorrectas',
-        message: 'El correo o la contraseña son incorrectos.',
-      });
+      return res.status(401).json(genericError);
     }
 
     // Sign JWT

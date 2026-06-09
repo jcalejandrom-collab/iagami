@@ -94,11 +94,17 @@ CREATE TABLE IF NOT EXISTS audit_logs (
   ip          VARCHAR(64),
   user_agent  VARCHAR(512),
   detail      VARCHAR(500),
-  created_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+  severity    VARCHAR(20)  NOT NULL DEFAULT 'INFO',
+  created_at  TIMESTAMPTZ  NOT NULL DEFAULT (NOW() AT TIME ZONE 'UTC')
 );
+
+-- Migration: add severity if deploying on an existing database
+ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS severity VARCHAR(20) NOT NULL DEFAULT 'INFO';
 
 CREATE INDEX IF NOT EXISTS idx_audit_logs_action     ON audit_logs(action);
 CREATE INDEX IF NOT EXISTS idx_audit_logs_created_at ON audit_logs(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_severity   ON audit_logs(severity);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_action_created ON audit_logs(action, created_at DESC);
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- Blindaje "append-only" de audit_logs (WORM real a nivel de privilegios)

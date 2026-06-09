@@ -4,6 +4,7 @@ const path = require('path');
 const fs = require('fs');
 
 const db = require('../config/db');
+const { recordAuditLog } = require('../utils/auditLog');
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -15,15 +16,13 @@ const db = require('../config/db');
 function deleteFile(fileUrl) {
   if (!fileUrl) return;
   try {
-    // fileUrl may be something like /uploads/revistas/portadas/uuid.jpg
-    // Strip the leading /uploads so we can join against UPLOAD_DIR
+    const UPLOAD_BASE = process.env.UPLOAD_DIR || path.resolve(__dirname, '..', 'uploads');
     const relative = fileUrl.replace(/^\/uploads\//, '');
-    const absPath = path.join(
-      process.env.UPLOAD_DIR || path.resolve(__dirname, '..', 'uploads'),
-      relative
-    );
-    if (fs.existsSync(absPath)) {
-      fs.unlinkSync(absPath);
+    const safePath = path.normalize(path.join(UPLOAD_BASE, relative));
+    if (!safePath.startsWith(path.normalize(UPLOAD_BASE) + path.sep) &&
+        safePath !== path.normalize(UPLOAD_BASE)) return;
+    if (fs.existsSync(safePath)) {
+      fs.unlinkSync(safePath);
     }
   } catch (err) {
     console.error('[revistaController] deleteFile error:', err.message);
@@ -283,6 +282,11 @@ async function createRevista(req, res) {
       ]
     );
 
+    await recordAuditLog(req, 'revista_created', {
+      userId: req.user.id, email: req.user.email, role: req.user.role,
+      detail: `id=${rows[0].id} titulo="${titulo}"`,
+    });
+
     return res.status(201).json(rows[0]);
   } catch (err) {
     console.error('[revistaController] createRevista:', err);
@@ -317,7 +321,6 @@ async function updateRevista(req, res) {
 
     const uploadedFiles = req.uploadedFiles || {};
 
-    // If new files were uploaded, delete old ones
     const portada_url =
       uploadedFiles.portada_url !== undefined
         ? uploadedFiles.portada_url
@@ -327,13 +330,6 @@ async function updateRevista(req, res) {
       uploadedFiles.pdf_url !== undefined
         ? uploadedFiles.pdf_url
         : current.pdf_url;
-
-    if (uploadedFiles.portada_url !== undefined && current.portada_url) {
-      deleteFile(current.portada_url);
-    }
-    if (uploadedFiles.pdf_url !== undefined && current.pdf_url) {
-      deleteFile(current.pdf_url);
-    }
 
     const { rows } = await db.query(
       `UPDATE revistas SET
@@ -366,6 +362,19 @@ async function updateRevista(req, res) {
       ]
     );
 
+    // Delete old files only after DB update succeeds to avoid orphaning data
+    if (uploadedFiles.portada_url !== undefined && current.portada_url) {
+      deleteFile(current.portada_url);
+    }
+    if (uploadedFiles.pdf_url !== undefined && current.pdf_url) {
+      deleteFile(current.pdf_url);
+    }
+
+    await recordAuditLog(req, 'revista_updated', {
+      userId: req.user.id, email: req.user.email, role: req.user.role,
+      detail: `id=${id} titulo="${rows[0].titulo}"`,
+    });
+
     return res.json(rows[0]);
   } catch (err) {
     console.error('[revistaController] updateRevista:', err);
@@ -388,11 +397,16 @@ async function deleteRevista(req, res) {
 
     const revista = existing.rows[0];
 
-    // Delete physical files
+    await db.query('DELETE FROM revistas WHERE id = $1', [id]);
+
+    // Delete physical files only after DB row is gone to avoid data/file mismatch on DB error
     deleteFile(revista.portada_url);
     deleteFile(revista.pdf_url);
 
-    await db.query('DELETE FROM revistas WHERE id = $1', [id]);
+    await recordAuditLog(req, 'revista_deleted', {
+      userId: req.user.id, email: req.user.email, role: req.user.role,
+      detail: `id=${id} titulo="${revista.titulo}"`, severity: 'CRITICAL',
+    });
 
     return res.json({ message: 'Revista eliminada' });
   } catch (err) {
@@ -425,6 +439,11 @@ async function toggleEstado(req, res) {
       [nuevoEstado, id]
     );
 
+    await recordAuditLog(req, 'revista_estado_changed', {
+      userId: req.user.id, email: req.user.email, role: req.user.role,
+      detail: `id=${id} estado=${current.estado}→${nuevoEstado}`,
+    });
+
     return res.json(rows[0]);
   } catch (err) {
     console.error('[revistaController] toggleEstado:', err);
@@ -454,6 +473,11 @@ async function toggleDestacada(req, res) {
       'UPDATE revistas SET destacada = $1 WHERE id = $2 RETURNING *',
       [!current.destacada, id]
     );
+
+    await recordAuditLog(req, 'revista_destacada_changed', {
+      userId: req.user.id, email: req.user.email, role: req.user.role,
+      detail: `id=${id} destacada=${current.destacada}→${!current.destacada}`,
+    });
 
     return res.json(rows[0]);
   } catch (err) {

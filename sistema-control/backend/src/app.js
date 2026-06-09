@@ -4,6 +4,7 @@ require('dotenv').config();
 
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
 const path = require('path');
 
 const { testConnection } = require('./config/db');
@@ -14,6 +15,13 @@ const revistasRouter = require('./routes/revistas');
 // ─── App setup ────────────────────────────────────────────────────────────────
 
 const app = express();
+
+// Trust the first proxy hop so req.ip reflects the real client IP behind
+// a reverse-proxy / load-balancer (required for rate-limit accuracy).
+app.set('trust proxy', 1);
+
+// ─── Helmet (security headers baseline) ──────────────────────────────────────
+app.use(helmet({ contentSecurityPolicy: false }));
 
 // ─── CORS ─────────────────────────────────────────────────────────────────────
 

@@ -179,3 +179,17 @@ select { cursor: pointer; }
   .form-card { padding: 18px; }
   .stats-grid { grid-template-columns: 1fr 1fr; }
 }
+
+/* ===== FORM VALIDATION ===== */
+.fg input.error,
+.fg textarea.error,
+.fg select.error { border-color: #e53935; background: #fff5f5; }
+.error-msg { font-size: 11px; color: #e53935; margin-top: 3px; display: block; }
+
+/* ===== PRINT ===== */
+@media print {
+  .nav, .navbtn, .navbtn-o, .btn-draft, .btn-submit, .btn-danger, .modal-bg { display: none !important; }
+  body { background: #fff; color: #000; }
+  .form-card { box-shadow: none; border: 1px solid #ccc; }
+  .main { padding: 0; max-width: 100%; }
+}

@@ -131,7 +131,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 .modal-row .icon{font-size:16px;flex-shrink:0;margin-top:1px}
 .modal-row .label{font-size:11px;font-weight:600;color:#4a8a6a;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px}
 .modal-row .value{font-size:14px;color:#1a3d2b;font-weight:500}
-.modal-desc{font-size:14px;color:#4a6a5a;line-height:1.65;margin-top:16px;padding-top:16px;border-top:1px solid #f0faf5}
+.modal-desc{font-size:14px;color:#4a6a5a;line-height:1.65;margin-top:16px;padding-top:16px;border-top:1px solid #f0faf5;white-space:pre-wrap}
 
 /* TOAST */
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#1d6b3e;color:#fff;padding:12px 24px;border-radius:12px;font-size:14px;font-weight:500;z-index:1000;opacity:0;transition:.3s;white-space:nowrap;box-shadow:0 8px 24px rgba(29,107,62,.3)}
@@ -282,6 +282,7 @@ let calMonth = 5; // 0-indexed: 5 = June
 let selectedDay = null;
 let allEvents = [];
 let filteredEvents = [];
+let cacheTodosEventos = [];
 
 const MONTHS_ES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 const MONTHS_SHORT = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
@@ -292,7 +293,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   calYear = today.getFullYear();
   calMonth = today.getMonth();
 
-  allEvents = ((await CMSDB.getAll('eventos')) || [])
+  cacheTodosEventos = (await CMSDB.getAll('eventos')) || [];
+  allEvents = cacheTodosEventos
     .filter(e => {
       if (!e.fecha) return false;
       const d = new Date(e.fecha + 'T00:00:00');
@@ -319,7 +321,7 @@ function switchView(v) {
 // ── Filter ──
 function filterEvents() {
   const tipo = document.getElementById('tipo-filter').value;
-  filteredEvents = tipo ? allEvents.filter(e => e.tipo === tipo) : [...allEvents];
+  filteredEvents = tipo ? allEvents.filter(e => (e.tipo||'').trim().toLowerCase() === tipo.trim().toLowerCase()) : [...allEvents];
   renderList();
 }
 
@@ -347,7 +349,7 @@ function eventCardHTML(e) {
   const descripcion = e.descripcion || '';
   const desc = descripcion.length > 120 ? descripcion.slice(0, 120) + '…' : descripcion;
   return `
-    <div class="event-card" onclick="openDetail(${e.id})">
+    <div class="event-card" onclick="openDetail('${e.id}')">
       <div class="event-card-border border-${tipoClass}"></div>
       <div class="event-card-body">
         <div class="date-badge">
@@ -403,7 +405,7 @@ async function renderCalendar() {
     cells.push({ date: new Date(calYear, calMonth + 1, d), thisMonth: false });
   }
 
-  const todosEventos = (await CMSDB.getAll('eventos')) || [];
+  const todosEventos = cacheTodosEventos;
   for (const cell of cells) {
     const dateStr = formatDate(cell.date);
     const dayEvents = todosEventos.filter(e => e.fecha === dateStr);
@@ -468,8 +470,7 @@ function nextMonth() {
 
 // ── Detail Modal ──
 async function openDetail(id) {
-  const todos = (await CMSDB.getAll('eventos')) || [];
-  const e = todos.find(ev => ev.id === id);
+  const e = cacheTodosEventos.find(ev => ev.id === id);
   if (!e) return;
 
   const d = new Date((e.fecha || '2000-01-01') + 'T00:00:00');
@@ -478,9 +479,9 @@ async function openDetail(id) {
   document.getElementById('modal-title').textContent = e.titulo || '';
   document.getElementById('modal-tipo-badge').innerHTML = `<span class="tipo-badge ${(e.tipo || 'otro').toLowerCase()}" style="margin-bottom:8px;display:inline-block">${e.tipo || ''}</span>`;
   document.getElementById('modal-fecha').textContent = fechaFmt;
-  document.getElementById('modal-lugar').textContent = e.lugar;
+  document.getElementById('modal-lugar').textContent = e.lugar || 'Por definir';
   document.getElementById('modal-responsable').textContent = e.responsable||e.ponente||'';
-  document.getElementById('modal-desc').textContent = e.descripcion;
+  document.getElementById('modal-desc').textContent = e.descripcion || '';
 
   document.getElementById('modal-overlay').classList.add('open');
 }

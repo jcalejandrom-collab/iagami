@@ -386,23 +386,20 @@ async function buscarDenuncia() {
     return;
   }
 
-  // Normalize: try as-is and also with/without "DEN-" prefix
-  const variants = new Set();
-  const upper = rawInput.toUpperCase();
-  variants.add(upper);
-  if (upper.startsWith('DEN-')) {
-    variants.add(upper.replace(/^DEN-/, ''));
-  } else {
-    variants.add('DEN-' + upper);
+  // Normalize: permitir con o sin prefijo DEN-
+  const upper = rawInput.toUpperCase().trim();
+  const normalized = upper.startsWith('DEN-') ? upper : 'DEN-' + upper;
+
+  // Validación estricta de formato — solo DEN- seguido de 1-10 dígitos
+  if (!/^DEN-\d{1,10}$/i.test(normalized)) {
+    toast('⚠ El número de caso debe tener el formato DEN-000001');
+    return;
   }
 
   // Consulta filtrada server-side: nunca se descarga la colección completa
   let found = null;
-  for (const v of variants) {
-    const safe = v.replace(/['"\\]/g, '');
-    const resultados = await CMSDB.getFiltered('denuncias', `caso="${safe}" && publicado=true`, { perPage: 1 });
-    if (resultados.length) { found = resultados[0]; break; }
-  }
+  const resultados = await CMSDB.getFiltered('denuncias', `caso="${normalized}" && publicado=true`, { perPage: 1 });
+  if (resultados.length) found = resultados[0];
 
   // Hide initial state
   document.getElementById('estado-inicial').style.display = 'none';
@@ -463,7 +460,8 @@ function renderCaseCard(d) {
 /* ─── TIMELINE ─── */
 function renderTimeline(d) {
   const cfg = ESTADO_CONFIG[d.estado] || ESTADO_CONFIG.pendiente;
-  const currentStep = cfg.step;
+  /* step 0 = pendiente: mostrar el primer paso como activo para no dejar el timeline vacío */
+  const currentStep = cfg.step || 1;
   const stepsRow = document.getElementById('steps-row');
 
   stepsRow.innerHTML = STEPS_DEF.map((s, i) => {
@@ -498,7 +496,7 @@ function renderHistorial(d) {
   }
 
   card.style.display = 'block';
-  const items = [...d.historial].sort((a, b) => (a.fecha||'').localeCompare(b.fecha||''));
+  const items = [...d.historial].sort((a, b) => (b.fecha||'').localeCompare(a.fecha||''));
 
   const HIST_EMOJIS = { recibida:'📩', revision:'🔎', inspeccion:'🔍', cerrada:'✅' };
   const HIST_DOT    = { recibida:'hist-dot-recibida', revision:'hist-dot-revision', inspeccion:'hist-dot-inspeccion', cerrada:'hist-dot-cerrada' };

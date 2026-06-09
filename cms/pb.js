@@ -39,10 +39,27 @@ const CMSDB = (function () {
   /* ─── AbortController por colección ─── */
   const _controllers = {};
 
-  function _abort(key) {
+  function _abort(key, timeoutMs = 10000) {
     if (_controllers[key]) { _controllers[key].abort(); }
-    _controllers[key] = new AbortController();
-    return _controllers[key].signal;
+    const ctrl = new AbortController();
+    _controllers[key] = ctrl;
+    setTimeout(() => ctrl.abort(), timeoutMs);
+    return ctrl.signal;
+  }
+
+  function _abortDone(key) {
+    delete _controllers[key];
+  }
+
+  /* ─── Promesas en vuelo para deduplicar peticiones concurrentes ─── */
+  const _inflight = {};
+
+  /* ─── Interceptor global de errores de auth ─── */
+  function _handleAuthError(status) {
+    if (status === 401 || status === 403) {
+      logout();
+      window.dispatchEvent(new CustomEvent('sigap:session-expired'));
+    }
   }
 
   /* ─── GET ALL (con paginación automática) ─── */
@@ -50,10 +67,15 @@ const CMSDB = (function () {
     const cached = _cacheGet(coleccion);
     if (cached) return cached;
 
-    const signal = _abort('getAll_' + coleccion);
-    try {
+    /* Si ya hay una petición en vuelo para esta colección, reutilizarla */
+    if (_inflight[coleccion]) return _inflight[coleccion];
+
+    const _key = 'getAll_' + coleccion;
+    const signal = _abort(_key);
+    _inflight[coleccion] = (async () => { try {
       let page = 1;
       const perPage = 200;
+      const MAX_ITEMS = 1000;
       let allItems = [];
       let totalPages = 1;
 
@@ -71,13 +93,14 @@ const CMSDB = (function () {
           console.warn(`[SIGAP] Colección "${coleccion}" no existe en PocketBase`);
           return [];
         }
-
+        _handleAuthError(res.status);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
         const data = await res.json();
         allItems = allItems.concat(data.items || []);
         totalPages = data.totalPages || 1;
         page++;
+        if (allItems.length >= MAX_ITEMS) break;
       } while (page <= totalPages);
 
       _cacheSet(coleccion, allItems);
@@ -87,7 +110,12 @@ const CMSDB = (function () {
       if (err.name === 'AbortError') return [];
       console.error(`[SIGAP] getAll("${coleccion}") falló:`, err.message);
       return [];
+    } finally {
+      _abortDone(_key);
+      delete _inflight[coleccion];
     }
+    })();
+    return _inflight[coleccion];
   }
 
   /* ─── GET FILTERED (consulta server-side, sin descargar la colección completa) ─── */
@@ -98,7 +126,9 @@ const CMSDB = (function () {
       if (token) headers['Authorization'] = token;
       let url = `${PB_URL}/api/collections/${coleccion}/records?page=1&perPage=1`;
       if (filtro) url += `&filter=${encodeURIComponent(filtro)}`;
-      const res = await fetch(url, { headers });
+      const ctrl = new AbortController();
+      setTimeout(() => ctrl.abort(), 10000);
+      const res = await fetch(url, { headers, signal: ctrl.signal });
       if (!res.ok) return 0;
       const json = await res.json();
       return json.totalItems || 0;
@@ -130,9 +160,11 @@ const CMSDB = (function () {
         Object.entries(opciones.params).forEach(([k, v]) => params.set(k, v));
       }
 
+      const _ctrl = new AbortController();
+      setTimeout(() => _ctrl.abort(), 10000);
       const res = await fetch(
         `${PB_URL}/api/collections/${coleccion}/records?${params.toString()}`,
-        { headers }
+        { headers, signal: _ctrl.signal }
       );
 
       if (res.status === 404) {
@@ -140,10 +172,8 @@ const CMSDB = (function () {
         return [];
       }
       if (res.status === 401 || res.status === 403) {
-        // No se interpola el filtro: puede contener tokens (TUC), números
-        // de caso u otros valores ingresados por el usuario que no deben
-        // quedar visibles en la consola del navegador.
         console.warn(`[SIGAP] Acceso denegado a "${coleccion}" (consulta rechazada por API Rules)`);
+        _handleAuthError(res.status);
         return [];
       }
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -165,6 +195,8 @@ const CMSDB = (function () {
         ? `${PB_URL}/api/collections/${coleccion}/records/${item.id}`
         : `${PB_URL}/api/collections/${coleccion}/records`;
 
+      const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+
       /* Detectar si hay archivos File/Blob en el item */
       const tieneArchivos = Object.values(item).some(
         v => v instanceof File || v instanceof Blob ||
@@ -175,14 +207,27 @@ const CMSDB = (function () {
       const token = getToken();
       if (token) headers['Authorization'] = token;
 
+      /* Campos de sistema que PocketBase rechaza en el body de PATCH */
+      const PB_READONLY = new Set(['id', 'created', 'updated', 'collectionId', 'collectionName', 'expand']);
+
       if (tieneArchivos) {
         const fd = new FormData();
         Object.entries(item).forEach(([key, val]) => {
+          if (isUpdate && PB_READONLY.has(key)) return;
           if (Array.isArray(val)) {
-            val.forEach(v => fd.append(key, v));
+            val.forEach(v => {
+              if ((v instanceof File || v instanceof Blob) && v.size > MAX_FILE_SIZE) {
+                throw new Error(`Archivo demasiado grande (máx 10 MB): ${v.name || key}`);
+              }
+              fd.append(key, v);
+            });
           } else if (val !== undefined && val !== null) {
+            if ((val instanceof File || val instanceof Blob) && val.size > MAX_FILE_SIZE) {
+              throw new Error(`Archivo demasiado grande (máx 10 MB): ${val.name || key}`);
+            }
             fd.append(key, val instanceof File || val instanceof Blob
               ? val
+              : val instanceof Date ? val.toISOString()
               : typeof val === 'object' ? JSON.stringify(val) : String(val)
             );
           }
@@ -190,20 +235,26 @@ const CMSDB = (function () {
         body = fd;
       } else {
         const payload = { ...item };
-        ['historial', 'adjuntos', 'requisitos', 'pasos', 'hitos',
-          'contenido_bloques'].forEach(k => {
-          if (payload[k] && typeof payload[k] !== 'string') {
-            payload[k] = JSON.stringify(payload[k]);
+        if (isUpdate) PB_READONLY.forEach(k => delete payload[k]);
+        Object.keys(payload).forEach(k => {
+          const v = payload[k];
+          if (v instanceof Date) {
+            payload[k] = v.toISOString();
+          } else if (typeof v === 'object' && v !== null && !(v instanceof File) && !(v instanceof Blob)) {
+            payload[k] = JSON.stringify(v);
           }
         });
         body = JSON.stringify(payload);
         headers['Content-Type'] = 'application/json';
       }
 
+      const _saveCtrl = new AbortController();
+      setTimeout(() => _saveCtrl.abort(), 10000);
       const res = await fetch(endpoint, {
         method: isUpdate ? 'PATCH' : 'POST',
         headers,
-        body
+        body,
+        signal: _saveCtrl.signal
       });
 
       if (!res.ok) {
@@ -229,9 +280,11 @@ const CMSDB = (function () {
       const token = getToken();
       const headers = { 'ngrok-skip-browser-warning': '1' };
       if (token) headers['Authorization'] = token;
+      const _delCtrl = new AbortController();
+      setTimeout(() => _delCtrl.abort(), 10000);
       const res = await fetch(
         `${PB_URL}/api/collections/${coleccion}/records/${id}`,
-        { method: 'DELETE', headers }
+        { method: 'DELETE', headers, signal: _delCtrl.signal }
       );
       if (!res.ok && res.status !== 204)
         throw new Error(`HTTP ${res.status}`);
@@ -254,9 +307,11 @@ const CMSDB = (function () {
       const token = getToken();
       const headers = { 'ngrok-skip-browser-warning': '1' };
       if (token) headers['Authorization'] = token;
+      const _oneCtrl = new AbortController();
+      setTimeout(() => _oneCtrl.abort(), 10000);
       const res = await fetch(
         `${PB_URL}/api/collections/${coleccion}/records/${id}`,
-        { headers }
+        { headers, signal: _oneCtrl.signal }
       );
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       return await res.json();
@@ -269,7 +324,9 @@ const CMSDB = (function () {
   /* ─── HEALTH CHECK ─── */
   async function ping() {
     try {
-      const res = await fetch(`${PB_URL}/api/health`, { signal: AbortSignal.timeout(3000) });
+      const ctrl = new AbortController();
+      setTimeout(() => ctrl.abort(), 3000);
+      const res = await fetch(`${PB_URL}/api/health`, { signal: ctrl.signal });
       return res.ok;
     } catch {
       return false;
@@ -288,10 +345,13 @@ const CMSDB = (function () {
      campo `role`), permitiendo RBAC mínimo sin exponer el superusuario. */
   async function login(email, password) {
     try {
+      const _loginCtrl = new AbortController();
+      setTimeout(() => _loginCtrl.abort(), 10000);
       const res = await fetch(`${PB_URL}/api/collections/admins/auth-with-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': '1' },
-        body: JSON.stringify({ identity: email, password })
+        body: JSON.stringify({ identity: email, password }),
+        signal: _loginCtrl.signal
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
@@ -334,29 +394,36 @@ const CMSDB = (function () {
     return !!user && roles.includes(user.role);
   }
 
+  let _refreshPromise = null;
   async function verifyToken() {
     const token = getToken();
     if (!token) return false;
-    try {
-      const res = await fetch(`${PB_URL}/api/collections/admins/auth-refresh`, {
-        method: 'POST',
-        headers: { 'Authorization': token, 'ngrok-skip-browser-warning': '1' }
-      });
-      if (!res.ok) {
+    if (_refreshPromise) return _refreshPromise;
+    _refreshPromise = (async () => {
+      try {
+        const _refCtrl = new AbortController();
+        setTimeout(() => _refCtrl.abort(), 10000);
+        const res = await fetch(`${PB_URL}/api/collections/admins/auth-refresh`, {
+          method: 'POST',
+          headers: { 'Authorization': token, 'ngrok-skip-browser-warning': '1' },
+          signal: _refCtrl.signal
+        });
+        if (!res.ok) { logout(); return false; }
+        const data = await res.json();
+        sessionStorage.setItem('pb_token', data.token);
+        return true;
+      } catch {
         logout();
         return false;
+      } finally {
+        _refreshPromise = null;
       }
-      const data = await res.json();
-      sessionStorage.setItem('pb_token', data.token);
-      return true;
-    } catch {
-      logout();
-      return false;
-    }
+    })();
+    return _refreshPromise;
   }
 
   /* ─── HELPERS (compatibilidad con código que los usa) ─── */
-  function uid() { return Math.random().toString(36).slice(2, 10) + Date.now().toString(36); }
+  function uid() { return crypto.randomUUID(); }
   function now() { return new Date().toISOString(); }
 
   /* ─── AUDITORÍA ─── */
@@ -374,7 +441,7 @@ const CMSDB = (function () {
         body: JSON.stringify({
           accion,
           modulo,
-          detalle: String(detalle).slice(0, 500),
+          detalle: String(detalle).replace(/[<>"'&]/g, '').slice(0, 500),
           usuario: userData.email || 'anonimo',
           nivel,
           ip: '',
