@@ -370,25 +370,39 @@ let _dragSrcIdx  = null;
    INIT
 ═══════════════════════════════════════════ */
 window.addEventListener('DOMContentLoaded', async () => {
+  if (typeof CMSDB === 'undefined') {
+    document.getElementById('canvas-inner').innerHTML = `<div class="canvas-empty"><div class="ce-ico">⚠️</div><h3>Error de conexión</h3><p>No se pudo cargar el módulo CMS. Verifica la ruta de pb.js en el &lt;head&gt;.</p></div>`;
+    return;
+  }
   if (!REVISTA_ID) {
     const titleEl = document.getElementById('editor-title');
     if (titleEl) titleEl.textContent = 'Error: sin ID de revista';
-    console.warn('[SIGAP] Editor: No se especificó una revista');
     return;
   }
-  const r = await CMSDB.getOne('revistas', REVISTA_ID);
-  if (!r) {
-    const titleEl = document.getElementById('editor-title');
-    if (titleEl) titleEl.textContent = 'Revista no encontrada';
-    console.warn('[SIGAP] Editor: Revista no encontrada:', REVISTA_ID);
-    return;
+  try {
+    const r = await CMSDB.getOne('revistas', REVISTA_ID);
+    if (!r) {
+      const titleEl = document.getElementById('editor-title');
+      if (titleEl) titleEl.textContent = 'Revista no encontrada';
+      showToast('Revista no encontrada', 'error');
+      return;
+    }
+    document.getElementById('editor-title').textContent = r.titulo;
+    _blocks = Array.isArray(r.contenido_bloques) ? JSON.parse(JSON.stringify(r.contenido_bloques)) : [];
+    try {
+      window._editorNoticias = await CMSDB.getAll('noticias');
+    } catch (e) {
+      console.error('[SIGAP] Error cargando noticias:', e);
+      window._editorNoticias = [];
+    }
+    renderCanvas();
+    renderPalette();
+    renderTemplates();
+  } catch (err) {
+    console.error('[SIGAP] Error crítico de inicialización:', err);
+    document.getElementById('canvas-inner').innerHTML = `<div class="canvas-empty"><div class="ce-ico">⚠️</div><h3>Error al cargar el editor</h3><p>${err.message}</p></div>`;
+    showToast('Error al cargar el editor', 'error');
   }
-  document.getElementById('editor-title').textContent = r.titulo;
-  _blocks = Array.isArray(r.contenido_bloques) ? JSON.parse(JSON.stringify(r.contenido_bloques)) : [];
-  window._editorNoticias = await CMSDB.getAll('noticias');
-  renderCanvas();
-  renderPalette();
-  renderTemplates();
 });
 
 /* ═══════════════════════════════════════════
