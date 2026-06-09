@@ -1934,9 +1934,23 @@ async function renderProyectos() {
 async function saveProyectos(e) {
   e.preventDefault();
   const form = document.getElementById('proyectos-form');
-  const data = collectForm(form);
-  data.hitos = getListValues('hitos-list');
-  data.porcentaje_avance = parseInt(data.porcentaje_avance)||0;
+  const raw = collectForm(form);
+  const data = {
+    id: raw.id,
+    nombre: raw.nombre,
+    descripcion: raw.descripcion,
+    estado: raw.estado,
+    fecha_inicio: raw.fecha_inicio,
+    fecha_fin: raw.fecha_fin_estimada,
+    avance: parseInt(raw.porcentaje_avance)||0,
+    imagen: raw.imagen,
+    responsable: raw.responsable,
+    municipio: raw.municipio,
+    beneficiados: raw.beneficiados,
+    presupuesto: raw.presupuesto,
+    hitos: getListValues('hitos-list'),
+  };
+  if (!data.id) delete data.id;
   const vp = validarContenido(data); if (!vp.isValid) { toast('❌ ' + vp.error, 'error'); return; }
   await CMSDB.save('proyectos', data);
   toast('Proyecto guardado');
