@@ -1350,6 +1350,7 @@ document.getElementById('modal-confirm-btn').addEventListener('click', () => {
 
 /* ─── PAGINATION HELPER ─── */
 function paginate(items, key, perPage=10) {
+  if (!Array.isArray(items)) items = [];
   if (!pages[key]) pages[key] = 1;
   const total = Math.ceil(items.length / perPage);
   if (pages[key] > total) pages[key] = Math.max(1, total);
@@ -1660,6 +1661,7 @@ async function renderDashboard() {
   ];
   for (const s of sources) {
     const rows = await CMSDB.getFiltered(s.key, '', { perPage: 5, sort: '-updated' });
+    if (!Array.isArray(rows)) continue;
     rows.forEach(it => {
       allItems.push({label:s.label, name:(it[s.field]||'Sin nombre').slice(0,50), date:it.updated||it.created||''});
     });
@@ -1885,7 +1887,8 @@ async function saveTransparencia(e) {
 async function populateOrgParentSelect(currentId=null, selectedPadre=null) {
   const sel = document.getElementById('org-padre-select');
   if (!sel) return;
-  const units = (await CMSDB.getAll('org')).filter(u => u.id !== currentId);
+  const orgAll = await CMSDB.getAll('org');
+  const units = Array.isArray(orgAll) ? orgAll.filter(u => u.id !== currentId) : [];
   sel.innerHTML = '<option value="">Ninguno</option>';
   units.forEach(u => {
     const opt = document.createElement('option');
@@ -2320,6 +2323,7 @@ function setMediaFilter(f) {
 
 async function renderArchivos() {
   let items = await CMSDB.getAll('media');
+  if (!Array.isArray(items)) items = [];
   if (mediaFilter === 'image') items = items.filter(i => i.tipo && i.tipo.startsWith('image'));
   if (mediaFilter === 'pdf') items = items.filter(i => i.tipo === 'application/pdf');
   const grid = document.getElementById('media-grid');
@@ -2435,7 +2439,7 @@ async function renderConsejos() {
   // populate parroquia filter
   const pfil = document.getElementById('f-consejos-par');
   if (pfil && pfil.options.length <= 1) {
-    const parroquias = [...new Set(allData.map(c=>c.parroquia).filter(Boolean))].sort();
+    const parroquias = Array.isArray(allData) ? [...new Set(allData.map(c=>c.parroquia).filter(Boolean))].sort() : [];
     parroquias.forEach(p => { const o = document.createElement('option'); o.value=p; o.textContent=p; pfil.appendChild(o); });
   }
 }
@@ -2534,7 +2538,8 @@ async function renderBienvenida() {
   // Historial
   const hist = document.getElementById('bv-historial');
   if (hist) {
-    const items = await CMSDB.getAll('bienvenida');
+    const bvItems = await CMSDB.getAll('bienvenida');
+    const items = Array.isArray(bvItems) ? bvItems : [];
     const allHist = [];
     items.forEach(b => { if (b.historial) b.historial.forEach(h => allHist.push(h)); });
     allHist.sort((a,b) => (b.fecha||'').localeCompare(a.fecha||''));
@@ -2624,7 +2629,8 @@ async function publicarBienvenida() {
   const data = await _bvBuildData('publicada', true);
   if (!data) return;
   // Deactivate all others
-  for (const b of await CMSDB.getAll('bienvenida')) {
+  const bvAll = await CMSDB.getAll('bienvenida');
+  for (const b of (Array.isArray(bvAll) ? bvAll : [])) {
     if (b.id !== data.id && b.activa) { await CMSDB.save('bienvenida', Object.assign({}, b, {activa: false, estado: 'desactivada'})); }
   }
   await CMSDB.save('bienvenida', data);
