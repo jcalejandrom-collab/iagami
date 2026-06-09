@@ -1440,6 +1440,15 @@ const formTitles = {
 
 function fillForm(form, item, section) {
   form.reset();
+  // Remap PocketBase field names to form field names for noticias
+  if (section === 'noticias') {
+    item = Object.assign({}, item, {
+      contenido: item.cuerpo,
+      fecha_publicacion: item.fecha,
+      destacada: item.destacado,
+      estado: item.publicado ? 'publicado' : 'borrador',
+    });
+  }
   // Fill standard inputs
   Array.from(form.elements).forEach(el => {
     if (!el.name || el.name==='id') return;
@@ -1483,7 +1492,7 @@ function validarContenido(data) {
 
   // 1. XSS básico
   const xss = /<script\b[^>]*>[\s\S]*?<\/script>|onerror\s*=|onload\s*=/gi;
-  for (const campo of ['titulo','contenido','descripcion','mensaje','nombre']) {
+  for (const campo of ['titulo','contenido','cuerpo','descripcion','mensaje','nombre']) {
     if (xss.test(str(data[campo]))) {
       return { isValid: false, error: `Campo "${campo}" contiene contenido no permitido (riesgo XSS).` };
     }
@@ -1670,7 +1679,8 @@ async function renderNoticias() {
   const estado = (document.getElementById('noticias-estado')||{}).value||'';
   items = filterItems(items, search, ['titulo','autor','categoria']);
   if (cat) items = items.filter(i=>i.categoria===cat);
-  if (estado) items = items.filter(i=>i.estado===estado);
+  if (estado === 'publicado') items = items.filter(i => i.publicado === true);
+  else if (estado === 'borrador') items = items.filter(i => !i.publicado);
   const {items:page, total, current} = paginate(items,'noticias');
   const tbody = document.getElementById('noticias-tbody');
   tbody.innerHTML = !page.length ? emptyState() : page.map(n => `<tr>
@@ -1678,13 +1688,13 @@ async function renderNoticias() {
     <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(n.titulo||'')}</td>
     <td>${escHtml(n.categoria||'')}</td>
     <td>${escHtml(n.autor||'')}</td>
-    <td>${n.fecha_publicacion||n.fecha||'—'}</td>
-    <td>${n.destacada?'⭐':'—'}</td>
-    <td>${estadoBadge(n.estado)}</td>
+    <td>${n.fecha||'—'}</td>
+    <td>${n.destacado?'⭐':'—'}</td>
+    <td>${estadoBadge(n.publicado?'publicado':'borrador')}</td>
     <td>
       <div style="display:flex;gap:4px">
         <button class="btn-icon" onclick="openForm('noticias','${n.id}')">✏️</button>
-        <button class="btn-icon" title="Toggle estado" onclick="toggleEstado('noticias','${n.id}','estado','publicado','borrador')">👁️</button>
+        <button class="btn-icon" title="Toggle publicado" onclick="toggleEstado('noticias','${n.id}','publicado',true,false)">👁️</button>
         <button class="btn-icon danger" onclick="deleteRecord('noticias','${n.id}')">🗑️</button>
       </div>
     </td>
