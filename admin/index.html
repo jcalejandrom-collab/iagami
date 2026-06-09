@@ -1794,8 +1794,22 @@ async function renderAgenda() {
 async function saveAgenda(e) {
   e.preventDefault();
   const form = document.getElementById('agenda-form');
-  const data = collectForm(form);
-  data.destacado = form.querySelector('[name="destacado"]').checked;
+  const raw = collectForm(form);
+  const data = {
+    id: raw.id,
+    titulo: raw.titulo,
+    descripcion: raw.descripcion,
+    tipo: raw.tipo,
+    fecha_inicio: raw.fecha,
+    lugar: raw.lugar,
+    hora_inicio: raw.hora_inicio,
+    hora_fin: raw.hora_fin,
+    responsable: raw.responsable,
+    publicado: raw.estado === 'publicado' || raw.estado === 'programado',
+    imagen: raw.imagen,
+    destacado: form.querySelector('[name="destacado"]').checked,
+  };
+  if (!data.id) delete data.id;
   const ve = validarContenido(data); if (!ve.isValid) { toast('❌ ' + ve.error, 'error'); return; }
   await CMSDB.save('eventos', data);
   toast('Evento guardado');
