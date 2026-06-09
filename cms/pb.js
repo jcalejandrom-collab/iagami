@@ -67,6 +67,20 @@ const CMSDB = (function () {
   }
 
   /* ─── GET FILTERED (consulta server-side, sin descargar la colección completa) ─── */
+  async function count(coleccion, filtro = '') {
+    try {
+      const token = getToken();
+      const headers = { 'ngrok-skip-browser-warning': '1' };
+      if (token) headers['Authorization'] = token;
+      let url = `${PB_URL}/api/collections/${coleccion}/records?page=1&perPage=1`;
+      if (filtro) url += `&filter=${encodeURIComponent(filtro)}`;
+      const res = await fetch(url, { headers });
+      if (!res.ok) return 0;
+      const json = await res.json();
+      return json.totalItems || 0;
+    } catch { return 0; }
+  }
+
   async function getFiltered(coleccion, filtro, opciones = {}) {
     try {
       const token = getToken();
@@ -347,5 +361,5 @@ const CMSDB = (function () {
     }
   }
 
-  return { getAll, getFiltered, save, deleteRecord, remove, getOne, clearCache, ping, uid, now, login, logout, getToken, isAuthenticated, getCurrentUser, hasRole, verifyToken, logAudit };
+  return { getAll, getFiltered, count, save, deleteRecord, remove, getOne, clearCache, ping, uid, now, login, logout, getToken, isAuthenticated, getCurrentUser, hasRole, verifyToken, logAudit };
 })();

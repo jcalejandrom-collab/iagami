@@ -1615,15 +1615,23 @@ function filterItems(items, search, fields) {
    DASHBOARD
 ════════════════════════════════════════ */
 async function renderDashboard() {
-  const alertas = (await CMSDB.getAll('alertas')).filter(a=>a.activa).length;
-  const multasPend = (await CMSDB.getAll('multas')).filter(m=>m.estado==='Pendiente').length;
+  const [noticias, tramites, eventos, documentos, proyectos, empresas, alertas, multasPend] = await Promise.all([
+    CMSDB.count('noticias'),
+    CMSDB.count('tramites'),
+    CMSDB.count('eventos'),
+    CMSDB.count('documentos'),
+    CMSDB.count('proyectos'),
+    CMSDB.count('empresas'),
+    CMSDB.count('alertas', 'activa=true'),
+    CMSDB.count('multas', 'estado="Pendiente"'),
+  ]);
   const stats = [
-    {icon:'📰', label:'Noticias', val: (await CMSDB.getAll('noticias')).length, sec:'noticias'},
-    {icon:'📋', label:'Trámites', val: (await CMSDB.getAll('tramites')).length, sec:'tramites'},
-    {icon:'📅', label:'Eventos', val: (await CMSDB.getAll('eventos')).length, sec:'agenda'},
-    {icon:'🏛️', label:'Documentos', val: (await CMSDB.getAll('documentos')).length, sec:'transparencia'},
-    {icon:'🌳', label:'Proyectos', val: (await CMSDB.getAll('proyectos')).length, sec:'proyectos'},
-    {icon:'🏭', label:'Empresas', val: (await CMSDB.getAll('empresas')).length, sec:'empresas'},
+    {icon:'📰', label:'Noticias', val: noticias, sec:'noticias'},
+    {icon:'📋', label:'Trámites', val: tramites, sec:'tramites'},
+    {icon:'📅', label:'Eventos', val: eventos, sec:'agenda'},
+    {icon:'🏛️', label:'Documentos', val: documentos, sec:'transparencia'},
+    {icon:'🌳', label:'Proyectos', val: proyectos, sec:'proyectos'},
+    {icon:'🏭', label:'Empresas', val: empresas, sec:'empresas'},
     {icon:'🚨', label:'Alertas Activas', val: alertas, sec:'alertas'},
     {icon:'⚖️', label:'Multas Pendientes', val: multasPend, sec:'multas'},
   ];
