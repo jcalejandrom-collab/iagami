@@ -1134,13 +1134,14 @@ function renderAdjuntos() {
     const isImg = f.type.startsWith('image/');
     const sizeStr = f.size > 1024*1024 ? (f.size/1024/1024).toFixed(1)+' MB' : Math.round(f.size/1024)+' KB';
     const fileIcon = f.type.includes('pdf') ? '📄' : f.type.includes('word') || f.type.includes('doc') ? '📝' : f.type.includes('video') ? '🎥' : '📎';
+    const safeName = escHtml(f.name);
     return `<div class="adj-item">
-      <button class="adj-remove" onclick="removeAdjunto(${i})" aria-label="Eliminar ${f.name}" title="Eliminar">×</button>
+      <button class="adj-remove" onclick="removeAdjunto(${i})" aria-label="Eliminar ${safeName}" title="Eliminar">×</button>
       ${isImg
-        ? `<img class="adj-img" src="${f.dataUrl}" alt="${f.name}"/>`
+        ? `<img class="adj-img" src="${f.dataUrl}" alt="${safeName}"/>`
         : `<div class="adj-file"><span class="adj-file-ico">${fileIcon}</span><span style="font-size:9px;color:#4a8a6a;text-align:center;padding:2px 4px">${f.type.split('/')[1]?.toUpperCase()||'FILE'}</span></div>`
       }
-      <div class="adj-name" title="${f.name}">${f.name}</div>
+      <div class="adj-name" title="${safeName}">${safeName}</div>
       <div class="adj-size">${sizeStr}</div>
     </div>`;
   }).join('');
@@ -1149,10 +1150,12 @@ function renderAdjuntos() {
   const dz = document.getElementById('drop-zone');
   if (dz) {
     const left = MAX_FILES - adjuntosData.length;
-    dz.querySelector('.dz-sub').textContent =
-      adjuntosData.length > 0
+    const dzSub = dz.querySelector('.dz-sub');
+    if (dzSub) {
+      dzSub.textContent = adjuntosData.length > 0
         ? `${adjuntosData.length} archivo(s) adjunto(s) · Puedes agregar ${left} más`
         : 'JPG, PNG, GIF, PDF, DOC, DOCX, MP4 · Máx. 5 archivos · 10 MB cada uno';
+    }
   }
 }
 
@@ -1177,49 +1180,52 @@ async function enviarDenuncia() {
   const originalText = submitBtn ? submitBtn.textContent : '';
   if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = '⏳ Enviando...'; }
 
-  setTimeout(async () => {
-    try {
-      const num = generarNumeroCaso();
-      const item = {
-        caso:      num,
-        tipo,
-        descripcion: desc,
-        nombre,
-        email:     document.getElementById('den-email').value,
-        telefono:  document.getElementById('den-tel').value,
-        cedula:    document.getElementById('den-cedula').value,
-        ubicacion: document.getElementById('input-ubicacion').value,
-        estado:    'recibida',
-        publicado: true,
-        fecha:     new Date().toISOString().slice(0, 10),
-        historial: [{ estado:'recibida', fecha: new Date().toISOString().slice(0,10), comentario:'Denuncia registrada en el sistema SIGAP.' }],
-        adjuntos:  adjuntosData.map(f => ({ name: f.name, type: f.type, size: f.size, dataUrl: f.dataUrl }))
-      };
-      await CMSDB.save('denuncias', item);
-      await CMSDB.logAudit('create', 'denuncias', 'denuncia publica enviada - caso: ' + num, 'info');
+  await new Promise(resolve => {
+    setTimeout(async () => {
+      try {
+        const num = generarNumeroCaso();
+        const item = {
+          caso:      num,
+          tipo,
+          descripcion: desc,
+          nombre,
+          email:     document.getElementById('den-email').value,
+          telefono:  document.getElementById('den-tel').value,
+          cedula:    document.getElementById('den-cedula').value,
+          ubicacion: document.getElementById('input-ubicacion').value,
+          estado:    'recibida',
+          publicado: true,
+          fecha:     new Date().toISOString().slice(0, 10),
+          historial: [{ estado:'recibida', fecha: new Date().toISOString().slice(0,10), comentario:'Denuncia registrada en el sistema SIGAP.' }],
+          adjuntos:  adjuntosData.map(f => ({ name: f.name, type: f.type, size: f.size, dataUrl: f.dataUrl }))
+        };
+        await CMSDB.save('denuncias', item);
+        await CMSDB.logAudit('create', 'denuncias', 'denuncia publica enviada - caso: ' + num, 'info');
 
-      const el = document.getElementById('modal-caso-num');
-      if (el) el.textContent = 'Número de caso: ' + num;
-      const adjMsg = adjuntosData.length ? ` · ${adjuntosData.length} archivo(s) adjunto(s)` : '';
-      toast('✅ Denuncia registrada · Caso ' + num + adjMsg);
-      setTimeout(() => openModal('modal-denuncia-ok'), 400);
+        const el = document.getElementById('modal-caso-num');
+        if (el) el.textContent = 'Número de caso: ' + num;
+        const adjMsg = adjuntosData.length ? ` · ${adjuntosData.length} archivo(s) adjunto(s)` : '';
+        toast('✅ Denuncia registrada · Caso ' + num + adjMsg);
+        setTimeout(() => openModal('modal-denuncia-ok'), 400);
 
-      // Reset form
-      ['den-tipo','den-desc','den-nombre','den-email','den-tel','den-cedula','input-ubicacion'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.value = '';
-      });
-      document.getElementById('ai-box').style.display = 'none';
-      adjuntosData = [];
-      renderAdjuntos();
-    } catch(e) {
-      toast('⚠ Error al guardar la denuncia. Intenta nuevamente.');
-      console.error('enviarDenuncia error:', e);
-    } finally {
-      _enviandoDenuncia = false;
-      if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = originalText; }
-    }
-  }, 600);
+        // Reset form
+        ['den-tipo','den-desc','den-nombre','den-email','den-tel','den-cedula','input-ubicacion'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.value = '';
+        });
+        document.getElementById('ai-box').style.display = 'none';
+        adjuntosData = [];
+        renderAdjuntos();
+      } catch(e) {
+        toast('⚠ Error al guardar la denuncia. Intenta nuevamente.');
+        console.error('enviarDenuncia error:', e);
+      } finally {
+        _enviandoDenuncia = false;
+        if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = originalText; }
+        resolve();
+      }
+    }, 600);
+  });
 }
 
 /* ═══════════════════════════════════════

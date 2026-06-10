@@ -22,7 +22,7 @@ const requireAuth = async (req, res, next) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded;
-    next();
+    return next();
   } catch (err) {
     await recordAuditLog(req, 'auth_failed', {
       detail: `${err.name}: ${err.message}`,
@@ -57,7 +57,7 @@ const requireAdmin = async (req, res, next) => {
       message: 'Se requieren permisos de administrador para realizar esta acción.',
     });
   }
-  next();
+  return next();
 };
 
 module.exports = { requireAuth, requireAdmin };

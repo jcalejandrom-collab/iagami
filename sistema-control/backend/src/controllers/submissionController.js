@@ -240,7 +240,7 @@ const getSubmissions = async (req, res) => {
       `SELECT COUNT(*) AS total FROM form_submissions s ${whereClause}`,
       params
     );
-    const total = parseInt(countResult.rows[0].total, 10);
+    const total = countResult.rows.length > 0 ? parseInt(countResult.rows[0].total, 10) : 0;
 
     // Main query with activity count
     const limitIdx = paramIndex++;
