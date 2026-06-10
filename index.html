@@ -609,6 +609,46 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
     </div>
   </div>
 
+  <!-- TRÁMITES DESTACADOS -->
+  <div class="sec-wrap3">
+    <div class="section">
+      <div class="sec-head">
+        <div class="sec-tag">TRÁMITES IAGAMI</div>
+        <h2>Trámites y servicios disponibles</h2>
+        <p>Permisos, certificaciones y registros ambientales para ciudadanos y empresas</p>
+      </div>
+      <div id="home-tramites-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-bottom:8px">
+        <!-- Populated by renderHomeTramites() -->
+      </div>
+      <div class="ver-mas-row">
+        <a class="btn-ver-mas" href="tramites/index.html">
+          Ver todos los trámites
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- TRANSPARENCIA -->
+  <div class="sec-wrap2">
+    <div class="section">
+      <div class="sec-head">
+        <div class="sec-tag">TRANSPARENCIA</div>
+        <h2>Documentos públicos</h2>
+        <p>Informes, presupuestos, resoluciones y documentos legales de IAGAMI</p>
+      </div>
+      <div id="home-docs-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-bottom:8px">
+        <!-- Populated by renderHomeDocumentos() -->
+      </div>
+      <div class="ver-mas-row">
+        <a class="btn-ver-mas" href="transparencia/index.html">
+          Ver todos los documentos
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+
   <!-- CTA -->
   <div class="cta">
     <div class="sec-tag" style="background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.25);color:#a8f0c8">PARTICIPACIÓN CIUDADANA</div>
@@ -1461,6 +1501,68 @@ async function renderHomeRevista() {
   }).join('');
 }
 
+async function renderHomeTramites() {
+  const grid = document.getElementById('home-tramites-grid');
+  if (!grid) return;
+  const _items = await CMSDB.getAll('tramites');
+  const items = (Array.isArray(_items) ? _items : [])
+    .filter(t => t.estado === 'activo')
+    .slice(0, 6);
+  if (!items.length) {
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="ico">📋</div>No hay trámites disponibles aún.</div>';
+    return;
+  }
+  const catIcon = { Permisos:'🌿', Certificaciones:'📜', Registros:'🗂️', Licencias:'🔖', Otros:'📋' };
+  grid.innerHTML = items.map(t => `
+    <div style="background:#fff;border:1px solid #d4edd8;border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:10px;transition:.2s"
+      onmouseover="this.style.boxShadow='0 6px 24px rgba(29,107,62,.12)';this.style.transform='translateY(-2px)'"
+      onmouseout="this.style.boxShadow='none';this.style.transform='none'">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:40px;height:40px;background:#e8f5ee;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">${catIcon[t.categoria] || '📋'}</div>
+        <div>
+          <div style="font-size:10px;font-weight:700;color:#1d6b3e;text-transform:uppercase;letter-spacing:.06em">${escHtml(t.categoria || 'General')}</div>
+          <div style="font-family:'Poppins',sans-serif;font-size:13px;font-weight:700;color:#1a3d2b;line-height:1.3">${escHtml(t.nombre)}</div>
+        </div>
+      </div>
+      ${t.descripcion ? `<div style="font-size:12px;color:#4a6a5a;line-height:1.5">${escHtml(t.descripcion.slice(0,100))}${t.descripcion.length>100?'…':''}</div>` : ''}
+      <div style="display:flex;gap:12px;font-size:11px;color:#4a8a6a">
+        ${t.tiempo_respuesta ? `<span>⏱ ${escHtml(t.tiempo_respuesta)}</span>` : ''}
+        ${t.costo ? `<span>💰 ${escHtml(t.costo)}</span>` : ''}
+      </div>
+      <a href="tramites/index.html" style="margin-top:auto;padding:7px 14px;background:#1d6b3e;color:#fff;border-radius:8px;font-size:11px;font-weight:700;text-align:center;text-decoration:none;font-family:'Poppins',sans-serif">Ver detalles →</a>
+    </div>`).join('');
+}
+
+async function renderHomeDocumentos() {
+  const grid = document.getElementById('home-docs-grid');
+  if (!grid) return;
+  const _items = await CMSDB.getAll('documentos');
+  const items = (Array.isArray(_items) ? _items : [])
+    .filter(d => d.estado === 'publicado')
+    .sort((a, b) => (b.año || 0) - (a.año || 0))
+    .slice(0, 4);
+  if (!items.length) {
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="ico">🏛️</div>No hay documentos publicados aún.</div>';
+    return;
+  }
+  const catIcon = { Informes:'📊', Memorias:'📔', Presupuestos:'💰', Resoluciones:'⚖️', 'Documentos Legales':'📜' };
+  grid.innerHTML = items.map(d => `
+    <div style="background:#fff;border:1px solid #d4edd8;border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:10px;transition:.2s"
+      onmouseover="this.style.boxShadow='0 6px 24px rgba(29,107,62,.12)';this.style.transform='translateY(-2px)'"
+      onmouseout="this.style.boxShadow='none';this.style.transform='none'">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:40px;height:40px;background:#e8f5ee;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">${catIcon[d.categoria] || '📄'}</div>
+        <div>
+          <div style="font-size:10px;font-weight:700;color:#1d6b3e;text-transform:uppercase;letter-spacing:.06em">${escHtml(d.categoria || 'Documento')} ${d.año ? '· '+escHtml(String(d.año)) : ''}</div>
+          <div style="font-family:'Poppins',sans-serif;font-size:13px;font-weight:700;color:#1a3d2b;line-height:1.3">${escHtml(d.titulo)}</div>
+        </div>
+      </div>
+      ${d.descripcion ? `<div style="font-size:12px;color:#4a6a5a;line-height:1.5">${escHtml(d.descripcion.slice(0,100))}${d.descripcion.length>100?'…':''}</div>` : ''}
+      ${d.pdf_url ? `<a href="${escHtml(d.pdf_url)}" target="_blank" rel="noopener noreferrer" style="margin-top:auto;padding:7px 14px;background:#1d6b3e;color:#fff;border-radius:8px;font-size:11px;font-weight:700;text-align:center;text-decoration:none;font-family:'Poppins',sans-serif">⬇ Descargar PDF</a>`
+        : `<a href="transparencia/index.html" style="margin-top:auto;padding:7px 14px;background:#fff;color:#1d6b3e;border:1.5px solid #1d6b3e;border-radius:8px;font-size:11px;font-weight:700;text-align:center;text-decoration:none;font-family:'Poppins',sans-serif">Ver en Transparencia →</a>`}
+    </div>`).join('');
+}
+
 /* ─── BIENVENIDA ─── */
 function _bvShouldShow(activa) {
   const freq = activa.frecuencia || 'siempre';
@@ -1578,6 +1680,8 @@ async function initPortal() {
     renderHomeProyectos,
     renderHomeAgenda,
     renderHomeRevista,
+    renderHomeTramites,
+    renderHomeDocumentos,
   ];
   for (const task of tasks) {
     try { await task(); } catch (e) { console.error('[IAGAMI] Fallo en ' + task.name + ':', e); }
