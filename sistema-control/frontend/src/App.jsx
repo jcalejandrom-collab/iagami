@@ -99,14 +99,40 @@ function ToastProvider({ children }) {
 }
 
 /* ============================================================
-   PrivateRoute — redirects to login if not authenticated
+   PrivateRoute — protege rutas de administración.
+   Redirige a login si no hay sesión, y exige rol admin: una sesión
+   válida sin rol admin no debe ver el panel (la API ya lo bloquea con
+   requireAdmin, pero la UI no debe insinuar acceso). Mientras se
+   revalida el token al cargar, muestra un estado de carga en lugar de
+   redirigir prematuramente.
    ============================================================ */
 function PrivateRoute({ children }) {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isAdmin, authChecked } = useAuth();
   const location = useLocation();
 
   if (!isAuthenticated) {
     return <Navigate to="/admin/login" state={{ from: location }} replace />;
+  }
+
+  if (!authChecked) {
+    return (
+      <div
+        style={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: 'var(--text-muted)',
+          fontFamily: 'var(--font-heading)',
+        }}
+      >
+        Verificando sesión…
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
+    return <Navigate to="/admin/login" state={{ from: location, denied: true }} replace />;
   }
 
   return children;

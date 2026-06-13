@@ -252,10 +252,15 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 <script>
 // ── State ──
 let currentTab = 'organigrama';
+let _orgUnits = [];
 
 document.addEventListener('DOMContentLoaded', async () => {
-  await buildOrgTree();
-  await renderDirectory();
+  try {
+    await buildOrgTree();
+    await renderDirectory();
+  } catch (err) {
+    console.error('[organizacion] Init falló:', err.message);
+  }
 });
 
 // ── Tab switch ──
@@ -269,8 +274,10 @@ function switchTab(tab) {
 
 // ── Build Org Tree ──
 async function buildOrgTree() {
-  const units = await CMSDB.getAll('org');
-  if (!units || units.length === 0) return;
+  const raw = await CMSDB.getAll('org');
+  const units = Array.isArray(raw) ? raw : [];
+  _orgUnits = units;
+  if (units.length === 0) return;
   const root = units.find(u => u.padre === null || u.padre === undefined || u.padre === '');
   if (!root) return;
   const children = units.filter(u => u.padre === root.id);
@@ -325,14 +332,29 @@ async function buildOrgTree() {
 
 // ── Open unit detail ──
 async function openUnit(id) {
-  const unit = (await CMSDB.getAll('org')).find(u => u.id === id);
+  /* Reusar los datos ya cargados en buildOrgTree en vez de pedirlos de
+     nuevo. Si el caché está vacío (carga parcial), recurrir a la API. */
+  let unit = _orgUnits.find(u => u.id === id);
+  if (!unit) {
+    try {
+      const raw = await CMSDB.getAll('org');
+      _orgUnits = Array.isArray(raw) ? raw : [];
+      unit = _orgUnits.find(u => u.id === id);
+    } catch (e) {
+      console.error('[organizacion] openUnit error:', e.message);
+    }
+  }
   if (!unit) return;
 
   document.getElementById('panel-title').textContent = unit.nombre;
 
   const tipoEl = document.getElementById('panel-tipo');
   tipoEl.textContent = unit.tipo;
-  tipoEl.className = 'panel-tipo-badge ' + unit.tipo.toLowerCase();
+  /* Solo permitir clases conocidas para no inyectar atributos arbitrarios
+     vía className si `tipo` trae espacios o caracteres especiales. */
+  const tipoNorm = String(unit.tipo || '').toLowerCase().trim();
+  const safeTipo = ['dirección', 'direccion', 'coordinación', 'coordinacion'].includes(tipoNorm) ? tipoNorm : 'otro';
+  tipoEl.className = 'panel-tipo-badge ' + safeTipo;
 
   document.getElementById('panel-responsable').textContent = unit.responsable;
 

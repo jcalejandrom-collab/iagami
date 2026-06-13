@@ -450,7 +450,16 @@ async function descargarRevista(id) {
 
 /* ─── MAIN RENDER ─── */
 async function renderPage() {
-  const all = await CMSDB.getAll('revistas');
+  let all;
+  try {
+    all = await CMSDB.getAll('revistas');
+  } catch (e) {
+    console.error('[revista] Error cargando revistas:', e.message);
+    const grid = document.getElementById('editions-grid');
+    if (grid) grid.innerHTML = '<div class="empty-state"><div class="empty-ico">📰</div><h3>Error al cargar</h3><p>No se pudieron cargar las ediciones. Intente más tarde.</p></div>';
+    return;
+  }
+  all = Array.isArray(all) ? all : [];
   renderStats(all);
   buildFilters(all);
   renderFeatured(all);

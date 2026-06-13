@@ -43,7 +43,7 @@ async function getRevistasPublicas(req, res) {
     const conditions = ["r.estado = 'publicada'"];
 
     if (q) {
-      params.push(`%${q}%`);
+      params.push(`%${String(q).trim().slice(0, 100)}%`);
       const qIdx = params.length;
       conditions.push(`(r.titulo ILIKE $${qIdx} OR r.descripcion ILIKE $${qIdx})`);
     }
@@ -63,7 +63,7 @@ async function getRevistasPublicas(req, res) {
     }
 
     if (numero_edicion) {
-      params.push(numero_edicion);
+      params.push(String(numero_edicion).trim().slice(0, 50));
       conditions.push(`r.numero_edicion = $${params.length}`);
     }
 
@@ -96,19 +96,12 @@ async function getRevistaPublica(req, res) {
   try {
     const { id } = req.params;
 
-    const check = await db.query(
-      "SELECT id FROM revistas WHERE id = $1 AND estado = 'publicada'",
-      [id]
-    );
-
-    if (check.rows.length === 0) {
-      return res.status(404).json({ error: 'Revista no encontrada' });
-    }
-
+    /* Un solo UPDATE condicionado al estado evita la carrera TOCTOU:
+       si la revista no existe o no está publicada, no devuelve filas. */
     const { rows } = await db.query(
       `UPDATE revistas
        SET visualizaciones = visualizaciones + 1
-       WHERE id = $1
+       WHERE id = $1 AND estado = 'publicada'
        RETURNING
          id, titulo, descripcion, numero_edicion, categoria,
          fecha_publicacion, portada_url, pdf_url,
@@ -116,6 +109,10 @@ async function getRevistaPublica(req, res) {
          created_at, updated_at`,
       [id]
     );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Revista no encontrada' });
+    }
 
     return res.json(rows[0]);
   } catch (err) {
@@ -132,22 +129,18 @@ async function descargarRevista(req, res) {
   try {
     const { id } = req.params;
 
-    const check = await db.query(
-      "SELECT id FROM revistas WHERE id = $1 AND estado = 'publicada'",
-      [id]
-    );
-
-    if (check.rows.length === 0) {
-      return res.status(404).json({ error: 'Revista no encontrada' });
-    }
-
+    /* UPDATE condicionado al estado en una sola consulta (evita TOCTOU). */
     const { rows } = await db.query(
       `UPDATE revistas
        SET descargas = descargas + 1
-       WHERE id = $1
+       WHERE id = $1 AND estado = 'publicada'
        RETURNING id, titulo, pdf_url`,
       [id]
     );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Revista no encontrada' });
+    }
 
     const revista = rows[0];
 
@@ -212,7 +205,7 @@ async function getRevistasAdmin(req, res) {
     }
 
     if (q) {
-      params.push(`%${q}%`);
+      params.push(`%${String(q).trim().slice(0, 100)}%`);
       const qIdx = params.length;
       conditions.push(`(r.titulo ILIKE $${qIdx} OR r.descripcion ILIKE $${qIdx})`);
     }
@@ -279,7 +272,7 @@ async function createRevista(req, res) {
         portada_url,
         pdf_url,
         destacada === true || destacada === 'true' ? true : false,
-        estado || 'borrador',
+        ['borrador', 'publicada'].includes(estado) ? estado : 'borrador',
         req.user.id,
       ]
     );
@@ -357,7 +350,7 @@ async function updateRevista(req, res) {
             ? true
             : false
           : null,
-        estado || null,
+        ['borrador', 'publicada'].includes(estado) ? estado : null,
         portada_url,
         pdf_url,
         id,

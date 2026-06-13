@@ -50,7 +50,10 @@ const fileFilter = (_req, file, cb) => {
 // Compatible con Vercel serverless y con PC fija.
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: MAX_FILE_SIZE_BYTES },
+  // fileSize: tope por archivo; files: tope de cantidad. Ambos acotan la
+  // memoria máxima que un request puede retener (memoryStorage mantiene
+  // cada archivo en RAM): 10 × MAX_FILE_SIZE_BYTES como cota superior.
+  limits: { fileSize: MAX_FILE_SIZE_BYTES, files: 10 },
   fileFilter,
 });
 

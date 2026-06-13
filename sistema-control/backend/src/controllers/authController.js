@@ -112,11 +112,15 @@ const me = (req, res) => {
  * es responsable de descartar el token.
  */
 const logout = async (req, res) => {
-  await recordAuditLog(req, 'logout', {
-    userId: req.user?.id ?? null,
-    email: req.user?.email ?? null,
-    role: req.user?.role ?? null,
-  });
+  try {
+    await recordAuditLog(req, 'logout', {
+      userId: req.user?.id ?? null,
+      email: req.user?.email ?? null,
+      role: req.user?.role ?? null,
+    });
+  } catch (err) {
+    console.error('[authController.logout]', err);
+  }
   return res.status(200).json({ message: 'Sesión cerrada.' });
 };
 

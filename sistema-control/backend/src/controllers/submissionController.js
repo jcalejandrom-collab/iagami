@@ -45,7 +45,13 @@ const reporteDiarioValidation = [
   body('responsable').trim().notEmpty().withMessage('El campo responsable es requerido.'),
   body('fecha').notEmpty().withMessage('El campo fecha es requerido.').isDate().withMessage('La fecha no tiene un formato válido (YYYY-MM-DD).'),
   body('institucion').trim().notEmpty().withMessage('El campo institución es requerido.'),
-  body('actividades').optional().isArray().withMessage('Las actividades deben ser un arreglo.'),
+  body('hora_fin').optional().custom((val, { req }) => {
+    if (req.body.hora_inicio && val && val <= req.body.hora_inicio) {
+      throw new Error('hora_fin debe ser posterior a hora_inicio.');
+    }
+    return true;
+  }),
+  body('actividades').optional().isArray({ max: 100 }).withMessage('Las actividades deben ser un arreglo (máximo 100).'),
   body('actividades.*.descripcion').if(body('actividades').exists()).notEmpty().withMessage('Cada actividad debe tener descripción.'),
 ];
 
@@ -53,7 +59,7 @@ const planificacionValidation = [
   body('responsable').trim().notEmpty().withMessage('El campo responsable es requerido.'),
   body('semana').trim().notEmpty().withMessage('El campo semana es requerido.'),
   body('institucion').trim().notEmpty().withMessage('El campo institución es requerido.'),
-  body('actividades').optional().isArray().withMessage('Las actividades deben ser un arreglo.'),
+  body('actividades').optional().isArray({ max: 100 }).withMessage('Las actividades deben ser un arreglo (máximo 100).'),
   body('actividades.*.descripcion').if(body('actividades').exists()).notEmpty().withMessage('Cada actividad debe tener descripción.'),
 ];
 

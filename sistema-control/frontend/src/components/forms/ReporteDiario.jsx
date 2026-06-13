@@ -23,6 +23,8 @@ function validate(fields, activities) {
   if (!fields.responsable) errors.responsable = 'El nombre del responsable es obligatorio.';
   if (!fields.horaInicio)  errors.horaInicio  = 'La hora de inicio es obligatoria.';
   if (!fields.horaFin)     errors.horaFin     = 'La hora de finalización es obligatoria.';
+  if (fields.horaInicio && fields.horaFin && fields.horaFin <= fields.horaInicio)
+    errors.horaFin = 'La hora de finalización debe ser posterior a la hora de inicio.';
   if (activities.length === 0)
     errors.activities = 'Debe agregar al menos una actividad.';
   return errors;

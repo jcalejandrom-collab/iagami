@@ -296,9 +296,13 @@ function escHtml(s) {
 
 function fmtFecha(iso) {
   if (!iso) return '—';
-  const [y, m, d] = iso.split('-');
+  // Tomar solo la parte de fecha (soporta ISO 8601 completo "...T..Z")
+  const soloFecha = String(iso).split('T')[0];
+  const [y, m, d] = soloFecha.split('-');
   const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-  return `${parseInt(d)} de ${meses[parseInt(m)-1]} de ${y}`;
+  const mi = parseInt(m, 10);
+  if (!y || !d || isNaN(mi) || mi < 1 || mi > 12) return String(iso);
+  return `${parseInt(d, 10)} de ${meses[mi - 1]} de ${y}`;
 }
 
 function fmtMonto(n) {

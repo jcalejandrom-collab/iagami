@@ -1507,7 +1507,7 @@ async function renderHomeRevista() {
         <div style="font-family:'Poppins',sans-serif;font-size:13px;font-weight:700;color:#1a3d2b;line-height:1.3;flex:1">${escHtml(r.titulo)}</div>
         <div style="font-size:11px;color:#4a8a6a">📅 ${escHtml(r.fecha) || '—'} · Edición Nº ${escHtml(r.numero_edicion)}</div>
         <div style="display:flex;gap:7px;margin-top:6px">
-          <a href="revista/visor.html?id=${r.id}" style="flex:1;padding:7px;background:#1d6b3e;color:#fff;border-radius:7px;font-size:11px;font-weight:700;text-align:center;text-decoration:none;font-family:'Poppins',sans-serif">👁 Ver</a>
+          <a href="revista/visor.html?id=${encodeURIComponent(r.id)}" style="flex:1;padding:7px;background:#1d6b3e;color:#fff;border-radius:7px;font-size:11px;font-weight:700;text-align:center;text-decoration:none;font-family:'Poppins',sans-serif">👁 Ver</a>
           <a href="revista/index.html" style="flex:1;padding:7px;background:#fff;color:#1d6b3e;border:1.5px solid #1d6b3e;border-radius:7px;font-size:11px;font-weight:700;text-align:center;text-decoration:none;font-family:'Poppins',sans-serif">⬇ PDF</a>
         </div>
       </div>
@@ -1578,6 +1578,18 @@ async function renderHomeDocumentos() {
 }
 
 /* ─── BIENVENIDA ─── */
+/* Clave de semana ISO-8601 (año-Wnn) estable y consistente, a diferencia
+   del cálculo previo basado en getDate()/getDay() que colisionaba entre
+   meses. */
+function _isoWeekKey(date) {
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  const day = d.getUTCDay() || 7; // lunes=1 … domingo=7
+  d.setUTCDate(d.getUTCDate() + 4 - day); // jueves de esta semana
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+  return `${d.getUTCFullYear()}-W${String(weekNo).padStart(2, '0')}`;
+}
+
 function _bvShouldShow(activa) {
   const freq = activa.frecuencia || 'siempre';
   const key = 'iagami_bv_shown';
@@ -1590,9 +1602,7 @@ function _bvShouldShow(activa) {
   }
   if (freq === 'semanal') {
     const stored = localStorage.getItem(key + '_w_' + activa.id);
-    const now = new Date();
-    const week = `${now.getFullYear()}-W${Math.ceil((now.getDate()-now.getDay()+6)/7)}`;
-    return stored !== week;
+    return stored !== _isoWeekKey(new Date());
   }
   return true;
 }
@@ -1603,17 +1613,18 @@ function _bvMarkShown(activa) {
   if (freq === 'una_vez') localStorage.setItem(key + '_' + activa.id, '1');
   if (freq === 'diaria') localStorage.setItem(key + '_d_' + activa.id, new Date().toLocaleDateString('sv-SE'));
   if (freq === 'semanal') {
-    const now = new Date();
-    const week = `${now.getFullYear()}-W${Math.ceil((now.getDate()-now.getDay()+6)/7)}`;
-    localStorage.setItem(key + '_w_' + activa.id, week);
+    localStorage.setItem(key + '_w_' + activa.id, _isoWeekKey(new Date()));
   }
 }
+
+let _bvActiva = null;
 
 async function checkBienvenida() {
   const _bvItems = await CMSDB.getAll('bienvenida');
   const items = Array.isArray(_bvItems) ? _bvItems : [];
   const activa = items.find(b => b.activa);
   if (!activa || !_bvShouldShow(activa)) return;
+  _bvActiva = activa; // guardar para cerrarBienvenida (evita refetch)
   const modal  = document.getElementById('bienvenida-modal');
   const titulo = document.getElementById('bienvenida-titulo');
   const mensaje = document.getElementById('bienvenida-mensaje');
@@ -1647,11 +1658,10 @@ async function checkBienvenida() {
   }
 }
 
-async function cerrarBienvenida() {
-  const _bvClose = await CMSDB.getAll('bienvenida');
-  const items = Array.isArray(_bvClose) ? _bvClose : [];
-  const activa = items.find(b => b.activa);
-  if (activa) _bvMarkShown(activa);
+function cerrarBienvenida() {
+  // Reutiliza el item activo ya cargado en checkBienvenida; no requiere
+  // una nueva llamada de red (que podría fallar y dejar el modal sin marcar).
+  if (_bvActiva) _bvMarkShown(_bvActiva);
   const modal = document.getElementById('bienvenida-modal');
   if (modal) {
     modal.style.display = 'none';

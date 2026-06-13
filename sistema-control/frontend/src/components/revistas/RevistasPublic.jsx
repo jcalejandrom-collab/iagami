@@ -798,6 +798,14 @@ export default function RevistasPublic() {
       return;
     }
 
+    /* Solo permitir http(s) o rutas absolutas del mismo origen. Bloquea
+       esquemas peligrosos como javascript: o data: que ejecutarían código
+       al hacer clic en el enlace generado. */
+    if (!/^(https?:\/\/|\/)/i.test(pdfUrl)) {
+      addToast('La URL del PDF no es válida.', 'error');
+      return;
+    }
+
     const a = document.createElement('a');
     a.href = pdfUrl;
     a.download = `revista-iagami-${titulo || id}.pdf`;

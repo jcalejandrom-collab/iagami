@@ -320,7 +320,7 @@ function applyFilters() {
   const permiso = document.getElementById('permisoFilter').value;
 
   filtered = allEmpresas.filter(e => {
-    const matchQ = !q || normalize(e.nombre).includes(nq) || normalize(e.rif).includes(nq) || normalize(e.actividad).includes(nq);
+    const matchQ = !q || normalize(e.nombre).includes(nq) || normalize(e.rif).includes(nq) || normalize(e.actividad || e.descripcion).includes(nq);
     const matchC = !cat || e.categoria === cat;
     const matchP = !permiso || e.estado_permiso === permiso;
     return matchQ && matchC && matchP;

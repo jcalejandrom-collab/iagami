@@ -2889,8 +2889,14 @@ async function savePlan() {
     avance: parseInt((document.getElementById('fp-avance')||{}).value)||0,
     publicado: !!(document.getElementById('fp-publicar')||{}).checked
   };
-  if (_editPlanId) { await CMSDB.save('planificacion', Object.assign({}, data, {id: _editPlanId})); }
-  else { await CMSDB.save('planificacion', data); }
+  try {
+    if (_editPlanId) { await CMSDB.save('planificacion', Object.assign({}, data, {id: _editPlanId})); }
+    else { await CMSDB.save('planificacion', data); }
+  } catch (e) {
+    console.error('[admin] savePlan error:', e.message);
+    showToast('Error al guardar la actividad', 'error');
+    return;
+  }
   closePlanForm();
   renderPlan();
   showToast('Actividad guardada correctamente', 'success');
@@ -2946,14 +2952,27 @@ async function openPlanSeguimiento(id) {
 
 async function addPlanUpdate(id) {
   if (!id) return;
-  const item = await CMSDB.getOne('planificacion', id);
+  let item;
+  try {
+    item = await CMSDB.getOne('planificacion', id);
+  } catch (e) {
+    console.error('[admin] addPlanUpdate getOne error:', e.message);
+    showToast('Error al cargar la actividad', 'error');
+    return;
+  }
   if (!item) return;
   const avance = parseInt((document.getElementById('seg-avance')||{}).value)||0;
   const tipo = (document.getElementById('seg-tipo')||{}).value||'Avance';
   const comentario = ((document.getElementById('seg-comentario')||{}).value||'').trim();
   const entry = { fecha: new Date().toLocaleString('es-VE'), tipo, avance, comentario };
-  const hist = item.historial ? [...item.historial, entry] : [entry];
-  await CMSDB.save('planificacion', Object.assign({}, item, { avance, historial: hist }));
+  const hist = Array.isArray(item.historial) ? [...item.historial, entry] : [entry];
+  try {
+    await CMSDB.save('planificacion', Object.assign({}, item, { avance, historial: hist }));
+  } catch (e) {
+    console.error('[admin] addPlanUpdate save error:', e.message);
+    showToast('Error al registrar la actualización', 'error');
+    return;
+  }
   showToast('Actualización registrada', 'success');
   openPlanSeguimiento(id);
   renderPlan();

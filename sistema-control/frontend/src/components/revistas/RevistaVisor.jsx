@@ -370,6 +370,14 @@ function fmtNum(n) {
   return Number(n).toLocaleString('es-ES');
 }
 
+/* Devuelve la URL solo si usa un esquema seguro (http/https o ruta
+   absoluta del mismo origen); en caso contrario null. Evita cargar
+   esquemas peligrosos (javascript:, data:) en el src del iframe. */
+function safePdfUrl(url) {
+  if (!url || typeof url !== 'string') return null;
+  return /^(https?:\/\/|\/)/i.test(url.trim()) ? url.trim() : null;
+}
+
 /* ============================================================
    Loading skeleton
    ============================================================ */
@@ -622,10 +630,10 @@ export default function RevistaVisor() {
                 ⚠️ En dispositivos móviles, si el PDF no carga correctamente, usa el botón "Abrir en nueva pestaña".
               </div>
 
-              {revista.pdf_url || revista.archivo_url ? (
+              {safePdfUrl(revista.pdf_url || revista.archivo_url) ? (
                 <div className="vsr-iframe-wrap">
                   <iframe
-                    src={revista.pdf_url || revista.archivo_url}
+                    src={safePdfUrl(revista.pdf_url || revista.archivo_url)}
                     title={revista.titulo}
                     allow="fullscreen"
                   />

@@ -57,8 +57,11 @@ const CMSDB = (function () {
   /* ─── Interceptor global de errores de auth ─── */
   function _handleAuthError(status) {
     if (status === 401 || status === 403) {
-      logout();
+      // Despachar el evento ANTES de limpiar la sesión, para que los
+      // listeners puedan acceder al token/usuario si lo necesitan en su
+      // cleanup (p. ej. auditoría) antes de que logout() lo borre.
       window.dispatchEvent(new CustomEvent('sigap:session-expired'));
+      logout();
     }
   }
 

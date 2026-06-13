@@ -1,6 +1,15 @@
 const jwt = require('jsonwebtoken');
 const { recordAuditLog } = require('../utils/auditLog');
 
+/* Sin JWT_SECRET, jwt.verify() lanza "secretOrPublicKey must have a value"
+   en CADA petición, bloqueando a todos los usuarios con un error engañoso
+   de "token inválido". Abortamos el arranque para que el fallo sea evidente
+   en el despliegue y no en producción. */
+if (!process.env.JWT_SECRET) {
+  console.error('[FATAL] La variable de entorno JWT_SECRET no está definida.');
+  process.exit(1);
+}
+
 /**
  * requireAuth
  * Verifies the Bearer JWT in the Authorization header.
