@@ -1120,7 +1120,7 @@ function handleFiles(fileList) {
     if (file.size > MAX_SIZE) { toast('⚠ "' + file.name + '" supera 10 MB y no fue agregado'); return; }
     const reader = new FileReader();
     reader.onload = e => {
-      adjuntosData.push({ name: file.name, type: file.type, size: file.size, dataUrl: e.target.result });
+      adjuntosData.push({ name: file.name, type: file.type, size: file.size, dataUrl: e.target.result, file });
       renderAdjuntos();
     };
     reader.readAsDataURL(file);
@@ -1205,7 +1205,8 @@ async function enviarDenuncia() {
           publicado: true,
           fecha:     new Date().toLocaleDateString('sv-SE'),
           historial: [{ estado:'recibida', fecha: new Date().toLocaleDateString('sv-SE'), comentario:'Denuncia registrada en el sistema SIGAP.' }],
-          adjuntos:  adjuntosData.map(f => ({ name: f.name, type: f.type, size: f.size }))
+          adjuntos:  adjuntosData.map(f => ({ name: f.name, type: f.type, size: f.size })),
+          ...(adjuntosData.length > 0 ? { evidencias: adjuntosData.map(f => f.file) } : {})
         };
         await CMSDB.save('denuncias', item);
         await CMSDB.logAudit('create', 'denuncias', 'denuncia publica enviada - caso: ' + num, 'info');
