@@ -349,7 +349,7 @@ function eventCardHTML(e) {
   const descripcion = e.descripcion || '';
   const desc = descripcion.length > 120 ? descripcion.slice(0, 120) + '…' : descripcion;
   return `
-    <div class="event-card" onclick="openDetail('${e.id}')">
+    <div class="event-card" onclick="openDetail('${escHtml(e.id)}')">
       <div class="event-card-border border-${tipoClass}"></div>
       <div class="event-card-body">
         <div class="date-badge">

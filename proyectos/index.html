@@ -290,7 +290,7 @@ function renderProyectos(data) {
     const inicio   = p.inicio || p.fecha_inicio || '—';
     const benef    = p.beneficiados || '—';
 
-    return `<div class="proj-card" onclick="openDetail(${JSON.stringify(p.id).replace(/"/g, '&quot;')})">
+    return `<div class="proj-card" onclick="openDetail('${escHtml(String(p.id))}')">
       <div class="proj-image ${sc}">${emoji}</div>
       <div class="proj-body">
         <div class="proj-header">
@@ -318,7 +318,7 @@ function renderProyectos(data) {
             ${escHtml(benef)}
           </div>
         </div>
-        <div class="proj-btn" onclick="event.stopPropagation();openDetail(${JSON.stringify(p.id).replace(/"/g, '&quot;')})">Ver Detalles →</div>
+        <div class="proj-btn" onclick="event.stopPropagation();openDetail('${escHtml(String(p.id))}')">Ver Detalles →</div>
       </div>
     </div>`;
   }).join('');

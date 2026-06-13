@@ -450,7 +450,7 @@ function renderCaseCard(d) {
       </div>
       <div>
         <div class="case-meta-label">Denunciado por</div>
-        <div class="case-meta-item">${d.nombre && d.nombre !== 'Ciudadano Anónimo' ? escHtml(d.nombre) : 'Ciudadano Anónimo'}</div>
+        <div class="case-meta-item">${d.nombre && d.nombre.trim() !== 'Ciudadano Anónimo' ? escHtml(d.nombre) : 'Ciudadano Anónimo'}</div>
       </div>
     </div>
     ${d.descripcion ? `<div class="case-desc"><strong>Descripción:</strong> ${escHtml(d.descripcion)}</div>` : ''}
@@ -490,7 +490,7 @@ function renderHistorial(d) {
   const card = document.getElementById('historial-card');
   const list = document.getElementById('historial-list');
 
-  if (!d.historial || !d.historial.length) {
+  if (!Array.isArray(d.historial) || !d.historial.length) {
     card.style.display = 'none';
     return;
   }

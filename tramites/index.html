@@ -294,7 +294,7 @@ function applyFilters() {
   const cat = document.getElementById('catFilter').value;
 
   filtered = allTramites.filter(t => {
-    const matchQ   = !q || t.nombre.toLowerCase().includes(q) || (t.descripcion||'').toLowerCase().includes(q) || (t.categoria||'').toLowerCase().includes(q);
+    const matchQ   = !q || (t.nombre||'').toLowerCase().includes(q) || (t.descripcion||'').toLowerCase().includes(q) || (t.categoria||'').toLowerCase().includes(q);
     const matchCat = !cat || t.categoria === cat;
     return matchQ && matchCat;
   });
@@ -327,7 +327,7 @@ function renderCards() {
 
   grid.innerHTML = filtered.map(t => {
     const s        = catStyle(t.categoria);
-    const isFree   = !t.costo || t.costo.toLowerCase() === 'gratuito';
+    const isFree   = !t.costo || String(t.costo).toLowerCase() === 'gratuito';
     const costoLbl = isFree ? 'Gratuito' : t.costo;
     const costoClass = isFree ? 'free' : 'paid';
 
@@ -350,7 +350,7 @@ function renderCards() {
           </div>
         </div>
         <div class="tr-card-footer">
-          <button class="btn-ver" onclick="openDetail('${t.id}')">
+          <button class="btn-ver" onclick="openDetail('${escHtml(t.id)}')">
             Ver Requisitos →
           </button>
         </div>
@@ -364,7 +364,14 @@ function renderCards() {
 async function openDetail(id) {
   lastFocusedElement = document.activeElement;
   history.pushState(null, '', '?tramite=' + encodeURIComponent(id));
-  const t = await CMSDB.getOne('tramites', id);
+  let t;
+  try {
+    t = await CMSDB.getOne('tramites', id);
+  } catch(e) {
+    console.error('[tramites] openDetail error:', e.message);
+    toast('Error al cargar el trámite', 'error');
+    return;
+  }
   if (!t) return;
 
   const s      = catStyle(t.categoria);
@@ -379,10 +386,10 @@ async function openDetail(id) {
   document.getElementById('modalTitleEl').textContent = t.nombre;
 
   /* body */
-  const reqItems = (t.requisitos || []).map(r =>
+  const reqItems = (Array.isArray(t.requisitos) ? t.requisitos : []).map(r =>
     `<li class="req-item">${escHtml(r)}</li>`).join('');
 
-  const pasoItems = (t.pasos || []).map(p =>
+  const pasoItems = (Array.isArray(t.pasos) ? t.pasos : []).map(p =>
     `<li class="step-item">${escHtml(p)}</li>`).join('');
 
   document.getElementById('modalBody').innerHTML = `

@@ -287,7 +287,7 @@ document.addEventListener('DOMContentLoaded', async () => {
    YEAR FILTER POPULATION
 ═══════════════════════════════ */
 function populateYears() {
-  const years = [...new Set(allNoticias.map(n => n.fecha.slice(0,4)))].sort((a,b)=>b-a);
+  const years = [...new Set(allNoticias.map(n => (n.fecha||'').slice(0,4)).filter(y => y))].sort((a,b)=>b-a);
   const sel = document.getElementById('yearFilter');
   years.forEach(y => {
     const opt = document.createElement('option');
@@ -313,8 +313,8 @@ function renderFeatured() {
     const s = catStyle(n.categoria);
     const excerpt = (n.contenido || '').slice(0, 160).replace(/\n/g,' ') + '…';
     return `
-      <article class="featured-card" onclick="openDetail('${n.id}')" tabindex="0"
-               onkeydown="if(event.key==='Enter')openDetail('${n.id}')">
+      <article class="featured-card" onclick="openDetail('${escHtml(n.id)}')" tabindex="0"
+               onkeydown="if(event.key==='Enter')openDetail('${escHtml(n.id)}')">
         <div class="featured-accent" style="background:${s.accent}"></div>
         <div class="featured-body">
           <span class="cat-badge" style="background:${s.bg};color:${s.text}">${n.categoria}</span>
