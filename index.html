@@ -1445,7 +1445,7 @@ async function renderHomeAgenda() {
   const today = new Date().toLocaleDateString('sv-SE');
   const _eventos = await CMSDB.getAll('eventos');
   const todos = Array.isArray(_eventos) ? _eventos : [];
-  const futuros = todos.filter(e => e.fecha && e.fecha >= today && e.estado !== 'cancelado');
+  const futuros = todos.filter(e => e.fecha && e.fecha >= today && e.estado !== 'cancelado' && e.estado !== 'borrador');
   const eventos = (futuros.length ? futuros : todos)
     .sort((a, b) => (a.fecha || '').localeCompare(b.fecha || ''))
     .slice(0, 20);
