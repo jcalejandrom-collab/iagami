@@ -1173,9 +1173,15 @@ async function enviarDenuncia() {
   const tipo   = document.getElementById('den-tipo').value;
   const desc   = document.getElementById('den-desc').value.trim();
   const nombre = document.getElementById('den-nombre').value.trim();
-  if (!tipo)   { toast('⚠ Selecciona el tipo de denuncia'); return; }
-  if (!desc)   { toast('⚠ Escribe la descripción del hecho'); return; }
-  if (!nombre) { toast('⚠ Ingresa tu nombre completo'); return; }
+  const email  = document.getElementById('den-email').value.trim();
+  const tel    = document.getElementById('den-tel').value.trim();
+  const cedula = document.getElementById('den-cedula').value.trim();
+  if (!tipo)              { toast('⚠ Selecciona el tipo de denuncia'); return; }
+  if (desc.length < 20)  { toast('⚠ La descripción debe tener al menos 20 caracteres'); return; }
+  if (!nombre)            { toast('⚠ Ingresa tu nombre completo'); return; }
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { toast('⚠ El correo electrónico no es válido'); return; }
+  if (tel && !/^\+?[\d\s\-()]{7,20}$/.test(tel))          { toast('⚠ El teléfono no es válido'); return; }
+  if (cedula && !/^[VEJPGvejpg]?[\-\d]{5,12}$/.test(cedula)) { toast('⚠ La cédula no es válida'); return; }
 
   // Block duplicate submissions
   _enviandoDenuncia = true;
@@ -1183,10 +1189,9 @@ async function enviarDenuncia() {
   const originalText = submitBtn ? submitBtn.textContent : '';
   if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = '⏳ Enviando...'; }
 
-  await new Promise(resolve => {
-    setTimeout(async () => {
-      try {
-        const num = generarNumeroCaso();
+  try {
+    {
+      const num = generarNumeroCaso();
         const item = {
           caso:      num,
           tipo,
@@ -1219,16 +1224,14 @@ async function enviarDenuncia() {
         document.getElementById('ai-box').style.display = 'none';
         adjuntosData = [];
         renderAdjuntos();
-      } catch(e) {
-        toast('⚠ Error al guardar la denuncia. Intenta nuevamente.');
-        console.error('enviarDenuncia error:', e);
-      } finally {
-        _enviandoDenuncia = false;
-        if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = originalText; }
-        resolve();
-      }
-    }, 600);
-  });
+    }
+  } catch(e) {
+    toast('⚠ Error al guardar la denuncia. Intenta nuevamente.');
+    console.error('enviarDenuncia error:', e);
+  } finally {
+    _enviandoDenuncia = false;
+    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = originalText; }
+  }
 }
 
 /* ═══════════════════════════════════════
