@@ -312,7 +312,7 @@ function estadoBadge(est) {
     'Pagada':     { cls: 'est-pagada',    dot: '#16a34a', label: 'Pagada' },
     'Anulada':    { cls: 'est-anulada',   dot: '#dc2626', label: 'Anulada' }
   };
-  const e = map[est] || { cls: 'est-pendiente', dot: '#888', label: est || '—' };
+  const e = map[est] || { cls: 'est-pendiente', dot: '#888', label: escHtml(est || '—') };
   return `<span class="estado-badge ${e.cls}"><span class="estado-dot" style="background:${e.dot}"></span>${e.label}</span>`;
 }
 
@@ -388,9 +388,10 @@ async function buscarMulta() {
 
 /* ── MOSTRAR RESULTADOS ── */
 function mostrarResultados(resultados, _tokenBuscado) {
+  const lista = Array.isArray(resultados) ? resultados : [];
   const area = document.getElementById('results-area');
 
-  if (!resultados.length) {
+  if (!lista.length) {
     area.innerHTML = `
       <div class="result-placeholder">
         <div class="ico">🔍</div>
@@ -404,7 +405,7 @@ function mostrarResultados(resultados, _tokenBuscado) {
   // No se muestra el documento de identidad (cédula/RIF): el token ya
   // identifica de forma exclusiva al titular del expediente, por lo
   // que no es necesario exponer ese dato adicional en la respuesta.
-  const cards = resultados.map(m => `
+  const cards = lista.map(m => `
     <div class="multa-card">
       <div class="multa-header">
         <div>

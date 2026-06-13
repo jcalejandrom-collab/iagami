@@ -339,13 +339,13 @@ async function openUnit(id) {
   const funcs = document.getElementById('panel-funcs');
   const funcionesVal = unit.funciones || '';
   funcs.innerHTML = Array.isArray(funcionesVal)
-    ? funcionesVal.map(f => `<li>${f}</li>`).join('')
-    : `<li>${funcionesVal}</li>`;
+    ? funcionesVal.map(f => `<li>${escHtml(f)}</li>`).join('')
+    : `<li>${escHtml(funcionesVal)}</li>`;
 
   const tel = unit.telefono || '';
   const email = unit.email || '';
-  document.getElementById('panel-telefono').innerHTML = tel ? `📞 <a href="tel:${tel}">${tel}</a>` : '📞 No disponible';
-  document.getElementById('panel-email').innerHTML = email ? `✉️ <a href="mailto:${email}">${email}</a>` : '✉️ No disponible';
+  document.getElementById('panel-telefono').innerHTML = tel ? `📞 <a href="tel:${escHtml(tel)}">${escHtml(tel)}</a>` : '📞 No disponible';
+  document.getElementById('panel-email').innerHTML = email ? `✉️ <a href="mailto:${escHtml(email)}">${escHtml(email)}</a>` : '✉️ No disponible';
 
   document.getElementById('panel-overlay').classList.add('open');
   document.getElementById('side-panel').classList.add('open');
@@ -360,7 +360,8 @@ function closePanel() {
 
 // ── Directory ──
 async function renderDirectory(search = '', tipo = '') {
-  const units = await CMSDB.getAll('org');
+  const raw = await CMSDB.getAll('org');
+  const units = Array.isArray(raw) ? raw : [];
   const filtered = units.filter(u => {
     const matchSearch = !search ||
       normalize(u.nombre).includes(search) ||

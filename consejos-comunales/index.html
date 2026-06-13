@@ -157,13 +157,17 @@ footer{background:#0a1f0e;color:rgba(255,255,255,.6);text-align:center;padding:2
 
 let currentPage = 1;
 const PER_PAGE = 9;
+let _allConsejos = [];
 
-async function getFiltered() {
+function escHtml(str) {
+  return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+function getFiltered() {
   const q = document.getElementById('q').value.toLowerCase().trim();
   const par = document.getElementById('f-parroquia').value;
   const est = document.getElementById('f-estatus').value;
-  const all = await CMSDB.getAll('consejos');
-  return all.filter(c => {
+  return _allConsejos.filter(c => {
     const matchQ = !q || [c.nombre,c.parroquia,c.comunidad,c.codigo].some(v => (v||'').toLowerCase().includes(q));
     const matchPar = !par || c.parroquia === par;
     const matchEst = !est || c.estatus === est;
@@ -190,7 +194,7 @@ function applyFilters() {
 }
 
 async function render() {
-  const data = await getFiltered();
+  const data = getFiltered();
   const total = data.length;
   const pages = Math.ceil(total / PER_PAGE) || 1;
   if (currentPage > pages) currentPage = 1;
@@ -201,21 +205,21 @@ async function render() {
     cards.innerHTML = '<div class="empty" style="grid-column:1/-1"><div class="empty-ico">🏘️</div><p>No se encontraron consejos comunales con esos filtros.</p></div>';
   } else {
     cards.innerHTML = slice.map(c => `
-      <div class="cc-card" onclick="openModal('${c.id}')">
+      <div class="cc-card" onclick="openModal('${escHtml(c.id)}')">
         <div class="cc-top">
-          <div class="cc-code">${c.codigo||'—'}</div>
-          <div class="cc-nombre">${c.nombre}</div>
-          <div class="cc-parroquia">📍 ${c.parroquia} · ${c.comunidad||''}</div>
-          <div class="estatus-dot dot-${(c.estatus||'Activo').toLowerCase()}"></div>
+          <div class="cc-code">${escHtml(c.codigo||'—')}</div>
+          <div class="cc-nombre">${escHtml(c.nombre)}</div>
+          <div class="cc-parroquia">📍 ${escHtml(c.parroquia)} · ${escHtml(c.comunidad||'')}</div>
+          <div class="estatus-dot dot-${escHtml((c.estatus||'Activo').toLowerCase())}"></div>
         </div>
         <div class="cc-body">
-          <div class="cc-row"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>${c.responsable||'—'}</div>
-          <div class="cc-row"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13.5 19.79 19.79 0 0 1 1.61 4.94 2 2 0 0 1 3.59 2.72h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.29 6.29l1.28-1.28a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>${c.telefono||'—'}</div>
-          ${c.coordenadas ? `<div class="cc-row"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 6.9 8 11.7z"/></svg>${c.coordenadas}</div>` : ''}
+          <div class="cc-row"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>${escHtml(c.responsable||'—')}</div>
+          <div class="cc-row"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13.5 19.79 19.79 0 0 1 1.61 4.94 2 2 0 0 1 3.59 2.72h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.29 6.29l1.28-1.28a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>${escHtml(c.telefono||'—')}</div>
+          ${c.coordenadas ? `<div class="cc-row"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 6.9 8 11.7z"/></svg>${escHtml(c.coordenadas)}</div>` : ''}
         </div>
         <div class="cc-footer">
-          <div class="cc-familias"><strong>${c.num_familias||0}</strong> familias · <strong>${c.num_habitantes||0}</strong> hab.</div>
-          <span class="badge-est est-${(c.estatus||'Activo').toLowerCase()}">${c.estatus||'Activo'}</span>
+          <div class="cc-familias"><strong>${escHtml(String(c.num_familias||0))}</strong> familias · <strong>${escHtml(String(c.num_habitantes||0))}</strong> hab.</div>
+          <span class="badge-est est-${escHtml((c.estatus||'Activo').toLowerCase())}">${escHtml(c.estatus||'Activo')}</span>
         </div>
       </div>`).join('');
   }
@@ -242,26 +246,26 @@ async function openModal(id) {
   }
   if (!c) return;
   document.getElementById('modal-header').innerHTML = `
-    <div style="font-size:10px;background:rgba(255,255,255,.2);border-radius:20px;padding:2px 10px;display:inline-block;margin-bottom:8px;font-family:monospace">${c.codigo||'—'}</div>
-    <h2>${c.nombre}</h2>
-    <div style="font-size:12px;opacity:.8;margin-top:4px">📍 ${c.parroquia} · ${c.comunidad} · ${c.municipio}, ${c.estado}</div>`;
+    <div style="font-size:10px;background:rgba(255,255,255,.2);border-radius:20px;padding:2px 10px;display:inline-block;margin-bottom:8px;font-family:monospace">${escHtml(c.codigo||'—')}</div>
+    <h2>${escHtml(c.nombre)}</h2>
+    <div style="font-size:12px;opacity:.8;margin-top:4px">📍 ${escHtml(c.parroquia)} · ${escHtml(c.comunidad)} · ${escHtml(c.municipio)}, ${escHtml(c.estado)}</div>`;
 
   document.getElementById('modal-body').innerHTML = `
     <div class="section-title">📋 Información General</div>
     <div class="info-grid">
-      <div class="info-item"><label>Responsable</label><p>${c.responsable||'—'}</p></div>
-      <div class="info-item"><label>Cédula</label><p>${c.cedula||'—'}</p></div>
-      <div class="info-item"><label>Teléfono</label><p>${c.telefono||'—'}</p></div>
-      <div class="info-item"><label>Correo</label><p>${c.email||'—'}</p></div>
-      <div class="info-item"><label>Dirección</label><p>${c.direccion||'—'}</p></div>
-      <div class="info-item"><label>Fecha de constitución</label><p>${c.fecha_constitucion ? new Date(c.fecha_constitucion).toLocaleDateString('es-VE') : '—'}</p></div>
-      <div class="info-item"><label>N° de familias</label><p>${c.num_familias||0}</p></div>
-      <div class="info-item"><label>N° de habitantes</label><p>${c.num_habitantes||0}</p></div>
-      <div class="info-item"><label>Estatus</label><p><span class="badge-est est-${(c.estatus||'Activo').toLowerCase()}">${c.estatus||'Activo'}</span></p></div>
-      ${c.coordenadas ? `<div class="info-item"><label>Coordenadas</label><p>${c.coordenadas}</p></div>` : ''}
+      <div class="info-item"><label>Responsable</label><p>${escHtml(c.responsable||'—')}</p></div>
+      <div class="info-item"><label>Cédula</label><p>${escHtml(c.cedula||'—')}</p></div>
+      <div class="info-item"><label>Teléfono</label><p>${escHtml(c.telefono||'—')}</p></div>
+      <div class="info-item"><label>Correo</label><p>${escHtml(c.email||'—')}</p></div>
+      <div class="info-item"><label>Dirección</label><p>${escHtml(c.direccion||'—')}</p></div>
+      <div class="info-item"><label>Fecha de constitución</label><p>${c.fecha_constitucion ? escHtml(new Date(c.fecha_constitucion).toLocaleDateString('es-VE')) : '—'}</p></div>
+      <div class="info-item"><label>N° de familias</label><p>${escHtml(String(c.num_familias||0))}</p></div>
+      <div class="info-item"><label>N° de habitantes</label><p>${escHtml(String(c.num_habitantes||0))}</p></div>
+      <div class="info-item"><label>Estatus</label><p><span class="badge-est est-${escHtml((c.estatus||'Activo').toLowerCase())}">${escHtml(c.estatus||'Activo')}</span></p></div>
+      ${c.coordenadas ? `<div class="info-item"><label>Coordenadas</label><p>${escHtml(c.coordenadas)}</p></div>` : ''}
     </div>
-    ${c.observaciones ? `<div class="section-title">📝 Observaciones</div><p style="font-size:13px;color:#4a8a6a;line-height:1.7">${c.observaciones}</p>` : ''}
-    ${c.coordenadas ? `<div class="section-title">🗺️ Ubicación</div><div class="map-box">📍 Coordenadas: ${c.coordenadas}<br><small>Para ver en mapa abre Google Maps con estas coordenadas</small></div>` : ''}
+    ${c.observaciones ? `<div class="section-title">📝 Observaciones</div><p style="font-size:13px;color:#4a8a6a;line-height:1.7">${escHtml(c.observaciones)}</p>` : ''}
+    ${c.coordenadas ? `<div class="section-title">🗺️ Ubicación</div><div class="map-box">📍 Coordenadas: ${escHtml(c.coordenadas)}<br><small>Para ver en mapa abre Google Maps con estas coordenadas</small></div>` : ''}
     <div class="section-title">📁 Documentos</div>
     <div class="docs-note">Los documentos administrativos están disponibles únicamente para personal autorizado de IAGAMI.<br>Contáctanos: <strong>comunales@iagami.gob.ve</strong></div>`;
 
@@ -278,7 +282,15 @@ function toast(msg) {
 }
 
 async function init() {
-  const all = await CMSDB.getAll('consejos');
+  try {
+    const raw = await CMSDB.getAll('consejos');
+    _allConsejos = Array.isArray(raw) ? raw : [];
+  } catch(e) {
+    console.error('[consejos-comunales] init error:', e.message);
+    _allConsejos = [];
+    toast('Error al cargar el directorio. Intente más tarde.');
+  }
+  const all = _allConsejos;
   const activos = all.filter(c => c.estatus === 'Activo');
   document.getElementById('stat-total').textContent = all.length;
   document.getElementById('stat-activos').textContent = activos.length;
@@ -286,7 +298,12 @@ async function init() {
   const parroquias = [...new Set(all.map(c => c.parroquia).filter(Boolean))];
   document.getElementById('stat-parroquias').textContent = parroquias.length;
   const sel = document.getElementById('f-parroquia');
-  parroquias.sort().forEach(p => sel.innerHTML += `<option value="${p}">${p}</option>`);
+  parroquias.sort().forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p;
+    opt.textContent = p;
+    sel.appendChild(opt);
+  });
 
   /* Restaurar filtros desde URLSearchParams (links compartidos) */
   const params = new URLSearchParams(location.search);

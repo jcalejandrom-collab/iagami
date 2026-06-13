@@ -243,7 +243,7 @@ function renderIndicadores(data) {
   }
 
   grid.innerHTML = data.map(ind => {
-    const emoji  = ind.icono || ind.emoji || '📊';
+    const emoji  = escHtml(ind.icono || ind.emoji || '📊');
     const val    = ind.valor_actual ?? 0;
     const meta   = ind.meta ?? 100;
     const unidad = ind.unidad || '';
@@ -282,7 +282,7 @@ function renderSummary(data) {
   const mejora     = data.filter(d => (d.tendencia||'').toLowerCase() === 'mejora').length;
   const estable    = data.filter(d => (d.tendencia||'').toLowerCase() === 'estable').length;
   const deterioro  = data.filter(d => (d.tendencia||'').toLowerCase() === 'deterioro').length;
-  const avgPct     = Math.round(data.reduce((acc, d) => acc + calcProgress(d.valor_actual ?? 0, d.meta ?? 100), 0) / total);
+  const avgPct     = Math.round(data.reduce((acc, d) => acc + calcProgress(d.valor_actual ?? 0, d.meta ?? 100, d.tipo || 'creciente'), 0) / total);
 
   document.getElementById('summaryMetrics').innerHTML = `
     <div class="sum-metric"><span class="sum-metric-val">${total}</span><span class="sum-metric-label">Indicadores Monitoreados</span></div>
@@ -323,7 +323,7 @@ function renderChart(data) {
       <div class="chart-label">${escHtml(ind.nombre || 'Indicador')}</div>
       <div class="chart-bar-wrap">
         <div class="chart-bar ${barClass}" style="width:${pct}%">
-          ${pct > 15 ? `<span class="chart-bar-label">${ind.valor_actual ?? ''} ${ind.unidad||''}</span>` : ''}
+          ${pct > 15 ? `<span class="chart-bar-label">${escHtml(String(ind.valor_actual ?? ''))} ${escHtml(ind.unidad||'')}</span>` : ''}
         </div>
       </div>
       <div class="chart-pct">${pct}%</div>
@@ -343,9 +343,9 @@ function updateDateBar(data) {
   });
   const bar = document.getElementById('updatedBar');
   if (latest) {
-    bar.innerHTML = `Última actualización: <strong>${latest.toLocaleDateString('es-VE', {day:'2-digit',month:'long',year:'numeric'})}</strong>`;
+    bar.innerHTML = `Última actualización: <strong>${escHtml(latest.toLocaleDateString('es-VE', {day:'2-digit',month:'long',year:'numeric'}))}</strong>`;
   } else {
-    bar.innerHTML = `Última actualización: <strong>${new Date().toLocaleDateString('es-VE', {day:'2-digit',month:'long',year:'numeric'})}</strong>`;
+    bar.innerHTML = `Última actualización: <strong>${escHtml(new Date().toLocaleDateString('es-VE', {day:'2-digit',month:'long',year:'numeric'}))}</strong>`;
   }
 }
 
