@@ -22,8 +22,9 @@ const handleValidationErrors = (req, res) => {
 const insertActivities = async (submissionId, activities, client) => {
   if (!Array.isArray(activities) || activities.length === 0) return;
 
-  const insertPromises = activities.map((act, index) =>
-    client.query(
+  for (let index = 0; index < activities.length; index++) {
+    const act = activities[index];
+    await client.query(
       `INSERT INTO activities (submission_id, descripcion, dia, hora, completada, orden)
        VALUES ($1, $2, $3, $4, $5, $6)`,
       [
@@ -34,10 +35,8 @@ const insertActivities = async (submissionId, activities, client) => {
         act.completada === true || act.completada === 'true' ? true : false,
         act.orden !== undefined ? Number(act.orden) : index,
       ]
-    )
-  );
-
-  await Promise.all(insertPromises);
+    );
+  }
 };
 
 // ─── Validation rules ─────────────────────────────────────────────────────────
@@ -119,7 +118,7 @@ const createReporteDiario = async (req, res) => {
       message: 'Reporte diario enviado exitosamente.',
     });
   } catch (err) {
-    await client.query('ROLLBACK');
+    await client.query('ROLLBACK').catch(e => console.error('[ROLLBACK error]', e));
     console.error('[submissionController.createReporteDiario]', err);
     return res.status(500).json({
       error: 'Error interno',
@@ -176,7 +175,7 @@ const createPlanificacion = async (req, res) => {
       message: 'Planificación semanal enviada exitosamente.',
     });
   } catch (err) {
-    await client.query('ROLLBACK');
+    await client.query('ROLLBACK').catch(e => console.error('[ROLLBACK error]', e));
     console.error('[submissionController.createPlanificacion]', err);
     return res.status(500).json({
       error: 'Error interno',
@@ -243,8 +242,8 @@ const getSubmissions = async (req, res) => {
     const total = countResult.rows.length > 0 ? parseInt(countResult.rows[0].total, 10) : 0;
 
     // Main query with activity count
-    const limitIdx = paramIndex++;
-    const offsetIdx = paramIndex++;
+    const limitIdx = params.length + 1;
+    const offsetIdx = params.length + 2;
     const dataParams = [...params, limitNum, offset];
     const dataResult = await query(
       `SELECT

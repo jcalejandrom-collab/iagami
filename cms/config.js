@@ -1,24 +1,21 @@
 'use strict';
 
-/* ══════════════════════════════════════════════════════════════
-   CONFIGURACIÓN DE ENTORNO — PORTAL IAGAMI
-   Protegido mediante inmutabilidad (Object.freeze + defineProperty)
-   ══════════════════════════════════════════════════════════════ */
-
 (function () {
+  function isValidUrl(str) {
+    try { new URL(str); return true; } catch (_) { return false; }
+  }
+
   const hostname = window.location.hostname;
   let pbUrl;
 
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
     pbUrl = 'http://127.0.0.1:8090';
   } else {
-    // En producción: leer meta tag pb-url solo si no está vacío.
-    // Fallback: window.__PB_URL__ (inyectable en build) o localhost.
-    // Para PC fija: poner la IP del servidor en el meta tag.
     const metaContent = document.querySelector('meta[name="pb-url"]')?.content?.trim();
-    pbUrl = (metaContent && metaContent !== '')
+    const candidate = (metaContent && metaContent !== '')
       ? metaContent
       : (window.__PB_URL__ || 'http://127.0.0.1:8090');
+    pbUrl = isValidUrl(candidate) ? candidate : 'http://127.0.0.1:8090';
   }
 
   const config = Object.freeze({
