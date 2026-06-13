@@ -1080,7 +1080,8 @@ function getGPS() {
         _gpsInput.placeholder = 'Dirección, coordenadas o referencia del lugar';
       }
       toast('No se pudo obtener la ubicación GPS');
-    }
+    },
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
   );
 }
 
@@ -1125,7 +1126,8 @@ function handleFiles(fileList) {
     reader.readAsDataURL(file);
   });
   // Reset input so same file can be re-selected
-  document.getElementById('den-archivos').value = '';
+  const _denArchivos = document.getElementById('den-archivos');
+  if (_denArchivos) _denArchivos.value = '';
 }
 
 function renderAdjuntos() {
@@ -1196,9 +1198,9 @@ async function enviarDenuncia() {
           ubicacion: document.getElementById('input-ubicacion').value,
           estado:    'recibida',
           publicado: true,
-          fecha:     new Date().toISOString().slice(0, 10),
-          historial: [{ estado:'recibida', fecha: new Date().toISOString().slice(0,10), comentario:'Denuncia registrada en el sistema SIGAP.' }],
-          adjuntos:  adjuntosData.map(f => ({ name: f.name, type: f.type, size: f.size, dataUrl: f.dataUrl }))
+          fecha:     new Date().toLocaleDateString('sv-SE'),
+          historial: [{ estado:'recibida', fecha: new Date().toLocaleDateString('sv-SE'), comentario:'Denuncia registrada en el sistema SIGAP.' }],
+          adjuntos:  adjuntosData.map(f => ({ name: f.name, type: f.type, size: f.size }))
         };
         await CMSDB.save('denuncias', item);
         await CMSDB.logAudit('create', 'denuncias', 'denuncia publica enviada - caso: ' + num, 'info');
@@ -1236,7 +1238,7 @@ async function enviarDenuncia() {
 async function renderAlertBar() {
   const bar = document.getElementById('alert-bar');
   if (!bar) return;
-  const today = new Date().toISOString().slice(0, 10);
+  const today = new Date().toLocaleDateString('sv-SE');
   const _alertasRaw = await CMSDB.getAll('alertas');
   const alertas = (Array.isArray(_alertasRaw) ? _alertasRaw : []).filter(a => {
     if (!a.activa) return false;
@@ -1384,7 +1386,7 @@ async function renderHomeNoticias() {
       'Medio Ambiente': '#e8f5ee', 'Comunidad': '#eff6ff',
       'Normativa': '#fefce8', 'Educación': '#faf5ff', 'Institucional': '#f8fafc'
     };
-    const imgUrl = n.imagen ? `${PB}/api/files/${n.collectionName||n.collectionId}/${n.id}/${n.imagen}` : '';
+    const imgUrl = (n.imagen && n.id && (n.collectionName || n.collectionId)) ? `${PB}/api/files/${n.collectionName||n.collectionId}/${n.id}/${n.imagen}` : '';
     return `<a class="news-card" href="noticias/index.html">
       <div class="news-img" style="background:${bgMap[n.categoria] || '#e8f5ee'}">
         ${imgUrl ? `<img src="${imgUrl}" alt="${n.titulo}" loading="lazy" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0"/>` : ''}
@@ -1418,7 +1420,7 @@ async function renderHomeProyectos() {
       'En Ejecución': 'linear-gradient(135deg,#dbeafe,#bfdbfe)',
       'Completado':   'linear-gradient(135deg,#dcfce7,#bbf7d0)'
     };
-    const imgUrl = p.imagen ? `${PB}/api/files/${p.collectionName||p.collectionId}/${p.id}/${p.imagen}` : '';
+    const imgUrl = (p.imagen && p.id && (p.collectionName || p.collectionId)) ? `${PB}/api/files/${p.collectionName||p.collectionId}/${p.id}/${p.imagen}` : '';
     return `<a class="proj-card" href="proyectos/index.html">
       <div class="proj-img" style="background:${gradMap[p.estado] || 'linear-gradient(135deg,#f1f5f9,#e2e8f0)'};position:relative;overflow:hidden">
         ${imgUrl ? `<img src="${imgUrl}" alt="${p.nombre}" loading="lazy" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0"/>` : proyIcon(p.nombre)}
@@ -1436,7 +1438,7 @@ async function renderHomeProyectos() {
 async function renderHomeAgenda() {
   const container = document.getElementById('home-agenda-grid');
   if (!container) return;
-  const today = new Date().toISOString().slice(0, 10);
+  const today = new Date().toLocaleDateString('sv-SE');
   const _eventos = await CMSDB.getAll('eventos');
   const todos = Array.isArray(_eventos) ? _eventos : [];
   const futuros = todos.filter(e => e.fecha && e.fecha >= today && e.estado !== 'cancelado');
@@ -1579,7 +1581,7 @@ function _bvShouldShow(activa) {
   if (freq === 'una_vez') return !localStorage.getItem(key + '_' + activa.id);
   if (freq === 'diaria') {
     const stored = localStorage.getItem(key + '_d_' + activa.id);
-    const today = new Date().toISOString().slice(0,10);
+    const today = new Date().toLocaleDateString('sv-SE');
     return stored !== today;
   }
   if (freq === 'semanal') {
@@ -1595,7 +1597,7 @@ function _bvMarkShown(activa) {
   const freq = activa.frecuencia || 'siempre';
   const key = 'iagami_bv_shown';
   if (freq === 'una_vez') localStorage.setItem(key + '_' + activa.id, '1');
-  if (freq === 'diaria') localStorage.setItem(key + '_d_' + activa.id, new Date().toISOString().slice(0,10));
+  if (freq === 'diaria') localStorage.setItem(key + '_d_' + activa.id, new Date().toLocaleDateString('sv-SE'));
   if (freq === 'semanal') {
     const now = new Date();
     const week = `${now.getFullYear()}-W${Math.ceil((now.getDate()-now.getDay()+6)/7)}`;
@@ -1620,7 +1622,12 @@ async function checkBienvenida() {
     const imgUrl = `${PB}/api/files/${activa.collectionName || activa.collectionId}/${activa.id}/${activa.imagen}`;
     fetch(imgUrl, { headers: { 'ngrok-skip-browser-warning': '1' } })
       .then(r => r.blob())
-      .then(blob => { imgEl.src = URL.createObjectURL(blob); imgEl.style.display = 'block'; })
+      .then(blob => {
+        const objUrl = URL.createObjectURL(blob);
+        imgEl.src = objUrl;
+        imgEl.style.display = 'block';
+        imgEl.onload = () => URL.revokeObjectURL(objUrl);
+      })
       .catch(() => { imgEl.src = imgUrl; imgEl.style.display = 'block'; });
     const inner = document.getElementById('bienvenida-img-inner');
     if (inner) inner.style.display = 'none';
