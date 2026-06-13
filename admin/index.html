@@ -1974,9 +1974,11 @@ async function saveProyectos(e) {
     beneficiados: raw.beneficiados,
     presupuesto: raw.presupuesto,
     hitos: getListValues('hitos-list'),
-    publicado: true,
   };
-  if (!data.id) delete data.id;
+  if (!data.id) {
+    data.publicado = true;
+    delete data.id;
+  }
   const vp = validarContenido(data); if (!vp.isValid) { toast('❌ ' + vp.error, 'error'); return; }
   await CMSDB.save('proyectos', data);
   toast('Proyecto guardado');
