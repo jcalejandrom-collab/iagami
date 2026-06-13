@@ -44,9 +44,8 @@ async function getRevistasPublicas(req, res) {
 
     if (q) {
       params.push(`%${q}%`);
-      conditions.push(
-        `(r.titulo ILIKE $${params.length} OR r.descripcion ILIKE $${params.length})`
-      );
+      const qIdx = params.length;
+      conditions.push(`(r.titulo ILIKE $${qIdx} OR r.descripcion ILIKE $${qIdx})`);
     }
 
     if (categoria) {
@@ -210,9 +209,8 @@ async function getRevistasAdmin(req, res) {
 
     if (q) {
       params.push(`%${q}%`);
-      conditions.push(
-        `(r.titulo ILIKE $${params.length} OR r.descripcion ILIKE $${params.length})`
-      );
+      const qIdx = params.length;
+      conditions.push(`(r.titulo ILIKE $${qIdx} OR r.descripcion ILIKE $${qIdx})`);
     }
 
     const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
