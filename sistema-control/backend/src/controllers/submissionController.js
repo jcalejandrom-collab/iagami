@@ -415,16 +415,17 @@ const uploadEvidences = async (req, res) => {
 
   const client = await pool.connect();
   try {
-    // Verify submission exists
-    const check = await client.query('SELECT id FROM form_submissions WHERE id = $1', [id]);
+    await client.query('BEGIN');
+
+    // Verify submission exists within the transaction (FOR SHARE locks the row)
+    const check = await client.query('SELECT id FROM form_submissions WHERE id = $1 FOR SHARE', [id]);
     if (check.rows.length === 0) {
+      await client.query('ROLLBACK').catch(e => console.error('[ROLLBACK error]', e));
       return res.status(404).json({
         error: 'No encontrado',
         message: 'La entrega asociada no existe.',
       });
     }
-
-    await client.query('BEGIN');
     const inserted = [];
 
     for (const file of req.files) {
@@ -444,7 +445,7 @@ const uploadEvidences = async (req, res) => {
       files: inserted,
     });
   } catch (err) {
-    await client.query('ROLLBACK');
+    await client.query('ROLLBACK').catch(e => console.error('[ROLLBACK error]', e));
     console.error('[submissionController.uploadEvidences]', err);
     return res.status(500).json({
       error: 'Error interno',

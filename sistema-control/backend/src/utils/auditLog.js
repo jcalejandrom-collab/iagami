@@ -10,7 +10,7 @@ const { query } = require('../config/db');
  */
 async function recordAuditLog(req, action, { userId = null, email = null, role = null, detail = '', severity = 'INFO' } = {}) {
   try {
-    const ip = (req.headers['x-forwarded-for'] || req.socket?.remoteAddress || '').split(',')[0].trim();
+    const ip = req.ip || req.socket?.remoteAddress || '';
     const userAgent = (req.headers['user-agent'] || '').slice(0, 512);
 
     await query(

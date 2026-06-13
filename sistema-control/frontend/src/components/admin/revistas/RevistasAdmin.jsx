@@ -306,8 +306,8 @@ export default function RevistasAdmin() {
               <StatCard icon="📰" value={fmtNum(stats?.total)}              label="Total Revistas"       bg="#e8f5ee" color="#1d6b3e" />
               <StatCard icon="✅" value={fmtNum(stats?.publicadas)}         label="Publicadas"           bg="#d1fae5" color="#16613a" />
               <StatCard icon="📝" value={fmtNum(stats?.borradores)}         label="Borradores"           bg="#f0f0f0" color="#555"    />
-              <StatCard icon="👁" value={fmtNum(stats?.total_visualizaciones)} label="Visualizaciones"   bg="#eff6ff" color="#1d4ed8" />
-              <StatCard icon="⬇" value={fmtNum(stats?.total_descargas)}    label="Descargas"            bg="#fef9c3" color="#713f12" />
+              <StatCard icon="👁" value={fmtNum(stats?.totalVisualizaciones ?? stats?.total_visualizaciones)} label="Visualizaciones"   bg="#eff6ff" color="#1d4ed8" />
+              <StatCard icon="⬇" value={fmtNum(stats?.totalDescargas ?? stats?.total_descargas)}    label="Descargas"            bg="#fef9c3" color="#713f12" />
             </div>
           )}
 

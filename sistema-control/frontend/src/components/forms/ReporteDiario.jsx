@@ -84,7 +84,7 @@ export default function ReporteDiario() {
     // Upload files if any
     if (files.length > 0) {
       const formData = new FormData();
-      files.forEach((file) => formData.append('evidencias', file));
+      files.forEach((file) => formData.append('files', file));
       const { error: uploadError } = await submissionsApi.uploadEvidences(submissionId, formData);
       if (uploadError) {
         // Non-fatal: we still show success but warn about files

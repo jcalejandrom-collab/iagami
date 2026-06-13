@@ -54,7 +54,11 @@ async function getRevistasPublicas(req, res) {
     }
 
     if (anio) {
-      params.push(parseInt(anio, 10));
+      const anioNum = parseInt(anio, 10);
+      if (isNaN(anioNum) || anioNum < 1900 || anioNum > 2100) {
+        return res.status(400).json({ error: 'El parámetro anio debe ser un año válido.' });
+      }
+      params.push(anioNum);
       conditions.push(`EXTRACT(YEAR FROM r.fecha_publicacion) = $${params.length}`);
     }
 

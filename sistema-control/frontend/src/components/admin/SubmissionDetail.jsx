@@ -34,7 +34,7 @@ function MetaItem({ label, value }) {
 }
 
 function EvidenceThumb({ file }) {
-  const isImage = /\.(jpe?g|png|gif|webp|svg)$/i.test(file.filename || file.url || '');
+  const isImage = /\.(jpe?g|png|gif|webp)$/i.test(file.filename || file.url || '');
   const url     = file.url || `${API_BASE}/evidences/${file.filename || file.id}`;
 
   if (isImage) {

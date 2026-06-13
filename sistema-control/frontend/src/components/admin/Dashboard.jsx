@@ -89,10 +89,13 @@ export default function Dashboard() {
     return s.length > 8 ? `…${s.slice(-8)}` : s;
   }
 
-  const totalEnviados   = stats?.por_estado?.enviado    ?? stats?.enviados    ?? 0;
-  const totalRevisados  = stats?.por_estado?.revisado   ?? stats?.revisados   ?? 0;
-  const totalAprobados  = stats?.por_estado?.aprobado   ?? stats?.aprobados   ?? 0;
-  const totalRechazados = stats?.por_estado?.rechazado  ?? stats?.rechazados  ?? 0;
+  const _byEstado = Array.isArray(stats?.por_estado)
+    ? stats.por_estado.reduce((acc, r) => ({ ...acc, [r.estado]: r.count }), {})
+    : (stats?.por_estado || {});
+  const totalEnviados   = _byEstado.enviado    ?? stats?.enviados    ?? 0;
+  const totalRevisados  = _byEstado.revisado   ?? stats?.revisados   ?? 0;
+  const totalAprobados  = _byEstado.aprobado   ?? stats?.aprobados   ?? 0;
+  const totalRechazados = _byEstado.rechazado  ?? stats?.rechazados  ?? 0;
   const totalGeneral    = stats?.total ?? (totalEnviados + totalRevisados + totalAprobados + totalRechazados);
 
   return (

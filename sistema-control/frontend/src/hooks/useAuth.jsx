@@ -76,7 +76,7 @@ export function AuthProvider({ children }) {
     setUser(null);
   }, []);
 
-  const isAdmin = !!(user && (user.role === 'admin' || user.isAdmin || user.is_admin));
+  const isAdmin = !!(user && user.role === 'admin');
 
   const value = {
     user,
