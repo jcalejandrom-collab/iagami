@@ -1227,7 +1227,7 @@ async function enviarDenuncia() {
         renderAdjuntos();
     }
   } catch(e) {
-    toast('⚠ Error al guardar la denuncia. Intenta nuevamente.');
+    toast('⚠ Error: ' + (e.message || 'Error al guardar la denuncia'));
     console.error('enviarDenuncia error:', e);
   } finally {
     _enviandoDenuncia = false;
