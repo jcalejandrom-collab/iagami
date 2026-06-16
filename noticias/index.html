@@ -251,10 +251,10 @@ footer p{margin-bottom:4px}
    CONFIG
 ═══════════════════════════════ */
 const PER_PAGE = 10;
-const PB_BASE = (window.__IAGAMI_CONFIG__ && window.__IAGAMI_CONFIG__.PB_URL) || 'http://127.0.0.1:8090';
 function getImgUrl(n) {
   if (!n.imagen || !n.id || !(n.collectionName || n.collectionId)) return '';
-  return `${PB_BASE}/api/files/${n.collectionName || n.collectionId}/${n.id}/${n.imagen}`;
+  const base = (window.__IAGAMI_CONFIG__ && window.__IAGAMI_CONFIG__.PB_URL) || 'http://127.0.0.1:8090';
+  return `${base}/api/files/${n.collectionName || n.collectionId}/${n.id}/${n.imagen}`;
 }
 
 const CAT_STYLES = {
@@ -281,7 +281,7 @@ let currentPage = 1;
 ═══════════════════════════════ */
 document.addEventListener('DOMContentLoaded', async () => {
   allNoticias = (await CMSDB.getAll('noticias'))
-    .filter(n => n.publicado === true)
+    .filter(n => n.publicado === true || n.publicado === 'true')
     .sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
 
   populateYears();
