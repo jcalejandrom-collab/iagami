@@ -252,10 +252,15 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 <script>
 // ── State ──
 let currentTab = 'organigrama';
+let _orgUnits = [];
 
 document.addEventListener('DOMContentLoaded', async () => {
-  await buildOrgTree();
-  await renderDirectory();
+  try {
+    await buildOrgTree();
+    await renderDirectory();
+  } catch (err) {
+    console.error('[organizacion] Init falló:', err.message);
+  }
 });
 
 // ── Tab switch ──
@@ -269,8 +274,10 @@ function switchTab(tab) {
 
 // ── Build Org Tree ──
 async function buildOrgTree() {
-  const units = await CMSDB.getAll('org');
-  if (!units || units.length === 0) return;
+  const raw = await CMSDB.getAll('org');
+  const units = Array.isArray(raw) ? raw : [];
+  _orgUnits = units;
+  if (units.length === 0) return;
   const root = units.find(u => u.padre === null || u.padre === undefined || u.padre === '');
   if (!root) return;
   const children = units.filter(u => u.padre === root.id);
@@ -281,10 +288,10 @@ async function buildOrgTree() {
   const rootWrap = document.createElement('div');
   rootWrap.className = 'org-root-wrap';
   rootWrap.innerHTML = `
-    <div class="org-box root" onclick="openUnit('${root.id}')">
+    <div class="org-box root" data-id="${escHtml(root.id)}">
       <div class="box-icon">🏛️</div>
-      <div class="box-name">${root.nombre}</div>
-      <div class="box-resp">${root.responsable}</div>
+      <div class="box-name">${escHtml(root.nombre)}</div>
+      <div class="box-resp">${escHtml(root.responsable)}</div>
       <span class="box-click-hint">Tap para ver detalles</span>
     </div>`;
   tree.appendChild(rootWrap);
@@ -305,41 +312,62 @@ async function buildOrgTree() {
     col.className = 'org-child-col';
     const icon = child.tipo === 'Dirección' ? '🏛️' : '📋';
     col.innerHTML = `
-      <div class="org-box" onclick="openUnit('${child.id}')">
+      <div class="org-box" data-id="${escHtml(child.id)}">
         <div class="box-icon">${icon}</div>
-        <div class="box-name">${child.nombre}</div>
-        <div class="box-resp">${child.responsable}</div>
+        <div class="box-name">${escHtml(child.nombre)}</div>
+        <div class="box-resp">${escHtml(child.responsable)}</div>
         <span class="box-click-hint">Ver detalles</span>
       </div>`;
     childrenRow.appendChild(col);
   });
 
   tree.appendChild(childrenRow);
+
+  /* Event delegation — evita onclick inline con IDs sin escapar */
+  tree.addEventListener('click', ev => {
+    const box = ev.target.closest('.org-box[data-id]');
+    if (box) openUnit(box.dataset.id);
+  });
 }
 
 // ── Open unit detail ──
 async function openUnit(id) {
-  const unit = (await CMSDB.getAll('org')).find(u => u.id === id);
+  /* Reusar los datos ya cargados en buildOrgTree en vez de pedirlos de
+     nuevo. Si el caché está vacío (carga parcial), recurrir a la API. */
+  let unit = _orgUnits.find(u => u.id === id);
+  if (!unit) {
+    try {
+      const raw = await CMSDB.getAll('org');
+      _orgUnits = Array.isArray(raw) ? raw : [];
+      unit = _orgUnits.find(u => u.id === id);
+    } catch (e) {
+      console.error('[organizacion] openUnit error:', e.message);
+    }
+  }
   if (!unit) return;
 
   document.getElementById('panel-title').textContent = unit.nombre;
 
   const tipoEl = document.getElementById('panel-tipo');
   tipoEl.textContent = unit.tipo;
-  tipoEl.className = 'panel-tipo-badge ' + unit.tipo.toLowerCase();
+  /* Solo permitir clases conocidas para no inyectar atributos arbitrarios
+     vía className si `tipo` trae espacios o caracteres especiales. */
+  const tipoNorm = String(unit.tipo || '').toLowerCase().trim();
+  const safeTipo = ['dirección', 'direccion', 'coordinación', 'coordinacion'].includes(tipoNorm) ? tipoNorm : 'otro';
+  tipoEl.className = 'panel-tipo-badge ' + safeTipo;
 
   document.getElementById('panel-responsable').textContent = unit.responsable;
 
   const funcs = document.getElementById('panel-funcs');
   const funcionesVal = unit.funciones || '';
   funcs.innerHTML = Array.isArray(funcionesVal)
-    ? funcionesVal.map(f => `<li>${f}</li>`).join('')
-    : `<li>${funcionesVal}</li>`;
+    ? funcionesVal.map(f => `<li>${escHtml(f)}</li>`).join('')
+    : `<li>${escHtml(funcionesVal)}</li>`;
 
   const tel = unit.telefono || '';
   const email = unit.email || '';
-  document.getElementById('panel-telefono').innerHTML = tel ? `📞 <a href="tel:${tel}">${tel}</a>` : '📞 No disponible';
-  document.getElementById('panel-email').innerHTML = email ? `✉️ <a href="mailto:${email}">${email}</a>` : '✉️ No disponible';
+  document.getElementById('panel-telefono').innerHTML = tel ? `📞 <a href="tel:${escHtml(tel)}">${escHtml(tel)}</a>` : '📞 No disponible';
+  document.getElementById('panel-email').innerHTML = email ? `✉️ <a href="mailto:${escHtml(email)}">${escHtml(email)}</a>` : '✉️ No disponible';
 
   document.getElementById('panel-overlay').classList.add('open');
   document.getElementById('side-panel').classList.add('open');
@@ -354,11 +382,12 @@ function closePanel() {
 
 // ── Directory ──
 async function renderDirectory(search = '', tipo = '') {
-  const units = await CMSDB.getAll('org');
+  const raw = await CMSDB.getAll('org');
+  const units = Array.isArray(raw) ? raw : [];
   const filtered = units.filter(u => {
     const matchSearch = !search ||
-      (u.nombre || '').toLowerCase().includes(search) ||
-      (u.responsable || '').toLowerCase().includes(search);
+      normalize(u.nombre).includes(search) ||
+      normalize(u.responsable).includes(search);
     const matchTipo = !tipo || u.tipo === tipo;
     return matchSearch && matchTipo;
   });
@@ -374,30 +403,43 @@ async function renderDirectory(search = '', tipo = '') {
 
 function dirCardHTML(u) {
   const icon = u.tipo === 'Dirección' ? '🏛️' : '📋';
-  const tipoClass = u.tipo.toLowerCase();
+  const tipoClass = escHtml((u.tipo || '').toLowerCase());
   return `
-    <div class="dir-card" onclick="openUnit('${u.id}')">
+    <div class="dir-card" data-id="${escHtml(u.id)}">
       <div class="dir-card-header">
         <div class="dir-unit-icon">${icon}</div>
         <div class="dir-card-header-text">
-          <span class="dir-tipo-badge ${tipoClass}">${u.tipo}</span>
-          <div class="dir-unit-name">${u.nombre}</div>
+          <span class="dir-tipo-badge ${tipoClass}">${escHtml(u.tipo)}</span>
+          <div class="dir-unit-name">${escHtml(u.nombre)}</div>
         </div>
       </div>
       <div class="dir-card-info">
-        <div class="info-row"><span>👤</span><span>${u.responsable || '—'}</span></div>
-        <div class="info-row"><span>📞</span><span>${u.telefono || 'No disponible'}</span></div>
-        <div class="info-row"><span>✉️</span><span>${u.email || 'No disponible'}</span></div>
+        <div class="info-row"><span>👤</span><span>${escHtml(u.responsable || '—')}</span></div>
+        <div class="info-row"><span>📞</span><span>${escHtml(u.telefono || 'No disponible')}</span></div>
+        <div class="info-row"><span>✉️</span><span>${escHtml(u.email || 'No disponible')}</span></div>
       </div>
       <div class="dir-card-cta">Ver funciones y detalle →</div>
     </div>`;
 }
 
 async function searchDirectory() {
-  const search = document.getElementById('dir-search').value.toLowerCase();
+  const search = document.getElementById('dir-search').value;
   const tipo = document.getElementById('tipo-filter').value;
-  await renderDirectory(search, tipo);
+  /* Persistir filtros en URL para links compartibles */
+  const params = new URLSearchParams();
+  if (search.trim()) params.set('q', search.trim());
+  if (tipo) params.set('tipo', tipo);
+  history.replaceState(null, '', params.toString() ? '?' + params.toString() : location.pathname);
+  await renderDirectory(normalize(search), tipo);
 }
+
+// ── Escape HTML ──
+function escHtml(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+// ── Normalize (tildes) ──
+const normalize = s => (s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
 
 // ── Toast ──
 function toast(msg) {
@@ -408,6 +450,20 @@ function toast(msg) {
 }
 
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closePanel(); });
+
+/* Event delegation para tarjetas del directorio */
+document.getElementById('dir-grid').addEventListener('click', ev => {
+  const card = ev.target.closest('.dir-card[data-id]');
+  if (card) openUnit(card.dataset.id);
+});
+
+/* Restaurar filtros desde URL al cargar */
+(function restoreParams() {
+  const p = new URLSearchParams(location.search);
+  if (p.get('q'))    document.getElementById('dir-search').value = p.get('q');
+  if (p.get('tipo')) document.getElementById('tipo-filter').value = p.get('tipo');
+  if (p.get('q') || p.get('tipo')) searchDirectory();
+})();
 </script>
 </body>
 </html>

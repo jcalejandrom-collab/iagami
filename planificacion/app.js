@@ -540,8 +540,12 @@ function openEvidencia(idx, reportId) {
   const report = DB.getReport(reportId);
   if (!report?.evidencias?.[idx]) return;
   const ev = report.evidencias[idx];
-  const win = window.open();
-  if (!win) return;
+  let win;
+  try { win = window.open(); } catch { win = null; }
+  if (!win) {
+    toast('No se pudo abrir la ventana. Permita ventanas emergentes para este sitio.', 'error');
+    return;
+  }
   // Se construye el documento con DOM seguro (sin document.write sobre datos
   // del usuario): nombre/tipo/dataUrl de la evidencia provienen de un archivo
   // subido y nunca deben interpretarse como HTML.
@@ -572,6 +576,14 @@ function openEvidencia(idx, reportId) {
 /* ══════════════════════════════════════════════
    INIT
 ══════════════════════════════════════════════ */
+window.onerror = function (message, source, lineno, colno, error) {
+  toast('Error inesperado: ' + (error?.message || message), 'error');
+};
+
 document.addEventListener('DOMContentLoaded', () => {
-  renderDashboard();
+  try {
+    renderDashboard();
+  } catch (e) {
+    toast('Error al cargar el módulo de planificación: ' + e.message, 'error');
+  }
 });

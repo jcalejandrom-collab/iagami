@@ -287,7 +287,7 @@ document.addEventListener('DOMContentLoaded', async () => {
    YEAR FILTER POPULATION
 ═══════════════════════════════ */
 function populateYears() {
-  const years = [...new Set(allNoticias.map(n => n.fecha.slice(0,4)))].sort((a,b)=>b-a);
+  const years = [...new Set(allNoticias.map(n => (n.fecha||'').slice(0,4)).filter(y => y))].sort((a,b)=>b-a);
   const sel = document.getElementById('yearFilter');
   years.forEach(y => {
     const opt = document.createElement('option');
@@ -313,8 +313,8 @@ function renderFeatured() {
     const s = catStyle(n.categoria);
     const excerpt = (n.contenido || '').slice(0, 160).replace(/\n/g,' ') + '…';
     return `
-      <article class="featured-card" onclick="openDetail('${n.id}')" tabindex="0"
-               onkeydown="if(event.key==='Enter')openDetail('${n.id}')">
+      <article class="featured-card" onclick="openDetail('${escHtml(n.id)}')" tabindex="0"
+               onkeydown="if(event.key==='Enter')openDetail('${escHtml(n.id)}')">
         <div class="featured-accent" style="background:${s.accent}"></div>
         <div class="featured-body">
           <span class="cat-badge" style="background:${s.bg};color:${s.text}">${n.categoria}</span>
@@ -333,12 +333,13 @@ function renderFeatured() {
    FILTERS
 ═══════════════════════════════ */
 function applyFilters() {
-  const q    = document.getElementById('searchInput').value.trim().toLowerCase();
+  const q    = document.getElementById('searchInput').value.trim();
+  const nq   = normalize(q);
   const cat  = document.getElementById('catFilter').value;
   const year = document.getElementById('yearFilter').value;
 
   filtered = allNoticias.filter(n => {
-    const matchQ   = !q || n.titulo.toLowerCase().includes(q) || (n.contenido||'').toLowerCase().includes(q) || (n.autor||'').toLowerCase().includes(q);
+    const matchQ   = !q || normalize(n.titulo).includes(nq) || normalize(n.contenido).includes(nq) || normalize(n.autor).includes(nq);
     const matchCat = !cat || n.categoria === cat;
     const matchY   = !year || n.fecha.startsWith(year);
     return matchQ && matchCat && matchY;
@@ -510,8 +511,9 @@ function bindEvents() {
 ═══════════════════════════════ */
 function formatDate(dateStr) {
   if (!dateStr) return '';
-  const d = new Date(dateStr + 'T00:00:00');
-  return d.toLocaleDateString('es-VE', { day:'numeric', month:'long', year:'numeric' });
+  const [y, m, d] = dateStr.split('T')[0].split('-');
+  const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  return `${parseInt(d)} de ${meses[parseInt(m)-1]} de ${y}`;
 }
 
 function escHtml(str) {
@@ -526,6 +528,8 @@ function escHtml(str) {
 function escAttr(str) {
   return String(str).replace(/"/g,'&quot;');
 }
+
+const normalize = s => (s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
 
 function debounce(fn, ms) {
   let t;

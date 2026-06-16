@@ -4,6 +4,7 @@ const path = require('path');
 const fs = require('fs');
 
 const db = require('../config/db');
+const { recordAuditLog } = require('../utils/auditLog');
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -15,15 +16,13 @@ const db = require('../config/db');
 function deleteFile(fileUrl) {
   if (!fileUrl) return;
   try {
-    // fileUrl may be something like /uploads/revistas/portadas/uuid.jpg
-    // Strip the leading /uploads so we can join against UPLOAD_DIR
+    const UPLOAD_BASE = process.env.UPLOAD_DIR || path.resolve(__dirname, '..', 'uploads');
     const relative = fileUrl.replace(/^\/uploads\//, '');
-    const absPath = path.join(
-      process.env.UPLOAD_DIR || path.resolve(__dirname, '..', 'uploads'),
-      relative
-    );
-    if (fs.existsSync(absPath)) {
-      fs.unlinkSync(absPath);
+    const safePath = path.normalize(path.join(UPLOAD_BASE, relative));
+    if (!safePath.startsWith(path.normalize(UPLOAD_BASE) + path.sep) &&
+        safePath !== path.normalize(UPLOAD_BASE)) return;
+    if (fs.existsSync(safePath)) {
+      fs.unlinkSync(safePath);
     }
   } catch (err) {
     console.error('[revistaController] deleteFile error:', err.message);
@@ -44,10 +43,9 @@ async function getRevistasPublicas(req, res) {
     const conditions = ["r.estado = 'publicada'"];
 
     if (q) {
-      params.push(`%${q}%`);
-      conditions.push(
-        `(r.titulo ILIKE $${params.length} OR r.descripcion ILIKE $${params.length})`
-      );
+      params.push(`%${String(q).trim().slice(0, 100)}%`);
+      const qIdx = params.length;
+      conditions.push(`(r.titulo ILIKE $${qIdx} OR r.descripcion ILIKE $${qIdx})`);
     }
 
     if (categoria) {
@@ -56,12 +54,16 @@ async function getRevistasPublicas(req, res) {
     }
 
     if (anio) {
-      params.push(parseInt(anio, 10));
+      const anioNum = parseInt(anio, 10);
+      if (isNaN(anioNum) || anioNum < 1900 || anioNum > 2100) {
+        return res.status(400).json({ error: 'El parámetro anio debe ser un año válido.' });
+      }
+      params.push(anioNum);
       conditions.push(`EXTRACT(YEAR FROM r.fecha_publicacion) = $${params.length}`);
     }
 
     if (numero_edicion) {
-      params.push(numero_edicion);
+      params.push(String(numero_edicion).trim().slice(0, 50));
       conditions.push(`r.numero_edicion = $${params.length}`);
     }
 
@@ -94,19 +96,12 @@ async function getRevistaPublica(req, res) {
   try {
     const { id } = req.params;
 
-    const check = await db.query(
-      "SELECT id FROM revistas WHERE id = $1 AND estado = 'publicada'",
-      [id]
-    );
-
-    if (check.rows.length === 0) {
-      return res.status(404).json({ error: 'Revista no encontrada' });
-    }
-
+    /* Un solo UPDATE condicionado al estado evita la carrera TOCTOU:
+       si la revista no existe o no está publicada, no devuelve filas. */
     const { rows } = await db.query(
       `UPDATE revistas
        SET visualizaciones = visualizaciones + 1
-       WHERE id = $1
+       WHERE id = $1 AND estado = 'publicada'
        RETURNING
          id, titulo, descripcion, numero_edicion, categoria,
          fecha_publicacion, portada_url, pdf_url,
@@ -114,6 +109,10 @@ async function getRevistaPublica(req, res) {
          created_at, updated_at`,
       [id]
     );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Revista no encontrada' });
+    }
 
     return res.json(rows[0]);
   } catch (err) {
@@ -130,22 +129,18 @@ async function descargarRevista(req, res) {
   try {
     const { id } = req.params;
 
-    const check = await db.query(
-      "SELECT id FROM revistas WHERE id = $1 AND estado = 'publicada'",
-      [id]
-    );
-
-    if (check.rows.length === 0) {
-      return res.status(404).json({ error: 'Revista no encontrada' });
-    }
-
+    /* UPDATE condicionado al estado en una sola consulta (evita TOCTOU). */
     const { rows } = await db.query(
       `UPDATE revistas
        SET descargas = descargas + 1
-       WHERE id = $1
+       WHERE id = $1 AND estado = 'publicada'
        RETURNING id, titulo, pdf_url`,
       [id]
     );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Revista no encontrada' });
+    }
 
     const revista = rows[0];
 
@@ -210,10 +205,9 @@ async function getRevistasAdmin(req, res) {
     }
 
     if (q) {
-      params.push(`%${q}%`);
-      conditions.push(
-        `(r.titulo ILIKE $${params.length} OR r.descripcion ILIKE $${params.length})`
-      );
+      params.push(`%${String(q).trim().slice(0, 100)}%`);
+      const qIdx = params.length;
+      conditions.push(`(r.titulo ILIKE $${qIdx} OR r.descripcion ILIKE $${qIdx})`);
     }
 
     const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
@@ -278,10 +272,15 @@ async function createRevista(req, res) {
         portada_url,
         pdf_url,
         destacada === true || destacada === 'true' ? true : false,
-        estado || 'borrador',
+        ['borrador', 'publicada'].includes(estado) ? estado : 'borrador',
         req.user.id,
       ]
     );
+
+    await recordAuditLog(req, 'revista_created', {
+      userId: req.user.id, email: req.user.email, role: req.user.role,
+      detail: `id=${rows[0].id} titulo="${titulo}"`,
+    });
 
     return res.status(201).json(rows[0]);
   } catch (err) {
@@ -317,7 +316,6 @@ async function updateRevista(req, res) {
 
     const uploadedFiles = req.uploadedFiles || {};
 
-    // If new files were uploaded, delete old ones
     const portada_url =
       uploadedFiles.portada_url !== undefined
         ? uploadedFiles.portada_url
@@ -327,13 +325,6 @@ async function updateRevista(req, res) {
       uploadedFiles.pdf_url !== undefined
         ? uploadedFiles.pdf_url
         : current.pdf_url;
-
-    if (uploadedFiles.portada_url !== undefined && current.portada_url) {
-      deleteFile(current.portada_url);
-    }
-    if (uploadedFiles.pdf_url !== undefined && current.pdf_url) {
-      deleteFile(current.pdf_url);
-    }
 
     const { rows } = await db.query(
       `UPDATE revistas SET
@@ -359,12 +350,25 @@ async function updateRevista(req, res) {
             ? true
             : false
           : null,
-        estado || null,
+        ['borrador', 'publicada'].includes(estado) ? estado : null,
         portada_url,
         pdf_url,
         id,
       ]
     );
+
+    // Delete old files only after DB update succeeds to avoid orphaning data
+    if (uploadedFiles.portada_url !== undefined && current.portada_url) {
+      deleteFile(current.portada_url);
+    }
+    if (uploadedFiles.pdf_url !== undefined && current.pdf_url) {
+      deleteFile(current.pdf_url);
+    }
+
+    await recordAuditLog(req, 'revista_updated', {
+      userId: req.user.id, email: req.user.email, role: req.user.role,
+      detail: `id=${id} titulo="${rows[0].titulo}"`,
+    });
 
     return res.json(rows[0]);
   } catch (err) {
@@ -388,11 +392,16 @@ async function deleteRevista(req, res) {
 
     const revista = existing.rows[0];
 
-    // Delete physical files
+    await db.query('DELETE FROM revistas WHERE id = $1', [id]);
+
+    // Delete physical files only after DB row is gone to avoid data/file mismatch on DB error
     deleteFile(revista.portada_url);
     deleteFile(revista.pdf_url);
 
-    await db.query('DELETE FROM revistas WHERE id = $1', [id]);
+    await recordAuditLog(req, 'revista_deleted', {
+      userId: req.user.id, email: req.user.email, role: req.user.role,
+      detail: `id=${id} titulo="${revista.titulo}"`, severity: 'CRITICAL',
+    });
 
     return res.json({ message: 'Revista eliminada' });
   } catch (err) {
@@ -425,6 +434,11 @@ async function toggleEstado(req, res) {
       [nuevoEstado, id]
     );
 
+    await recordAuditLog(req, 'revista_estado_changed', {
+      userId: req.user.id, email: req.user.email, role: req.user.role,
+      detail: `id=${id} estado=${current.estado}→${nuevoEstado}`,
+    });
+
     return res.json(rows[0]);
   } catch (err) {
     console.error('[revistaController] toggleEstado:', err);
@@ -454,6 +468,11 @@ async function toggleDestacada(req, res) {
       'UPDATE revistas SET destacada = $1 WHERE id = $2 RETURNING *',
       [!current.destacada, id]
     );
+
+    await recordAuditLog(req, 'revista_destacada_changed', {
+      userId: req.user.id, email: req.user.email, role: req.user.role,
+      detail: `id=${id} destacada=${current.destacada}→${!current.destacada}`,
+    });
 
     return res.json(rows[0]);
   } catch (err) {

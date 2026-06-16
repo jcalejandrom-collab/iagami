@@ -1,15 +1,25 @@
 const jwt = require('jsonwebtoken');
 const { recordAuditLog } = require('../utils/auditLog');
 
+/* Sin JWT_SECRET, jwt.verify() lanza "secretOrPublicKey must have a value"
+   en CADA petición, bloqueando a todos los usuarios con un error engañoso
+   de "token inválido". Abortamos el arranque para que el fallo sea evidente
+   en el despliegue y no en producción. */
+if (!process.env.JWT_SECRET) {
+  console.error('[FATAL] La variable de entorno JWT_SECRET no está definida.');
+  process.exit(1);
+}
+
 /**
  * requireAuth
  * Verifies the Bearer JWT in the Authorization header.
  * Attaches the decoded payload to req.user.
  */
-const requireAuth = (req, res, next) => {
+const requireAuth = async (req, res, next) => {
   const authHeader = req.headers['authorization'];
 
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+  // Strict format check: must be exactly "Bearer <token>" with a single space
+  if (!authHeader || !/^Bearer [^\s]+$/.test(authHeader)) {
     return res.status(401).json({
       error: 'No autorizado',
       message: 'Se requiere un token de autenticación válido.',
@@ -18,27 +28,21 @@ const requireAuth = (req, res, next) => {
 
   const token = authHeader.split(' ')[1];
 
-  if (!token) {
-    return res.status(401).json({
-      error: 'No autorizado',
-      message: 'Token no proporcionado.',
-    });
-  }
-
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded;
-    next();
+    return next();
   } catch (err) {
-    if (err.name === 'TokenExpiredError') {
-      return res.status(401).json({
-        error: 'Token expirado',
-        message: 'La sesión ha expirado. Por favor, inicie sesión nuevamente.',
-      });
-    }
+    await recordAuditLog(req, 'auth_failed', {
+      detail: `${err.name}: ${err.message}`,
+      severity: 'WARNING',
+    });
+    const isExpired = err.name === 'TokenExpiredError';
     return res.status(401).json({
-      error: 'Token inválido',
-      message: 'El token de autenticación no es válido.',
+      error: isExpired ? 'Token expirado' : 'Token inválido',
+      message: isExpired
+        ? 'La sesión ha expirado. Por favor, inicie sesión nuevamente.'
+        : 'El token de autenticación no es válido.',
     });
   }
 };
@@ -48,20 +52,21 @@ const requireAuth = (req, res, next) => {
  * Must be used after requireAuth.
  * Checks that req.user.role === 'admin'.
  */
-const requireAdmin = (req, res, next) => {
+const requireAdmin = async (req, res, next) => {
   if (!req.user || req.user.role !== 'admin') {
-    recordAuditLog(req, 'permission_denied', {
+    await recordAuditLog(req, 'permission_denied', {
       userId: req.user?.id ?? null,
       email: req.user?.email ?? null,
       role: req.user?.role ?? null,
       detail: `${req.method} ${req.originalUrl}`,
+      severity: 'CRITICAL',
     });
     return res.status(403).json({
       error: 'Acceso denegado',
       message: 'Se requieren permisos de administrador para realizar esta acción.',
     });
   }
-  next();
+  return next();
 };
 
 module.exports = { requireAuth, requireAdmin };

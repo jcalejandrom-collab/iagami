@@ -33,7 +33,9 @@ const CMSDB = (() => {
   ───────────────────────────────────────── */
 
   function uid() {
-    return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+    return (typeof crypto !== 'undefined' && crypto.randomUUID)
+      ? crypto.randomUUID()
+      : Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
   }
 
   function now() {
@@ -57,8 +59,13 @@ const CMSDB = (() => {
   function _write(storageKey, data) {
     try {
       localStorage.setItem(storageKey, JSON.stringify(data));
+      return true;
     } catch (e) {
       console.error('[CMSDB] write error →', storageKey, e);
+      if (e && e.name === 'QuotaExceededError') {
+        alert('Error crítico: almacenamiento local lleno. Por favor, limpie el sistema desde el panel de mantenimiento.');
+      }
+      return false;
     }
   }
 
@@ -138,12 +145,14 @@ const CMSDB = (() => {
 
   function _seed(collection, items) {
     const storageKey = _key(collection);
-    if (_read(storageKey).length > 0) return; // already seeded — skip
+    const initKey = storageKey + '_initialized';
+    if (localStorage.getItem(initKey)) return;
     const stamped = items.map(item => Object.assign({
       created_at: now(),
       updated_at: now()
     }, item));
     _write(storageKey, stamped);
+    localStorage.setItem(initKey, 'true');
   }
 
   /* ═══════════════════════════════════════════════════

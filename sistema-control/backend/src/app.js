@@ -4,9 +4,10 @@ require('dotenv').config();
 
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
 const path = require('path');
 
-const { testConnection } = require('./config/db');
+const { testConnection, query } = require('./config/db');
 const authRouter = require('./routes/auth');
 const submissionsRouter = require('./routes/submissions');
 const revistasRouter = require('./routes/revistas');
@@ -15,10 +16,22 @@ const revistasRouter = require('./routes/revistas');
 
 const app = express();
 
+// Trust the first proxy hop so req.ip reflects the real client IP behind
+// a reverse-proxy / load-balancer (required for rate-limit accuracy).
+app.set('trust proxy', 1);
+
+// ─── Helmet (security headers baseline) ──────────────────────────────────────
+app.use(helmet({ contentSecurityPolicy: false }));
+
 // ─── CORS ─────────────────────────────────────────────────────────────────────
 
 const allowedOrigins = [
-  process.env.FRONTEND_URL || 'http://localhost:5173',
+  'http://localhost:3000',
+  'http://localhost:5173',
+  'http://127.0.0.1:3000',
+  'http://127.0.0.1:5173',
+  'https://iagami.vercel.app',
+  ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : []),
 ];
 
 app.use(
@@ -72,13 +85,28 @@ app.use('/api/revistas', revistasRouter);
 
 // ─── Health check ─────────────────────────────────────────────────────────────
 
-app.get('/api/health', (_req, res) => {
-  res.status(200).json({
-    status: 'ok',
-    service: 'IAGAMI Forms Backend',
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development',
-  });
+app.get('/api/health', async (_req, res) => {
+  const t0 = Date.now();
+  try {
+    await query('SELECT 1');
+    return res.status(200).json({
+      status: 'ok',
+      service: 'IAGAMI Forms Backend',
+      db: 'connected',
+      db_latency_ms: Date.now() - t0,
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development',
+    });
+  } catch (err) {
+    console.error('[Health] DB check failed:', err.message);
+    return res.status(503).json({
+      status: 'error',
+      service: 'IAGAMI Forms Backend',
+      db: 'disconnected',
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development',
+    });
+  }
 });
 
 // ─── 404 handler ─────────────────────────────────────────────────────────────
@@ -92,7 +120,6 @@ app.use((_req, res) => {
 
 // ─── Global error handler ─────────────────────────────────────────────────────
 
-// eslint-disable-next-line no-unused-vars
 app.use((err, _req, res, _next) => {
   console.error('[App] Unhandled error:', err);
 

@@ -6,13 +6,28 @@ const DB = (() => {
 
   function read(key) {
     try { return JSON.parse(localStorage.getItem(key) || '[]'); }
-    catch { return []; }
+    catch {
+      alert('Los datos de "' + key + '" están corruptos y no se pudieron leer. Se iniciará con una lista vacía.');
+      localStorage.removeItem(key);
+      return [];
+    }
   }
   function write(key, data) {
-    localStorage.setItem(key, JSON.stringify(data));
+    try {
+      localStorage.setItem(key, JSON.stringify(data));
+      return true;
+    } catch (e) {
+      if (e instanceof DOMException && e.name === 'QuotaExceededError') {
+        alert('Almacenamiento local lleno. No se pudo guardar. Libere espacio eliminando datos antiguos.');
+      }
+      return false;
+    }
   }
   function uid(prefix) {
-    return prefix + '-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6).toUpperCase();
+    const rand = (typeof crypto !== 'undefined' && crypto.randomUUID)
+      ? crypto.randomUUID().replace(/-/g, '').slice(0, 8).toUpperCase()
+      : Math.random().toString(36).slice(2, 10).toUpperCase();
+    return prefix + '-' + rand;
   }
   function now() { return new Date().toISOString(); }
 

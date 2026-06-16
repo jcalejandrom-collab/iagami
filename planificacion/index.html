@@ -417,7 +417,7 @@ function renderLista() {
         <div class="plan-bar-track"><div class="plan-bar-fill" style="width:${pct}%;background:${fill}"></div></div>
         <div class="plan-bar-pct">${pct}%</div>
       </div>
-      ${tags.length ? `<div class="plan-tags">${tags.map(t => `<span class="plan-tag">${t}</span>`).join('')}</div>` : ''}
+      ${tags.length ? `<div class="plan-tags">${tags.map(t => `<span class="plan-tag">${escHtml(t)}</span>`).join('')}</div>` : ''}
     </div>`;
   }).join('') + '</div>';
 }

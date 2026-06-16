@@ -296,9 +296,13 @@ function escHtml(s) {
 
 function fmtFecha(iso) {
   if (!iso) return '—';
-  const [y, m, d] = iso.split('-');
+  // Tomar solo la parte de fecha (soporta ISO 8601 completo "...T..Z")
+  const soloFecha = String(iso).split('T')[0];
+  const [y, m, d] = soloFecha.split('-');
   const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-  return `${parseInt(d)} de ${meses[parseInt(m)-1]} de ${y}`;
+  const mi = parseInt(m, 10);
+  if (!y || !d || isNaN(mi) || mi < 1 || mi > 12) return String(iso);
+  return `${parseInt(d, 10)} de ${meses[mi - 1]} de ${y}`;
 }
 
 function fmtMonto(n) {
@@ -312,7 +316,7 @@ function estadoBadge(est) {
     'Pagada':     { cls: 'est-pagada',    dot: '#16a34a', label: 'Pagada' },
     'Anulada':    { cls: 'est-anulada',   dot: '#dc2626', label: 'Anulada' }
   };
-  const e = map[est] || { cls: 'est-pendiente', dot: '#888', label: est || '—' };
+  const e = map[est] || { cls: 'est-pendiente', dot: '#888', label: escHtml(est || '—') };
   return `<span class="estado-badge ${e.cls}"><span class="estado-dot" style="background:${e.dot}"></span>${e.label}</span>`;
 }
 
@@ -320,7 +324,7 @@ function estadoBadge(est) {
 function normalizarToken(valor) {
   // El TUC es un UUID v4: solo recortamos espacios y normalizamos a minúsculas.
   // No removemos guiones (son parte del formato UUID) ni prefijos.
-  return valor.trim().toLowerCase();
+  return valor.replace(/\s+/g, '').toLowerCase();
 }
 
 /* ── LÍMITE DE INTENTOS (anti fuerza-bruta del lado cliente) ──
@@ -388,9 +392,10 @@ async function buscarMulta() {
 
 /* ── MOSTRAR RESULTADOS ── */
 function mostrarResultados(resultados, _tokenBuscado) {
+  const lista = Array.isArray(resultados) ? resultados : [];
   const area = document.getElementById('results-area');
 
-  if (!resultados.length) {
+  if (!lista.length) {
     area.innerHTML = `
       <div class="result-placeholder">
         <div class="ico">🔍</div>
@@ -404,7 +409,7 @@ function mostrarResultados(resultados, _tokenBuscado) {
   // No se muestra el documento de identidad (cédula/RIF): el token ya
   // identifica de forma exclusiva al titular del expediente, por lo
   // que no es necesario exponer ese dato adicional en la respuesta.
-  const cards = resultados.map(m => `
+  const cards = lista.map(m => `
     <div class="multa-card">
       <div class="multa-header">
         <div>

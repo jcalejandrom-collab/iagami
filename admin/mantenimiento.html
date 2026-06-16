@@ -765,7 +765,7 @@ async function deduplicateDenuncias(btn) {
   const seen = new Set();
   let removed = 0;
   for (const d of all) {
-    const key = `${d.tipo||''}|${d.nombre||''}|${d.fecha||''}`;
+    const key = `${d.tipo||d.categoria||''}|${(d.descripcion||d.contenido||'').slice(0,20)}|${d.fecha||d.created_at||''}`;
     if (seen.has(key)) { await CMSDB.remove('denuncias', d.id); removed++; }
     else seen.add(key);
   }
@@ -793,11 +793,6 @@ async function validateIDs(btn) {
 
 async function regenStats(btn) {
   btn.disabled = true;
-  let html = '<div style="font-size:12px;text-align:left">';
-  for (const k of CMS_MODULES) {
-    html += `${MODULE_LABELS[k]}: ${(await CMSDB.getAll(k)).length} | `;
-  }
-  html += '</div>';
   const counts = [];
   for (const k of CMS_MODULES) counts.push(`${MODULE_LABELS[k]}:${(await CMSDB.getAll(k)).length}`);
   const result = counts.join(', ');
@@ -957,8 +952,14 @@ function renderLogs(filters) {
   // Pagination
   const pgEl = document.getElementById('logs-pagination');
   let pgHtml = `<span style="font-size:12px;color:var(--muted)">${total} registros</span>`;
-  for (let i = 1; i <= Math.min(pages, 10); i++) {
-    pgHtml += `<button class="page-btn ${i===_logPage?'active':''}" onclick="_logPage=${i};renderLogs()">${i}</button>`;
+  if (pages > 1) {
+    pgHtml += `<button class="page-btn" onclick="_logPage=Math.max(1,_logPage-1);renderLogs()" ${_logPage<=1?'disabled':''}>‹</button>`;
+    const start = Math.max(1, _logPage - 4);
+    const end   = Math.min(pages, start + 9);
+    for (let i = start; i <= end; i++) {
+      pgHtml += `<button class="page-btn ${i===_logPage?'active':''}" onclick="_logPage=${i};renderLogs()">${i}</button>`;
+    }
+    pgHtml += `<button class="page-btn" onclick="_logPage=Math.min(${pages},_logPage+1);renderLogs()" ${_logPage>=pages?'disabled':''}>›</button>`;
   }
   pgEl.innerHTML = pgHtml;
 }
@@ -1096,8 +1097,8 @@ function changePassword() {
   const sess = getCurrentUser();
   if (!sess) return;
   const users = getUsers();
-  const u = users.find(u => u.id === sess.userId);
-  if (!u) return;
+  const u = users.find(u => u.id === (sess.userId || sess.id) || u.username === sess.username);
+  if (!u) { toast('No se pudo identificar el usuario. Contacta al administrador.', 'error'); return; }
   if (u.passwordHash !== hashPwd(current)) { toast('Contraseña actual incorrecta', 'error'); return; }
   if (newPwd.length < 8) { toast('Nueva contraseña mínimo 8 caracteres', 'error'); return; }
   if (newPwd !== confirm) { toast('Las contraseñas no coinciden', 'error'); return; }
@@ -1287,9 +1288,15 @@ async function removeIncomplete(btn) {
   if (!confirm('¿Eliminar registros sin campos requeridos?')) return;
   btn.disabled = true;
   let total = 0;
+  const _requiredFields = {
+    multas:    ['expediente'],
+    alertas:   ['mensaje'],
+    denuncias: ['descripcion', 'contenido'],
+  };
   for (const k of CMS_MODULES) {
     const items = await CMSDB.getAll(k);
-    const toRemove = items.filter(i => !i.id || (!i.titulo && !i.nombre && !i.name && k !== 'org' && k !== 'media'));
+    const fields = _requiredFields[k] || ['titulo', 'nombre', 'name'];
+    const toRemove = items.filter(i => !i.id || (!fields.some(f => i[f]) && k !== 'org' && k !== 'media'));
     for (const i of toRemove) { if (i.id) await CMSDB.remove(k, i.id); total++; }
   }
   setCRes('removeIncomplete', `${total} registros eliminados`);
@@ -1337,11 +1344,11 @@ async function archiveExpiredAlerts(btn) {
 
 async function archivePastEvents(btn) {
   btn.disabled = true;
-  const now = new Date();
+  const todayStr = new Date().toISOString().split('T')[0];
   const all = await CMSDB.getAll('eventos');
   let count = 0;
   for (const e of all) {
-    if (e.fecha && new Date(e.fecha) < now && e.estado !== 'completado') {
+    if (e.fecha && e.fecha < todayStr && e.estado !== 'completado') {
       e.estado = 'completado';
       await CMSDB.save('eventos', e);
       count++;

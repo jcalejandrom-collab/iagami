@@ -19,10 +19,16 @@ export function AuthProvider({ children }) {
     }
   });
   const [loading, setLoading] = useState(false);
+  /* authChecked: false mientras se revalida el token al montar. Permite que
+     las rutas protegidas muestren un estado de carga en vez de redirigir
+     prematuramente a login cuando el token existe pero el perfil aún no se
+     ha resuelto. */
+  const [authChecked, setAuthChecked] = useState(() => !(localStorage.getItem(TOKEN_KEY) && !localStorage.getItem(USER_KEY)));
 
   /* On mount: if we have a token but no user, fetch profile */
   useEffect(() => {
     if (token && !user) {
+      setLoading(true);
       authApi.me().then(({ data, error }) => {
         if (!error && data) {
           const profile = data.user || data;
@@ -35,6 +41,9 @@ export function AuthProvider({ children }) {
           localStorage.removeItem(TOKEN_KEY);
           localStorage.removeItem(USER_KEY);
         }
+      }).finally(() => {
+        setLoading(false);
+        setAuthChecked(true);
       });
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -76,12 +85,13 @@ export function AuthProvider({ children }) {
     setUser(null);
   }, []);
 
-  const isAdmin = !!(user && (user.role === 'admin' || user.isAdmin || user.is_admin));
+  const isAdmin = !!(user && user.role === 'admin');
 
   const value = {
     user,
     token,
     loading,
+    authChecked,
     isAdmin,
     isAuthenticated: !!token,
     login,

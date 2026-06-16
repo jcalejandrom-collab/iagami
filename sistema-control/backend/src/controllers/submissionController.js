@@ -1,5 +1,6 @@
 const { body, param, validationResult } = require('express-validator');
-const { query } = require('../config/db');
+const { pool, query } = require('../config/db');
+const { recordAuditLog } = require('../utils/auditLog');
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -21,8 +22,9 @@ const handleValidationErrors = (req, res) => {
 const insertActivities = async (submissionId, activities, client) => {
   if (!Array.isArray(activities) || activities.length === 0) return;
 
-  const insertPromises = activities.map((act, index) =>
-    client.query(
+  for (let index = 0; index < activities.length; index++) {
+    const act = activities[index];
+    await client.query(
       `INSERT INTO activities (submission_id, descripcion, dia, hora, completada, orden)
        VALUES ($1, $2, $3, $4, $5, $6)`,
       [
@@ -33,10 +35,8 @@ const insertActivities = async (submissionId, activities, client) => {
         act.completada === true || act.completada === 'true' ? true : false,
         act.orden !== undefined ? Number(act.orden) : index,
       ]
-    )
-  );
-
-  await Promise.all(insertPromises);
+    );
+  }
 };
 
 // ─── Validation rules ─────────────────────────────────────────────────────────
@@ -45,7 +45,13 @@ const reporteDiarioValidation = [
   body('responsable').trim().notEmpty().withMessage('El campo responsable es requerido.'),
   body('fecha').notEmpty().withMessage('El campo fecha es requerido.').isDate().withMessage('La fecha no tiene un formato válido (YYYY-MM-DD).'),
   body('institucion').trim().notEmpty().withMessage('El campo institución es requerido.'),
-  body('actividades').optional().isArray().withMessage('Las actividades deben ser un arreglo.'),
+  body('hora_fin').optional().custom((val, { req }) => {
+    if (req.body.hora_inicio && val && val <= req.body.hora_inicio) {
+      throw new Error('hora_fin debe ser posterior a hora_inicio.');
+    }
+    return true;
+  }),
+  body('actividades').optional().isArray({ max: 100 }).withMessage('Las actividades deben ser un arreglo (máximo 100).'),
   body('actividades.*.descripcion').if(body('actividades').exists()).notEmpty().withMessage('Cada actividad debe tener descripción.'),
 ];
 
@@ -53,7 +59,7 @@ const planificacionValidation = [
   body('responsable').trim().notEmpty().withMessage('El campo responsable es requerido.'),
   body('semana').trim().notEmpty().withMessage('El campo semana es requerido.'),
   body('institucion').trim().notEmpty().withMessage('El campo institución es requerido.'),
-  body('actividades').optional().isArray().withMessage('Las actividades deben ser un arreglo.'),
+  body('actividades').optional().isArray({ max: 100 }).withMessage('Las actividades deben ser un arreglo (máximo 100).'),
   body('actividades.*.descripcion').if(body('actividades').exists()).notEmpty().withMessage('Cada actividad debe tener descripción.'),
 ];
 
@@ -85,8 +91,11 @@ const createReporteDiario = async (req, res) => {
     form_id,
   } = req.body;
 
+  const client = await pool.connect();
   try {
-    const result = await query(
+    await client.query('BEGIN');
+
+    const result = await client.query(
       `INSERT INTO form_submissions
          (form_id, form_type, institucion, responsable, fecha, hora_inicio, hora_fin, observaciones)
        VALUES ($1, 'reporte_diario', $2, $3, $4, $5, $6, $7)
@@ -105,19 +114,24 @@ const createReporteDiario = async (req, res) => {
     const submissionId = result.rows[0].id;
 
     if (actividades && actividades.length > 0) {
-      await insertActivities(submissionId, actividades, { query });
+      await insertActivities(submissionId, actividades, client);
     }
+
+    await client.query('COMMIT');
 
     return res.status(201).json({
       id: submissionId,
       message: 'Reporte diario enviado exitosamente.',
     });
   } catch (err) {
+    await client.query('ROLLBACK').catch(e => console.error('[ROLLBACK error]', e));
     console.error('[submissionController.createReporteDiario]', err);
     return res.status(500).json({
       error: 'Error interno',
       message: 'No se pudo guardar el reporte diario.',
     });
+  } finally {
+    client.release();
   }
 };
 
@@ -136,8 +150,11 @@ const createPlanificacion = async (req, res) => {
     form_id,
   } = req.body;
 
+  const client = await pool.connect();
   try {
-    const result = await query(
+    await client.query('BEGIN');
+
+    const result = await client.query(
       `INSERT INTO form_submissions
          (form_id, form_type, institucion, responsable, semana, observaciones)
        VALUES ($1, 'planificacion_semanal', $2, $3, $4, $5)
@@ -154,19 +171,24 @@ const createPlanificacion = async (req, res) => {
     const submissionId = result.rows[0].id;
 
     if (actividades && actividades.length > 0) {
-      await insertActivities(submissionId, actividades, { query });
+      await insertActivities(submissionId, actividades, client);
     }
+
+    await client.query('COMMIT');
 
     return res.status(201).json({
       id: submissionId,
       message: 'Planificación semanal enviada exitosamente.',
     });
   } catch (err) {
+    await client.query('ROLLBACK').catch(e => console.error('[ROLLBACK error]', e));
     console.error('[submissionController.createPlanificacion]', err);
     return res.status(500).json({
       error: 'Error interno',
       message: 'No se pudo guardar la planificación semanal.',
     });
+  } finally {
+    client.release();
   }
 };
 
@@ -223,9 +245,11 @@ const getSubmissions = async (req, res) => {
       `SELECT COUNT(*) AS total FROM form_submissions s ${whereClause}`,
       params
     );
-    const total = parseInt(countResult.rows[0].total, 10);
+    const total = countResult.rows.length > 0 ? parseInt(countResult.rows[0].total, 10) : 0;
 
     // Main query with activity count
+    const limitIdx = params.length + 1;
+    const offsetIdx = params.length + 2;
     const dataParams = [...params, limitNum, offset];
     const dataResult = await query(
       `SELECT
@@ -251,7 +275,7 @@ const getSubmissions = async (req, res) => {
        ${whereClause}
        GROUP BY s.id, u.name
        ORDER BY s.submitted_at DESC
-       LIMIT $${paramIndex++} OFFSET $${paramIndex++}`,
+       LIMIT $${limitIdx} OFFSET $${offsetIdx}`,
       dataParams
     );
 
@@ -362,6 +386,12 @@ const updateStatus = async (req, res) => {
       });
     }
 
+    await recordAuditLog(req, 'submission_status_changed', {
+      userId: req.user.id, email: req.user.email, role: req.user.role,
+      detail: `id=${id} estado→${estado}`,
+      severity: estado === 'rechazado' ? 'WARNING' : 'INFO',
+    });
+
     return res.status(200).json({
       message: 'Estado actualizado correctamente.',
       submission: result.rows[0],
@@ -389,20 +419,23 @@ const uploadEvidences = async (req, res) => {
     });
   }
 
+  const client = await pool.connect();
   try {
-    // Verify submission exists
-    const check = await query('SELECT id FROM form_submissions WHERE id = $1', [id]);
+    await client.query('BEGIN');
+
+    // Verify submission exists within the transaction (FOR SHARE locks the row)
+    const check = await client.query('SELECT id FROM form_submissions WHERE id = $1 FOR SHARE', [id]);
     if (check.rows.length === 0) {
+      await client.query('ROLLBACK').catch(e => console.error('[ROLLBACK error]', e));
       return res.status(404).json({
         error: 'No encontrado',
         message: 'La entrega asociada no existe.',
       });
     }
-
     const inserted = [];
 
     for (const file of req.files) {
-      const result = await query(
+      const result = await client.query(
         `INSERT INTO evidences (submission_id, filename, original_name, mimetype, size_bytes)
          VALUES ($1, $2, $3, $4, $5)
          RETURNING id, filename, original_name, mimetype, size_bytes, uploaded_at`,
@@ -411,16 +444,21 @@ const uploadEvidences = async (req, res) => {
       inserted.push(result.rows[0]);
     }
 
+    await client.query('COMMIT');
+
     return res.status(201).json({
       message: `${inserted.length} archivo(s) subido(s) exitosamente.`,
       files: inserted,
     });
   } catch (err) {
+    await client.query('ROLLBACK').catch(e => console.error('[ROLLBACK error]', e));
     console.error('[submissionController.uploadEvidences]', err);
     return res.status(500).json({
       error: 'Error interno',
       message: 'No se pudieron guardar los archivos.',
     });
+  } finally {
+    client.release();
   }
 };
 

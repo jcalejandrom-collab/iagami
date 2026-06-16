@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="pb-url" content="https://video-forbes-earlier-soonest.trycloudflare.com">
 <title>IAGAMI Admin CMS</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
 <script src="../cms/config.js"></script>
@@ -1227,10 +1228,13 @@ input,select,textarea{font-family:inherit}
 (async function checkAuth() {
   const ok = await CMSDB.verifyToken();
   if (!ok) {
-    // Redirigir al portal con hash para abrir login
     window.location.replace('../index.html#login');
   }
 })();
+
+window.addEventListener('sigap:session-expired', () => {
+  window.location.replace('../index.html#login');
+});
 
 /* ─── NAVIGATION ─── */
 const NAV = [
@@ -1347,6 +1351,7 @@ document.getElementById('modal-confirm-btn').addEventListener('click', () => {
 
 /* ─── PAGINATION HELPER ─── */
 function paginate(items, key, perPage=10) {
+  if (!Array.isArray(items)) items = [];
   if (!pages[key]) pages[key] = 1;
   const total = Math.ceil(items.length / perPage);
   if (pages[key] > total) pages[key] = Math.max(1, total);
@@ -1490,8 +1495,8 @@ function cancelForm(section) {
 function validarContenido(data) {
   const str = v => (v == null ? '' : String(v));
 
-  // 1. XSS básico
-  const xss = /<script\b[^>]*>[\s\S]*?<\/script>|onerror\s*=|onload\s*=/gi;
+  // 1. XSS básico — cubre <script>, event handlers inline, javascript: y tags peligrosos
+  const xss = /<script\b[^>]*>[\s\S]*?<\/script>|on\w+\s*=|javascript\s*:|<\s*(iframe|object|embed|form|base|link|meta|svg|math)\b/gi;
   for (const campo of ['titulo','contenido','cuerpo','descripcion','mensaje','nombre']) {
     if (xss.test(str(data[campo]))) {
       return { isValid: false, error: `Campo "${campo}" contiene contenido no permitido (riesgo XSS).` };
@@ -1656,7 +1661,8 @@ async function renderDashboard() {
     {key:'multas',label:'Multa',field:'expediente'},
   ];
   for (const s of sources) {
-    const rows = await CMSDB.getAll(s.key);
+    const rows = await CMSDB.getFiltered(s.key, '', { perPage: 5, sort: '-updated' });
+    if (!Array.isArray(rows)) continue;
     rows.forEach(it => {
       allItems.push({label:s.label, name:(it[s.field]||'Sin nombre').slice(0,50), date:it.updated||it.created||''});
     });
@@ -1882,7 +1888,8 @@ async function saveTransparencia(e) {
 async function populateOrgParentSelect(currentId=null, selectedPadre=null) {
   const sel = document.getElementById('org-padre-select');
   if (!sel) return;
-  const units = (await CMSDB.getAll('org')).filter(u => u.id !== currentId);
+  const orgAll = await CMSDB.getAll('org');
+  const units = Array.isArray(orgAll) ? orgAll.filter(u => u.id !== currentId) : [];
   sel.innerHTML = '<option value="">Ninguno</option>';
   units.forEach(u => {
     const opt = document.createElement('option');
@@ -1968,7 +1975,10 @@ async function saveProyectos(e) {
     presupuesto: raw.presupuesto,
     hitos: getListValues('hitos-list'),
   };
-  if (!data.id) delete data.id;
+  if (!data.id) {
+    data.publicado = true;
+    delete data.id;
+  }
   const vp = validarContenido(data); if (!vp.isValid) { toast('❌ ' + vp.error, 'error'); return; }
   await CMSDB.save('proyectos', data);
   toast('Proyecto guardado');
@@ -2239,7 +2249,8 @@ async function renderDenuncias() {
       if (raw) items = JSON.parse(raw);
     } catch(e) {}
   }
-  const {items:page, total, current} = paginate(items,'denuncias');
+  const DENUNCIAS_PER_PAGE = 10;
+  const {items:page, total, current} = paginate(items,'denuncias', DENUNCIAS_PER_PAGE);
   const tbody = document.getElementById('denuncias-tbody');
   if (!items.length) {
     tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">📬</div>No hay denuncias registradas aún. Las denuncias del portal aparecerán aquí.</div></td></tr>`;
@@ -2247,7 +2258,7 @@ async function renderDenuncias() {
     return;
   }
   tbody.innerHTML = page.map((d,i) => `<tr>
-    <td>${(pages.denuncias-1||0)*10+i+1}</td>
+    <td>${(pages.denuncias-1||0)*DENUNCIAS_PER_PAGE+i+1}</td>
     <td>${escHtml(d.tipo||d.categoria||'—')}</td>
     <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(d.descripcion||d.contenido||'—')}</td>
     <td>
@@ -2316,6 +2327,7 @@ function setMediaFilter(f) {
 
 async function renderArchivos() {
   let items = await CMSDB.getAll('media');
+  if (!Array.isArray(items)) items = [];
   if (mediaFilter === 'image') items = items.filter(i => i.tipo && i.tipo.startsWith('image'));
   if (mediaFilter === 'pdf') items = items.filter(i => i.tipo === 'application/pdf');
   const grid = document.getElementById('media-grid');
@@ -2385,7 +2397,8 @@ async function renderConsejos() {
   const search = (document.getElementById('q-consejos')||{}).value||'';
   const parroquia = (document.getElementById('f-consejos-par')||{}).value||'';
   const estatus = (document.getElementById('f-consejos-est')||{}).value||'';
-  let data = await CMSDB.getAll('consejos');
+  const allData = await CMSDB.getAll('consejos');
+  let data = allData;
   if (search) {
     const q = search.toLowerCase();
     data = data.filter(c => (c.nombre||'').toLowerCase().includes(q) || (c.codigo||'').toLowerCase().includes(q) || (c.responsable||'').toLowerCase().includes(q));
@@ -2403,13 +2416,13 @@ async function renderConsejos() {
     <th>Estatus</th><th>Responsable</th><th>Teléfono</th><th>Acciones</th>
   </tr></thead><tbody>${
     slice.length ? slice.map(c => `<tr>
-      <td><span class="badge badge-secondary">${c.codigo||'-'}</span></td>
-      <td><strong>${c.nombre}</strong></td>
-      <td>${c.parroquia||'-'}</td>
-      <td>${c.comunidad||'-'}</td>
-      <td><span class="badge ${c.estatus==='Activo'?'badge-success':'badge-error'}">${c.estatus||'-'}</span></td>
-      <td>${c.responsable||'-'}</td>
-      <td>${c.telefono||'-'}</td>
+      <td><span class="badge badge-secondary">${escHtml(c.codigo||'-')}</span></td>
+      <td><strong>${escHtml(c.nombre||'')}</strong></td>
+      <td>${escHtml(c.parroquia||'-')}</td>
+      <td>${escHtml(c.comunidad||'-')}</td>
+      <td><span class="badge ${c.estatus==='Activo'?'badge-success':'badge-error'}">${escHtml(c.estatus||'-')}</span></td>
+      <td>${escHtml(c.responsable||'-')}</td>
+      <td>${escHtml(c.telefono||'-')}</td>
       <td><div style="display:flex;gap:4px">
         <button class="btn btn-sm" onclick="openConsejoForm('${c.id}')">✏️</button>
         <button class="btn btn-sm btn-danger" onclick="deleteConsejo('${c.id}')">🗑️</button>
@@ -2430,8 +2443,7 @@ async function renderConsejos() {
   // populate parroquia filter
   const pfil = document.getElementById('f-consejos-par');
   if (pfil && pfil.options.length <= 1) {
-    const all = await CMSDB.getAll('consejos');
-    const parroquias = [...new Set(all.map(c=>c.parroquia).filter(Boolean))].sort();
+    const parroquias = Array.isArray(allData) ? [...new Set(allData.map(c=>c.parroquia).filter(Boolean))].sort() : [];
     parroquias.forEach(p => { const o = document.createElement('option'); o.value=p; o.textContent=p; pfil.appendChild(o); });
   }
 }
@@ -2530,7 +2542,8 @@ async function renderBienvenida() {
   // Historial
   const hist = document.getElementById('bv-historial');
   if (hist) {
-    const items = await CMSDB.getAll('bienvenida');
+    const bvItems = await CMSDB.getAll('bienvenida');
+    const items = Array.isArray(bvItems) ? bvItems : [];
     const allHist = [];
     items.forEach(b => { if (b.historial) b.historial.forEach(h => allHist.push(h)); });
     allHist.sort((a,b) => (b.fecha||'').localeCompare(a.fecha||''));
@@ -2620,7 +2633,8 @@ async function publicarBienvenida() {
   const data = await _bvBuildData('publicada', true);
   if (!data) return;
   // Deactivate all others
-  for (const b of await CMSDB.getAll('bienvenida')) {
+  const bvAll = await CMSDB.getAll('bienvenida');
+  for (const b of (Array.isArray(bvAll) ? bvAll : [])) {
     if (b.id !== data.id && b.activa) { await CMSDB.save('bienvenida', Object.assign({}, b, {activa: false, estado: 'desactivada'})); }
   }
   await CMSDB.save('bienvenida', data);
@@ -2736,9 +2750,9 @@ async function renderPlan() {
       <td>${_planBadge(p.estado, _planEstColors)}</td>
       <td style="text-align:center">${p.publicar ? '<span style="color:#1d6b3e;font-size:14px">✓</span>' : '<span style="color:#ccc">—</span>'}</td>
       <td><div style="display:flex;gap:4px">
-        <button class="btn btn-secondary" style="padding:4px 8px;font-size:12px" onclick="openPlanForm('${p.id}')">✏️</button>
-        <button class="btn btn-secondary" style="padding:4px 8px;font-size:12px" onclick="openPlanSeguimiento('${p.id}')">📋</button>
-        <button class="btn btn-danger" style="padding:4px 8px;font-size:12px" onclick="deletePlan('${p.id}')">🗑️</button>
+        <button class="btn btn-secondary" style="padding:4px 8px;font-size:12px" onclick="openPlanForm('${escHtml(p.id)}')">✏️</button>
+        <button class="btn btn-secondary" style="padding:4px 8px;font-size:12px" onclick="openPlanSeguimiento('${escHtml(p.id)}')">📋</button>
+        <button class="btn btn-danger" style="padding:4px 8px;font-size:12px" onclick="deletePlan('${escHtml(p.id)}')">🗑️</button>
       </div></td>
     </tr>`).join('')}
   </tbody></table>`;
@@ -2767,7 +2781,7 @@ async function renderPlanCalendario() {
     const dayItems = items.filter(p => p.fecha === dateStr);
     html += `<div style="min-height:72px;border:1px solid var(--border);border-radius:6px;padding:4px;background:#fff">
       <div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:2px">${d}</div>
-      ${dayItems.map(p => `<div style="font-size:10px;padding:2px 4px;border-radius:4px;margin-bottom:2px;background:${priC[p.prioridad]||'#f1f5f9'};overflow:hidden;white-space:nowrap;text-overflow:ellipsis;cursor:pointer" onclick="openPlanForm('${p.id}')" title="${p.titulo}">${p.titulo}</div>`).join('')}
+      ${dayItems.map(p => `<div style="font-size:10px;padding:2px 4px;border-radius:4px;margin-bottom:2px;background:${priC[p.prioridad]||'#f1f5f9'};overflow:hidden;white-space:nowrap;text-overflow:ellipsis;cursor:pointer" onclick="openPlanForm('${escHtml(p.id)}')" title="${escHtml(p.titulo||'')}">${escHtml(p.titulo||'')}</div>`).join('')}
     </div>`;
   }
   html += '</div>';
@@ -2875,8 +2889,14 @@ async function savePlan() {
     avance: parseInt((document.getElementById('fp-avance')||{}).value)||0,
     publicado: !!(document.getElementById('fp-publicar')||{}).checked
   };
-  if (_editPlanId) { await CMSDB.save('planificacion', Object.assign({}, data, {id: _editPlanId})); }
-  else { await CMSDB.save('planificacion', data); }
+  try {
+    if (_editPlanId) { await CMSDB.save('planificacion', Object.assign({}, data, {id: _editPlanId})); }
+    else { await CMSDB.save('planificacion', data); }
+  } catch (e) {
+    console.error('[admin] savePlan error:', e.message);
+    showToast('Error al guardar la actividad', 'error');
+    return;
+  }
   closePlanForm();
   renderPlan();
   showToast('Actividad guardada correctamente', 'success');
@@ -2899,12 +2919,12 @@ async function openPlanSeguimiento(id) {
   const timeline = document.getElementById('plan-seg-timeline');
   if (detail) detail.innerHTML = `
     <div style="display:flex;flex-wrap:wrap;gap:16px">
-      <div><strong>Título:</strong> ${item.titulo||'—'}</div>
-      <div><strong>Tipo:</strong> ${item.tipo||'—'}</div>
-      <div><strong>Fecha:</strong> ${item.fecha||'—'}</div>
-      <div><strong>Responsable:</strong> ${item.responsable||'—'}</div>
+      <div><strong>Título:</strong> ${escHtml(item.titulo||'—')}</div>
+      <div><strong>Tipo:</strong> ${escHtml(item.tipo||'—')}</div>
+      <div><strong>Fecha:</strong> ${escHtml(item.fecha||'—')}</div>
+      <div><strong>Responsable:</strong> ${escHtml(item.responsable||'—')}</div>
       <div><strong>Estado:</strong> ${_planBadge(item.estado,_planEstColors)}</div>
-      <div><strong>Avance:</strong> <span style="font-weight:700;color:#1d6b3e">${item.avance||0}%</span></div>
+      <div><strong>Avance:</strong> <span style="font-weight:700;color:#1d6b3e">${escHtml(String(item.avance||0))}%</span></div>
     </div>`;
   const hist = item.historial || [];
   if (timeline) {
@@ -2914,11 +2934,11 @@ async function openPlanSeguimiento(id) {
       timeline.innerHTML = hist.slice().reverse().map(h => `
         <div style="border-left:3px solid #d4edd8;padding:8px 14px;margin-bottom:8px;background:#f8fdfb;border-radius:0 8px 8px 0">
           <div style="display:flex;gap:10px;align-items:center;margin-bottom:4px">
-            <span style="font-size:11px;font-weight:700;color:#1d6b3e">${h.tipo||'Avance'}</span>
-            <span style="font-size:11px;color:var(--muted)">${h.fecha||'—'}</span>
-            <span style="font-size:11px;font-weight:600;color:#1d6b3e">${h.avance!=null?h.avance+'%':''}</span>
+            <span style="font-size:11px;font-weight:700;color:#1d6b3e">${escHtml(h.tipo||'Avance')}</span>
+            <span style="font-size:11px;color:var(--muted)">${escHtml(h.fecha||'—')}</span>
+            <span style="font-size:11px;font-weight:600;color:#1d6b3e">${h.avance!=null?escHtml(String(h.avance))+'%':''}</span>
           </div>
-          <div style="font-size:13px;color:var(--text)">${h.comentario||'—'}</div>
+          <div style="font-size:13px;color:var(--text)">${escHtml(h.comentario||'—')}</div>
         </div>`).join('');
     }
   }
@@ -2932,14 +2952,27 @@ async function openPlanSeguimiento(id) {
 
 async function addPlanUpdate(id) {
   if (!id) return;
-  const item = await CMSDB.getOne('planificacion', id);
+  let item;
+  try {
+    item = await CMSDB.getOne('planificacion', id);
+  } catch (e) {
+    console.error('[admin] addPlanUpdate getOne error:', e.message);
+    showToast('Error al cargar la actividad', 'error');
+    return;
+  }
   if (!item) return;
   const avance = parseInt((document.getElementById('seg-avance')||{}).value)||0;
   const tipo = (document.getElementById('seg-tipo')||{}).value||'Avance';
   const comentario = ((document.getElementById('seg-comentario')||{}).value||'').trim();
   const entry = { fecha: new Date().toLocaleString('es-VE'), tipo, avance, comentario };
-  const hist = item.historial ? [...item.historial, entry] : [entry];
-  await CMSDB.save('planificacion', Object.assign({}, item, { avance, historial: hist }));
+  const hist = Array.isArray(item.historial) ? [...item.historial, entry] : [entry];
+  try {
+    await CMSDB.save('planificacion', Object.assign({}, item, { avance, historial: hist }));
+  } catch (e) {
+    console.error('[admin] addPlanUpdate save error:', e.message);
+    showToast('Error al registrar la actualización', 'error');
+    return;
+  }
   showToast('Actualización registrada', 'success');
   openPlanSeguimiento(id);
   renderPlan();
@@ -2982,8 +3015,8 @@ async function renderRevistas() {
     <td style="text-align:center">${r.destacada?'⭐':'—'}</td>
     <td style="font-size:12px">${r.descargas||0}</td>
     <td><div style="display:flex;gap:5px;flex-wrap:wrap">
-      <button class="btn btn-secondary" style="padding:4px 8px;font-size:11px" onclick="openRevistaEditor('${r.id}')">🎨 Editor Canva</button>
-      <button class="btn btn-danger"    style="padding:4px 8px;font-size:11px" onclick="confirmDelete(()=>deleteRevista('${r.id}'))">🗑️</button>
+      <button class="btn btn-secondary" style="padding:4px 8px;font-size:11px" onclick="openRevistaEditor('${escHtml(r.id)}')">🎨 Editor Canva</button>
+      <button class="btn btn-danger"    style="padding:4px 8px;font-size:11px" onclick="confirmDelete(()=>deleteRevista('${escHtml(r.id)}'))">🗑️</button>
     </div></td>
   </tr>`).join('')}
   </tbody></table>`;
@@ -3051,12 +3084,17 @@ async function saveRevistaMeta() {
   };
 
   let saved;
-  if (_revistaEditId) {
-    const existing = await CMSDB.getOne('revistas', _revistaEditId);
-    saved = await CMSDB.save('revistas', Object.assign({}, existing, data, {id: _revistaEditId}));
-  } else {
-    saved = await CMSDB.save('revistas', data);
-    _revistaEditId = saved.id;
+  try {
+    if (_revistaEditId) {
+      const existing = await CMSDB.getOne('revistas', _revistaEditId);
+      saved = await CMSDB.save('revistas', Object.assign({}, existing, data, {id: _revistaEditId}));
+    } else {
+      saved = await CMSDB.save('revistas', data);
+      _revistaEditId = saved.id;
+    }
+  } catch (err) {
+    showToast('Error al guardar la revista: ' + err.message, 'error');
+    return;
   }
 
   showToast('Datos guardados. Abre el editor de bloques.', 'success');
@@ -3187,6 +3225,7 @@ function renderBlocks() {
     return `<div class="block-item" draggable="true"
       ondragstart="_dragSrcIdx=${i};event.dataTransfer.effectAllowed='move'"
       ondragover="event.preventDefault();event.dataTransfer.dropEffect='move'"
+      ondragend="_dragSrcIdx=null"
       ondrop="event.preventDefault();if(_dragSrcIdx!==null&&_dragSrcIdx!==${i}){const t=_revistaBlocks.splice(_dragSrcIdx,1)[0];_revistaBlocks.splice(${i},0,t);_dragSrcIdx=null;renderBlocks()}"
       style="background:#fff;border:1px solid var(--border);border-radius:10px;overflow:hidden;cursor:grab">
       <div style="background:#f8fcfa;border-bottom:1px solid #e8f5ee;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px">
@@ -3211,18 +3250,12 @@ function renderBlocks() {
 /* ─── LOGOUT ─── */
 async function doLogout() {
   await CMSDB.logAudit('logout', 'admin', 'sesion cerrada');
+  CMSDB.logout();
   sessionStorage.removeItem('iagami_admin_session');
-  window.location.href = '../index.html';
+  window.location.replace('../index.html');
 }
 
 /* ─── INIT ─── */
-(function checkAuth() {
-  const session = sessionStorage.getItem('iagami_admin_session');
-  if (!session) {
-    CMSDB.logAudit('auth_fail', 'admin', 'token invalido', 'warning');
-  }
-})();
-sessionStorage.setItem('iagami_admin_session', JSON.stringify({loggedIn:true, time: Date.now()}));
 showSection('dashboard');
 setMediaFilter('all');
 </script>

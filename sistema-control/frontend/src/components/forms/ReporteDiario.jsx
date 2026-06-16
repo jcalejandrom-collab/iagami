@@ -23,6 +23,8 @@ function validate(fields, activities) {
   if (!fields.responsable) errors.responsable = 'El nombre del responsable es obligatorio.';
   if (!fields.horaInicio)  errors.horaInicio  = 'La hora de inicio es obligatoria.';
   if (!fields.horaFin)     errors.horaFin     = 'La hora de finalización es obligatoria.';
+  if (fields.horaInicio && fields.horaFin && fields.horaFin <= fields.horaInicio)
+    errors.horaFin = 'La hora de finalización debe ser posterior a la hora de inicio.';
   if (activities.length === 0)
     errors.activities = 'Debe agregar al menos una actividad.';
   return errors;
@@ -84,7 +86,7 @@ export default function ReporteDiario() {
     // Upload files if any
     if (files.length > 0) {
       const formData = new FormData();
-      files.forEach((file) => formData.append('evidencias', file));
+      files.forEach((file) => formData.append('files', file));
       const { error: uploadError } = await submissionsApi.uploadEvidences(submissionId, formData);
       if (uploadError) {
         // Non-fatal: we still show success but warn about files

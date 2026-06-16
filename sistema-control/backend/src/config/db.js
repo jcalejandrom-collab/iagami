@@ -1,6 +1,14 @@
 const { Pool } = require('pg');
 require('dotenv').config();
 
+/* Fallo temprano y explícito si falta la cadena de conexión: sin ella el
+   pool no lanza al crearse, pero cada query falla luego con un error
+   críptico de conexión. Mejor abortar el arranque con un mensaje claro. */
+if (!process.env.DATABASE_URL) {
+  console.error('[FATAL] La variable de entorno DATABASE_URL no está definida.');
+  process.exit(1);
+}
+
 /* `rejectUnauthorized: false` aceptaría cualquier certificado TLS del
    servidor PostgreSQL —incluido el de un atacante en posición MITM—
    anulando la protección que SSL debería ofrecer. Se exige verificación
@@ -12,6 +20,9 @@ const sslRejectUnauthorized = process.env.DB_SSL_REJECT_UNAUTHORIZED !== 'false'
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: sslRejectUnauthorized } : false,
+  max: 20,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 2000,
 });
 
 pool.on('connect', () => {
@@ -19,8 +30,10 @@ pool.on('connect', () => {
 });
 
 pool.on('error', (err) => {
+  // Log the error but do not kill the process — transient network errors
+  // (TCP timeouts, PG restart) are recoverable; the pool will reconnect.
+  // process.exit here would cause full downtime on any blip.
   console.error('[DB] Unexpected error on idle client:', err.message);
-  process.exit(-1);
 });
 
 /**

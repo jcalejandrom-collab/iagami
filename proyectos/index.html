@@ -61,6 +61,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 /* ===== PROJECT CARD ===== */
 .proj-card{background:#fff;border-radius:16px;border:1.5px solid #d4edd8;overflow:hidden;transition:.2s;cursor:pointer;display:flex;flex-direction:column}
 .proj-card:hover{border-color:#1d6b3e;box-shadow:0 8px 32px rgba(29,107,62,.12);transform:translateY(-3px)}
+.proj-card:active{transform:scale(0.98)}
 .proj-image{height:140px;display:flex;align-items:center;justify-content:center;font-size:56px;position:relative;flex-shrink:0}
 .proj-image.ejecucion{background:linear-gradient(135deg,#1e40af,#3b82f6)}
 .proj-image.completado{background:linear-gradient(135deg,#1d6b3e,#4ade80)}
@@ -83,6 +84,14 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 .meta-row svg{width:12px;height:12px;flex-shrink:0;color:#4a8a6a;opacity:.8}
 .proj-btn{margin-top:auto;padding:10px 16px;border-radius:8px;background:#f0faf5;border:1.5px solid #d4edd8;color:#1d6b3e;font-size:13px;font-weight:600;cursor:pointer;text-align:center;transition:.15s;font-family:'Inter',sans-serif}
 .proj-btn:hover{background:#1d6b3e;color:#fff;border-color:#1d6b3e}
+
+/* ===== SKELETON ===== */
+.skel-card{background:#fff;border-radius:16px;border:1.5px solid #d4edd8;overflow:hidden;pointer-events:none}
+.skel-img{height:140px;background:linear-gradient(90deg,#e8f5ee 25%,#d4edd8 50%,#e8f5ee 75%);background-size:200% 100%;animation:skel-pulse 1.4s ease infinite}
+.skel-body{padding:20px;display:flex;flex-direction:column;gap:12px}
+.skel-line{height:12px;border-radius:6px;background:linear-gradient(90deg,#e8f5ee 25%,#d4edd8 50%,#e8f5ee 75%);background-size:200% 100%;animation:skel-pulse 1.4s ease infinite}
+.skel-line.w80{width:80%}.skel-line.w60{width:60%}.skel-line.w40{width:40%}
+@keyframes skel-pulse{0%{background-position:200% 0}100%{background-position:-200% 0}}
 
 /* ===== EMPTY STATE ===== */
 .empty-state{text-align:center;padding:72px 24px;color:#4a8a6a}
@@ -238,7 +247,8 @@ function getStatusClass(estado) {
 
 function getProgress(p) {
   const raw = p.porcentaje_avance ?? p.progreso ?? 0;
-  return Math.min(100, Math.max(0, Number(raw) || 0));
+  const cleanRaw = String(raw).replace(/[^0-9]/g, '');
+  return Math.min(100, Math.max(0, parseInt(cleanRaw) || 0));
 }
 
 /* ── Build stats ── */
@@ -280,7 +290,7 @@ function renderProyectos(data) {
     const inicio   = p.inicio || p.fecha_inicio || '—';
     const benef    = p.beneficiados || '—';
 
-    return `<div class="proj-card" onclick="openDetail(${JSON.stringify(p.id).replace(/"/g, '&quot;')})">
+    return `<div class="proj-card" onclick="openDetail('${escHtml(String(p.id))}')">
       <div class="proj-image ${sc}">${emoji}</div>
       <div class="proj-body">
         <div class="proj-header">
@@ -308,7 +318,7 @@ function renderProyectos(data) {
             ${escHtml(benef)}
           </div>
         </div>
-        <div class="proj-btn" onclick="event.stopPropagation();openDetail(${JSON.stringify(p.id).replace(/"/g, '&quot;')})">Ver Detalles →</div>
+        <div class="proj-btn" onclick="event.stopPropagation();openDetail('${escHtml(String(p.id))}')">Ver Detalles →</div>
       </div>
     </div>`;
   }).join('');
@@ -428,18 +438,23 @@ function escHtml(str) {
   return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 
+/* ── Skeleton loader ── */
+function showSkeleton() {
+  const grid = document.getElementById('projectsGrid');
+  const card = () => `<div class="skel-card"><div class="skel-img"></div><div class="skel-body"><div class="skel-line w80"></div><div class="skel-line w60"></div><div class="skel-line w40"></div></div></div>`;
+  grid.innerHTML = card() + card() + card();
+}
+
 /* ── Init ── */
 async function init() {
+  showSkeleton();
   try {
     allProyectos = (await CMSDB.getAll('proyectos')) || [];
     if (!Array.isArray(allProyectos)) allProyectos = [];
   } catch(e) {
     console.error('Error loading proyectos:', e);
     allProyectos = [];
-  }
-
-  if (allProyectos.length === 0) {
-    toast('Cargando datos de proyectos…');
+    toast('Error al cargar proyectos', 'error');
   }
 
   updateStats(allProyectos);

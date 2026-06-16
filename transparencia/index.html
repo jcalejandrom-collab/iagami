@@ -182,7 +182,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
   <div class="search-row">
     <div class="search-input-wrap">
       <span class="si-icon">🔍</span>
-      <input class="search-input" type="text" id="search-input" placeholder="Buscar documento por título o descripción…" oninput="filterDocs()"/>
+      <input class="search-input" type="text" id="search-input" placeholder="Buscar documento por título o descripción…" aria-label="Buscar documento"/>
     </div>
     <select class="year-select" id="year-select" onchange="filterDocs()">
       <option value="">Todos los años</option>
@@ -218,6 +218,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 let currentCat = '';
 let currentSearch = '';
 let currentYear = '';
+let _cachedDocs = [];
 
 const CAT_CLASS = {
   'Informes': 'informes',
@@ -227,14 +228,30 @@ const CAT_CLASS = {
   'Documentos Legales': 'documentos-legales'
 };
 
+function escHtml(str) {
+  return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+function debounce(fn, ms) {
+  let t;
+  return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
-  const docs = (await CMSDB.getAll('documentos')) || [];
+  try {
+    const raw = await CMSDB.getAll('documentos');
+    _cachedDocs = Array.isArray(raw) ? raw : [];
+  } catch (e) {
+    console.error('[transparencia] Error cargando documentos:', e.message);
+    _cachedDocs = [];
+    if (typeof toast === 'function') toast('Error al cargar documentos. Intente más tarde.');
+  }
 
   // Populate stats
-  document.getElementById('stat-total').textContent = docs.length;
+  document.getElementById('stat-total').textContent = _cachedDocs.length;
 
   // Get unique years
-  const years = [...new Set(docs.map(d => d.anio).filter(Boolean))].sort((a,b) => b - a);
+  const years = [...new Set(_cachedDocs.map(d => d.anio).filter(Boolean))].sort((a,b) => b - a);
   const yearSel = document.getElementById('year-select');
   years.forEach(y => {
     const opt = document.createElement('option');
@@ -244,11 +261,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   // Latest update
-  const dates = docs.map(d => d.fecha).filter(Boolean).sort().reverse();
+  const dates = _cachedDocs.map(d => d.fecha).filter(Boolean).sort().reverse();
   if (dates.length) {
     const d = new Date(dates[0] + 'T00:00:00');
-    document.getElementById('stat-year').textContent = d.toLocaleDateString('es-VE', { month: 'short', year: 'numeric' }).replace('.','');
+    if (!isNaN(d.getTime())) {
+      document.getElementById('stat-year').textContent = d.toLocaleDateString('es-VE', { month: 'short', year: 'numeric' }).replace('.','');
+    }
   }
+
+  document.getElementById('search-input').addEventListener('input', debounce(filterDocs, 220));
 
   renderDocs();
 });
@@ -266,9 +287,8 @@ function filterDocs() {
   renderDocs();
 }
 
-async function renderDocs() {
-  const docs = (await CMSDB.getAll('documentos')) || [];
-  let filtered = docs.filter(d => {
+function renderDocs() {
+  let filtered = _cachedDocs.filter(d => {
     const matchCat = !currentCat || d.categoria === currentCat;
     const matchYear = !currentYear || String(d.anio) === String(currentYear);
     const titulo = (d.titulo || '').toLowerCase();
@@ -298,18 +318,18 @@ function docCardHTML(d) {
       <div class="doc-pdf-icon">
         <div class="pdf-icon">📄</div>
         <div class="doc-meta-top">
-          <span class="cat-badge ${catClass}">${d.categoria}</span>
-          <div class="doc-title">${d.titulo}</div>
+          <span class="cat-badge ${catClass}">${escHtml(d.categoria)}</span>
+          <div class="doc-title">${escHtml(d.titulo)}</div>
         </div>
       </div>
       <div class="doc-info-row">
         <span>📅 ${fechaFmt}</span>
-        ${d.paginas ? `<span>📄 ${d.paginas} páginas</span>` : ''}
-        ${d.tamano ? `<span>💾 ${d.tamano}</span>` : ''}
+        ${d.paginas ? `<span>📄 ${escHtml(String(d.paginas))} páginas</span>` : ''}
+        ${d.tamano ? `<span>💾 ${escHtml(d.tamano)}</span>` : ''}
       </div>
-      <div class="doc-desc">${desc}</div>
+      <div class="doc-desc">${escHtml(desc)}</div>
       <div class="doc-footer">
-        <div class="doc-meta-bottom">Año ${d.anio}</div>
+        <div class="doc-meta-bottom">Año ${escHtml(String(d.anio || ''))}</div>
         <button class="download-btn" onclick="handleDownload()">⬇ Descargar PDF</button>
       </div>
     </div>`;

@@ -1,10 +1,8 @@
 const { Router } = require('express');
 const path = require('path');
-const fs = require('fs');
 const multer = require('multer');
-const { v4: uuidv4 } = require('uuid');
 const { requireAuth, requireAdmin } = require('../middleware/auth');
-const { submissionLimiter } = require('../middleware/rateLimit');
+const { submissionLimiter, evidenceLimiter } = require('../middleware/rateLimit');
 const { isValidFileSignature } = require('../utils/fileSignature');
 const {
   createReporteDiario,
@@ -23,7 +21,6 @@ const router = Router();
 
 // ─── Multer configuration ─────────────────────────────────────────────────────
 
-const UPLOAD_DIR = path.resolve(process.env.UPLOAD_DIR || 'src/uploads');
 const MAX_FILE_SIZE_BYTES = (parseInt(process.env.MAX_FILE_SIZE_MB, 10) || 5) * 1024 * 1024;
 
 const ALLOWED_MIMETYPES = [
@@ -34,17 +31,6 @@ const ALLOWED_MIMETYPES = [
   'image/webp',
   'application/pdf',
 ];
-
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => {
-    cb(null, UPLOAD_DIR);
-  },
-  filename: (_req, file, cb) => {
-    const ext = path.extname(file.originalname).toLowerCase();
-    const uniqueName = `${uuidv4()}${ext}`;
-    cb(null, uniqueName);
-  },
-});
 
 const fileFilter = (_req, file, cb) => {
   if (ALLOWED_MIMETYPES.includes(file.mimetype)) {
@@ -60,9 +46,14 @@ const fileFilter = (_req, file, cb) => {
   }
 };
 
+// memoryStorage: los archivos viven en Buffer en RAM, sin escritura a disco.
+// Compatible con Vercel serverless y con PC fija.
 const upload = multer({
-  storage,
-  limits: { fileSize: MAX_FILE_SIZE_BYTES },
+  storage: multer.memoryStorage(),
+  // fileSize: tope por archivo; files: tope de cantidad. Ambos acotan la
+  // memoria máxima que un request puede retener (memoryStorage mantiene
+  // cada archivo en RAM): 10 × MAX_FILE_SIZE_BYTES como cota superior.
+  limits: { fileSize: MAX_FILE_SIZE_BYTES, files: 10 },
   fileFilter,
 });
 
@@ -99,34 +90,16 @@ const handleUpload = (req, res, next) => {
    cabecera binaria real de cada archivo guardado y, si no coincide con
    la firma esperada para su mimetype declarado, se borra y se rechaza
    toda la solicitud. */
+// Con memoryStorage los bytes están en file.buffer — sin lectura de disco.
 const verifyFileSignatures = (req, res, next) => {
   if (!req.files || req.files.length === 0) return next();
 
   for (const file of req.files) {
-    let fd;
-    try {
-      fd = fs.openSync(file.path, 'r');
-      const header = Buffer.alloc(12);
-      fs.readSync(fd, header, 0, 12, 0);
-      fs.closeSync(fd);
-
-      if (!isValidFileSignature(header, file.mimetype)) {
-        for (const f of req.files) {
-          fs.unlink(f.path, () => {});
-        }
-        return res.status(400).json({
-          error: 'Archivo inválido',
-          message: `El contenido de "${file.originalname}" no coincide con el tipo de archivo declarado.`,
-        });
-      }
-    } catch (e) {
-      if (fd !== undefined) { try { fs.closeSync(fd); } catch {} }
-      for (const f of req.files) {
-        fs.unlink(f.path, () => {});
-      }
+    const header = file.buffer.slice(0, 12);
+    if (!isValidFileSignature(header, file.mimetype)) {
       return res.status(400).json({
         error: 'Archivo inválido',
-        message: `No se pudo verificar el archivo "${file.originalname}".`,
+        message: `El contenido de "${file.originalname}" no coincide con el tipo de archivo declarado.`,
       });
     }
   }
@@ -156,11 +129,12 @@ router.post('/planificacion-semanal', submissionLimiter, planificacionValidation
  * POST /api/submissions/:id/evidences
  * Upload evidence files for an existing submission.
  * Accepts: images (jpeg, png, gif, webp) and PDF. Max 5 MB per file, up to 10 files.
- * Rate limited: 5 envíos por IP cada 5 minutos. El contenido real del
- * archivo se valida por magic-bytes en handleUpload (no solo el MIME
- * declarado por el cliente, que es trivialmente falsificable).
+ * Rate limited: submissionLimiter (5/5min) + evidenceLimiter (10/1h).
+ * Doble capa: submissionLimiter bloquea ráfagas cortas, evidenceLimiter
+ * bloquea agotamiento de disco sostenido. Magic-bytes valida el contenido
+ * binario real (no el MIME declarado por el cliente, trivialmente falsificable).
  */
-router.post('/:id/evidences', submissionLimiter, handleUpload, verifyFileSignatures, uploadEvidences);
+router.post('/:id/evidences', submissionLimiter, evidenceLimiter, handleUpload, verifyFileSignatures, uploadEvidences);
 
 // Admin-protected routes
 

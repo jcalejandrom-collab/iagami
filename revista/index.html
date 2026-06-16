@@ -276,7 +276,10 @@ function buildFilters(all) {
   const cats = [...new Set(pub.map(r => r.categoria).filter(Boolean))].sort();
   const wrap = document.getElementById('filter-cats');
   wrap.innerHTML = `<button class="filter-btn${_currentFilter===''?' active':''}" onclick="filterRevistas('')">Todas</button>`
-    + cats.map(c => `<button class="filter-btn${_currentFilter===c?' active':''}" onclick="filterRevistas('${c}')">${c}</button>`).join('');
+    + cats.map(c => `<button class="filter-btn${_currentFilter===c?' active':''}" data-cat="${escHtml(c)}">${escHtml(c)}</button>`).join('');
+  wrap.querySelectorAll('[data-cat]').forEach(btn => {
+    btn.addEventListener('click', () => filterRevistas(btn.dataset.cat));
+  });
 }
 
 function filterRevistas(cat) {
@@ -340,7 +343,7 @@ function renderFeatured(all) {
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
           Ver revista
         </a>
-        <button class="btn-pdf" onclick="descargarRevista('${featured.id}')">
+        <button class="btn-pdf" onclick="descargarRevista('${escHtml(featured.id)}')">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           Descargar PDF
         </button>
@@ -376,7 +379,7 @@ function renderGrid(all) {
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
             Ver revista
           </a>
-          <button class="btn-sm-pdf" onclick="descargarRevista('${r.id}')">
+          <button class="btn-sm-pdf" onclick="descargarRevista('${escHtml(r.id)}')">
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             Descargar PDF
           </button>
@@ -390,7 +393,7 @@ function renderGrid(all) {
 function getCoverColor(r) {
   if (Array.isArray(r.contenido_bloques)) {
     const p = r.contenido_bloques.find(b => b.tipo === 'portada');
-    if (p?.color_fondo) return p.color_fondo;
+    if (p?.color_fondo) return safeColor(p.color_fondo);
   }
   return '#1d6b3e';
 }
@@ -411,11 +414,21 @@ function safeImageUrl(u) {
 }
 
 async function descargarRevista(id) {
-  const r = await CMSDB.getOne('revistas', id);
+  let r;
+  try {
+    r = await CMSDB.getOne('revistas', id);
+  } catch(e) {
+    toast('Error al iniciar descarga', 'error');
+    return;
+  }
   if (!r) return;
 
-  const updated = Object.assign({}, r, {descargas: (r.descargas||0)+1});
-  await CMSDB.save('revistas', updated);
+  try {
+    const updated = Object.assign({}, r, {descargas: (r.descargas||0)+1});
+    await CMSDB.save('revistas', updated);
+  } catch(e) {
+    console.warn('[revista] No se pudo actualizar contador de descargas:', e.message);
+  }
   toast('⬇️ Descarga iniciada correctamente');
 
   const titulo = r.titulo || 'Revista';
@@ -437,7 +450,16 @@ async function descargarRevista(id) {
 
 /* ─── MAIN RENDER ─── */
 async function renderPage() {
-  const all = await CMSDB.getAll('revistas');
+  let all;
+  try {
+    all = await CMSDB.getAll('revistas');
+  } catch (e) {
+    console.error('[revista] Error cargando revistas:', e.message);
+    const grid = document.getElementById('editions-grid');
+    if (grid) grid.innerHTML = '<div class="empty-state"><div class="empty-ico">📰</div><h3>Error al cargar</h3><p>No se pudieron cargar las ediciones. Intente más tarde.</p></div>';
+    return;
+  }
+  all = Array.isArray(all) ? all : [];
   renderStats(all);
   buildFilters(all);
   renderFeatured(all);

@@ -8,6 +8,7 @@ const multer = require('multer');
 const { v4: uuidv4 } = require('uuid');
 
 const { requireAuth, requireAdmin } = require('../middleware/auth');
+const { isValidFileSignature } = require('../utils/fileSignature');
 const {
   getRevistasPublicas,
   getRevistaPublica,
@@ -36,21 +37,6 @@ const PDFS_DIR = path.join(UPLOAD_BASE, 'revistas', 'pdfs');
     fs.mkdirSync(dir, { recursive: true });
   }
 });
-
-// ─── Multer storage engines ───────────────────────────────────────────────────
-
-function makeStorage(dest) {
-  return multer.diskStorage({
-    destination: (_req, _file, cb) => cb(null, dest),
-    filename: (_req, file, cb) => {
-      const ext = path.extname(file.originalname).toLowerCase();
-      cb(null, `${uuidv4()}${ext}`);
-    },
-  });
-}
-
-const portadaStorage = makeStorage(PORTADAS_DIR);
-const pdfStorage = makeStorage(PDFS_DIR);
 
 // multer.fields requires a single storage; we use a combined diskStorage that
 // routes to the correct directory based on the field name.
@@ -121,26 +107,48 @@ const parseRevistaFiles = [
       next();
     });
   },
-  (req, _res, next) => {
+  (req, res, next) => {
     req.uploadedFiles = {};
+
+    const unlinkAll = () => {
+      for (const field of ['portada', 'pdf']) {
+        const f = req.files?.[field]?.[0];
+        if (f) try { fs.unlinkSync(f.path); } catch (_err) { /* best-effort cleanup */ }
+      }
+    };
 
     if (req.files) {
       if (req.files.portada && req.files.portada[0]) {
         const file = req.files.portada[0];
         // Enforce 5 MB limit for portada
         if (file.size > 5 * 1024 * 1024) {
-          // Delete the uploaded file and reject
-          try { fs.unlinkSync(file.path); } catch (_) {}
-          return _res.status(400).json({ error: 'La portada no debe superar 5 MB' });
+          try { fs.unlinkSync(file.path); } catch (_err) { /* best-effort cleanup */ }
+          return res.status(400).json({ error: 'La portada no debe superar 5 MB' });
         }
-        // Build URL relative to /uploads
+        // Validate magic bytes — read only first 12 bytes, never full file
+        const portadaBuf = Buffer.alloc(12);
+        const portadaFd = fs.openSync(file.path, 'r');
+        fs.readSync(portadaFd, portadaBuf, 0, 12, 0);
+        fs.closeSync(portadaFd);
+        if (!isValidFileSignature(portadaBuf, file.mimetype)) {
+          unlinkAll();
+          return res.status(400).json({ error: 'La portada tiene un formato de imagen inválido' });
+        }
         const relative = path.relative(UPLOAD_BASE, file.path).replace(/\\/g, '/');
         req.uploadedFiles.portada_url = `/uploads/${relative}`;
       }
 
       if (req.files.pdf && req.files.pdf[0]) {
         const file = req.files.pdf[0];
-        // 50 MB already enforced by multer limits; just build URL
+        // Validate magic bytes — read only first 12 bytes, never full file
+        const pdfBuf = Buffer.alloc(12);
+        const pdfFd = fs.openSync(file.path, 'r');
+        fs.readSync(pdfFd, pdfBuf, 0, 12, 0);
+        fs.closeSync(pdfFd);
+        if (!isValidFileSignature(pdfBuf, file.mimetype)) {
+          unlinkAll();
+          return res.status(400).json({ error: 'El PDF tiene un formato de archivo inválido' });
+        }
         const relative = path.relative(UPLOAD_BASE, file.path).replace(/\\/g, '/');
         req.uploadedFiles.pdf_url = `/uploads/${relative}`;
       }

@@ -6,6 +6,7 @@
 <title>IAGAMI — Portal de Gestión Ambiental del Municipio Iribarren</title>
 <meta name="description" content="Portal digital de IAGAMI. Gestión ambiental, denuncias ciudadanas, noticias y participación comunitaria para el Municipio Iribarren, Lara, Venezuela."/>
 <meta name="theme-color" content="#1d6b3e"/>
+<meta name="pb-url" content="https://video-forbes-earlier-soonest.trycloudflare.com"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet"/>
@@ -608,6 +609,46 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
     </div>
   </div>
 
+  <!-- TRÁMITES DESTACADOS -->
+  <div class="sec-wrap3">
+    <div class="section">
+      <div class="sec-head">
+        <div class="sec-tag">TRÁMITES IAGAMI</div>
+        <h2>Trámites y servicios disponibles</h2>
+        <p>Permisos, certificaciones y registros ambientales para ciudadanos y empresas</p>
+      </div>
+      <div id="home-tramites-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-bottom:8px">
+        <!-- Populated by renderHomeTramites() -->
+      </div>
+      <div class="ver-mas-row">
+        <a class="btn-ver-mas" href="tramites/index.html">
+          Ver todos los trámites
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- TRANSPARENCIA -->
+  <div class="sec-wrap2">
+    <div class="section">
+      <div class="sec-head">
+        <div class="sec-tag">TRANSPARENCIA</div>
+        <h2>Documentos públicos</h2>
+        <p>Informes, presupuestos, resoluciones y documentos legales de IAGAMI</p>
+      </div>
+      <div id="home-docs-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-bottom:8px">
+        <!-- Populated by renderHomeDocumentos() -->
+      </div>
+      <div class="ver-mas-row">
+        <a class="btn-ver-mas" href="transparencia/index.html">
+          Ver todos los documentos
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+
   <!-- CTA -->
   <div class="cta">
     <div class="sec-tag" style="background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.25);color:#a8f0c8">PARTICIPACIÓN CIUDADANA</div>
@@ -1029,7 +1070,8 @@ function getGPS() {
   navigator.geolocation.getCurrentPosition(
     pos => {
       const coords = pos.coords.latitude.toFixed(5) + ', ' + pos.coords.longitude.toFixed(5);
-      document.getElementById('input-ubicacion').value = coords;
+      const _ubInput = document.getElementById('input-ubicacion');
+      if (_ubInput) _ubInput.value = coords;
       toast('📍 Ubicación capturada');
     },
     err => {
@@ -1038,7 +1080,8 @@ function getGPS() {
         _gpsInput.placeholder = 'Dirección, coordenadas o referencia del lugar';
       }
       toast('No se pudo obtener la ubicación GPS');
-    }
+    },
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
   );
 }
 
@@ -1077,13 +1120,14 @@ function handleFiles(fileList) {
     if (file.size > MAX_SIZE) { toast('⚠ "' + file.name + '" supera 10 MB y no fue agregado'); return; }
     const reader = new FileReader();
     reader.onload = e => {
-      adjuntosData.push({ name: file.name, type: file.type, size: file.size, dataUrl: e.target.result });
+      adjuntosData.push({ name: file.name, type: file.type, size: file.size, dataUrl: e.target.result, file });
       renderAdjuntos();
     };
     reader.readAsDataURL(file);
   });
   // Reset input so same file can be re-selected
-  document.getElementById('den-archivos').value = '';
+  const _denArchivos = document.getElementById('den-archivos');
+  if (_denArchivos) _denArchivos.value = '';
 }
 
 function renderAdjuntos() {
@@ -1093,13 +1137,14 @@ function renderAdjuntos() {
     const isImg = f.type.startsWith('image/');
     const sizeStr = f.size > 1024*1024 ? (f.size/1024/1024).toFixed(1)+' MB' : Math.round(f.size/1024)+' KB';
     const fileIcon = f.type.includes('pdf') ? '📄' : f.type.includes('word') || f.type.includes('doc') ? '📝' : f.type.includes('video') ? '🎥' : '📎';
+    const safeName = escHtml(f.name);
     return `<div class="adj-item">
-      <button class="adj-remove" onclick="removeAdjunto(${i})" aria-label="Eliminar ${f.name}" title="Eliminar">×</button>
+      <button class="adj-remove" onclick="removeAdjunto(${i})" aria-label="Eliminar ${safeName}" title="Eliminar">×</button>
       ${isImg
-        ? `<img class="adj-img" src="${f.dataUrl}" alt="${f.name}"/>`
+        ? `<img class="adj-img" src="${f.dataUrl}" alt="${safeName}"/>`
         : `<div class="adj-file"><span class="adj-file-ico">${fileIcon}</span><span style="font-size:9px;color:#4a8a6a;text-align:center;padding:2px 4px">${f.type.split('/')[1]?.toUpperCase()||'FILE'}</span></div>`
       }
-      <div class="adj-name" title="${f.name}">${f.name}</div>
+      <div class="adj-name" title="${safeName}">${safeName}</div>
       <div class="adj-size">${sizeStr}</div>
     </div>`;
   }).join('');
@@ -1108,10 +1153,12 @@ function renderAdjuntos() {
   const dz = document.getElementById('drop-zone');
   if (dz) {
     const left = MAX_FILES - adjuntosData.length;
-    dz.querySelector('.dz-sub').textContent =
-      adjuntosData.length > 0
+    const dzSub = dz.querySelector('.dz-sub');
+    if (dzSub) {
+      dzSub.textContent = adjuntosData.length > 0
         ? `${adjuntosData.length} archivo(s) adjunto(s) · Puedes agregar ${left} más`
         : 'JPG, PNG, GIF, PDF, DOC, DOCX, MP4 · Máx. 5 archivos · 10 MB cada uno';
+    }
   }
 }
 
@@ -1126,9 +1173,15 @@ async function enviarDenuncia() {
   const tipo   = document.getElementById('den-tipo').value;
   const desc   = document.getElementById('den-desc').value.trim();
   const nombre = document.getElementById('den-nombre').value.trim();
-  if (!tipo)   { toast('⚠ Selecciona el tipo de denuncia'); return; }
-  if (!desc)   { toast('⚠ Escribe la descripción del hecho'); return; }
-  if (!nombre) { toast('⚠ Ingresa tu nombre completo'); return; }
+  const email  = document.getElementById('den-email').value.trim();
+  const tel    = document.getElementById('den-tel').value.trim();
+  const cedula = document.getElementById('den-cedula').value.trim();
+  if (!tipo)              { toast('⚠ Selecciona el tipo de denuncia'); return; }
+  if (desc.length < 20)  { toast('⚠ La descripción debe tener al menos 20 caracteres'); return; }
+  if (!nombre)            { toast('⚠ Ingresa tu nombre completo'); return; }
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { toast('⚠ El correo electrónico no es válido'); return; }
+  if (tel && !/^\+?[\d\s\-()]{7,20}$/.test(tel))          { toast('⚠ El teléfono no es válido'); return; }
+  if (cedula && !/^[VEJPGvejpg]?[\-\d]{5,12}$/.test(cedula)) { toast('⚠ La cédula no es válida'); return; }
 
   // Block duplicate submissions
   _enviandoDenuncia = true;
@@ -1136,49 +1189,50 @@ async function enviarDenuncia() {
   const originalText = submitBtn ? submitBtn.textContent : '';
   if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = '⏳ Enviando...'; }
 
-  setTimeout(async () => {
-    try {
+  try {
+    {
       const num = generarNumeroCaso();
-      const item = {
-        caso:      num,
-        tipo,
-        descripcion: desc,
-        nombre,
-        email:     document.getElementById('den-email').value,
-        telefono:  document.getElementById('den-tel').value,
-        cedula:    document.getElementById('den-cedula').value,
-        ubicacion: document.getElementById('input-ubicacion').value,
-        estado:    'recibida',
-        publicado: true,
-        fecha:     new Date().toISOString().slice(0, 10),
-        historial: [{ estado:'recibida', fecha: new Date().toISOString().slice(0,10), comentario:'Denuncia registrada en el sistema SIGAP.' }],
-        adjuntos:  adjuntosData.map(f => ({ name: f.name, type: f.type, size: f.size, dataUrl: f.dataUrl }))
-      };
-      await CMSDB.save('denuncias', item);
-      await CMSDB.logAudit('create', 'denuncias', 'denuncia publica enviada - caso: ' + num, 'info');
+        const item = {
+          caso:      num,
+          tipo,
+          descripcion: desc,
+          nombre,
+          email:     document.getElementById('den-email').value,
+          telefono:  document.getElementById('den-tel').value,
+          cedula:    document.getElementById('den-cedula').value,
+          ubicacion: document.getElementById('input-ubicacion').value,
+          estado:    'recibida',
+          publicado: true,
+          fecha:     new Date().toLocaleDateString('sv-SE'),
+          historial: [{ estado:'recibida', fecha: new Date().toLocaleDateString('sv-SE'), comentario:'Denuncia registrada en el sistema SIGAP.' }],
+          adjuntos:  adjuntosData.map(f => ({ name: f.name, type: f.type, size: f.size })),
+          ...(adjuntosData.length > 0 ? { evidencias: adjuntosData.map(f => f.file) } : {})
+        };
+        await CMSDB.save('denuncias', item);
+        await CMSDB.logAudit('create', 'denuncias', 'denuncia publica enviada - caso: ' + num, 'info');
 
-      const el = document.getElementById('modal-caso-num');
-      if (el) el.textContent = 'Número de caso: ' + num;
-      const adjMsg = adjuntosData.length ? ` · ${adjuntosData.length} archivo(s) adjunto(s)` : '';
-      toast('✅ Denuncia registrada · Caso ' + num + adjMsg);
-      setTimeout(() => openModal('modal-denuncia-ok'), 400);
+        const el = document.getElementById('modal-caso-num');
+        if (el) el.textContent = 'Número de caso: ' + num;
+        const adjMsg = adjuntosData.length ? ` · ${adjuntosData.length} archivo(s) adjunto(s)` : '';
+        toast('✅ Denuncia registrada · Caso ' + num + adjMsg);
+        setTimeout(() => openModal('modal-denuncia-ok'), 400);
 
-      // Reset form
-      ['den-tipo','den-desc','den-nombre','den-email','den-tel','den-cedula','input-ubicacion'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.value = '';
-      });
-      document.getElementById('ai-box').style.display = 'none';
-      adjuntosData = [];
-      renderAdjuntos();
-    } catch(e) {
-      toast('⚠ Error al guardar la denuncia. Intenta nuevamente.');
-      console.error('enviarDenuncia error:', e);
-    } finally {
-      _enviandoDenuncia = false;
-      if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = originalText; }
+        // Reset form
+        ['den-tipo','den-desc','den-nombre','den-email','den-tel','den-cedula','input-ubicacion'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.value = '';
+        });
+        document.getElementById('ai-box').style.display = 'none';
+        adjuntosData = [];
+        renderAdjuntos();
     }
-  }, 600);
+  } catch(e) {
+    toast('⚠ Error al guardar la denuncia. Intenta nuevamente.');
+    console.error('enviarDenuncia error:', e);
+  } finally {
+    _enviandoDenuncia = false;
+    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = originalText; }
+  }
 }
 
 /* ═══════════════════════════════════════
@@ -1188,8 +1242,9 @@ async function enviarDenuncia() {
 async function renderAlertBar() {
   const bar = document.getElementById('alert-bar');
   if (!bar) return;
-  const today = new Date().toISOString().slice(0, 10);
-  const alertas = (await CMSDB.getAll('alertas')).filter(a => {
+  const today = new Date().toLocaleDateString('sv-SE');
+  const _alertasRaw = await CMSDB.getAll('alertas');
+  const alertas = (Array.isArray(_alertasRaw) ? _alertasRaw : []).filter(a => {
     if (!a.activa) return false;
     if (a.fecha_fin && a.fecha_fin < today) return false;
     if (a.fecha_inicio && a.fecha_inicio > today) return false;
@@ -1200,7 +1255,7 @@ async function renderAlertBar() {
   const ticker = document.getElementById('alert-ticker-inner');
   if (!ticker) return;
   const items = alertas
-    .map(a => `<span class="alert-pill">${a.mensaje || ''}</span>`)
+    .map(a => `<span class="alert-pill">${escHtml(a.mensaje)}</span>`)
     .join('<span style="color:#4a8a6a;padding:0 8px">·</span>');
   ticker.innerHTML = alertas.length > 1
     ? items + '<span style="padding:0 24px">·</span>' + items
@@ -1214,12 +1269,16 @@ async function renderHeroPanel() {
   // PII de denunciantes); un visitante anónimo no puede listarla ni contar
   // casos pendientes. Esa cifra debe publicarse como agregado desde el panel
   // admin (autenticado), nunca calculada descargando la colección completa.
-  const [inds, tramites, proyectos, alertas] = await Promise.all([
+  const [_indsR, _tramitesR, _proyectosR, _alertasR] = await Promise.all([
     CMSDB.getAll('indicadores'),
     CMSDB.getAll('tramites'),
     CMSDB.getAll('proyectos'),
     CMSDB.getAll('alertas')
   ]);
+  const inds = Array.isArray(_indsR) ? _indsR : [];
+  const tramites = Array.isArray(_tramitesR) ? _tramitesR : [];
+  const proyectos = Array.isArray(_proyectosR) ? _proyectosR : [];
+  const alertas = Array.isArray(_alertasR) ? _alertasR : [];
   const aire = inds.find(i => i.nombre?.toLowerCase().includes('aire'));
   const agua = inds.find(i => i.nombre?.toLowerCase().includes('agua'));
   const dens = '—';
@@ -1231,12 +1290,12 @@ async function renderHeroPanel() {
   body.innerHTML = `
     <div class="mc">
       <div class="mc-lbl">CALIDAD AIRE</div>
-      <div class="mc-val">${aire?.valor_actual ?? '—'}<span class="mc-unit">${aire?.unidad ?? ''}</span></div>
+      <div class="mc-val">${escHtml(aire?.valor_actual ?? '—')}<span class="mc-unit">${escHtml(aire?.unidad ?? '')}</span></div>
       <div class="mc-sub" style="color:#4ade80">↑ mejora continua</div>
     </div>
     <div class="mc">
       <div class="mc-lbl">CALIDAD AGUA</div>
-      <div class="mc-val">${agua?.valor_actual ?? '—'}<span class="mc-unit">${agua?.unidad ?? ''}</span></div>
+      <div class="mc-val">${escHtml(agua?.valor_actual ?? '—')}<span class="mc-unit">${escHtml(agua?.unidad ?? '')}</span></div>
       <div class="mc-sub" style="color:#64748b">— monitoreo activo</div>
     </div>
     <div class="mc mc-blue">
@@ -1258,13 +1317,13 @@ async function renderHeroPanel() {
       </div>
       <div class="bar-row">
         <span class="bar-name">Agua</span>
-        <div class="bar-track"><div class="bar-fill" style="width:${agua?.valor_actual ?? 72}%;background:#60b8f0"></div></div>
-        <span class="bar-pct" style="color:#60b8f0">${agua?.valor_actual ?? 72}%</span>
+        <div class="bar-track"><div class="bar-fill" style="width:${Math.min(100,Math.max(0,parseFloat(agua?.valor_actual)||72))}%;background:#60b8f0"></div></div>
+        <span class="bar-pct" style="color:#60b8f0">${Math.min(100,Math.max(0,parseFloat(agua?.valor_actual)||72))}%</span>
       </div>
       <div class="bar-row">
         <span class="bar-name">Aire</span>
-        <div class="bar-track"><div class="bar-fill" style="width:${aire?.valor_actual ?? 87}%;background:#eea82a"></div></div>
-        <span class="bar-pct" style="color:#eea82a">${aire?.valor_actual ?? 87}%</span>
+        <div class="bar-track"><div class="bar-fill" style="width:${Math.min(100,Math.max(0,parseFloat(aire?.valor_actual)||87))}%;background:#eea82a"></div></div>
+        <span class="bar-pct" style="color:#eea82a">${Math.min(100,Math.max(0,parseFloat(aire?.valor_actual)||87))}%</span>
       </div>
     </div>
     <div class="sys-row">
@@ -1279,10 +1338,12 @@ async function renderHeroPanel() {
 }
 
 async function renderHeroStats() {
-  const [consejos, empresas] = await Promise.all([
+  const [_consejosR, _empresasR] = await Promise.all([
     CMSDB.getAll('consejos'),
     CMSDB.getAll('empresas')
   ]);
+  const consejos = Array.isArray(_consejosR) ? _consejosR : [];
+  const empresas = Array.isArray(_empresasR) ? _empresasR : [];
   const sc = document.getElementById('stat-consejos');
   const se = document.getElementById('stat-empresas');
   if (sc) sc.textContent = consejos.filter(c => c.estatus === 'Activo').length;
@@ -1292,7 +1353,8 @@ async function renderHeroStats() {
 async function renderHomeIndicadores() {
   const grid = document.getElementById('home-indicadores-grid');
   if (!grid) return;
-  const inds = await CMSDB.getAll('indicadores');
+  const _inds = await CMSDB.getAll('indicadores');
+  const inds = Array.isArray(_inds) ? _inds : [];
   if (!inds.length) {
     grid.innerHTML = '<div class="empty-state"><div class="ico">📊</div>No hay indicadores configurados.</div>';
     return;
@@ -1300,10 +1362,10 @@ async function renderHomeIndicadores() {
   grid.innerHTML = inds.map(ind => {
     const t = tendIcon(ind.tendencia);
     return `<div class="ind-card">
-      <div class="ind-ico">${ind.icono || '📊'}</div>
-      <div class="ind-val">${ind.valor_actual ?? '—'}<span class="ind-unit">${ind.unidad || ''}</span></div>
-      <div class="ind-name">${ind.nombre}</div>
-      <div class="ind-t" style="color:${t.color}">${t.icon} ${ind.tendencia || ''}</div>
+      <div class="ind-ico">${escHtml(ind.icono) || '📊'}</div>
+      <div class="ind-val">${escHtml(ind.valor_actual ?? '—')}<span class="ind-unit">${escHtml(ind.unidad)}</span></div>
+      <div class="ind-name">${escHtml(ind.nombre)}</div>
+      <div class="ind-t" style="color:${t.color}">${t.icon} ${escHtml(ind.tendencia)}</div>
     </div>`;
   }).join('');
 }
@@ -1312,7 +1374,8 @@ async function renderHomeNoticias() {
   const grid = document.getElementById('home-noticias-grid');
   if (!grid) return;
   const PB = (window.__IAGAMI_CONFIG__ && window.__IAGAMI_CONFIG__.PB_URL) || 'http://127.0.0.1:8090';
-  const noticias = (await CMSDB.getAll('noticias'))
+  const _noticias = await CMSDB.getAll('noticias');
+  const noticias = (Array.isArray(_noticias) ? _noticias : [])
     .filter(n => n.publicado !== false && n.estado !== 'borrador')
     .sort((a, b) => (b.fecha || '').localeCompare(a.fecha || ''))
     .slice(0, 40);
@@ -1327,16 +1390,16 @@ async function renderHomeNoticias() {
       'Medio Ambiente': '#e8f5ee', 'Comunidad': '#eff6ff',
       'Normativa': '#fefce8', 'Educación': '#faf5ff', 'Institucional': '#f8fafc'
     };
-    const imgUrl = n.imagen ? `${PB}/api/files/${n.collectionName||n.collectionId}/${n.id}/${n.imagen}` : '';
+    const imgUrl = (n.imagen && n.id && (n.collectionName || n.collectionId)) ? `${PB}/api/files/${n.collectionName||n.collectionId}/${n.id}/${n.imagen}` : '';
     return `<a class="news-card" href="noticias/index.html">
       <div class="news-img" style="background:${bgMap[n.categoria] || '#e8f5ee'}">
-        ${imgUrl ? `<img src="${imgUrl}" alt="${n.titulo}" loading="lazy" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0"/>` : ''}
+        ${imgUrl ? `<img src="${escHtml(imgUrl)}" alt="${escHtml(n.titulo)}" loading="lazy" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0"/>` : ''}
         ${icon}
       </div>
       <div class="news-body">
-        <span class="news-cat" style="${cc}">${n.categoria || 'General'}</span>
-        <div class="news-title">${n.titulo}</div>
-        <div class="news-date">${fmtFecha(n.fecha)}</div>
+        <span class="news-cat" style="${cc}">${escHtml(n.categoria) || 'General'}</span>
+        <div class="news-title">${escHtml(n.titulo)}</div>
+        <div class="news-date">${escHtml(fmtFecha(n.fecha))}</div>
       </div>
     </a>`;
   }).join('');
@@ -1346,7 +1409,8 @@ async function renderHomeProyectos() {
   const grid = document.getElementById('home-proyectos-grid');
   if (!grid) return;
   const PB = (window.__IAGAMI_CONFIG__ && window.__IAGAMI_CONFIG__.PB_URL) || 'http://127.0.0.1:8090';
-  const proyectos = (await CMSDB.getAll('proyectos'))
+  const _proy = await CMSDB.getAll('proyectos');
+  const proyectos = (Array.isArray(_proy) ? _proy : [])
     .filter(p => p.publicado !== false)
     .slice(0, 15);
   if (!proyectos.length) {
@@ -1360,16 +1424,16 @@ async function renderHomeProyectos() {
       'En Ejecución': 'linear-gradient(135deg,#dbeafe,#bfdbfe)',
       'Completado':   'linear-gradient(135deg,#dcfce7,#bbf7d0)'
     };
-    const imgUrl = p.imagen ? `${PB}/api/files/${p.collectionName||p.collectionId}/${p.id}/${p.imagen}` : '';
+    const imgUrl = (p.imagen && p.id && (p.collectionName || p.collectionId)) ? `${PB}/api/files/${p.collectionName||p.collectionId}/${p.id}/${p.imagen}` : '';
     return `<a class="proj-card" href="proyectos/index.html">
       <div class="proj-img" style="background:${gradMap[p.estado] || 'linear-gradient(135deg,#f1f5f9,#e2e8f0)'};position:relative;overflow:hidden">
-        ${imgUrl ? `<img src="${imgUrl}" alt="${p.nombre}" loading="lazy" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0"/>` : proyIcon(p.nombre)}
+        ${imgUrl ? `<img src="${escHtml(imgUrl)}" alt="${escHtml(p.nombre)}" loading="lazy" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0"/>` : proyIcon(p.nombre)}
       </div>
       <div class="proj-body">
-        <span class="ps ${cls}">${label}</span>
-        <div class="proj-name">${p.nombre}</div>
+        <span class="ps ${escHtml(cls)}">${escHtml(label)}</span>
+        <div class="proj-name">${escHtml(p.nombre)}</div>
         <div class="proj-bar"><div class="proj-fill" style="width:${pct}%;background:${p.estado === 'Completado' ? '#16a34a' : '#1d6b3e'}"></div></div>
-        <div class="proj-pct">${pct}%${p.beneficiados ? ' · ' + p.beneficiados + ' beneficiados' : ''}</div>
+        <div class="proj-pct">${pct}%${p.beneficiados ? ' · ' + escHtml(p.beneficiados) + ' beneficiados' : ''}</div>
       </div>
     </a>`;
   }).join('');
@@ -1378,9 +1442,10 @@ async function renderHomeProyectos() {
 async function renderHomeAgenda() {
   const container = document.getElementById('home-agenda-grid');
   if (!container) return;
-  const today = new Date().toISOString().slice(0, 10);
-  const todos = await CMSDB.getAll('eventos');
-  const futuros = todos.filter(e => e.fecha && e.fecha >= today && e.estado !== 'cancelado');
+  const today = new Date().toLocaleDateString('sv-SE');
+  const _eventos = await CMSDB.getAll('eventos');
+  const todos = Array.isArray(_eventos) ? _eventos : [];
+  const futuros = todos.filter(e => e.fecha && e.fecha >= today && e.estado !== 'cancelado' && e.estado !== 'borrador');
   const eventos = (futuros.length ? futuros : todos)
     .sort((a, b) => (a.fecha || '').localeCompare(b.fecha || ''))
     .slice(0, 20);
@@ -1398,9 +1463,9 @@ async function renderHomeAgenda() {
         <div class="ev-mon">${mes}</div>
       </div>
       <div>
-        <span class="ev-tipo">${e.tipo || 'Evento'}</span>
-        <div class="ev-title">${e.titulo}</div>
-        <div class="ev-place">📍 ${e.lugar || ''}${hora ? ' · ' + hora : ''}</div>
+        <span class="ev-tipo">${escHtml(e.tipo) || 'Evento'}</span>
+        <div class="ev-title">${escHtml(e.titulo)}</div>
+        <div class="ev-place">📍 ${escHtml(e.lugar)}${hora ? ' · ' + escHtml(hora) : ''}</div>
       </div>
     </div>`;
   }).join('');
@@ -1410,7 +1475,8 @@ async function renderHomeAgenda() {
 async function renderHomeRevista() {
   const grid = document.getElementById('home-revista-grid');
   if (!grid) return;
-  const revistas = (await CMSDB.getAll('revistas'))
+  const _revistas = await CMSDB.getAll('revistas');
+  const revistas = (Array.isArray(_revistas) ? _revistas : [])
     .filter(r => r.estado === 'publicada')
     .sort((a, b) => (b.fecha || '').localeCompare(a.fecha || ''))
     .slice(0, 4);
@@ -1421,9 +1487,10 @@ async function renderHomeRevista() {
   grid.innerHTML = revistas.map(r => {
     const firstBlock = Array.isArray(r.contenido_bloques)
       ? r.contenido_bloques.find(b => b.tipo === 'portada') : null;
-    const bg = firstBlock?.color_fondo || '#1d6b3e';
+    const _rawBg = firstBlock?.color_fondo || '';
+    const bg = /^#[0-9a-fA-F]{3,8}$/.test(_rawBg) ? _rawBg : '#1d6b3e';
     const coverHtml = r.portada_url
-      ? `<img src="${r.portada_url}" alt="${r.titulo}" style="width:100%;height:100%;object-fit:cover;display:block" loading="lazy"/>`
+      ? `<img src="${escHtml(r.portada_url)}" alt="${escHtml(r.titulo)}" style="width:100%;height:100%;object-fit:cover;display:block" loading="lazy"/>`
       : `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:16px;text-align:center">
            <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.6);letter-spacing:.1em;margin-bottom:6px">EDICIÓN Nº ${r.numero_edicion}</div>
            <div style="font-family:'Poppins',sans-serif;font-size:14px;font-weight:800;color:#fff;line-height:1.25">${r.titulo}</div>
@@ -1436,11 +1503,11 @@ async function renderHomeRevista() {
         ${r.destacada ? '<span style="position:absolute;top:8px;right:8px;background:#4ade80;color:#0d2d1a;font-size:10px;font-weight:800;border-radius:20px;padding:2px 9px">⭐ Destacada</span>' : ''}
       </div>
       <div style="padding:14px;flex:1;display:flex;flex-direction:column;gap:6px">
-        <div style="font-size:10px;font-weight:700;color:#1d6b3e;text-transform:uppercase;letter-spacing:.06em">${r.categoria || 'Institucional'}</div>
-        <div style="font-family:'Poppins',sans-serif;font-size:13px;font-weight:700;color:#1a3d2b;line-height:1.3;flex:1">${r.titulo}</div>
-        <div style="font-size:11px;color:#4a8a6a">📅 ${r.fecha || '—'} · Edición Nº ${r.numero_edicion}</div>
+        <div style="font-size:10px;font-weight:700;color:#1d6b3e;text-transform:uppercase;letter-spacing:.06em">${escHtml(r.categoria) || 'Institucional'}</div>
+        <div style="font-family:'Poppins',sans-serif;font-size:13px;font-weight:700;color:#1a3d2b;line-height:1.3;flex:1">${escHtml(r.titulo)}</div>
+        <div style="font-size:11px;color:#4a8a6a">📅 ${escHtml(r.fecha) || '—'} · Edición Nº ${escHtml(r.numero_edicion)}</div>
         <div style="display:flex;gap:7px;margin-top:6px">
-          <a href="revista/visor.html?id=${r.id}" style="flex:1;padding:7px;background:#1d6b3e;color:#fff;border-radius:7px;font-size:11px;font-weight:700;text-align:center;text-decoration:none;font-family:'Poppins',sans-serif">👁 Ver</a>
+          <a href="revista/visor.html?id=${encodeURIComponent(r.id)}" style="flex:1;padding:7px;background:#1d6b3e;color:#fff;border-radius:7px;font-size:11px;font-weight:700;text-align:center;text-decoration:none;font-family:'Poppins',sans-serif">👁 Ver</a>
           <a href="revista/index.html" style="flex:1;padding:7px;background:#fff;color:#1d6b3e;border:1.5px solid #1d6b3e;border-radius:7px;font-size:11px;font-weight:700;text-align:center;text-decoration:none;font-family:'Poppins',sans-serif">⬇ PDF</a>
         </div>
       </div>
@@ -1448,7 +1515,81 @@ async function renderHomeRevista() {
   }).join('');
 }
 
+async function renderHomeTramites() {
+  const grid = document.getElementById('home-tramites-grid');
+  if (!grid) return;
+  const _items = await CMSDB.getAll('tramites');
+  const items = (Array.isArray(_items) ? _items : [])
+    .filter(t => t.estado === 'activo')
+    .slice(0, 6);
+  if (!items.length) {
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="ico">📋</div>No hay trámites disponibles aún.</div>';
+    return;
+  }
+  const catIcon = { Permisos:'🌿', Certificaciones:'📜', Registros:'🗂️', Licencias:'🔖', Otros:'📋' };
+  grid.innerHTML = items.map(t => `
+    <div style="background:#fff;border:1px solid #d4edd8;border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:10px;transition:.2s"
+      onmouseover="this.style.boxShadow='0 6px 24px rgba(29,107,62,.12)';this.style.transform='translateY(-2px)'"
+      onmouseout="this.style.boxShadow='none';this.style.transform='none'">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:40px;height:40px;background:#e8f5ee;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">${catIcon[t.categoria] || '📋'}</div>
+        <div>
+          <div style="font-size:10px;font-weight:700;color:#1d6b3e;text-transform:uppercase;letter-spacing:.06em">${escHtml(t.categoria || 'General')}</div>
+          <div style="font-family:'Poppins',sans-serif;font-size:13px;font-weight:700;color:#1a3d2b;line-height:1.3">${escHtml(t.nombre)}</div>
+        </div>
+      </div>
+      ${t.descripcion ? `<div style="font-size:12px;color:#4a6a5a;line-height:1.5">${escHtml(t.descripcion.slice(0,100))}${t.descripcion.length>100?'…':''}</div>` : ''}
+      <div style="display:flex;gap:12px;font-size:11px;color:#4a8a6a">
+        ${t.tiempo_respuesta ? `<span>⏱ ${escHtml(t.tiempo_respuesta)}</span>` : ''}
+        ${t.costo ? `<span>💰 ${escHtml(t.costo)}</span>` : ''}
+      </div>
+      <a href="tramites/index.html" style="margin-top:auto;padding:7px 14px;background:#1d6b3e;color:#fff;border-radius:8px;font-size:11px;font-weight:700;text-align:center;text-decoration:none;font-family:'Poppins',sans-serif">Ver detalles →</a>
+    </div>`).join('');
+}
+
+async function renderHomeDocumentos() {
+  const grid = document.getElementById('home-docs-grid');
+  if (!grid) return;
+  const _items = await CMSDB.getAll('documentos');
+  const items = (Array.isArray(_items) ? _items : [])
+    .filter(d => d.estado === 'publicado')
+    .sort((a, b) => (b.año || 0) - (a.año || 0))
+    .slice(0, 4);
+  if (!items.length) {
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="ico">🏛️</div>No hay documentos publicados aún.</div>';
+    return;
+  }
+  const catIcon = { Informes:'📊', Memorias:'📔', Presupuestos:'💰', Resoluciones:'⚖️', 'Documentos Legales':'📜' };
+  grid.innerHTML = items.map(d => `
+    <div style="background:#fff;border:1px solid #d4edd8;border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:10px;transition:.2s"
+      onmouseover="this.style.boxShadow='0 6px 24px rgba(29,107,62,.12)';this.style.transform='translateY(-2px)'"
+      onmouseout="this.style.boxShadow='none';this.style.transform='none'">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:40px;height:40px;background:#e8f5ee;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">${catIcon[d.categoria] || '📄'}</div>
+        <div>
+          <div style="font-size:10px;font-weight:700;color:#1d6b3e;text-transform:uppercase;letter-spacing:.06em">${escHtml(d.categoria || 'Documento')} ${d.año ? '· '+escHtml(String(d.año)) : ''}</div>
+          <div style="font-family:'Poppins',sans-serif;font-size:13px;font-weight:700;color:#1a3d2b;line-height:1.3">${escHtml(d.titulo)}</div>
+        </div>
+      </div>
+      ${d.descripcion ? `<div style="font-size:12px;color:#4a6a5a;line-height:1.5">${escHtml(d.descripcion.slice(0,100))}${d.descripcion.length>100?'…':''}</div>` : ''}
+      ${d.pdf_url ? `<a href="${/^https?:\/\//i.test(d.pdf_url) ? escHtml(d.pdf_url) : '#'}" target="_blank" rel="noopener noreferrer" style="margin-top:auto;padding:7px 14px;background:#1d6b3e;color:#fff;border-radius:8px;font-size:11px;font-weight:700;text-align:center;text-decoration:none;font-family:'Poppins',sans-serif">⬇ Descargar PDF</a>`
+        : `<a href="transparencia/index.html" style="margin-top:auto;padding:7px 14px;background:#fff;color:#1d6b3e;border:1.5px solid #1d6b3e;border-radius:8px;font-size:11px;font-weight:700;text-align:center;text-decoration:none;font-family:'Poppins',sans-serif">Ver en Transparencia →</a>`}
+    </div>`).join('');
+}
+
 /* ─── BIENVENIDA ─── */
+/* Clave de semana ISO-8601 (año-Wnn) estable y consistente, a diferencia
+   del cálculo previo basado en getDate()/getDay() que colisionaba entre
+   meses. */
+function _isoWeekKey(date) {
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  const day = d.getUTCDay() || 7; // lunes=1 … domingo=7
+  d.setUTCDate(d.getUTCDate() + 4 - day); // jueves de esta semana
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+  return `${d.getUTCFullYear()}-W${String(weekNo).padStart(2, '0')}`;
+}
+
 function _bvShouldShow(activa) {
   const freq = activa.frecuencia || 'siempre';
   const key = 'iagami_bv_shown';
@@ -1456,14 +1597,12 @@ function _bvShouldShow(activa) {
   if (freq === 'una_vez') return !localStorage.getItem(key + '_' + activa.id);
   if (freq === 'diaria') {
     const stored = localStorage.getItem(key + '_d_' + activa.id);
-    const today = new Date().toISOString().slice(0,10);
+    const today = new Date().toLocaleDateString('sv-SE');
     return stored !== today;
   }
   if (freq === 'semanal') {
     const stored = localStorage.getItem(key + '_w_' + activa.id);
-    const now = new Date();
-    const week = `${now.getFullYear()}-W${Math.ceil((now.getDate()-now.getDay()+6)/7)}`;
-    return stored !== week;
+    return stored !== _isoWeekKey(new Date());
   }
   return true;
 }
@@ -1472,18 +1611,20 @@ function _bvMarkShown(activa) {
   const freq = activa.frecuencia || 'siempre';
   const key = 'iagami_bv_shown';
   if (freq === 'una_vez') localStorage.setItem(key + '_' + activa.id, '1');
-  if (freq === 'diaria') localStorage.setItem(key + '_d_' + activa.id, new Date().toISOString().slice(0,10));
+  if (freq === 'diaria') localStorage.setItem(key + '_d_' + activa.id, new Date().toLocaleDateString('sv-SE'));
   if (freq === 'semanal') {
-    const now = new Date();
-    const week = `${now.getFullYear()}-W${Math.ceil((now.getDate()-now.getDay()+6)/7)}`;
-    localStorage.setItem(key + '_w_' + activa.id, week);
+    localStorage.setItem(key + '_w_' + activa.id, _isoWeekKey(new Date()));
   }
 }
 
+let _bvActiva = null;
+
 async function checkBienvenida() {
-  const items = await CMSDB.getAll('bienvenida');
+  const _bvItems = await CMSDB.getAll('bienvenida');
+  const items = Array.isArray(_bvItems) ? _bvItems : [];
   const activa = items.find(b => b.activa);
   if (!activa || !_bvShouldShow(activa)) return;
+  _bvActiva = activa; // guardar para cerrarBienvenida (evita refetch)
   const modal  = document.getElementById('bienvenida-modal');
   const titulo = document.getElementById('bienvenida-titulo');
   const mensaje = document.getElementById('bienvenida-mensaje');
@@ -1496,7 +1637,12 @@ async function checkBienvenida() {
     const imgUrl = `${PB}/api/files/${activa.collectionName || activa.collectionId}/${activa.id}/${activa.imagen}`;
     fetch(imgUrl, { headers: { 'ngrok-skip-browser-warning': '1' } })
       .then(r => r.blob())
-      .then(blob => { imgEl.src = URL.createObjectURL(blob); imgEl.style.display = 'block'; })
+      .then(blob => {
+        const objUrl = URL.createObjectURL(blob);
+        imgEl.src = objUrl;
+        imgEl.style.display = 'block';
+        imgEl.onload = () => URL.revokeObjectURL(objUrl);
+      })
       .catch(() => { imgEl.src = imgUrl; imgEl.style.display = 'block'; });
     const inner = document.getElementById('bienvenida-img-inner');
     if (inner) inner.style.display = 'none';
@@ -1512,10 +1658,10 @@ async function checkBienvenida() {
   }
 }
 
-async function cerrarBienvenida() {
-  const items = await CMSDB.getAll('bienvenida');
-  const activa = items.find(b => b.activa);
-  if (activa) _bvMarkShown(activa);
+function cerrarBienvenida() {
+  // Reutiliza el item activo ya cargado en checkBienvenida; no requiere
+  // una nueva llamada de red (que podría fallar y dejar el modal sin marcar).
+  if (_bvActiva) _bvMarkShown(_bvActiva);
   const modal = document.getElementById('bienvenida-modal');
   if (modal) {
     modal.style.display = 'none';
@@ -1536,17 +1682,39 @@ function actualizarBotonAdmin() {
   });
 }
 
-function initPortal() {
+function escHtml(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+window.onerror = function(msg, src, line, col, err) {
+  console.error('[IAGAMI] Error global:', msg, src + ':' + line);
+};
+window.addEventListener('unhandledrejection', function(e) {
+  console.error('[IAGAMI] Promesa rechazada sin capturar:', e.reason);
+});
+
+async function initPortal() {
+  if (typeof CMSDB === 'undefined') {
+    console.error('[IAGAMI] CMSDB no definido — verifica cms/config.js y cms/pb.js');
+    return;
+  }
   actualizarBotonAdmin();
-  checkBienvenida();
-  renderAlertBar();
-  renderHeroPanel();
-  renderHeroStats();
-  renderHomeIndicadores();
-  renderHomeNoticias();
-  renderHomeProyectos();
-  renderHomeAgenda();
-  renderHomeRevista();
+  const tasks = [
+    checkBienvenida,
+    renderAlertBar,
+    renderHeroPanel,
+    renderHeroStats,
+    renderHomeIndicadores,
+    renderHomeNoticias,
+    renderHomeProyectos,
+    renderHomeAgenda,
+    renderHomeRevista,
+    renderHomeTramites,
+    renderHomeDocumentos,
+  ];
+  for (const task of tasks) {
+    try { await task(); } catch (e) { console.error('[IAGAMI] Fallo en ' + task.name + ':', e); }
+  }
 }
 
 document.addEventListener('DOMContentLoaded', function() {
