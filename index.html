@@ -1552,7 +1552,7 @@ async function renderHomeDocumentos() {
   if (!grid) return;
   const _items = await CMSDB.getAll('documentos');
   const items = (Array.isArray(_items) ? _items : [])
-    .filter(d => d.estado === 'publicado')
+    .filter(d => d.publicado === true)
     .sort((a, b) => (b.año || 0) - (a.año || 0))
     .slice(0, 4);
   if (!items.length) {
