@@ -464,9 +464,9 @@ async function openDetail(id) {
   document.getElementById('modalMeta').innerHTML = `
     <span>📅 ${formatDate(n.fecha)}</span>
     <span>✍ ${escHtml(n.autor)}</span>
-    <span>📌 ${n.estado === 'publicado' ? 'Publicado' : n.estado}</span>`;
+    <span>📌 ${n.publicado ? 'Publicado' : 'Borrador'}</span>`;
 
-  const paragraphs = (n.contenido || '').split('\n\n').filter(Boolean);
+  const paragraphs = (n.cuerpo || n.contenido || '').split('\n\n').filter(Boolean);
   document.getElementById('modalContent').innerHTML =
     paragraphs.map(p => `<p>${escHtml(p)}</p>`).join('');
 
