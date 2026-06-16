@@ -1736,11 +1736,15 @@ async function saveNoticias(e) {
   };
   if (!data.id) delete data.id;
   const vn = validarContenido(data); if (!vn.isValid) { toast('❌ ' + vn.error, 'error'); return; }
-  const item = await CMSDB.save('noticias', data);
-  await CMSDB.logAudit('save', 'noticias', item.titulo || '');
-  toast('Noticia guardada');
-  cancelForm('noticias');
-  renderNoticias();
+  try {
+    const item = await CMSDB.save('noticias', data);
+    await CMSDB.logAudit('save', 'noticias', item.titulo || '');
+    toast('Noticia guardada');
+    cancelForm('noticias');
+    renderNoticias();
+  } catch (err) {
+    toast('❌ Error al guardar: ' + err.message, 'error');
+  }
 }
 
 async function toggleEstado(key, id, field, val1, val2) {
@@ -1786,10 +1790,12 @@ async function saveTramites(e) {
   data.requisitos = getListValues('req-list');
   data.pasos = getListValues('pasos-list');
   const vt = validarContenido(data); if (!vt.isValid) { toast('❌ ' + vt.error, 'error'); return; }
-  await CMSDB.save('tramites', data);
-  toast('Trámite guardado');
-  cancelForm('tramites');
-  renderTramites();
+  try {
+    await CMSDB.save('tramites', data);
+    toast('Trámite guardado');
+    cancelForm('tramites');
+    renderTramites();
+  } catch (err) { toast('❌ Error al guardar: ' + err.message, 'error'); }
 }
 
 /* ════════════════════════════════════════
@@ -1835,10 +1841,12 @@ async function saveAgenda(e) {
   };
   if (!data.id) delete data.id;
   const ve = validarContenido(data); if (!ve.isValid) { toast('❌ ' + ve.error, 'error'); return; }
-  await CMSDB.save('eventos', data);
-  toast('Evento guardado');
-  cancelForm('agenda');
-  renderAgenda();
+  try {
+    await CMSDB.save('eventos', data);
+    toast('Evento guardado');
+    cancelForm('agenda');
+    renderAgenda();
+  } catch (err) { toast('❌ Error al guardar: ' + err.message, 'error'); }
 }
 
 /* ════════════════════════════════════════
@@ -1876,10 +1884,12 @@ async function saveTransparencia(e) {
     pdf_url: raw.pdf_url,
   };
   if (!data.id) delete data.id;
-  await CMSDB.save('documentos', data);
-  toast('Documento guardado');
-  cancelForm('transparencia');
-  renderTransparencia();
+  try {
+    await CMSDB.save('documentos', data);
+    toast('Documento guardado');
+    cancelForm('transparencia');
+    renderTransparencia();
+  } catch (err) { toast('❌ Error al guardar: ' + err.message, 'error'); }
 }
 
 /* ════════════════════════════════════════
@@ -1929,10 +1939,12 @@ async function saveOrganizacion(e) {
     funciones: raw.funciones,
   };
   if (!data.id) delete data.id;
-  await CMSDB.save('org', data);
-  toast('Unidad organizacional guardada');
-  cancelForm('organizacion');
-  renderOrganizacion();
+  try {
+    await CMSDB.save('org', data);
+    toast('Unidad organizacional guardada');
+    cancelForm('organizacion');
+    renderOrganizacion();
+  } catch (err) { toast('❌ Error al guardar: ' + err.message, 'error'); }
 }
 
 /* ════════════════════════════════════════
@@ -1981,10 +1993,12 @@ async function saveProyectos(e) {
     delete data.id;
   }
   const vp = validarContenido(data); if (!vp.isValid) { toast('❌ ' + vp.error, 'error'); return; }
-  await CMSDB.save('proyectos', data);
-  toast('Proyecto guardado');
-  cancelForm('proyectos');
-  renderProyectos();
+  try {
+    await CMSDB.save('proyectos', data);
+    toast('Proyecto guardado');
+    cancelForm('proyectos');
+    renderProyectos();
+  } catch (err) { toast('❌ Error al guardar: ' + err.message, 'error'); }
 }
 
 /* ════════════════════════════════════════
@@ -2020,10 +2034,12 @@ async function saveIndicadores(e) {
     descripcion: raw.descripcion,
   };
   if (!data.id) delete data.id;
-  await CMSDB.save('indicadores', data);
-  toast('Indicador guardado');
-  cancelForm('indicadores');
-  renderIndicadores();
+  try {
+    await CMSDB.save('indicadores', data);
+    toast('Indicador guardado');
+    cancelForm('indicadores');
+    renderIndicadores();
+  } catch (err) { toast('❌ Error al guardar: ' + err.message, 'error'); }
 }
 
 /* ════════════════════════════════════════
@@ -2050,10 +2066,12 @@ async function renderEmpresas() {
 async function saveEmpresas(e) {
   e.preventDefault();
   const data = collectForm(document.getElementById('empresas-form'));
-  await CMSDB.save('empresas', data);
-  toast('Empresa guardada');
-  cancelForm('empresas');
-  renderEmpresas();
+  try {
+    await CMSDB.save('empresas', data);
+    toast('Empresa guardada');
+    cancelForm('empresas');
+    renderEmpresas();
+  } catch (err) { toast('❌ Error al guardar: ' + err.message, 'error'); }
 }
 
 /* ════════════════════════════════════════
@@ -2084,10 +2102,12 @@ async function saveAlertas(e) {
   const data = collectForm(form);
   data.activa = form.querySelector('[name="activa"]').checked;
   const va = validarContenido(data); if (!va.isValid) { toast('❌ ' + va.error, 'error'); return; }
-  await CMSDB.save('alertas', data);
-  toast('Alerta guardada');
-  cancelForm('alertas');
-  renderAlertas();
+  try {
+    await CMSDB.save('alertas', data);
+    toast('Alerta guardada');
+    cancelForm('alertas');
+    renderAlertas();
+  } catch (err) { toast('❌ Error al guardar: ' + err.message, 'error'); }
 }
 
 // toggleEstado handles boolean and string toggling — unified in original declaration above
