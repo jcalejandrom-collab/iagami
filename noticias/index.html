@@ -280,8 +280,10 @@ let currentPage = 1;
    INIT
 ═══════════════════════════════ */
 document.addEventListener('DOMContentLoaded', async () => {
-  allNoticias = (await CMSDB.getAll('noticias'))
-    .filter(n => n.publicado === true || n.publicado === 'true')
+  const _raw = await CMSDB.getAll('noticias');
+  console.log('[IAGAMI] noticias raw count:', _raw.length, _raw[0] && JSON.stringify({publicado: _raw[0].publicado, fecha: _raw[0].fecha}));
+  allNoticias = _raw
+    .filter(n => n.publicado !== false && n.publicado != null)
     .sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
 
   populateYears();
