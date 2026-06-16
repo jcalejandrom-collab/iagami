@@ -1974,6 +1974,7 @@ async function saveProyectos(e) {
     beneficiados: raw.beneficiados,
     presupuesto: raw.presupuesto,
     hitos: getListValues('hitos-list'),
+    publicado: true,
   };
   if (!data.id) {
     data.publicado = true;
