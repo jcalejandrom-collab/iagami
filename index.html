@@ -971,8 +971,8 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
   const rnd = (a,b) => a + Math.random()*(b-a);
   const verdes = ['rgba(126,196,108,.85)','rgba(94,168,92,.8)','rgba(168,214,120,.85)','rgba(74,140,84,.8)'];
 
-  /* 10 hojas */
-  for(let i=0;i<10;i++){
+  /* 20 hojas */
+  for(let i=0;i<20;i++){
     const el = document.createElement('div');
     el.className = 'hoja leaf';
     const size = rnd(7,18);
@@ -987,8 +987,8 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
     cont.appendChild(el);
   }
 
-  /* 8 partículas doradas */
-  for(let i=0;i<8;i++){
+  /* 16 partículas doradas */
+  for(let i=0;i<16;i++){
     const el = document.createElement('div');
     el.className = 'hoja mote';
     const size = rnd(3,7);
