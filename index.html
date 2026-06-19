@@ -35,6 +35,33 @@ html{scroll-behavior:smooth}
 @keyframes pageIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 @keyframes rippleAnim{to{transform:scale(1);opacity:0}}
 
+/* FASE 4 — Modal scale-in */
+@keyframes modalIn{from{opacity:0;transform:scale(.92) translateY(12px)}to{opacity:1;transform:none}}
+@keyframes modalOut{from{opacity:1;transform:none}to{opacity:0;transform:scale(.94) translateY(8px)}}
+.modal-bg.open>.modal{animation:modalIn .28s cubic-bezier(.34,1.56,.64,1) forwards}
+.modal-bg.closing>.modal{animation:modalOut .2s ease forwards}
+
+/* FASE 4 — Card 3D tilt */
+.svc-card,.news-card,.proj-card,.ev-card{transform-style:preserve-3d;will-change:transform}
+
+/* FASE 4 — Toast progress bar */
+.toast-bar{position:absolute;bottom:0;left:0;height:3px;border-radius:0 0 10px 10px;
+  background:rgba(74,222,128,.7);width:100%;transform-origin:left;
+  animation:toastProgress 3s linear forwards}
+@keyframes toastProgress{from{transform:scaleX(1)}to{transform:scaleX(0)}}
+
+/* FASE 4 — Word reveal */
+.word-reveal .word{display:inline-block;opacity:0;transform:translateY(18px);
+  transition:opacity .45s ease,transform .45s ease}
+.word-reveal.revealed .word{opacity:1;transform:none}
+
+/* FASE 4 — Cursor glow */
+.hero-cursor-glow{position:absolute;width:320px;height:320px;border-radius:50%;
+  pointer-events:none;z-index:1;
+  background:radial-gradient(circle,rgba(34,197,94,.12) 0%,transparent 70%);
+  transform:translate(-50%,-50%);transition:left .08s ease,top .08s ease;
+  mix-blend-mode:screen}
+
 /* Hover premium cards */
 .svc-card{transition:border-color .22s ease,transform .22s ease,box-shadow .22s ease}
 .svc-card:hover{border-color:#1d6b3e;transform:translateY(-5px) scale(1.02);box-shadow:0 12px 32px rgba(29,107,62,.16)}
@@ -550,7 +577,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
     <div class="section">
       <div class="sec-head">
         <div class="sec-tag">SERVICIOS EN LÍNEA</div>
-        <h2>Todo lo que necesitas, en un solo lugar</h2>
+        <h2 data-word-reveal>Todo lo que necesitas, en un solo lugar</h2>
         <p>Accede a los servicios institucionales del municipio desde cualquier dispositivo</p>
       </div>
       <div class="svc-grid" data-stagger>
@@ -603,7 +630,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
     <div class="section">
       <div class="sec-head">
         <div class="sec-tag">INDICADORES AMBIENTALES</div>
-        <h2>Estado del medio ambiente en Iribarren</h2>
+        <h2 data-word-reveal>Estado del medio ambiente en Iribarren</h2>
         <p>Datos del monitoreo ambiental municipal actualizados desde el sistema SIGAP</p>
       </div>
       <div id="home-indicadores-grid" class="ind-grid" data-stagger data-stagger-delay="80">
@@ -617,7 +644,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
     <div class="section">
       <div class="sec-head">
         <div class="sec-tag">NOTICIAS</div>
-        <h2>Últimas noticias de IAGAMI</h2>
+        <h2 data-word-reveal>Últimas noticias de IAGAMI</h2>
         <p>Información institucional y ambiental del municipio</p>
       </div>
       <div id="home-noticias-grid" class="news-grid" data-stagger data-stagger-delay="80">
@@ -637,7 +664,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
     <div class="section">
       <div class="sec-head">
         <div class="sec-tag">PROYECTOS SIGAP</div>
-        <h2>Proyectos en ejecución</h2>
+        <h2 data-word-reveal>Proyectos en ejecución</h2>
         <p>Iniciativas activas de gestión y restauración ambiental</p>
       </div>
       <div id="home-proyectos-grid" class="proj-grid" data-stagger data-stagger-delay="80">
@@ -1104,16 +1131,19 @@ function toast(msg) {
   const t = document.getElementById('app-toast');
   t.textContent = msg;
   t.classList.add('show');
+  if (window.IAGAMI_ANIM) IAGAMI_ANIM.addToastBar(t);
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
 }
 
 /* ─── MODALS ─── */
 function openModal(id) {
+  if (window.IAGAMI_ANIM) { IAGAMI_ANIM.openModalAnim(id); return; }
   const m = document.getElementById(id);
   if (m) m.classList.add('open');
 }
 function closeModal(id) {
+  if (window.IAGAMI_ANIM) { IAGAMI_ANIM.closeModalAnim(id); return; }
   const m = document.getElementById(id);
   if (m) m.classList.remove('open');
 }

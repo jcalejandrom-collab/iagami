@@ -337,6 +337,116 @@
     }, { passive: true });
   }
 
+  /* ─── FASE 4 ──────────────────────────────────────────────────────────────── */
+
+  /* ─── 13. MODAL ANIMADO ──────────────────────────────────────────────────────
+     openModalAnim / closeModalAnim reemplazan openModal/closeModal.
+     La clase .closing dispara el keyframe de salida antes de ocultar.
+  ────────────────────────────────────────────────────────────────────────── */
+  function openModalAnim(id) {
+    const m = document.getElementById(id);
+    if (!m) return;
+    m.classList.remove('closing');
+    m.classList.add('open');
+  }
+
+  function closeModalAnim(id) {
+    const m = document.getElementById(id);
+    if (!m) return;
+    if (reduced) { m.classList.remove('open'); return; }
+    m.classList.add('closing');
+    setTimeout(() => { m.classList.remove('open', 'closing'); }, 200);
+  }
+
+  /* ─── 14. CARD 3D TILT ───────────────────────────────────────────────────────
+     Inclinación 3D suave al mover el mouse sobre las cards.
+     Máximo 8° de rotación.
+  ────────────────────────────────────────────────────────────────────────── */
+  function initCardTilt() {
+    if (reduced) return;
+    const MAX = 8;
+
+    function onMove(e) {
+      const card = e.currentTarget;
+      const rect = card.getBoundingClientRect();
+      const cx   = rect.left + rect.width  / 2;
+      const cy   = rect.top  + rect.height / 2;
+      const dx   = (e.clientX - cx) / (rect.width  / 2);
+      const dy   = (e.clientY - cy) / (rect.height / 2);
+      card.style.transform = `perspective(600px) rotateY(${dx * MAX}deg) rotateX(${-dy * MAX}deg) translateY(-4px)`;
+    }
+
+    function onLeave(e) {
+      const card = e.currentTarget;
+      card.style.transition = 'transform .4s ease';
+      card.style.transform  = '';
+      setTimeout(() => { card.style.transition = ''; }, 400);
+    }
+
+    document.querySelectorAll('.svc-card,.news-card,.proj-card,.ev-card').forEach(card => {
+      card.addEventListener('mousemove', onMove);
+      card.addEventListener('mouseleave', onLeave);
+    });
+  }
+
+  /* ─── 15. CURSOR GLOW EN HERO ────────────────────────────────────────────────
+     Un resplandor verde translúcido sigue el cursor dentro del hero.
+  ────────────────────────────────────────────────────────────────────────── */
+  function initCursorGlow() {
+    if (reduced) return;
+    const hero = document.querySelector('.hero');
+    if (!hero) return;
+    const glow = document.createElement('div');
+    glow.className = 'hero-cursor-glow';
+    hero.appendChild(glow);
+    hero.addEventListener('mousemove', e => {
+      const rect = hero.getBoundingClientRect();
+      glow.style.left = (e.clientX - rect.left) + 'px';
+      glow.style.top  = (e.clientY - rect.top)  + 'px';
+      glow.style.opacity = '1';
+    });
+    hero.addEventListener('mouseleave', () => { glow.style.opacity = '0'; });
+    glow.style.opacity = '0';
+    glow.style.transition = 'opacity .4s ease, left .08s ease, top .08s ease';
+  }
+
+  /* ─── 16. WORD REVEAL EN HEADINGS ────────────────────────────────────────────
+     Los h2 con data-word-reveal se revelan palabra a palabra al entrar
+     en el viewport.
+  ────────────────────────────────────────────────────────────────────────── */
+  function initWordReveal() {
+    if (reduced) return;
+    document.querySelectorAll('[data-word-reveal]').forEach(el => {
+      const words = el.textContent.trim().split(/\s+/);
+      el.classList.add('word-reveal');
+      el.innerHTML = words.map((w, i) =>
+        `<span class="word" style="transition-delay:${i * 90}ms">${w}</span>`
+      ).join(' ');
+
+      const io = new IntersectionObserver(entries => {
+        if (!entries[0].isIntersecting) return;
+        el.classList.add('revealed');
+        io.disconnect();
+      }, { threshold: 0.5 });
+      io.observe(el);
+    });
+  }
+
+  /* ─── 17. TOAST CON BARRA DE PROGRESO ───────────────────────────────────────
+     Inyecta una barra animada al toast para indicar cuánto tiempo queda.
+     Se llama desde la función toast() de cada página.
+  ────────────────────────────────────────────────────────────────────────── */
+  function addToastBar(toastEl) {
+    if (reduced || !toastEl) return;
+    const old = toastEl.querySelector('.toast-bar');
+    if (old) old.remove();
+    const bar = document.createElement('span');
+    bar.className = 'toast-bar';
+    toastEl.style.position = 'relative';
+    toastEl.style.overflow = 'hidden';
+    toastEl.appendChild(bar);
+  }
+
   /* ─── INIT ─────────────────────────────────────────────────────────────── */
   function init() {
     initNavShrink();
@@ -347,6 +457,9 @@
     initRipple();
     initTypewriter();
     initHeroParallax();
+    initCardTilt();
+    initCursorGlow();
+    initWordReveal();
     window.IAGAMI_ANIM = {
       initProgressBars,
       animateCounter,
@@ -354,7 +467,11 @@
       staggerChildren,
       animateNumber,
       pageFade,
-      initRipple
+      initRipple,
+      openModalAnim,
+      closeModalAnim,
+      addToastBar,
+      initCardTilt
     };
   }
 
