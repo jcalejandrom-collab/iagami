@@ -56,10 +56,70 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
   align-items:center;
   overflow:hidden;
   background-image:url('./hero-iagami.png');
-  background-size:cover;
+  background-size:110%;
   background-position:center top;
   background-repeat:no-repeat;
   background-color:#1a4a2e;
+  transform-origin:50% 58%;
+  animation:heroCradle 9s ease-in-out infinite;
+}
+@keyframes heroCradle{
+  0%,100%{background-size:110%;background-position:50% 0%}
+  50%{background-size:111.5%;background-position:51% -0.8%}
+}
+
+/* ── Capas de efecto sobre el hero ── */
+.hero-efecto{position:absolute;inset:0;pointer-events:none;z-index:1}
+
+.hoja-hero{
+  position:absolute;
+  opacity:0;
+  animation:floatUpHero var(--dur,9s) ease-in-out var(--delay,0s) infinite;
+  will-change:transform,opacity;
+}
+.hoja-hero.leaf{border-radius:50% 0 50% 0;filter:blur(0.4px)}
+.hoja-hero.mote{
+  border-radius:50%;mix-blend-mode:screen;filter:blur(0.6px);
+  background:radial-gradient(circle,rgba(255,244,180,.92) 0%,rgba(255,224,100,0) 70%);
+}
+@keyframes floatUpHero{
+  0%  {transform:translate(0,0) rotate(0deg) scale(var(--s,1));opacity:0}
+  12% {opacity:var(--o,.7)}
+  85% {opacity:var(--o,.7)}
+  100%{transform:translate(var(--dx,0px),var(--dy,-200px)) rotate(var(--dr,180deg)) scale(var(--s,1));opacity:0}
+}
+
+.hero-glow-calido{
+  position:absolute;inset:0;pointer-events:none;z-index:1;
+  background:radial-gradient(ellipse 55% 45% at 50% 62%,
+    rgba(200,160,60,.22) 0%,rgba(80,180,80,.10) 40%,transparent 70%);
+  mix-blend-mode:screen;
+  animation:heroGlowPulse 9s ease-in-out infinite;
+}
+@keyframes heroGlowPulse{
+  0%,100%{opacity:.50} 45%{opacity:.85} 50%{opacity:.92} 55%{opacity:.85}
+}
+
+.hero-rayos{position:absolute;inset:0;pointer-events:none;z-index:1;overflow:hidden}
+.hero-rayo{
+  position:absolute;top:-20%;width:180px;height:130%;
+  mix-blend-mode:screen;filter:blur(18px);
+  animation:heroBeam 9s ease-in-out infinite;
+  background:linear-gradient(180deg,rgba(255,240,180,.18) 0%,rgba(255,240,180,.05) 60%,transparent 100%);
+}
+.hero-rayo:nth-child(1){left:28%;transform:rotate(-14deg);animation-delay:0s}
+.hero-rayo:nth-child(2){left:62%;transform:rotate(10deg);animation-delay:-4.5s}
+@keyframes heroBeam{
+  0%,100%{opacity:.20} 30%{opacity:.45} 65%{opacity:.15}
+}
+
+.hero-vineta{
+  position:absolute;inset:0;pointer-events:none;z-index:1;
+  background:radial-gradient(ellipse 80% 80% at 50% 50%,transparent 35%,rgba(0,0,0,.50) 100%);
+  animation:heroVineta 9s ease-in-out infinite;
+}
+@keyframes heroVineta{
+  0%,100%{opacity:.70} 50%{opacity:.40}
 }
 .hero-overlay-left{
   position:absolute;inset:0;z-index:1;
@@ -454,6 +514,16 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
     <div class="hero">
       <div class="hero-overlay-left"></div>
       <div class="hero-overlay-depth"></div>
+
+      <!-- Efectos ilustración viva -->
+      <div class="hero-efecto" id="hero-hojas"></div>
+      <div class="hero-glow-calido"></div>
+      <div class="hero-rayos">
+        <div class="hero-rayo"></div>
+        <div class="hero-rayo"></div>
+      </div>
+      <div class="hero-vineta"></div>
+
       <div class="hero-content">
 
         <!-- TEXTO IZQUIERDA -->
@@ -1828,6 +1898,48 @@ async function doLogin() {
     if (errEl) { errEl.textContent = 'Credenciales incorrectas'; errEl.style.display = 'block'; }
   }
 }
+
+/* ── Hojas y partículas del hero ── */
+(function(){
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const cont = document.getElementById('hero-hojas');
+  if(!cont) return;
+  const rnd = (a,b) => a + Math.random()*(b-a);
+  const verdes = [
+    'rgba(112,175,86,.90)','rgba(94,168,92,.85)',
+    'rgba(168,214,120,.88)','rgba(74,140,84,.82)',
+    'rgba(140,196,100,.86)','rgba(60,120,60,.80)'
+  ];
+  for(let i=0;i<22;i++){
+    const el = document.createElement('div');
+    el.className = 'hoja-hero leaf';
+    const size = rnd(7,18), dur = rnd(7,13);
+    el.style.cssText = `
+      left:${rnd(10,88)}%;bottom:${rnd(5,90)}%;
+      width:${size}px;height:${size}px;
+      background:${verdes[Math.floor(rnd(0,verdes.length))]};
+      --dx:${rnd(-80,80)}px;--dy:${rnd(-280,-110)}px;
+      --dr:${rnd(-240,240)}deg;--s:${rnd(0.65,1.35)};
+      --o:${rnd(0.40,0.80)};--dur:${dur.toFixed(2)}s;
+      --delay:${rnd(-dur,0).toFixed(2)}s;
+    `;
+    cont.appendChild(el);
+  }
+  for(let i=0;i<16;i++){
+    const el = document.createElement('div');
+    el.className = 'hoja-hero mote';
+    const size = rnd(3,8), dur = rnd(6,11);
+    el.style.cssText = `
+      left:${rnd(15,82)}%;bottom:${rnd(10,85)}%;
+      width:${size}px;height:${size}px;
+      --dx:${rnd(-55,55)}px;--dy:${rnd(-220,-80)}px;
+      --dr:0deg;--s:${rnd(0.6,1.5)};
+      --o:${rnd(0.50,0.90)};--dur:${dur.toFixed(2)}s;
+      --delay:${rnd(-dur,0).toFixed(2)}s;
+    `;
+    cont.appendChild(el);
+  }
+})();
 </script>
 </body>
 </html>
