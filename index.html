@@ -27,6 +27,10 @@ html{scroll-behavior:smooth}
 .nav-scrolled .navinner{height:50px}
 @media(prefers-reduced-motion:reduce){.nav{transition:none}}
 
+/* FASE 2 — Stagger cards */
+[data-stagger]>*{opacity:0;transform:translateY(20px);transition:opacity .4s ease,transform .4s ease}
+[data-stagger]>*.stagger-in{opacity:1;transform:none}
+
 /* Hover premium cards */
 .svc-card{transition:border-color .22s ease,transform .22s ease,box-shadow .22s ease}
 .svc-card:hover{border-color:#1d6b3e;transform:translateY(-5px) scale(1.02);box-shadow:0 12px 32px rgba(29,107,62,.16)}
@@ -545,7 +549,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
         <h2>Todo lo que necesitas, en un solo lugar</h2>
         <p>Accede a los servicios institucionales del municipio desde cualquier dispositivo</p>
       </div>
-      <div class="svc-grid">
+      <div class="svc-grid" data-stagger>
         <a class="svc-card" href="#" onclick="showPage('denuncia');return false">
           <div class="svc-ico" style="background:#fee2e2">🚨</div>
           <div class="svc-name">Presentar Denuncia</div>
@@ -598,7 +602,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
         <h2>Estado del medio ambiente en Iribarren</h2>
         <p>Datos del monitoreo ambiental municipal actualizados desde el sistema SIGAP</p>
       </div>
-      <div id="home-indicadores-grid" class="ind-grid">
+      <div id="home-indicadores-grid" class="ind-grid" data-stagger data-stagger-delay="80">
         <!-- Populated by renderHomeIndicadores() -->
       </div>
     </div>
@@ -612,7 +616,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
         <h2>Últimas noticias de IAGAMI</h2>
         <p>Información institucional y ambiental del municipio</p>
       </div>
-      <div id="home-noticias-grid" class="news-grid">
+      <div id="home-noticias-grid" class="news-grid" data-stagger data-stagger-delay="80">
         <!-- Populated by renderHomeNoticias() -->
       </div>
       <div class="ver-mas-row">
@@ -632,7 +636,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
         <h2>Proyectos en ejecución</h2>
         <p>Iniciativas activas de gestión y restauración ambiental</p>
       </div>
-      <div id="home-proyectos-grid" class="proj-grid">
+      <div id="home-proyectos-grid" class="proj-grid" data-stagger data-stagger-delay="80">
         <!-- Populated by renderHomeProyectos() -->
       </div>
       <div class="ver-mas-row">

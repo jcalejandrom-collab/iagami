@@ -1,5 +1,5 @@
 /**
- * IAGAMI — Módulo de animaciones FASE 1
+ * IAGAMI — Módulo de animaciones FASE 1 + FASE 2
  * Pure JS + CSS. Sin dependencias. WCAG / prefers-reduced-motion safe.
  */
 'use strict';
@@ -118,19 +118,144 @@
     });
   }
 
-  /* ─── 5. SKELETON SHIMMER ────────────────────────────────────────────────────
-     Uso: reemplaza contenido temporal con <div class="skel-line"></div>
-     El shimmer se aplica automáticamente vía CSS.
+  /* ─── FASE 2 ──────────────────────────────────────────────────────────────── */
+
+  /* ─── 5. STAGGER CARDS ───────────────────────────────────────────────────────
+     Cuando un grid entra en el viewport, sus hijos aparecen uno a uno
+     con un pequeño retraso entre cada uno (efecto cascada).
+     Uso: agrega data-stagger al contenedor grid.
+     CSS necesario en cada página:
+       [data-stagger] > * { opacity:0; transform:translateY(20px);
+                            transition:opacity .4s ease, transform .4s ease; }
+       [data-stagger] > *.stagger-in { opacity:1; transform:none; }
   ────────────────────────────────────────────────────────────────────────── */
-  // (Solo CSS — se activa con clase .skeleton en el contenedor padre)
+  function initStaggerCards() {
+    if (reduced) {
+      document.querySelectorAll('[data-stagger]').forEach(grid => {
+        grid.querySelectorAll(':scope > *').forEach(el => el.classList.add('stagger-in'));
+      });
+      return;
+    }
+
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        const grid  = entry.target;
+        const items = Array.from(grid.querySelectorAll(':scope > *'));
+        const base  = parseInt(grid.dataset.staggerDelay || '60', 10);
+        items.forEach((item, i) => {
+          setTimeout(() => item.classList.add('stagger-in'), i * base);
+        });
+        io.unobserve(grid);
+      });
+    }, { threshold: 0.08, rootMargin: '0px 0px -30px 0px' });
+
+    document.querySelectorAll('[data-stagger]').forEach(grid => io.observe(grid));
+  }
+
+  /* ─── 6. FILTER FADE ─────────────────────────────────────────────────────────
+     Fade-out + fade-in cuando se cambia el contenido de un contenedor filtrable.
+     Uso JS: IAGAMI_ANIM.filterFade(containerEl, renderFn)
+       containerEl : el div que contiene las cards
+       renderFn    : función que actualiza el innerHTML
+  ────────────────────────────────────────────────────────────────────────── */
+  function filterFade(container, renderFn) {
+    if (reduced || !container) { renderFn(); return; }
+    container.style.transition = 'opacity .22s ease';
+    container.style.opacity    = '0';
+    setTimeout(() => {
+      renderFn();
+      requestAnimationFrame(() => {
+        container.style.opacity = '1';
+        staggerChildren(container);
+      });
+    }, 220);
+  }
+
+  function staggerChildren(container) {
+    if (reduced) return;
+    const base  = 55;
+    const items = Array.from(container.querySelectorAll(':scope > *'));
+    items.forEach(el => { el.style.opacity = '0'; el.style.transform = 'translateY(16px)'; });
+    items.forEach((el, i) => {
+      setTimeout(() => {
+        el.style.transition = 'opacity .35s ease, transform .35s ease';
+        el.style.opacity    = '1';
+        el.style.transform  = 'none';
+      }, i * base);
+    });
+  }
+
+  /* ─── 7. TAB UNDERLINE SLIDE ─────────────────────────────────────────────────
+     Desliza un indicador visual bajo el tab activo.
+     Uso: agrega data-tab-group al contenedor de tabs.
+     El módulo inyecta un div.tab-indicator y lo mueve con CSS transform.
+  ────────────────────────────────────────────────────────────────────────── */
+  function initTabSlider() {
+    document.querySelectorAll('[data-tab-group]').forEach(group => {
+      const indicator = document.createElement('div');
+      indicator.className = 'tab-indicator';
+      indicator.style.cssText = `
+        position:absolute;bottom:0;left:0;height:3px;
+        background:var(--primary,#1d6b3e);border-radius:2px 2px 0 0;
+        transition:transform .28s cubic-bezier(.4,0,.2,1), width .28s cubic-bezier(.4,0,.2,1);
+        pointer-events:none;`;
+      group.style.position = 'relative';
+      group.appendChild(indicator);
+
+      function moveIndicator(activeBtn) {
+        if (!activeBtn) return;
+        const gRect = group.getBoundingClientRect();
+        const bRect = activeBtn.getBoundingClientRect();
+        indicator.style.width     = bRect.width + 'px';
+        indicator.style.transform = `translateX(${bRect.left - gRect.left}px)`;
+      }
+
+      const active = group.querySelector('.active, [aria-selected="true"]');
+      if (active) moveIndicator(active);
+
+      group.addEventListener('click', e => {
+        const btn = e.target.closest('button, [role="tab"]');
+        if (!btn || !group.contains(btn)) return;
+        requestAnimationFrame(() => moveIndicator(btn));
+      });
+    });
+  }
+
+  /* ─── 8. SMOOTH NUMBER UPDATE ───────────────────────────────────────────────
+     Para actualizar un número en pantalla con animación (badges de conteo).
+     Uso JS: IAGAMI_ANIM.animateNumber(el, newValue)
+  ────────────────────────────────────────────────────────────────────────── */
+  function animateNumber(el, newVal) {
+    if (reduced || !el) { el.textContent = newVal; return; }
+    const from = parseFloat(el.textContent) || 0;
+    const to   = parseFloat(newVal) || 0;
+    if (from === to) return;
+    const dur   = 400;
+    const start = performance.now();
+    function tick(now) {
+      const p = Math.min((now - start) / dur, 1);
+      const ease = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.round(from + (to - from) * ease);
+      if (p < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
 
   /* ─── INIT ─────────────────────────────────────────────────────────────── */
   function init() {
     initNavShrink();
     initScrollReveal();
     initCounters();
-    // Progress bars se llaman desde cada página después de renderizar las barras
-    window.IAGAMI_ANIM = { initProgressBars, animateCounter };
+    initStaggerCards();
+    initTabSlider();
+    window.IAGAMI_ANIM = {
+      initProgressBars,
+      animateCounter,
+      filterFade,
+      staggerChildren,
+      animateNumber
+    };
   }
 
   if (document.readyState === 'loading') {

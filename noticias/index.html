@@ -19,7 +19,9 @@ html{scroll-behavior:smooth}
 [data-reveal]{opacity:0;transform:translateY(22px);transition:opacity .55s ease,transform .55s ease}
 [data-reveal].revealed{opacity:1;transform:none}
 @media(prefers-reduced-motion:reduce){[data-reveal]{opacity:1;transform:none;transition:none}}
-.nav-scrolled{backdrop-filter:blur(12px) saturate(160%);-webkit-backdrop-filter:blur(12px) saturate(160%);background:rgba(255,255,255,.88)!important;box-shadow:0 2px 20px rgba(29,107,62,.13)!important}
+.nav-scrolled{backdrop-filter:none;background:#fff!important;box-shadow:0 2px 20px rgba(29,107,62,.13)!important}
+[data-stagger]>*{opacity:0;transform:translateY(20px);transition:opacity .4s ease,transform .4s ease}
+[data-stagger]>*.stagger-in{opacity:1;transform:none}
 .skel-line{background:linear-gradient(90deg,#e8f5ee 25%,#d4edd8 50%,#e8f5ee 75%);background-size:200% 100%;animation:shimmer 1.4s ease infinite;border-radius:6px;height:14px;margin-bottom:8px}
 .skel-img{background:linear-gradient(90deg,#e8f5ee 25%,#d4edd8 50%,#e8f5ee 75%);background-size:200% 100%;animation:shimmer 1.4s ease infinite;border-radius:10px;height:180px}
 @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
@@ -216,7 +218,7 @@ footer p{margin-bottom:4px}
 
 <!-- NEWS GRID -->
 <div class="news-grid-wrap" data-reveal>
-  <div class="news-grid" id="newsGrid"></div>
+  <div class="news-grid" id="newsGrid" data-stagger data-stagger-delay="70"></div>
   <div id="emptyState" class="empty-state" style="display:none">
     <span class="icon">🌿</span>
     <h3>Sin resultados</h3>
@@ -422,6 +424,7 @@ function renderGrid() {
         </div>
       </article>`;
   }).join('');
+  if (window.IAGAMI_ANIM) IAGAMI_ANIM.staggerChildren(grid);
 }
 
 /* ═══════════════════════════════
