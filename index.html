@@ -1154,24 +1154,68 @@ function toggleChat() {
   const p = document.getElementById('chat-panel');
   if (p) p.classList.toggle('open');
 }
-function sendChat() {
+/* ── FAQ seed local ── */
+const CHAT_FAQ_SEED = [
+  {pregunta:'¿Cómo presento una denuncia?',respuesta:'Puede presentar su denuncia en línea desde nuestra sección <strong>Denuncias</strong> o llamar al 📞 (0251) 000-0000. También puede venir a nuestra sede en Barquisimeto, Lara.',palabras_clave:['denuncia','contamina','basura','talar','árbol','quema','ruido','ilegal']},
+  {pregunta:'¿Cómo consulto una multa?',respuesta:'En la sección <strong>Multas</strong> puede buscar su expediente por número o cédula/RIF. Para reportar un pago vaya a <strong>Multas → Reportar Pago</strong>. Dudas: multas@iagami.gob.ve',palabras_clave:['multa','expediente','pagar','deuda','sanción','infracción','cobro']},
+  {pregunta:'¿Qué trámites ofrece IAGAMI?',respuesta:'Ofrecemos permisos ambientales, certificados de conformidad, registro de empresas, licencias y más. Vea el catálogo completo en <strong>Trámites</strong> y solicite en línea.',palabras_clave:['trámite','permiso','certificado','licencia','registro','solicitud','formulario']},
+  {pregunta:'¿Cuál es el horario de atención?',respuesta:'Atendemos <strong>Lunes a Viernes de 8:00 am a 12:00 pm</strong>. Sede IAGAMI, Barquisimeto, Estado Lara. Las denuncias se reciben <strong>24/7 en línea</strong>.',palabras_clave:['horario','atención','oficina','sede','hora','abierto','cuando','cierra']},
+  {pregunta:'¿Cómo registro mi empresa?',respuesta:'El registro ambiental de empresas se gestiona en la sección <strong>Empresas</strong>. Necesitará RIF, documentos constitutivos y la ficha técnica ambiental.',palabras_clave:['empresa','rif','registro','industria','comercio','negocio','permiso ambiental']},
+  {pregunta:'¿Cómo consulto proyectos ambientales?',respuesta:'En la sección <strong>Proyectos</strong> puede ver todos los proyectos ambientales activos del municipio con su avance, beneficiarios e indicadores.',palabras_clave:['proyecto','ambiental','inversión','plan','programa','avance']},
+  {pregunta:'¿Qué indicadores ambientales mide IAGAMI?',respuesta:'Monitoreamos calidad del aire, cobertura vegetal, árboles plantados, denuncias atendidas y más. Vea el panel en <strong>Indicadores</strong>.',palabras_clave:['indicador','calidad','aire','agua','árbol','verde','cobertura','medición']}
+];
+
+let _chatFaqs = null;
+
+async function loadChatFaqs() {
+  if (_chatFaqs) return _chatFaqs;
+  try {
+    const data = await CMSDB.getAll('chatbot_faq');
+    _chatFaqs = data.length ? data : CHAT_FAQ_SEED;
+  } catch(e) {
+    _chatFaqs = CHAT_FAQ_SEED;
+  }
+  return _chatFaqs;
+}
+
+function findFaqResponse(text, faqs) {
+  const lower = text.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+  for (const faq of faqs) {
+    const keys = Array.isArray(faq.palabras_clave) ? faq.palabras_clave : (faq.palabras_clave ? JSON.parse(faq.palabras_clave) : []);
+    if (keys.some(k => lower.includes(k.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'')))) {
+      return faq.respuesta;
+    }
+  }
+  return null;
+}
+
+function addChatBubble(msgs, html, isUser) {
+  const b = document.createElement('div');
+  if (isUser) {
+    b.style.cssText = 'background:#1d6b3e;color:#fff;border-radius:10px 10px 2px 10px;padding:9px 12px;max-width:85%;align-self:flex-end;font-size:12px;line-height:1.5';
+    b.textContent = html;
+  } else {
+    b.className = 'chat-bubble';
+    b.innerHTML = html;
+  }
+  msgs.appendChild(b);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+async function sendChat() {
   const inp = document.getElementById('chat-input');
   const msgs = document.getElementById('chat-msgs');
   const txt = inp.value.trim();
   if (!txt) return;
-  const userBubble = document.createElement('div');
-  userBubble.style.cssText = 'background:#1d6b3e;color:#fff;border-radius:10px 10px 2px 10px;padding:9px 12px;max-width:85%;align-self:flex-end;font-size:12px;line-height:1.5';
-  userBubble.textContent = txt;
-  msgs.appendChild(userBubble);
   inp.value = '';
-  msgs.scrollTop = msgs.scrollHeight;
+  addChatBubble(msgs, txt, true);
+
+  const faqs = await loadChatFaqs();
+  const respuesta = findFaqResponse(txt, faqs);
+
   setTimeout(() => {
-    const resp = document.createElement('div');
-    resp.className = 'chat-bubble';
-    resp.textContent = 'Gracias por tu mensaje. Un agente de IAGAMI te responderá pronto. También puedes presentar una denuncia formal usando el formulario.';
-    msgs.appendChild(resp);
-    msgs.scrollTop = msgs.scrollHeight;
-  }, 900);
+    addChatBubble(msgs, respuesta || 'No encontré información exacta sobre eso. Para atención personalizada: 📞 (0251) 000-0000 o ✉ info@iagami.gob.ve — también puede usar el formulario de <strong>Denuncias</strong>.', false);
+  }, 700);
 }
 
 /* ─── IA ANÁLISIS ─── */

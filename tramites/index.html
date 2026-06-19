@@ -149,6 +149,39 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 footer{background:#0d3d20;color:rgba(255,255,255,.75);text-align:center;padding:28px 24px;font-size:12px;margin-top:20px}
 footer strong{color:#fff}
 footer p{margin-bottom:4px}
+
+/* ── SOLICITUD FORM ── */
+.solicitud-overlay{position:fixed;inset:0;background:rgba(10,30,18,.65);z-index:1100;display:none;align-items:flex-start;justify-content:center;padding:24px;backdrop-filter:blur(4px);overflow-y:auto}
+.solicitud-overlay.open{display:flex}
+.solicitud-box{background:#fff;border-radius:20px;max-width:600px;width:100%;margin:auto;box-shadow:0 24px 80px rgba(10,30,18,.25);animation:modalIn .25s ease}
+.solicitud-header{background:linear-gradient(135deg,#1d6b3e,#2d8a52);color:#fff;padding:20px 24px;border-radius:20px 20px 0 0;display:flex;justify-content:space-between;align-items:center}
+.solicitud-header h3{font-family:'Poppins',sans-serif;font-size:17px;font-weight:700;margin:0}
+.solicitud-close{background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;line-height:1}
+.solicitud-body{padding:24px;display:flex;flex-direction:column;gap:16px}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-group label{font-size:12px;font-weight:600;color:#1a3d2b;text-transform:uppercase;letter-spacing:.04em}
+.form-group input,.form-group textarea,.form-group select{border:1.5px solid #d4edd8;border-radius:9px;padding:10px 13px;font-size:13px;font-family:'Inter',sans-serif;color:#1a3d2b;outline:none;transition:.15s;background:#fafffe;width:100%}
+.form-group input:focus,.form-group textarea:focus,.form-group select:focus{border-color:#1d6b3e;box-shadow:0 0 0 3px rgba(29,107,62,.1)}
+.form-group textarea{resize:vertical;min-height:80px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.file-upload-area{border:2px dashed #a8dfc0;border-radius:10px;padding:18px;text-align:center;cursor:pointer;transition:.2s;background:#f8fdf9}
+.file-upload-area:hover{border-color:#1d6b3e;background:#e8f5ee}
+.file-upload-area input[type=file]{display:none}
+.file-upload-label{font-size:13px;color:#4a8a6a;cursor:pointer}
+.file-upload-label strong{color:#1d6b3e}
+.file-list{display:flex;flex-direction:column;gap:4px;margin-top:8px}
+.file-item{display:flex;align-items:center;gap:6px;font-size:12px;color:#2a5a3a;background:#e8f5ee;border-radius:6px;padding:4px 8px}
+.solicitud-footer{padding:0 24px 24px;display:flex;gap:10px;justify-content:flex-end}
+.btn-submit-solicitud{background:linear-gradient(135deg,#1d6b3e,#22c55e);color:#fff;border:none;border-radius:9px;padding:11px 24px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;display:inline-flex;align-items:center;gap:7px;transition:.2s}
+.btn-submit-solicitud:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(29,107,62,.3)}
+.btn-submit-solicitud:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.btn-cancel-solicitud{background:#f0faf5;color:#1d6b3e;border:1.5px solid #a8dfc0;border-radius:9px;padding:11px 18px;font-size:13px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;transition:.15s}
+.btn-cancel-solicitud:hover{background:#e8f5ee}
+.solicitud-success{text-align:center;padding:32px 24px;display:flex;flex-direction:column;align-items:center;gap:12px}
+.solicitud-success .check{font-size:56px}
+.solicitud-success h3{font-family:'Poppins',sans-serif;font-size:20px;font-weight:800;color:#1a3d2b}
+.solicitud-success p{font-size:14px;color:#4a8a6a;max-width:360px;line-height:1.7}
+.codigo-solicitud{font-family:'Courier New',monospace;font-size:18px;font-weight:700;color:#1d6b3e;background:#e8f5ee;border-radius:8px;padding:8px 16px;letter-spacing:.1em;border:1.5px solid #a8dfc0}
 </style>
 </head>
 <body>
@@ -249,6 +282,58 @@ footer p{margin-bottom:4px}
   <p><strong>IAGAMI</strong> — Instituto Autónomo de Gestión Ambiental del Municipio Iribarren</p>
   <p>Barquisimeto, Estado Lara, Venezuela &nbsp;|&nbsp; tramites@iagami.gob.ve &nbsp;|&nbsp; +58 (251) 000-0000</p>
 </footer>
+
+<!-- SOLICITUD ONLINE MODAL -->
+<div class="solicitud-overlay" id="solicitudOverlay">
+  <div class="solicitud-box">
+    <div class="solicitud-header">
+      <h3 id="solicitudTitle">Iniciar Solicitud</h3>
+      <button class="solicitud-close" onclick="closeSolicitud()" aria-label="Cerrar">✕</button>
+    </div>
+    <div id="solicitudContent">
+      <div class="solicitud-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="sol-nombre">Nombre Completo *</label>
+            <input type="text" id="sol-nombre" placeholder="Juan Pérez" required/>
+          </div>
+          <div class="form-group">
+            <label for="sol-cedula">Cédula de Identidad *</label>
+            <input type="text" id="sol-cedula" placeholder="V-12345678" required/>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="sol-telefono">Teléfono *</label>
+            <input type="tel" id="sol-telefono" placeholder="0424-0000000" required/>
+          </div>
+          <div class="form-group">
+            <label for="sol-correo">Correo Electrónico *</label>
+            <input type="email" id="sol-correo" placeholder="correo@gmail.com" required/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="sol-observaciones">Observaciones / Descripción del caso</label>
+          <textarea id="sol-observaciones" placeholder="Describa brevemente su solicitud..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Documentos Adjuntos</label>
+          <div class="file-upload-area" onclick="document.getElementById('sol-files').click()">
+            <input type="file" id="sol-files" multiple accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" onchange="handleSolicitudFiles(this)"/>
+            <div class="file-upload-label">📎 <strong>Haga clic para adjuntar archivos</strong><br><span style="font-size:11px;color:#6a8a72">PDF, JPG, PNG, DOC — Máx. 10MB por archivo</span></div>
+            <div class="file-list" id="fileList"></div>
+          </div>
+        </div>
+      </div>
+      <div class="solicitud-footer">
+        <button class="btn-cancel-solicitud" onclick="closeSolicitud()">Cancelar</button>
+        <button class="btn-submit-solicitud" id="btnSubmitSolicitud" onclick="submitSolicitud()">
+          📤 Enviar Solicitud
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- DATABASE -->
 <script src="../cms/config.js"></script>
@@ -431,8 +516,8 @@ async function openDetail(id) {
     </div>
 
     <div class="modal-actions">
-      <button class="btn-download" onclick="handleDownload()">
-        ⬇ Descargar Formulario
+      <button class="btn-download" onclick="openSolicitud('${escHtml(t.id || '')}', '${escHtml(t.nombre)}')">
+        📤 Iniciar Solicitud Online
       </button>
       <button class="btn-close-modal" onclick="closeDetail()">Cerrar</button>
     </div>`;
@@ -450,8 +535,95 @@ function closeDetail() {
   if (lastFocusedElement) { lastFocusedElement.focus(); lastFocusedElement = null; }
 }
 
-function handleDownload() {
-  toast('📄 Formulario disponible próximamente. Contáctenos en tramites@iagami.gob.ve', 'info', 4000);
+/* ── SOLICITUD ONLINE ── */
+let currentTramiteId = null;
+let currentTramiteNombre = '';
+let selectedFiles = [];
+
+function openSolicitud(tramiteId, tramiteName) {
+  currentTramiteId = tramiteId;
+  currentTramiteNombre = tramiteName;
+  document.getElementById('solicitudTitle').textContent = `Solicitud: ${tramiteName}`;
+  selectedFiles = [];
+  document.getElementById('fileList').innerHTML = '';
+  document.getElementById('sol-nombre').value = '';
+  document.getElementById('sol-cedula').value = '';
+  document.getElementById('sol-telefono').value = '';
+  document.getElementById('sol-correo').value = '';
+  document.getElementById('sol-observaciones').value = '';
+  document.getElementById('solicitudOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  document.getElementById('sol-nombre').focus();
+}
+
+function closeSolicitud() {
+  document.getElementById('solicitudOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function handleSolicitudFiles(input) {
+  selectedFiles = Array.from(input.files);
+  const list = document.getElementById('fileList');
+  list.innerHTML = selectedFiles.map(f =>
+    `<div class="file-item">📄 ${escHtml(f.name)} <span style="color:#6a8a72;margin-left:auto">${(f.size/1024).toFixed(0)} KB</span></div>`
+  ).join('');
+}
+
+async function submitSolicitud() {
+  const nombre = document.getElementById('sol-nombre').value.trim();
+  const cedula = document.getElementById('sol-cedula').value.trim();
+  const telefono = document.getElementById('sol-telefono').value.trim();
+  const correo = document.getElementById('sol-correo').value.trim();
+  const obs = document.getElementById('sol-observaciones').value.trim();
+
+  if (!nombre || !cedula || !telefono || !correo) {
+    toast('⚠ Complete los campos obligatorios', 'info', 3000);
+    return;
+  }
+
+  const btn = document.getElementById('btnSubmitSolicitud');
+  btn.disabled = true;
+  btn.textContent = 'Enviando...';
+
+  const codigo = 'SOL-' + Date.now().toString(36).toUpperCase();
+  const payload = {
+    tramite: currentTramiteId,
+    tramite_nombre: currentTramiteNombre,
+    solicitante_nombre: nombre,
+    cedula,
+    telefono,
+    correo,
+    observaciones: obs,
+    estado: 'Recibido',
+    codigo,
+    fecha_solicitud: new Date().toISOString()
+  };
+
+  try {
+    const pbUrl = document.querySelector('meta[name="pb-url"]')?.content;
+    if (pbUrl) {
+      const fd = new FormData();
+      Object.entries(payload).forEach(([k,v]) => fd.append(k, v));
+      selectedFiles.forEach(f => fd.append('adjuntos', f));
+      await fetch(`${pbUrl}/api/collections/solicitudes_tramites/records`, {
+        method: 'POST', body: fd
+      });
+    }
+  } catch(e) {
+    const stored = JSON.parse(localStorage.getItem('solicitudes_tramites') || '[]');
+    stored.push(payload);
+    localStorage.setItem('solicitudes_tramites', JSON.stringify(stored));
+  }
+
+  document.getElementById('solicitudContent').innerHTML = `
+    <div class="solicitud-success">
+      <div class="check">✅</div>
+      <h3>¡Solicitud Enviada!</h3>
+      <p>Su solicitud ha sido registrada exitosamente. Guarde su código de seguimiento:</p>
+      <div class="codigo-solicitud">${codigo}</div>
+      <p style="font-size:12px;color:#6a8a72;margin-top:8px">Recibirá respuesta a <strong>${escHtml(correo)}</strong> en un plazo de 5 días hábiles.</p>
+      <button class="btn-submit-solicitud" style="margin-top:8px" onclick="closeSolicitud()">Cerrar</button>
+    </div>`;
 }
 
 /* ═══════════════════════════════
@@ -483,6 +655,9 @@ function bindEvents() {
   document.getElementById('modalClose').addEventListener('click', closeDetail);
   document.getElementById('modalOverlay').addEventListener('click', e => {
     if (e.target === document.getElementById('modalOverlay')) closeDetail();
+  });
+  document.getElementById('solicitudOverlay').addEventListener('click', e => {
+    if (e.target === document.getElementById('solicitudOverlay')) closeSolicitud();
   });
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') closeDetail();
