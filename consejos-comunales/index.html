@@ -1304,8 +1304,6 @@ async function saveForm(){
   const ts=new Date().toISOString();
 
   const orgData={
-    _localId: 'local-'+Date.now(),
-    id: 'local-'+Date.now(),
     codigo_registro: code,
     tipo,
     nombre: ($('f-nombre').value||'').trim(),
@@ -1399,19 +1397,19 @@ async function saveForm(){
 
   try{
     if(typeof CMSDB!=='undefined'&&PB_URL){
-      await CMSDB.create(collection,orgData);
+      await CMSDB.save(collection,orgData);
       savedItems.push(`${tipo} registrada en el sistema.`);
-      await CMSDB.create('diagnosticos_ambientales',diagData);
+      await CMSDB.save('diagnosticos_ambientales',diagData);
       savedItems.push('Diagnóstico ambiental guardado.');
       if(denunciaData){
-        await CMSDB.create('denuncias_comunitarias',denunciaData);
+        await CMSDB.save('denuncias_comunitarias',denunciaData);
         savedItems.push('Denuncia ambiental registrada.');
       }
     } else throw new Error('CMSDB not available');
   }catch(pbErr){
-    // fallback localStorage
+    // fallback localStorage (assign a local id only for the offline copy)
     const orgArr=lsGet(collection);
-    orgArr.push(orgData);
+    orgArr.push(Object.assign({id:'local-'+Date.now()},orgData));
     lsSet(collection,orgArr);
     savedItems.push(`${tipo} guardada localmente.`);
 
