@@ -861,6 +861,7 @@ input,select,textarea{font-family:inherit}
           <button class="btn btn-secondary" onclick="closeConsejoForm()">Cancelar</button>
         </div>
       </div>
+    </div>
     <!-- BIENVENIDA SECTION -->
     <div class="section" id="sec-bienvenida">
       <div class="page-header">
@@ -1454,6 +1455,35 @@ function fillForm(form, item, section) {
       estado: item.publicado ? 'publicado' : 'borrador',
     });
   }
+  if (section === 'transparencia') {
+    item = Object.assign({}, item, {
+      'año': item.año !== undefined ? item.año : item.year,
+      estado: item.publicado ? 'publicado' : 'borrador',
+    });
+  }
+  if (section === 'agenda') {
+    item = Object.assign({}, item, {
+      fecha: item.fecha !== undefined ? item.fecha : item.fecha_inicio,
+      estado: item.estado || (item.publicado ? 'publicado' : 'borrador'),
+    });
+  }
+  if (section === 'proyectos') {
+    item = Object.assign({}, item, {
+      porcentaje_avance: item.porcentaje_avance !== undefined ? item.porcentaje_avance : item.avance,
+      fecha_inicio: item.fecha_inicio,
+      fecha_fin_estimada: item.fecha_fin_estimada !== undefined ? item.fecha_fin_estimada : item.fecha_fin,
+    });
+  }
+  if (section === 'indicadores') {
+    item = Object.assign({}, item, {
+      valor_actual: item.valor_actual !== undefined ? item.valor_actual : item.valor,
+    });
+  }
+  if (section === 'organizacion') {
+    item = Object.assign({}, item, {
+      padre: item.padre !== undefined ? item.padre : item.parent,
+    });
+  }
   // Fill standard inputs
   Array.from(form.elements).forEach(el => {
     if (!el.name || el.name==='id') return;
@@ -1835,6 +1865,7 @@ async function saveAgenda(e) {
     hora_inicio: raw.hora_inicio,
     hora_fin: raw.hora_fin,
     responsable: raw.responsable,
+    estado: raw.estado,
     publicado: raw.estado === 'publicado' || raw.estado === 'programado',
     imagen: raw.imagen,
     destacado: form.querySelector('[name="destacado"]').checked,
@@ -1863,7 +1894,7 @@ async function renderTransparencia() {
   tbody.innerHTML = !page.length ? emptyState() : page.map(d => `<tr>
     <td style="font-weight:500">${escHtml(d.titulo||'')}</td>
     <td>${escHtml(d.categoria||'')}</td>
-    <td>${d.año||d['año']||'—'}</td>
+    <td>${d.año||d.year||'—'}</td>
     <td>${estadoBadge(d.estado)}</td>
     <td>${actionBtns('transparencia',d.id)}</td>
   </tr>`).join('');
@@ -1961,7 +1992,7 @@ async function renderProyectos() {
   tbody.innerHTML = !page.length ? emptyState() : page.map(p => `<tr>
     <td style="font-weight:500">${escHtml(p.nombre||'')}</td>
     <td>${estadoBadge(p.estado)}</td>
-    <td style="min-width:120px">${progressBar(p.porcentaje_avance)}</td>
+    <td style="min-width:120px">${progressBar(p.porcentaje_avance!=null?p.porcentaje_avance:p.avance)}</td>
     <td>${escHtml(p.responsable||'—')}</td>
     <td>${actionBtns('proyectos',p.id)}</td>
   </tr>`).join('');
@@ -2010,7 +2041,7 @@ async function renderIndicadores() {
   const tbody = document.getElementById('indicadores-tbody');
   tbody.innerHTML = !page.length ? emptyState() : page.map(ind => `<tr>
     <td><span style="margin-right:6px">${ind.icono||''}</span><strong>${escHtml(ind.nombre||'')}</strong></td>
-    <td style="font-weight:700;color:var(--primary)">${ind.valor_actual??'—'}</td>
+    <td style="font-weight:700;color:var(--primary)">${(ind.valor_actual??ind.valor)??'—'}</td>
     <td>${escHtml(ind.unidad||'')}</td>
     <td>${ind.meta??'—'}</td>
     <td>${tendenciaBadge(ind.tendencia)}</td>
@@ -2388,7 +2419,9 @@ async function handleFileUpload(e) {
   await CMSDB.save('media', {
     nombre: file.name,
     archivo: file,
-    tipo: file.type.startsWith('image/') ? 'imagen' : 'pdf',
+    tipo: file.type,
+    tamaño: file.size,
+    fecha: new Date().toISOString(),
     descripcion: '',
     publicado: true,
   });
@@ -2894,9 +2927,11 @@ async function savePlan() {
   if (!titulo.trim()) { showToast('El título es obligatorio', 'error'); return; }
   const gv = id => (document.getElementById(id)||{}).value||'';
   const data = {
+    titulo: titulo.trim(),
     nombre: titulo.trim(),
     tipo: gv('fp-tipo'),
     codigo: gv('fp-codigo'),
+    fecha: gv('fp-fecha'),
     fecha_inicio: gv('fp-fecha'),
     hora_inicio: gv('fp-hora_inicio'),
     hora_fin: gv('fp-hora_fin'),
@@ -2908,6 +2943,7 @@ async function savePlan() {
     descripcion: gv('fp-descripcion'),
     observaciones: gv('fp-observaciones'),
     avance: parseInt((document.getElementById('fp-avance')||{}).value)||0,
+    publicar: !!(document.getElementById('fp-publicar')||{}).checked,
     publicado: !!(document.getElementById('fp-publicar')||{}).checked
   };
   try {
@@ -3092,16 +3128,15 @@ async function saveRevistaMeta() {
 
   const data = {
     titulo,
-    edicion:        numero,
+    numero_edicion: numero,
     fecha:          document.getElementById('rv-fecha').value,
     categoria:      document.getElementById('rv-categoria').value,
-    publicado:      document.getElementById('rv-estado').value === 'publicado',
+    estado:         document.getElementById('rv-estado').value,
+    publicado:      document.getElementById('rv-estado').value === 'publicada',
     descripcion:    document.getElementById('rv-descripcion').value.trim(),
     portada:        (document.getElementById('rv-portada-file')?.files?.[0]) || undefined,
     pdf:            (document.getElementById('rv-pdf-file')?.files?.[0]) || undefined,
-    destacada:      document.getElementById('rv-destacada').checked,
-    vistas:         0,
-    descarga:       0
+    destacada:      document.getElementById('rv-destacada').checked
   };
 
   let saved;
