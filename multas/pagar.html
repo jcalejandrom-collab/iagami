@@ -322,6 +322,32 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
           </div>
         </div>
 
+        <!-- COMPROBANTE DE PAGO -->
+        <div class="form-section">
+          <div class="form-section-title">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Cargar Comprobante de Pago
+          </div>
+          <div class="form-group" style="margin-bottom:14px">
+            <label>Comprobante / Captura de pantalla</label>
+            <div id="comprobante-drop" style="border:2px dashed #a8dfc0;border-radius:10px;padding:22px;text-align:center;cursor:pointer;transition:.2s;background:#f8fdf9" onclick="document.getElementById('f-comprobante').click()" ondragover="event.preventDefault();this.style.borderColor='#1d6b3e'" ondragleave="this.style.borderColor='#a8dfc0'" ondrop="dropComprobante(event)">
+              <input type="file" id="f-comprobante" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="previewComprobante(this)"/>
+              <div id="comprobante-placeholder">
+                <div style="font-size:28px;margin-bottom:6px">📎</div>
+                <div style="font-size:13px;color:#1d6b3e;font-weight:600">Haga clic o arrastre el comprobante aquí</div>
+                <div style="font-size:11px;color:#6a8a72;margin-top:4px">PDF, JPG, PNG — Máx. 10 MB</div>
+              </div>
+              <div id="comprobante-preview" style="display:none;align-items:center;gap:10px;justify-content:center">
+                <span style="font-size:20px">📄</span>
+                <span id="comprobante-fname" style="font-size:13px;color:#1a3d2b;font-weight:600"></span>
+                <span id="comprobante-fsize" style="font-size:11px;color:#4a8a6a"></span>
+                <button type="button" onclick="clearComprobante(event)" style="background:none;border:none;color:#dc2626;cursor:pointer;font-size:14px;padding:0 4px" title="Quitar">✕</button>
+              </div>
+            </div>
+            <span style="font-size:11px;color:#4a8a6a;margin-top:4px">Adjunte la captura o PDF de su comprobante bancario</span>
+          </div>
+        </div>
+
         <button class="submit-btn" id="btn-enviar" onclick="enviarReporte()">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="20 6 9 17 4 12"/></svg>
           Enviar reporte de pago
@@ -535,7 +561,24 @@ async function enviarReporte() {
         created_at:    new Date().toISOString(),
       };
 
-      await CMSDB.save('reportes_pago', reporte);
+      /* Save to pagos collection with comprobante file */
+      try {
+        const pbUrl = document.querySelector('meta[name="pb-url"]')?.content;
+        if (pbUrl) {
+          const fd = new FormData();
+          Object.entries(reporte).forEach(([k,v]) => fd.append(k, String(v)));
+          if (_comprobanteFile) fd.append('comprobante', _comprobanteFile);
+          await fetch(`${pbUrl}/api/collections/pagos/records`, { method: 'POST', body: fd });
+        } else {
+          throw new Error('no pb-url');
+        }
+      } catch(_pbErr) {
+        await CMSDB.save('reportes_pago', reporte);
+        /* fallback localStorage */
+        const stored = JSON.parse(localStorage.getItem('pagos') || '[]');
+        stored.push(reporte);
+        localStorage.setItem('pagos', JSON.stringify(stored));
+      }
 
       /* Mostrar panel de éxito */
       document.getElementById('form-panel').style.display = 'none';
@@ -552,6 +595,43 @@ async function enviarReporte() {
       _enviandoReporte = false;
     }
   }, 1000);
+}
+
+/* ── COMPROBANTE DE PAGO ── */
+let _comprobanteFile = null;
+
+function previewComprobante(input) {
+  if (!input.files || !input.files[0]) return;
+  _comprobanteFile = input.files[0];
+  document.getElementById('comprobante-placeholder').style.display = 'none';
+  const prev = document.getElementById('comprobante-preview');
+  prev.style.display = 'flex';
+  document.getElementById('comprobante-fname').textContent = _comprobanteFile.name;
+  document.getElementById('comprobante-fsize').textContent = (_comprobanteFile.size / 1024).toFixed(0) + ' KB';
+}
+
+function clearComprobante(e) {
+  e.stopPropagation();
+  _comprobanteFile = null;
+  document.getElementById('f-comprobante').value = '';
+  document.getElementById('comprobante-placeholder').style.display = 'block';
+  document.getElementById('comprobante-preview').style.display = 'none';
+}
+
+function dropComprobante(e) {
+  e.preventDefault();
+  document.getElementById('comprobante-drop').style.borderColor = '#a8dfc0';
+  const file = e.dataTransfer.files[0];
+  if (!file) return;
+  const allowed = ['application/pdf','image/jpeg','image/png'];
+  if (!allowed.includes(file.type)) { toast('Solo se aceptan PDF, JPG o PNG'); return; }
+  if (file.size > 10 * 1024 * 1024) { toast('El archivo supera 10 MB'); return; }
+  _comprobanteFile = file;
+  document.getElementById('comprobante-placeholder').style.display = 'none';
+  const prev = document.getElementById('comprobante-preview');
+  prev.style.display = 'flex';
+  document.getElementById('comprobante-fname').textContent = file.name;
+  document.getElementById('comprobante-fsize').textContent = (file.size / 1024).toFixed(0) + ' KB';
 }
 
 /* ── INIT ── */
