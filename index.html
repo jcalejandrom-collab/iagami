@@ -94,7 +94,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
   background-position:center top;
   background-repeat:no-repeat;
   z-index:0;
-  animation:cradle 9s ease-in-out infinite;
+  animation:cradle 40s ease-in-out infinite;
   will-change:transform;
 }
 @keyframes cradle{
@@ -127,8 +127,28 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 }
 .hero::after{
   content:'';position:absolute;inset:0;z-index:1;
-  background:radial-gradient(ellipse 60% 70% at 20% 60%, rgba(34,197,94,.18) 0%, rgba(0,0,0,0) 70%);
+  background:radial-gradient(circle at 35% 30%, rgba(34,197,94,.15), transparent 50%);
   pointer-events:none;
+  animation:glow 12s ease-in-out infinite;
+}
+@keyframes glow{
+  0%,100%{opacity:.4}
+  50%{opacity:.8}
+}
+@media(prefers-reduced-motion:reduce){
+  .hero::after{animation:none;opacity:.6}
+}
+.hero-particle{
+  position:absolute;border-radius:50%;pointer-events:none;z-index:1;
+  background:rgba(234,179,8,.55);
+  animation:floatUp linear infinite;
+  will-change:transform,opacity;
+}
+@keyframes floatUp{
+  0%{transform:translateY(0) scale(1);opacity:0}
+  10%{opacity:1}
+  90%{opacity:.6}
+  100%{transform:translateY(-60px) scale(.6);opacity:0}
 }
 .hero-content{
   position:relative;z-index:2;
@@ -938,6 +958,28 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 <script src="cms/config.js"></script>
 <script src="cms/pb.js"></script>
 <script src="cms/animations.js" defer></script>
+<script>
+(function(){
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const hero = document.querySelector('.hero');
+  if(!hero) return;
+  const COUNT = 7;
+  for(let i=0;i<COUNT;i++){
+    const p = document.createElement('span');
+    p.className = 'hero-particle';
+    const size = 2 + Math.random()*3;
+    p.style.cssText = [
+      'width:'+size+'px','height:'+size+'px',
+      'left:'+(8+Math.random()*45)+'%',
+      'bottom:'+(10+Math.random()*40)+'%',
+      'opacity:'+(0.2+Math.random()*0.35),
+      'animation-duration:'+(6+Math.random()*10)+'s',
+      'animation-delay:'+(Math.random()*8)+'s'
+    ].join(';');
+    hero.appendChild(p);
+  }
+})();
+</script>
 
 <script>
 'use strict';
