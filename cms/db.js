@@ -146,7 +146,9 @@ const CMSDB = (() => {
   function _seed(collection, items) {
     const storageKey = _key(collection);
     const initKey = storageKey + '_initialized';
-    if (localStorage.getItem(initKey)) return;
+    const existing = _read(storageKey);
+    if (localStorage.getItem(initKey) && existing.length > 0) return;
+    if (items.length === 0 && existing.length > 0) return;
     const stamped = items.map(item => Object.assign({
       created_at: now(),
       updated_at: now()
