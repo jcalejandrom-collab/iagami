@@ -83,11 +83,26 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
   display:flex;
   align-items:center;
   overflow:hidden;
+  background-color:#1a4a2e;
+}
+.hero::before{
+  content:'';
+  position:absolute;
+  inset:-6%;
   background-image:url('./hero-iagami.png');
   background-size:cover;
   background-position:center top;
   background-repeat:no-repeat;
-  background-color:#1a4a2e;
+  z-index:0;
+  animation:kenburns 22s ease-in-out infinite alternate;
+  will-change:transform;
+}
+@keyframes kenburns{
+  0%  {transform:scale(1)    translate(0%,  0%)}
+  100%{transform:scale(1.07) translate(-1%, 1%)}
+}
+@media(prefers-reduced-motion:reduce){
+  .hero::before{animation:none}
 }
 .hero-overlay-left{
   position:absolute;inset:0;z-index:1;
