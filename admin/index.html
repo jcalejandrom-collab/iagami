@@ -2176,7 +2176,7 @@ async function renderMultas() {
     ? '<span style="background:#dcfce7;color:#166534;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px">✓ Pública</span>'
     : '<span style="background:#f1f5f9;color:#64748b;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px">Privada</span>';
   tbody.innerHTML = !page.length
-    ? `<tr><td colspan="9" style="text-align:center;padding:28px;color:#888">${emptyState('No hay multas registradas')}</td></tr>`
+    ? emptyState('No hay multas registradas')
     : page.map(m => `<tr>
       <td style="font-family:monospace;font-size:12px">${escHtml(m.expediente||'—')}</td>
       <td style="font-size:12px">${escHtml(m.documento||'—')}</td>
