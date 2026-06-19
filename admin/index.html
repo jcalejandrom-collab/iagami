@@ -1286,6 +1286,28 @@ input,select,textarea{font-family:inherit}
       </div>
     </div>
 
+    <!-- SEED SECTION -->
+    <div data-section="seed" class="section-panel">
+      <div class="page-header">
+        <div><div class="page-title">🌱 Sembrar Datos Iniciales</div><div class="page-subtitle">Importa Comunas y Consejos Comunales con coordenadas aproximadas para que aparezcan en el mapa</div></div>
+      </div>
+      <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:24px;max-width:680px">
+        <p style="font-size:13px;color:var(--muted);margin:0 0 16px">Esta herramienta crea los registros de Comunas y Consejos Comunales de <strong>Municipio Iribarren</strong> y <strong>Municipio Morán</strong> con coordenadas GPS aproximadas según su parroquia. Luego puedes afinar las coordenadas individualmente desde las secciones correspondientes.</p>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px">
+          <input type="checkbox" id="seed-skip" checked style="width:16px;height:16px;cursor:pointer"/>
+          <label for="seed-skip" style="font-size:13px;cursor:pointer">Omitir registros que ya existen (recomendado)</label>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-primary" onclick="runSeed(false)">🌱 Sembrar Datos</button>
+          <button class="btn btn-secondary" onclick="runSeed(true)">🔍 Simulación (sin guardar)</button>
+        </div>
+        <div id="seed-log" style="display:none;margin-top:20px;background:#f8f9fa;border-radius:8px;padding:16px;max-height:400px;overflow-y:auto">
+          <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:8px">Registro de operaciones</div>
+          <pre id="seed-log-pre" style="font-size:11px;line-height:1.6;margin:0;white-space:pre-wrap;word-break:break-all"></pre>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -1340,6 +1362,7 @@ const NAV = [
   {id:'planificacion', icon:'📆', label:'Planificación'},
   {id:'revista',       icon:'📰', label:'Revista Digital'},
   {id:'chatbot',       icon:'🤖', label:'Chatbot FAQ'},
+  {id:'seed',          icon:'🌱', label:'Sembrar Datos'},
 ];
 
 let currentSection = 'dashboard';
@@ -1393,6 +1416,7 @@ async function renderSection(name) {
     case 'planificacion': await renderPlan(); break;
     case 'revista':       await renderRevistas(); break;
     case 'chatbot':       await renderChatbot(); break;
+    case 'seed':          renderSeed(); break;
   }
 }
 
@@ -3587,6 +3611,40 @@ async function saveChatbot() {
   showToast(id ? 'Pregunta actualizada' : 'Pregunta guardada', 'success');
   closeChatbotForm();
   await renderChatbot();
+}
+
+/* ─── SEED ─── */
+function renderSeed() {
+  // Panel is static HTML; just ensure log is hidden when navigating to it
+  const log = document.getElementById('seed-log');
+  if (log) log.style.display = 'none';
+}
+
+async function runSeed(dryRun) {
+  const skipExisting = document.getElementById('seed-skip').checked;
+  const logEl   = document.getElementById('seed-log');
+  const logPre  = document.getElementById('seed-log-pre');
+  logEl.style.display = 'block';
+  logPre.textContent  = dryRun ? '⏳ Simulando...\n' : '⏳ Sembrando datos...\n';
+
+  // Load seed script dynamically if not already loaded
+  if (!window.seedIagami) {
+    await new Promise((res, rej) => {
+      const s = document.createElement('script');
+      s.src = '../cms/seed_comunas.js';
+      s.onload = res; s.onerror = rej;
+      document.head.appendChild(s);
+    });
+  }
+
+  try {
+    const log = await window.seedIagami({ dryRun, skipExisting });
+    logPre.textContent = (log || []).join('\n') || '(sin resultados)';
+    if (!dryRun) showToast('Siembra completada', 'success');
+  } catch(e) {
+    logPre.textContent = '❌ ERROR: ' + e.message;
+    showToast('Error durante la siembra', 'error');
+  }
 }
 
 /* ─── LOGOUT ─── */
