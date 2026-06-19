@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Ilustración Viva — IAGAMI</title>
+<style>
+/* ─── RESET ─────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; height: 100%; overflow: hidden; background: #0d1a0f; }
+
+/* ─── ESCENA (fondo a pantalla completa) ────────────────────── */
+.escena {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+}
+
+/* ─── 1. IMAGEN PRINCIPAL (respiración / mecer) ─────────────── */
+.img-fondo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  transform-origin: 50% 58%;  /* ancla en el centro del abrazo */
+  animation: cradle 9s ease-in-out infinite;
+  will-change: transform;
+}
+
+@keyframes cradle {
+  0%,100% { transform: scale(1.05)  rotate(-0.45deg) translateY(0);      }
+  50%      { transform: scale(1.065) rotate( 0.50deg) translateY(-0.8%);  }
+}
+
+/* ─── 2 & 3. HOJAS + PARTÍCULAS ─────────────────────────────── */
+.capa-efecto {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* Base compartida — los valores individuales vienen de vars JS */
+.hoja {
+  position: absolute;
+  opacity: 0;
+  animation: floatUp var(--dur, 9s) ease-in-out var(--delay, 0s) infinite;
+  will-change: transform, opacity;
+}
+/* Forma de hoja */
+.hoja.leaf {
+  border-radius: 50% 0 50% 0;
+  filter: blur(0.4px);
+}
+/* Partícula de luz dorada */
+.hoja.mote {
+  border-radius: 50%;
+  mix-blend-mode: screen;
+  filter: blur(0.6px);
+  background: radial-gradient(circle,
+    rgba(255,244,180,.92) 0%,
+    rgba(255,224,100, 0) 70%
+  );
+}
+
+@keyframes floatUp {
+  0%   { transform: translate(0,0)           rotate(0deg)      scale(var(--s,1));   opacity: 0;          }
+  12%  { opacity: var(--o, .7);                                                                           }
+  85%  { opacity: var(--o, .7);                                                                           }
+  100% { transform: translate(var(--dx,0px), var(--dy,-200px)) rotate(var(--dr,180deg)) scale(var(--s,1)); opacity: 0; }
+}
+
+/* ─── 4. RESPLANDOR CÁLIDO (Tierra + bosque) ────────────────── */
+.glow-calido {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 55% 45% at 50% 62%,
+      rgba(200, 160,  60, .28) 0%,
+      rgba( 80, 180,  80, .12) 40%,
+      transparent 70%
+    );
+  mix-blend-mode: screen;
+  animation: glowPulse 9s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+  0%,100% { opacity: .55; }
+  45%     { opacity: .90; }
+  50%     { opacity: .95; }
+  55%     { opacity: .90; }
+}
+
+/* ─── 5. RAYOS DE LUZ del bosque ────────────────────────────── */
+.rayos {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.rayo {
+  position: absolute;
+  top: -20%;
+  width: 180px;
+  height: 130%;
+  mix-blend-mode: screen;
+  filter: blur(18px);
+  animation: beamShimmer 9s ease-in-out infinite;
+  background: linear-gradient(180deg,
+    rgba(255,240,180,.22) 0%,
+    rgba(255,240,180,.06) 60%,
+    transparent 100%
+  );
+}
+.rayo:nth-child(1) { left: 28%; transform: rotate(-14deg); animation-delay: 0s;    }
+.rayo:nth-child(2) { left: 58%; transform: rotate( 10deg); animation-delay: -4.5s; }
+
+@keyframes beamShimmer {
+  0%,100% { opacity: .25; }
+  30%     { opacity: .55; }
+  65%     { opacity: .18; }
+}
+
+/* ─── 6. VIÑETA QUE RESPIRA ─────────────────────────────────── */
+.vineta {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse 80% 80% at 50% 50%,
+    transparent 35%,
+    rgba(0,0,0,.55) 100%
+  );
+  animation: vinetaPulse 9s ease-in-out infinite;
+}
+
+@keyframes vinetaPulse {
+  0%,100% { opacity: .75; }
+  50%     { opacity: .45; }
+}
+
+/* ─── CONTENIDO SOBRE EL FONDO ───────────────────────────────── */
+.contenido {
+  position: relative;
+  z-index: 1;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #fff;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  padding: 24px;
+}
+.contenido h1 {
+  font-size: clamp(28px, 5vw, 56px);
+  font-weight: 800;
+  text-shadow: 0 2px 24px rgba(0,0,0,.6);
+  letter-spacing: -.02em;
+  max-width: 700px;
+  line-height: 1.1;
+  margin-bottom: 16px;
+}
+.contenido p {
+  font-size: clamp(14px, 2vw, 18px);
+  color: rgba(255,255,255,.75);
+  max-width: 480px;
+  line-height: 1.7;
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════
+     ESCENA — todos los efectos en layers
+════════════════════════════════════════════════════ -->
+<div class="escena">
+
+  <!-- 1. Imagen principal con respiración -->
+  <img class="img-fondo" src="./hero-iagami.png" alt="Madre Naturaleza abrazando la Tierra"/>
+
+  <!-- 2 & 3. Hojas + partículas (generadas por JS) -->
+  <div class="capa-efecto" id="capas"></div>
+
+  <!-- 4. Resplandor cálido -->
+  <div class="glow-calido"></div>
+
+  <!-- 5. Rayos de luz -->
+  <div class="rayos">
+    <div class="rayo"></div>
+    <div class="rayo"></div>
+  </div>
+
+  <!-- 6. Viñeta -->
+  <div class="vineta"></div>
+
+</div>
+
+<!-- Contenido sobre el fondo -->
+<div class="contenido">
+  <h1>Gestionamos el futuro ambiental de nuestro municipio</h1>
+  <p>Portal institucional IAGAMI · Municipio Iribarren, Estado Lara</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     JS — genera hojas y partículas con vars CSS
+════════════════════════════════════════════════════ -->
+<script>
+(function () {
+  /* Respeta prefers-reduced-motion */
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  const cont  = document.getElementById('capas');
+  const rnd   = (a, b) => a + Math.random() * (b - a);
+
+  /* Paleta de verdes tomada de la ilustración */
+  const verdes = [
+    'rgba(112,175, 86,.90)',
+    'rgba( 94,168, 92,.85)',
+    'rgba(168,214,120,.88)',
+    'rgba( 74,140, 84,.82)',
+    'rgba(140,196,100,.86)',
+    'rgba( 60,120, 60,.80)',
+  ];
+
+  /* ── 22 HOJAS ── */
+  for (let i = 0; i < 22; i++) {
+    const el   = document.createElement('div');
+    el.className = 'hoja leaf';
+
+    const size = rnd(7, 18);
+    const dur  = rnd(7, 13);        // cada hoja va a velocidad propia
+
+    /* Variables CSS individuales */
+    el.style.cssText = `
+      left:   ${rnd(10, 88)}%;
+      bottom: ${rnd( 5, 90)}%;
+      width:  ${size}px;
+      height: ${size}px;
+      background: ${verdes[Math.floor(rnd(0, verdes.length))]};
+      --dx:    ${rnd(-80, 80)}px;
+      --dy:    ${rnd(-280,-110)}px;
+      --dr:    ${rnd(-240, 240)}deg;
+      --s:     ${rnd(0.65, 1.35)};
+      --o:     ${rnd(0.40, 0.80)};
+      --dur:   ${dur.toFixed(2)}s;
+      --delay: ${rnd(-dur, 0).toFixed(2)}s;
+    `;
+    cont.appendChild(el);
+  }
+
+  /* ── 16 PARTÍCULAS DORADAS ── */
+  for (let i = 0; i < 16; i++) {
+    const el   = document.createElement('div');
+    el.className = 'hoja mote';
+
+    const size = rnd(3, 8);
+    const dur  = rnd(6, 11);
+
+    el.style.cssText = `
+      left:   ${rnd(15, 82)}%;
+      bottom: ${rnd(10, 85)}%;
+      width:  ${size}px;
+      height: ${size}px;
+      --dx:    ${rnd(-55, 55)}px;
+      --dy:    ${rnd(-220,-80)}px;
+      --dr:    0deg;
+      --s:     ${rnd(0.6, 1.5)};
+      --o:     ${rnd(0.50, 0.90)};
+      --dur:   ${dur.toFixed(2)}s;
+      --delay: ${rnd(-dur, 0).toFixed(2)}s;
+    `;
+    cont.appendChild(el);
+  }
+})();
+</script>
+
+</body>
+</html>
