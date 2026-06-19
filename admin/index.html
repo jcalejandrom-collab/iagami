@@ -3613,6 +3613,91 @@ async function saveChatbot() {
   await renderChatbot();
 }
 
+/* ─── SEED DATA ─── */
+const _PARROQUIA_COORDS = {
+  'Catedral':[10.0678,-69.3467],'La Concepción':[10.0580,-69.3350],'Santa Rosa':[10.0490,-69.3600],
+  'Tamaca':[10.0400,-69.3700],'Juan de Villegas':[10.0300,-69.3820],'Guerrera Ana Soto':[10.0350,-69.3880],
+  'Unión':[10.0450,-69.3550],'Aguedo Felipe Alvarado':[10.0550,-69.3440],'El Cují':[10.1100,-69.3500],
+  'Buena Vista':[10.0750,-69.3300],'Agua Viva':[10.0200,-69.3600],'Juares':[10.0650,-69.3800],
+};
+const _COMUNAS_SEED = [
+  {nombre:'IHAJARA SOR',parroquia:'Catedral',municipio:'Iribarren',estado:'Lara'},
+  {nombre:'ALEZGA NORTE',parroquia:'Catedral',municipio:'Iribarren',estado:'Lara'},
+  {nombre:'ECOLÓGICA GRAL. JACINTO LARA',parroquia:'Catedral',municipio:'Iribarren',estado:'Lara'},
+  {nombre:'HUELGA SUR',parroquia:'Catedral',municipio:'Iribarren',estado:'Lara'},
+  {nombre:'EL SOL ESEQUIBO',parroquia:'La Concepción',municipio:'Iribarren',estado:'Lara'},
+  {nombre:'LIBERTADOR SIMÓN BOLÍVAR',parroquia:'La Concepción',municipio:'Iribarren',estado:'Lara'},
+  {nombre:'SOCIALISTA DEL SUR',parroquia:'La Concepción',municipio:'Iribarren',estado:'Lara'},
+  {nombre:'BOLÍVAR ES EL CENTRO',parroquia:'La Concepción',municipio:'Iribarren',estado:'Lara'},
+  {nombre:'SIMÓN RODRÍGUEZ',parroquia:'Santa Rosa',municipio:'Iribarren',estado:'Lara'},
+  {nombre:'EZEQUIEL ZAMORA',parroquia:'Santa Rosa',municipio:'Iribarren',estado:'Lara'},
+  {nombre:'EL LIBERTADOR',parroquia:'Santa Rosa',municipio:'Iribarren',estado:'Lara'},
+  {nombre:'ROSA INÉS',parroquia:'Santa Rosa',municipio:'Iribarren',estado:'Lara'},
+  {nombre:'TAMACA NUEVA',parroquia:'Tamaca',municipio:'Iribarren',estado:'Lara'},
+  {nombre:'CIUDAD NUEVA',parroquia:'Tamaca',municipio:'Iribarren',estado:'Lara'},
+  {nombre:'LA UNIDAD',parroquia:'Tamaca',municipio:'Iribarren',estado:'Lara'},
+  {nombre:'ANA SOTO I',parroquia:'Guerrera Ana Soto',municipio:'Iribarren',estado:'Lara'},
+  {nombre:'ANA SOTO II',parroquia:'Guerrera Ana Soto',municipio:'Iribarren',estado:'Lara'},
+  {nombre:'NUEVA GENERACIÓN',parroquia:'Guerrera Ana Soto',municipio:'Iribarren',estado:'Lara'},
+  {nombre:'REVOLUCIÓN BOLIVARIANA',parroquia:'Guerrera Ana Soto',municipio:'Iribarren',estado:'Lara'},
+  {nombre:'TIERRA FIRME',parroquia:'Guerrera Ana Soto',municipio:'Iribarren',estado:'Lara'},
+  {nombre:'PUEBLO NUEVO',parroquia:'Aguedo Felipe Alvarado',municipio:'Iribarren',estado:'Lara'},
+  {nombre:'LOS OLIVOS',parroquia:'Aguedo Felipe Alvarado',municipio:'Iribarren',estado:'Lara'},
+  {nombre:'PROGRESISTA',parroquia:'Aguedo Felipe Alvarado',municipio:'Iribarren',estado:'Lara'},
+  {nombre:'EL CUJÍ PRODUCTIVO',parroquia:'El Cují',municipio:'Iribarren',estado:'Lara'},
+  {nombre:'NORTE VERDE',parroquia:'El Cují',municipio:'Iribarren',estado:'Lara'},
+];
+const _CONSEJOS_SEED = [
+  {nombre:'EL BICENTENARIO',parroquia:'Tamaca',municipio:'Iribarren',estado:'Lara'},
+  {nombre:'VILLA CREPUSCULAR',parroquia:'Juan de Villegas',municipio:'Iribarren',estado:'Lara'},
+  {nombre:'FUTURO EN MARCHA',parroquia:'Juan de Villegas',municipio:'Iribarren',estado:'Lara'},
+  {nombre:'PAVIA LA ORQUIDEA',parroquia:'Juan de Villegas',municipio:'Iribarren',estado:'Lara'},
+  {nombre:'LOS VENCEDORES',parroquia:'Juan de Villegas',municipio:'Iribarren',estado:'Lara'},
+  {nombre:'MUJERES VENCEDORAS',parroquia:'Unión',municipio:'Iribarren',estado:'Lara'},
+  {nombre:'CARMEN MENDOZA DE OROPEZA',parroquia:'Unión',municipio:'Iribarren',estado:'Lara'},
+  {nombre:'JUAN SANCHEZ',parroquia:'Unión',municipio:'Iribarren',estado:'Lara'},
+  {nombre:'UN CAMINO A LA ESPERANZA',parroquia:'Unión',municipio:'Iribarren',estado:'Lara'},
+  {nombre:'SAN JACINTO 1 PARTE BAJA',parroquia:'Unión',municipio:'Iribarren',estado:'Lara'},
+  {nombre:'MARCOS DURAN',parroquia:'Unión',municipio:'Iribarren',estado:'Lara'},
+];
+function _jitter(base,idx){
+  return [+(base[0]+((idx*7+3)%11-5)*0.001).toFixed(6),+(base[1]+((idx*13+2)%11-5)*0.001).toFixed(6)];
+}
+async function _seedIagami({dryRun=false,skipExisting=true}={}) {
+  const log=[];
+  let existingComunas=[],existingConsejos=[];
+  try{ existingComunas=await CMSDB.getAll('comunas')||[]; }catch(e){}
+  try{ existingConsejos=await CMSDB.getAll('consejos_comunales')||[]; }catch(e){}
+  const exC=new Set(existingComunas.map(c=>c.nombre?.toUpperCase()));
+  const exCC=new Set(existingConsejos.map(c=>c.nombre?.toUpperCase()));
+  const comunaIdMap={};
+  existingComunas.forEach(c=>{comunaIdMap[c.nombre?.toUpperCase()]=c.id;});
+  const cnt={};
+  for(const c of _COMUNAS_SEED){
+    const key=c.nombre.toUpperCase();
+    if(skipExisting&&exC.has(key)){const ex=existingComunas.find(x=>x.nombre?.toUpperCase()===key);if(ex)comunaIdMap[key]=ex.id;log.push(`⚪ [SKIP] COMUNA: ${c.nombre}`);continue;}
+    const base=_PARROQUIA_COORDS[c.parroquia]||[10.0678,-69.3467];
+    const idx=(cnt[c.parroquia]=(cnt[c.parroquia]||0)+1);
+    const [lat,lng]=_jitter(base,idx);
+    if(!dryRun){try{const rec=await CMSDB.save('comunas',{...c,lat,lng,activo:true});comunaIdMap[key]=rec.id;log.push(`✅ COMUNA: ${c.nombre}`);}catch(e){log.push(`❌ ERROR COMUNA ${c.nombre}: ${e.message}`);}}
+    else{log.push(`🔍 [DRY] COMUNA: ${c.nombre} → lat:${lat} lng:${lng}`);}
+  }
+  const cnt2={};
+  for(const cc of _CONSEJOS_SEED){
+    const key=cc.nombre.toUpperCase();
+    if(skipExisting&&exCC.has(key)){log.push(`⚪ [SKIP] CONSEJO: ${cc.nombre}`);continue;}
+    const base=_PARROQUIA_COORDS[cc.parroquia]||[10.0678,-69.3467];
+    const idx=(cnt2[cc.parroquia]=(cnt2[cc.parroquia]||0)+1);
+    const [lat,lng]=_jitter(base,idx);
+    const comunaDefault=_COMUNAS_SEED.find(c=>c.parroquia===cc.parroquia);
+    const comunaId=comunaDefault?comunaIdMap[comunaDefault.nombre.toUpperCase()]:null;
+    const payload={nombre:cc.nombre,parroquia:cc.parroquia,municipio:cc.municipio,estado:cc.estado,lat,lng,activo:true,...(comunaId?{comuna:comunaId}:{})};
+    if(!dryRun){try{await CMSDB.save('consejos_comunales',payload);log.push(`✅ CONSEJO: ${cc.nombre}`);}catch(e){log.push(`❌ ERROR CONSEJO ${cc.nombre}: ${e.message}`);}}
+    else{log.push(`🔍 [DRY] CONSEJO: ${cc.nombre} → lat:${lat} lng:${lng}`);}
+  }
+  return log;
+}
+
 /* ─── SEED ─── */
 function renderSeed() {
   // Panel is static HTML; just ensure log is hidden when navigating to it
@@ -3627,18 +3712,8 @@ async function runSeed(dryRun) {
   logEl.style.display = 'block';
   logPre.textContent  = dryRun ? '⏳ Simulando...\n' : '⏳ Sembrando datos...\n';
 
-  // Load seed script dynamically if not already loaded
-  if (!window.seedIagami) {
-    await new Promise((res, rej) => {
-      const s = document.createElement('script');
-      s.src = '../cms/seed_comunas.js';
-      s.onload = res; s.onerror = rej;
-      document.head.appendChild(s);
-    });
-  }
-
   try {
-    const log = await window.seedIagami({ dryRun, skipExisting });
+    const log = await _seedIagami({ dryRun, skipExisting });
     logPre.textContent = (log || []).join('\n') || '(sin resultados)';
     if (!dryRun) showToast('Siembra completada', 'success');
   } catch(e) {
