@@ -108,10 +108,10 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
   position:absolute;inset:0;z-index:1;
   background:linear-gradient(
     90deg,
-    rgba(4,12,6,.55) 0%,
-    rgba(4,12,6,.40) 35%,
-    rgba(4,12,6,.22) 58%,
-    rgba(4,12,6,.06) 75%,
+    rgba(4,12,6,.32) 0%,
+    rgba(4,12,6,.22) 35%,
+    rgba(4,12,6,.10) 58%,
+    rgba(4,12,6,.02) 75%,
     rgba(0,0,0,0) 100%
   );
 }
@@ -149,6 +149,13 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
   10%{opacity:1}
   90%{opacity:.6}
   100%{transform:translateY(-60px) scale(.6);opacity:0}
+}
+@keyframes leafDrift{
+  0%  {transform:translateY(0)   translateX(0)   rotate(0deg)   scale(1)}
+  25% {transform:translateY(-18px) translateX(8px)  rotate(40deg)  scale(.95)}
+  50% {transform:translateY(-8px)  translateX(-6px) rotate(-15deg) scale(1.05)}
+  75% {transform:translateY(-22px) translateX(4px)  rotate(55deg)  scale(.9)}
+  100%{transform:translateY(0)   translateX(0)   rotate(0deg)   scale(1)}
 }
 .hero-content{
   position:relative;z-index:2;
@@ -977,6 +984,33 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
       'animation-delay:'+(Math.random()*8)+'s'
     ].join(';');
     hero.appendChild(p);
+  }
+
+  /* 10 hojas flotantes — colores tomados de la ilustración */
+  const verdes = [
+    'rgba(112,175,86,VAL)',
+    'rgba(140,190,100,VAL)',
+    'rgba(90,150,70,VAL)',
+    'rgba(170,220,120,VAL)'
+  ];
+  for(let i=0;i<10;i++){
+    const l = document.createElement('span');
+    l.className = 'hero-leaf';
+    const op = (0.15 + Math.random()*0.30).toFixed(2);
+    const color = verdes[i%verdes.length].replace('VAL', op);
+    const size = 6 + Math.random()*10;
+    const dur  = 18 + Math.random()*12;
+    const delay = Math.random()*12;
+    l.style.cssText = [
+      'position:absolute','border-radius:50% 0 50% 0','pointer-events:none','z-index:1',
+      'width:'+size+'px','height:'+(size*1.5)+'px',
+      'left:'+(5+Math.random()*55)+'%',
+      'bottom:'+(-5+Math.random()*90)+'%',
+      'background:'+color,
+      'transform:rotate('+(Math.random()*360)+'deg)',
+      'animation:leafDrift '+dur+'s ease-in-out '+delay+'s infinite'
+    ].join(';');
+    hero.appendChild(l);
   }
 })();
 </script>
