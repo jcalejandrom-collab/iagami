@@ -1204,6 +1204,44 @@ input,select,textarea{font-family:inherit}
       </div>
     </div>
 
+    <!-- CHATBOT FAQ SECTION -->
+    <div class="section" id="sec-chatbot">
+      <div class="page-header">
+        <div><div class="page-title">🤖 Chatbot FAQ</div><div class="page-subtitle">Administra las preguntas frecuentes que responde el asistente virtual del portal</div></div>
+        <button class="btn btn-primary" onclick="openChatbotForm()">+ Nueva Pregunta</button>
+      </div>
+      <div class="toolbar">
+        <input type="text" class="search-input" id="q-chatbot" placeholder="Buscar preguntas o palabras clave..." oninput="renderChatbot()" style="flex:1;min-width:200px"/>
+      </div>
+      <div id="tbl-chatbot"></div>
+      <div id="chatbot-form" style="display:none;background:#fff;border:1px solid var(--border);border-radius:12px;padding:24px;margin-top:16px">
+        <div style="font-family:'Poppins',sans-serif;font-size:15px;font-weight:700;color:var(--text);margin-bottom:18px" id="chatbot-form-title">🤖 Nueva Pregunta FAQ</div>
+        <input type="hidden" id="faq-id"/>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div style="display:flex;flex-direction:column;gap:5px">
+            <label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Pregunta *</label>
+            <input type="text" id="faq-pregunta" placeholder="Ej: ¿Cómo puedo realizar una denuncia ambiental?" style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none"/>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:5px">
+            <label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Respuesta *</label>
+            <textarea id="faq-respuesta" rows="4" placeholder="Escribe la respuesta completa..." style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none;resize:vertical;font-family:inherit"></textarea>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:5px">
+            <label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Palabras clave (separadas por coma)</label>
+            <input type="text" id="faq-palabras" placeholder="Ej: denuncia, contaminacion, reporte" style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none"/>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <input type="checkbox" id="faq-activo" checked style="width:16px;height:16px;cursor:pointer"/>
+            <label for="faq-activo" style="font-size:13px;cursor:pointer">Activa (visible para el chatbot)</label>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:20px">
+          <button class="btn btn-primary" onclick="saveChatbot()">💾 Guardar</button>
+          <button class="btn btn-secondary" onclick="closeChatbotForm()">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -1256,6 +1294,7 @@ const NAV = [
   {id:'bienvenida',    icon:'🌟', label:'Pantalla de Bienvenida'},
   {id:'planificacion', icon:'📆', label:'Planificación'},
   {id:'revista',       icon:'📰', label:'Revista Digital'},
+  {id:'chatbot',       icon:'🤖', label:'Chatbot FAQ'},
 ];
 
 let currentSection = 'dashboard';
@@ -1307,6 +1346,7 @@ async function renderSection(name) {
     case 'bienvenida':    await renderBienvenida(); break;
     case 'planificacion': await renderPlan(); break;
     case 'revista':       await renderRevistas(); break;
+    case 'chatbot':       await renderChatbot(); break;
   }
 }
 
@@ -3316,6 +3356,65 @@ function renderBlocks() {
       </div>
     </div>`;
   }).join('');
+}
+
+/* ─── CHATBOT FAQ ─── */
+async function renderChatbot() {
+  const q = (document.getElementById('q-chatbot')?.value||'').toLowerCase();
+  let items = await CMSDB.getAll('chatbot_faq');
+  if (!Array.isArray(items)) items = [];
+  if (q) items = items.filter(f => (f.pregunta||'').toLowerCase().includes(q) || (f.palabras_clave||[]).join(' ').toLowerCase().includes(q));
+  const el = document.getElementById('tbl-chatbot');
+  if (!el) return;
+  if (!items.length) { el.innerHTML = `<div class="empty-state"><div style="font-size:36px">🤖</div><p>No hay preguntas FAQ.</p></div>`; return; }
+  el.innerHTML = `<table class="data-table"><thead><tr><th>Pregunta</th><th>Palabras clave</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>${
+    items.map(f=>`<tr>
+      <td style="max-width:320px"><strong>${escHtml(f.pregunta||'')}</strong><div style="font-size:11px;color:var(--muted);margin-top:2px">${escHtml((f.respuesta||'').substring(0,80))}...</div></td>
+      <td><div style="display:flex;flex-wrap:wrap;gap:4px">${(Array.isArray(f.palabras_clave)?f.palabras_clave:(f.palabras_clave||'').split(',')).filter(Boolean).map(k=>`<span style="background:#e8f5ee;color:#1d6b3e;border-radius:10px;padding:1px 7px;font-size:11px">${escHtml(k.trim())}</span>`).join('')}</div></td>
+      <td><span class="badge ${f.activo!==false?'badge-success':'badge-warning'}">${f.activo!==false?'Activa':'Inactiva'}</span></td>
+      <td><div class="row-actions">
+        <button class="btn-icon" onclick="editChatbot('${f.id}')">✏️</button>
+        <button class="btn-icon btn-icon-danger" onclick="confirmDelete('chatbot_faq','${f.id}',renderChatbot)">🗑️</button>
+      </div></td>
+    </tr>`).join('')
+  }</tbody></table>`;
+}
+
+function openChatbotForm(item) {
+  document.getElementById('chatbot-form-title').textContent = item ? '✏️ Editar Pregunta FAQ' : '🤖 Nueva Pregunta FAQ';
+  document.getElementById('faq-id').value = item?.id||'';
+  document.getElementById('faq-pregunta').value = item?.pregunta||'';
+  document.getElementById('faq-respuesta').value = item?.respuesta||'';
+  const kw = Array.isArray(item?.palabras_clave) ? item.palabras_clave.join(', ') : (item?.palabras_clave||'');
+  document.getElementById('faq-palabras').value = kw;
+  document.getElementById('faq-activo').checked = item?.activo!==false;
+  document.getElementById('chatbot-form').style.display='block';
+  document.getElementById('chatbot-form').scrollIntoView({behavior:'smooth'});
+}
+
+function closeChatbotForm() {
+  document.getElementById('chatbot-form').style.display='none';
+}
+
+async function editChatbot(id) {
+  const items = await CMSDB.getAll('chatbot_faq');
+  const item = items.find(f=>f.id===id);
+  if (item) openChatbotForm(item);
+}
+
+async function saveChatbot() {
+  const pregunta = document.getElementById('faq-pregunta').value.trim();
+  const respuesta = document.getElementById('faq-respuesta').value.trim();
+  if (!pregunta || !respuesta) { showToast('Pregunta y respuesta son obligatorias','error'); return; }
+  const palabrasRaw = document.getElementById('faq-palabras').value;
+  const palabras_clave = palabrasRaw.split(',').map(k=>k.trim().toLowerCase()).filter(Boolean);
+  const id = document.getElementById('faq-id').value;
+  const payload = { pregunta, respuesta, palabras_clave, activo: document.getElementById('faq-activo').checked };
+  if (id) payload.id = id;
+  await CMSDB.save('chatbot_faq', payload);
+  showToast(id ? 'Pregunta actualizada' : 'Pregunta guardada', 'success');
+  closeChatbotForm();
+  await renderChatbot();
 }
 
 /* ─── LOGOUT ─── */
