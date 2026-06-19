@@ -14,6 +14,16 @@
 /* ── RESET ── */
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
+
+/* ── ANIMACIONES FASE 1 ── */
+[data-reveal]{opacity:0;transform:translateY(22px);transition:opacity .55s ease,transform .55s ease}
+[data-reveal].revealed{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){[data-reveal]{opacity:1;transform:none;transition:none}}
+.nav-scrolled{backdrop-filter:blur(12px) saturate(160%);-webkit-backdrop-filter:blur(12px) saturate(160%);background:rgba(255,255,255,.88)!important;box-shadow:0 2px 20px rgba(29,107,62,.13)!important}
+.skel-line{background:linear-gradient(90deg,#e8f5ee 25%,#d4edd8 50%,#e8f5ee 75%);background-size:200% 100%;animation:shimmer 1.4s ease infinite;border-radius:6px;height:14px;margin-bottom:8px}
+.skel-img{background:linear-gradient(90deg,#e8f5ee 25%,#d4edd8 50%,#e8f5ee 75%);background-size:200% 100%;animation:shimmer 1.4s ease infinite;border-radius:10px;height:180px}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+@media(prefers-reduced-motion:reduce){.skel-line,.skel-img{animation:none}}
 body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height:1.6}
 
 /* ── NAV ── */
@@ -178,13 +188,13 @@ footer p{margin-bottom:4px}
 </section>
 
 <!-- FEATURED -->
-<section class="featured-section">
+<section class="featured-section" data-reveal>
   <div class="section-title">⭐ Noticias Destacadas</div>
   <div class="featured-grid" id="featuredGrid"></div>
 </section>
 
 <!-- SEARCH -->
-<div class="search-area">
+<div class="search-area" data-reveal>
   <div class="search-bar">
     <span style="font-size:16px;color:#6a8a72">🔍</span>
     <input type="text" id="searchInput" placeholder="Buscar noticias…" aria-label="Buscar noticias"/>
@@ -205,7 +215,7 @@ footer p{margin-bottom:4px}
 <div class="results-count" id="resultsCount"></div>
 
 <!-- NEWS GRID -->
-<div class="news-grid-wrap">
+<div class="news-grid-wrap" data-reveal>
   <div class="news-grid" id="newsGrid"></div>
   <div id="emptyState" class="empty-state" style="display:none">
     <span class="icon">🌿</span>
@@ -242,6 +252,7 @@ footer p{margin-bottom:4px}
 </footer>
 
 <!-- DATABASE -->
+<script src="../cms/animations.js" defer></script>
 <script src="../cms/config.js"></script>
 <script src="../cms/pb.js"></script>
 

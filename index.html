@@ -14,6 +14,34 @@
 /* ===== RESET & BASE ===== */
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
+
+/* ===== ANIMACIONES FASE 1 ===== */
+/* Scroll Reveal */
+[data-reveal]{opacity:0;transform:translateY(22px);transition:opacity .55s ease,transform .55s ease}
+[data-reveal].revealed{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){[data-reveal]{opacity:1;transform:none;transition:none}}
+
+/* Navbar shrink + blur */
+.nav{transition:height .3s ease,box-shadow .3s ease,backdrop-filter .3s ease}
+.nav-scrolled{backdrop-filter:blur(12px) saturate(160%);-webkit-backdrop-filter:blur(12px) saturate(160%);background:rgba(255,255,255,.88)!important;box-shadow:0 2px 20px rgba(29,107,62,.13)!important}
+.nav-scrolled .navinner{height:50px}
+@media(prefers-reduced-motion:reduce){.nav{transition:none}}
+
+/* Hover premium cards */
+.svc-card{transition:border-color .22s ease,transform .22s ease,box-shadow .22s ease}
+.svc-card:hover{border-color:#1d6b3e;transform:translateY(-5px) scale(1.02);box-shadow:0 12px 32px rgba(29,107,62,.16)}
+.news-card{transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease}
+.news-card:hover{transform:translateY(-5px);box-shadow:0 12px 32px rgba(29,107,62,.14);border-color:#a8dfc0}
+.proj-card{transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease}
+.proj-card:hover{transform:translateY(-4px);box-shadow:0 10px 28px rgba(29,107,62,.13);border-color:#a8dfc0}
+
+/* Skeleton shimmer */
+.skel-line{background:linear-gradient(90deg,#e8f5ee 25%,#d4edd8 50%,#e8f5ee 75%);background-size:200% 100%;animation:shimmer 1.4s ease infinite;border-radius:6px;height:14px;margin-bottom:8px}
+.skel-line.lg{height:20px;width:70%}
+.skel-line.sm{height:10px;width:50%}
+.skel-img{background:linear-gradient(90deg,#e8f5ee 25%,#d4edd8 50%,#e8f5ee 75%);background-size:200% 100%;animation:shimmer 1.4s ease infinite;border-radius:10px;height:180px}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+@media(prefers-reduced-motion:reduce){.skel-line,.skel-img{animation:none}}
 body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height:1.6}
 
 /* ===== TOPBAR ===== */
@@ -465,7 +493,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
   </div>
 
   <!-- SERVICIOS -->
-  <div class="sec-wrap">
+  <div class="sec-wrap" data-reveal>
     <div class="section">
       <div class="sec-head">
         <div class="sec-tag">SERVICIOS EN LÍNEA</div>
@@ -518,7 +546,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
   </div>
 
   <!-- INDICADORES DINÁMICOS -->
-  <div class="sec-wrap2">
+  <div class="sec-wrap2" data-reveal>
     <div class="section">
       <div class="sec-head">
         <div class="sec-tag">INDICADORES AMBIENTALES</div>
@@ -532,7 +560,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
   </div>
 
   <!-- NOTICIAS DINÁMICAS -->
-  <div class="sec-wrap3">
+  <div class="sec-wrap3" data-reveal>
     <div class="section">
       <div class="sec-head">
         <div class="sec-tag">NOTICIAS</div>
@@ -552,7 +580,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
   </div>
 
   <!-- PROYECTOS DINÁMICOS -->
-  <div class="sec-wrap2">
+  <div class="sec-wrap2" data-reveal>
     <div class="section">
       <div class="sec-head">
         <div class="sec-tag">PROYECTOS SIGAP</div>
@@ -572,7 +600,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
   </div>
 
   <!-- AGENDA DINÁMICA -->
-  <div class="sec-wrap3">
+  <div class="sec-wrap3" data-reveal>
     <div class="section">
       <div class="sec-head">
         <div class="sec-tag">AGENDA SIGAP</div>
@@ -592,7 +620,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
   </div>
 
   <!-- REVISTA DIGITAL -->
-  <div class="sec-wrap2">
+  <div class="sec-wrap2" data-reveal>
     <div class="section">
       <div class="sec-head">
         <div class="sec-tag">REVISTA DIGITAL</div>
@@ -610,7 +638,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
   </div>
 
   <!-- TRÁMITES DESTACADOS -->
-  <div class="sec-wrap3">
+  <div class="sec-wrap3" data-reveal>
     <div class="section">
       <div class="sec-head">
         <div class="sec-tag">TRÁMITES IAGAMI</div>
@@ -630,7 +658,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
   </div>
 
   <!-- TRANSPARENCIA -->
-  <div class="sec-wrap2">
+  <div class="sec-wrap2" data-reveal>
     <div class="section">
       <div class="sec-head">
         <div class="sec-tag">TRANSPARENCIA</div>
@@ -723,7 +751,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
       </div>
     </div>
   </nav>
-  <div class="sec-wrap">
+  <div class="sec-wrap" data-reveal>
     <div class="denuncia-wrap">
       <div class="sec-head" style="text-align:left;margin-bottom:24px">
         <div class="sec-tag">PARTICIPACIÓN CIUDADANA</div>
@@ -889,6 +917,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 <!-- CMS Database -->
 <script src="cms/config.js"></script>
 <script src="cms/pb.js"></script>
+<script src="cms/animations.js" defer></script>
 
 <script>
 'use strict';
@@ -1346,8 +1375,22 @@ async function renderHeroStats() {
   const empresas = Array.isArray(_empresasR) ? _empresasR : [];
   const sc = document.getElementById('stat-consejos');
   const se = document.getElementById('stat-empresas');
-  if (sc) sc.textContent = consejos.filter(c => c.estatus === 'Activo').length;
-  if (se) se.textContent = empresas.length;
+  const nConsejos = consejos.filter(c => c.estatus === 'Activo').length;
+  const nEmpresas = empresas.length;
+  if (sc) {
+    sc.dataset.counter = nConsejos;
+    sc.dataset.counterDuration = '1000';
+    sc.textContent = '0';
+    if (window.IAGAMI_ANIM) window.IAGAMI_ANIM.animateCounter(sc);
+    else sc.textContent = nConsejos;
+  }
+  if (se) {
+    se.dataset.counter = nEmpresas;
+    se.dataset.counterDuration = '1000';
+    se.textContent = '0';
+    if (window.IAGAMI_ANIM) window.IAGAMI_ANIM.animateCounter(se);
+    else se.textContent = nEmpresas;
+  }
 }
 
 async function renderHomeIndicadores() {
