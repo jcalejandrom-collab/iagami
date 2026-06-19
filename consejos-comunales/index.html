@@ -8,6 +8,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin></script>
 <script src="../cms/config.js"></script>
 <script src="../cms/pb.js"></script>
 <style>
@@ -181,7 +183,8 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 .rm-row-btn{background:none;border:none;cursor:pointer;color:#dc2626;font-size:14px;padding:0 4px}
 
 /* ===== MAP PREVIEW ===== */
-.map-preview{background:#e8f5ee;border:1px solid #a8dfc0;border-radius:9px;padding:16px;font-size:13px;color:#4a8a6a;text-align:center;margin-top:8px;min-height:60px;display:flex;align-items:center;justify-content:center}
+.map-preview{border:1.5px solid #a8dfc0;border-radius:9px;overflow:hidden;margin-top:8px;height:220px;display:none}
+.map-preview.visible{display:block}
 
 /* ===== FORM NAV BUTTONS ===== */
 .form-nav{display:flex;justify-content:space-between;align-items:center;padding:18px 24px;border-top:1px solid #e8f5ee;gap:10px}
@@ -275,6 +278,15 @@ footer{background:#0a1f0e;color:rgba(255,255,255,.6);text-align:center;padding:2
     <select id="f-parroquia" onchange="applyFilters()"><option value="">Todas las parroquias</option></select>
     <button class="btn-register" onclick="openRegModal()">+ Registrar Organización</button>
   </div>
+  <!-- MAPA GENERAL -->
+  <div id="mapa-wrap" style="margin-bottom:24px;border-radius:14px;overflow:hidden;border:1.5px solid #d4edd8;box-shadow:0 2px 12px rgba(29,107,62,.08)">
+    <div style="background:#e8f5ee;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #d4edd8">
+      <span style="font-size:13px;font-weight:600;color:#1a3d2b">🗺️ Mapa del Observatorio — Municipio Iribarren</span>
+      <button onclick="toggleMapa()" id="btn-toggle-mapa" style="font-size:11px;background:none;border:1px solid #a8dfc0;border-radius:6px;padding:4px 10px;color:#1d6b3e;cursor:pointer;font-weight:600">Ocultar mapa</button>
+    </div>
+    <div id="mapa-general" style="height:340px"></div>
+  </div>
+
   <div class="cards-grid" id="cards"></div>
   <div class="pagination" id="pagination"></div>
 </div>
@@ -1140,8 +1152,33 @@ function getGPS(){
   );
 }
 
-function updateMapPreview(lat,lng){
-  $('map-preview').innerHTML=`📍 Lat: <strong>${esc(lat)}</strong> · Lng: <strong>${esc(lng)}</strong><br><small style="color:#a8dfc0">Municipio Iribarren, Estado Lara</small>`;
+/* ── Mini-mapa en el formulario (Sección III) ── */
+let _miniMap = null;
+let _miniMarker = null;
+
+function updateMapPreview(lat, lng) {
+  const el = $('map-preview');
+  el.classList.add('visible');
+  const latN = parseFloat(lat), lngN = parseFloat(lng);
+  if (_miniMap) {
+    _miniMap.setView([latN, lngN], 16);
+    _miniMarker.setLatLng([latN, lngN]);
+  } else {
+    _miniMap = L.map('map-preview', { zoomControl: true, scrollWheelZoom: false })
+               .setView([latN, lngN], 16);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© <a href="https://www.openstreetmap.org/">OpenStreetMap</a>',
+      maxZoom: 19
+    }).addTo(_miniMap);
+    _miniMarker = L.marker([latN, lngN]).addTo(_miniMap)
+                   .bindPopup('📍 Ubicación seleccionada').openPopup();
+    /* Permitir mover el marcador haciendo clic en el mapa */
+    _miniMap.on('click', e => {
+      _miniMarker.setLatLng(e.latlng);
+      $('f-lat').value = e.latlng.lat.toFixed(6);
+      $('f-lng').value = e.latlng.lng.toFixed(6);
+    });
+  }
 }
 
 /* ============================================================
@@ -1398,14 +1435,64 @@ async function saveForm(){
   $('reg-form-wrap').style.display='none';
   $('success-screen').style.display='';
 
-  // refresh directory
+  // refresh directory and map
   updateStats();
   render();
+  refreshMapaGeneral();
 }
 
 /* ============================================================
    INIT
 ============================================================ */
+/* ── Mapa General del Directorio ── */
+let _mapaGeneral = null;
+let _mapaVisible = true;
+
+function initMapaGeneral() {
+  if (_mapaGeneral) { refreshMapaGeneral(); return; }
+  _mapaGeneral = L.map('mapa-general', { scrollWheelZoom: false })
+                  .setView([10.0678, -69.3474], 12);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© <a href="https://www.openstreetmap.org/">OpenStreetMap</a>',
+    maxZoom: 19
+  }).addTo(_mapaGeneral);
+  refreshMapaGeneral();
+}
+
+function refreshMapaGeneral() {
+  if (!_mapaGeneral) return;
+  _mapaGeneral.eachLayer(l => { if (l instanceof L.Marker) _mapaGeneral.removeLayer(l); });
+  const iconComuna = L.divIcon({
+    html: '<div style="background:#1d6b3e;border:2px solid #fff;border-radius:50%;width:14px;height:14px;box-shadow:0 2px 6px rgba(0,0,0,.3)"></div>',
+    iconSize: [14, 14], iconAnchor: [7, 7], className: ''
+  });
+  const iconConsejo = L.divIcon({
+    html: '<div style="background:#22c55e;border:2px solid #fff;border-radius:50%;width:11px;height:11px;box-shadow:0 2px 6px rgba(0,0,0,.3)"></div>',
+    iconSize: [11, 11], iconAnchor: [5, 5], className: ''
+  });
+  const orgs = getAllRecords().filter(o => o.latitud && o.longitud);
+  orgs.forEach(o => {
+    const lat = parseFloat(o.latitud), lng = parseFloat(o.longitud);
+    if (isNaN(lat) || isNaN(lng)) return;
+    L.marker([lat, lng], { icon: o._tipo === 'comuna' ? iconComuna : iconConsejo })
+     .addTo(_mapaGeneral)
+     .bindPopup(`<b>${esc(o.nombre)}</b><br><span style="font-size:11px;color:#4a6a5a">${o._tipo === 'comuna' ? 'Comuna' : 'Consejo Comunal'} · ${esc(o.parroquia || '')}</span>`);
+  });
+  if (orgs.length > 0) {
+    const bounds = L.latLngBounds(orgs.map(o => [parseFloat(o.latitud), parseFloat(o.longitud)]));
+    _mapaGeneral.fitBounds(bounds, { padding: [40, 40] });
+  }
+}
+
+function toggleMapa() {
+  _mapaVisible = !_mapaVisible;
+  const wrap = $('mapa-general');
+  const btn = $('btn-toggle-mapa');
+  wrap.style.display = _mapaVisible ? '' : 'none';
+  btn.textContent = _mapaVisible ? 'Ocultar mapa' : 'Mostrar mapa';
+  if (_mapaVisible && _mapaGeneral) _mapaGeneral.invalidateSize();
+}
+
 async function init(){
   buildStepper();
   initFormFields();
@@ -1415,6 +1502,7 @@ async function init(){
 
   updateStats();
   render();
+  initMapaGeneral();
 }
 
 init();
