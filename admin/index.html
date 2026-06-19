@@ -1465,13 +1465,16 @@ function fillForm(form, item, section) {
     item = Object.assign({}, item, {
       fecha: item.fecha !== undefined ? item.fecha : item.fecha_inicio,
       estado: item.estado || (item.publicado ? 'publicado' : 'borrador'),
+      responsable: item.responsable !== undefined ? item.responsable : item.organizador,
     });
   }
   if (section === 'proyectos') {
     item = Object.assign({}, item, {
       porcentaje_avance: item.porcentaje_avance !== undefined ? item.porcentaje_avance : item.avance,
-      fecha_inicio: item.fecha_inicio,
-      fecha_fin_estimada: item.fecha_fin_estimada !== undefined ? item.fecha_fin_estimada : item.fecha_fin,
+      fecha_inicio: item.fecha_inicio !== undefined ? item.fecha_inicio : item.inicio,
+      fecha_fin_estimada: item.fecha_fin_estimada !== undefined ? item.fecha_fin_estimada
+        : (item.fecha_fin !== undefined ? item.fecha_fin : item.fin_estimado),
+      municipio: item.municipio !== undefined ? item.municipio : item.ubicacion,
     });
   }
   if (section === 'indicadores') {
@@ -3186,7 +3189,13 @@ function closeEditor() {
 async function saveRevistaBlocks() {
   if (!_revistaEditId) return;
   const existing = await CMSDB.getOne('revistas', _revistaEditId);
-  await CMSDB.save('revistas', Object.assign({}, existing, { contenido_bloques: _revistaBlocks }));
+  if (!existing) return;
+  // Guard: only overwrite blocks if we actually have in-memory blocks to save.
+  // The block editing now lives in ../revista/editor.html, so _revistaBlocks is
+  // usually empty here — writing it would wipe the saved contenido_bloques.
+  const payload = Object.assign({}, existing);
+  if (_revistaBlocks.length) payload.contenido_bloques = _revistaBlocks;
+  await CMSDB.save('revistas', payload);
   showToast('Revista guardada correctamente', 'success');
 }
 
