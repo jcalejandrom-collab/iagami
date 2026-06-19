@@ -2315,7 +2315,7 @@ async function renderDenuncias() {
     <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(d.descripcion||d.contenido||'—')}</td>
     <td>
       <select class="status-select" onchange="updateDenunciaStatus('${d.id}',this.value)">
-        ${['Pendiente','En revisión','Resuelta','Archivada'].map(s=>`<option ${(d.estado||'Pendiente')===s?'selected':''}>${s}</option>`).join('')}
+        ${[['recibida','Recibida'],['revision','En revisión'],['inspeccion','En inspección'],['cerrada','Cerrada']].map(([v,lbl])=>`<option value="${v}" ${(d.estado||'recibida')===v?'selected':''}>${lbl}</option>`).join('')}
       </select>
     </td>
     <td style="font-size:12px;white-space:nowrap">${d.fecha||d.created_at||(d.fecha_denuncia)||'—'}</td>
@@ -2348,7 +2348,13 @@ async function updateDenunciaStatus(id, estado) {
       if (item) { item.estado = estado; localStorage.setItem('iagami_denuncias', JSON.stringify(list)); toast('Estado actualizado'); return; }
     } catch(e) {}
   }
-  if (item) { item.estado = estado; await CMSDB.save('denuncias', item); toast('Estado actualizado'); }
+  if (item) {
+    item.estado = estado;
+    const entry = { estado, fecha: new Date().toLocaleDateString('sv-SE'), comentario: 'Estado actualizado por el administrador.' };
+    item.historial = Array.isArray(item.historial) ? [...item.historial, entry] : [entry];
+    await CMSDB.save('denuncias', item);
+    toast('Estado actualizado');
+  }
 }
 
 async function saveDenunciaNota(id, notas) {
