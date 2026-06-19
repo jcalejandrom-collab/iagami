@@ -242,6 +242,101 @@
     requestAnimationFrame(tick);
   }
 
+  /* ─── FASE 3 ──────────────────────────────────────────────────────────────── */
+
+  /* ─── 9. PAGE TRANSITION ────────────────────────────────────────────────────
+     Fade suave al cambiar de página dentro del SPA (showPage).
+     Uso JS: IAGAMI_ANIM.pageFade(inEl, outEl)
+       outEl : elemento .page que sale (opcional, si null solo fade in)
+       inEl  : elemento .page que entra
+  ────────────────────────────────────────────────────────────────────────── */
+  function pageFade(inEl, outEl) {
+    if (reduced || !inEl) { return; }
+    inEl.style.animation = 'pageIn .32s cubic-bezier(.4,0,.2,1) forwards';
+  }
+
+  /* ─── 10. RIPPLE EN BOTONES ─────────────────────────────────────────────────
+     Efecto de onda al hacer clic. Se aplica a cualquier elemento con
+     la clase .btn-p, .btn-s, .cta-btn, o atributo data-ripple.
+  ────────────────────────────────────────────────────────────────────────── */
+  function initRipple() {
+    if (reduced) return;
+    function createRipple(e) {
+      const btn  = e.currentTarget;
+      const rect = btn.getBoundingClientRect();
+      const size = Math.max(rect.width, rect.height) * 2;
+      const x    = e.clientX - rect.left - size / 2;
+      const y    = e.clientY - rect.top  - size / 2;
+      const r    = document.createElement('span');
+      r.style.cssText = `position:absolute;border-radius:50%;pointer-events:none;
+        width:${size}px;height:${size}px;left:${x}px;top:${y}px;
+        background:rgba(255,255,255,.28);transform:scale(0);
+        animation:rippleAnim .55s ease-out forwards;`;
+      const prev = btn.style.position;
+      if (!prev || prev === 'static') btn.style.position = 'relative';
+      btn.style.overflow = 'hidden';
+      btn.appendChild(r);
+      setTimeout(() => r.remove(), 600);
+    }
+    document.querySelectorAll('.btn-p,.btn-s,.cta-btn,[data-ripple]').forEach(btn => {
+      btn.addEventListener('click', createRipple);
+    });
+  }
+
+  /* ─── 11. TYPEWRITER ────────────────────────────────────────────────────────
+     Escribe el texto carácter a carácter.
+     Uso: <span data-typewriter data-tw-speed="55">Texto aquí</span>
+     El texto original del elemento es el que se escribe.
+  ────────────────────────────────────────────────────────────────────────── */
+  function initTypewriter() {
+    if (reduced) return;
+    document.querySelectorAll('[data-typewriter]').forEach(el => {
+      const text  = el.textContent.trim();
+      const speed = parseInt(el.dataset.twSpeed || '55', 10);
+      el.textContent = '';
+      el.style.borderRight = '2px solid currentColor';
+      el.style.paddingRight = '2px';
+
+      const io = new IntersectionObserver((entries) => {
+        if (!entries[0].isIntersecting) return;
+        io.disconnect();
+        let i = 0;
+        const delay = parseInt(el.dataset.twDelay || '0', 10);
+        setTimeout(() => {
+          const t = setInterval(() => {
+            el.textContent = text.slice(0, ++i);
+            if (i >= text.length) {
+              clearInterval(t);
+              setTimeout(() => { el.style.borderRight = 'none'; el.style.paddingRight = '0'; }, 800);
+            }
+          }, speed);
+        }, delay);
+      }, { threshold: 0.8 });
+      io.observe(el);
+    });
+  }
+
+  /* ─── 12. HERO PARALLAX ─────────────────────────────────────────────────────
+     El contenido izquierdo del hero sube levemente al hacer scroll,
+     dando sensación de profundidad respecto a la imagen de fondo.
+  ────────────────────────────────────────────────────────────────────────── */
+  function initHeroParallax() {
+    if (reduced) return;
+    const heroLeft = document.querySelector('.hero-left');
+    if (!heroLeft) return;
+    let ticking = false;
+    window.addEventListener('scroll', () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          const y = window.scrollY;
+          if (y < 600) heroLeft.style.transform = `translateY(${y * 0.12}px)`;
+          ticking = false;
+        });
+        ticking = true;
+      }
+    }, { passive: true });
+  }
+
   /* ─── INIT ─────────────────────────────────────────────────────────────── */
   function init() {
     initNavShrink();
@@ -249,12 +344,17 @@
     initCounters();
     initStaggerCards();
     initTabSlider();
+    initRipple();
+    initTypewriter();
+    initHeroParallax();
     window.IAGAMI_ANIM = {
       initProgressBars,
       animateCounter,
       filterFade,
       staggerChildren,
-      animateNumber
+      animateNumber,
+      pageFade,
+      initRipple
     };
   }
 

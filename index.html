@@ -31,6 +31,10 @@ html{scroll-behavior:smooth}
 [data-stagger]>*{opacity:0;transform:translateY(20px);transition:opacity .4s ease,transform .4s ease}
 [data-stagger]>*.stagger-in{opacity:1;transform:none}
 
+/* FASE 3 — Page transition + Ripple */
+@keyframes pageIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes rippleAnim{to{transform:scale(1);opacity:0}}
+
 /* Hover premium cards */
 .svc-card{transition:border-color .22s ease,transform .22s ease,box-shadow .22s ease}
 .svc-card:hover{border-color:#1d6b3e;transform:translateY(-5px) scale(1.02);box-shadow:0 12px 32px rgba(29,107,62,.16)}
@@ -499,7 +503,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
         <!-- TEXTO IZQUIERDA -->
         <div class="hero-left">
           <div class="hero-badge"><span class="pulse"></span> SIGAP · Sistema Integral de Gestión Ambiental</div>
-          <div class="hero-slogan">Iribarren Verde para la vida</div>
+          <div class="hero-slogan" data-typewriter data-tw-speed="60" data-tw-delay="400">Iribarren Verde para la vida</div>
           <h1>Gestionamos el <span class="green">futuro ambiental</span> de nuestro municipio</h1>
           <p class="hero-desc">Portal institucional IAGAMI. Planificación estratégica, seguimiento de actividades programadas, denuncias ciudadanas y monitoreo ambiental en tiempo real para el Municipio Iribarren, Estado Lara.</p>
           <div class="hero-btns">
@@ -1074,6 +1078,7 @@ function showPage(name) {
   if (!el) { toast('Página no disponible'); return; }
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   el.classList.add('active');
+  if (window.IAGAMI_ANIM) IAGAMI_ANIM.pageFade(el);
   window.scrollTo({ top: 0, behavior: 'smooth' });
   document.querySelectorAll('.nl[data-page]').forEach(l => l.classList.toggle('active', l.dataset.page === name));
 }
@@ -1515,6 +1520,7 @@ async function renderHomeNoticias() {
     grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="ico">📰</div>No hay noticias publicadas aún. Agrega noticias desde el panel de administración.</div>';
     return;
   }
+  grid._staggerDone = false;
   grid.innerHTML = noticias.map(n => {
     const icon = catIcon(n.categoria);
     const cc   = catColor(n.categoria);
@@ -1535,6 +1541,7 @@ async function renderHomeNoticias() {
       </div>
     </a>`;
   }).join('');
+  if (window.IAGAMI_ANIM) IAGAMI_ANIM.staggerChildren(grid);
 }
 
 async function renderHomeProyectos() {
@@ -1569,6 +1576,7 @@ async function renderHomeProyectos() {
       </div>
     </a>`;
   }).join('');
+  if (window.IAGAMI_ANIM) IAGAMI_ANIM.staggerChildren(grid);
 }
 
 async function renderHomeAgenda() {
@@ -1645,6 +1653,7 @@ async function renderHomeRevista() {
       </div>
     </div>`;
   }).join('');
+  if (window.IAGAMI_ANIM) IAGAMI_ANIM.staggerChildren(container);
 }
 
 async function renderHomeTramites() {
@@ -1677,6 +1686,7 @@ async function renderHomeTramites() {
       </div>
       <a href="tramites/index.html" style="margin-top:auto;padding:7px 14px;background:#1d6b3e;color:#fff;border-radius:8px;font-size:11px;font-weight:700;text-align:center;text-decoration:none;font-family:'Poppins',sans-serif">Ver detalles →</a>
     </div>`).join('');
+  if (window.IAGAMI_ANIM) IAGAMI_ANIM.staggerChildren(grid);
 }
 
 async function renderHomeDocumentos() {
