@@ -1,6 +1,6 @@
 /**
  * Seed data: Comunas y Consejos Comunales
- * Municipio Iribarren y Municipio Morán — Estado Lara, Venezuela
+ * Municipio Iribarren (Barquisimeto) — Estado Lara, Venezuela
  *
  * Coordenadas aproximadas por parroquia.
  * Para refinar: editar lat/lng en el Admin → Consejos Comunales.
@@ -24,15 +24,6 @@ const PARROQUIA_COORDS = {
   'Buena Vista':           [10.0750, -69.3300],
   'Agua Viva':             [10.0200, -69.3600],
   'Juares':                [10.0650, -69.3800],
-  // Municipio Morán - El Tocuyo y alrededores
-  'Bolívar (Morán)':       [9.7820,  -69.7920],
-  'Morán':                 [9.7900,  -69.8050],
-  'Humocaro Bajo':         [9.7200,  -69.8500],
-  'La Candelaria':         [9.8100,  -69.7700],
-  'Hilario Luna y Luna':   [9.7500,  -69.8200],
-  'Humocaro Alto':         [9.6950,  -69.8900],
-  'Guárico':               [9.8500,  -69.8000],
-  'Anzoátegui':            [9.8700,  -69.7800],
 };
 
 // Jitter para separar puntos en la misma parroquia (±0.005°≈500m)
@@ -96,52 +87,6 @@ const CONSEJOS_SEED = [
   { nombre:'UN CAMINO A LA ESPERANZA',   parroquia:'Unión',            municipio:'Iribarren', estado:'Lara' },
   { nombre:'SAN JACINTO 1 PARTE BAJA',   parroquia:'Unión',            municipio:'Iribarren', estado:'Lara' },
   { nombre:'MARCOS DURAN',               parroquia:'Unión',            municipio:'Iribarren', estado:'Lara' },
-
-  // ── Municipio Morán ──────────────────────────────────────────
-  // Parroquia Bolívar (El Tocuyo)
-  { nombre:'LOS EJIDOS',                  parroquia:'Bolívar (Morán)',  municipio:'Morán', estado:'Lara' },
-  { nombre:'LOS LANZEROS DEL CALVARIO',   parroquia:'Bolívar (Morán)',  municipio:'Morán', estado:'Lara' },
-  { nombre:'CALLE LAS FLORES',            parroquia:'Bolívar (Morán)',  municipio:'Morán', estado:'Lara' },
-  { nombre:'LA ERMITA',                   parroquia:'Bolívar (Morán)',  municipio:'Morán', estado:'Lara' },
-  { nombre:'SAN ISIDRO',                  parroquia:'Bolívar (Morán)',  municipio:'Morán', estado:'Lara' },
-  { nombre:'EL PROGRESO',                 parroquia:'Bolívar (Morán)',  municipio:'Morán', estado:'Lara' },
-  { nombre:'LOS LAURELES',                parroquia:'Bolívar (Morán)',  municipio:'Morán', estado:'Lara' },
-  { nombre:'BARRIO NUEVO',                parroquia:'Bolívar (Morán)',  municipio:'Morán', estado:'Lara' },
-  { nombre:'LA QUEBRADA',                 parroquia:'Bolívar (Morán)',  municipio:'Morán', estado:'Lara' },
-  { nombre:'EL CALVARIO',                 parroquia:'Bolívar (Morán)',  municipio:'Morán', estado:'Lara' },
-  { nombre:'SIMÓN BOLÍVAR NORTE',         parroquia:'Bolívar (Morán)',  municipio:'Morán', estado:'Lara' },
-  { nombre:'SIMÓN BOLÍVAR SUR',           parroquia:'Bolívar (Morán)',  municipio:'Morán', estado:'Lara' },
-  { nombre:'LA ESPERANZA',                parroquia:'Bolívar (Morán)',  municipio:'Morán', estado:'Lara' },
-  { nombre:'LOS MANGOS',                  parroquia:'Bolívar (Morán)',  municipio:'Morán', estado:'Lara' },
-  { nombre:'SECTOR CENTRO',               parroquia:'Bolívar (Morán)',  municipio:'Morán', estado:'Lara' },
-  { nombre:'LOS ALISOS',                  parroquia:'Bolívar (Morán)',  municipio:'Morán', estado:'Lara' },
-  { nombre:'CAMPO ALEGRE',                parroquia:'Bolívar (Morán)',  municipio:'Morán', estado:'Lara' },
-  { nombre:'LA COLONIA',                  parroquia:'Bolívar (Morán)',  municipio:'Morán', estado:'Lara' },
-  { nombre:'EL LLANO',                    parroquia:'Bolívar (Morán)',  municipio:'Morán', estado:'Lara' },
-  { nombre:'VILLA NUEVA',                 parroquia:'Bolívar (Morán)',  municipio:'Morán', estado:'Lara' },
-  // Parroquia Morán
-  { nombre:'LA MONTAÑA',                  parroquia:'Morán',            municipio:'Morán', estado:'Lara' },
-  { nombre:'EL ZAMURO',                   parroquia:'Morán',            municipio:'Morán', estado:'Lara' },
-  { nombre:'LOS NARANJOS',                parroquia:'Morán',            municipio:'Morán', estado:'Lara' },
-  // Parroquia Humocaro Bajo
-  { nombre:'HUMOCARO BAJO CENTRAL',       parroquia:'Humocaro Bajo',    municipio:'Morán', estado:'Lara' },
-  { nombre:'EL SALADO',                   parroquia:'Humocaro Bajo',    municipio:'Morán', estado:'Lara' },
-  { nombre:'LA PARAGUA',                  parroquia:'Humocaro Bajo',    municipio:'Morán', estado:'Lara' },
-  // Parroquia La Candelaria
-  { nombre:'LA CANDELARIA CENTRAL',       parroquia:'La Candelaria',    municipio:'Morán', estado:'Lara' },
-  { nombre:'EL RASTRO',                   parroquia:'La Candelaria',    municipio:'Morán', estado:'Lara' },
-  // Parroquia Hilario Luna y Luna
-  { nombre:'HILARIO LUNA CENTRAL',        parroquia:'Hilario Luna y Luna', municipio:'Morán', estado:'Lara' },
-  { nombre:'EL CEIBO',                    parroquia:'Hilario Luna y Luna', municipio:'Morán', estado:'Lara' },
-  // Parroquia Humocaro Alto
-  { nombre:'HUMOCARO ALTO CENTRAL',       parroquia:'Humocaro Alto',    municipio:'Morán', estado:'Lara' },
-  { nombre:'LAS DELICIAS',                parroquia:'Humocaro Alto',    municipio:'Morán', estado:'Lara' },
-  // Parroquia Guárico
-  { nombre:'GUÁRICO CENTRAL',             parroquia:'Guárico',          municipio:'Morán', estado:'Lara' },
-  { nombre:'LA LOMA',                     parroquia:'Guárico',          municipio:'Morán', estado:'Lara' },
-  // Parroquia Anzoátegui
-  { nombre:'ANZOÁTEGUI CENTRAL',          parroquia:'Anzoátegui',       municipio:'Morán', estado:'Lara' },
-  { nombre:'EL HATILLO',                  parroquia:'Anzoátegui',       municipio:'Morán', estado:'Lara' },
 ];
 
 // ─── Función principal de siembra ────────────────────────────────────────────

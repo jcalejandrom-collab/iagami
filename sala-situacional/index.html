@@ -114,6 +114,10 @@ async function init(){
   comunas=Array.isArray(comunas)?comunas:[];
   infra=Array.isArray(infra)?infra:[];
 
+  // Solo mostrar Municipio Iribarren (Barquisimeto) en esta sala
+  consejos = consejos.filter(c => !c.municipio || c.municipio === 'Iribarren');
+  comunas  = comunas.filter(c  => !c.municipio || c.municipio === 'Iribarren');
+
   const comunaNombre = id => { const c=comunas.find(x=>x.id===id); return c?(c.nombre||'—'):'—'; };
   // Un registro hídrico por consejo (el más reciente)
   const infraPorConsejo = {};
@@ -169,9 +173,11 @@ async function init(){
   }
 
   // ── Mapa ──
-  const map=L.map('mapa').setView([10.066,-69.347],11); // Barquisimeto / Iribarren
+  // Límites geográficos de Barquisimeto / Municipio Iribarren
+  const IRIBARREN_BOUNDS = L.latLngBounds([9.92,-69.50],[10.22,-69.18]);
+  const map=L.map('mapa',{maxBounds:IRIBARREN_BOUNDS,maxBoundsViscosity:0.9}).setView([10.066,-69.347],12);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-    maxZoom:19, attribution:'© OpenStreetMap'
+    maxZoom:18, minZoom:10, attribution:'© OpenStreetMap'
   }).addTo(map);
   const pts=[];
   consejos.forEach(c=>{
@@ -186,6 +192,7 @@ async function init(){
     pts.push([lat,lng]);
   });
   if(pts.length) map.fitBounds(pts,{padding:[40,40],maxZoom:14});
+  else map.fitBounds(IRIBARREN_BOUNDS);
 }
 init();
 </script>
