@@ -261,8 +261,10 @@
   ────────────────────────────────────────────────────────────────────────── */
   function initRipple() {
     if (reduced) return;
-    function createRipple(e) {
-      const btn  = e.currentTarget;
+    // Event delegation — works on dynamically added buttons too
+    document.addEventListener('click', e => {
+      const btn = e.target.closest('.btn-p,.btn-s,.cta-btn,[data-ripple]');
+      if (!btn) return;
       const rect = btn.getBoundingClientRect();
       const size = Math.max(rect.width, rect.height) * 2;
       const x    = e.clientX - rect.left - size / 2;
@@ -272,14 +274,10 @@
         width:${size}px;height:${size}px;left:${x}px;top:${y}px;
         background:rgba(255,255,255,.28);transform:scale(0);
         animation:rippleAnim .55s ease-out forwards;`;
-      const prev = btn.style.position;
-      if (!prev || prev === 'static') btn.style.position = 'relative';
+      if (getComputedStyle(btn).position === 'static') btn.style.position = 'relative';
       btn.style.overflow = 'hidden';
       btn.appendChild(r);
       setTimeout(() => r.remove(), 600);
-    }
-    document.querySelectorAll('.btn-p,.btn-s,.cta-btn,[data-ripple]').forEach(btn => {
-      btn.addEventListener('click', createRipple);
     });
   }
 
@@ -321,7 +319,7 @@
      dando sensación de profundidad respecto a la imagen de fondo.
   ────────────────────────────────────────────────────────────────────────── */
   function initHeroParallax() {
-    if (reduced) return;
+    if (reduced || window.innerWidth < 768) return;
     const heroLeft = document.querySelector('.hero-left');
     if (!heroLeft) return;
     let ticking = false;
@@ -330,6 +328,7 @@
         requestAnimationFrame(() => {
           const y = window.scrollY;
           if (y < 600) heroLeft.style.transform = `translateY(${y * 0.12}px)`;
+          else heroLeft.style.transform = '';
           ticking = false;
         });
         ticking = true;
@@ -354,8 +353,15 @@
     const m = document.getElementById(id);
     if (!m) return;
     if (reduced) { m.classList.remove('open'); return; }
+    // Remove .open so backdrop fades, add .closing so modal plays exit animation
+    // .closing needs display:flex to be visible during the animation
+    m.style.display = 'flex';
+    m.classList.remove('open');
     m.classList.add('closing');
-    setTimeout(() => { m.classList.remove('open', 'closing'); }, 200);
+    setTimeout(() => {
+      m.classList.remove('closing');
+      m.style.display = '';
+    }, 200);
   }
 
   /* ─── 14. CARD 3D TILT ───────────────────────────────────────────────────────
@@ -365,28 +371,24 @@
   function initCardTilt() {
     if (reduced) return;
     const MAX = 8;
+    const SEL = '.svc-card,.news-card,.proj-card,.ev-card';
 
-    function onMove(e) {
-      const card = e.currentTarget;
+    document.addEventListener('mousemove', e => {
+      const card = e.target.closest(SEL);
+      if (!card) return;
       const rect = card.getBoundingClientRect();
-      const cx   = rect.left + rect.width  / 2;
-      const cy   = rect.top  + rect.height / 2;
-      const dx   = (e.clientX - cx) / (rect.width  / 2);
-      const dy   = (e.clientY - cy) / (rect.height / 2);
+      const dx   = (e.clientX - rect.left - rect.width  / 2) / (rect.width  / 2);
+      const dy   = (e.clientY - rect.top  - rect.height / 2) / (rect.height / 2);
       card.style.transform = `perspective(600px) rotateY(${dx * MAX}deg) rotateX(${-dy * MAX}deg) translateY(-4px)`;
-    }
+    });
 
-    function onLeave(e) {
-      const card = e.currentTarget;
+    document.addEventListener('mouseleave', e => {
+      const card = e.target.closest(SEL);
+      if (!card) return;
       card.style.transition = 'transform .4s ease';
       card.style.transform  = '';
       setTimeout(() => { card.style.transition = ''; }, 400);
-    }
-
-    document.querySelectorAll('.svc-card,.news-card,.proj-card,.ev-card').forEach(card => {
-      card.addEventListener('mousemove', onMove);
-      card.addEventListener('mouseleave', onLeave);
-    });
+    }, true);
   }
 
   /* ─── 15. CURSOR GLOW EN HERO ────────────────────────────────────────────────

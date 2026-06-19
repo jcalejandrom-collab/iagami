@@ -294,7 +294,6 @@ function renderProyectos(data) {
     return;
   }
 
-  grid.removeAttribute('data-stagger');
   grid.innerHTML = data.map((p, idx) => {
     const emoji    = getEmoji(p, idx);
     const sc       = getStatusClass(p.estado);
@@ -336,7 +335,10 @@ function renderProyectos(data) {
       </div>
     </div>`;
   }).join('');
-  if (window.IAGAMI_ANIM) IAGAMI_ANIM.staggerChildren(grid);
+  if (window.IAGAMI_ANIM) {
+    IAGAMI_ANIM.staggerChildren(grid);
+    IAGAMI_ANIM.initProgressBars();
+  }
 }
 
 /* ── Filter ── */
