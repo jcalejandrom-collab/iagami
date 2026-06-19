@@ -276,6 +276,9 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 <script src="../cms/config.js"></script>
 <script src="../cms/pb.js"></script>
 <script>
+// ── Helpers ──
+function escHtml(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
 // ── State ──
 let currentView = 'lista';
 let calYear = 2026;
@@ -368,7 +371,7 @@ function eventCardHTML(e) {
             <span>📍 ${e.lugar}</span>
             <span>👤 ${e.responsable||e.ponente||''}</span>
           </div>
-          <div class="event-desc">${desc}</div>
+          <div class="event-desc">${escHtml(desc)}</div>
         </div>
       </div>
     </div>`;
@@ -478,7 +481,7 @@ async function openDetail(id) {
   const fechaFmt = `${d.getDate()} de ${MONTHS_ES[d.getMonth()]} de ${d.getFullYear()}, ${e.hora_inicio||e.hora||''} hrs`;
 
   document.getElementById('modal-title').textContent = e.titulo || '';
-  document.getElementById('modal-tipo-badge').innerHTML = `<span class="tipo-badge ${(e.tipo || 'otro').toLowerCase()}" style="margin-bottom:8px;display:inline-block">${e.tipo || ''}</span>`;
+  document.getElementById('modal-tipo-badge').innerHTML = `<span class="tipo-badge ${(e.tipo || 'otro').toLowerCase()}" style="margin-bottom:8px;display:inline-block">${escHtml(e.tipo || '')}</span>`;
   document.getElementById('modal-fecha').textContent = fechaFmt;
   document.getElementById('modal-lugar').textContent = e.lugar || 'Por definir';
   document.getElementById('modal-responsable').textContent = e.responsable||e.ponente||'';

@@ -5,6 +5,7 @@
 <meta name="pb-url" content="https://sentence-recovery-ozone-fruit.trycloudflare.com"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>IAGAMI · Comunas y Consejos Comunales — Observatorio Ambiental Comunitario</title>
+<meta name="description" content="Directorio y observatorio ambiental de comunas y consejos comunales del Municipio Iribarren. Registra tu organización, consulta diagnósticos ambientales y ubicaciones en el mapa."/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet"/>
@@ -1197,7 +1198,10 @@ function dzFileInput(e,listId){addFiles(e.target.files,listId);e.target.value=''
 
 function addFiles(files,listId){
   if(!_fileStore[listId])_fileStore[listId]=[];
+  const allowed=['application/pdf','image/jpeg','image/png'];
   Array.from(files).forEach(f=>{
+    if(!allowed.includes(f.type)){alert(`"${f.name}": solo se aceptan PDF, JPG o PNG`);return;}
+    if(f.size>10*1024*1024){alert(`"${f.name}" supera 10 MB`);return;}
     if(!_fileStore[listId].find(x=>x.name===f.name&&x.size===f.size)){
       _fileStore[listId].push(f);
     }

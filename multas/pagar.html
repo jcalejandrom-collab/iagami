@@ -602,7 +602,11 @@ let _comprobanteFile = null;
 
 function previewComprobante(input) {
   if (!input.files || !input.files[0]) return;
-  _comprobanteFile = input.files[0];
+  const file = input.files[0];
+  const allowed = ['application/pdf','image/jpeg','image/png'];
+  if (!allowed.includes(file.type)) { toast('Solo se aceptan PDF, JPG o PNG'); input.value=''; return; }
+  if (file.size > 10 * 1024 * 1024) { toast('El archivo supera 10 MB'); input.value=''; return; }
+  _comprobanteFile = file;
   document.getElementById('comprobante-placeholder').style.display = 'none';
   const prev = document.getElementById('comprobante-preview');
   prev.style.display = 'flex';

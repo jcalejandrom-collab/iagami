@@ -562,7 +562,13 @@ function closeSolicitud() {
 }
 
 function handleSolicitudFiles(input) {
-  selectedFiles = Array.from(input.files);
+  const allowed = ['application/pdf','image/jpeg','image/png'];
+  const valid = Array.from(input.files).filter(f => {
+    if (!allowed.includes(f.type)) { alert(`"${f.name}": solo se aceptan PDF, JPG o PNG`); return false; }
+    if (f.size > 10 * 1024 * 1024) { alert(`"${f.name}" supera 10 MB`); return false; }
+    return true;
+  });
+  selectedFiles = valid;
   const list = document.getElementById('fileList');
   list.innerHTML = selectedFiles.map(f =>
     `<div class="file-item">📄 ${escHtml(f.name)} <span style="color:#6a8a72;margin-left:auto">${(f.size/1024).toFixed(0)} KB</span></div>`
@@ -599,17 +605,23 @@ async function submitSolicitud() {
     fecha_solicitud: new Date().toISOString()
   };
 
+  let saved = false;
   try {
     const pbUrl = document.querySelector('meta[name="pb-url"]')?.content;
     if (pbUrl) {
       const fd = new FormData();
       Object.entries(payload).forEach(([k,v]) => fd.append(k, v));
       selectedFiles.forEach(f => fd.append('adjuntos', f));
-      await fetch(`${pbUrl}/api/collections/solicitudes_tramites/records`, {
+      const res = await fetch(`${pbUrl}/api/collections/solicitudes_tramites/records`, {
         method: 'POST', body: fd
       });
+      saved = res.ok;
     }
   } catch(e) {
+    saved = false;
+  }
+  if (!saved) {
+    // Persist locally so the request is never lost
     const stored = JSON.parse(localStorage.getItem('solicitudes_tramites') || '[]');
     stored.push(payload);
     localStorage.setItem('solicitudes_tramites', JSON.stringify(stored));

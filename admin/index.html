@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
 <meta name="pb-url" content="https://sentence-recovery-ozone-fruit.trycloudflare.com">
 <title>IAGAMI Admin CMS</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
@@ -1798,11 +1799,13 @@ async function saveNoticias(e) {
     titulo: raw.titulo,
     resumen: raw.resumen || '',
     cuerpo: raw.contenido,
+    contenido: raw.contenido,
     imagen: raw.imagen,
     categoria: raw.categoria,
     fecha: raw.fecha_publicacion,
     publicado: raw.estado === 'publicado',
     destacado: form.querySelector('[name="destacada"]').checked,
+    destacada: form.querySelector('[name="destacada"]').checked,
     autor: raw.autor,
     video_url: raw.video_url,
     tags: raw.tags,
@@ -1904,6 +1907,7 @@ async function saveAgenda(e) {
     descripcion: raw.descripcion,
     tipo: raw.tipo,
     fecha_inicio: raw.fecha,
+    fecha: raw.fecha,
     lugar: raw.lugar,
     hora_inicio: raw.hora_inicio,
     hora_fin: raw.hora_fin,
@@ -1954,6 +1958,7 @@ async function saveTransparencia(e) {
     descripcion: raw.descripcion,
     categoria: raw.categoria,
     year: raw.año ? parseInt(raw.año) : null,
+    anio: raw.año ? parseInt(raw.año) : null,
     publicado: raw.estado === 'publicado',
     pdf_url: raw.pdf_url,
   };
@@ -2006,6 +2011,7 @@ async function saveOrganizacion(e) {
     nombre: raw.nombre,
     tipo: raw.tipo,
     parent: raw.padre || null,
+    padre: raw.padre || null,
     responsable: raw.responsable,
     telefono: raw.telefono,
     email: raw.email,
@@ -2054,9 +2060,11 @@ async function saveProyectos(e) {
     fecha_inicio: raw.fecha_inicio,
     fecha_fin: raw.fecha_fin_estimada,
     avance: parseInt(raw.porcentaje_avance)||0,
+    porcentaje_avance: parseInt(raw.porcentaje_avance)||0,
     imagen: raw.imagen,
     responsable: raw.responsable,
     municipio: raw.municipio,
+    ubicacion: raw.municipio,
     beneficiados: raw.beneficiados,
     presupuesto: raw.presupuesto,
     hitos: getListValues('hitos-list'),
@@ -2100,8 +2108,10 @@ async function saveIndicadores(e) {
     id: raw.id,
     nombre: raw.nombre,
     icono: raw.icono,
+    emoji: raw.icono,
     categoria: raw.categoria,
     valor: parseFloat(raw.valor_actual)||0,
+    valor_actual: parseFloat(raw.valor_actual)||0,
     unidad: raw.unidad,
     meta: parseFloat(raw.meta)||0,
     tendencia: raw.tendencia,
@@ -2500,7 +2510,7 @@ async function renderConsejos() {
   const search = (document.getElementById('q-consejos')||{}).value||'';
   const parroquia = (document.getElementById('f-consejos-par')||{}).value||'';
   const estatus = (document.getElementById('f-consejos-est')||{}).value||'';
-  const allData = await CMSDB.getAll('consejos');
+  const allData = await CMSDB.getAll('consejos_comunales');
   let data = allData;
   if (search) {
     const q = search.toLowerCase();
@@ -2559,7 +2569,7 @@ async function openConsejoForm(id) {
   form.style.display = 'block';
   form.scrollIntoView({behavior:'smooth', block:'start'});
   ccFormId = id||'';
-  const cc = id ? await CMSDB.getOne('consejos', id) : null;
+  const cc = id ? await CMSDB.getOne('consejos_comunales', id) : null;
   const fields = ['nombre','codigo','estatus','estado','municipio','parroquia','comunidad','direccion','fecha_constitucion','num_familias','num_habitantes','responsable','cedula','telefono','email','coordenadas','observaciones'];
   fields.forEach(f => {
     const el = document.getElementById('fc-'+f);
@@ -2577,7 +2587,14 @@ async function saveConsejo() {
   const fields = ['nombre','codigo','estatus','estado','municipio','parroquia','comunidad','direccion','fecha_constitucion','num_familias','num_habitantes','responsable','cedula','telefono','email','coordenadas','observaciones'];
   const item = { id: ccFormId||undefined };
   fields.forEach(f => { const el = document.getElementById('fc-'+f); if (el) item[f] = el.value; });
-  await CMSDB.save('consejos', item);
+  // Alias fields so the public Observatorio (consejos_comunales) renders them
+  item.rif = item.codigo || item.rif || '';
+  item.sector = item.comunidad || item.sector || '';
+  if (item.coordenadas) {
+    const m = String(item.coordenadas).split(/[,;]/).map(s => parseFloat(s.trim()));
+    if (m.length === 2 && !isNaN(m[0]) && !isNaN(m[1])) { item.lat = m[0]; item.lng = m[1]; }
+  }
+  await CMSDB.save('consejos_comunales', item);
   toast(ccFormId ? 'Consejo actualizado' : 'Consejo registrado');
   closeConsejoForm();
 }
@@ -2591,7 +2608,7 @@ function closeConsejoForm() {
 
 async function deleteConsejo(id) {
   confirmDelete(async () => {
-    await CMSDB.remove('consejos', id);
+    await CMSDB.remove('consejos_comunales', id);
     toast('Consejo eliminado');
     renderConsejos();
   });
@@ -2986,12 +3003,14 @@ async function savePlan() {
     hora_fin: gv('fp-hora_fin'),
     lugar: gv('fp-lugar'),
     departamento: gv('fp-departamento'),
+    area: gv('fp-departamento'),
     responsable: gv('fp-responsable'),
     prioridad: gv('fp-prioridad'),
     estado: gv('fp-estado'),
     descripcion: gv('fp-descripcion'),
     observaciones: gv('fp-observaciones'),
     avance: parseInt((document.getElementById('fp-avance')||{}).value)||0,
+    porcentaje_avance: parseInt((document.getElementById('fp-avance')||{}).value)||0,
     publicar: !!(document.getElementById('fp-publicar')||{}).checked,
     publicado: !!(document.getElementById('fp-publicar')||{}).checked
   };

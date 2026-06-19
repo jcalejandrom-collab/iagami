@@ -295,7 +295,6 @@ let currentPage = 1;
 ═══════════════════════════════ */
 document.addEventListener('DOMContentLoaded', async () => {
   const _raw = await CMSDB.getAll('noticias');
-  console.log('[IAGAMI] noticias raw count:', _raw.length, _raw[0] && JSON.stringify({publicado: _raw[0].publicado, fecha: _raw[0].fecha}));
   allNoticias = _raw
     .filter(n => n.publicado !== false && n.publicado != null)
     .sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
@@ -325,7 +324,7 @@ function populateYears() {
 ═══════════════════════════════ */
 function renderFeatured() {
   const dest = document.getElementById('featuredGrid');
-  const destacadas = allNoticias.filter(n => n.destacada);
+  const destacadas = allNoticias.filter(n => n.destacada || n.destacado);
 
   if (!destacadas.length) {
     dest.closest('.featured-section').style.display = 'none';
@@ -334,13 +333,13 @@ function renderFeatured() {
 
   dest.innerHTML = destacadas.map(n => {
     const s = catStyle(n.categoria);
-    const excerpt = (n.contenido || '').slice(0, 160).replace(/\n/g,' ') + '…';
+    const excerpt = (n.contenido || n.cuerpo || '').slice(0, 160).replace(/\n/g,' ') + '…';
     return `
       <article class="featured-card" onclick="openDetail('${escHtml(n.id)}')" tabindex="0"
                onkeydown="if(event.key==='Enter')openDetail('${escHtml(n.id)}')">
         <div class="featured-accent" style="background:${s.accent}"></div>
         <div class="featured-body">
-          <span class="cat-badge" style="background:${s.bg};color:${s.text}">${n.categoria}</span>
+          <span class="cat-badge" style="background:${s.bg};color:${s.text}">${escHtml(n.categoria||'')}</span>
           <div class="featured-title">${escHtml(n.titulo)}</div>
           <div class="featured-meta">
             <span>📅 ${formatDate(n.fecha)}</span>
@@ -471,7 +470,7 @@ async function openDetail(id) {
   document.getElementById('modalAccentBar').style.background = s.accent;
 
   document.getElementById('modalCat').innerHTML =
-    `<span class="cat-badge" style="background:${s.bg};color:${s.text}">${n.categoria}</span>`;
+    `<span class="cat-badge" style="background:${s.bg};color:${s.text}">${escHtml(n.categoria||'')}</span>`;
 
   document.getElementById('modalTitle').textContent = n.titulo;
 
