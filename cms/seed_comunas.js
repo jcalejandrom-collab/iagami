@@ -94,7 +94,7 @@ window.seedIagami = async function(opts = {}) {
   const { dryRun = false, skipExisting = true } = opts;
   const log = [];
 
-  if (!window.CMSDB) {
+  if (!CMSDB) {
     alert('CMSDB no disponible. Abre este script desde /admin/.');
     return;
   }
@@ -102,8 +102,8 @@ window.seedIagami = async function(opts = {}) {
   // Verificar si ya hay datos
   let existingComunas = [], existingConsejos = [];
   try {
-    existingComunas  = (await window.CMSDB.getAll('comunas', {perPage:500})).items || [];
-    existingConsejos = (await window.CMSDB.getAll('consejos_comunales', {perPage:500})).items || [];
+    existingComunas  = await CMSDB.getAll('comunas') || [];
+    existingConsejos = await CMSDB.getAll('consejos_comunales') || [];
   } catch(e) { /* colecciones vacías o inexistentes */ }
 
   const existingComunaNames  = new Set(existingComunas.map(c => c.nombre?.toUpperCase()));
@@ -130,7 +130,7 @@ window.seedIagami = async function(opts = {}) {
     const payload = { ...c, lat, lng, tipo: 'Comuna', activo: true };
     if (!dryRun) {
       try {
-        const rec = await window.CMSDB.save('comunas', payload);
+        const rec = await CMSDB.save('comunas', payload);
         comunaIdMap[key] = rec.id;
         log.push(`✅ COMUNA: ${c.nombre} [${lat},${lng}]`);
       } catch(e) {
@@ -170,7 +170,7 @@ window.seedIagami = async function(opts = {}) {
     };
     if (!dryRun) {
       try {
-        await window.CMSDB.save('consejos_comunales', payload);
+        await CMSDB.save('consejos_comunales', payload);
         log.push(`✅ CONSEJO: ${cc.nombre} [${lat},${lng}]`);
       } catch(e) {
         log.push(`❌ ERROR CONSEJO ${cc.nombre}: ${e.message}`);
