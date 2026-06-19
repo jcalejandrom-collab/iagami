@@ -113,22 +113,23 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
   text-shadow:0 2px 12px rgba(0,0,0,.4);
 }
 .hero h1{
-  font-family:'Poppins',sans-serif;font-size:34px;font-weight:800;
-  line-height:1.15;color:#fff;margin-bottom:12px;
-  text-shadow:0 2px 24px rgba(0,0,0,.5);
+  font-family:'Poppins',sans-serif;font-size:clamp(30px,5vw,52px);font-weight:800;
+  line-height:1.1;color:#F8FAFC;margin-bottom:14px;
+  text-shadow:0 2px 16px rgba(0,0,0,.35);letter-spacing:-0.02em;
 }
 .hero h1 .green{color:#4ade80}
-.hero-desc{font-size:13.5px;color:rgba(255,255,255,.82);line-height:1.75;margin-bottom:24px;max-width:420px}
+.hero-desc{font-size:14px;color:#E2E8F0;line-height:1.75;margin-bottom:24px;max-width:420px}
 .hero-btns{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:28px}
 .btn-p{
-  background:#1d6b3e;color:#fff;border:none;border-radius:10px;
+  background:linear-gradient(135deg,#1d6b3e,#22c55e);
+  color:#fff;border:none;border-radius:10px;
   padding:13px 22px;font-size:13px;font-weight:700;cursor:pointer;
   display:inline-flex;align-items:center;gap:7px;
   font-family:'Poppins',sans-serif;
-  box-shadow:0 4px 24px rgba(29,107,62,.55);
-  transition:.2s;text-decoration:none;
+  box-shadow:0 4px 24px rgba(34,197,94,.35);
+  transition:.25s;text-decoration:none;
 }
-.btn-p:hover{background:#155c32;transform:translateY(-1px)}
+.btn-p:hover{background:linear-gradient(135deg,#155c32,#16a34a);transform:translateY(-2px);box-shadow:0 8px 32px rgba(34,197,94,.5)}
 .btn-s{
   background:rgba(255,255,255,.12);color:#fff;
   border:1.5px solid rgba(255,255,255,.38);border-radius:10px;
@@ -200,8 +201,44 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 .sec-wrap{background:#f8fcfa}.sec-wrap2{background:#fff}.sec-wrap3{background:#f0faf5}
 .sec-tag{display:inline-block;font-size:11px;font-weight:700;color:#1d6b3e;background:#e8f5ee;border:1px solid #a8dfc0;border-radius:20px;padding:3px 13px;margin-bottom:9px;letter-spacing:.05em}
 .sec-head{text-align:center;margin-bottom:26px}
-.sec-head h2{font-family:'Poppins',sans-serif;font-size:22px;font-weight:700;color:#1a3d2b;margin-bottom:5px}
+.sec-head h2{font-family:'Poppins',sans-serif;font-size:clamp(22px,3.5vw,36px);font-weight:700;color:#1a3d2b;margin-bottom:8px;letter-spacing:-0.01em}
 .sec-head p{font-size:13px;color:#4a8a6a}
+
+/* ===== STATS BAND ===== */
+.stats-band{background:#0a1f0f;padding:48px 24px;border-top:1px solid rgba(74,222,128,.15);border-bottom:1px solid rgba(74,222,128,.12)}
+.stats-band-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+@media(max-width:640px){.stats-band-inner{grid-template-columns:repeat(2,1fr)}}
+.sband-item{text-align:center;padding:16px;border-right:1px solid rgba(74,222,128,.12)}
+.sband-item:last-child{border-right:none}
+.sband-num{font-family:'Poppins',sans-serif;font-size:clamp(2.2rem,4vw,3.8rem);font-weight:800;color:#4ade80;line-height:1;text-shadow:0 0 40px rgba(74,222,128,.45);letter-spacing:-0.02em}
+.sband-desc{font-size:12px;color:rgba(255,255,255,.5);margin-top:8px;letter-spacing:.05em;text-transform:uppercase;font-weight:500}
+
+/* ===== WAVE DIVIDER ===== */
+.wave-div{line-height:0;overflow:hidden;display:block}
+.wave-div svg{display:block;width:100%;height:auto}
+
+/* ===== MAGAZINE NEWS GRID ===== */
+.news-grid-magazine{display:grid!important;grid-template-columns:2fr 1fr!important;gap:16px!important}
+.news-grid-magazine .news-card:first-child .news-img{height:220px}
+@media(max-width:700px){.news-grid-magazine{grid-template-columns:1fr!important}}
+
+/* ===== PREMIUM FOOTER ===== */
+.footer-premium{background:#030d06;border-top:1px solid rgba(74,222,128,.1);padding:64px 24px 0;color:rgba(255,255,255,.65)}
+.footer-premium-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px;padding-bottom:52px}
+@media(max-width:900px){.footer-premium-inner{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.footer-premium-inner{grid-template-columns:1fr}}
+.fp-brand-logo{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.fp-brand-logo img{width:48px;height:48px;object-fit:contain;border-radius:12px;border:1px solid rgba(74,222,128,.2)}
+.fp-brand-name{font-family:'Poppins',sans-serif;font-size:20px;font-weight:800;color:#fff;letter-spacing:-.01em;line-height:1}
+.fp-brand-sub{font-size:11px;color:rgba(255,255,255,.35);margin-top:3px}
+.fp-mission{font-size:13px;line-height:1.75;color:rgba(255,255,255,.45);max-width:280px;margin-bottom:16px}
+.fp-tagline{font-size:13px;color:#4ade80;font-weight:600;display:flex;align-items:center;gap:6px}
+.fp-col-title{font-family:'Poppins',sans-serif;font-size:10px;font-weight:700;color:#4ade80;letter-spacing:.12em;text-transform:uppercase;margin-bottom:18px}
+.fp-links{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:11px}
+.fp-links a,.fp-links li{font-size:13px;color:rgba(255,255,255,.5);text-decoration:none;transition:color .2s,padding-left .2s;cursor:pointer}
+.fp-links a:hover,.fp-links li:hover{color:#4ade80;padding-left:4px}
+.fp-bottom{border-top:1px solid rgba(255,255,255,.06);padding:20px 0;max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;font-size:11px;color:rgba(255,255,255,.28)}
+.fp-bottom-badge{color:rgba(74,222,128,.5);font-size:11px}
 
 /* ===== SERVICES ===== */
 .svc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(115px,1fr));gap:11px}
@@ -464,6 +501,31 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
     </div>
   </div>
 
+  <!-- STATS BAND -->
+  <div class="stats-band" data-reveal>
+    <div class="stats-band-inner">
+      <div class="sband-item">
+        <div class="sband-num" data-counter="47" data-counter-duration="1400">0</div>
+        <div class="sband-desc">Consejos Comunales</div>
+      </div>
+      <div class="sband-item">
+        <div class="sband-num" data-counter="320" data-counter-suffix="+" data-counter-duration="1600">0</div>
+        <div class="sband-desc">Empresas Registradas</div>
+      </div>
+      <div class="sband-item">
+        <div class="sband-num" data-counter="98" data-counter-suffix="%" data-counter-duration="1200">0</div>
+        <div class="sband-desc">Cumplimiento Ambiental</div>
+      </div>
+      <div class="sband-item">
+        <div class="sband-num" data-counter="12" data-counter-duration="1000">0</div>
+        <div class="sband-desc">Años de Gestión</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WAVE → claro -->
+  <div class="wave-div"><svg viewBox="0 0 1440 54" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"><path d="M0,32 C480,72 960,0 1440,32 L1440,54 L0,54 Z" fill="#f8fcfa"/></svg></div>
+
   <!-- SERVICIOS -->
   <div class="sec-wrap">
     <div class="section">
@@ -649,55 +711,76 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
     </div>
   </div>
 
-  <!-- CTA -->
-  <div class="cta">
-    <div class="sec-tag" style="background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.25);color:#a8f0c8">PARTICIPACIÓN CIUDADANA</div>
-    <h2 style="margin-top:10px">¿Observas un problema ambiental?</h2>
-    <p>Tu denuncia es importante. Con tecnología IA asignamos prioridad y área competente automáticamente. Juntos protegemos el Municipio Iribarren.</p>
-    <button class="cta-btn" onclick="showPage('denuncia')">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-      Presentar Denuncia Ahora
-    </button>
+  <!-- WAVE → oscuro -->
+  <div class="wave-div"><svg viewBox="0 0 1440 54" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"><path d="M0,22 C360,60 1080,0 1440,22 L1440,0 L0,0 Z" fill="#fff"/></svg></div>
+
+  <!-- CTA DARK PREMIUM -->
+  <div class="cta" style="background:linear-gradient(135deg,#061209 0%,#0d2d1a 50%,#061a0d 100%);position:relative;overflow:hidden">
+    <div style="position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 50% 100%,rgba(34,197,94,.12),transparent 70%);pointer-events:none"></div>
+    <div style="position:relative;z-index:1">
+      <div class="sec-tag" style="background:rgba(74,222,128,.12);border-color:rgba(74,222,128,.3);color:#4ade80">PARTICIPACIÓN CIUDADANA</div>
+      <h2 style="margin-top:12px;font-size:clamp(24px,4vw,40px);letter-spacing:-0.02em;color:#F8FAFC">¿Observas un problema ambiental?</h2>
+      <p style="color:rgba(255,255,255,.6);max-width:520px;margin:12px auto 28px;line-height:1.75">Tu denuncia es importante. Con tecnología IA asignamos prioridad y área competente automáticamente. Juntos protegemos el Municipio Iribarren.</p>
+      <button class="cta-btn" onclick="showPage('denuncia')" data-ripple>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Presentar Denuncia Ahora
+      </button>
+    </div>
   </div>
 
-  <!-- FOOTER -->
-  <footer class="footer">
-    <div class="footer-inner">
-      <div class="footer-grid">
-        <div class="footer-brand">
-          <h3>IAGAMI · SIGAP</h3>
-          <p>Instituto Autónomo de Gestión Ambiental del Municipio Iribarren. Sistema Integral de Gestión de Actividades Programadas.<br><em style="color:#a8dfc0;font-style:italic">Iribarren Verde para la vida.</em></p>
+  <!-- WAVE → footer -->
+  <div class="wave-div" style="background:#030d06"><svg viewBox="0 0 1440 40" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"><path d="M0,20 C720,-20 720,60 1440,20 L1440,40 L0,40 Z" fill="#061209"/></svg></div>
+
+  <!-- FOOTER PREMIUM -->
+  <footer class="footer-premium">
+    <div class="footer-premium-inner">
+      <div>
+        <div class="fp-brand-logo">
+          <img src="./logo-iagami.png" alt="IAGAMI" onerror="this.style.display='none'"/>
+          <div>
+            <div class="fp-brand-name">IAGAMI</div>
+            <div class="fp-brand-sub">Instituto Autónomo de Gestión Ambiental</div>
+          </div>
         </div>
-        <div class="footer-col">
-          <h4>Servicios</h4>
-          <ul>
-            <li onclick="showPage('denuncia')">Presentar Denuncia</li>
-            <li><a href="tramites/index.html">Trámites en Línea</a></li>
-            <li><a href="multas/index.html">Consulta de Multas</a></li>
-            <li onclick="showPage('denuncia')">Atención Ciudadana</li>
-          </ul>
-        </div>
-        <div class="footer-col">
-          <h4>Institución</h4>
-          <ul>
-            <li><a href="organizacion/index.html">Organización</a></li>
-            <li><a href="transparencia/index.html">Transparencia</a></li>
-            <li><a href="noticias/index.html">Noticias</a></li>
-            <li><a href="agenda/index.html">Agenda SIGAP</a></li>
-            <li><a href="proyectos/index.html">Proyectos</a></li>
-          </ul>
-        </div>
-        <div class="footer-col">
-          <h4>Contacto</h4>
-          <div class="contact-item">📍 Barquisimeto, Estado Lara</div>
-          <div class="contact-item">📞 +58 (251) 000-0000</div>
-          <div class="contact-item">✉️ contacto@iagami.gob.ve</div>
-          <div class="contact-item">🕐 Lun–Vie 8:00–16:00</div>
-        </div>
+        <p class="fp-mission">Municipio Iribarren, Estado Lara, Venezuela. Comprometidos con la gestión ambiental sostenible y la participación ciudadana activa.</p>
+        <div class="fp-tagline">🌿 Iribarren Verde para la vida</div>
       </div>
-      <div class="footer-bottom">© 2026 IAGAMI — Municipio Iribarren, Estado Lara, Venezuela. Todos los derechos reservados.</div>
+      <div>
+        <div class="fp-col-title">Servicios</div>
+        <ul class="fp-links">
+          <li onclick="showPage('denuncia')">Presentar Denuncia</li>
+          <li><a href="tramites/index.html">Trámites Ambientales</a></li>
+          <li><a href="multas/index.html">Consulta de Multas</a></li>
+          <li><a href="empresas/index.html">Registro de Empresas</a></li>
+          <li><a href="transparencia/index.html">Transparencia</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="fp-col-title">Información</div>
+        <ul class="fp-links">
+          <li><a href="noticias/index.html">Noticias</a></li>
+          <li><a href="proyectos/index.html">Proyectos SIGAP</a></li>
+          <li><a href="agenda/index.html">Agenda Ambiental</a></li>
+          <li><a href="revista/index.html">Revista Digital</a></li>
+          <li><a href="organizacion/index.html">Organización</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="fp-col-title">Contacto</div>
+        <ul class="fp-links">
+          <li>📍 Barquisimeto, Estado Lara</li>
+          <li>📞 +58 (251) 000-0000</li>
+          <li>✉️ contacto@iagami.gob.ve</li>
+          <li>🕐 Lun–Vie 8:00–16:00</li>
+        </ul>
+      </div>
+    </div>
+    <div class="fp-bottom">
+      <span>© <span id="fp-year"></span> IAGAMI — Municipio Iribarren, Estado Lara, Venezuela</span>
+      <span class="fp-bottom-badge">Decreto 3.390 · Software Libre · SIGAP v3.0</span>
     </div>
   </footer>
+  <script>document.getElementById('fp-year').textContent=new Date().getFullYear()</script>
 
 </div><!-- /page-home -->
 
@@ -1403,6 +1486,9 @@ async function renderHomeNoticias() {
       </div>
     </a>`;
   }).join('');
+  if (noticias.length >= 3) grid.classList.add('news-grid-magazine');
+  else grid.classList.remove('news-grid-magazine');
+  if (window.IAGAMI_ANIM) IAGAMI_ANIM.staggerChildren(grid);
 }
 
 async function renderHomeProyectos() {
