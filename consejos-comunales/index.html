@@ -246,6 +246,7 @@ footer{background:#0a1f0e;color:rgba(255,255,255,.6);text-align:center;padding:2
       </div>
       <div><div class="logo-text">IAGAMI</div><div class="logo-sub">Gestión Ambiental · Iribarren</div></div>
     </a>
+    <a class="navbtn" href="../sala-situacional/index.html">💧 Sala del Agua</a>
     <a class="navbtn" href="../index.html">← Portal</a>
   </div>
 </nav>
@@ -418,6 +419,15 @@ footer{background:#0a1f0e;color:rgba(255,255,255,.6);text-align:center;padding:2
               <tbody id="consejos-tbody"></tbody>
             </table>
             <button type="button" class="add-row-btn" onclick="addConsejoRow()">+ Agregar Consejo</button>
+          </div>
+
+          <!-- Comuna a la que pertenece (sólo para consejos comunales) -->
+          <div id="sub-comuna-padre" style="display:none">
+            <div class="sec-sub">Comuna a la que pertenece</div>
+            <div class="field-group">
+              <label>Comuna asociada <span style="color:#7a9a88;font-weight:400">(opcional, si forma parte de una comuna registrada)</span></label>
+              <select id="f-comuna-padre"><option value="">— Ninguna / Independiente —</option></select>
+            </div>
           </div>
         </div>
 
@@ -992,6 +1002,18 @@ function onTipoChange(){
   });
   const tipo=getRadioValue('tipo_org');
   $('sub-consejos-integrantes').style.display=tipo==='Comuna'?'':'none';
+  const cp=$('sub-comuna-padre'); if(cp){ cp.style.display=tipo==='Consejo Comunal'?'':'none'; if(tipo==='Consejo Comunal') loadComunasSelect(); }
+}
+
+let _comunasLoaded=false;
+async function loadComunasSelect(){
+  if(_comunasLoaded) return;
+  const sel=$('f-comuna-padre'); if(!sel) return;
+  let comunas=[]; try{ comunas=await CMSDB.getAll('comunas'); }catch(e){}
+  comunas=Array.isArray(comunas)?comunas:[];
+  sel.innerHTML='<option value="">— Ninguna / Independiente —</option>'+
+    comunas.map(c=>`<option value="${esc(c.id)}">${esc(c.nombre||c.codigo_registro||c.id)}</option>`).join('');
+  _comunasLoaded=true;
 }
 
 /* ============================================================
@@ -1329,6 +1351,9 @@ async function saveForm(){
   if(tipo==='Comuna'){
     orgData.num_consejos=$('f-num-consejos').value||0;
     orgData.consejos_integrantes=_consejosRows.map(r=>({nombre:r.nombre,rif:r.rif}));
+  } else if(tipo==='Consejo Comunal'){
+    const cid=($('f-comuna-padre')||{}).value||'';
+    if(cid) orgData.comuna=cid; // relación real → comunas.id
   }
 
   const diagData={

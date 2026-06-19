@@ -11,6 +11,7 @@
   <url><loc>/proyectos/</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>/empresas/</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
   <url><loc>/consejos-comunales/</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>/sala-situacional/</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>/denuncias/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>/multas/</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
   <url><loc>/planificacion/</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="pb-url" content="https://sentence-recovery-ozone-fruit.trycloudflare.com"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>IAGAMI · Sala Situacional del Agua — Municipio Iribarren</title>
+<meta name="description" content="Sala Situacional del Agua de IAGAMI: estado de la infraestructura hídrica comunitaria del Municipio Iribarren — pozos, tuberías, tanques, estaciones de bombeo y familias beneficiadas."/>
+<link rel="canonical" href="https://iagami.gob.ve/sala-situacional/"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:#f3faf6;color:#143726;line-height:1.55}
+a{color:inherit;text-decoration:none}
+.topbar{background:#0d2d1a;color:#fff;padding:14px 22px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.topbar .brand{font-family:'Poppins',sans-serif;font-weight:700;font-size:16px;display:flex;align-items:center;gap:8px}
+.topbar .nl{margin-left:auto;font-size:13px;opacity:.85}
+.topbar .nl:hover{opacity:1}
+.hero{background:linear-gradient(135deg,#1d6b3e,#0d4d2a);color:#fff;padding:34px 22px 30px}
+.hero h1{font-family:'Poppins',sans-serif;font-size:26px;font-weight:800;display:flex;align-items:center;gap:10px}
+.hero p{font-size:14px;opacity:.9;margin-top:6px;max-width:680px}
+.wrap{max-width:1180px;margin:0 auto;padding:22px}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:14px}
+.kpi{background:#fff;border:1px solid #d8efe2;border-radius:14px;padding:18px;position:relative;overflow:hidden}
+.kpi .ic{font-size:22px}
+.kpi .v{font-family:'Poppins',sans-serif;font-size:28px;font-weight:800;color:#1d6b3e;margin-top:6px;line-height:1}
+.kpi .l{font-size:12px;color:#4a7a5e;margin-top:4px;text-transform:uppercase;letter-spacing:.04em;font-weight:600}
+.kpi.red .v{color:#c0392b}.kpi.amber .v{color:#b8860b}
+.section-title{font-family:'Poppins',sans-serif;font-size:18px;font-weight:700;margin:28px 0 12px;display:flex;align-items:center;gap:8px}
+#mapa{height:440px;border-radius:14px;border:1px solid #d8efe2;z-index:1}
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin:10px 0 4px;font-size:13px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.dot{width:12px;height:12px;border-radius:50%;display:inline-block}
+.dot.g{background:#27ae60}.dot.y{background:#f1c40f}.dot.r{background:#e74c3c}
+.table-wrap{background:#fff;border:1px solid #d8efe2;border-radius:14px;overflow:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:11px 13px;text-align:left;border-bottom:1px solid #eef6f1}
+th{background:#f0faf5;font-weight:600;color:#2e6b4a;white-space:nowrap}
+tbody tr:hover td{background:#f7fcf9}
+.badge{display:inline-block;padding:2px 9px;border-radius:11px;font-size:11px;font-weight:600}
+.b-g{background:#e3f7ea;color:#1d6b3e}.b-y{background:#fef6da;color:#9a7400}.b-r{background:#fde6e3;color:#c0392b}
+.loading{padding:40px;text-align:center;color:#4a7a5e}
+.empty{padding:34px;text-align:center;color:#7a9a88}
+.foot{text-align:center;font-size:12px;color:#7a9a88;padding:26px}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <a class="brand" href="../index.html">💧 IAGAMI</a>
+  <a class="nl" href="../index.html">← Portal</a>
+  <a class="nl" href="../consejos-comunales/index.html">Comunas y Consejos</a>
+</div>
+
+<div class="hero">
+  <h1>💧 Sala Situacional del Agua</h1>
+  <p>Estado en tiempo real de la infraestructura hídrica comunitaria del Municipio Iribarren, alimentado por los registros de los consejos comunales y el equipo técnico de IAGAMI.</p>
+</div>
+
+<div class="wrap">
+  <div class="kpi-grid" id="kpis"><div class="loading">Cargando indicadores…</div></div>
+
+  <div class="section-title">🗺️ Mapa de estado por consejo comunal</div>
+  <div class="legend">
+    <span><i class="dot g"></i> Operativo</span>
+    <span><i class="dot y"></i> Parcial</span>
+    <span><i class="dot r"></i> Crítico</span>
+    <span style="color:#7a9a88">⚪ Sin datos hídricos</span>
+  </div>
+  <div id="mapa"></div>
+
+  <div class="section-title">📋 Detalle por consejo comunal</div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Consejo Comunal</th><th>Comuna</th><th>Pozos act/inact</th><th>Tuberías cons/x cons (km)</th><th>Tanques</th><th>E. bombeo</th><th>Familias</th><th>Estado</th></tr></thead>
+      <tbody id="tbody"><tr><td colspan="8" class="loading">Cargando…</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="foot">IAGAMI — Instituto Autónomo de Gestión Ambiental del Municipio Iribarren · Sala Situacional del Agua</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="../cms/config.js"></script>
+<script src="../cms/pb.js"></script>
+<script>
+'use strict';
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+const ESTADO_META = {
+  Operativo:{cls:'b-g',dot:'#27ae60',ico:'🟢'},
+  Parcial:  {cls:'b-y',dot:'#f1c40f',ico:'🟡'},
+  Critico:  {cls:'b-r',dot:'#e74c3c',ico:'🔴'},
+};
+// Deriva un estado si el staff no lo fijó explícitamente
+function deriveEstado(i){
+  if(i.estado_operativo && ESTADO_META[i.estado_operativo]) return i.estado_operativo;
+  const act=+i.pozos_activos||0, inact=+i.pozos_inactivos||0;
+  if(act===0 && inact>0) return 'Critico';
+  if(inact>act) return 'Parcial';
+  return 'Operativo';
+}
+const num = v => +v || 0;
+
+async function init(){
+  let consejos=[], comunas=[], infra=[];
+  try{
+    [consejos,comunas,infra]=await Promise.all([
+      CMSDB.getAll('consejos_comunales'),
+      CMSDB.getAll('comunas'),
+      CMSDB.getAll('infraestructura_hidrica'),
+    ]);
+  }catch(e){ /* getAll already returns [] on error */ }
+  consejos=Array.isArray(consejos)?consejos:[];
+  comunas=Array.isArray(comunas)?comunas:[];
+  infra=Array.isArray(infra)?infra:[];
+
+  const comunaNombre = id => { const c=comunas.find(x=>x.id===id); return c?(c.nombre||'—'):'—'; };
+  // Un registro hídrico por consejo (el más reciente)
+  const infraPorConsejo = {};
+  infra.forEach(i=>{
+    const k=i.consejo_comunal;
+    if(!k) return;
+    const prev=infraPorConsejo[k];
+    if(!prev || (i.fecha_actualizacion||'') > (prev.fecha_actualizacion||'')) infraPorConsejo[k]=i;
+  });
+
+  // ── KPIs ──
+  const tot = {pozosA:0,pozosI:0,tubC:0,tubX:0,tanques:0,estaciones:0,familias:0};
+  Object.values(infraPorConsejo).forEach(i=>{
+    tot.pozosA+=num(i.pozos_activos); tot.pozosI+=num(i.pozos_inactivos);
+    tot.tubC+=num(i.tuberias_consolidadas); tot.tubX+=num(i.tuberias_por_consolidar);
+    tot.tanques+=num(i.tanques); tot.estaciones+=num(i.estaciones_bombeo);
+    tot.familias+=num(i.familias_beneficiadas);
+  });
+  const kpis=[
+    {ic:'🏘️',v:comunas.length,l:'Comunas'},
+    {ic:'🤝',v:consejos.length,l:'Consejos Comunales'},
+    {ic:'🟢',v:tot.pozosA,l:'Pozos Activos'},
+    {ic:'🔴',v:tot.pozosI,l:'Pozos Inactivos',cls:tot.pozosI>0?'red':''},
+    {ic:'🛠️',v:tot.tubC.toFixed(1),l:'Km Tubería Consolidada'},
+    {ic:'⚠️',v:tot.tubX.toFixed(1),l:'Km Tubería por Consolidar',cls:tot.tubX>0?'amber':''},
+    {ic:'🪣',v:tot.tanques,l:'Tanques'},
+    {ic:'⚙️',v:tot.estaciones,l:'Estaciones de Bombeo'},
+    {ic:'👨‍👩‍👧‍👦',v:tot.familias.toLocaleString('es'),l:'Familias Beneficiadas'},
+  ];
+  document.getElementById('kpis').innerHTML = kpis.map(k=>
+    `<div class="kpi ${k.cls||''}"><div class="ic">${k.ic}</div><div class="v">${k.v}</div><div class="l">${esc(k.l)}</div></div>`
+  ).join('');
+
+  // ── Tabla ──
+  const tbody=document.getElementById('tbody');
+  if(!consejos.length){ tbody.innerHTML='<tr><td colspan="8" class="empty">Aún no hay consejos comunales registrados.</td></tr>'; }
+  else{
+    tbody.innerHTML = consejos.map(c=>{
+      const i=infraPorConsejo[c.id];
+      if(!i) return `<tr><td><strong>${esc(c.nombre||c.codigo_registro||'—')}</strong></td><td>${esc(comunaNombre(c.comuna))}</td><td colspan="5" style="color:#9aaea0">Sin datos hídricos</td><td><span class="badge" style="background:#eef2f0;color:#7a9a88">⚪ Sin datos</span></td></tr>`;
+      const est=deriveEstado(i), m=ESTADO_META[est];
+      return `<tr>
+        <td><strong>${esc(c.nombre||c.codigo_registro||'—')}</strong></td>
+        <td>${esc(comunaNombre(c.comuna))}</td>
+        <td>${num(i.pozos_activos)} / ${num(i.pozos_inactivos)}</td>
+        <td>${num(i.tuberias_consolidadas)} / ${num(i.tuberias_por_consolidar)}</td>
+        <td>${num(i.tanques)}</td>
+        <td>${num(i.estaciones_bombeo)}</td>
+        <td>${num(i.familias_beneficiadas)}</td>
+        <td><span class="badge ${m.cls}">${m.ico} ${esc(est)}</span></td>
+      </tr>`;
+    }).join('');
+  }
+
+  // ── Mapa ──
+  const map=L.map('mapa').setView([10.066,-69.347],11); // Barquisimeto / Iribarren
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+    maxZoom:19, attribution:'© OpenStreetMap'
+  }).addTo(map);
+  const pts=[];
+  consejos.forEach(c=>{
+    const lat=parseFloat(c.lat), lng=parseFloat(c.lng);
+    if(isNaN(lat)||isNaN(lng)) return;
+    const i=infraPorConsejo[c.id];
+    const est=i?deriveEstado(i):null;
+    const color=est?ESTADO_META[est].dot:'#bdc3c7';
+    const marker=L.circleMarker([lat,lng],{radius:9,fillColor:color,color:'#fff',weight:2,fillOpacity:.92}).addTo(map);
+    const det=i?`Pozos: ${num(i.pozos_activos)} act / ${num(i.pozos_inactivos)} inact<br>Familias: ${num(i.familias_beneficiadas)}`:'Sin datos hídricos';
+    marker.bindPopup(`<strong>${esc(c.nombre||'Consejo')}</strong><br>${esc(comunaNombre(c.comuna))}<br>Estado: ${est?ESTADO_META[est].ico+' '+est:'⚪ Sin datos'}<br>${det}`);
+    pts.push([lat,lng]);
+  });
+  if(pts.length) map.fitBounds(pts,{padding:[40,40],maxZoom:14});
+}
+init();
+</script>
+</body>
+</html>

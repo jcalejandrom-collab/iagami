@@ -1205,6 +1205,49 @@ input,select,textarea{font-family:inherit}
       </div>
     </div>
 
+    <!-- INFRAESTRUCTURA HÍDRICA SECTION -->
+    <div class="section" id="sec-hidrica">
+      <div class="page-header">
+        <div><div class="page-title">💧 Infraestructura Hídrica</div><div class="page-subtitle">Registra el estado hídrico de cada consejo comunal — alimenta la Sala Situacional del Agua</div></div>
+        <button class="btn btn-primary" onclick="openHidricaForm()">+ Nuevo Registro</button>
+      </div>
+      <div class="toolbar">
+        <input type="text" class="search-input" id="q-hidrica" placeholder="Buscar por consejo comunal..." oninput="renderHidrica()" style="flex:1;min-width:200px"/>
+        <select id="f-hidrica-estado" onchange="renderHidrica()" style="padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px">
+          <option value="">Todos los estados</option>
+          <option value="Operativo">🟢 Operativo</option>
+          <option value="Parcial">🟡 Parcial</option>
+          <option value="Critico">🔴 Crítico</option>
+        </select>
+      </div>
+      <div id="tbl-hidrica"></div>
+
+      <div id="hidrica-form" style="display:none;background:#fff;border:1px solid var(--border);border-radius:12px;padding:24px;margin-top:16px">
+        <div style="font-family:'Poppins',sans-serif;font-size:15px;font-weight:700;color:var(--text);margin-bottom:18px" id="hidrica-form-title">💧 Nuevo Registro Hídrico</div>
+        <input type="hidden" id="hid-id"/>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <div style="display:flex;flex-direction:column;gap:5px;grid-column:1/-1">
+            <label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Consejo Comunal *</label>
+            <select id="hid-consejo" style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none"><option value="">— Selecciona —</option></select>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:5px"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Pozos activos</label><input type="number" min="0" id="hid-pozos_activos" value="0" style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px"/></div>
+          <div style="display:flex;flex-direction:column;gap:5px"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Pozos inactivos</label><input type="number" min="0" id="hid-pozos_inactivos" value="0" style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px"/></div>
+          <div style="display:flex;flex-direction:column;gap:5px"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Tuberías consolidadas (km)</label><input type="number" min="0" step="0.1" id="hid-tuberias_consolidadas" value="0" style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px"/></div>
+          <div style="display:flex;flex-direction:column;gap:5px"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Tuberías por consolidar (km)</label><input type="number" min="0" step="0.1" id="hid-tuberias_por_consolidar" value="0" style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px"/></div>
+          <div style="display:flex;flex-direction:column;gap:5px"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Tanques</label><input type="number" min="0" id="hid-tanques" value="0" style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px"/></div>
+          <div style="display:flex;flex-direction:column;gap:5px"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Estaciones de bombeo</label><input type="number" min="0" id="hid-estaciones_bombeo" value="0" style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px"/></div>
+          <div style="display:flex;flex-direction:column;gap:5px"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Familias beneficiadas</label><input type="number" min="0" id="hid-familias_beneficiadas" value="0" style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px"/></div>
+          <div style="display:flex;flex-direction:column;gap:5px"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Estado operativo</label><select id="hid-estado_operativo" style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px"><option value="Operativo">🟢 Operativo</option><option value="Parcial">🟡 Parcial</option><option value="Critico">🔴 Crítico</option></select></div>
+          <div style="display:flex;flex-direction:column;gap:5px"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Fecha de actualización</label><input type="date" id="hid-fecha_actualizacion" style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px"/></div>
+          <div style="display:flex;flex-direction:column;gap:5px;grid-column:1/-1"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Observaciones</label><textarea id="hid-observaciones" rows="3" style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;resize:vertical;font-family:inherit"></textarea></div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:20px">
+          <button class="btn btn-primary" onclick="saveHidrica()">💾 Guardar</button>
+          <button class="btn btn-secondary" onclick="closeHidricaForm()">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
     <!-- CHATBOT FAQ SECTION -->
     <div class="section" id="sec-chatbot">
       <div class="page-header">
@@ -1292,6 +1335,7 @@ const NAV = [
   {id:'denuncias',     icon:'⚠️',  label:'Denuncias'},
   {id:'archivos',      icon:'📁', label:'Archivos'},
   {id:'consejos',      icon:'🏘️', label:'Consejos Comunales'},
+  {id:'hidrica',       icon:'💧', label:'Infraestructura Hídrica'},
   {id:'bienvenida',    icon:'🌟', label:'Pantalla de Bienvenida'},
   {id:'planificacion', icon:'📆', label:'Planificación'},
   {id:'revista',       icon:'📰', label:'Revista Digital'},
@@ -1344,6 +1388,7 @@ async function renderSection(name) {
     case 'denuncias':     await renderDenuncias(); break;
     case 'archivos':      await renderArchivos(); break;
     case 'consejos':      await renderConsejos(); break;
+    case 'hidrica':       await renderHidrica(); break;
     case 'bienvenida':    await renderBienvenida(); break;
     case 'planificacion': await renderPlan(); break;
     case 'revista':       await renderRevistas(); break;
@@ -2524,7 +2569,7 @@ async function renderConsejos() {
   const slice = data.slice((ccPage-1)*CC_PER_PAGE, ccPage*CC_PER_PAGE);
   const tbl = document.getElementById('tbl-consejos');
   if (!tbl) return;
-  tbl.innerHTML = `<table class="data-table"><thead><tr>
+  tbl.innerHTML = `<div class="table-wrap"><table><thead><tr>
     <th>Código</th><th>Nombre</th><th>Parroquia</th><th>Comunidad</th>
     <th>Estatus</th><th>Responsable</th><th>Teléfono</th><th>Acciones</th>
   </tr></thead><tbody>${
@@ -2533,7 +2578,7 @@ async function renderConsejos() {
       <td><strong>${escHtml(c.nombre||'')}</strong></td>
       <td>${escHtml(c.parroquia||'-')}</td>
       <td>${escHtml(c.comunidad||'-')}</td>
-      <td><span class="badge ${c.estatus==='Activo'?'badge-success':'badge-error'}">${escHtml(c.estatus||'-')}</span></td>
+      <td><span class="badge ${c.estatus==='Activo'?'badge-green':'badge-red'}">${escHtml(c.estatus||'-')}</span></td>
       <td>${escHtml(c.responsable||'-')}</td>
       <td>${escHtml(c.telefono||'-')}</td>
       <td><div style="display:flex;gap:4px">
@@ -2541,7 +2586,7 @@ async function renderConsejos() {
         <button class="btn btn-sm btn-danger" onclick="deleteConsejo('${c.id}')">🗑️</button>
       </div></td>
     </tr>`).join('') : '<tr><td colspan="8" style="text-align:center;color:#888;padding:20px">Sin resultados</td></tr>'
-  }</tbody></table>`;
+  }</tbody></table></div>`;
   // pagination
   const pg = document.getElementById('pg-consejos');
   if (pg) {
@@ -3377,6 +3422,106 @@ function renderBlocks() {
   }).join('');
 }
 
+/* ─── INFRAESTRUCTURA HÍDRICA ─── */
+const _estadoBadge = e => {
+  const map = {Operativo:['🟢','badge-green'],Parcial:['🟡','badge-yellow'],Critico:['🔴','badge-red']};
+  const [ico,cls] = map[e] || ['⚪','badge-gray'];
+  return `<span class="badge ${cls}">${ico} ${escHtml(e||'—')}</span>`;
+};
+
+async function renderHidrica() {
+  const q = (document.getElementById('q-hidrica')?.value||'').toLowerCase();
+  const fEstado = document.getElementById('f-hidrica-estado')?.value||'';
+  let items = await CMSDB.getAll('infraestructura_hidrica');
+  if (!Array.isArray(items)) items = [];
+  const consejos = await CMSDB.getAll('consejos_comunales');
+  const nombreDe = id => { const c = (Array.isArray(consejos)?consejos:[]).find(x=>x.id===id); return c?(c.nombre||c.codigo_registro||id):(id||'—'); };
+  if (fEstado) items = items.filter(i => (i.estado_operativo||'') === fEstado);
+  if (q) items = items.filter(i => nombreDe(i.consejo_comunal).toLowerCase().includes(q));
+  const el = document.getElementById('tbl-hidrica');
+  if (!el) return;
+  if (!items.length) { el.innerHTML = `<div class="table-wrap"><table><tbody>${emptyState('Sin registros hídricos. Pulsa “+ Nuevo Registro”.')}</tbody></table></div>`; return; }
+  el.innerHTML = `<div class="table-wrap"><table><thead><tr><th>Consejo Comunal</th><th>Pozos (act/inact)</th><th>Tuberías (cons/x cons) km</th><th>Tanques</th><th>Familias</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>${
+    items.map(i=>`<tr>
+      <td><strong>${escHtml(nombreDe(i.consejo_comunal))}</strong>${i.fecha_actualizacion?`<div style="font-size:11px;color:var(--muted)">act. ${escHtml(i.fecha_actualizacion)}</div>`:''}</td>
+      <td>${(+i.pozos_activos||0)} / ${(+i.pozos_inactivos||0)}</td>
+      <td>${(+i.tuberias_consolidadas||0)} / ${(+i.tuberias_por_consolidar||0)}</td>
+      <td>${(+i.tanques||0)}</td>
+      <td>${(+i.familias_beneficiadas||0)}</td>
+      <td>${_estadoBadge(i.estado_operativo)}</td>
+      <td><div style="display:flex;gap:4px">
+        <button class="btn-icon" onclick="editHidrica('${i.id}')">✏️</button>
+        <button class="btn-icon danger" onclick="deleteHidrica('${i.id}')">🗑️</button>
+      </div></td>
+    </tr>`).join('')
+  }</tbody></table></div>`;
+}
+
+async function _fillConsejoSelect(selected) {
+  const sel = document.getElementById('hid-consejo');
+  if (!sel) return;
+  const consejos = await CMSDB.getAll('consejos_comunales');
+  sel.innerHTML = '<option value="">— Selecciona —</option>' +
+    (Array.isArray(consejos)?consejos:[]).map(c=>`<option value="${escHtml(c.id)}" ${c.id===selected?'selected':''}>${escHtml(c.nombre||c.codigo_registro||c.id)}</option>`).join('');
+}
+
+async function openHidricaForm(item) {
+  document.getElementById('hidrica-form-title').textContent = item ? '✏️ Editar Registro Hídrico' : '💧 Nuevo Registro Hídrico';
+  document.getElementById('hid-id').value = item?.id||'';
+  await _fillConsejoSelect(item?.consejo_comunal);
+  const num = ['pozos_activos','pozos_inactivos','tuberias_consolidadas','tuberias_por_consolidar','tanques','estaciones_bombeo','familias_beneficiadas'];
+  num.forEach(f => { document.getElementById('hid-'+f).value = item?.[f]??0; });
+  document.getElementById('hid-estado_operativo').value = item?.estado_operativo || 'Operativo';
+  document.getElementById('hid-fecha_actualizacion').value = item?.fecha_actualizacion || new Date().toISOString().slice(0,10);
+  document.getElementById('hid-observaciones').value = item?.observaciones || '';
+  document.getElementById('hidrica-form').style.display='block';
+  document.getElementById('hidrica-form').scrollIntoView({behavior:'smooth'});
+}
+
+function closeHidricaForm() { document.getElementById('hidrica-form').style.display='none'; }
+
+function deleteHidrica(id) {
+  confirmDelete(async () => {
+    await CMSDB.remove('infraestructura_hidrica', id);
+    showToast('Registro eliminado','success');
+    renderHidrica();
+  });
+}
+
+async function editHidrica(id) {
+  const items = await CMSDB.getAll('infraestructura_hidrica');
+  const item = items.find(i=>i.id===id);
+  if (item) openHidricaForm(item);
+}
+
+async function saveHidrica() {
+  const consejo = document.getElementById('hid-consejo').value;
+  if (!consejo) { showToast('Selecciona un consejo comunal','error'); return; }
+  const id = document.getElementById('hid-id').value;
+  const numF = id => parseFloat(document.getElementById(id).value)||0;
+  const payload = {
+    consejo_comunal: consejo,
+    pozos_activos: numF('hid-pozos_activos'),
+    pozos_inactivos: numF('hid-pozos_inactivos'),
+    tuberias_consolidadas: numF('hid-tuberias_consolidadas'),
+    tuberias_por_consolidar: numF('hid-tuberias_por_consolidar'),
+    tanques: numF('hid-tanques'),
+    estaciones_bombeo: numF('hid-estaciones_bombeo'),
+    familias_beneficiadas: numF('hid-familias_beneficiadas'),
+    estado_operativo: document.getElementById('hid-estado_operativo').value,
+    fecha_actualizacion: document.getElementById('hid-fecha_actualizacion').value,
+    observaciones: document.getElementById('hid-observaciones').value.trim(),
+  };
+  if (id) payload.id = id;
+  try {
+    await CMSDB.save('infraestructura_hidrica', payload);
+    await CMSDB.logAudit('save','infraestructura_hidrica', consejo);
+    showToast(id ? 'Registro actualizado' : 'Registro guardado','success');
+    closeHidricaForm();
+    await renderHidrica();
+  } catch (err) { showToast('Error al guardar: '+err.message,'error'); }
+}
+
 /* ─── CHATBOT FAQ ─── */
 async function renderChatbot() {
   const q = (document.getElementById('q-chatbot')?.value||'').toLowerCase();
@@ -3385,18 +3530,18 @@ async function renderChatbot() {
   if (q) items = items.filter(f => (f.pregunta||'').toLowerCase().includes(q) || (f.palabras_clave||[]).join(' ').toLowerCase().includes(q));
   const el = document.getElementById('tbl-chatbot');
   if (!el) return;
-  if (!items.length) { el.innerHTML = `<div class="empty-state"><div style="font-size:36px">🤖</div><p>No hay preguntas FAQ.</p></div>`; return; }
-  el.innerHTML = `<table class="data-table"><thead><tr><th>Pregunta</th><th>Palabras clave</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>${
+  if (!items.length) { el.innerHTML = `<div class="table-wrap"><table><tbody>${emptyState('No hay preguntas FAQ.')}</tbody></table></div>`; return; }
+  el.innerHTML = `<div class="table-wrap"><table><thead><tr><th>Pregunta</th><th>Palabras clave</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>${
     items.map(f=>`<tr>
       <td style="max-width:320px"><strong>${escHtml(f.pregunta||'')}</strong><div style="font-size:11px;color:var(--muted);margin-top:2px">${escHtml((f.respuesta||'').substring(0,80))}...</div></td>
       <td><div style="display:flex;flex-wrap:wrap;gap:4px">${(Array.isArray(f.palabras_clave)?f.palabras_clave:(f.palabras_clave||'').split(',')).filter(Boolean).map(k=>`<span style="background:#e8f5ee;color:#1d6b3e;border-radius:10px;padding:1px 7px;font-size:11px">${escHtml(k.trim())}</span>`).join('')}</div></td>
-      <td><span class="badge ${f.activo!==false?'badge-success':'badge-warning'}">${f.activo!==false?'Activa':'Inactiva'}</span></td>
-      <td><div class="row-actions">
+      <td><span class="badge ${f.activo!==false?'badge-green':'badge-gray'}">${f.activo!==false?'Activa':'Inactiva'}</span></td>
+      <td><div style="display:flex;gap:4px">
         <button class="btn-icon" onclick="editChatbot('${f.id}')">✏️</button>
-        <button class="btn-icon btn-icon-danger" onclick="confirmDelete('chatbot_faq','${f.id}',renderChatbot)">🗑️</button>
+        <button class="btn-icon danger" onclick="deleteChatbot('${f.id}')">🗑️</button>
       </div></td>
     </tr>`).join('')
-  }</tbody></table>`;
+  }</tbody></table></div>`;
 }
 
 function openChatbotForm(item) {
@@ -3413,6 +3558,14 @@ function openChatbotForm(item) {
 
 function closeChatbotForm() {
   document.getElementById('chatbot-form').style.display='none';
+}
+
+function deleteChatbot(id) {
+  confirmDelete(async () => {
+    await CMSDB.remove('chatbot_faq', id);
+    showToast('Pregunta eliminada','success');
+    renderChatbot();
+  });
 }
 
 async function editChatbot(id) {
