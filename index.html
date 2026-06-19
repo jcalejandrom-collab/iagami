@@ -94,15 +94,12 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
   background-position:center top;
   background-repeat:no-repeat;
   z-index:0;
-  animation:kenburns 16s ease-in-out infinite;
+  animation:cradle 9s ease-in-out infinite;
   will-change:transform;
 }
-@keyframes kenburns{
-  0%  {transform:scale(1)    translate(0%,   0%)}
-  25% {transform:scale(1.06) translate(-2%,  1%)}
-  50% {transform:scale(1.1)  translate(-1%, -2%)}
-  75% {transform:scale(1.06) translate( 2%, -1%)}
-  100%{transform:scale(1)    translate( 1%,  2%)}
+@keyframes cradle{
+  0%,100%{transform:scale(1.055) rotate(-0.45deg) translateY(0)}
+  50%    {transform:scale(1.07)  rotate(0.5deg)   translateY(-0.7%)}
 }
 @media(prefers-reduced-motion:reduce){
   .hero::before{animation:none}
