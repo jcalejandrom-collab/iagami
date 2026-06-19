@@ -6,7 +6,7 @@
 <title>IAGAMI — Portal de Gestión Ambiental del Municipio Iribarren</title>
 <meta name="description" content="Portal digital de IAGAMI. Gestión ambiental, denuncias ciudadanas, noticias y participación comunitaria para el Municipio Iribarren, Lara, Venezuela."/>
 <meta name="theme-color" content="#1d6b3e"/>
-<meta name="pb-url" content="https://sentence-recovery-ozone-fruit.trycloudflare.com"/>
+<meta name="pb-url" content="https://video-forbes-earlier-soonest.trycloudflare.com"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet"/>
@@ -14,69 +14,6 @@
 /* ===== RESET & BASE ===== */
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
-
-/* ===== ANIMACIONES FASE 1 ===== */
-/* Scroll Reveal */
-[data-reveal]{opacity:0;transform:translateY(22px);transition:opacity .55s ease,transform .55s ease}
-[data-reveal].revealed{opacity:1;transform:none}
-@media(prefers-reduced-motion:reduce){[data-reveal]{opacity:1;transform:none;transition:none}}
-
-/* Navbar shrink + blur */
-.nav{transition:height .3s ease,box-shadow .3s ease,backdrop-filter .3s ease}
-.nav-scrolled{backdrop-filter:none;-webkit-backdrop-filter:none;background:#fff!important;box-shadow:0 2px 20px rgba(29,107,62,.13)!important}
-.nav-scrolled .navinner{height:50px}
-@media(prefers-reduced-motion:reduce){.nav{transition:none}}
-
-/* FASE 2 — Stagger cards */
-[data-stagger]>*{opacity:0;transform:translateY(20px);transition:opacity .4s ease,transform .4s ease}
-[data-stagger]>*.stagger-in{opacity:1;transform:none}
-
-/* FASE 3 — Page transition + Ripple */
-@keyframes pageIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
-@keyframes rippleAnim{to{transform:scale(1);opacity:0}}
-
-/* FASE 4 — Modal scale-in */
-@keyframes modalIn{from{opacity:0;transform:scale(.92) translateY(12px)}to{opacity:1;transform:none}}
-@keyframes modalOut{from{opacity:1;transform:scale(1)}to{opacity:0;transform:scale(.94) translateY(8px)}}
-.modal-bg.open>.modal{animation:modalIn .28s cubic-bezier(.34,1.56,.64,1) forwards}
-.modal-bg.closing>.modal{animation:modalOut .18s ease forwards}
-
-/* FASE 4 — Card 3D tilt */
-.svc-card,.news-card,.proj-card,.ev-card{transform-style:preserve-3d;will-change:transform}
-
-/* FASE 4 — Toast progress bar */
-.toast-bar{position:absolute;bottom:0;left:0;height:3px;border-radius:0 0 10px 10px;
-  background:rgba(74,222,128,.7);width:100%;transform-origin:left;
-  animation:toastProgress 3s linear forwards}
-@keyframes toastProgress{from{transform:scaleX(1)}to{transform:scaleX(0)}}
-
-/* FASE 4 — Word reveal */
-.word-reveal .word{display:inline-block;opacity:0;transform:translateY(18px);
-  transition:opacity .45s ease,transform .45s ease}
-.word-reveal.revealed .word{opacity:1;transform:none}
-
-/* FASE 4 — Cursor glow */
-.hero-cursor-glow{position:absolute;width:320px;height:320px;border-radius:50%;
-  pointer-events:none;z-index:1;
-  background:radial-gradient(circle,rgba(34,197,94,.12) 0%,transparent 70%);
-  transform:translate(-50%,-50%);transition:left .08s ease,top .08s ease;
-  mix-blend-mode:screen}
-
-/* Hover premium cards */
-.svc-card{transition:border-color .22s ease,transform .22s ease,box-shadow .22s ease}
-.svc-card:hover{border-color:#1d6b3e;transform:translateY(-5px) scale(1.02);box-shadow:0 12px 32px rgba(29,107,62,.16)}
-.news-card{transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease}
-.news-card:hover{transform:translateY(-5px);box-shadow:0 12px 32px rgba(29,107,62,.14);border-color:#a8dfc0}
-.proj-card{transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease}
-.proj-card:hover{transform:translateY(-4px);box-shadow:0 10px 28px rgba(29,107,62,.13);border-color:#a8dfc0}
-
-/* Skeleton shimmer */
-.skel-line{background:linear-gradient(90deg,#e8f5ee 25%,#d4edd8 50%,#e8f5ee 75%);background-size:200% 100%;animation:shimmer 1.4s ease infinite;border-radius:6px;height:14px;margin-bottom:8px}
-.skel-line.lg{height:20px;width:70%}
-.skel-line.sm{height:10px;width:50%}
-.skel-img{background:linear-gradient(90deg,#e8f5ee 25%,#d4edd8 50%,#e8f5ee 75%);background-size:200% 100%;animation:shimmer 1.4s ease infinite;border-radius:10px;height:180px}
-@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
-@media(prefers-reduced-motion:reduce){.skel-line,.skel-img{animation:none}}
 body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height:1.6}
 
 /* ===== TOPBAR ===== */
@@ -118,35 +55,20 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
   display:flex;
   align-items:center;
   overflow:hidden;
-  background-color:#1a4a2e;
-}
-.hero::before{
-  content:'';
-  position:absolute;
-  inset:0;
   background-image:url('./hero-iagami.png');
-  background-size:110%;
+  background-size:cover;
   background-position:center top;
   background-repeat:no-repeat;
-  z-index:0;
-  animation:cradle 40s ease-in-out infinite;
-  will-change:transform;
-}
-@keyframes cradle{
-  0%,100%{transform:scale(1.055) rotate(-0.45deg) translateY(0)}
-  50%    {transform:scale(1.07)  rotate(0.5deg)   translateY(-0.7%)}
-}
-@media(prefers-reduced-motion:reduce){
-  .hero::before{animation:none}
+  background-color:#1a4a2e;
 }
 .hero-overlay-left{
   position:absolute;inset:0;z-index:1;
   background:linear-gradient(
     90deg,
-    rgba(4,12,6,.32) 0%,
-    rgba(4,12,6,.22) 35%,
-    rgba(4,12,6,.10) 58%,
-    rgba(4,12,6,.02) 75%,
+    rgba(4,12,6,.92) 0%,
+    rgba(4,12,6,.88) 35%,
+    rgba(4,12,6,.60) 58%,
+    rgba(4,12,6,.15) 75%,
     rgba(0,0,0,0) 100%
   );
 }
@@ -154,41 +76,12 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
   position:absolute;inset:0;z-index:1;
   background:linear-gradient(
     180deg,
-    rgba(0,0,0,.12) 0%,
+    rgba(0,0,0,.18) 0%,
     rgba(0,0,0,0) 35%,
     rgba(0,0,0,0) 65%,
-    rgba(0,0,0,.18) 100%
+    rgba(0,0,0,.30) 100%
   );
 }
-.hero::after{
-  content:'';position:absolute;inset:0;z-index:1;
-  background:radial-gradient(circle at 35% 30%, rgba(34,197,94,.15), transparent 50%);
-  pointer-events:none;
-  animation:glow 12s ease-in-out infinite;
-}
-@keyframes glow{
-  0%,100%{opacity:.4}
-  50%{opacity:.8}
-}
-@media(prefers-reduced-motion:reduce){
-  .hero::after{animation:none;opacity:.6}
-}
-.hoja{
-  position:absolute;opacity:0;pointer-events:none;z-index:1;
-  animation:floatUp 9s ease-in-out infinite;
-}
-.hoja.leaf{border-radius:50% 0 50% 0;filter:blur(0.4px)}
-.hoja.mote{
-  border-radius:50%;mix-blend-mode:screen;filter:blur(0.5px);
-  background:radial-gradient(circle,rgba(255,244,200,.95) 0%,rgba(255,228,150,0) 70%);
-}
-@keyframes floatUp{
-  0%  {transform:translate(0,0) rotate(0deg) scale(var(--s));opacity:0}
-  14% {opacity:var(--o)}
-  84% {opacity:var(--o)}
-  100%{transform:translate(var(--dx),var(--dy)) rotate(var(--dr)) scale(var(--s));opacity:0}
-}
-.hero-capa{position:absolute;inset:0;pointer-events:none;z-index:1}
 .hero-content{
   position:relative;z-index:2;
   width:100%;max-width:1200px;
@@ -220,22 +113,23 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
   text-shadow:0 2px 12px rgba(0,0,0,.4);
 }
 .hero h1{
-  font-family:'Poppins',sans-serif;font-size:34px;font-weight:800;
-  line-height:1.15;color:#F8FAFC;margin-bottom:12px;
-  text-shadow:0 2px 16px rgba(0,0,0,.35);
+  font-family:'Poppins',sans-serif;font-size:clamp(30px,5vw,52px);font-weight:800;
+  line-height:1.1;color:#F8FAFC;margin-bottom:14px;
+  text-shadow:0 2px 16px rgba(0,0,0,.35);letter-spacing:-0.02em;
 }
-.hero h1 .green{color:#4ADE80}
-.hero-desc{font-size:13.5px;color:#E2E8F0;line-height:1.75;margin-bottom:24px;max-width:420px}
+.hero h1 .green{color:#4ade80}
+.hero-desc{font-size:14px;color:#E2E8F0;line-height:1.75;margin-bottom:24px;max-width:420px}
 .hero-btns{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:28px}
 .btn-p{
-  background:#1d6b3e;color:#fff;border:none;border-radius:10px;
+  background:linear-gradient(135deg,#1d6b3e,#22c55e);
+  color:#fff;border:none;border-radius:10px;
   padding:13px 22px;font-size:13px;font-weight:700;cursor:pointer;
   display:inline-flex;align-items:center;gap:7px;
   font-family:'Poppins',sans-serif;
-  box-shadow:0 4px 24px rgba(29,107,62,.55);
-  transition:.2s;text-decoration:none;
+  box-shadow:0 4px 24px rgba(34,197,94,.35);
+  transition:.25s;text-decoration:none;
 }
-.btn-p:hover{background:#155c32;transform:translateY(-1px)}
+.btn-p:hover{background:linear-gradient(135deg,#155c32,#16a34a);transform:translateY(-2px);box-shadow:0 8px 32px rgba(34,197,94,.5)}
 .btn-s{
   background:rgba(255,255,255,.12);color:#fff;
   border:1.5px solid rgba(255,255,255,.38);border-radius:10px;
@@ -248,15 +142,15 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
   display:grid;grid-template-columns:repeat(3,1fr);gap:12px;
   border-top:1px solid rgba(255,255,255,.18);padding-top:20px;
 }
-.stat-v{font-family:'Poppins',sans-serif;font-size:3rem;font-weight:800;color:#4ade80;text-shadow:0 0 20px rgba(74,222,128,.4)}
+.stat-v{font-family:'Poppins',sans-serif;font-size:24px;font-weight:800;color:#4ade80;text-shadow:0 0 20px rgba(74,222,128,.4)}
 .stat-l{font-size:10px;color:rgba(255,255,255,.6);margin-top:2px;line-height:1.4}
 
 /* ===== PANEL SIGAP ===== */
 .hero-panel{
-  background:rgba(10,35,20,.75);
+  background:rgba(8,20,12,.88);
   border:1px solid rgba(74,222,128,.28);
   border-radius:16px;
-  backdrop-filter:blur(18px);
+  backdrop-filter:blur(14px);
   overflow:hidden;
   box-shadow:0 8px 40px rgba(0,0,0,.35);
 }
@@ -268,7 +162,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 .panel-title{font-size:10px;color:rgba(255,255,255,.72);margin-left:7px;font-family:'Courier New',monospace;letter-spacing:.05em}
 .plive{margin-left:auto;font-size:9px;color:rgba(255,255,255,.5);display:flex;align-items:center;gap:4px}
 .panel-body{padding:14px;display:grid;grid-template-columns:1fr 1fr;gap:9px}
-.mc{background:rgba(255,255,255,.04);border:1px solid rgba(34,197,94,.25);border-radius:9px;padding:10px 11px}
+.mc{background:rgba(255,255,255,.05);border:1px solid rgba(74,222,128,.18);border-radius:9px;padding:10px 11px}
 .mc-lbl{font-size:9px;color:rgba(74,222,128,.78);font-family:'Courier New',monospace;letter-spacing:.06em;margin-bottom:3px}
 .mc-val{font-family:'Poppins',sans-serif;font-size:18px;font-weight:700;color:#4ade80}
 .mc-unit{font-size:9px;color:rgba(255,255,255,.42);margin-left:2px}
@@ -307,8 +201,44 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 .sec-wrap{background:#f8fcfa}.sec-wrap2{background:#fff}.sec-wrap3{background:#f0faf5}
 .sec-tag{display:inline-block;font-size:11px;font-weight:700;color:#1d6b3e;background:#e8f5ee;border:1px solid #a8dfc0;border-radius:20px;padding:3px 13px;margin-bottom:9px;letter-spacing:.05em}
 .sec-head{text-align:center;margin-bottom:26px}
-.sec-head h2{font-family:'Poppins',sans-serif;font-size:22px;font-weight:700;color:#1a3d2b;margin-bottom:5px}
+.sec-head h2{font-family:'Poppins',sans-serif;font-size:clamp(22px,3.5vw,36px);font-weight:700;color:#1a3d2b;margin-bottom:8px;letter-spacing:-0.01em}
 .sec-head p{font-size:13px;color:#4a8a6a}
+
+/* ===== STATS BAND ===== */
+.stats-band{background:#0a1f0f;padding:48px 24px;border-top:1px solid rgba(74,222,128,.15);border-bottom:1px solid rgba(74,222,128,.12)}
+.stats-band-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+@media(max-width:640px){.stats-band-inner{grid-template-columns:repeat(2,1fr)}}
+.sband-item{text-align:center;padding:16px;border-right:1px solid rgba(74,222,128,.12)}
+.sband-item:last-child{border-right:none}
+.sband-num{font-family:'Poppins',sans-serif;font-size:clamp(2.2rem,4vw,3.8rem);font-weight:800;color:#4ade80;line-height:1;text-shadow:0 0 40px rgba(74,222,128,.45);letter-spacing:-0.02em}
+.sband-desc{font-size:12px;color:rgba(255,255,255,.5);margin-top:8px;letter-spacing:.05em;text-transform:uppercase;font-weight:500}
+
+/* ===== WAVE DIVIDER ===== */
+.wave-div{line-height:0;overflow:hidden;display:block}
+.wave-div svg{display:block;width:100%;height:auto}
+
+/* ===== MAGAZINE NEWS GRID ===== */
+.news-grid-magazine{display:grid!important;grid-template-columns:2fr 1fr!important;gap:16px!important}
+.news-grid-magazine .news-card:first-child .news-img{height:220px}
+@media(max-width:700px){.news-grid-magazine{grid-template-columns:1fr!important}}
+
+/* ===== PREMIUM FOOTER ===== */
+.footer-premium{background:#030d06;border-top:1px solid rgba(74,222,128,.1);padding:64px 24px 0;color:rgba(255,255,255,.65)}
+.footer-premium-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px;padding-bottom:52px}
+@media(max-width:900px){.footer-premium-inner{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.footer-premium-inner{grid-template-columns:1fr}}
+.fp-brand-logo{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.fp-brand-logo img{width:48px;height:48px;object-fit:contain;border-radius:12px;border:1px solid rgba(74,222,128,.2)}
+.fp-brand-name{font-family:'Poppins',sans-serif;font-size:20px;font-weight:800;color:#fff;letter-spacing:-.01em;line-height:1}
+.fp-brand-sub{font-size:11px;color:rgba(255,255,255,.35);margin-top:3px}
+.fp-mission{font-size:13px;line-height:1.75;color:rgba(255,255,255,.45);max-width:280px;margin-bottom:16px}
+.fp-tagline{font-size:13px;color:#4ade80;font-weight:600;display:flex;align-items:center;gap:6px}
+.fp-col-title{font-family:'Poppins',sans-serif;font-size:10px;font-weight:700;color:#4ade80;letter-spacing:.12em;text-transform:uppercase;margin-bottom:18px}
+.fp-links{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:11px}
+.fp-links a,.fp-links li{font-size:13px;color:rgba(255,255,255,.5);text-decoration:none;transition:color .2s,padding-left .2s;cursor:pointer}
+.fp-links a:hover,.fp-links li:hover{color:#4ade80;padding-left:4px}
+.fp-bottom{border-top:1px solid rgba(255,255,255,.06);padding:20px 0;max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;font-size:11px;color:rgba(255,255,255,.28)}
+.fp-bottom-badge{color:rgba(74,222,128,.5);font-size:11px}
 
 /* ===== SERVICES ===== */
 .svc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(115px,1fr));gap:11px}
@@ -332,8 +262,8 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 .news-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
 .news-card{background:#fff;border:1px solid #d4edd8;border-radius:13px;overflow:hidden;cursor:pointer;transition:.2s;display:block;text-decoration:none}
 .news-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(29,107,62,.1);border-color:#a8dfc0}
-.news-img{height:180px;display:flex;align-items:center;justify-content:center;font-size:36px;position:relative;overflow:hidden}
-.news-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top}
+.news-img{height:115px;display:flex;align-items:center;justify-content:center;font-size:36px;position:relative;overflow:hidden}
+.news-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .news-body{padding:13px}
 .news-cat{font-size:10px;font-weight:700;background:#e8f5ee;color:#1d6b3e;border-radius:20px;padding:2px 9px;display:inline-block;margin-bottom:6px}
 .news-title{font-size:12px;font-weight:600;color:#1a3d2b;line-height:1.45;margin-bottom:5px}
@@ -421,8 +351,8 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
 /* ===== MODAL ===== */
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;display:flex;align-items:center;justify-content:center;visibility:hidden;opacity:0;transition:opacity .2s ease,visibility .2s ease}
-.modal-bg.open{visibility:visible;opacity:1}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;display:none;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
 .modal{background:#fff;border-radius:16px;padding:28px;max-width:380px;width:90%;position:relative;box-shadow:0 8px 40px rgba(0,0,0,.2)}
 .modal h3{font-family:'Poppins',sans-serif;font-size:18px;font-weight:700;color:#1a3d2b;margin-bottom:4px}
 .modal p{font-size:12px;color:#4a8a6a;margin-bottom:18px}
@@ -524,13 +454,12 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
     <div class="hero">
       <div class="hero-overlay-left"></div>
       <div class="hero-overlay-depth"></div>
-      <div class="hero-capa" id="hero-hojas"></div>
       <div class="hero-content">
 
         <!-- TEXTO IZQUIERDA -->
         <div class="hero-left">
           <div class="hero-badge"><span class="pulse"></span> SIGAP · Sistema Integral de Gestión Ambiental</div>
-          <div class="hero-slogan" data-typewriter data-tw-speed="60" data-tw-delay="400">Iribarren Verde para la vida</div>
+          <div class="hero-slogan">Iribarren Verde para la vida</div>
           <h1>Gestionamos el <span class="green">futuro ambiental</span> de nuestro municipio</h1>
           <p class="hero-desc">Portal institucional IAGAMI. Planificación estratégica, seguimiento de actividades programadas, denuncias ciudadanas y monitoreo ambiental en tiempo real para el Municipio Iribarren, Estado Lara.</p>
           <div class="hero-btns">
@@ -572,15 +501,40 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
     </div>
   </div>
 
+  <!-- STATS BAND -->
+  <div class="stats-band" data-reveal>
+    <div class="stats-band-inner">
+      <div class="sband-item">
+        <div class="sband-num" data-counter="47" data-counter-duration="1400">0</div>
+        <div class="sband-desc">Consejos Comunales</div>
+      </div>
+      <div class="sband-item">
+        <div class="sband-num" data-counter="320" data-counter-suffix="+" data-counter-duration="1600">0</div>
+        <div class="sband-desc">Empresas Registradas</div>
+      </div>
+      <div class="sband-item">
+        <div class="sband-num" data-counter="98" data-counter-suffix="%" data-counter-duration="1200">0</div>
+        <div class="sband-desc">Cumplimiento Ambiental</div>
+      </div>
+      <div class="sband-item">
+        <div class="sband-num" data-counter="12" data-counter-duration="1000">0</div>
+        <div class="sband-desc">Años de Gestión</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WAVE → claro -->
+  <div class="wave-div"><svg viewBox="0 0 1440 54" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"><path d="M0,32 C480,72 960,0 1440,32 L1440,54 L0,54 Z" fill="#f8fcfa"/></svg></div>
+
   <!-- SERVICIOS -->
-  <div class="sec-wrap" data-reveal>
+  <div class="sec-wrap">
     <div class="section">
       <div class="sec-head">
         <div class="sec-tag">SERVICIOS EN LÍNEA</div>
-        <h2 data-word-reveal>Todo lo que necesitas, en un solo lugar</h2>
+        <h2>Todo lo que necesitas, en un solo lugar</h2>
         <p>Accede a los servicios institucionales del municipio desde cualquier dispositivo</p>
       </div>
-      <div class="svc-grid" data-stagger>
+      <div class="svc-grid">
         <a class="svc-card" href="#" onclick="showPage('denuncia');return false">
           <div class="svc-ico" style="background:#fee2e2">🚨</div>
           <div class="svc-name">Presentar Denuncia</div>
@@ -626,28 +580,28 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
   </div>
 
   <!-- INDICADORES DINÁMICOS -->
-  <div class="sec-wrap2" data-reveal>
+  <div class="sec-wrap2">
     <div class="section">
       <div class="sec-head">
         <div class="sec-tag">INDICADORES AMBIENTALES</div>
-        <h2 data-word-reveal>Estado del medio ambiente en Iribarren</h2>
+        <h2>Estado del medio ambiente en Iribarren</h2>
         <p>Datos del monitoreo ambiental municipal actualizados desde el sistema SIGAP</p>
       </div>
-      <div id="home-indicadores-grid" class="ind-grid" data-stagger data-stagger-delay="80">
+      <div id="home-indicadores-grid" class="ind-grid">
         <!-- Populated by renderHomeIndicadores() -->
       </div>
     </div>
   </div>
 
   <!-- NOTICIAS DINÁMICAS -->
-  <div class="sec-wrap3" data-reveal>
+  <div class="sec-wrap3">
     <div class="section">
       <div class="sec-head">
         <div class="sec-tag">NOTICIAS</div>
-        <h2 data-word-reveal>Últimas noticias de IAGAMI</h2>
+        <h2>Últimas noticias de IAGAMI</h2>
         <p>Información institucional y ambiental del municipio</p>
       </div>
-      <div id="home-noticias-grid" class="news-grid" data-stagger data-stagger-delay="80">
+      <div id="home-noticias-grid" class="news-grid">
         <!-- Populated by renderHomeNoticias() -->
       </div>
       <div class="ver-mas-row">
@@ -660,14 +614,14 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
   </div>
 
   <!-- PROYECTOS DINÁMICOS -->
-  <div class="sec-wrap2" data-reveal>
+  <div class="sec-wrap2">
     <div class="section">
       <div class="sec-head">
         <div class="sec-tag">PROYECTOS SIGAP</div>
-        <h2 data-word-reveal>Proyectos en ejecución</h2>
+        <h2>Proyectos en ejecución</h2>
         <p>Iniciativas activas de gestión y restauración ambiental</p>
       </div>
-      <div id="home-proyectos-grid" class="proj-grid" data-stagger data-stagger-delay="80">
+      <div id="home-proyectos-grid" class="proj-grid">
         <!-- Populated by renderHomeProyectos() -->
       </div>
       <div class="ver-mas-row">
@@ -680,7 +634,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
   </div>
 
   <!-- AGENDA DINÁMICA -->
-  <div class="sec-wrap3" data-reveal>
+  <div class="sec-wrap3">
     <div class="section">
       <div class="sec-head">
         <div class="sec-tag">AGENDA SIGAP</div>
@@ -700,7 +654,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
   </div>
 
   <!-- REVISTA DIGITAL -->
-  <div class="sec-wrap2" data-reveal>
+  <div class="sec-wrap2">
     <div class="section">
       <div class="sec-head">
         <div class="sec-tag">REVISTA DIGITAL</div>
@@ -718,7 +672,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
   </div>
 
   <!-- TRÁMITES DESTACADOS -->
-  <div class="sec-wrap3" data-reveal>
+  <div class="sec-wrap3">
     <div class="section">
       <div class="sec-head">
         <div class="sec-tag">TRÁMITES IAGAMI</div>
@@ -738,7 +692,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
   </div>
 
   <!-- TRANSPARENCIA -->
-  <div class="sec-wrap2" data-reveal>
+  <div class="sec-wrap2">
     <div class="section">
       <div class="sec-head">
         <div class="sec-tag">TRANSPARENCIA</div>
@@ -757,55 +711,76 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
     </div>
   </div>
 
-  <!-- CTA -->
-  <div class="cta">
-    <div class="sec-tag" style="background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.25);color:#a8f0c8">PARTICIPACIÓN CIUDADANA</div>
-    <h2 style="margin-top:10px">¿Observas un problema ambiental?</h2>
-    <p>Tu denuncia es importante. Con tecnología IA asignamos prioridad y área competente automáticamente. Juntos protegemos el Municipio Iribarren.</p>
-    <button class="cta-btn" onclick="showPage('denuncia')">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-      Presentar Denuncia Ahora
-    </button>
+  <!-- WAVE → oscuro -->
+  <div class="wave-div"><svg viewBox="0 0 1440 54" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"><path d="M0,22 C360,60 1080,0 1440,22 L1440,0 L0,0 Z" fill="#fff"/></svg></div>
+
+  <!-- CTA DARK PREMIUM -->
+  <div class="cta" style="background:linear-gradient(135deg,#061209 0%,#0d2d1a 50%,#061a0d 100%);position:relative;overflow:hidden">
+    <div style="position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 50% 100%,rgba(34,197,94,.12),transparent 70%);pointer-events:none"></div>
+    <div style="position:relative;z-index:1">
+      <div class="sec-tag" style="background:rgba(74,222,128,.12);border-color:rgba(74,222,128,.3);color:#4ade80">PARTICIPACIÓN CIUDADANA</div>
+      <h2 style="margin-top:12px;font-size:clamp(24px,4vw,40px);letter-spacing:-0.02em;color:#F8FAFC">¿Observas un problema ambiental?</h2>
+      <p style="color:rgba(255,255,255,.6);max-width:520px;margin:12px auto 28px;line-height:1.75">Tu denuncia es importante. Con tecnología IA asignamos prioridad y área competente automáticamente. Juntos protegemos el Municipio Iribarren.</p>
+      <button class="cta-btn" onclick="showPage('denuncia')" data-ripple>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Presentar Denuncia Ahora
+      </button>
+    </div>
   </div>
 
-  <!-- FOOTER -->
-  <footer class="footer">
-    <div class="footer-inner">
-      <div class="footer-grid">
-        <div class="footer-brand">
-          <h3>IAGAMI · SIGAP</h3>
-          <p>Instituto Autónomo de Gestión Ambiental del Municipio Iribarren. Sistema Integral de Gestión de Actividades Programadas.<br><em style="color:#a8dfc0;font-style:italic">Iribarren Verde para la vida.</em></p>
+  <!-- WAVE → footer -->
+  <div class="wave-div" style="background:#030d06"><svg viewBox="0 0 1440 40" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"><path d="M0,20 C720,-20 720,60 1440,20 L1440,40 L0,40 Z" fill="#061209"/></svg></div>
+
+  <!-- FOOTER PREMIUM -->
+  <footer class="footer-premium">
+    <div class="footer-premium-inner">
+      <div>
+        <div class="fp-brand-logo">
+          <img src="./logo-iagami.png" alt="IAGAMI" onerror="this.style.display='none'"/>
+          <div>
+            <div class="fp-brand-name">IAGAMI</div>
+            <div class="fp-brand-sub">Instituto Autónomo de Gestión Ambiental</div>
+          </div>
         </div>
-        <div class="footer-col">
-          <h4>Servicios</h4>
-          <ul>
-            <li onclick="showPage('denuncia')">Presentar Denuncia</li>
-            <li><a href="tramites/index.html">Trámites en Línea</a></li>
-            <li><a href="multas/index.html">Consulta de Multas</a></li>
-            <li onclick="showPage('denuncia')">Atención Ciudadana</li>
-          </ul>
-        </div>
-        <div class="footer-col">
-          <h4>Institución</h4>
-          <ul>
-            <li><a href="organizacion/index.html">Organización</a></li>
-            <li><a href="transparencia/index.html">Transparencia</a></li>
-            <li><a href="noticias/index.html">Noticias</a></li>
-            <li><a href="agenda/index.html">Agenda SIGAP</a></li>
-            <li><a href="proyectos/index.html">Proyectos</a></li>
-          </ul>
-        </div>
-        <div class="footer-col">
-          <h4>Contacto</h4>
-          <div class="contact-item">📍 Barquisimeto, Estado Lara</div>
-          <div class="contact-item">📞 +58 (251) 000-0000</div>
-          <div class="contact-item">✉️ contacto@iagami.gob.ve</div>
-          <div class="contact-item">🕐 Lun–Vie 8:00–16:00</div>
-        </div>
+        <p class="fp-mission">Municipio Iribarren, Estado Lara, Venezuela. Comprometidos con la gestión ambiental sostenible y la participación ciudadana activa.</p>
+        <div class="fp-tagline">🌿 Iribarren Verde para la vida</div>
       </div>
-      <div class="footer-bottom">© 2026 IAGAMI — Municipio Iribarren, Estado Lara, Venezuela. Todos los derechos reservados.</div>
+      <div>
+        <div class="fp-col-title">Servicios</div>
+        <ul class="fp-links">
+          <li onclick="showPage('denuncia')">Presentar Denuncia</li>
+          <li><a href="tramites/index.html">Trámites Ambientales</a></li>
+          <li><a href="multas/index.html">Consulta de Multas</a></li>
+          <li><a href="empresas/index.html">Registro de Empresas</a></li>
+          <li><a href="transparencia/index.html">Transparencia</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="fp-col-title">Información</div>
+        <ul class="fp-links">
+          <li><a href="noticias/index.html">Noticias</a></li>
+          <li><a href="proyectos/index.html">Proyectos SIGAP</a></li>
+          <li><a href="agenda/index.html">Agenda Ambiental</a></li>
+          <li><a href="revista/index.html">Revista Digital</a></li>
+          <li><a href="organizacion/index.html">Organización</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="fp-col-title">Contacto</div>
+        <ul class="fp-links">
+          <li>📍 Barquisimeto, Estado Lara</li>
+          <li>📞 +58 (251) 000-0000</li>
+          <li>✉️ contacto@iagami.gob.ve</li>
+          <li>🕐 Lun–Vie 8:00–16:00</li>
+        </ul>
+      </div>
+    </div>
+    <div class="fp-bottom">
+      <span>© <span id="fp-year"></span> IAGAMI — Municipio Iribarren, Estado Lara, Venezuela</span>
+      <span class="fp-bottom-badge">Decreto 3.390 · Software Libre · SIGAP v3.0</span>
     </div>
   </footer>
+  <script>document.getElementById('fp-year').textContent=new Date().getFullYear()</script>
 
 </div><!-- /page-home -->
 
@@ -831,7 +806,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
       </div>
     </div>
   </nav>
-  <div class="sec-wrap" data-reveal>
+  <div class="sec-wrap">
     <div class="denuncia-wrap">
       <div class="sec-head" style="text-align:left;margin-bottom:24px">
         <div class="sec-tag">PARTICIPACIÓN CIUDADANA</div>
@@ -997,47 +972,6 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 <!-- CMS Database -->
 <script src="cms/config.js"></script>
 <script src="cms/pb.js"></script>
-<script src="cms/animations.js" defer></script>
-<script>
-(function(){
-  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  const cont = document.getElementById('hero-hojas');
-  if(!cont) return;
-  const rnd = (a,b) => a + Math.random()*(b-a);
-  const verdes = ['rgba(126,196,108,.85)','rgba(94,168,92,.8)','rgba(168,214,120,.85)','rgba(74,140,84,.8)'];
-
-  /* 20 hojas */
-  for(let i=0;i<20;i++){
-    const el = document.createElement('div');
-    el.className = 'hoja leaf';
-    const size = rnd(7,18);
-    el.style.cssText = `
-      left:${rnd(20,80)}%;top:${rnd(40,95)}%;
-      width:${size}px;height:${size}px;
-      background:${verdes[Math.floor(rnd(0,verdes.length))]};
-      --dx:${rnd(-70,70)}px;--dy:${rnd(-260,-120)}px;--dr:${rnd(-220,220)}deg;
-      --s:${rnd(.7,1.3)};--o:${rnd(.15,.40)};
-      animation-duration:${rnd(18,28)}s;
-      animation-delay:${rnd(-18,0)}s`;
-    cont.appendChild(el);
-  }
-
-  /* 16 partículas doradas */
-  for(let i=0;i<16;i++){
-    const el = document.createElement('div');
-    el.className = 'hoja mote';
-    const size = rnd(3,7);
-    el.style.cssText = `
-      left:${rnd(25,75)}%;top:${rnd(45,95)}%;
-      width:${size}px;height:${size}px;
-      --dx:${rnd(-50,50)}px;--dy:${rnd(-200,-90)}px;--dr:0deg;
-      --s:${rnd(.6,1.4)};--o:${rnd(.18,.45)};
-      animation-duration:${rnd(14,22)}s;
-      animation-delay:${rnd(-14,0)}s`;
-    cont.appendChild(el);
-  }
-})();
-</script>
 
 <script>
 'use strict';
@@ -1105,7 +1039,6 @@ function showPage(name) {
   if (!el) { toast('Página no disponible'); return; }
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   el.classList.add('active');
-  if (window.IAGAMI_ANIM && IAGAMI_ANIM.pageFade) IAGAMI_ANIM.pageFade(el);
   window.scrollTo({ top: 0, behavior: 'smooth' });
   document.querySelectorAll('.nl[data-page]').forEach(l => l.classList.toggle('active', l.dataset.page === name));
 }
@@ -1131,19 +1064,16 @@ function toast(msg) {
   const t = document.getElementById('app-toast');
   t.textContent = msg;
   t.classList.add('show');
-  if (window.IAGAMI_ANIM) IAGAMI_ANIM.addToastBar(t);
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
 }
 
 /* ─── MODALS ─── */
 function openModal(id) {
-  if (window.IAGAMI_ANIM) { IAGAMI_ANIM.openModalAnim(id); return; }
   const m = document.getElementById(id);
   if (m) m.classList.add('open');
 }
 function closeModal(id) {
-  if (window.IAGAMI_ANIM) { IAGAMI_ANIM.closeModalAnim(id); return; }
   const m = document.getElementById(id);
   if (m) m.classList.remove('open');
 }
@@ -1380,7 +1310,7 @@ async function enviarDenuncia() {
         renderAdjuntos();
     }
   } catch(e) {
-    toast('⚠ Error: ' + (e.message || 'Error al guardar la denuncia'));
+    toast('⚠ Error al guardar la denuncia. Intenta nuevamente.');
     console.error('enviarDenuncia error:', e);
   } finally {
     _enviandoDenuncia = false;
@@ -1499,22 +1429,8 @@ async function renderHeroStats() {
   const empresas = Array.isArray(_empresasR) ? _empresasR : [];
   const sc = document.getElementById('stat-consejos');
   const se = document.getElementById('stat-empresas');
-  const nConsejos = consejos.filter(c => c.estatus === 'Activo').length;
-  const nEmpresas = empresas.length;
-  if (sc) {
-    sc.dataset.counter = nConsejos;
-    sc.dataset.counterDuration = '1000';
-    sc.textContent = '0';
-    if (window.IAGAMI_ANIM) window.IAGAMI_ANIM.animateCounter(sc);
-    else sc.textContent = nConsejos;
-  }
-  if (se) {
-    se.dataset.counter = nEmpresas;
-    se.dataset.counterDuration = '1000';
-    se.textContent = '0';
-    if (window.IAGAMI_ANIM) window.IAGAMI_ANIM.animateCounter(se);
-    else se.textContent = nEmpresas;
-  }
+  if (sc) sc.textContent = consejos.filter(c => c.estatus === 'Activo').length;
+  if (se) se.textContent = empresas.length;
 }
 
 async function renderHomeIndicadores() {
@@ -1570,6 +1486,8 @@ async function renderHomeNoticias() {
       </div>
     </a>`;
   }).join('');
+  if (noticias.length >= 3) grid.classList.add('news-grid-magazine');
+  else grid.classList.remove('news-grid-magazine');
   if (window.IAGAMI_ANIM) IAGAMI_ANIM.staggerChildren(grid);
 }
 
@@ -1605,7 +1523,6 @@ async function renderHomeProyectos() {
       </div>
     </a>`;
   }).join('');
-  if (window.IAGAMI_ANIM) IAGAMI_ANIM.staggerChildren(grid);
 }
 
 async function renderHomeAgenda() {
@@ -1682,7 +1599,6 @@ async function renderHomeRevista() {
       </div>
     </div>`;
   }).join('');
-  if (window.IAGAMI_ANIM) IAGAMI_ANIM.staggerChildren(container);
 }
 
 async function renderHomeTramites() {
@@ -1715,7 +1631,6 @@ async function renderHomeTramites() {
       </div>
       <a href="tramites/index.html" style="margin-top:auto;padding:7px 14px;background:#1d6b3e;color:#fff;border-radius:8px;font-size:11px;font-weight:700;text-align:center;text-decoration:none;font-family:'Poppins',sans-serif">Ver detalles →</a>
     </div>`).join('');
-  if (window.IAGAMI_ANIM) IAGAMI_ANIM.staggerChildren(grid);
 }
 
 async function renderHomeDocumentos() {
@@ -1723,7 +1638,7 @@ async function renderHomeDocumentos() {
   if (!grid) return;
   const _items = await CMSDB.getAll('documentos');
   const items = (Array.isArray(_items) ? _items : [])
-    .filter(d => d.publicado === true)
+    .filter(d => d.estado === 'publicado')
     .sort((a, b) => (b.año || 0) - (a.año || 0))
     .slice(0, 4);
   if (!items.length) {
