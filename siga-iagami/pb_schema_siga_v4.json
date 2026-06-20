@@ -1,0 +1,417 @@
+[
+  {
+    "id": "sigaactivida001",
+    "name": "actividades",
+    "type": "base",
+    "fields": [
+      {
+        "name": "trabajador_id",
+        "type": "relation",
+        "required": true,
+        "maxSelect": 1,
+        "collectionId": "sigatrabajad001",
+        "cascadeDelete": false,
+        "id": "relation000000000"
+      },
+      {
+        "name": "fecha",
+        "type": "date",
+        "required": true,
+        "id": "date010000000"
+      },
+      {
+        "name": "actividad",
+        "type": "text",
+        "required": true,
+        "id": "text020000000"
+      },
+      {
+        "name": "descripcion",
+        "type": "text",
+        "id": "text030000000"
+      },
+      {
+        "name": "resultado",
+        "type": "text",
+        "id": "text040000000"
+      },
+      {
+        "name": "hora_inicio",
+        "type": "text",
+        "id": "text050000000"
+      },
+      {
+        "name": "hora_fin",
+        "type": "text",
+        "id": "text060000000"
+      },
+      {
+        "name": "estado",
+        "type": "text",
+        "id": "text070000000"
+      },
+      {
+        "name": "observaciones",
+        "type": "text",
+        "id": "text080000000"
+      },
+      {
+        "name": "ubicacion",
+        "type": "text",
+        "id": "text090000000"
+      },
+      {
+        "name": "proyecto_id",
+        "type": "text",
+        "id": "text0100000000"
+      },
+      {
+        "name": "proyecto_nombre",
+        "type": "text",
+        "id": "text0110000000"
+      },
+      {
+        "name": "comuna_id",
+        "type": "text",
+        "id": "text0120000000"
+      },
+      {
+        "name": "consejo_id",
+        "type": "text",
+        "id": "text0130000000"
+      }
+    ],
+    "listRule": "@request.auth.collectionName = \"trabajadores\"",
+    "viewRule": "@request.auth.collectionName = \"trabajadores\"",
+    "createRule": "@request.auth.collectionName = \"trabajadores\"",
+    "updateRule": null,
+    "deleteRule": null
+  },
+  {
+    "id": "sigasolicit0001",
+    "name": "solicitudes_rrhh",
+    "type": "base",
+    "fields": [
+      {
+        "name": "trabajador_id",
+        "type": "relation",
+        "required": true,
+        "maxSelect": 1,
+        "collectionId": "sigatrabajad001",
+        "cascadeDelete": false,
+        "id": "relation100000000"
+      },
+      {
+        "name": "tipo",
+        "type": "text",
+        "id": "text110000000"
+      },
+      {
+        "name": "descripcion",
+        "type": "text",
+        "required": true,
+        "id": "text120000000"
+      },
+      {
+        "name": "estado",
+        "type": "text",
+        "id": "text130000000"
+      },
+      {
+        "name": "respuesta",
+        "type": "text",
+        "id": "text140000000"
+      },
+      {
+        "name": "fecha_desde",
+        "type": "date",
+        "id": "date150000000"
+      },
+      {
+        "name": "fecha_hasta",
+        "type": "date",
+        "id": "date160000000"
+      }
+    ],
+    "listRule": "@request.auth.collectionName = \"trabajadores\"",
+    "viewRule": "@request.auth.collectionName = \"trabajadores\"",
+    "createRule": "@request.auth.collectionName = \"trabajadores\"",
+    "updateRule": "@request.auth.rol = \"RRHH\" || @request.auth.rol = \"DIRECTOR\" || @request.auth.rol = \"PRESIDENTE\"",
+    "deleteRule": "@request.auth.rol = \"RRHH\""
+  },
+  {
+    "id": "sigacomunic0001",
+    "name": "comunicados",
+    "type": "base",
+    "fields": [
+      {
+        "name": "tipo",
+        "type": "text",
+        "id": "text200000000"
+      },
+      {
+        "name": "destino",
+        "type": "text",
+        "id": "text210000000"
+      },
+      {
+        "name": "asunto",
+        "type": "text",
+        "required": true,
+        "id": "text220000000"
+      },
+      {
+        "name": "cuerpo",
+        "type": "editor",
+        "id": "editor230000000"
+      },
+      {
+        "name": "autor_id",
+        "type": "relation",
+        "maxSelect": 1,
+        "collectionId": "sigatrabajad001",
+        "cascadeDelete": false,
+        "id": "relation240000000"
+      },
+      {
+        "name": "autor_nombre",
+        "type": "text",
+        "id": "text250000000"
+      },
+      {
+        "name": "publicado",
+        "type": "bool",
+        "id": "bool260000000"
+      }
+    ],
+    "listRule": "@request.auth.collectionName = \"trabajadores\"",
+    "viewRule": "@request.auth.collectionName = \"trabajadores\"",
+    "createRule": "@request.auth.rol = \"RRHH\" || @request.auth.rol = \"DIRECTOR\" || @request.auth.rol = \"PRESIDENTE\" || @request.auth.rol = \"COORDINADOR\"",
+    "updateRule": "@request.auth.rol = \"RRHH\" || @request.auth.rol = \"DIRECTOR\" || @request.auth.rol = \"PRESIDENTE\" || @request.auth.rol = \"COORDINADOR\"",
+    "deleteRule": "@request.auth.rol = \"DIRECTOR\" || @request.auth.rol = \"PRESIDENTE\""
+  },
+  {
+    "id": "sigacapacit0001",
+    "name": "capacitaciones",
+    "type": "base",
+    "fields": [
+      {
+        "name": "nombre",
+        "type": "text",
+        "required": true,
+        "id": "text300000000"
+      },
+      {
+        "name": "descripcion",
+        "type": "text",
+        "id": "text310000000"
+      },
+      {
+        "name": "instructor",
+        "type": "text",
+        "id": "text320000000"
+      },
+      {
+        "name": "fecha_inicio",
+        "type": "date",
+        "id": "date330000000"
+      },
+      {
+        "name": "fecha_fin",
+        "type": "date",
+        "id": "date340000000"
+      },
+      {
+        "name": "modalidad",
+        "type": "text",
+        "id": "text350000000"
+      },
+      {
+        "name": "estado",
+        "type": "text",
+        "id": "text360000000"
+      },
+      {
+        "name": "participantes",
+        "type": "json",
+        "id": "json370000000"
+      },
+      {
+        "name": "autor_id",
+        "type": "relation",
+        "maxSelect": 1,
+        "collectionId": "sigatrabajad001",
+        "cascadeDelete": false,
+        "id": "relation380000000"
+      }
+    ],
+    "listRule": "@request.auth.collectionName = \"trabajadores\"",
+    "viewRule": "@request.auth.collectionName = \"trabajadores\"",
+    "createRule": "@request.auth.rol = \"RRHH\" || @request.auth.rol = \"DIRECTOR\" || @request.auth.rol = \"PRESIDENTE\"",
+    "updateRule": "@request.auth.rol = \"RRHH\" || @request.auth.rol = \"DIRECTOR\" || @request.auth.rol = \"PRESIDENTE\"",
+    "deleteRule": "@request.auth.rol = \"RRHH\""
+  },
+  {
+    "id": "sigaplanific001",
+    "name": "planificaciones",
+    "type": "base",
+    "fields": [
+      {
+        "name": "trabajador_id",
+        "type": "relation",
+        "required": true,
+        "maxSelect": 1,
+        "collectionId": "sigatrabajad001",
+        "cascadeDelete": false,
+        "id": "relation400000000"
+      },
+      {
+        "name": "semana_inicio",
+        "type": "date",
+        "id": "date410000000"
+      },
+      {
+        "name": "prioridad",
+        "type": "text",
+        "id": "text420000000"
+      },
+      {
+        "name": "objetivo",
+        "type": "text",
+        "id": "text430000000"
+      },
+      {
+        "name": "actividad",
+        "type": "text",
+        "id": "text440000000"
+      },
+      {
+        "name": "resultado_esperado",
+        "type": "text",
+        "id": "text450000000"
+      },
+      {
+        "name": "estado",
+        "type": "text",
+        "id": "text460000000"
+      }
+    ],
+    "listRule": "@request.auth.collectionName = \"trabajadores\"",
+    "viewRule": "@request.auth.collectionName = \"trabajadores\"",
+    "createRule": "@request.auth.collectionName = \"trabajadores\"",
+    "updateRule": null,
+    "deleteRule": null
+  },
+  {
+    "id": "sigatickets0001",
+    "name": "tickets_soporte",
+    "type": "base",
+    "fields": [
+      {
+        "name": "solicitante_id",
+        "type": "relation",
+        "required": true,
+        "maxSelect": 1,
+        "collectionId": "sigatrabajad001",
+        "cascadeDelete": false,
+        "id": "relation500000000"
+      },
+      {
+        "name": "tipo",
+        "type": "text",
+        "id": "text510000000"
+      },
+      {
+        "name": "asunto",
+        "type": "text",
+        "required": true,
+        "id": "text520000000"
+      },
+      {
+        "name": "descripcion",
+        "type": "text",
+        "required": true,
+        "id": "text530000000"
+      },
+      {
+        "name": "prioridad",
+        "type": "text",
+        "id": "text540000000"
+      },
+      {
+        "name": "estado",
+        "type": "text",
+        "id": "text550000000"
+      },
+      {
+        "name": "asignado_a",
+        "type": "relation",
+        "maxSelect": 1,
+        "collectionId": "sigatrabajad001",
+        "cascadeDelete": false,
+        "id": "relation560000000"
+      },
+      {
+        "name": "resolucion",
+        "type": "text",
+        "id": "text570000000"
+      },
+      {
+        "name": "fecha_cierre",
+        "type": "date",
+        "id": "date580000000"
+      }
+    ],
+    "listRule": "@request.auth.collectionName = \"trabajadores\"",
+    "viewRule": "@request.auth.collectionName = \"trabajadores\"",
+    "createRule": "@request.auth.collectionName = \"trabajadores\"",
+    "updateRule": "@request.auth.rol = \"TECNOLOGIA\"",
+    "deleteRule": "@request.auth.rol = \"TECNOLOGIA\""
+  },
+  {
+    "id": "sigaauditor0001",
+    "name": "auditoria_siga",
+    "type": "base",
+    "fields": [
+      {
+        "name": "usuario_id",
+        "type": "relation",
+        "maxSelect": 1,
+        "collectionId": "sigatrabajad001",
+        "cascadeDelete": false,
+        "id": "relation600000000"
+      },
+      {
+        "name": "accion",
+        "type": "text",
+        "required": true,
+        "id": "text610000000"
+      },
+      {
+        "name": "modulo",
+        "type": "text",
+        "id": "text620000000"
+      },
+      {
+        "name": "resultado",
+        "type": "text",
+        "id": "text630000000"
+      },
+      {
+        "name": "detalle",
+        "type": "json",
+        "id": "json640000000"
+      },
+      {
+        "name": "ip",
+        "type": "text",
+        "id": "text650000000"
+      }
+    ],
+    "listRule": "@request.auth.rol = \"TECNOLOGIA\" || @request.auth.rol = \"PRESIDENTE\"",
+    "viewRule": "@request.auth.rol = \"TECNOLOGIA\" || @request.auth.rol = \"PRESIDENTE\"",
+    "createRule": "@request.auth.collectionName = \"trabajadores\"",
+    "updateRule": null,
+    "deleteRule": null
+  }
+]
