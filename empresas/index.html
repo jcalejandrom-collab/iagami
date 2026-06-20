@@ -135,6 +135,28 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
   .filter-select{width:100%}
   .modal-content{padding:20px}
 }
+/* ── Registro de empresa ── */
+.hero-register-btn{margin-top:18px;background:#fff;color:#1d6b3e;border:none;border-radius:10px;padding:12px 26px;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.18);transition:.15s}
+.hero-register-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(0,0,0,.24)}
+.reg-form{padding:26px}
+.reg-form h2{font-family:'Poppins',sans-serif;font-size:19px;font-weight:700;color:#1a3d2b;margin-bottom:4px}
+.reg-form .reg-sub{font-size:13px;color:#4a8a6a;margin-bottom:20px}
+.reg-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.reg-field{display:flex;flex-direction:column;gap:5px}
+.reg-field.full{grid-column:1 / -1}
+.reg-field label{font-size:12px;font-weight:600;color:#2a5a3e}
+.reg-field label .req{color:#dc2626}
+.reg-field input,.reg-field select,.reg-field textarea{font-family:inherit;font-size:13px;padding:9px 11px;border:1.5px solid #cfe8da;border-radius:8px;background:#fff;color:#1a3d2b;transition:.15s}
+.reg-field input:focus,.reg-field select:focus,.reg-field textarea:focus{outline:none;border-color:#1d6b3e;box-shadow:0 0 0 3px rgba(29,107,62,.12)}
+.reg-field .err{font-size:11px;color:#dc2626;display:none}
+.reg-field.invalid input,.reg-field.invalid select{border-color:#dc2626}
+.reg-field.invalid .err{display:block}
+.reg-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:22px}
+.reg-btn-primary{background:#1d6b3e;color:#fff;border:none;border-radius:9px;padding:11px 22px;font-size:14px;font-weight:600;cursor:pointer;transition:.15s}
+.reg-btn-primary:hover{background:#155c32}
+.reg-btn-primary:disabled{opacity:.6;cursor:not-allowed}
+.reg-btn-secondary{background:#f0faf5;color:#1d6b3e;border:1.5px solid #cfe8da;border-radius:9px;padding:11px 20px;font-size:14px;font-weight:600;cursor:pointer}
+@media(max-width:560px){.reg-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -164,6 +186,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
     <span class="hero-emoji">🏭</span>
     <h1>Directorio Empresarial</h1>
     <p>Empresas con registro ambiental en el Municipio Iribarren</p>
+    <button type="button" class="hero-register-btn" onclick="openRegEmpresa()">+ Registrar mi empresa</button>
   </div>
 </section>
 
@@ -216,6 +239,63 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
     <div class="modal-footer">
       <button class="modal-close-btn" onclick="closeModal()">Cerrar</button>
     </div>
+  </div>
+</div>
+
+<!-- MODAL REGISTRO EMPRESA -->
+<div class="modal-overlay" id="regOverlay" onclick="if(event.target===this)closeRegEmpresa()">
+  <div class="modal" id="regBox">
+    <button class="modal-close" onclick="closeRegEmpresa()" aria-label="Cerrar">×</button>
+    <form class="reg-form" id="regForm" onsubmit="submitEmpresa(event)">
+      <h2>🏭 Registrar mi empresa</h2>
+      <div class="reg-sub">Completa los datos para aparecer en el directorio ambiental del Municipio Iribarren.</div>
+      <div class="reg-grid">
+        <div class="reg-field full">
+          <label>Nombre de la empresa <span class="req">*</span></label>
+          <input type="text" id="re-nombre" placeholder="Razón social completa" required/>
+          <span class="err">Ingresa el nombre de la empresa.</span>
+        </div>
+        <div class="reg-field">
+          <label>RIF <span class="req">*</span></label>
+          <input type="text" id="re-rif" placeholder="J-12345678-9" required/>
+          <span class="err" id="re-rif-err">Ingresa el RIF.</span>
+        </div>
+        <div class="reg-field">
+          <label>Categoría</label>
+          <select id="re-categoria">
+            <option>Industrial</option><option>Construcción</option><option>Comercial</option><option>Servicios</option><option>Agrícola</option>
+          </select>
+        </div>
+        <div class="reg-field full">
+          <label>Actividad económica</label>
+          <input type="text" id="re-actividad" placeholder="Ej: Fabricación de bloques de concreto"/>
+        </div>
+        <div class="reg-field">
+          <label>Responsable</label>
+          <input type="text" id="re-responsable" placeholder="Nombre del responsable"/>
+        </div>
+        <div class="reg-field">
+          <label>Teléfono</label>
+          <input type="tel" id="re-telefono" placeholder="0412-1234567"/>
+        </div>
+        <div class="reg-field">
+          <label>Correo electrónico</label>
+          <input type="email" id="re-email" placeholder="correo@empresa.com"/>
+        </div>
+        <div class="reg-field">
+          <label>Dirección</label>
+          <input type="text" id="re-direccion" placeholder="Dirección de la sede"/>
+        </div>
+        <div class="reg-field full">
+          <label>Observaciones</label>
+          <textarea id="re-observaciones" rows="2" placeholder="Información adicional (opcional)"></textarea>
+        </div>
+      </div>
+      <div class="reg-actions">
+        <button type="button" class="reg-btn-secondary" onclick="closeRegEmpresa()">Cancelar</button>
+        <button type="submit" class="reg-btn-primary" id="re-submit">Registrar empresa</button>
+      </div>
+    </form>
   </div>
 </div>
 
@@ -445,6 +525,83 @@ async function init() {
   filtered = [...allEmpresas];
   updateStats(allEmpresas);
   renderEmpresas(filtered);
+}
+
+/* ── Registro público de empresa ── */
+// Normaliza un RIF para comparar: quita todo lo que no sea alfanumérico y pasa a mayúsculas.
+// Así "J-12345678-9", "j123456789" y "J 12345678 9" se consideran el mismo RIF.
+const normRif = r => String(r || '').replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+
+function openRegEmpresa() {
+  document.getElementById('regForm').reset();
+  document.querySelectorAll('#regForm .reg-field.invalid').forEach(f => f.classList.remove('invalid'));
+  document.getElementById('regOverlay').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function closeRegEmpresa() {
+  document.getElementById('regOverlay').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+async function submitEmpresa(ev) {
+  ev.preventDefault();
+  const get = id => (document.getElementById(id).value || '').trim();
+  const nombre = get('re-nombre');
+  const rif = get('re-rif');
+
+  // Validación de requeridos
+  let ok = true;
+  const setInvalid = (fieldId, bad) => {
+    document.getElementById(fieldId).closest('.reg-field').classList.toggle('invalid', bad);
+    if (bad) ok = false;
+  };
+  setInvalid('re-nombre', !nombre);
+  setInvalid('re-rif', !rif);
+
+  // RIF único: no puede haber dos empresas con el mismo RIF
+  const rifKey = normRif(rif);
+  if (rif && allEmpresas.some(e => normRif(e.rif) === rifKey)) {
+    const f = document.getElementById('re-rif').closest('.reg-field');
+    f.classList.add('invalid');
+    document.getElementById('re-rif-err').textContent = 'Ya existe una empresa registrada con este RIF.';
+    ok = false;
+  } else {
+    document.getElementById('re-rif-err').textContent = 'Ingresa el RIF.';
+  }
+
+  if (!ok) { toast('Revisa los campos marcados', 'error'); return; }
+
+  const payload = {
+    nombre,
+    rif,
+    categoria: get('re-categoria'),
+    actividad: get('re-actividad'),
+    responsable: get('re-responsable'),
+    telefono: get('re-telefono'),
+    email: get('re-email'),
+    direccion: get('re-direccion'),
+    observaciones: get('re-observaciones'),
+    estado_permiso: 'En Proceso',
+    publicado: true,
+    fecha_registro: new Date().toLocaleDateString('sv-SE'),
+  };
+
+  const btn = document.getElementById('re-submit');
+  btn.disabled = true; btn.textContent = 'Registrando…';
+  try {
+    const saved = await CMSDB.save('empresas', payload);
+    allEmpresas.push(saved && saved.id ? saved : payload);
+    filtered = [...allEmpresas];
+    updateStats(allEmpresas);
+    renderEmpresas(filtered);
+    closeRegEmpresa();
+    toast('✅ Empresa registrada correctamente');
+  } catch (e) {
+    console.error('Error registrando empresa:', e);
+    toast('No se pudo registrar la empresa. Intenta de nuevo.', 'error');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Registrar empresa';
+  }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
