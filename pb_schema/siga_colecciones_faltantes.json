@@ -1,0 +1,176 @@
+[
+  {
+    "id": "actividadesig01",
+    "name": "actividades",
+    "type": "base",
+    "fields": [
+      { "id":"txt_act_001","name":"trabajador",              "type":"text","required":true },
+      { "id":"txt_act_002","name":"titulo",                  "type":"text","required":true },
+      { "id":"txt_act_003","name":"descripcion",             "type":"text" },
+      { "id":"sel_act_004","name":"tipo",                    "type":"select","maxSelect":1,
+        "values":["Operativo","Administrativo","Campo","Inspección","Reunión","Capacitación"] },
+      { "id":"sel_act_005","name":"estado",                  "type":"select","maxSelect":1,
+        "values":["Pendiente","En Proceso","Completada","Observada","Suspendida"] },
+      { "id":"dat_act_006","name":"fecha",                   "type":"date","required":true },
+      { "id":"dat_act_007","name":"fecha_fin",               "type":"date" },
+      { "id":"num_act_008","name":"porcentaje_cumplimiento", "type":"number","min":0,"max":100 },
+      { "id":"txt_act_009","name":"resultado_obtenido",      "type":"text" },
+      { "id":"txt_act_010","name":"ubicacion_gps",           "type":"text" },
+      { "id":"sel_act_011","name":"estatus_revision",        "type":"select","maxSelect":1,
+        "values":["Pendiente","Aprobada","Observada","Rechazada"] },
+      { "id":"txt_act_012","name":"observaciones",           "type":"text" }
+    ],
+    "listRule":   "@request.auth.id != \"\"",
+    "viewRule":   "@request.auth.id != \"\"",
+    "createRule": "@request.auth.id != \"\"",
+    "updateRule": "@request.auth.id != \"\"",
+    "deleteRule": "@request.auth.rol = 'RRHH' || @request.auth.rol = 'DIRECTOR' || @request.auth.rol = 'PRESIDENTE'"
+  },
+  {
+    "id": "solicitudesrh01",
+    "name": "solicitudes_rrhh",
+    "type": "base",
+    "fields": [
+      { "id":"txt_sol_001","name":"trabajador",   "type":"text","required":true },
+      { "id":"sel_sol_002","name":"tipo",         "type":"select","maxSelect":1,
+        "values":["Vacaciones","Permiso","Reposo","Constancia","Capacitación","Comisión","Otro"] },
+      { "id":"txt_sol_003","name":"descripcion",  "type":"text" },
+      { "id":"dat_sol_004","name":"fecha_inicio", "type":"date" },
+      { "id":"dat_sol_005","name":"fecha_fin",    "type":"date" },
+      { "id":"sel_sol_006","name":"estado",       "type":"select","maxSelect":1,
+        "values":["Pendiente","Aprobada","Rechazada","En Revisión"] },
+      { "id":"txt_sol_007","name":"respuesta",    "type":"text" },
+      { "id":"txt_sol_008","name":"aprobado_por", "type":"text" }
+    ],
+    "listRule":   "@request.auth.id != \"\"",
+    "viewRule":   "@request.auth.id != \"\"",
+    "createRule": "@request.auth.id != \"\"",
+    "updateRule": "@request.auth.id != \"\"",
+    "deleteRule": null
+  },
+  {
+    "id": "comunicadosig01",
+    "name": "comunicados",
+    "type": "base",
+    "fields": [
+      { "id":"txt_com_001","name":"autor",         "type":"text","required":true },
+      { "id":"txt_com_002","name":"titulo",        "type":"text","required":true },
+      { "id":"txt_com_003","name":"contenido",     "type":"text","required":true },
+      { "id":"sel_com_004","name":"tipo",          "type":"select","maxSelect":1,
+        "values":["Circular","Memorándum","Resolución","Aviso","Convocatoria"] },
+      { "id":"sel_com_005","name":"dirigido_a",    "type":"select","maxSelect":1,
+        "values":["Todos","RRHH","Supervisores","Trabajadores","Dirección"] },
+      { "id":"sel_com_006","name":"estado",        "type":"select","maxSelect":1,
+        "values":["Borrador","Publicado","Archivado"] },
+      { "id":"dat_com_007","name":"fecha_pub",     "type":"date" }
+    ],
+    "listRule":   "@request.auth.id != \"\"",
+    "viewRule":   "@request.auth.id != \"\"",
+    "createRule": "@request.auth.rol = 'RRHH' || @request.auth.rol = 'DIRECTOR' || @request.auth.rol = 'PRESIDENTE' || @request.auth.rol = 'COORDINADOR'",
+    "updateRule": "@request.auth.rol = 'RRHH' || @request.auth.rol = 'DIRECTOR' || @request.auth.rol = 'PRESIDENTE'",
+    "deleteRule": "@request.auth.rol = 'DIRECTOR' || @request.auth.rol = 'PRESIDENTE'"
+  },
+  {
+    "id": "capacitacione01",
+    "name": "capacitaciones",
+    "type": "base",
+    "fields": [
+      { "id":"txt_cap_001","name":"titulo",        "type":"text","required":true },
+      { "id":"txt_cap_002","name":"descripcion",   "type":"text" },
+      { "id":"txt_cap_003","name":"facilitador",   "type":"text" },
+      { "id":"dat_cap_004","name":"fecha",         "type":"date","required":true },
+      { "id":"txt_cap_005","name":"lugar",         "type":"text" },
+      { "id":"num_cap_006","name":"duracion_horas","type":"number","min":1 },
+      { "id":"sel_cap_007","name":"estado",        "type":"select","maxSelect":1,
+        "values":["Programada","En Curso","Completada","Cancelada"] },
+      { "id":"txt_cap_008","name":"participantes", "type":"text" }
+    ],
+    "listRule":   "@request.auth.id != \"\"",
+    "viewRule":   "@request.auth.id != \"\"",
+    "createRule": "@request.auth.rol = 'RRHH' || @request.auth.rol = 'DIRECTOR' || @request.auth.rol = 'PRESIDENTE'",
+    "updateRule": "@request.auth.rol = 'RRHH' || @request.auth.rol = 'DIRECTOR' || @request.auth.rol = 'PRESIDENTE'",
+    "deleteRule": "@request.auth.rol = 'RRHH' || @request.auth.rol = 'DIRECTOR' || @request.auth.rol = 'PRESIDENTE'"
+  },
+  {
+    "id": "planificacion01",
+    "name": "planificaciones",
+    "type": "base",
+    "fields": [
+      { "id":"txt_pla_001","name":"trabajador",    "type":"text","required":true },
+      { "id":"txt_pla_002","name":"semana",        "type":"text","required":true },
+      { "id":"txt_pla_003","name":"objetivo",      "type":"text","required":true },
+      { "id":"txt_pla_004","name":"actividades",   "type":"text" },
+      { "id":"sel_pla_005","name":"estado",        "type":"select","maxSelect":1,
+        "values":["Borrador","Enviada","Aprobada","Observada"] },
+      { "id":"num_pla_006","name":"avance",        "type":"number","min":0,"max":100 },
+      { "id":"dat_pla_007","name":"fecha_inicio",  "type":"date" },
+      { "id":"dat_pla_008","name":"fecha_fin",     "type":"date" },
+      { "id":"txt_pla_009","name":"observaciones", "type":"text" }
+    ],
+    "listRule":   "@request.auth.id != \"\"",
+    "viewRule":   "@request.auth.id != \"\"",
+    "createRule": "@request.auth.id != \"\"",
+    "updateRule": "@request.auth.id != \"\"",
+    "deleteRule": null
+  },
+  {
+    "id": "ticketsopor01",
+    "name": "tickets_soporte",
+    "type": "base",
+    "fields": [
+      { "id":"txt_tck_001","name":"creado_por",    "type":"text","required":true },
+      { "id":"txt_tck_002","name":"titulo",        "type":"text","required":true },
+      { "id":"txt_tck_003","name":"descripcion",   "type":"text","required":true },
+      { "id":"sel_tck_004","name":"categoria",     "type":"select","maxSelect":1,
+        "values":["Hardware","Software","Red","Acceso","Otro"] },
+      { "id":"sel_tck_005","name":"prioridad",     "type":"select","maxSelect":1,
+        "values":["Baja","Media","Alta","Urgente"] },
+      { "id":"sel_tck_006","name":"estado",        "type":"select","maxSelect":1,
+        "values":["Abierto","En Proceso","Resuelto","Cerrado"] },
+      { "id":"txt_tck_007","name":"asignado_a",    "type":"text" },
+      { "id":"txt_tck_008","name":"resolucion",    "type":"text" },
+      { "id":"dat_tck_009","name":"fecha_cierre",  "type":"date" }
+    ],
+    "listRule":   "@request.auth.id != \"\"",
+    "viewRule":   "@request.auth.id != \"\"",
+    "createRule": "@request.auth.id != \"\"",
+    "updateRule": "@request.auth.id != \"\"",
+    "deleteRule": "@request.auth.rol = 'TECNOLOGIA' || @request.auth.rol = 'PRESIDENTE'"
+  },
+  {
+    "id": "auditoriasig01",
+    "name": "auditoria_siga",
+    "type": "base",
+    "fields": [
+      { "id":"txt_aud_001","name":"usuario",       "type":"text","required":true },
+      { "id":"txt_aud_002","name":"accion",        "type":"text","required":true },
+      { "id":"txt_aud_003","name":"coleccion",     "type":"text" },
+      { "id":"txt_aud_004","name":"registro_id",   "type":"text" },
+      { "id":"txt_aud_005","name":"detalle",       "type":"text" },
+      { "id":"txt_aud_006","name":"ip",            "type":"text" },
+      { "id":"dat_aud_007","name":"fecha",         "type":"date","required":true }
+    ],
+    "listRule":   "@request.auth.rol = 'TECNOLOGIA' || @request.auth.rol = 'PRESIDENTE'",
+    "viewRule":   "@request.auth.rol = 'TECNOLOGIA' || @request.auth.rol = 'PRESIDENTE'",
+    "createRule": "@request.auth.id != \"\"",
+    "updateRule": null,
+    "deleteRule": null
+  },
+  {
+    "id": "direccionesi01",
+    "name": "direcciones",
+    "type": "base",
+    "fields": [
+      { "id":"txt_dir_001","name":"nombre",        "type":"text","required":true },
+      { "id":"txt_dir_002","name":"codigo",        "type":"text" },
+      { "id":"txt_dir_003","name":"director",      "type":"text" },
+      { "id":"txt_dir_004","name":"descripcion",   "type":"text" },
+      { "id":"bol_dir_005","name":"activa",        "type":"bool" }
+    ],
+    "listRule":   "@request.auth.id != \"\"",
+    "viewRule":   "@request.auth.id != \"\"",
+    "createRule": "@request.auth.rol = 'PRESIDENTE' || @request.auth.rol = 'DIRECTOR' || @request.auth.rol = 'TECNOLOGIA'",
+    "updateRule": "@request.auth.rol = 'PRESIDENTE' || @request.auth.rol = 'DIRECTOR' || @request.auth.rol = 'TECNOLOGIA'",
+    "deleteRule": "@request.auth.rol = 'PRESIDENTE' || @request.auth.rol = 'TECNOLOGIA'"
+  }
+]
