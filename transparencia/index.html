@@ -290,7 +290,7 @@ function filterDocs() {
 
 function renderDocs() {
   let filtered = _cachedDocs.filter(d => {
-    if (d.publicado === false) return false;
+    if (!d.publicado) return false;
     const matchCat = !currentCat || d.categoria === currentCat;
     const matchYear = !currentYear || String(d.year || d.anio) === String(currentYear);
     const titulo = (d.titulo || '').toLowerCase();

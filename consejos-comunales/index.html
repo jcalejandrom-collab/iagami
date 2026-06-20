@@ -1460,7 +1460,7 @@ async function saveForm(){
     savedItems.push('Diagnóstico ambiental guardado.');
   }catch(e){
     const diagArr=lsGet('diagnosticos_ambientales');
-    diagArr.push(diagData);
+    diagArr.push(diagPayload);
     lsSet('diagnosticos_ambientales',diagArr);
     savedItems.push('Diagnóstico guardado localmente (sin conexión).');
   }
@@ -1472,7 +1472,7 @@ async function saveForm(){
       savedItems.push('Denuncia ambiental registrada.');
     }catch(e){
       const denArr=lsGet('denuncias_comunitarias');
-      denArr.push(denunciaData);
+      denArr.push(denPayload);
       lsSet('denuncias_comunitarias',denArr);
       savedItems.push('Denuncia guardada localmente (sin conexión).');
     }
