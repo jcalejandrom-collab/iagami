@@ -146,6 +146,7 @@
         <button class="tab" onclick="switchTab('rrhh','solicitudes')">📬 Solicitudes</button>
         <button class="tab" onclick="switchTab('rrhh','comunicados')">📢 Comunicados</button>
         <button class="tab" onclick="switchTab('rrhh','capacitaciones')">🎓 Capacitaciones</button>
+        <button class="tab" onclick="switchTab('rrhh','reportes')">📊 Reportes Diarios <span id="badge-reportes-rrhh" style="background:#dc2626;color:#fff;border-radius:999px;font-size:10px;padding:1px 6px;font-weight:700;display:none;margin-left:4px">0</span></button>
       </div>
 
       <!-- Tab: Personal -->
@@ -218,6 +219,21 @@
           <button class="btn btn-primary" id="btn-nueva-cap" onclick="abrirModalCapacitacion()">+ Nueva Capacitación</button>
         </div>
         <div class="cards-grid" id="lista-capacitaciones"><p style="color:var(--muted);font-size:13px">Cargando…</p></div>
+      </div>
+
+      <!-- Tab: Reportes Diarios (RRHH) -->
+      <div class="tab-content" id="tab-rrhh-reportes">
+        <div style="margin-bottom:12px;display:flex;align-items:center;justify-content:space-between">
+          <p style="font-size:13px;color:var(--muted)">Reportes diarios enviados por los trabajadores.</p>
+          <button class="btn btn-sm btn-secondary" onclick="loadReportesRRHH()">↺ Actualizar</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Trabajador</th><th>Fecha</th><th>Resumen del día</th><th>Horas</th><th>Estado</th><th>Acciones</th></tr></thead>
+            <tbody id="tabla-reportes-rrhh"></tbody>
+          </table>
+          <div id="reportes-rrhh-empty" class="no-rows" style="display:none">No hay reportes registrados.</div>
+        </div>
       </div>
     </div>
 
@@ -538,6 +554,101 @@
       </div>
     </div>
 
+    <!-- ══ SEC: REPORTE DIARIO ══ -->
+    <div class="section" id="sec-reporte">
+      <div class="page-header">
+        <div>
+          <div class="page-title">📝 Reporte Diario</div>
+          <div class="page-subtitle">Registra tu resumen de actividades del día</div>
+        </div>
+        <button class="btn btn-primary" onclick="abrirModalReporte()">+ Nuevo Reporte</button>
+      </div>
+      <div class="dash-grid" style="margin-bottom:20px">
+        <div class="dash-stat"><div class="ds-icon">📝</div><div class="ds-val" id="rep-total">0</div><div class="ds-lbl">Reportes enviados</div></div>
+        <div class="dash-stat amber"><div class="ds-icon">⏳</div><div class="ds-val" id="rep-pendientes">0</div><div class="ds-lbl">Pendientes validación</div></div>
+        <div class="dash-stat"><div class="ds-icon">✅</div><div class="ds-val" id="rep-validados">0</div><div class="ds-lbl">Validados por RRHH</div></div>
+        <div class="dash-stat blue"><div class="ds-icon">🕐</div><div class="ds-val" id="rep-horas">0</div><div class="ds-lbl">Horas registradas</div></div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Fecha</th><th>Resumen del día</th><th>Logros</th><th>Dificultades</th><th>Horas</th><th>Estado</th></tr></thead>
+          <tbody id="tabla-reportes"></tbody>
+        </table>
+        <div id="reportes-empty" class="no-rows" style="display:none">No has enviado reportes aún.</div>
+      </div>
+    </div>
+
+    <!-- ══ SEC: SEGUIMIENTO ══ -->
+    <div class="section" id="sec-seguimiento">
+      <div class="page-header">
+        <div>
+          <div class="page-title">🔍 Seguimiento y Control</div>
+          <div class="page-subtitle">Supervisión de actividades, observaciones y reportes del equipo</div>
+        </div>
+        <button class="btn btn-primary" onclick="abrirModalNuevaAlerta()" style="background:#dc2626">🚨 Enviar Alerta</button>
+      </div>
+      <div class="tabs" id="seguimiento-tabs">
+        <button class="tab active" onclick="switchTab('seguimiento','actividades')">📋 Actividades</button>
+        <button class="tab" onclick="switchTab('seguimiento','reportes')">📝 Reportes Diarios</button>
+        <button class="tab" onclick="switchTab('seguimiento','observaciones')">🗒️ Observaciones</button>
+      </div>
+      <div class="tab-content active" id="tab-seguimiento-actividades">
+        <div class="search-bar" style="margin-bottom:16px">
+          <input type="search" class="search-input" placeholder="Buscar actividad…" id="seg-q" oninput="filterSeguimiento()"/>
+          <select class="filter-select" id="seg-estado" onchange="filterSeguimiento()">
+            <option value="">Todos los estados</option>
+            <option>Pendiente</option><option>En Proceso</option><option>Completada</option><option>Observada</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Trabajador</th><th>Actividad</th><th>Tipo</th><th>Fecha</th><th>Avance</th><th>Estado</th><th></th></tr></thead>
+            <tbody id="tabla-seg-actividades"></tbody>
+          </table>
+          <div id="seg-act-empty" class="no-rows" style="display:none">No hay actividades registradas.</div>
+        </div>
+      </div>
+      <div class="tab-content" id="tab-seguimiento-reportes">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Trabajador</th><th>Fecha</th><th>Resumen</th><th>Horas</th><th>Validado</th><th></th></tr></thead>
+            <tbody id="tabla-seg-reportes"></tbody>
+          </table>
+          <div id="seg-rep-empty" class="no-rows" style="display:none">No hay reportes del equipo.</div>
+        </div>
+      </div>
+      <div class="tab-content" id="tab-seguimiento-observaciones">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Actividad</th><th>Supervisor</th><th>Estado anterior</th><th>Estado nuevo</th><th>Observación</th><th>Avance</th><th>Fecha</th></tr></thead>
+            <tbody id="tabla-seg-obs"></tbody>
+          </table>
+          <div id="seg-obs-empty" class="no-rows" style="display:none">No hay observaciones registradas.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SEC: ALERTAS ══ -->
+    <div class="section" id="sec-alertas">
+      <div class="page-header">
+        <div>
+          <div class="page-title">🚨 Alertas del Sistema</div>
+          <div class="page-subtitle">Notificaciones, instrucciones y avisos institucionales</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          ${['RRHH','SUPERVISOR','DIRECTOR','PRESIDENTE'].includes('__ROL__')?`<button class="btn btn-primary" style="background:#dc2626" onclick="abrirModalNuevaAlerta()">🚨 Nueva Alerta</button>`:''}
+          <button class="btn btn-sm btn-secondary" onclick="loadAlertas()">↺ Actualizar</button>
+        </div>
+      </div>
+      <div class="dash-grid" style="margin-bottom:20px">
+        <div class="dash-stat red"><div class="ds-icon">🚨</div><div class="ds-val" id="alerta-urgentes">0</div><div class="ds-lbl">Urgentes</div></div>
+        <div class="dash-stat amber"><div class="ds-icon">👥</div><div class="ds-val" id="alerta-rrhh">0</div><div class="ds-lbl">De RRHH</div></div>
+        <div class="dash-stat blue"><div class="ds-icon">📋</div><div class="ds-val" id="alerta-actividad">0</div><div class="ds-lbl">De Actividades</div></div>
+        <div class="dash-stat"><div class="ds-icon">⚙️</div><div class="ds-val" id="alerta-sistema">0</div><div class="ds-lbl">Del Sistema</div></div>
+      </div>
+      <div id="lista-alertas"><p style="color:var(--muted);font-size:13px">Cargando alertas…</p></div>
+    </div>
+
   </div><!-- /content -->
 </div><!-- /main -->
 
@@ -565,6 +676,80 @@
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="cerrarModal('modal-nuevo-mensaje')">Cancelar</button>
       <button class="btn btn-primary" onclick="enviarNuevoMensaje()">✉️ Enviar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Reporte Diario -->
+<div class="modal-overlay" id="modal-reporte">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <div class="modal-title">📝 Reporte Diario</div>
+      <button class="modal-close" onclick="cerrarModal('modal-reporte')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group"><label>Fecha *</label><input type="date" id="rep-fecha" required/></div>
+        <div class="form-group"><label>Horas trabajadas *</label><input type="number" id="rep-horas-inp" min="1" max="24" step="0.5" placeholder="8"/></div>
+      </div>
+      <div class="form-group"><label>Resumen del día *</label><textarea id="rep-resumen" rows="3" placeholder="¿Qué hiciste hoy?"></textarea></div>
+      <div class="form-group"><label>Logros</label><textarea id="rep-logros" rows="2" placeholder="¿Qué lograste?"></textarea></div>
+      <div class="form-group"><label>Dificultades</label><textarea id="rep-dificultades" rows="2" placeholder="¿Tuviste algún obstáculo?"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="cerrarModal('modal-reporte')">Cancelar</button>
+      <button class="btn btn-primary" onclick="submitReporteDiario()">📨 Enviar Reporte</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Observación de Actividad -->
+<div class="modal-overlay" id="modal-obs-actividad">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title">🗒️ Agregar Observación</div>
+      <button class="modal-close" onclick="cerrarModal('modal-obs-actividad')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="obs-act-id"/>
+      <div class="form-group"><label>Estado anterior</label><input type="text" id="obs-est-anterior" readonly style="background:var(--bg)"/></div>
+      <div class="form-group"><label>Nuevo estado *</label>
+        <select id="obs-est-nuevo">
+          <option>Pendiente</option><option>En Proceso</option><option>Completada</option><option>Observada</option><option>Suspendida</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Porcentaje de avance (0–100)</label><input type="number" id="obs-avance" min="0" max="100" step="5" placeholder="0"/></div>
+      <div class="form-group"><label>Observación *</label><textarea id="obs-texto" rows="3" placeholder="Escribe tu observación…"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="cerrarModal('modal-obs-actividad')">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarObservacion()">💾 Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Nueva Alerta -->
+<div class="modal-overlay" id="modal-nueva-alerta">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title">🚨 Enviar Alerta</div>
+      <button class="modal-close" onclick="cerrarModal('modal-nueva-alerta')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group"><label>Destinatario *</label><select id="alerta-para"></select></div>
+      <div class="form-group"><label>Tipo *</label>
+        <select id="alerta-tipo">
+          <option value="rrhh">👥 RRHH</option>
+          <option value="actividad">📋 Actividad</option>
+          <option value="urgente">🚨 Urgente</option>
+          <option value="sistema">⚙️ Sistema</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Mensaje *</label><textarea id="alerta-msg" rows="3" placeholder="Escribe el mensaje de la alerta…"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="cerrarModal('modal-nueva-alerta')">Cancelar</button>
+      <button class="btn btn-primary" onclick="enviarAlerta()">📨 Enviar</button>
     </div>
   </div>
 </div>
@@ -922,6 +1107,9 @@ const MENU_ALL = [
   { id:'evaluaciones', icon:'📊', label:'Evaluaciones', roles:['RRHH','DIRECTOR','PRESIDENTE'] },
   { id:'comunicaciones', icon:'📢', label:'Comunicaciones' },
   { id:'mensajes', icon:'💬', label:'Mensajes', badge:'msg-badge' },
+  { id:'reporte', icon:'📝', label:'Reporte Diario' },
+  { id:'alertas', icon:'🚨', label:'Alertas', badge:'alertas-badge' },
+  { id:'seguimiento', icon:'🔍', label:'Seguimiento', roles:['RRHH','SUPERVISOR','DIRECTOR','PRESIDENTE','COORDINADOR'] },
   { id:'indicadores', icon:'📈', label:'Indicadores', roles:['COORDINADOR','DIRECTOR','RRHH','PRESIDENTE','TECNOLOGIA'] },
   { id:'presidencia', icon:'🏛️', label:'Presidencia', roles:['PRESIDENTE','DIRECTOR'] },
   { section:'Sistema' },
@@ -967,6 +1155,9 @@ window.sigaNav = function(id) {
   if (id === 'asistencia')     loadAsistencia();
   if (id === 'evaluaciones')   loadEvaluaciones();
   if (id === 'mensajes')       loadMensajes();
+  if (id === 'reporte')        loadReporteDiario();
+  if (id === 'seguimiento')    loadSeguimiento();
+  if (id === 'alertas')        loadAlertas();
 };
 
 /* ─── Tabs ─── */
@@ -978,6 +1169,9 @@ window.switchTab = function(prefix, id) {
   if (tc) tc.classList.add('active');
   if (prefix==='rrhh' && id==='personal')  loadPersonal();
   if (prefix==='rrhh' && id==='registros') loadRegistrosPendientes();
+  if (prefix==='rrhh' && id==='reportes')  loadReportesRRHH();
+  if (prefix==='seguimiento' && id==='reportes')     loadSegReportes();
+  if (prefix==='seguimiento' && id==='observaciones') loadSegObservaciones();
   if (prefix==='rrhh' && id==='solicitudes') loadSolicitudesRRHH();
   if (prefix==='rrhh' && id==='comunicados') loadComunicadosRRHH();
   if (prefix==='rrhh' && id==='capacitaciones') loadCapacitaciones();
@@ -1145,6 +1339,9 @@ async function loadDashboard() {
 /* ─── Quick Actions por rol ─── */
 function buildQuickActions() {
   const all = [
+    { icon:'📝', label:'Reporte Diario', sub:'Informe del día', color:'#f0fdf4', fn:`sigaNav('reporte');setTimeout(abrirModalReporte,100)`, roles:['TRABAJADOR','SUPERVISOR','COORDINADOR','DIRECTOR','RRHH','TECNOLOGIA','PRESIDENTE'] },
+    { icon:'🔍', label:'Seguimiento', sub:'Control del equipo', color:'#e0f2fe', fn:`sigaNav('seguimiento')`, roles:['RRHH','SUPERVISOR','DIRECTOR','PRESIDENTE','COORDINADOR'] },
+    { icon:'🚨', label:'Enviar Alerta', sub:'Notificar al equipo', color:'#fee2e2', fn:`abrirModalNuevaAlerta()`, roles:['RRHH','SUPERVISOR','DIRECTOR','PRESIDENTE'] },
     { icon:'📋', label:'Registrar Actividad', sub:'Control diario', color:'#dcfce7', fn:`abrirModalActividad()`, roles:['TRABAJADOR','SUPERVISOR','COORDINADOR','DIRECTOR','RRHH','TECNOLOGIA','PRESIDENTE'] },
     { icon:'📬', label:'Nueva Solicitud', sub:'Vacaciones, permisos…', color:'#dbeafe', fn:`sigaNav('mi-solicitud');abrirModalSolicitud()`, roles:['TRABAJADOR','SUPERVISOR','COORDINADOR','DIRECTOR','RRHH'] },
     { icon:'📅', label:'Planificación Semanal', sub:'Registrar objetivos', color:'#fef3c7', fn:`sigaNav('planificacion')`, roles:['TRABAJADOR','SUPERVISOR','COORDINADOR','DIRECTOR'] },
@@ -2466,6 +2663,317 @@ function estadoBadge(estado) {
 }
 
 window.addEventListener('sigap:session-expired', () => { SIGA.toast('Sesión expirada. Redirigiendo…','warning'); setTimeout(()=>SIGA.logout(),1500); });
+
+/* ═══════════════════════════════════════════════════════
+   REPORTE DIARIO
+══════════════════════════════════════════════════════ */
+let _misReportes = [];
+async function loadReporteDiario() {
+  const U = SIGA.getUser();
+  const tbody = document.getElementById('tabla-reportes');
+  const empty = document.getElementById('reportes-empty');
+  if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="6" class="no-rows">Cargando…</td></tr>';
+  const items = await SIGA.list('reportes_diarios', `user_id="${U.id}"`, 100, 1, '-fecha').catch(()=>[]);
+  _misReportes = items;
+  const total    = items.length;
+  const validados = items.filter(r => r.validado_rrhh).length;
+  const horas    = items.reduce((s,r) => s + (parseFloat(r.horas_trabajadas)||0), 0);
+  setText('rep-total',     total);
+  setText('rep-pendientes', total - validados);
+  setText('rep-validados',  validados);
+  setText('rep-horas',      horas.toFixed(1));
+  if (!items.length) { tbody.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display = 'none';
+  tbody.innerHTML = items.map(r => `<tr>
+    <td>${fmt(r.fecha)}</td>
+    <td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(r.resumen_dia||'—')}</td>
+    <td style="max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(r.logros||'—')}</td>
+    <td style="max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(r.dificultades||'—')}</td>
+    <td>${r.horas_trabajadas||'—'}h</td>
+    <td><span class="badge ${r.validado_rrhh?'badge-green':'badge-warn'}">${r.validado_rrhh?'✅ Validado':'⏳ Pendiente'}</span></td>
+  </tr>`).join('');
+}
+
+function abrirModalReporte() {
+  document.getElementById('rep-fecha').value = new Date().toISOString().substring(0,10);
+  document.getElementById('rep-horas-inp').value = '';
+  document.getElementById('rep-resumen').value = '';
+  document.getElementById('rep-logros').value = '';
+  document.getElementById('rep-dificultades').value = '';
+  document.getElementById('modal-reporte').classList.add('active');
+}
+
+async function submitReporteDiario() {
+  const U        = SIGA.getUser();
+  const fecha    = document.getElementById('rep-fecha').value;
+  const horas    = parseFloat(document.getElementById('rep-horas-inp').value)||0;
+  const resumen  = document.getElementById('rep-resumen').value.trim();
+  const logros   = document.getElementById('rep-logros').value.trim();
+  const dificult = document.getElementById('rep-dificultades').value.trim();
+  if (!fecha || !resumen || !horas) { SIGA.toast('Completa los campos obligatorios.','error'); return; }
+  try {
+    await SIGA.create('reportes_diarios', {
+      user_id: U.id, fecha, horas_trabajadas: horas,
+      resumen_dia: resumen, logros, dificultades: dificult, validado_rrhh: false
+    });
+    cerrarModal('modal-reporte');
+    SIGA.toast('Reporte enviado correctamente.');
+    loadReporteDiario();
+  } catch(e) { SIGA.toast('Error: '+e.message,'error'); }
+}
+
+/* ═══════════════════════════════════════════════════════
+   REPORTES DIARIOS — vista RRHH
+══════════════════════════════════════════════════════ */
+async function loadReportesRRHH() {
+  const tbody = document.getElementById('tabla-reportes-rrhh');
+  const empty = document.getElementById('reportes-rrhh-empty');
+  if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="6" class="no-rows">Cargando…</td></tr>';
+  const items = await SIGA.list('reportes_diarios','',200,1,'-fecha','user_id').catch(()=>[]);
+  const noVal = items.filter(r=>!r.validado_rrhh).length;
+  const badge = document.getElementById('badge-reportes-rrhh');
+  if (badge) { badge.textContent=noVal; badge.style.display=noVal>0?'inline':'none'; }
+  if (!items.length) { tbody.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+  tbody.innerHTML = items.map(r => {
+    const w = r.expand?.user_id || {};
+    const nombre = `${esc(w.nombres||'')} ${esc(w.apellidos||'')}`.trim() || esc(r.user_id||'—');
+    return `<tr>
+      <td>${nombre}</td>
+      <td>${fmt(r.fecha)}</td>
+      <td style="max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(r.resumen_dia||'—')}</td>
+      <td>${r.horas_trabajadas||'—'}h</td>
+      <td><span class="badge ${r.validado_rrhh?'badge-green':'badge-warn'}">${r.validado_rrhh?'✅ Validado':'⏳ Pendiente'}</span></td>
+      <td class="td-actions">${!r.validado_rrhh?`<button class="btn btn-sm btn-primary" onclick="validarReporte('${esc(r.id)}')">✅ Validar</button>`:''}</td>
+    </tr>`;
+  }).join('');
+}
+
+async function validarReporte(id) {
+  const U = SIGA.getUser();
+  try {
+    await SIGA.update('reportes_diarios', id, { validado_rrhh: true, validado_por: U.id });
+    SIGA.toast('Reporte validado.');
+    loadReportesRRHH();
+  } catch(e) { SIGA.toast('Error: '+e.message,'error'); }
+}
+
+/* ═══════════════════════════════════════════════════════
+   SEGUIMIENTO (Supervisor / RRHH)
+══════════════════════════════════════════════════════ */
+let _segActividades = [];
+async function loadSeguimiento() {
+  await loadSegActividades();
+}
+
+async function loadSegActividades() {
+  const tbody = document.getElementById('tabla-seg-actividades');
+  const empty = document.getElementById('seg-act-empty');
+  if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="7" class="no-rows">Cargando…</td></tr>';
+  const items = await SIGA.list('actividades','',500,1,'-fecha','trabajador').catch(()=>[]);
+  _segActividades = items;
+  renderSegActividades(items);
+}
+
+function renderSegActividades(items) {
+  const q   = (document.getElementById('seg-q')?.value||'').toLowerCase();
+  const est = document.getElementById('seg-estado')?.value||'';
+  const tbody = document.getElementById('tabla-seg-actividades');
+  const empty = document.getElementById('seg-act-empty');
+  const filt = items.filter(a => {
+    if (q && !`${a.titulo||''} ${a.descripcion||''}`.toLowerCase().includes(q)) return false;
+    if (est && a.estado !== est) return false;
+    return true;
+  });
+  if (!filt.length) { tbody.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+  const estadoClass = { Pendiente:'badge-warn','En Proceso':'badge-blue',Completada:'badge-green',
+    Observada:'badge-amber',Suspendida:'badge-red' };
+  tbody.innerHTML = filt.map(a => {
+    const w = a.expand?.trabajador || {};
+    const nombre = `${esc(w.nombres||'')} ${esc(w.apellidos||'')}`.trim() || esc(a.trabajador||'—');
+    const avance = parseInt(a.porcentaje_cumplimiento||0);
+    return `<tr>
+      <td>${nombre}</td>
+      <td><div style="font-weight:500;font-size:13px">${esc(a.titulo||'Sin título')}</div>
+          <div style="font-size:11px;color:var(--muted)">${esc((a.descripcion||'').substring(0,60))}${(a.descripcion||'').length>60?'…':''}</div></td>
+      <td>${esc(a.tipo||'—')}</td>
+      <td>${fmt(a.fecha)}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:6px">
+          <div style="flex:1;background:var(--border);border-radius:999px;height:5px;min-width:60px">
+            <div style="background:${avance>=100?'#16a34a':avance>50?'#2563eb':'#f59e0b'};width:${avance}%;height:5px;border-radius:999px"></div>
+          </div>
+          <span style="font-size:11px;font-weight:600;min-width:28px">${avance}%</span>
+        </div>
+      </td>
+      <td><span class="badge ${estadoClass[a.estado]||'badge-gray'}">${esc(a.estado||'—')}</span></td>
+      <td class="td-actions"><button class="btn-icon" title="Observación" onclick="abrirObservacion('${esc(a.id)}','${esc(a.estado||'')}')">🗒️</button></td>
+    </tr>`;
+  }).join('');
+}
+window.filterSeguimiento = () => renderSegActividades(_segActividades);
+
+async function loadSegReportes() {
+  const tbody = document.getElementById('tabla-seg-reportes');
+  const empty = document.getElementById('seg-rep-empty');
+  if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="6" class="no-rows">Cargando…</td></tr>';
+  const items = await SIGA.list('reportes_diarios','',200,1,'-fecha','user_id').catch(()=>[]);
+  if (!items.length) { tbody.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+  tbody.innerHTML = items.map(r => {
+    const w = r.expand?.user_id || {};
+    const nombre = `${esc(w.nombres||'')} ${esc(w.apellidos||'')}`.trim() || esc(r.user_id||'—');
+    return `<tr>
+      <td>${nombre}</td>
+      <td>${fmt(r.fecha)}</td>
+      <td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(r.resumen_dia||'—')}</td>
+      <td>${r.horas_trabajadas||'—'}h</td>
+      <td><span class="badge ${r.validado_rrhh?'badge-green':'badge-warn'}">${r.validado_rrhh?'✅ Sí':'⏳ No'}</span></td>
+      <td>${!r.validado_rrhh?`<button class="btn btn-sm btn-primary" onclick="validarReporte('${esc(r.id)}')">✅ Validar</button>`:''}</td>
+    </tr>`;
+  }).join('');
+}
+
+async function loadSegObservaciones() {
+  const tbody = document.getElementById('tabla-seg-obs');
+  const empty = document.getElementById('seg-obs-empty');
+  if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="7" class="no-rows">Cargando…</td></tr>';
+  const items = await SIGA.list('seguimiento_actividades','',200,1,'-fecha','actividad_id,supervisor_id').catch(()=>[]);
+  if (!items.length) { tbody.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+  tbody.innerHTML = items.map(s => {
+    const act = s.expand?.actividad_id || {};
+    const sup = s.expand?.supervisor_id || {};
+    return `<tr>
+      <td>${esc(act.titulo||s.actividad_id||'—')}</td>
+      <td>${esc(`${sup.nombres||''} ${sup.apellidos||''}`.trim()||s.supervisor_id||'—')}</td>
+      <td><span class="badge badge-gray">${esc(s.estado_anterior||'—')}</span></td>
+      <td><span class="badge badge-blue">${esc(s.estado_nuevo||'—')}</span></td>
+      <td style="max-width:200px">${esc(s.observacion||'—')}</td>
+      <td>${s.porcentaje_avance!=null?s.porcentaje_avance+'%':'—'}</td>
+      <td>${fmt(s.fecha)}</td>
+    </tr>`;
+  }).join('');
+}
+
+function abrirObservacion(actId, estadoActual) {
+  document.getElementById('obs-act-id').value = actId;
+  document.getElementById('obs-est-anterior').value = estadoActual;
+  document.getElementById('obs-est-nuevo').value = estadoActual;
+  document.getElementById('obs-avance').value = '';
+  document.getElementById('obs-texto').value = '';
+  document.getElementById('modal-obs-actividad').classList.add('active');
+}
+
+async function guardarObservacion() {
+  const U        = SIGA.getUser();
+  const actId    = document.getElementById('obs-act-id').value;
+  const estAntes = document.getElementById('obs-est-anterior').value;
+  const estNuevo = document.getElementById('obs-est-nuevo').value;
+  const avance   = parseInt(document.getElementById('obs-avance').value)||0;
+  const texto    = document.getElementById('obs-texto').value.trim();
+  if (!texto) { SIGA.toast('Escribe una observación.','error'); return; }
+  try {
+    await SIGA.create('seguimiento_actividades', {
+      actividad_id: actId, supervisor_id: U.id,
+      estado_anterior: estAntes, estado_nuevo: estNuevo,
+      observacion: texto, porcentaje_avance: avance,
+      fecha: new Date().toISOString().substring(0,10)
+    });
+    if (estNuevo !== estAntes) {
+      await SIGA.update('actividades', actId, { estado: estNuevo, porcentaje_cumplimiento: avance });
+    }
+    cerrarModal('modal-obs-actividad');
+    SIGA.toast('Observación registrada.');
+    loadSegActividades();
+  } catch(e) { SIGA.toast('Error: '+e.message,'error'); }
+}
+
+/* ═══════════════════════════════════════════════════════
+   ALERTAS DEL SISTEMA
+══════════════════════════════════════════════════════ */
+async function loadAlertas() {
+  const U = SIGA.getUser();
+  const lista = document.getElementById('lista-alertas');
+  if (!lista) return;
+  lista.innerHTML = '<p style="color:var(--muted);font-size:13px">Cargando…</p>';
+  const filtro = ['RRHH','TECNOLOGIA','DIRECTOR','PRESIDENTE'].includes(ROL) ? '' : `user_id="${U.id}"`;
+  const items = await SIGA.list('alertas_sistema', filtro, 100, 1, '-fecha').catch(()=>[]);
+  setText('alerta-urgentes', items.filter(a=>a.tipo==='urgente').length);
+  setText('alerta-rrhh',     items.filter(a=>a.tipo==='rrhh').length);
+  setText('alerta-actividad',items.filter(a=>a.tipo==='actividad').length);
+  setText('alerta-sistema',  items.filter(a=>a.tipo==='sistema').length);
+  actualizarAlertasBadge(items);
+  if (!items.length) { lista.innerHTML='<p style="color:var(--muted);text-align:center;padding:30px;font-size:13px">No tienes alertas.</p>'; return; }
+  const iconos = { urgente:'🚨', rrhh:'👥', actividad:'📋', sistema:'⚙️' };
+  const clases = { urgente:'badge-red', rrhh:'badge-amber', actividad:'badge-blue', sistema:'badge-gray' };
+  lista.innerHTML = items.map(a => `
+    <div style="background:${a.visto?'var(--surface)':'#fffbeb'};border:1px solid ${a.visto?'var(--border)':'#fde68a'};border-radius:12px;padding:14px 16px;display:flex;align-items:flex-start;gap:12px${a.visto?';opacity:.75':''}">
+      <div style="font-size:22px;flex-shrink:0">${iconos[a.tipo]||'🔔'}</div>
+      <div style="flex:1">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap">
+          <span class="badge ${clases[a.tipo]||'badge-gray'}">${esc(a.tipo||'sistema')}</span>
+          <span style="font-size:11px;color:var(--muted)">${fmt(a.fecha)}</span>
+          ${!a.visto?'<span style="background:#dc2626;color:#fff;font-size:10px;padding:1px 6px;border-radius:999px;font-weight:700">NUEVA</span>':''}
+        </div>
+        <div style="font-size:14px;color:var(--text)">${esc(a.mensaje||'—')}</div>
+      </div>
+      ${!a.visto?`<button class="btn btn-sm btn-secondary" style="flex-shrink:0" onclick="marcarAlertaVista('${esc(a.id)}')">✓ Leída</button>`:''}
+    </div>`).join('');
+}
+
+async function marcarAlertaVista(id) {
+  try { await SIGA.update('alertas_sistema', id, { visto: true }); loadAlertas(); } catch(_) {}
+}
+
+function actualizarAlertasBadge(items) {
+  const badge = document.getElementById('alertas-badge');
+  if (!badge) return;
+  const count = items ? items.filter(a=>!a.visto).length : 0;
+  if (count > 0) { badge.textContent = count; badge.style.display = 'inline'; }
+  else badge.style.display = 'none';
+}
+
+async function pollAlertasBadge() {
+  const U = SIGA.getUser();
+  if (!U.id) return;
+  const items = await SIGA.list('alertas_sistema', `user_id="${U.id}"`, 50, 1, '-fecha').catch(()=>[]);
+  actualizarAlertasBadge(items);
+}
+
+function abrirModalNuevaAlerta() {
+  const sel = document.getElementById('alerta-para');
+  SIGA.list('trabajadores','',200).then(ts => {
+    sel.innerHTML = ts.map(t => `<option value="${esc(t.id)}">${esc(t.nombres||'')} ${esc(t.apellidos||'')} (${esc(t.rol||'TRABAJADOR')})</option>`).join('');
+  }).catch(()=>{});
+  document.getElementById('alerta-msg').value='';
+  document.getElementById('modal-nueva-alerta').classList.add('active');
+}
+
+async function enviarAlerta() {
+  const para = document.getElementById('alerta-para').value;
+  const tipo = document.getElementById('alerta-tipo').value;
+  const msg  = document.getElementById('alerta-msg').value.trim();
+  if (!para || !msg) { SIGA.toast('Completa todos los campos.','error'); return; }
+  try {
+    await SIGA.create('alertas_sistema', {
+      tipo, mensaje: msg, user_id: para, visto: false,
+      fecha: new Date().toISOString().substring(0,10)
+    });
+    cerrarModal('modal-nueva-alerta');
+    SIGA.toast('Alerta enviada.');
+  } catch(e) { SIGA.toast('Error: '+e.message,'error'); }
+}
+
+/* ── Arrancar polling de alertas ── */
+setTimeout(pollAlertasBadge, 3000);
+setInterval(pollAlertasBadge, 60000);
 </script>
 </body>
 </html>
