@@ -119,6 +119,7 @@ button{cursor:pointer;font-family:inherit}
 .badge-green{background:#dcfce7;color:#15803d}
 .badge-red{background:#fee2e2;color:#dc2626}
 .badge-amber{background:#fef3c7;color:#b45309}
+.badge-warn{background:#fef3c7;color:#92400e;border:1px solid #fde68a}
 .badge-blue{background:#dbeafe;color:#1d4ed8}
 .badge-gray{background:#f1f5f9;color:#475569}
 .badge-purple{background:#f3e8ff;color:#7e22ce}

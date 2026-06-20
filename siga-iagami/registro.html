@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <meta name="pb-url" content="https://api.iagami.online"/>
+  <meta name="robots" content="noindex,nofollow"/>
+  <title>SIGA-IAGAMI — Registro de Trabajador</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet"/>
+  <script src="../cms/config.js"></script>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Inter',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:30px 16px;
+      background:linear-gradient(135deg,#0d2d1a 0%,#1d6b3e 60%,#2d8a55 100%)}
+    .reg-card{background:#fff;border-radius:18px;padding:36px 32px;box-shadow:0 20px 60px rgba(0,0,0,.3);width:100%;max-width:500px}
+    .reg-logo{display:flex;align-items:center;gap:12px;margin-bottom:24px;justify-content:center}
+    .reg-logo-icon{width:46px;height:46px;background:linear-gradient(135deg,#0d2d1a,#1d6b3e);border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:20px}
+    .reg-logo-text{font-family:'Poppins',sans-serif;font-size:18px;font-weight:700;color:#0d2d1a}
+    .reg-logo-sub{font-size:11px;color:#4a8a6a;letter-spacing:.04em}
+    h1{font-family:'Poppins',sans-serif;font-size:20px;font-weight:700;color:#1a3d2b;text-align:center;margin-bottom:5px}
+    .reg-desc{font-size:13px;color:#4a8a6a;text-align:center;margin-bottom:24px;line-height:1.5}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    @media(max-width:480px){.form-row{grid-template-columns:1fr}}
+    .fg{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
+    .fg label{font-size:12px;font-weight:600;color:#4a8a6a;text-transform:uppercase;letter-spacing:.05em}
+    .fg input,.fg select{padding:11px 14px;border:1.5px solid #d4edd8;border-radius:10px;font-size:14px;
+      font-family:'Inter',sans-serif;outline:none;transition:border-color .15s;color:#1a3d2b;background:#fff}
+    .fg input:focus,.fg select:focus{border-color:#1d6b3e;box-shadow:0 0 0 3px rgba(29,107,62,.08)}
+    .btn-reg{width:100%;padding:13px;background:#1d6b3e;color:#fff;border:none;
+      border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;transition:background .15s;margin-top:4px;
+      font-family:'Inter',sans-serif;display:flex;align-items:center;justify-content:center;gap:8px}
+    .btn-reg:hover{background:#165730}
+    .btn-reg:disabled{opacity:.6;cursor:not-allowed}
+    .msg{margin-top:14px;padding:12px 14px;border-radius:8px;font-size:13px;text-align:center;display:none}
+    .msg.err{background:#fee2e2;color:#dc2626;display:block}
+    .msg.ok{background:#dcfce7;color:#166534;display:block}
+    .reg-footer{text-align:center;margin-top:16px;font-size:13px;color:#4a8a6a}
+    .reg-footer a{color:#1d6b3e;font-weight:600;text-decoration:none}
+    .reg-footer a:hover{text-decoration:underline}
+    .page-footer{text-align:center;margin-top:24px;font-size:11px;color:rgba(255,255,255,.5)}
+    .spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .req{color:#dc2626;margin-left:2px}
+    .pass-hint{font-size:11px;color:#6b9e80;margin-top:3px}
+    .divider{border:none;border-top:1px solid #e8f5ec;margin:18px 0}
+    .pending-box{background:#fefce8;border:1px solid #fde68a;border-radius:10px;padding:16px;text-align:center;display:none}
+    .pending-box h3{color:#92400e;font-size:15px;font-weight:600;margin-bottom:6px}
+    .pending-box p{color:#78350f;font-size:13px;line-height:1.5}
+  </style>
+</head>
+<body>
+<div class="reg-card">
+  <div class="reg-logo">
+    <div class="reg-logo-icon">🌿</div>
+    <div>
+      <div class="reg-logo-text">SIGA-IAGAMI</div>
+      <div class="reg-logo-sub">Sistema Integral de Gestión</div>
+    </div>
+  </div>
+  <h1>Solicitar Acceso</h1>
+  <p class="reg-desc">Completa el formulario para registrarte como trabajador.<br>Tu cuenta será activada por Recursos Humanos.</p>
+
+  <!-- Formulario de registro -->
+  <form id="reg-form" onsubmit="doRegistro(event)" style="display:block">
+    <div class="form-row">
+      <div class="fg">
+        <label>Nombre(s)<span class="req">*</span></label>
+        <input type="text" id="r-nombres" placeholder="Juan Carlos" required autocomplete="given-name"/>
+      </div>
+      <div class="fg">
+        <label>Apellido(s)<span class="req">*</span></label>
+        <input type="text" id="r-apellidos" placeholder="González" required autocomplete="family-name"/>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="fg">
+        <label>Cédula<span class="req">*</span></label>
+        <input type="text" id="r-cedula" placeholder="V-12345678" required/>
+      </div>
+      <div class="fg">
+        <label>Teléfono</label>
+        <input type="tel" id="r-telefono" placeholder="0414-1234567" autocomplete="tel"/>
+      </div>
+    </div>
+    <div class="fg">
+      <label>Correo Institucional<span class="req">*</span></label>
+      <input type="email" id="r-email" placeholder="usuario@iagami.gob.ve" required autocomplete="username"/>
+    </div>
+    <div class="fg">
+      <label>Cargo / Función</label>
+      <input type="text" id="r-cargo" placeholder="Ej: Analista de Sistemas"/>
+    </div>
+    <div class="form-row">
+      <div class="fg">
+        <label>Contraseña<span class="req">*</span></label>
+        <input type="password" id="r-pass" placeholder="••••••••" required minlength="8" autocomplete="new-password"/>
+        <div class="pass-hint">Mínimo 8 caracteres</div>
+      </div>
+      <div class="fg">
+        <label>Confirmar contraseña<span class="req">*</span></label>
+        <input type="password" id="r-pass2" placeholder="••••••••" required minlength="8" autocomplete="new-password"/>
+      </div>
+    </div>
+    <button type="submit" class="btn-reg" id="btn-reg">
+      <span id="btn-reg-lbl">Enviar Solicitud de Registro</span>
+    </button>
+    <div class="msg" id="reg-msg"></div>
+  </form>
+
+  <!-- Pantalla de éxito -->
+  <div class="pending-box" id="pending-ok">
+    <h3>✅ Solicitud enviada</h3>
+    <p>Tu solicitud de registro fue recibida.<br>
+    Recursos Humanos revisará tu información y activará tu cuenta en breve.<br>
+    Recibirás acceso cuando sea aprobada.</p>
+  </div>
+
+  <hr class="divider"/>
+  <div class="reg-footer">¿Ya tienes cuenta? <a href="login.html">Iniciar sesión</a></div>
+  <div class="reg-footer" style="margin-top:8px"><a href="../index.html">← Volver al Portal Ciudadano</a></div>
+</div>
+<div class="page-footer">IAGAMI · Sistema Interno · Acceso restringido al personal autorizado</div>
+
+<script>
+  const PB_URL = (() => {
+    if (window.__SIGACFG_URL) return window.__SIGACFG_URL;
+    const m = document.querySelector('meta[name="pb-url"]');
+    return m?.content?.trim() || 'http://127.0.0.1:8090';
+  })();
+
+  async function doRegistro(ev) {
+    ev.preventDefault();
+    const nombres   = document.getElementById('r-nombres').value.trim();
+    const apellidos = document.getElementById('r-apellidos').value.trim();
+    const cedula    = document.getElementById('r-cedula').value.trim();
+    const telefono  = document.getElementById('r-telefono').value.trim();
+    const email     = document.getElementById('r-email').value.trim();
+    const cargo     = document.getElementById('r-cargo').value.trim();
+    const pass      = document.getElementById('r-pass').value;
+    const pass2     = document.getElementById('r-pass2').value;
+    const msg       = document.getElementById('reg-msg');
+    const btn       = document.getElementById('btn-reg');
+    const lbl       = document.getElementById('btn-reg-lbl');
+
+    msg.className = 'msg';
+    msg.style.display = 'none';
+
+    if (pass !== pass2) {
+      showErr('Las contraseñas no coinciden.'); return;
+    }
+    if (pass.length < 8) {
+      showErr('La contraseña debe tener al menos 8 caracteres.'); return;
+    }
+
+    btn.disabled = true;
+    lbl.innerHTML = '<div class="spinner"></div>';
+
+    try {
+      const res = await fetch(`${PB_URL}/api/collections/trabajadores/records`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': '1' },
+        body: JSON.stringify({
+          email,
+          password: pass,
+          passwordConfirm: pass2,
+          nombres,
+          apellidos,
+          cedula,
+          telefono,
+          cargo: cargo || '',
+          rol: 'TRABAJADOR',
+          estado_cuenta: 'pendiente'
+        })
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        const detail = err?.data?.email?.message || err?.data?.cedula?.message || err.message || `Error ${res.status}`;
+        showErr(detail);
+        return;
+      }
+
+      // Éxito: ocultar formulario y mostrar pantalla pendiente
+      document.getElementById('reg-form').style.display = 'none';
+      document.getElementById('pending-ok').style.display = 'block';
+
+    } catch(e) {
+      showErr(`Error de conexión: ${e.message}`);
+    } finally {
+      btn.disabled = false;
+      lbl.textContent = 'Enviar Solicitud de Registro';
+    }
+  }
+
+  function showErr(text) {
+    const msg = document.getElementById('reg-msg');
+    msg.textContent = text;
+    msg.className = 'msg err';
+  }
+</script>
+</body>
+</html>
