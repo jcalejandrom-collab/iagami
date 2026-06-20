@@ -59,6 +59,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 /* ===== CARDS GRID ===== */
 .cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:16px}
 .cc-card{background:#fff;border:1px solid #d4edd8;border-radius:13px;overflow:hidden;cursor:pointer;transition:.2s}
+.cc-card--public{cursor:default}
 .cc-card:hover{border-color:#1d6b3e;box-shadow:0 6px 24px rgba(29,107,62,.12);transform:translateY(-2px)}
 .cc-top{background:linear-gradient(135deg,#1d6b3e,#2d9a5f);padding:16px;color:#fff;position:relative}
 .cc-type-badge{font-size:9px;font-weight:700;background:rgba(255,255,255,.2);border-radius:20px;padding:2px 9px;display:inline-block;margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em}
@@ -286,7 +287,7 @@ footer{background:#0a1f0e;color:rgba(255,255,255,.6);text-align:center;padding:2
 <!-- MAIN CONTENT -->
 <div class="content">
   <div class="toolbar">
-    <input type="text" id="q" placeholder="Buscar por nombre, parroquia, sector o RIF..." oninput="applyFilters()"/>
+    <input type="text" id="q" placeholder="Buscar por nombre o parroquia..." oninput="applyFilters()"/>
     <div class="filter-tabs">
       <button class="ftab active" data-filter="todos" onclick="setTypeFilter('todos',this)">Todos</button>
       <button class="ftab" data-filter="comuna" onclick="setTypeFilter('comuna',this)">Comunas</button>
@@ -857,7 +858,7 @@ function getFiltered(){
   if(typeFilter==='comuna') data=data.filter(c=>c._tipo==='comuna');
   if(typeFilter==='consejo') data=data.filter(c=>c._tipo==='consejo');
   return data.filter(c=>{
-    const mQ=!q||[c.nombre,c.rif,c.parroquia,c.sector,c.responsable].some(v=>(v||'').toLowerCase().includes(q));
+    const mQ=!q||[c.nombre,c.parroquia].some(v=>(v||'').toLowerCase().includes(q));
     const mP=!par||c.parroquia===par;
     return mQ&&mP;
   });
@@ -874,21 +875,17 @@ function render(){
   if(!slice.length){
     cards.innerHTML='<div class="empty" style="grid-column:1/-1"><div class="empty-ico">🌿</div><p>No se encontraron organizaciones con esos filtros.</p></div>';
   }else{
+    // Vista pública mínima: solo nombre, tipo y parroquia. Sin datos sensibles
+    // (RIF, responsable, cédula, teléfono, correo, dirección, sector, comunidad).
     cards.innerHTML=slice.map(c=>`
-      <div class="cc-card" onclick="openDetail('${esc(c.id||'')}','${esc(c._tipo)}')">
+      <div class="cc-card cc-card--public">
         <div class="cc-top">
           <div class="cc-type-badge">${c._tipo==='comuna'?'Comuna':'Consejo Comunal'}</div>
           <div class="cc-nombre">${esc(c.nombre)}</div>
-          <div class="cc-rif">${esc(c.rif||'—')}</div>
-          <div class="cc-parroquia">📍 ${esc(c.parroquia||'—')} · ${esc(c.sector||'')}</div>
+          <div class="cc-parroquia">📍 ${esc(c.parroquia||'—')}</div>
           <div class="estatus-dot dot-${(c.estatus||'activo').toLowerCase()==='activo'?'activo':'inactivo'}"></div>
         </div>
-        <div class="cc-body">
-          <div class="cc-row"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>${esc(c.responsable||'—')}</div>
-          ${c.telefono?`<div class="cc-row"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13.5 19.79 19.79 0 0 1 1.61 4.94 2 2 0 0 1 3.59 2.72h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.29 6.29l1.28-1.28a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>${esc(c.telefono)}</div>`:''}
-        </div>
         <div class="cc-footer">
-          <span style="font-size:11px;color:#4a8a6a">${esc(c.comunidad||'')}</span>
           <span class="badge-est est-${(c.estatus||'activo').toLowerCase()==='activo'?'activo':'inactivo'}">${esc(c.estatus||'Activo')}</span>
         </div>
       </div>`).join('');
