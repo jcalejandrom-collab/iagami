@@ -1643,7 +1643,7 @@ async function renderHomeNoticias() {
   const PB = (window.__IAGAMI_CONFIG__ && window.__IAGAMI_CONFIG__.PB_URL) || 'http://127.0.0.1:8090';
   const _noticias = await CMSDB.getAll('noticias');
   const noticias = (Array.isArray(_noticias) ? _noticias : [])
-    .filter(n => n.publicado !== false && n.estado !== 'borrador')
+    .filter(n => n.publicado === true)
     .sort((a, b) => (b.fecha || '').localeCompare(a.fecha || ''))
     .slice(0, 40);
   if (!noticias.length) {
@@ -1681,7 +1681,7 @@ async function renderHomeProyectos() {
   const PB = (window.__IAGAMI_CONFIG__ && window.__IAGAMI_CONFIG__.PB_URL) || 'http://127.0.0.1:8090';
   const _proy = await CMSDB.getAll('proyectos');
   const proyectos = (Array.isArray(_proy) ? _proy : [])
-    .filter(p => p.publicado !== false)
+    .filter(p => p.publicado === true)
     .slice(0, 15);
   if (!proyectos.length) {
     grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="ico">🌳</div>No hay proyectos registrados aún. Agrega proyectos desde el panel de administración.</div>';
@@ -1715,7 +1715,7 @@ async function renderHomeAgenda() {
   const today = new Date().toLocaleDateString('sv-SE');
   const _eventos = await CMSDB.getAll('eventos');
   const todos = Array.isArray(_eventos) ? _eventos : [];
-  const futuros = todos.filter(e => e.fecha && e.fecha >= today && e.estado !== 'cancelado' && e.estado !== 'borrador');
+  const futuros = todos.filter(e => e.fecha && e.fecha >= today && e.publicado === true);
   const eventos = (futuros.length ? futuros : todos)
     .sort((a, b) => (a.fecha || '').localeCompare(b.fecha || ''))
     .slice(0, 20);
@@ -1822,7 +1822,7 @@ async function renderHomeDocumentos() {
   if (!grid) return;
   const _items = await CMSDB.getAll('documentos');
   const items = (Array.isArray(_items) ? _items : [])
-    .filter(d => d.estado === 'publicado')
+    .filter(d => d.publicado === true)
     .sort((a, b) => (b.año || 0) - (a.año || 0))
     .slice(0, 4);
   if (!items.length) {

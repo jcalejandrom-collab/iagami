@@ -297,7 +297,7 @@ let currentPage = 1;
 document.addEventListener('DOMContentLoaded', async () => {
   const _raw = await CMSDB.getAll('noticias');
   allNoticias = _raw
-    .filter(n => n.publicado !== false && n.publicado != null)
+    .filter(n => n.publicado === true)
     .sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
 
   populateYears();
