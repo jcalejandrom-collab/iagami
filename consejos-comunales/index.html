@@ -1322,8 +1322,15 @@ async function saveForm(){
   if(!validateStep(9))return;
 
   const tipo=getRadioValue('tipo_org');
-  const code=genCode();
   const ts=new Date().toISOString();
+  const normRif = r => String(r||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
+
+  // ¿Ya existe esta organización? (mismo RIF en el directorio) → se ACTUALIZA en
+  // lugar de crear una tarjeta duplicada. Conserva su código de registro original.
+  const rifKey = normRif(($('f-rif').value||'').trim());
+  const existingList = tipo==='Comuna' ? _comunas : _consejos;
+  const orgExistente = rifKey ? existingList.find(o => normRif(o.rif)===rifKey) : null;
+  const code = orgExistente ? (orgExistente.codigo_registro || genCode()) : genCode();
 
   const orgData={
     codigo_registro: code,
@@ -1345,8 +1352,10 @@ async function saveForm(){
     lat: $('f-lat').value||null,
     lng: $('f-lng').value||null,
     estatus: 'Activo',
-    fecha_registro: ts,
+    fecha_registro: orgExistente ? (orgExistente.fecha_registro || ts) : ts,
   };
+  // Si existe, usamos su id → CMSDB.save hace UPDATE (PATCH) en vez de crear.
+  if (orgExistente && orgExistente.id) orgData.id = orgExistente.id;
 
   if(tipo==='Comuna'){
     orgData.num_consejos=$('f-num-consejos').value||0;
@@ -1431,6 +1440,9 @@ async function saveForm(){
     fecha_registro: diagData.fecha_registro,
     datos: diagData,
   };
+  // Si la organización ya tenía un diagnóstico, lo actualizamos (no duplicamos).
+  const diagExistente = rifKey ? _diagnosticos.find(d => normRif(d.rif_org)===rifKey) : null;
+  if (diagExistente && diagExistente.id) diagPayload.id = diagExistente.id;
   const denPayload = denunciaData ? {
     codigo_registro: denunciaData.codigo_registro,
     tipo_org: denunciaData.tipo_org,
@@ -1446,10 +1458,12 @@ async function saveForm(){
   try{
     if(!pbOn) throw new Error('CMSDB not available');
     await CMSDB.save(collection,orgData);
-    savedItems.push(`${tipo} registrada en el sistema.`);
+    savedItems.push(`${tipo} ${orgExistente?'actualizada':'registrada'} en el sistema.`);
   }catch(e){
     const orgArr=lsGet(collection);
-    orgArr.push(Object.assign({id:'local-'+Date.now()},orgData));
+    const idx = orgExistente ? orgArr.findIndex(o=>normRif(o.rif)===rifKey) : -1;
+    if(idx>=0) orgArr[idx]=Object.assign({},orgArr[idx],orgData);
+    else orgArr.push(Object.assign({id:'local-'+Date.now()},orgData));
     lsSet(collection,orgArr);
     savedItems.push(`${tipo} guardada localmente (sin conexión).`);
   }
@@ -1460,7 +1474,9 @@ async function saveForm(){
     savedItems.push('Diagnóstico ambiental guardado.');
   }catch(e){
     const diagArr=lsGet('diagnosticos_ambientales');
-    diagArr.push(diagPayload);
+    const di = diagExistente ? diagArr.findIndex(d=>normRif(d.rif_org)===rifKey) : -1;
+    if(di>=0) diagArr[di]=Object.assign({},diagArr[di],diagPayload);
+    else diagArr.push(diagPayload);
     lsSet('diagnosticos_ambientales',diagArr);
     savedItems.push('Diagnóstico guardado localmente (sin conexión).');
   }
@@ -1478,12 +1494,20 @@ async function saveForm(){
     }
   }
 
-  // refresh local arrays
-  if(tipo==='Comuna') _comunas.push(orgData);
-  else _consejos.push(orgData);
-  _diagnosticos.push(diagData);
+  // refresh local arrays (reemplaza si ya existía, agrega si es nuevo → evita duplicar tarjetas)
+  const replaceOrPush = (arr, match, val) => {
+    const i = arr.findIndex(match);
+    if(i>=0) arr[i]=Object.assign({},arr[i],val); else arr.push(val);
+  };
+  const orgList = tipo==='Comuna' ? _comunas : _consejos;
+  if(orgExistente) replaceOrPush(orgList, o=>normRif(o.rif)===rifKey, orgData);
+  else orgList.push(orgData);
+  if(diagExistente) replaceOrPush(_diagnosticos, d=>normRif(d.rif_org)===rifKey, diagPayload);
+  else _diagnosticos.push(diagPayload);
 
   // show success
+  const titleEl=document.querySelector('.success-screen-title');
+  if(titleEl) titleEl.textContent = orgExistente ? '¡Datos actualizados!' : '¡Registro exitoso!';
   $('success-code').textContent=code;
   $('success-list').innerHTML=savedItems.map(i=>`<li>${esc(i)}</li>`).join('');
   $('reg-form-wrap').style.display='none';
