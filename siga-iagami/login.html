@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <meta name="pb-url" content="https://api.iagami.online"/>
+  <meta name="robots" content="noindex,nofollow"/>
+  <title>SIGA-IAGAMI — Iniciar Sesión</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet"/>
+  <script src="../cms/config.js"></script>
+  <script src="siga-auth.js"></script>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Inter',sans-serif;min-height:100vh;display:flex;
+      background:linear-gradient(135deg,#0d2d1a 0%,#1d6b3e 60%,#2d8a55 100%)}
+    .login-wrap{margin:auto;width:100%;max-width:420px;padding:24px}
+    .login-card{background:#fff;border-radius:18px;padding:36px 32px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+    .login-logo{display:flex;align-items:center;gap:12px;margin-bottom:28px;justify-content:center}
+    .login-logo-icon{width:50px;height:50px;background:linear-gradient(135deg,#0d2d1a,#1d6b3e);
+      border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px}
+    .login-logo-text{font-family:'Poppins',sans-serif;font-size:20px;font-weight:700;color:#0d2d1a}
+    .login-logo-sub{font-size:11px;color:#4a8a6a;letter-spacing:.04em;margin-top:1px}
+    h1{font-family:'Poppins',sans-serif;font-size:22px;font-weight:700;color:#1a3d2b;text-align:center;margin-bottom:6px}
+    .login-desc{font-size:13px;color:#4a8a6a;text-align:center;margin-bottom:28px}
+    .fg{display:flex;flex-direction:column;gap:5px;margin-bottom:16px}
+    .fg label{font-size:12px;font-weight:600;color:#4a8a6a;text-transform:uppercase;letter-spacing:.05em}
+    .fg input{padding:11px 14px;border:1.5px solid #d4edd8;border-radius:10px;font-size:14px;
+      font-family:'Inter',sans-serif;outline:none;transition:border-color .15s;color:#1a3d2b}
+    .fg input:focus{border-color:#1d6b3e;box-shadow:0 0 0 3px rgba(29,107,62,.08)}
+    .btn-login{width:100%;padding:13px;background:#1d6b3e;color:#fff;border:none;
+      border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;transition:background .15s;margin-top:8px;
+      font-family:'Inter',sans-serif;display:flex;align-items:center;justify-content:center;gap:8px}
+    .btn-login:hover{background:#165730}
+    .btn-login:disabled{opacity:.6;cursor:not-allowed}
+    .login-err{margin-top:14px;padding:10px 14px;background:#fee2e2;color:#dc2626;border-radius:8px;
+      font-size:13px;text-align:center;display:none}
+    .login-err.show{display:block}
+    .login-back{text-align:center;margin-top:18px;font-size:12px;color:#4a8a6a}
+    .login-back a{color:#1d6b3e;font-weight:600;text-decoration:none}
+    .login-back a:hover{text-decoration:underline}
+    .login-footer{text-align:center;margin-top:28px;font-size:11px;color:rgba(255,255,255,.5)}
+    .spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;
+      border-radius:50%;animation:spin .7s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+  </style>
+</head>
+<body>
+<div class="login-wrap">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="login-logo-icon">🌿</div>
+      <div>
+        <div class="login-logo-text">SIGA-IAGAMI</div>
+        <div class="login-logo-sub">Sistema Integral de Gestión</div>
+      </div>
+    </div>
+    <h1>Bienvenido</h1>
+    <p class="login-desc">Ingresa con tus credenciales institucionales</p>
+    <form id="login-form" onsubmit="doLogin(event)">
+      <div class="fg">
+        <label for="l-email">Correo institucional</label>
+        <input type="email" id="l-email" placeholder="usuario@iagami.gob.ve" required autocomplete="username"/>
+      </div>
+      <div class="fg">
+        <label for="l-pass">Contraseña</label>
+        <input type="password" id="l-pass" placeholder="••••••••" required autocomplete="current-password"/>
+      </div>
+      <button type="submit" class="btn-login" id="btn-login">
+        <span id="btn-label">Iniciar Sesión</span>
+      </button>
+      <div class="login-err" id="login-err"></div>
+    </form>
+    <div class="login-back"><a href="../index.html">← Volver al Portal Ciudadano</a></div>
+  </div>
+  <div class="login-footer">IAGAMI · Sistema Interno · Acceso restringido al personal autorizado</div>
+</div>
+<script>
+  // Si ya está autenticado, redirigir al dashboard
+  if (window.SIGA && SIGA.isAuth()) {
+    window.location.href = 'index.html';
+  }
+
+  async function doLogin(ev) {
+    ev.preventDefault();
+    const email = document.getElementById('l-email').value.trim();
+    const pass  = document.getElementById('l-pass').value;
+    const btn   = document.getElementById('btn-login');
+    const lbl   = document.getElementById('btn-label');
+    const err   = document.getElementById('login-err');
+    err.classList.remove('show');
+    btn.disabled = true;
+    lbl.innerHTML = '<div class="spinner"></div>';
+    try {
+      await SIGA.login(email, pass);
+      window.location.href = 'index.html';
+    } catch(e) {
+      err.textContent = e.message.includes('400') || e.message.toLowerCase().includes('invalid')
+        ? 'Credenciales incorrectas. Verifica tu correo y contraseña.'
+        : `Error de conexión: ${e.message}`;
+      err.classList.add('show');
+      lbl.textContent = 'Iniciar Sesión';
+      btn.disabled = false;
+    }
+  }
+</script>
+</body>
+</html>

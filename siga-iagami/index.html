@@ -1,0 +1,1559 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <meta name="pb-url" content="https://api.iagami.online"/>
+  <meta name="robots" content="noindex,nofollow"/>
+  <title>SIGA-IAGAMI — Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet"/>
+  <script src="../cms/config.js"></script>
+  <script src="siga-auth.js"></script>
+  <link rel="stylesheet" href="siga.css"/>
+  <style>
+    /* Dashboard específico */
+    .dash-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin-bottom:28px}
+    .dash-stat{background:#fff;border-radius:12px;padding:20px;border:1px solid var(--border);box-shadow:var(--shadow);position:relative;overflow:hidden}
+    .dash-stat::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--primary)}
+    .dash-stat.amber::before{background:var(--warning)}
+    .dash-stat.blue::before{background:var(--info)}
+    .dash-stat.red::before{background:var(--danger)}
+    .ds-icon{font-size:26px;margin-bottom:10px}
+    .ds-val{font-family:'Poppins',sans-serif;font-size:32px;font-weight:700;color:var(--text);line-height:1}
+    .ds-lbl{font-size:12px;color:var(--muted);margin-top:4px}
+    .ds-sub{font-size:11px;color:var(--muted);margin-top:8px;display:flex;align-items:center;gap:4px}
+
+    .home-grid{display:grid;grid-template-columns:2fr 1fr;gap:20px;align-items:start}
+    @media(max-width:900px){.home-grid{grid-template-columns:1fr}}
+
+    .activity-feed{background:#fff;border-radius:12px;border:1px solid var(--border);box-shadow:var(--shadow);overflow:hidden}
+    .af-header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border)}
+    .af-title{font-weight:600;font-size:14px}
+    .af-item{display:flex;align-items:center;gap:12px;padding:12px 18px;border-bottom:1px solid var(--border)}
+    .af-item:last-child{border-bottom:none}
+    .af-info{flex:1;min-width:0}
+    .af-name{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .af-meta{font-size:11px;color:var(--muted);margin-top:2px}
+
+    .quick-actions{background:#fff;border-radius:12px;border:1px solid var(--border);box-shadow:var(--shadow);overflow:hidden}
+    .qa-header{padding:14px 18px;border-bottom:1px solid var(--border);font-weight:600;font-size:14px}
+    .qa-item{display:flex;align-items:center;gap:10px;padding:11px 18px;cursor:pointer;transition:background .15s;border-bottom:1px solid var(--border)}
+    .qa-item:last-child{border-bottom:none}
+    .qa-item:hover{background:var(--primary-lighter)}
+    .qa-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+    .qa-label{font-size:13px;font-weight:500}
+    .qa-sub{font-size:11px;color:var(--muted)}
+
+    .pending-wrap{background:#fff;border-radius:12px;border:1px solid var(--border);box-shadow:var(--shadow);padding:18px;margin-bottom:20px}
+    .pw-title{font-weight:600;font-size:14px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
+    .pending-item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)}
+    .pending-item:last-child{border-bottom:none}
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav id="sidebar">
+  <div class="sidebar-logo">
+    <span style="font-size:22px">🌿</span>
+    <div class="sidebar-logo-text">SIGA-IAGAMI<span>Sistema Integral</span></div>
+  </div>
+  <div id="siga-user-chip" class="user-chip" style="margin:10px 10px 0"></div>
+  <div class="sidebar-nav" id="sidebar-nav"></div>
+  <div class="sidebar-bottom">
+    <a href="../index.html">🌐 Ver Portal Ciudadano</a>
+    <button onclick="SIGA.logout()">🔒 Cerrar Sesión</button>
+  </div>
+</nav>
+<div id="overlay" onclick="SIGA.toggleSidebar()"></div>
+
+<!-- MAIN -->
+<div id="main">
+  <header id="topbar">
+    <button id="hamburger" onclick="SIGA.toggleSidebar()">☰</button>
+    <div id="breadcrumb">SIGA-IAGAMI / <strong id="breadcrumb-label">Dashboard</strong></div>
+    <div class="topbar-right">
+      <button class="notif-btn" id="notif-btn" onclick="sigaNav('comunicaciones')" title="Comunicados">
+        🔔<span class="notif-badge" id="notif-count" style="display:none">0</span>
+      </button>
+    </div>
+  </header>
+
+  <div id="content">
+
+    <!-- ══ SEC: DASHBOARD ══ -->
+    <div class="section active" id="sec-dashboard">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Dashboard Ejecutivo</div>
+          <div class="page-subtitle" id="dash-greeting">Buenos días — <span id="today-date"></span></div>
+        </div>
+      </div>
+
+      <div class="dash-grid" id="stats-grid">
+        <div class="dash-stat"><div class="ds-icon">👥</div><div class="ds-val" id="st-trabajadores">—</div><div class="ds-lbl">Trabajadores activos</div></div>
+        <div class="dash-stat amber"><div class="ds-icon">📋</div><div class="ds-val" id="st-hoy">—</div><div class="ds-lbl">Actividades hoy</div></div>
+        <div class="dash-stat blue"><div class="ds-icon">📬</div><div class="ds-val" id="st-solicitudes">—</div><div class="ds-lbl">Solicitudes pendientes</div></div>
+        <div class="dash-stat"><div class="ds-icon">✅</div><div class="ds-val" id="st-cumplimiento">—</div><div class="ds-lbl">Cumplimiento semanal</div></div>
+        <div class="dash-stat red"><div class="ds-icon">⚠️</div><div class="ds-val" id="st-denuncias">—</div><div class="ds-lbl">Denuncias abiertas</div></div>
+        <div class="dash-stat blue"><div class="ds-icon">🏘️</div><div class="ds-val" id="st-comunas">—</div><div class="ds-lbl">Comunas atendidas</div></div>
+      </div>
+
+      <div class="home-grid">
+        <div>
+          <!-- Actividades recientes -->
+          <div class="activity-feed" style="margin-bottom:20px">
+            <div class="af-header">
+              <span class="af-title">⚡ Actividades Recientes</span>
+              <button class="btn btn-sm btn-secondary" onclick="sigaNav('actividades')">Ver todas</button>
+            </div>
+            <div id="feed-actividades">
+              <div class="af-item"><div class="af-info"><div class="af-name skeleton" style="height:13px;width:200px;margin-bottom:5px"> </div><div class="af-meta skeleton" style="height:11px;width:140px"> </div></div></div>
+              <div class="af-item"><div class="af-info"><div class="af-name skeleton" style="height:13px;width:220px;margin-bottom:5px"> </div><div class="af-meta skeleton" style="height:11px;width:120px"> </div></div></div>
+              <div class="af-item"><div class="af-info"><div class="af-name skeleton" style="height:13px;width:180px;margin-bottom:5px"> </div><div class="af-meta skeleton" style="height:11px;width:160px"> </div></div></div>
+            </div>
+          </div>
+
+          <!-- Solicitudes pendientes -->
+          <div class="pending-wrap" id="sec-pendientes-dash">
+            <div class="pw-title">📬 Solicitudes Pendientes <button class="btn btn-sm btn-secondary" onclick="sigaNav('rrhh')">Ver RRHH</button></div>
+            <div id="feed-solicitudes"><p style="font-size:13px;color:var(--muted)">Cargando…</p></div>
+          </div>
+        </div>
+
+        <div>
+          <!-- Acciones rápidas según rol -->
+          <div class="quick-actions">
+            <div class="qa-header">⚡ Acciones Rápidas</div>
+            <div id="quick-actions-list"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SEC: RRHH ══ -->
+    <div class="section" id="sec-rrhh">
+      <div class="page-header">
+        <div>
+          <div class="page-title">👥 Recursos Humanos</div>
+          <div class="page-subtitle">Gestión de personal, solicitudes y comunicaciones internas</div>
+        </div>
+        <div class="page-actions" id="rrhh-actions"></div>
+      </div>
+      <div class="tabs" id="rrhh-tabs">
+        <button class="tab active" onclick="switchTab('rrhh','personal')">👤 Personal</button>
+        <button class="tab" onclick="switchTab('rrhh','solicitudes')">📬 Solicitudes</button>
+        <button class="tab" onclick="switchTab('rrhh','comunicados')">📢 Comunicados</button>
+        <button class="tab" onclick="switchTab('rrhh','capacitaciones')">🎓 Capacitaciones</button>
+      </div>
+
+      <!-- Tab: Personal -->
+      <div class="tab-content active" id="tab-rrhh-personal">
+        <div class="search-bar" style="margin-bottom:16px">
+          <input type="search" class="search-input" placeholder="Buscar por nombre, cédula o cargo…" id="personal-q" oninput="filterPersonal()"/>
+          <select class="filter-select" id="personal-dir" onchange="filterPersonal()"><option value="">Todas las direcciones</option></select>
+          <select class="filter-select" id="personal-estado" onchange="filterPersonal()">
+            <option value="">Todos</option><option value="Activo">Activo</option><option value="Inactivo">Inactivo</option>
+          </select>
+          <button class="btn btn-primary" id="btn-nuevo-trabajador" onclick="abrirModalTrabajador()">+ Nuevo Trabajador</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Trabajador</th><th>Cédula</th><th>Cargo</th><th>Dirección</th><th>Estado</th><th>Ingreso</th><th></th></tr></thead>
+            <tbody id="tabla-personal"></tbody>
+          </table>
+          <div id="personal-empty" class="no-rows" style="display:none">No se encontraron trabajadores.</div>
+        </div>
+      </div>
+
+      <!-- Tab: Solicitudes -->
+      <div class="tab-content" id="tab-rrhh-solicitudes">
+        <div class="search-bar" style="margin-bottom:16px">
+          <select class="filter-select" id="sol-tipo" onchange="filterSolicitudes()">
+            <option value="">Todos los tipos</option>
+            <option>Vacaciones</option><option>Permiso</option><option>Reposo</option>
+            <option>Constancia</option><option>Capacitación</option><option>Comisión</option>
+          </select>
+          <select class="filter-select" id="sol-estado" onchange="filterSolicitudes()">
+            <option value="">Todos los estados</option>
+            <option>Pendiente</option><option>Aprobada</option><option>Rechazada</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Trabajador</th><th>Tipo</th><th>Fecha solicitud</th><th>Detalles</th><th>Estado</th><th>Acciones</th></tr></thead>
+            <tbody id="tabla-solicitudes"></tbody>
+          </table>
+          <div id="sol-empty" class="no-rows" style="display:none">No hay solicitudes.</div>
+        </div>
+      </div>
+
+      <!-- Tab: Comunicados -->
+      <div class="tab-content" id="tab-rrhh-comunicados">
+        <div class="page-actions" style="margin-bottom:16px">
+          <button class="btn btn-primary" id="btn-nuevo-comunicado" onclick="abrirModalComunicado()">+ Nuevo Comunicado</button>
+        </div>
+        <div class="cards-grid" id="lista-comunicados"><p style="color:var(--muted);font-size:13px">Cargando…</p></div>
+      </div>
+
+      <!-- Tab: Capacitaciones -->
+      <div class="tab-content" id="tab-rrhh-capacitaciones">
+        <div class="page-actions" style="margin-bottom:16px">
+          <button class="btn btn-primary" id="btn-nueva-cap" onclick="abrirModalCapacitacion()">+ Nueva Capacitación</button>
+        </div>
+        <div class="cards-grid" id="lista-capacitaciones"><p style="color:var(--muted);font-size:13px">Cargando…</p></div>
+      </div>
+    </div>
+
+    <!-- ══ SEC: ACTIVIDADES ══ -->
+    <div class="section" id="sec-actividades">
+      <div class="page-header">
+        <div>
+          <div class="page-title">📋 Control de Actividades</div>
+          <div class="page-subtitle">Registro diario de jornada y actividades del trabajador</div>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-primary" onclick="abrirModalActividad()">+ Registrar Actividad</button>
+        </div>
+      </div>
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab('act','mis')">📋 Mis Actividades</button>
+        <button class="tab" id="tab-act-equipo-btn" onclick="switchTab('act','equipo')" style="display:none">👥 Equipo</button>
+        <button class="tab" id="tab-act-global-btn" onclick="switchTab('act','global')" style="display:none">🏢 Global</button>
+      </div>
+      <div class="tab-content active" id="tab-act-mis">
+        <div class="search-bar" style="margin-bottom:16px">
+          <input type="date" class="filter-select" id="act-fecha-desde" onchange="loadMisActividades()"/>
+          <input type="date" class="filter-select" id="act-fecha-hasta" onchange="loadMisActividades()"/>
+          <select class="filter-select" id="act-estado-f" onchange="loadMisActividades()">
+            <option value="">Todos los estados</option>
+            <option>Pendiente</option><option>En Proceso</option><option>Completada</option><option>Reprogramada</option><option>Suspendida</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Fecha</th><th>Actividad</th><th>Proyecto</th><th>Inicio</th><th>Fin</th><th>Estado</th><th></th></tr></thead>
+            <tbody id="tabla-mis-act"></tbody>
+          </table>
+          <div id="mis-act-empty" class="no-rows" style="display:none">No hay actividades registradas en este período.</div>
+        </div>
+      </div>
+      <div class="tab-content" id="tab-act-equipo">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Trabajador</th><th>Actividad</th><th>Fecha</th><th>Estado</th><th></th></tr></thead>
+            <tbody id="tabla-equipo-act"></tbody>
+          </table>
+          <div id="equipo-act-empty" class="no-rows" style="display:none">No hay actividades del equipo.</div>
+        </div>
+      </div>
+      <div class="tab-content" id="tab-act-global">
+        <div class="search-bar" style="margin-bottom:16px">
+          <input type="search" class="search-input" placeholder="Buscar por trabajador o actividad…" id="global-q" oninput="loadGlobalActividades()"/>
+          <select class="filter-select" id="global-dir" onchange="loadGlobalActividades()"><option value="">Todas las direcciones</option></select>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Trabajador</th><th>Actividad</th><th>Dirección</th><th>Fecha</th><th>Estado</th><th></th></tr></thead>
+            <tbody id="tabla-global-act"></tbody>
+          </table>
+          <div id="global-act-empty" class="no-rows" style="display:none">No hay actividades.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SEC: PLANIFICACIÓN ══ -->
+    <div class="section" id="sec-planificacion">
+      <div class="page-header">
+        <div><div class="page-title">📅 Planificación Semanal</div><div class="page-subtitle">Registro y seguimiento de objetivos por semana</div></div>
+        <button class="btn btn-primary" onclick="abrirModalPlanificacion()">+ Nueva Planificación</button>
+      </div>
+      <div id="plan-semanas"></div>
+    </div>
+
+    <!-- ══ SEC: COMUNICACIONES ══ -->
+    <div class="section" id="sec-comunicaciones">
+      <div class="page-header">
+        <div><div class="page-title">📢 Comunicaciones Internas</div><div class="page-subtitle">Comunicados, memorándums y convocatorias institucionales</div></div>
+      </div>
+      <div class="cards-grid" id="lista-comunicaciones"><p style="color:var(--muted);font-size:13px">Cargando…</p></div>
+    </div>
+
+    <!-- ══ SEC: INDICADORES ══ -->
+    <div class="section" id="sec-indicadores">
+      <div class="page-header">
+        <div><div class="page-title">📊 Indicadores Institucionales</div><div class="page-subtitle">Métricas en tiempo real generadas automáticamente</div></div>
+      </div>
+      <div class="dash-grid" id="ind-grid">
+        <div class="dash-stat"><div class="ds-icon">📋</div><div class="ds-val" id="ind-act-mes">—</div><div class="ds-lbl">Actividades este mes</div></div>
+        <div class="dash-stat amber"><div class="ds-icon">⏱️</div><div class="ds-val" id="ind-horas">—</div><div class="ds-lbl">Horas registradas (mes)</div></div>
+        <div class="dash-stat"><div class="ds-icon">✅</div><div class="ds-val" id="ind-pct">—%</div><div class="ds-lbl">% Cumplimiento global</div></div>
+        <div class="dash-stat blue"><div class="ds-icon">🎓</div><div class="ds-val" id="ind-cap">—</div><div class="ds-lbl">Capacitaciones activas</div></div>
+      </div>
+      <div class="home-grid">
+        <div class="table-wrap">
+          <div class="af-header"><span class="af-title">Cumplimiento por Dirección</span></div>
+          <div id="ind-por-dir" style="padding:16px"><p style="font-size:13px;color:var(--muted)">Cargando…</p></div>
+        </div>
+        <div class="table-wrap">
+          <div class="af-header"><span class="af-title">Top Trabajadores (mes)</span></div>
+          <div id="ind-top-trab" style="padding:16px"><p style="font-size:13px;color:var(--muted)">Cargando…</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SEC: PRESIDENCIA ══ -->
+    <div class="section" id="sec-presidencia">
+      <div class="page-header">
+        <div><div class="page-title">🏛️ Vista Presidencia</div><div class="page-subtitle">Control institucional global en tiempo real</div></div>
+        <button class="btn btn-secondary" onclick="loadPresidencia()">🔄 Actualizar</button>
+      </div>
+      <div class="dash-grid" id="pres-stats"></div>
+      <div class="home-grid">
+        <div class="activity-feed">
+          <div class="af-header"><span class="af-title">📋 Actividades por Dirección</span></div>
+          <div id="pres-dir-act" style="padding:16px"><p style="font-size:13px;color:var(--muted)">Cargando…</p></div>
+        </div>
+        <div class="quick-actions">
+          <div class="qa-header">📈 Resumen Ejecutivo</div>
+          <div id="pres-resumen" style="padding:16px"><p style="font-size:13px;color:var(--muted)">Cargando…</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SEC: TECNOLOGÍA ══ -->
+    <div class="section" id="sec-tecnologia">
+      <div class="page-header">
+        <div><div class="page-title">⚙️ Tecnología y Sistema</div><div class="page-subtitle">Administración, auditoría y monitoreo del sistema</div></div>
+      </div>
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab('tec','usuarios')">👤 Usuarios</button>
+        <button class="tab" onclick="switchTab('tec','auditoria')">📜 Auditoría</button>
+        <button class="tab" onclick="switchTab('tec','tickets')">🎫 Tickets</button>
+        <button class="tab" onclick="switchTab('tec','monitor')">📡 Monitor</button>
+      </div>
+      <div class="tab-content active" id="tab-tec-usuarios">
+        <div class="search-bar" style="margin-bottom:16px">
+          <input type="search" class="search-input" placeholder="Buscar usuario…" id="tec-user-q" oninput="filterTecUsers()"/>
+          <button class="btn btn-primary" onclick="abrirModalTrabajador(true)">+ Crear Usuario</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Usuario</th><th>Correo</th><th>Rol</th><th>Estado</th><th>Último acceso</th><th>Acciones</th></tr></thead>
+            <tbody id="tabla-tec-usuarios"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="tab-content" id="tab-tec-auditoria">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Usuario</th><th>Acción</th><th>Módulo</th><th>Fecha / Hora</th><th>Resultado</th></tr></thead>
+            <tbody id="tabla-auditoria"></tbody>
+          </table>
+          <div id="audit-empty" class="no-rows" style="display:none">No hay registros de auditoría.</div>
+        </div>
+      </div>
+      <div class="tab-content" id="tab-tec-tickets">
+        <div class="page-actions" style="margin-bottom:16px">
+          <button class="btn btn-primary" onclick="abrirModalTicket()">+ Nuevo Ticket</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>ID</th><th>Asunto</th><th>Prioridad</th><th>Responsable</th><th>Estado</th><th>Fecha</th><th></th></tr></thead>
+            <tbody id="tabla-tickets"></tbody>
+          </table>
+          <div id="tickets-empty" class="no-rows" style="display:none">No hay tickets.</div>
+        </div>
+      </div>
+      <div class="tab-content" id="tab-tec-monitor">
+        <div class="dash-grid">
+          <div class="dash-stat"><div class="ds-icon">🖥️</div><div class="ds-val" id="mon-pb">—</div><div class="ds-lbl">PocketBase</div></div>
+          <div class="dash-stat"><div class="ds-icon">👤</div><div class="ds-val" id="mon-users">—</div><div class="ds-lbl">Usuarios activos hoy</div></div>
+          <div class="dash-stat amber"><div class="ds-icon">📡</div><div class="ds-val" id="mon-api">—ms</div><div class="ds-lbl">Latencia API</div></div>
+        </div>
+        <div class="form-wrap">
+          <div class="form-section-title">Estado del Sistema</div>
+          <div id="sys-status-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SEC: MI SOLICITUD ══ -->
+    <div class="section" id="sec-mi-solicitud">
+      <div class="page-header">
+        <div><div class="page-title">📬 Mis Solicitudes</div><div class="page-subtitle">Vacaciones, permisos, reposos y más</div></div>
+        <button class="btn btn-primary" onclick="abrirModalSolicitud()">+ Nueva Solicitud</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Tipo</th><th>Fecha solicitud</th><th>Detalles</th><th>Estado</th><th>Respuesta</th></tr></thead>
+          <tbody id="tabla-mis-solicitudes"></tbody>
+        </table>
+        <div id="mis-sol-empty" class="no-rows" style="display:none">No tienes solicitudes aún.</div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- ── MODALES ── -->
+
+<!-- Modal: Trabajador -->
+<div class="modal-overlay" id="modal-trabajador">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-trab-title">Nuevo Trabajador</div>
+      <button class="modal-close" onclick="cerrarModal('modal-trabajador')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-section">
+        <div class="form-section-title">Datos Personales</div>
+        <div class="form-row">
+          <div class="form-group"><label>Nombres *</label><input id="t-nombres" type="text" required/></div>
+          <div class="form-group"><label>Apellidos *</label><input id="t-apellidos" type="text" required/></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Cédula *</label><input id="t-cedula" type="text" placeholder="V-12345678" required/></div>
+          <div class="form-group"><label>Teléfono</label><input id="t-telefono" type="tel" placeholder="0412-1234567"/></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Correo institucional *</label><input id="t-email" type="email" required/></div>
+          <div class="form-group"><label>Fecha de ingreso</label><input id="t-ingreso" type="date"/></div>
+        </div>
+      </div>
+      <div class="form-section">
+        <div class="form-section-title">Cargo y Organización</div>
+        <div class="form-row">
+          <div class="form-group"><label>Cargo *</label><input id="t-cargo" type="text" required/></div>
+          <div class="form-group"><label>Rol del sistema *</label>
+            <select id="t-rol">
+              <option>TRABAJADOR</option><option>SUPERVISOR</option><option>COORDINADOR</option>
+              <option>DIRECTOR</option><option>RRHH</option><option>TECNOLOGIA</option><option>PRESIDENTE</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Dirección</label><select id="t-direccion"><option value="">— Seleccionar —</option></select></div>
+          <div class="form-group"><label>Coordinación</label><input id="t-coordinacion" type="text"/></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Supervisor directo</label><select id="t-supervisor"><option value="">— Sin supervisor —</option></select></div>
+          <div class="form-group"><label>Estado</label><select id="t-estado"><option>Activo</option><option>Inactivo</option><option>Vacaciones</option><option>Reposo</option></select></div>
+        </div>
+      </div>
+      <div class="form-section" id="sec-password-field">
+        <div class="form-section-title">Acceso al Sistema</div>
+        <div class="form-row">
+          <div class="form-group"><label>Contraseña *</label><input id="t-password" type="password" minlength="8" placeholder="Mínimo 8 caracteres"/></div>
+          <div class="form-group"><label>Confirmar contraseña *</label><input id="t-password2" type="password" minlength="8"/></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="cerrarModal('modal-trabajador')">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarTrabajador()">💾 Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Actividad -->
+<div class="modal-overlay" id="modal-actividad">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-act-title">Registrar Actividad</div>
+      <button class="modal-close" onclick="cerrarModal('modal-actividad')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-section">
+        <div class="form-section-title">Datos de la Actividad</div>
+        <div class="form-row">
+          <div class="form-group"><label>Fecha *</label><input id="a-fecha" type="date" required/></div>
+          <div class="form-group"><label>Hora inicio</label><input id="a-inicio" type="time"/></div>
+          <div class="form-group"><label>Hora fin</label><input id="a-fin" type="time"/></div>
+        </div>
+        <div class="form-group" style="margin-bottom:12px"><label>Actividad *</label><input id="a-actividad" type="text" required placeholder="Título o nombre de la actividad"/></div>
+        <div class="form-group" style="margin-bottom:12px"><label>Descripción</label><textarea id="a-descripcion" rows="3" placeholder="Detalle lo realizado…"></textarea></div>
+        <div class="form-group" style="margin-bottom:12px"><label>Resultado obtenido</label><textarea id="a-resultado" rows="2" placeholder="Logros, productos, alcances…"></textarea></div>
+        <div class="form-row">
+          <div class="form-group"><label>Estado *</label>
+            <select id="a-estado">
+              <option>Completada</option><option>En Proceso</option><option>Pendiente</option><option>Reprogramada</option><option>Suspendida</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Proyecto asociado</label><select id="a-proyecto"><option value="">— Sin proyecto —</option></select></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Comuna (si aplica)</label><select id="a-comuna"><option value="">— Sin comunidad —</option></select></div>
+          <div class="form-group"><label>Consejo Comunal</label><select id="a-consejo"><option value="">— Sin consejo —</option></select></div>
+        </div>
+        <div class="form-group"><label>Ubicación / Dirección</label><input id="a-ubicacion" type="text" placeholder="Lugar donde se realizó la actividad"/></div>
+      </div>
+      <div class="form-section">
+        <div class="form-section-title">Observaciones</div>
+        <div class="form-group"><textarea id="a-obs" rows="2" placeholder="Dificultades, recomendaciones…"></textarea></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="cerrarModal('modal-actividad')">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarActividad()">💾 Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Solicitud RRHH -->
+<div class="modal-overlay" id="modal-solicitud">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Nueva Solicitud</div>
+      <button class="modal-close" onclick="cerrarModal('modal-solicitud')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group" style="margin-bottom:14px"><label>Tipo de solicitud *</label>
+        <select id="sol-tipo-new">
+          <option>Vacaciones</option><option>Permiso</option><option>Reposo</option>
+          <option>Constancia</option><option>Capacitación</option><option>Actualización de datos</option><option>Comisión de servicio</option>
+        </select>
+      </div>
+      <div class="form-row" style="margin-bottom:12px">
+        <div class="form-group"><label>Fecha desde</label><input id="sol-desde" type="date"/></div>
+        <div class="form-group"><label>Fecha hasta</label><input id="sol-hasta" type="date"/></div>
+      </div>
+      <div class="form-group"><label>Descripción / Motivo *</label><textarea id="sol-desc" rows="4" required placeholder="Explique el motivo de la solicitud…"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="cerrarModal('modal-solicitud')">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarSolicitud()">📨 Enviar Solicitud</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Comunicado -->
+<div class="modal-overlay" id="modal-comunicado">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <div class="modal-title">Nuevo Comunicado</div>
+      <button class="modal-close" onclick="cerrarModal('modal-comunicado')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row" style="margin-bottom:12px">
+        <div class="form-group"><label>Tipo *</label>
+          <select id="com-tipo"><option>Circular</option><option>Memorándum</option><option>Convocatoria</option><option>Aviso</option><option>Curso</option></select>
+        </div>
+        <div class="form-group"><label>Dirigido a *</label>
+          <select id="com-destino"><option>Toda la institución</option><option>Dirección específica</option><option>Coordinación</option><option>Cargo específico</option></select>
+        </div>
+      </div>
+      <div class="form-group" style="margin-bottom:12px"><label>Asunto *</label><input id="com-asunto" type="text" required/></div>
+      <div class="form-group"><label>Contenido *</label><textarea id="com-cuerpo" rows="6" required placeholder="Cuerpo del comunicado…"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="cerrarModal('modal-comunicado')">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarComunicado()">📢 Publicar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Planificación semanal -->
+<div class="modal-overlay" id="modal-planificacion">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Nueva Planificación Semanal</div>
+      <button class="modal-close" onclick="cerrarModal('modal-planificacion')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row" style="margin-bottom:12px">
+        <div class="form-group"><label>Semana (fecha inicio)</label><input id="p-semana" type="date"/></div>
+        <div class="form-group"><label>Prioridad</label><select id="p-prioridad"><option>Alta</option><option>Media</option><option>Baja</option></select></div>
+      </div>
+      <div class="form-group" style="margin-bottom:12px"><label>Objetivo *</label><input id="p-objetivo" type="text" required/></div>
+      <div class="form-group" style="margin-bottom:12px"><label>Actividad planificada *</label><textarea id="p-actividad" rows="3" required></textarea></div>
+      <div class="form-group"><label>Resultado esperado</label><textarea id="p-resultado" rows="2"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="cerrarModal('modal-planificacion')">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarPlanificacion()">💾 Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Ticket -->
+<div class="modal-overlay" id="modal-ticket">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Nuevo Ticket de Soporte</div>
+      <button class="modal-close" onclick="cerrarModal('modal-ticket')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row" style="margin-bottom:12px">
+        <div class="form-group"><label>Tipo de incidencia</label>
+          <select id="tk-tipo"><option>Falla técnica</option><option>Acceso / Permisos</option><option>Error en datos</option><option>Solicitud nueva función</option><option>Otro</option></select>
+        </div>
+        <div class="form-group"><label>Prioridad</label>
+          <select id="tk-prioridad"><option>Alta</option><option>Media</option><option>Baja</option></select>
+        </div>
+      </div>
+      <div class="form-group" style="margin-bottom:12px"><label>Asunto *</label><input id="tk-asunto" type="text" required/></div>
+      <div class="form-group"><label>Descripción detallada *</label><textarea id="tk-desc" rows="4" required></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="cerrarModal('modal-ticket')">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarTicket()">🎫 Crear Ticket</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════
+   SIGA-IAGAMI — Controlador del Dashboard
+═══════════════════════════════════════════════════ */
+
+// Auth guard
+if (!window.SIGA || !SIGA.isAuth()) {
+  window.location.href = 'login.html';
+}
+
+const U   = SIGA.getUser();
+const ROL = SIGA.getRole();
+const esc = SIGA.escSiga;
+const fmt = SIGA.fmtFecha;
+const fmtH = SIGA.fmtFechaHora;
+let _currentSection = 'dashboard';
+let _allTrabajadores = [];
+let _allDirecciones  = [];
+let _allProyectos    = [];
+let _allComunas      = [];
+let _allConsejos     = [];
+let _editTrabId      = null;
+
+/* ─── Toast global ─── */
+function toast(msg, type='success') { SIGA.toast(msg, type); }
+
+/* ─── Sidebar menu ─── */
+const MENU_ALL = [
+  { id:'dashboard', icon:'🏠', label:'Dashboard' },
+  { section:'Personal' },
+  { id:'actividades', icon:'📋', label:'Mis Actividades' },
+  { id:'mi-solicitud', icon:'📬', label:'Mis Solicitudes' },
+  { id:'planificacion', icon:'📅', label:'Planificación' },
+  { section:'Gestión' },
+  { id:'rrhh', icon:'👥', label:'RRHH', roles:['RRHH','DIRECTOR','PRESIDENTE','TECNOLOGIA'] },
+  { id:'comunicaciones', icon:'📢', label:'Comunicaciones' },
+  { id:'indicadores', icon:'📊', label:'Indicadores', roles:['COORDINADOR','DIRECTOR','RRHH','PRESIDENTE','TECNOLOGIA'] },
+  { id:'presidencia', icon:'🏛️', label:'Presidencia', roles:['PRESIDENTE','DIRECTOR'] },
+  { section:'Sistema' },
+  { id:'tecnologia', icon:'⚙️', label:'Tecnología', roles:['TECNOLOGIA','PRESIDENTE'] },
+];
+
+function buildMenu() {
+  const nav = document.getElementById('sidebar-nav');
+  nav.innerHTML = MENU_ALL.map(it => {
+    if (it.section) return `<div class="sidebar-section">${esc(it.section)}</div>`;
+    if (it.roles && !it.roles.includes(ROL)) return '';
+    const active = it.id === _currentSection ? ' active' : '';
+    return `<button class="nav-item${active}" onclick="sigaNav('${it.id}')">
+      <span class="nav-icon">${it.icon}</span>${esc(it.label)}</button>`;
+  }).join('');
+}
+
+window.sigaNav = function(id) {
+  _currentSection = id;
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  const sec = document.getElementById('sec-' + id);
+  if (sec) sec.classList.add('active');
+  const label = MENU_ALL.find(m=>m.id===id)?.label || id;
+  document.getElementById('breadcrumb-label').textContent = label;
+  buildMenu();
+  if (document.getElementById('sidebar')?.classList.contains('open')) SIGA.toggleSidebar();
+  // Cargar datos de la sección
+  if (id === 'rrhh')           loadRRHH();
+  if (id === 'actividades')    loadMisActividades();
+  if (id === 'comunicaciones') loadComunicaciones();
+  if (id === 'indicadores')    loadIndicadores();
+  if (id === 'presidencia')    loadPresidencia();
+  if (id === 'tecnologia')     loadTecnologia();
+  if (id === 'planificacion')  loadPlanificacion();
+  if (id === 'mi-solicitud')   loadMisSolicitudes();
+};
+
+/* ─── Tabs ─── */
+window.switchTab = function(prefix, id) {
+  document.querySelectorAll(`#sec-${prefix==='rrhh'?'rrhh':'actividades'==='act'?'actividades':prefix} .tab`).forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll(`#sec-${prefix==='act'?'actividades':prefix==='tec'?'tecnologia':prefix} .tab-content`).forEach(t=>t.classList.remove('active'));
+  event.target.classList.add('active');
+  const tc = document.getElementById(`tab-${prefix}-${id}`);
+  if (tc) tc.classList.add('active');
+  if (prefix==='rrhh' && id==='personal') loadPersonal();
+  if (prefix==='rrhh' && id==='solicitudes') loadSolicitudesRRHH();
+  if (prefix==='rrhh' && id==='comunicados') loadComunicadosRRHH();
+  if (prefix==='rrhh' && id==='capacitaciones') loadCapacitaciones();
+  if (prefix==='tec' && id==='usuarios') loadTecUsuarios();
+  if (prefix==='tec' && id==='auditoria') loadAuditoria();
+  if (prefix==='tec' && id==='tickets') loadTickets();
+  if (prefix==='tec' && id==='monitor') loadMonitor();
+};
+
+/* ─── Modal helpers ─── */
+window.cerrarModal = id => document.getElementById(id)?.classList.remove('open');
+function abrirModal(id) { document.getElementById(id)?.classList.add('open'); }
+document.addEventListener('keydown', e => { if(e.key==='Escape') document.querySelectorAll('.modal-overlay.open').forEach(m=>m.classList.remove('open')); });
+
+/* ─── INIT ─── */
+document.addEventListener('DOMContentLoaded', async () => {
+  SIGA.renderUserChip && SIGA.renderUserChip();
+  // Render user chip manual
+  const chip = document.getElementById('siga-user-chip');
+  if (chip) {
+    const initials = ((U.nombres||'').charAt(0)+(U.apellidos||'').charAt(0)).toUpperCase()||'U';
+    chip.innerHTML = `<div class="uc-av">${esc(initials)}</div>
+      <div class="uc-info">
+        <div class="uc-name">${esc((U.nombres||'')+' '+(U.apellidos||''))}</div>
+        <div class="uc-role">${esc(U.rol||ROL)}</div>
+      </div><div class="uc-dot"></div>`;
+  }
+
+  // Fecha
+  const today = new Date();
+  document.getElementById('today-date').textContent = today.toLocaleDateString('es-VE',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  const hr = today.getHours();
+  const greet = hr < 12 ? 'Buenos días' : hr < 19 ? 'Buenas tardes' : 'Buenas noches';
+  document.querySelector('#dash-greeting') && (document.querySelector('#dash-greeting').innerHTML = `${greet}, <strong>${esc(U.nombres||'')}</strong> — ${today.toLocaleDateString('es-VE',{weekday:'long',day:'numeric',month:'long'})}`);
+
+  buildMenu();
+  showTabBtnsForRole();
+  await loadCatalogoBase();
+  await loadDashboard();
+  buildQuickActions();
+});
+
+/* ─── Tabs de equipo/global según rol ─── */
+function showTabBtnsForRole() {
+  if (['COORDINADOR','SUPERVISOR','DIRECTOR','RRHH','PRESIDENTE','TECNOLOGIA'].includes(ROL))
+    document.getElementById('tab-act-equipo-btn')?.style.setProperty('display','inline-flex');
+  if (['DIRECTOR','PRESIDENTE','RRHH','TECNOLOGIA'].includes(ROL))
+    document.getElementById('tab-act-global-btn')?.style.setProperty('display','inline-flex');
+  if (['RRHH','DIRECTOR','PRESIDENTE','TECNOLOGIA'].includes(ROL)) {
+    document.getElementById('btn-nuevo-comunicado')?.style.setProperty('display','inline-flex');
+    document.getElementById('btn-nuevo-trabajador')?.style.setProperty('display','inline-flex');
+    document.getElementById('btn-nueva-cap')?.style.setProperty('display','inline-flex');
+  } else {
+    document.getElementById('btn-nuevo-comunicado')?.style.setProperty('display','none');
+    document.getElementById('btn-nuevo-trabajador')?.style.setProperty('display','none');
+    document.getElementById('btn-nueva-cap')?.style.setProperty('display','none');
+  }
+}
+
+/* ─── Catálogo base ─── */
+async function loadCatalogoBase() {
+  [_allTrabajadores, _allDirecciones, _allProyectos, _allComunas, _allConsejos] = await Promise.all([
+    SIGA.list('trabajadores').catch(()=>[]),
+    SIGA.list('direcciones').catch(()=>[]),
+    SIGA.list('proyectos','publicado=true').catch(()=>[]),
+    SIGA.list('comunas').catch(()=>[]),
+    SIGA.list('consejos_comunales').catch(()=>[]),
+  ]);
+  // Poblar selects
+  populateSelect('personal-dir', _allDirecciones, 'nombre', 'Todas las direcciones');
+  populateSelect('global-dir', _allDirecciones, 'nombre', 'Todas las direcciones');
+  populateSelect('t-direccion', _allDirecciones, 'nombre', '— Seleccionar —');
+  populateSelect('t-supervisor', _allTrabajadores, t=>`${t.nombres} ${t.apellidos}`, '— Sin supervisor —', 'id');
+  populateSelect('a-proyecto', _allProyectos, 'nombre', '— Sin proyecto —', 'id');
+  populateSelect('a-comuna', _allComunas, 'nombre', '— Sin comunidad —', 'id');
+  populateSelect('a-consejo', _allConsejos, 'nombre', '— Sin consejo —', 'id');
+}
+
+function populateSelect(id, items, labelFn, placeholder, valField='nombre') {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const pOpt = `<option value="">${esc(placeholder)}</option>`;
+  el.innerHTML = pOpt + items.map(it => {
+    const label = typeof labelFn === 'function' ? labelFn(it) : (it[labelFn]||'');
+    const val   = valField === 'id' ? (it.id||'') : (it[valField]||label);
+    return `<option value="${esc(val)}">${esc(label)}</option>`;
+  }).join('');
+}
+
+/* ─── DASHBOARD ─── */
+async function loadDashboard() {
+  const [actividades, solicitudes, denuncias, comunas] = await Promise.all([
+    SIGA.list('actividades', ROL==='TRABAJADOR'?`trabajador_id="${U.id}"`:'', 100).catch(()=>[]),
+    SIGA.list('solicitudes_rrhh','estado="Pendiente"',50).catch(()=>[]),
+    SIGA.list('denuncias','publicado=true',10).catch(()=>[]),
+    SIGA.list('comunas','',10).catch(()=>[]),
+  ]);
+
+  const todayStr = new Date().toLocaleDateString('sv-SE');
+  const actHoy = actividades.filter(a => (a.fecha||'').startsWith(todayStr));
+  const actSemana = actividades.filter(a => {
+    const d = new Date(a.fecha||'');
+    const now = new Date();
+    const start = new Date(now); start.setDate(now.getDate()-now.getDay());
+    return d >= start && d <= now;
+  });
+  const completadas = actSemana.filter(a=>a.estado==='Completada').length;
+  const pct = actSemana.length ? Math.round(completadas/actSemana.length*100) : 0;
+
+  setText('st-trabajadores', _allTrabajadores.filter(t=>t.estado==='Activo').length || '—');
+  setText('st-hoy', actHoy.length);
+  setText('st-solicitudes', solicitudes.length);
+  setText('st-cumplimiento', pct+'%');
+  setText('st-denuncias', denuncias.length);
+  setText('st-comunas', comunas.length);
+
+  // Feed actividades
+  const feed = document.getElementById('feed-actividades');
+  if (actividades.length === 0) {
+    feed.innerHTML = '<div class="af-item"><div class="af-info"><div class="af-name" style="color:var(--muted)">No hay actividades registradas aún.</div></div></div>';
+  } else {
+    feed.innerHTML = actividades.slice(0,5).map(a => {
+      const trab = _allTrabajadores.find(t=>t.id===a.trabajador_id);
+      const quien = trab ? `${esc(trab.nombres)} ${esc(trab.apellidos)}` : esc(U.nombres||'Tú');
+      return `<div class="af-item">
+        <div class="av av-sm">${(esc(quien).charAt(0)||'A')}</div>
+        <div class="af-info">
+          <div class="af-name">${esc(a.actividad||'Actividad sin título')}</div>
+          <div class="af-meta">${quien} · ${fmt(a.fecha)} · <span class="badge ${estadoBadge(a.estado)}">${esc(a.estado||'—')}</span></div>
+        </div></div>`;
+    }).join('');
+  }
+
+  // Feed solicitudes
+  const feedSol = document.getElementById('feed-solicitudes');
+  if (solicitudes.length === 0) {
+    feedSol.innerHTML = '<p style="font-size:13px;color:var(--muted)">No hay solicitudes pendientes.</p>';
+  } else {
+    feedSol.innerHTML = solicitudes.slice(0,5).map(s => {
+      const trab = _allTrabajadores.find(t=>t.id===s.trabajador_id);
+      const quien = trab ? `${esc(trab.nombres)} ${esc(trab.apellidos)}` : '—';
+      return `<div class="pending-item">
+        <span class="badge badge-amber">${esc(s.tipo||'Solicitud')}</span>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:500">${quien}</div>
+          <div style="font-size:11px;color:var(--muted)">${fmt(s.created)}</div>
+        </div>
+        ${['RRHH','DIRECTOR','PRESIDENTE'].includes(ROL)?`<div class="td-actions">
+          <button class="btn btn-sm btn-primary" onclick="responderSolicitud('${esc(s.id)}','Aprobada')">✓</button>
+          <button class="btn btn-sm btn-danger" onclick="responderSolicitud('${esc(s.id)}','Rechazada')">✗</button>
+        </div>`:''}
+      </div>`;
+    }).join('');
+  }
+
+  // Notif badge
+  const nb = document.getElementById('notif-count');
+  const comunicados = await SIGA.list('comunicados','',5).catch(()=>[]);
+  if (nb && comunicados.length > 0) { nb.textContent = comunicados.length; nb.style.display='flex'; }
+}
+
+/* ─── Quick Actions por rol ─── */
+function buildQuickActions() {
+  const all = [
+    { icon:'📋', label:'Registrar Actividad', sub:'Control diario', color:'#dcfce7', fn:`abrirModalActividad()`, roles:['TRABAJADOR','SUPERVISOR','COORDINADOR','DIRECTOR','RRHH','TECNOLOGIA','PRESIDENTE'] },
+    { icon:'📬', label:'Nueva Solicitud', sub:'Vacaciones, permisos…', color:'#dbeafe', fn:`sigaNav('mi-solicitud');abrirModalSolicitud()`, roles:['TRABAJADOR','SUPERVISOR','COORDINADOR','DIRECTOR','RRHH'] },
+    { icon:'📅', label:'Planificación Semanal', sub:'Registrar objetivos', color:'#fef3c7', fn:`sigaNav('planificacion')`, roles:['TRABAJADOR','SUPERVISOR','COORDINADOR','DIRECTOR'] },
+    { icon:'📢', label:'Enviar Comunicado', sub:'Circulares, memorándums', color:'#f3e8ff', fn:`sigaNav('rrhh');setTimeout(()=>switchTab('rrhh','comunicados'),100)`, roles:['RRHH','DIRECTOR','PRESIDENTE'] },
+    { icon:'📊', label:'Ver Indicadores', sub:'Métricas del equipo', color:'#dcfce7', fn:`sigaNav('indicadores')`, roles:['COORDINADOR','DIRECTOR','RRHH','PRESIDENTE','TECNOLOGIA'] },
+    { icon:'🏛️', label:'Vista Presidencia', sub:'Control global', color:'#e0f2fe', fn:`sigaNav('presidencia')`, roles:['PRESIDENTE','DIRECTOR'] },
+    { icon:'⚙️', label:'Admin Sistema', sub:'Usuarios y auditoría', color:'#fce7f3', fn:`sigaNav('tecnologia')`, roles:['TECNOLOGIA','PRESIDENTE'] },
+  ];
+  const qa = document.getElementById('quick-actions-list');
+  qa.innerHTML = all.filter(a=>a.roles.includes(ROL)).map(a =>
+    `<div class="qa-item" onclick="${a.fn}">
+      <div class="qa-icon" style="background:${a.color}">${a.icon}</div>
+      <div><div class="qa-label">${esc(a.label)}</div><div class="qa-sub">${esc(a.sub)}</div></div>
+    </div>`).join('');
+}
+
+/* ─── RRHH ─── */
+async function loadRRHH() {
+  loadPersonal();
+}
+async function loadPersonal() {
+  const tbody = document.getElementById('tabla-personal');
+  tbody.innerHTML = '<tr><td colspan="7" class="no-rows">Cargando…</td></tr>';
+  const items = await SIGA.list('trabajadores').catch(()=>[]);
+  _allTrabajadores = items;
+  renderPersonal(items);
+}
+function renderPersonal(items) {
+  const q     = (document.getElementById('personal-q')?.value||'').toLowerCase();
+  const dir   = document.getElementById('personal-dir')?.value||'';
+  const est   = document.getElementById('personal-estado')?.value||'';
+  const filt  = items.filter(t => {
+    if (q && !`${t.nombres} ${t.apellidos} ${t.cedula} ${t.cargo}`.toLowerCase().includes(q)) return false;
+    if (dir && t.direccion !== dir) return false;
+    if (est && t.estado !== est) return false;
+    return true;
+  });
+  const empty = document.getElementById('personal-empty');
+  const tbody = document.getElementById('tabla-personal');
+  if (!filt.length) { tbody.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+  tbody.innerHTML = filt.map(t => `<tr>
+    <td><div style="display:flex;align-items:center;gap:8px"><div class="av av-sm">${esc(((t.nombres||'').charAt(0)+(t.apellidos||'').charAt(0)).toUpperCase())}</div>
+      <div><div style="font-weight:500;font-size:13px">${esc(t.nombres||'')} ${esc(t.apellidos||'')}</div>
+      <div style="font-size:11px;color:var(--muted)">${esc(t.email||'')}</div></div></div></td>
+    <td>${esc(t.cedula||'—')}</td>
+    <td>${esc(t.cargo||'—')}</td>
+    <td>${esc(t.direccion||'—')}</td>
+    <td><span class="badge ${t.estado==='Activo'?'badge-green':t.estado==='Inactivo'?'badge-red':'badge-amber'}">${esc(t.estado||'—')}</span></td>
+    <td>${fmt(t.fecha_ingreso)}</td>
+    <td class="td-actions">
+      <button class="btn-icon" title="Editar" onclick="editarTrabajador('${esc(t.id)}')">✏️</button>
+      ${ROL==='TECNOLOGIA'||ROL==='PRESIDENTE'?`<button class="btn-icon btn-danger" title="Eliminar" onclick="eliminarTrabajador('${esc(t.id)}')">🗑️</button>`:''}
+    </td></tr>`).join('');
+}
+window.filterPersonal = () => renderPersonal(_allTrabajadores);
+
+async function loadSolicitudesRRHH() {
+  const tbody = document.getElementById('tabla-solicitudes');
+  tbody.innerHTML = '<tr><td colspan="6" class="no-rows">Cargando…</td></tr>';
+  const items = await SIGA.list('solicitudes_rrhh','',200,1,'-created').catch(()=>[]);
+  const tipo = document.getElementById('sol-tipo')?.value||'';
+  const est  = document.getElementById('sol-estado')?.value||'';
+  const filt = items.filter(s => (!tipo||s.tipo===tipo) && (!est||s.estado===est));
+  const empty = document.getElementById('sol-empty');
+  if (!filt.length) { tbody.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+  tbody.innerHTML = filt.map(s => {
+    const trab = _allTrabajadores.find(t=>t.id===s.trabajador_id);
+    const quien = trab ? `${esc(trab.nombres)} ${esc(trab.apellidos)}` : '—';
+    return `<tr>
+      <td>${quien}</td>
+      <td><span class="badge badge-blue">${esc(s.tipo||'—')}</span></td>
+      <td>${fmt(s.created)}</td>
+      <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(s.descripcion||'—')}</td>
+      <td><span class="badge ${estadoBadge(s.estado)}">${esc(s.estado||'Pendiente')}</span></td>
+      <td class="td-actions">
+        ${s.estado==='Pendiente' && ['RRHH','DIRECTOR','PRESIDENTE'].includes(ROL)?`
+          <button class="btn btn-sm btn-primary" onclick="responderSolicitud('${esc(s.id)}','Aprobada')">✓ Aprobar</button>
+          <button class="btn btn-sm btn-danger" onclick="responderSolicitud('${esc(s.id)}','Rechazada')">✗ Rechazar</button>`:'—'}
+      </td></tr>`;
+  }).join('');
+}
+window.filterSolicitudes = loadSolicitudesRRHH;
+
+window.responderSolicitud = async (id, estado) => {
+  if (!confirm(`¿${estado==='Aprobada'?'Aprobar':'Rechazar'} esta solicitud?`)) return;
+  await SIGA.update('solicitudes_rrhh', id, { estado, revisado_por: U.id, fecha_respuesta: new Date().toISOString() });
+  toast(`Solicitud ${estado.toLowerCase()}`);
+  loadSolicitudesRRHH();
+  // Recargar dashboard también
+  loadDashboard();
+};
+
+async function loadComunicadosRRHH() {
+  const items = await SIGA.list('comunicados','',100,1,'-created').catch(()=>[]);
+  renderComunicados(items, 'lista-comunicados');
+}
+async function loadComunicaciones() {
+  const items = await SIGA.list('comunicados','',100,1,'-created').catch(()=>[]);
+  renderComunicados(items, 'lista-comunicaciones');
+}
+function renderComunicados(items, containerId) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  if (!items.length) { el.innerHTML='<div class="empty-state"><div class="es-icon">📢</div><div class="es-title">Sin comunicados</div><div class="es-sub">No hay comunicados publicados aún.</div></div>'; return; }
+  el.innerHTML = items.map(c => `<div class="card">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+      <span class="badge badge-purple">${esc(c.tipo||'Comunicado')}</span>
+      <span class="badge badge-gray">${esc(c.destino||'Todos')}</span>
+    </div>
+    <div class="card-title">${esc(c.asunto||'Sin asunto')}</div>
+    <div class="card-sub">${fmtH(c.created)}</div>
+    <div class="card-body" style="font-size:13px;color:var(--muted);line-height:1.5">${esc((c.cuerpo||'').substring(0,200))}${(c.cuerpo||'').length>200?'…':''}</div>
+  </div>`).join('');
+}
+
+async function loadCapacitaciones() {
+  const items = await SIGA.list('capacitaciones').catch(()=>[]);
+  const el = document.getElementById('lista-capacitaciones');
+  if (!items.length) { el.innerHTML='<div class="empty-state"><div class="es-icon">🎓</div><div class="es-title">Sin capacitaciones</div><div class="es-sub">No hay capacitaciones registradas.</div></div>'; return; }
+  el.innerHTML = items.map(c => `<div class="card">
+    <div class="card-title">${esc(c.nombre||'Capacitación')}</div>
+    <div class="card-sub">${esc(c.modalidad||'')} · ${fmt(c.fecha_inicio)} ${c.fecha_fin?'— '+fmt(c.fecha_fin):''}</div>
+    <div class="card-body" style="font-size:13px;color:var(--muted)">${esc((c.descripcion||'').substring(0,120))}</div>
+    <div class="card-footer">
+      <span class="badge badge-blue">${esc(c.dirigido_a||'Todos')}</span>
+      <span class="badge ${c.estado==='Activa'?'badge-green':'badge-gray'}">${esc(c.estado||'—')}</span>
+    </div>
+  </div>`).join('');
+}
+
+/* ─── ACTIVIDADES ─── */
+async function loadMisActividades() {
+  const tbody = document.getElementById('tabla-mis-act');
+  tbody.innerHTML = '<tr><td colspan="7" class="no-rows">Cargando…</td></tr>';
+  let filter = `trabajador_id="${U.id}"`;
+  const desde = document.getElementById('act-fecha-desde')?.value;
+  const hasta = document.getElementById('act-fecha-hasta')?.value;
+  const est   = document.getElementById('act-estado-f')?.value;
+  if (desde) filter += ` && fecha>="${desde}"`;
+  if (hasta) filter += ` && fecha<="${hasta}"`;
+  if (est)   filter += ` && estado="${est}"`;
+  const items = await SIGA.list('actividades', filter, 200, 1, '-fecha').catch(()=>[]);
+  const empty = document.getElementById('mis-act-empty');
+  if (!items.length) { tbody.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+  tbody.innerHTML = items.map(a => `<tr>
+    <td>${fmt(a.fecha)}</td>
+    <td style="font-weight:500">${esc(a.actividad||'—')}</td>
+    <td>${esc(a.proyecto_nombre||'—')}</td>
+    <td>${esc(a.hora_inicio||'—')}</td>
+    <td>${esc(a.hora_fin||'—')}</td>
+    <td><span class="badge ${estadoBadge(a.estado)}">${esc(a.estado||'—')}</span></td>
+    <td class="td-actions">
+      <button class="btn-icon" onclick="editarActividad('${esc(a.id)}')">✏️</button>
+      <button class="btn-icon" style="color:var(--danger)" onclick="eliminarActividad('${esc(a.id)}')">🗑️</button>
+    </td></tr>`).join('');
+}
+
+async function loadGlobalActividades() {
+  const tbody = document.getElementById('tabla-global-act');
+  tbody.innerHTML = '<tr><td colspan="6" class="no-rows">Cargando…</td></tr>';
+  const items = await SIGA.list('actividades','',300,1,'-fecha').catch(()=>[]);
+  const q   = (document.getElementById('global-q')?.value||'').toLowerCase();
+  const dir = document.getElementById('global-dir')?.value||'';
+  const filt = items.filter(a => {
+    const trab = _allTrabajadores.find(t=>t.id===a.trabajador_id);
+    if (q && !`${a.actividad} ${trab?.nombres||''} ${trab?.apellidos||''}`.toLowerCase().includes(q)) return false;
+    if (dir && trab?.direccion !== dir) return false;
+    return true;
+  });
+  if (!filt.length) { tbody.innerHTML=''; document.getElementById('global-act-empty').style.display='block'; return; }
+  document.getElementById('global-act-empty').style.display='none';
+  tbody.innerHTML = filt.map(a => {
+    const trab = _allTrabajadores.find(t=>t.id===a.trabajador_id);
+    const quien = trab ? `${esc(trab.nombres)} ${esc(trab.apellidos)}` : '—';
+    return `<tr>
+      <td>${quien}</td>
+      <td>${esc(a.actividad||'—')}</td>
+      <td>${esc(trab?.direccion||'—')}</td>
+      <td>${fmt(a.fecha)}</td>
+      <td><span class="badge ${estadoBadge(a.estado)}">${esc(a.estado||'—')}</span></td>
+      <td><button class="btn-icon" onclick="verActividad('${esc(a.id)}')">👁️</button></td></tr>`;
+  }).join('');
+}
+
+/* ─── PLANIFICACIÓN ─── */
+async function loadPlanificacion() {
+  const el = document.getElementById('plan-semanas');
+  el.innerHTML = '<p style="color:var(--muted);font-size:13px">Cargando…</p>';
+  const filter = ROL==='TRABAJADOR' ? `trabajador_id="${U.id}"` : '';
+  const items = await SIGA.list('planificaciones', filter, 100, 1, '-semana_inicio').catch(()=>[]);
+  if (!items.length) {
+    el.innerHTML = `<div class="empty-state"><div class="es-icon">📅</div><div class="es-title">Sin planificaciones</div>
+      <div class="es-sub">No hay planificaciones registradas.</div></div>`; return;
+  }
+  el.innerHTML = items.map(p => `<div class="table-wrap" style="margin-bottom:16px">
+    <div class="table-toolbar">
+      <span class="table-title">Semana del ${fmt(p.semana_inicio)}</span>
+      <span class="badge ${p.prioridad==='Alta'?'badge-red':p.prioridad==='Media'?'badge-amber':'badge-gray'}">${esc(p.prioridad||'—')}</span>
+    </div>
+    <table><tbody>
+      <tr><th style="width:140px">Objetivo</th><td>${esc(p.objetivo||'—')}</td></tr>
+      <tr><th>Actividad</th><td>${esc(p.actividad||'—')}</td></tr>
+      <tr><th>Resultado esperado</th><td>${esc(p.resultado_esperado||'—')}</td></tr>
+    </tbody></table>
+  </div>`).join('');
+}
+
+/* ─── MIS SOLICITUDES ─── */
+async function loadMisSolicitudes() {
+  const tbody = document.getElementById('tabla-mis-solicitudes');
+  const filter = `trabajador_id="${U.id}"`;
+  const items = await SIGA.list('solicitudes_rrhh', filter, 100, 1, '-created').catch(()=>[]);
+  const empty = document.getElementById('mis-sol-empty');
+  if (!items.length) { tbody.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+  tbody.innerHTML = items.map(s => `<tr>
+    <td><span class="badge badge-blue">${esc(s.tipo||'—')}</span></td>
+    <td>${fmt(s.created)}</td>
+    <td style="max-width:200px">${esc((s.descripcion||'').substring(0,80))}</td>
+    <td><span class="badge ${estadoBadge(s.estado)}">${esc(s.estado||'Pendiente')}</span></td>
+    <td style="font-size:12px;color:var(--muted)">${esc(s.respuesta||'—')}</td>
+  </tr>`).join('');
+}
+
+/* ─── INDICADORES ─── */
+async function loadIndicadores() {
+  const [actividades, capacitaciones] = await Promise.all([
+    SIGA.list('actividades','',500).catch(()=>[]),
+    SIGA.list('capacitaciones','estado="Activa"').catch(()=>[]),
+  ]);
+  const mes = new Date().getMonth();
+  const año = new Date().getFullYear();
+  const actMes = actividades.filter(a => { const d=new Date(a.fecha||''); return d.getMonth()===mes && d.getFullYear()===año; });
+  const completadas = actMes.filter(a=>a.estado==='Completada').length;
+  const pct = actMes.length ? Math.round(completadas/actMes.length*100) : 0;
+  // Horas totales (suma de duración si hay hora_inicio y hora_fin)
+  let horas = 0;
+  actMes.forEach(a => {
+    if (a.hora_inicio && a.hora_fin) {
+      const [ih,im] = a.hora_inicio.split(':').map(Number);
+      const [fh,fm] = a.hora_fin.split(':').map(Number);
+      horas += (fh*60+fm - ih*60-im)/60;
+    }
+  });
+  setText('ind-act-mes', actMes.length);
+  setText('ind-horas', horas.toFixed(1)+'h');
+  setText('ind-pct', pct+'%');
+  setText('ind-cap', capacitaciones.length);
+
+  // Por dirección
+  const porDir = {};
+  _allDirecciones.forEach(d => porDir[d.nombre]={total:0,completadas:0});
+  actMes.forEach(a => {
+    const trab = _allTrabajadores.find(t=>t.id===a.trabajador_id);
+    const dir = trab?.direccion||'Sin dirección';
+    if (!porDir[dir]) porDir[dir]={total:0,completadas:0};
+    porDir[dir].total++;
+    if (a.estado==='Completada') porDir[dir].completadas++;
+  });
+  const dirEl = document.getElementById('ind-por-dir');
+  dirEl.innerHTML = Object.entries(porDir).filter(([,v])=>v.total>0).map(([dir,v]) => {
+    const pctDir = v.total ? Math.round(v.completadas/v.total*100) : 0;
+    return `<div style="margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px">
+        <span style="font-weight:500">${esc(dir)}</span>
+        <span style="color:var(--muted)">${v.completadas}/${v.total} · ${pctDir}%</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill${pctDir<50?' red':pctDir<80?' amber':''}" style="width:${pctDir}%"></div></div>
+    </div>`;
+  }).join('') || '<p style="font-size:13px;color:var(--muted)">Sin datos este mes.</p>';
+
+  // Top trabajadores
+  const porTrab = {};
+  actMes.forEach(a => {
+    if (!porTrab[a.trabajador_id]) porTrab[a.trabajador_id]=0;
+    porTrab[a.trabajador_id]++;
+  });
+  const topTrab = Object.entries(porTrab).sort(([,a],[,b])=>b-a).slice(0,5);
+  const topEl = document.getElementById('ind-top-trab');
+  topEl.innerHTML = topTrab.map(([id,n],i) => {
+    const trab = _allTrabajadores.find(t=>t.id===id);
+    const nombre = trab ? `${esc(trab.nombres)} ${esc(trab.apellidos)}` : '—';
+    const initials = trab ? `${(trab.nombres||'').charAt(0)}${(trab.apellidos||'').charAt(0)}` : '?';
+    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
+      <div style="font-weight:700;color:var(--muted);width:18px;font-size:12px">#${i+1}</div>
+      <div class="av av-sm">${esc(initials.toUpperCase())}</div>
+      <div style="flex:1;font-size:13px;font-weight:500">${nombre}</div>
+      <div style="font-size:12px;color:var(--muted)">${n} act.</div>
+    </div>`;
+  }).join('') || '<p style="font-size:13px;color:var(--muted)">Sin datos este mes.</p>';
+}
+
+/* ─── PRESIDENCIA ─── */
+async function loadPresidencia() {
+  const [trabajadores, actividades, solicitudes, denuncias, proyectos, comunas, consejos] = await Promise.all([
+    SIGA.list('trabajadores').catch(()=>[]),
+    SIGA.list('actividades','',500).catch(()=>[]),
+    SIGA.list('solicitudes_rrhh','estado="Pendiente"').catch(()=>[]),
+    SIGA.list('denuncias','publicado=true').catch(()=>[]),
+    SIGA.list('proyectos','publicado=true').catch(()=>[]),
+    SIGA.list('comunas').catch(()=>[]),
+    SIGA.list('consejos_comunales').catch(()=>[]),
+  ]);
+  const todayStr = new Date().toLocaleDateString('sv-SE');
+  const actHoy = actividades.filter(a=>(a.fecha||'').startsWith(todayStr));
+  const grid = document.getElementById('pres-stats');
+  grid.innerHTML = [
+    {icon:'👥',val:trabajadores.filter(t=>t.estado==='Activo').length,lbl:'Trabajadores activos'},
+    {icon:'📋',val:actHoy.length,lbl:'Actividades hoy'},
+    {icon:'📬',val:solicitudes.length,lbl:'Solicitudes RRHH pendientes',cls:'amber'},
+    {icon:'🏗️',val:proyectos.filter(p=>p.estado==='En Ejecución').length,lbl:'Proyectos en ejecución'},
+    {icon:'⚠️',val:denuncias.length,lbl:'Denuncias abiertas',cls:'red'},
+    {icon:'🏘️',val:comunas.length+consejos.length,lbl:'Org. comunitarias'},
+  ].map(s=>`<div class="dash-stat${s.cls?' '+s.cls:''}">
+    <div class="ds-icon">${s.icon}</div>
+    <div class="ds-val">${s.val}</div>
+    <div class="ds-lbl">${esc(s.lbl)}</div>
+  </div>`).join('');
+
+  // Por dirección
+  const porDir = {};
+  actividades.filter(a=>(a.fecha||'').startsWith(todayStr)).forEach(a => {
+    const trab = trabajadores.find(t=>t.id===a.trabajador_id);
+    const dir = trab?.direccion||'Sin dirección';
+    if (!porDir[dir]) porDir[dir]={total:0,completadas:0};
+    porDir[dir].total++;
+    if (a.estado==='Completada') porDir[dir].completadas++;
+  });
+  document.getElementById('pres-dir-act').innerHTML = Object.keys(porDir).length
+    ? Object.entries(porDir).map(([dir,v])=>`<div class="af-item">
+        <div class="af-info"><div class="af-name">${esc(dir)}</div>
+          <div class="af-meta">${v.completadas}/${v.total} completadas hoy</div>
+        </div>
+        <div class="progress-bar" style="width:100px"><div class="progress-fill${v.total?'':' red'}" style="width:${v.total?Math.round(v.completadas/v.total*100):0}%"></div></div>
+      </div>`).join('')
+    : '<p style="font-size:13px;color:var(--muted);padding:8px">Sin actividades registradas hoy.</p>';
+
+  const totalSem = actividades.filter(a=>{
+    const d=new Date(a.fecha||'');const now=new Date();const s=new Date(now);s.setDate(now.getDate()-now.getDay());return d>=s&&d<=now;
+  }).length;
+  const compSem = actividades.filter(a=>{
+    const d=new Date(a.fecha||'');const now=new Date();const s=new Date(now);s.setDate(now.getDate()-now.getDay());
+    return d>=s&&d<=now&&a.estado==='Completada';
+  }).length;
+  document.getElementById('pres-resumen').innerHTML = `
+    <div style="font-size:13px;line-height:2">
+      <div>📋 Actividades esta semana: <strong>${totalSem}</strong></div>
+      <div>✅ Completadas: <strong>${compSem}</strong></div>
+      <div>📊 Cumplimiento: <strong>${totalSem?Math.round(compSem/totalSem*100):0}%</strong></div>
+      <div>📬 Solicitudes pendientes: <strong>${solicitudes.length}</strong></div>
+      <div>🏘️ Comunas: <strong>${comunas.length}</strong></div>
+      <div>🤝 Consejos Comunales: <strong>${consejos.length}</strong></div>
+    </div>`;
+}
+
+/* ─── TECNOLOGÍA ─── */
+async function loadTecnologia() { loadTecUsuarios(); }
+async function loadTecUsuarios() {
+  const items = _allTrabajadores.length ? _allTrabajadores : await SIGA.list('trabajadores').catch(()=>[]);
+  filterTecUsers(items);
+}
+window.filterTecUsers = function(items) {
+  if (!items) items = _allTrabajadores;
+  const q = (document.getElementById('tec-user-q')?.value||'').toLowerCase();
+  const filt = items.filter(t => !q || `${t.nombres} ${t.apellidos} ${t.email} ${t.rol}`.toLowerCase().includes(q));
+  const tbody = document.getElementById('tabla-tec-usuarios');
+  if (!tbody) return;
+  tbody.innerHTML = filt.map(t => `<tr>
+    <td><div style="display:flex;align-items:center;gap:8px">
+      <div class="av av-sm">${esc(((t.nombres||'').charAt(0)+(t.apellidos||'').charAt(0)).toUpperCase())}</div>
+      <div style="font-size:13px;font-weight:500">${esc(t.nombres||'')} ${esc(t.apellidos||'')}</div></div></td>
+    <td>${esc(t.email||'—')}</td>
+    <td><span class="badge badge-purple">${esc(t.rol||'TRABAJADOR')}</span></td>
+    <td><span class="badge ${t.estado==='Activo'?'badge-green':'badge-red'}">${esc(t.estado||'—')}</span></td>
+    <td style="font-size:12px;color:var(--muted)">${fmt(t.updated||t.created)}</td>
+    <td class="td-actions">
+      <button class="btn-icon" onclick="editarTrabajador('${esc(t.id)}')">✏️</button>
+      <button class="btn-icon" onclick="toggleEstadoUser('${esc(t.id)}','${esc(t.estado||'Activo')}')">${t.estado==='Activo'?'🔒':'🔓'}</button>
+    </td></tr>`).join('');
+}
+
+async function loadAuditoria() {
+  const tbody = document.getElementById('tabla-auditoria');
+  tbody.innerHTML = '<tr><td colspan="5" class="no-rows">Cargando…</td></tr>';
+  const items = await SIGA.list('auditoria_sistema','',100,1,'-created').catch(()=>[]);
+  if (!items.length) { tbody.innerHTML=''; document.getElementById('audit-empty').style.display='block'; return; }
+  document.getElementById('audit-empty').style.display='none';
+  tbody.innerHTML = items.map(a => {
+    const trab = _allTrabajadores.find(t=>t.id===a.usuario_id);
+    const quien = trab ? `${esc(trab.nombres)} ${esc(trab.apellidos)}` : esc(a.usuario_id||'—');
+    return `<tr>
+      <td>${quien}</td>
+      <td>${esc(a.accion||'—')}</td>
+      <td><span class="badge badge-blue">${esc(a.modulo||'—')}</span></td>
+      <td style="font-size:12px">${fmtH(a.created)}</td>
+      <td><span class="badge ${a.resultado==='OK'?'badge-green':'badge-red'}">${esc(a.resultado||'—')}</span></td>
+    </tr>`;
+  }).join('');
+}
+async function loadTickets() {
+  const tbody = document.getElementById('tabla-tickets');
+  tbody.innerHTML = '<tr><td colspan="7" class="no-rows">Cargando…</td></tr>';
+  const items = await SIGA.list('tickets_soporte','',100,1,'-created').catch(()=>[]);
+  if (!items.length) { tbody.innerHTML=''; document.getElementById('tickets-empty').style.display='block'; return; }
+  document.getElementById('tickets-empty').style.display='none';
+  tbody.innerHTML = items.map(t => `<tr>
+    <td style="font-size:11px;color:var(--muted)">${esc((t.id||'').substring(0,8))}</td>
+    <td style="font-weight:500">${esc(t.asunto||'—')}</td>
+    <td><span class="badge ${t.prioridad==='Alta'?'badge-red':t.prioridad==='Media'?'badge-amber':'badge-gray'}">${esc(t.prioridad||'—')}</span></td>
+    <td>${esc(t.responsable||'Por asignar')}</td>
+    <td><span class="badge ${estadoBadge(t.estado)}">${esc(t.estado||'Abierto')}</span></td>
+    <td style="font-size:12px">${fmt(t.created)}</td>
+    <td class="td-actions">
+      <button class="btn-icon" onclick="cerrarTicket('${esc(t.id)}')">✅</button>
+    </td></tr>`).join('');
+}
+async function loadMonitor() {
+  const pb = document.getElementById('mon-pb');
+  const api = document.getElementById('mon-api');
+  const usersEl = document.getElementById('mon-users');
+  const statusList = document.getElementById('sys-status-list');
+  const t0 = Date.now();
+  try {
+    await fetch(document.querySelector('meta[name="pb-url"]')?.content+'/api/health');
+    const ms = Date.now()-t0;
+    if (pb) pb.textContent = '✅ Online';
+    if (api) api.textContent = ms+'ms';
+  } catch {
+    if (pb) pb.textContent = '❌ Offline';
+    if (api) api.textContent = '—';
+  }
+  const actHoy = await SIGA.list('auditoria_sistema', `created>="${new Date().toLocaleDateString('sv-SE')}"`, 1).catch(()=>[]);
+  if (usersEl) usersEl.textContent = _allTrabajadores.filter(t=>t.estado==='Activo').length;
+  if (statusList) statusList.innerHTML = `
+    <div style="font-size:13px;line-height:2.2">
+      <div>🖥️ PocketBase: <strong>${pb?.textContent||'—'}</strong></div>
+      <div>📡 Latencia API: <strong>${api?.textContent||'—'}</strong></div>
+      <div>👤 Trabajadores activos: <strong>${_allTrabajadores.filter(t=>t.estado==='Activo').length}</strong></div>
+      <div>🌐 Portal: <a href="../index.html" style="color:var(--primary)">iagami.online</a></div>
+    </div>`;
+}
+
+/* ─── GUARDAR: Trabajador ─── */
+window.abrirModalTrabajador = function(fromTec) {
+  _editTrabId = null;
+  document.getElementById('modal-trab-title').textContent = 'Nuevo Trabajador';
+  document.getElementById('sec-password-field').style.display='block';
+  ['t-nombres','t-apellidos','t-cedula','t-telefono','t-email','t-cargo','t-ingreso','t-password','t-password2','t-coordinacion'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('t-rol').value='TRABAJADOR';
+  document.getElementById('t-estado').value='Activo';
+  abrirModal('modal-trabajador');
+};
+window.editarTrabajador = function(id) {
+  _editTrabId = id;
+  const t = _allTrabajadores.find(x=>x.id===id);
+  if (!t) return;
+  document.getElementById('modal-trab-title').textContent = 'Editar Trabajador';
+  document.getElementById('sec-password-field').style.display='none';
+  document.getElementById('t-nombres').value = t.nombres||'';
+  document.getElementById('t-apellidos').value = t.apellidos||'';
+  document.getElementById('t-cedula').value = t.cedula||'';
+  document.getElementById('t-telefono').value = t.telefono||'';
+  document.getElementById('t-email').value = t.email||'';
+  document.getElementById('t-cargo').value = t.cargo||'';
+  document.getElementById('t-ingreso').value = t.fecha_ingreso||'';
+  document.getElementById('t-rol').value = t.rol||'TRABAJADOR';
+  document.getElementById('t-estado').value = t.estado||'Activo';
+  document.getElementById('t-coordinacion').value = t.coordinacion||'';
+  if (document.getElementById('t-direccion')) document.getElementById('t-direccion').value = t.direccion||'';
+  abrirModal('modal-trabajador');
+};
+window.guardarTrabajador = async function() {
+  const nombres = document.getElementById('t-nombres').value.trim();
+  const apellidos = document.getElementById('t-apellidos').value.trim();
+  const email    = document.getElementById('t-email').value.trim();
+  const cargo    = document.getElementById('t-cargo').value.trim();
+  if (!nombres||!apellidos||!email||!cargo) { toast('Completa los campos obligatorios','error'); return; }
+  const data = {
+    nombres, apellidos, email, cargo,
+    cedula: document.getElementById('t-cedula').value.trim(),
+    telefono: document.getElementById('t-telefono').value.trim(),
+    rol: document.getElementById('t-rol').value,
+    estado: document.getElementById('t-estado').value,
+    direccion: document.getElementById('t-direccion')?.value||'',
+    coordinacion: document.getElementById('t-coordinacion').value.trim(),
+    fecha_ingreso: document.getElementById('t-ingreso').value||null,
+  };
+  if (!_editTrabId) {
+    const pass  = document.getElementById('t-password').value;
+    const pass2 = document.getElementById('t-password2').value;
+    if (pass.length < 8) { toast('Contraseña mínimo 8 caracteres','error'); return; }
+    if (pass !== pass2)  { toast('Las contraseñas no coinciden','error'); return; }
+    data.password = pass; data.passwordConfirm = pass2; data.username = email;
+  }
+  try {
+    if (_editTrabId) await SIGA.update('trabajadores', _editTrabId, data);
+    else             await SIGA.create('trabajadores', data);
+    toast(_editTrabId?'Trabajador actualizado':'Trabajador creado');
+    cerrarModal('modal-trabajador');
+    await loadCatalogoBase();
+    loadPersonal();
+  } catch(e) { toast('Error: '+e.message,'error'); }
+};
+window.eliminarTrabajador = async function(id) {
+  if (!confirm('¿Eliminar este trabajador? Esta acción es irreversible.')) return;
+  try { await SIGA.remove('trabajadores',id); toast('Trabajador eliminado'); loadCatalogoBase(); loadPersonal(); }
+  catch(e) { toast('Error: '+e.message,'error'); }
+};
+window.toggleEstadoUser = async function(id, estadoActual) {
+  const nuevo = estadoActual==='Activo' ? 'Inactivo' : 'Activo';
+  if (!confirm(`¿${nuevo==='Activo'?'Activar':'Bloquear'} este usuario?`)) return;
+  await SIGA.update('trabajadores',id,{estado:nuevo});
+  toast(`Usuario ${nuevo.toLowerCase()}`);
+  await loadCatalogoBase(); loadTecUsuarios();
+};
+
+/* ─── GUARDAR: Actividad ─── */
+let _editActId = null;
+window.abrirModalActividad = function() {
+  _editActId = null;
+  document.getElementById('modal-act-title').textContent='Registrar Actividad';
+  ['a-actividad','a-descripcion','a-resultado','a-obs','a-ubicacion'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('a-fecha').value = new Date().toLocaleDateString('sv-SE');
+  document.getElementById('a-estado').value='Completada';
+  abrirModal('modal-actividad');
+};
+window.editarActividad = async function(id) {
+  _editActId = id;
+  const a = await SIGA.getOne('actividades',id).catch(()=>null);
+  if (!a) return;
+  document.getElementById('modal-act-title').textContent='Editar Actividad';
+  document.getElementById('a-fecha').value = a.fecha||'';
+  document.getElementById('a-inicio').value = a.hora_inicio||'';
+  document.getElementById('a-fin').value = a.hora_fin||'';
+  document.getElementById('a-actividad').value = a.actividad||'';
+  document.getElementById('a-descripcion').value = a.descripcion||'';
+  document.getElementById('a-resultado').value = a.resultado||'';
+  document.getElementById('a-estado').value = a.estado||'Completada';
+  document.getElementById('a-obs').value = a.observaciones||'';
+  document.getElementById('a-ubicacion').value = a.ubicacion||'';
+  abrirModal('modal-actividad');
+};
+window.guardarActividad = async function() {
+  const actividad = document.getElementById('a-actividad').value.trim();
+  const fecha     = document.getElementById('a-fecha').value;
+  if (!actividad||!fecha) { toast('Actividad y fecha son obligatorias','error'); return; }
+  const proy = _allProyectos.find(p=>p.id===document.getElementById('a-proyecto').value);
+  const data = {
+    trabajador_id: U.id, fecha, actividad,
+    descripcion: document.getElementById('a-descripcion').value.trim(),
+    resultado:   document.getElementById('a-resultado').value.trim(),
+    hora_inicio: document.getElementById('a-inicio').value,
+    hora_fin:    document.getElementById('a-fin').value,
+    estado:      document.getElementById('a-estado').value,
+    observaciones: document.getElementById('a-obs').value.trim(),
+    ubicacion:   document.getElementById('a-ubicacion').value.trim(),
+    proyecto_id: document.getElementById('a-proyecto').value||null,
+    proyecto_nombre: proy?.nombre||null,
+    comuna_id:   document.getElementById('a-comuna').value||null,
+    consejo_id:  document.getElementById('a-consejo').value||null,
+  };
+  try {
+    if (_editActId) await SIGA.update('actividades',_editActId,data);
+    else            await SIGA.create('actividades',data);
+    toast(_editActId?'Actividad actualizada':'Actividad registrada');
+    cerrarModal('modal-actividad');
+    loadMisActividades();
+    loadDashboard();
+    await registrarAuditoria('Registrar actividad','Actividades','OK');
+  } catch(e) { toast('Error: '+e.message,'error'); }
+};
+window.eliminarActividad = async function(id) {
+  if (!confirm('¿Eliminar esta actividad?')) return;
+  await SIGA.remove('actividades',id).catch(e=>toast('Error: '+e.message,'error'));
+  toast('Actividad eliminada');
+  loadMisActividades();
+};
+window.verActividad = async function(id) {
+  const a = await SIGA.getOne('actividades',id).catch(()=>null);
+  if (!a) return;
+  alert(`Actividad: ${a.actividad}\nFecha: ${fmt(a.fecha)}\nEstado: ${a.estado}\nDescripción: ${a.descripcion||'—'}\nResultado: ${a.resultado||'—'}`);
+};
+
+/* ─── GUARDAR: Solicitud ─── */
+window.abrirModalSolicitud = function() { abrirModal('modal-solicitud'); };
+window.guardarSolicitud = async function() {
+  const desc = document.getElementById('sol-desc').value.trim();
+  if (!desc) { toast('Completa la descripción','error'); return; }
+  const data = {
+    trabajador_id: U.id,
+    tipo: document.getElementById('sol-tipo-new').value,
+    fecha_desde: document.getElementById('sol-desde').value||null,
+    fecha_hasta: document.getElementById('sol-hasta').value||null,
+    descripcion: desc,
+    estado: 'Pendiente',
+  };
+  try {
+    await SIGA.create('solicitudes_rrhh',data);
+    toast('Solicitud enviada — pendiente de aprobación');
+    cerrarModal('modal-solicitud');
+    loadMisSolicitudes();
+  } catch(e) { toast('Error: '+e.message,'error'); }
+};
+
+/* ─── GUARDAR: Comunicado ─── */
+window.abrirModalComunicado = function() { abrirModal('modal-comunicado'); };
+window.guardarComunicado = async function() {
+  const asunto = document.getElementById('com-asunto').value.trim();
+  const cuerpo = document.getElementById('com-cuerpo').value.trim();
+  if (!asunto||!cuerpo) { toast('Asunto y contenido son obligatorios','error'); return; }
+  const data = {
+    tipo: document.getElementById('com-tipo').value,
+    destino: document.getElementById('com-destino').value,
+    asunto, cuerpo,
+    autor_id: U.id,
+    autor_nombre: `${U.nombres||''} ${U.apellidos||''}`.trim(),
+  };
+  try {
+    await SIGA.create('comunicados',data);
+    toast('Comunicado publicado');
+    cerrarModal('modal-comunicado');
+    loadComunicadosRRHH();
+  } catch(e) { toast('Error: '+e.message,'error'); }
+};
+
+/* ─── GUARDAR: Planificación ─── */
+window.abrirModalPlanificacion = function() { abrirModal('modal-planificacion'); };
+window.guardarPlanificacion = async function() {
+  const objetivo = document.getElementById('p-objetivo').value.trim();
+  const actividad = document.getElementById('p-actividad').value.trim();
+  if (!objetivo||!actividad) { toast('Objetivo y actividad son obligatorios','error'); return; }
+  const data = {
+    trabajador_id: U.id,
+    semana_inicio: document.getElementById('p-semana').value||null,
+    prioridad: document.getElementById('p-prioridad').value,
+    objetivo, actividad,
+    resultado_esperado: document.getElementById('p-resultado').value.trim(),
+  };
+  try {
+    await SIGA.create('planificaciones',data);
+    toast('Planificación guardada');
+    cerrarModal('modal-planificacion');
+    loadPlanificacion();
+  } catch(e) { toast('Error: '+e.message,'error'); }
+};
+
+/* ─── GUARDAR: Ticket ─── */
+window.abrirModalTicket = function() { abrirModal('modal-ticket'); };
+window.guardarTicket = async function() {
+  const asunto = document.getElementById('tk-asunto').value.trim();
+  const desc   = document.getElementById('tk-desc').value.trim();
+  if (!asunto||!desc) { toast('Completa todos los campos','error'); return; }
+  const data = {
+    tipo: document.getElementById('tk-tipo').value,
+    prioridad: document.getElementById('tk-prioridad').value,
+    asunto, descripcion: desc,
+    solicitante_id: U.id,
+    estado: 'Abierto',
+  };
+  try {
+    await SIGA.create('tickets_soporte',data);
+    toast('Ticket creado');
+    cerrarModal('modal-ticket');
+    loadTickets();
+  } catch(e) { toast('Error: '+e.message,'error'); }
+};
+window.cerrarTicket = async function(id) {
+  if (!confirm('¿Cerrar este ticket?')) return;
+  await SIGA.update('tickets_soporte',id,{estado:'Resuelto',fecha_cierre:new Date().toISOString()});
+  toast('Ticket cerrado');
+  loadTickets();
+};
+
+/* ─── Capacitación (básico) ─── */
+window.abrirModalCapacitacion = function() {
+  const nombre = prompt('Nombre de la capacitación:');
+  if (!nombre) return;
+  const fecha = prompt('Fecha de inicio (YYYY-MM-DD):');
+  SIGA.create('capacitaciones',{nombre,fecha_inicio:fecha,estado:'Activa',autor_id:U.id})
+    .then(()=>{ toast('Capacitación registrada'); loadCapacitaciones(); })
+    .catch(e=>toast('Error: '+e.message,'error'));
+};
+
+/* ─── Auditoría ─── */
+async function registrarAuditoria(accion, modulo, resultado='OK') {
+  SIGA.create('auditoria_sistema', {
+    usuario_id: U.id,
+    accion, modulo, resultado,
+  }).catch(()=>{});
+}
+
+/* ─── Helpers ─── */
+function setText(id, val) { const el=document.getElementById(id); if(el) el.textContent=val; }
+function estadoBadge(estado) {
+  const m={'Completada':'badge-green','Aprobada':'badge-green','OK':'badge-green','Activo':'badge-green','Activa':'badge-green',
+    'Pendiente':'badge-amber','En Proceso':'badge-amber','En Ejecución':'badge-amber',
+    'Rechazada':'badge-red','Suspendida':'badge-red','Inactivo':'badge-red','Offline':'badge-red',
+    'Reprogramada':'badge-blue','Resuelto':'badge-blue'};
+  return m[estado]||'badge-gray';
+}
+
+window.addEventListener('sigap:session-expired', () => { SIGA.toast('Sesión expirada. Redirigiendo…','warning'); setTimeout(()=>SIGA.logout(),1500); });
+</script>
+</body>
+</html>
