@@ -105,7 +105,7 @@
           <div class="activity-feed" style="margin-bottom:20px">
             <div class="af-header">
               <span class="af-title">⚡ Actividades Recientes</span>
-              <button class="btn btn-sm btn-secondary" onclick="sigaNav('actividades')">Ver todas</button>
+              <button class="btn btn-sm btn-secondary" onclick="window.sigaNav&&sigaNav('actividades')">Ver todas</button>
             </div>
             <div id="feed-actividades">
               <div class="af-item"><div class="af-info"><div class="af-name skeleton" style="height:13px;width:200px;margin-bottom:5px"> </div><div class="af-meta skeleton" style="height:11px;width:140px"> </div></div></div>
@@ -116,7 +116,7 @@
 
           <!-- Solicitudes pendientes -->
           <div class="pending-wrap" id="sec-pendientes-dash">
-            <div class="pw-title">📬 Solicitudes Pendientes <button class="btn btn-sm btn-secondary" onclick="sigaNav('rrhh')">Ver RRHH</button></div>
+            <div class="pw-title">📬 Solicitudes Pendientes <button class="btn btn-sm btn-secondary" onclick="window.sigaNav&&sigaNav('rrhh')">Ver RRHH</button></div>
             <div id="feed-solicitudes"><p style="font-size:13px;color:var(--muted)">Cargando…</p></div>
           </div>
         </div>
