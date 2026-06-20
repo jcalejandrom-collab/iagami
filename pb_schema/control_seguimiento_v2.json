@@ -1,0 +1,64 @@
+[
+  {
+    "id": "seguimactvd001",
+    "name": "seguimiento_actividades",
+    "type": "base",
+    "fields": [
+      { "id":"rel_seg_001","name":"actividad_id","type":"relation","required":true,
+        "maxSelect":1,"collectionId":"actividadesid01","cascadeDelete":false },
+      { "id":"rel_seg_002","name":"supervisor_id","type":"relation","required":true,
+        "maxSelect":1,"collectionId":"sigatrabajad001","cascadeDelete":false },
+      { "id":"txt_seg_003","name":"estado_anterior","type":"text" },
+      { "id":"txt_seg_004","name":"estado_nuevo","type":"text" },
+      { "id":"txt_seg_005","name":"observacion","type":"text","required":true },
+      { "id":"num_seg_006","name":"porcentaje_avance","type":"number","min":0,"max":100 },
+      { "id":"dat_seg_007","name":"fecha","type":"date","required":true }
+    ],
+    "listRule":   "@request.auth.id != \"\"",
+    "viewRule":   "@request.auth.id != \"\"",
+    "createRule": "@request.auth.id != \"\"",
+    "updateRule": "@request.auth.id != \"\"",
+    "deleteRule": null
+  },
+  {
+    "id": "reportesdiar001",
+    "name": "reportes_diarios",
+    "type": "base",
+    "fields": [
+      { "id":"rel_rep_001","name":"user_id","type":"relation","required":true,
+        "maxSelect":1,"collectionId":"sigatrabajad001","cascadeDelete":false },
+      { "id":"txt_rep_002","name":"resumen_dia","type":"text","required":true },
+      { "id":"txt_rep_003","name":"logros","type":"text" },
+      { "id":"txt_rep_004","name":"dificultades","type":"text" },
+      { "id":"num_rep_005","name":"horas_trabajadas","type":"number","min":0,"max":24 },
+      { "id":"dat_rep_006","name":"fecha","type":"date","required":true },
+      { "id":"bol_rep_007","name":"validado_rrhh","type":"bool" },
+      { "id":"rel_rep_008","name":"validado_por","type":"relation",
+        "maxSelect":1,"collectionId":"sigatrabajad001","cascadeDelete":false }
+    ],
+    "listRule":   "@request.auth.id = user_id || @request.auth.rol = 'RRHH' || @request.auth.rol = 'DIRECTOR' || @request.auth.rol = 'PRESIDENTE' || @request.auth.rol = 'SUPERVISOR'",
+    "viewRule":   "@request.auth.id = user_id || @request.auth.rol = 'RRHH' || @request.auth.rol = 'DIRECTOR' || @request.auth.rol = 'PRESIDENTE' || @request.auth.rol = 'SUPERVISOR'",
+    "createRule": "@request.auth.id != \"\"",
+    "updateRule": "@request.auth.rol = 'RRHH' || @request.auth.rol = 'DIRECTOR' || @request.auth.rol = 'PRESIDENTE' || @request.auth.id = user_id",
+    "deleteRule": null
+  },
+  {
+    "id": "alertasistem001",
+    "name": "alertas_sistema",
+    "type": "base",
+    "fields": [
+      { "id":"sel_alt_001","name":"tipo","type":"select","required":true,
+        "maxSelect":1,"values":["sistema","rrhh","actividad","urgente"] },
+      { "id":"txt_alt_002","name":"mensaje","type":"text","required":true },
+      { "id":"rel_alt_003","name":"user_id","type":"relation","required":true,
+        "maxSelect":1,"collectionId":"sigatrabajad001","cascadeDelete":false },
+      { "id":"bol_alt_004","name":"visto","type":"bool" },
+      { "id":"dat_alt_005","name":"fecha","type":"date","required":true }
+    ],
+    "listRule":   "@request.auth.id = user_id || @request.auth.rol = 'RRHH' || @request.auth.rol = 'TECNOLOGIA' || @request.auth.rol = 'PRESIDENTE'",
+    "viewRule":   "@request.auth.id = user_id || @request.auth.rol = 'RRHH' || @request.auth.rol = 'TECNOLOGIA' || @request.auth.rol = 'PRESIDENTE'",
+    "createRule": "@request.auth.id != \"\"",
+    "updateRule": "@request.auth.id = user_id || @request.auth.rol = 'RRHH' || @request.auth.rol = 'TECNOLOGIA'",
+    "deleteRule": null
+  }
+]

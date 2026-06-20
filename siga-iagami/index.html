@@ -146,6 +146,7 @@
         <button class="tab" onclick="switchTab('rrhh','solicitudes')">📬 Solicitudes</button>
         <button class="tab" onclick="switchTab('rrhh','comunicados')">📢 Comunicados</button>
         <button class="tab" onclick="switchTab('rrhh','capacitaciones')">🎓 Capacitaciones</button>
+        <button class="tab" onclick="switchTab('rrhh','reportes')">📊 Reportes Diarios <span id="badge-reportes-rrhh" style="background:#dc2626;color:#fff;border-radius:999px;font-size:10px;padding:1px 6px;font-weight:700;display:none;margin-left:4px">0</span></button>
       </div>
 
       <!-- Tab: Personal -->
@@ -218,6 +219,21 @@
           <button class="btn btn-primary" id="btn-nueva-cap" onclick="abrirModalCapacitacion()">+ Nueva Capacitación</button>
         </div>
         <div class="cards-grid" id="lista-capacitaciones"><p style="color:var(--muted);font-size:13px">Cargando…</p></div>
+      </div>
+
+      <!-- Tab: Reportes Diarios (RRHH) -->
+      <div class="tab-content" id="tab-rrhh-reportes">
+        <div style="margin-bottom:12px;display:flex;align-items:center;justify-content:space-between">
+          <p style="font-size:13px;color:var(--muted)">Reportes diarios enviados por los trabajadores.</p>
+          <button class="btn btn-sm btn-secondary" onclick="loadReportesRRHH()">↺ Actualizar</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Trabajador</th><th>Fecha</th><th>Resumen del día</th><th>Horas</th><th>Estado</th><th>Acciones</th></tr></thead>
+            <tbody id="tabla-reportes-rrhh"></tbody>
+          </table>
+          <div id="reportes-rrhh-empty" class="no-rows" style="display:none">No hay reportes registrados.</div>
+        </div>
       </div>
     </div>
 
@@ -922,6 +938,9 @@ const MENU_ALL = [
   { id:'evaluaciones', icon:'📊', label:'Evaluaciones', roles:['RRHH','DIRECTOR','PRESIDENTE'] },
   { id:'comunicaciones', icon:'📢', label:'Comunicaciones' },
   { id:'mensajes', icon:'💬', label:'Mensajes', badge:'msg-badge' },
+  { id:'reporte', icon:'📝', label:'Reporte Diario' },
+  { id:'alertas', icon:'🚨', label:'Alertas', badge:'alertas-badge' },
+  { id:'seguimiento', icon:'🔍', label:'Seguimiento', roles:['RRHH','SUPERVISOR','DIRECTOR','PRESIDENTE','COORDINADOR'] },
   { id:'indicadores', icon:'📈', label:'Indicadores', roles:['COORDINADOR','DIRECTOR','RRHH','PRESIDENTE','TECNOLOGIA'] },
   { id:'presidencia', icon:'🏛️', label:'Presidencia', roles:['PRESIDENTE','DIRECTOR'] },
   { section:'Sistema' },
@@ -967,6 +986,9 @@ window.sigaNav = function(id) {
   if (id === 'asistencia')     loadAsistencia();
   if (id === 'evaluaciones')   loadEvaluaciones();
   if (id === 'mensajes')       loadMensajes();
+  if (id === 'reporte')        loadReporteDiario();
+  if (id === 'seguimiento')    loadSeguimiento();
+  if (id === 'alertas')        loadAlertas();
 };
 
 /* ─── Tabs ─── */
@@ -978,6 +1000,9 @@ window.switchTab = function(prefix, id) {
   if (tc) tc.classList.add('active');
   if (prefix==='rrhh' && id==='personal')  loadPersonal();
   if (prefix==='rrhh' && id==='registros') loadRegistrosPendientes();
+  if (prefix==='rrhh' && id==='reportes')  loadReportesRRHH();
+  if (prefix==='seguimiento' && id==='reportes')     loadSegReportes();
+  if (prefix==='seguimiento' && id==='observaciones') loadSegObservaciones();
   if (prefix==='rrhh' && id==='solicitudes') loadSolicitudesRRHH();
   if (prefix==='rrhh' && id==='comunicados') loadComunicadosRRHH();
   if (prefix==='rrhh' && id==='capacitaciones') loadCapacitaciones();
