@@ -297,7 +297,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   calYear = today.getFullYear();
   calMonth = today.getMonth();
 
-  cacheTodosEventos = (await CMSDB.getAll('eventos')) || [];
+  // Filtro server-side: solo eventos publicados (el filtro de fecha futura sigue en cliente).
+  cacheTodosEventos = (await CMSDB.getFiltered('eventos', 'publicado=true', { perPage: 200 })) || [];
   allEvents = cacheTodosEventos
     .filter(e => {
       if (e.publicado !== true) return false;

@@ -295,9 +295,9 @@ let currentPage = 1;
    INIT
 ═══════════════════════════════ */
 document.addEventListener('DOMContentLoaded', async () => {
-  const _raw = await CMSDB.getAll('noticias');
-  allNoticias = _raw
-    .filter(n => n.publicado === true)
+  // Filtro server-side: PocketBase solo devuelve las publicadas (menos tráfico).
+  const _raw = await CMSDB.getFiltered('noticias', 'publicado=true', { perPage: 200 });
+  allNoticias = (Array.isArray(_raw) ? _raw : [])
     .sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
 
   populateYears();

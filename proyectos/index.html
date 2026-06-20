@@ -471,7 +471,8 @@ function showSkeleton() {
 async function init() {
   showSkeleton();
   try {
-    allProyectos = (await CMSDB.getAll('proyectos')) || [];
+    // Filtro server-side: solo proyectos publicados (evita exponer borradores).
+    allProyectos = (await CMSDB.getFiltered('proyectos', 'publicado=true', { perPage: 200 })) || [];
     if (!Array.isArray(allProyectos)) allProyectos = [];
   } catch(e) {
     console.error('Error loading proyectos:', e);

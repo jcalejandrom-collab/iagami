@@ -240,7 +240,7 @@ function debounce(fn, ms) {
 
 document.addEventListener('DOMContentLoaded', async () => {
   try {
-    const raw = await CMSDB.getAll('documentos');
+    const raw = await CMSDB.getFiltered('documentos', 'publicado=true', { perPage: 200 });
     _cachedDocs = Array.isArray(raw) ? raw : [];
   } catch (e) {
     console.error('[transparencia] Error cargando documentos:', e.message);
