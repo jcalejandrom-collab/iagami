@@ -2872,123 +2872,74 @@ async function renderConsejos() {
 
 function ccChangePage(p) { ccPage = p; renderConsejos(); }
 
-function _openPDFWindow(html) {
-  const w = window.open('','_blank','width=1200,height=850');
-  if (!w) { toast('Permite ventanas emergentes en tu navegador para generar el PDF','warning'); return; }
-  w.document.open();
-  w.document.write(html);
-  w.document.close();
-}
-
-function _fichaConsejoHTML(c, diag) {
-  const d = diag || {};
-  const v = (val, fallback) => escHtml(String(val||'')||fallback||'—');
-  const estColor = c.estatus==='Activo' ? '#15803d' : '#dc2626';
-  const estBg    = c.estatus==='Activo' ? '#dcfce7' : '#fee2e2';
-  const aguaColor= d.aguas_estado==='Buena'?'#15803d':d.aguas_estado==='Regular'?'#92400e':'#dc2626';
-  const aguaBg   = d.aguas_estado==='Buena'?'#dcfce7':d.aguas_estado==='Regular'?'#fef3c7':'#fee2e2';
-  return `<div class="ficha">
-    <div class="ficha-header">
-      <div>
-        <div class="ficha-titulo">${v(c.nombre)} <span style="font-size:10px;font-weight:400;color:#4a8a6a">${v(c.codigo)}</span></div>
-        <div class="ficha-sub">${v(c.parroquia)} · ${v(c.municipio,'Iribarren')} · ${v(c.estado,'Lara')}</div>
-      </div>
-      <span style="background:${estBg};color:${estColor};padding:3px 12px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap">${v(c.estatus)}</span>
-    </div>
-    <div class="seccion-titulo">📍 Datos de Identificación y Ubicación</div>
-    <div class="grid3">
-      <div class="campo"><span class="label">Código / RIF</span><span class="valor">${v(c.codigo)}</span></div>
-      <div class="campo"><span class="label">Parroquia</span><span class="valor">${v(c.parroquia)}</span></div>
-      <div class="campo"><span class="label">Comunidad</span><span class="valor">${v(c.comunidad)}</span></div>
-      <div class="campo"><span class="label">Sector</span><span class="valor">${v(c.sector)}</span></div>
-      <div class="campo"><span class="label">Municipio</span><span class="valor">${v(c.municipio,'Iribarren')}</span></div>
-      <div class="campo"><span class="label">Estado</span><span class="valor">${v(c.estado,'Lara')}</span></div>
-      <div class="campo full"><span class="label">Dirección detallada</span><span class="valor">${v(c.direccion||c.dir_detallada)}</span></div>
-      <div class="campo"><span class="label">Coordenadas GPS</span><span class="valor">${v(c.coordenadas)}</span></div>
-      <div class="campo"><span class="label">Fecha de constitución</span><span class="valor">${v(c.fecha_constitucion)}</span></div>
-      <div class="campo"><span class="label">N° de familias</span><span class="valor">${v(c.num_familias)}</span></div>
-      <div class="campo"><span class="label">N° de habitantes</span><span class="valor">${v(c.num_habitantes)}</span></div>
-      <div class="campo"><span class="label">Tipo de organización</span><span class="valor">${v(c.tipo)}</span></div>
-    </div>
-    <div class="seccion-titulo">👤 Responsable / Sala de Batalla</div>
-    <div class="grid3">
-      <div class="campo"><span class="label">Responsable / Vocero</span><span class="valor">${v(c.responsable||c.resp_sala)}</span></div>
-      <div class="campo"><span class="label">Cédula</span><span class="valor">${v(c.cedula)}</span></div>
-      <div class="campo"><span class="label">Teléfono</span><span class="valor">${v(c.telefono)}</span></div>
-      <div class="campo"><span class="label">Correo electrónico</span><span class="valor">${v(c.email||c.correo)}</span></div>
-    </div>
-    <div class="seccion-titulo">💧 Diagnóstico de Agua y Saneamiento</div>
-    <div class="grid3">
-      <div class="campo"><span class="label">Estado general del agua</span><span class="valor" style="font-weight:700;color:${aguaColor};background:${aguaBg};padding:1px 8px;border-radius:10px">${v(d.aguas_estado)}</span></div>
-      <div class="campo"><span class="label">Pozos activos</span><span class="valor">${v(d.pozos_activos,'0')}</span></div>
-      <div class="campo"><span class="label">Pozos inactivos</span><span class="valor">${v(d.pozos_inactivos,'0')}</span></div>
-      <div class="campo"><span class="label">Redes consolidadas (km)</span><span class="valor">${v(d.redes_consolidadas,'0')}</span></div>
-      <div class="campo"><span class="label">Redes no consolidadas (km)</span><span class="valor">${v(d.redes_no_consolidadas,'0')}</span></div>
-      <div class="campo"><span class="label">Sistemas de bombeo</span><span class="valor">${v(d.sistemas_bombeo,'0')}</span></div>
-      <div class="campo"><span class="label">Aguas servidas</span><span class="valor">${v(d.aguas_servidas)}</span></div>
-      <div class="campo"><span class="label">Fecha del diagnóstico</span><span class="valor">${v(d.fecha_registro)}</span></div>
-    </div>
-    <div class="seccion-titulo">🌿 Diagnóstico Ambiental</div>
-    <div class="grid3">
-      <div class="campo"><span class="label">Desechos sólidos</span><span class="valor">${v(d.desechos_solidos)}</span></div>
-      <div class="campo"><span class="label">Áreas degradadas (ha)</span><span class="valor">${v(d.areas_degradadas,'0')}</span></div>
-      <div class="campo"><span class="label">Áreas reforestadas (ha)</span><span class="valor">${v(d.areas_reforestadas,'0')}</span></div>
-      <div class="campo full"><span class="label">Riesgos ambientales identificados</span><span class="valor">${v(d.riesgos)}</span></div>
-      <div class="campo full"><span class="label">Necesidades prioritarias</span><span class="valor">${v(d.necesidades_prioritarias)}</span></div>
-    </div>
-    ${c.observaciones ? `<div class="seccion-titulo">📝 Observaciones</div><div class="grid3"><div class="campo full"><span class="label">Observaciones generales</span><span class="valor">${v(c.observaciones)}</span></div></div>` : ''}
-  </div>`;
-}
-
-function _buildConsejosPDFHtml(consejos, diagnosticos, titulo, subtitulo) {
+function _buildConsejosPDFHtml(data, titulo, subtitulo) {
   const fecha = new Date().toLocaleDateString('es-VE',{day:'2-digit',month:'long',year:'numeric'});
-  // Map diagnosticos por consejo_comunal id
-  const diagMap = {};
-  if (Array.isArray(diagnosticos)) {
-    diagnosticos.forEach(d => { if (d.consejo_comunal) diagMap[d.consejo_comunal] = d; });
-  }
-  const fichas = consejos.map(c => _fichaConsejoHTML(c, diagMap[c.id])).join('');
+  const filas = data.map((c,i) => `
+    <tr style="background:${i%2===0?'#fff':'#f8fafb'}">
+      <td>${escHtml(c.codigo||c.codigo_registro||'-')}</td>
+      <td><strong>${escHtml(c.nombre||'-')}</strong></td>
+      <td>${escHtml(c.parroquia||'-')}</td>
+      <td>${escHtml(c.municipio||'Iribarren')}</td>
+      <td>${escHtml(c.comunidad||'-')}</td>
+      <td>${escHtml(c.sector||'-')}</td>
+      <td>${escHtml(c.responsable||'-')}</td>
+      <td>${escHtml(c.cedula||'-')}</td>
+      <td>${escHtml(c.telefono||'-')}</td>
+      <td>${escHtml(c.email||c.correo||'-')}</td>
+      <td>${escHtml(c.direccion||c.dir_detallada||'-')}</td>
+      <td>${escHtml(c.fecha_constitucion||'-')}</td>
+      <td>${escHtml(String(c.num_familias||'-'))}</td>
+      <td style="text-align:center"><span style="background:${c.estatus==='Activo'?'#dcfce7':'#fee2e2'};color:${c.estatus==='Activo'?'#15803d':'#dc2626'};padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700">${escHtml(c.estatus||'—')}</span></td>
+    </tr>`).join('');
   return `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"/>
-  <title>${escHtml(titulo)} — IAGAMI</title>
+  <title>${titulo} — IAGAMI</title>
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:Arial,sans-serif;font-size:10px;color:#1a1a1a;background:#f5f5f5;padding:16px}
-    .doc-header{display:flex;align-items:center;gap:16px;margin-bottom:14px;border-bottom:3px solid #1d6b3e;padding-bottom:12px;background:#fff;padding:14px 18px;border-radius:10px}
-    .doc-logo{font-size:30px}
-    .doc-org h1{font-size:15px;font-weight:700;color:#0d2d1a;margin-bottom:2px}
-    .doc-org p{font-size:9px;color:#4a8a6a}
-    .doc-meta{font-size:9px;color:#555;margin-bottom:12px;background:#fff;padding:8px 14px;border-radius:8px;border:1px solid #e0ede6}
-    .doc-meta b{color:#1d6b3e}
-    .ficha{background:#fff;border:1px solid #c8e6d4;border-radius:10px;margin-bottom:18px;overflow:hidden;page-break-inside:avoid}
-    .ficha-header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:#0d2d1a;color:#fff;padding:10px 14px}
-    .ficha-titulo{font-size:13px;font-weight:700;color:#fff}
-    .ficha-sub{font-size:9px;color:#a7d4ba;margin-top:2px}
-    .seccion-titulo{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#1d6b3e;background:#f0fdf4;padding:5px 14px;border-top:1px solid #c8e6d4;border-bottom:1px solid #e8f5ec}
-    .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;padding:6px 14px 4px}
-    .campo{padding:4px 6px;border-bottom:1px dotted #e0ede6}
-    .campo.full{grid-column:1/-1}
-    .label{display:block;font-size:8px;font-weight:700;text-transform:uppercase;color:#6b7280;margin-bottom:2px}
-    .valor{display:block;font-size:10px;color:#1a1a1a}
-    .footer{font-size:8px;color:#888;text-align:center;border-top:1px solid #e0ede6;padding-top:8px;margin-top:14px}
-    @media print{body{background:#fff;padding:6px}@page{size:A4 portrait;margin:12mm}.ficha{page-break-inside:avoid}}
+    body{font-family:Arial,sans-serif;font-size:10px;color:#1a1a1a;padding:18px}
+    .header{display:flex;align-items:center;gap:16px;margin-bottom:16px;border-bottom:3px solid #1d6b3e;padding-bottom:12px}
+    .logo{font-size:26px}
+    .org h1{font-size:16px;font-weight:700;color:#0d2d1a;margin-bottom:3px}
+    .org p{font-size:10px;color:#4a8a6a}
+    .meta{margin-bottom:12px;font-size:10px;color:#555;line-height:1.7}
+    .meta span{font-weight:700;color:#1d6b3e}
+    table{width:100%;border-collapse:collapse;font-size:9px}
+    th{background:#1d6b3e;color:#fff;padding:5px 7px;text-align:left;font-size:9px;white-space:nowrap}
+    td{padding:4px 7px;border-bottom:1px solid #e8f5ec;vertical-align:top;word-break:break-word}
+    .footer{margin-top:16px;font-size:9px;color:#888;text-align:center;border-top:1px solid #e8f5ec;padding-top:8px}
+    @media print{body{padding:8px}@page{size:A4 landscape;margin:10mm}}
   </style></head><body>
-  <div class="doc-header">
-    <div class="doc-logo">🌿</div>
-    <div class="doc-org">
+  <div class="header">
+    <div class="logo">🌿</div>
+    <div class="org">
       <h1>IAGAMI — Instituto de Asuntos de la Gestión Ambiental del Municipio Iribarren</h1>
       <p>Estado Lara · Venezuela · iagami.online</p>
     </div>
   </div>
-  <div class="doc-meta">
-    <b>Reporte:</b> ${escHtml(titulo)} &nbsp;·&nbsp;
-    <b>Filtro:</b> ${escHtml(subtitulo)} &nbsp;·&nbsp;
-    <b>Total:</b> ${consejos.length} consejo(s) &nbsp;·&nbsp;
-    <b>Fecha:</b> ${fecha}
+  <div class="meta">
+    <strong>Reporte:</strong> <span>${titulo}</span> &nbsp;|&nbsp;
+    <strong>Descripción:</strong> <span>${subtitulo}</span> &nbsp;|&nbsp;
+    <strong>Total registros:</strong> <span>${data.length}</span> &nbsp;|&nbsp;
+    <strong>Fecha:</strong> <span>${fecha}</span>
   </div>
-  ${fichas||'<p style="text-align:center;color:#888;padding:30px">Sin registros</p>'}
-  <div class="footer">Documento generado por el Sistema IAGAMI · ${fecha} · ${consejos.length} consejo(s) comunal(es)</div>
-  <script>window.onload=function(){setTimeout(function(){window.print();},500);}<\/script>
+  <table>
+    <thead><tr>
+      <th>Código</th><th>Nombre</th><th>Parroquia</th><th>Municipio</th><th>Comunidad</th><th>Sector</th>
+      <th>Responsable</th><th>Cédula</th><th>Teléfono</th><th>Correo</th><th>Dirección</th>
+      <th>F. Constitución</th><th>Familias</th><th>Estatus</th>
+    </tr></thead>
+    <tbody>${filas||'<tr><td colspan="14" style="text-align:center;padding:20px;color:#888">Sin registros</td></tr>'}</tbody>
+  </table>
+  <div class="footer">Generado por el Sistema IAGAMI · ${fecha} · ${data.length} registro(s)</div>
+  <script>window.onload=function(){setTimeout(function(){window.print();},400);}<\/script>
   </body></html>`;
+}
+
+function _openPDFWindow(html) {
+  const w = window.open('','_blank','width=1200,height=800');
+  if (!w) { toast('Permite ventanas emergentes en tu navegador para generar el PDF','warning'); return; }
+  w.document.open();
+  w.document.write(html);
+  w.document.close();
 }
 
 async function exportConsejosPDF() {
@@ -3001,19 +2952,15 @@ async function exportConsejosPDF() {
   if (parroquia) data = data.filter(c => c.parroquia === parroquia);
   if (estatus)   data = data.filter(c => c.estatus === estatus);
   if (!data.length) { toast('No hay registros para exportar','warning'); return; }
-  const diagnosticos = await CMSDB.getAll('diagnosticos_ambientales');
   const subtitulo = [parroquia||'Todas las parroquias', estatus||'Todos los estatus'].join(' · ');
-  _openPDFWindow(_buildConsejosPDFHtml(data, diagnosticos, 'Consejos Comunales', subtitulo));
+  _openPDFWindow(_buildConsejosPDFHtml(data, 'Consejos Comunales', subtitulo));
 }
 
 async function exportConsejoSinglePDF(id) {
   if (!id) return;
   const c = await CMSDB.getOne('consejos_comunales', id);
   if (!c) { toast('Registro no encontrado','error'); return; }
-  // Try to find linked diagnostico
-  let diagData = [];
-  try { diagData = await CMSDB.getAll('diagnosticos_ambientales'); } catch(e) {}
-  _openPDFWindow(_buildConsejosPDFHtml([c], diagData, `Consejo Comunal: ${c.nombre||id}`, `Parroquia: ${c.parroquia||'—'}`));
+  _openPDFWindow(_buildConsejosPDFHtml([c], `Consejo Comunal: ${c.nombre||id}`, `Parroquia: ${c.parroquia||'—'}`));
 }
 
 async function openConsejoForm(id) {
