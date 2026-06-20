@@ -24,7 +24,7 @@
   const getToken   = () => sessionStorage.getItem(KEY_TOKEN);
   const getUser    = () => { try{ return JSON.parse(sessionStorage.getItem(KEY_USER)||'{}'); }catch{ return {}; } };
   const isAuth     = () => !!getToken();
-  const getRole    = () => (getUser().rol || '').toUpperCase();
+  const getRole    = () => String(getUser().rol || '').toUpperCase();
 
   /* ─── Login contra colección trabajadores ─── */
   async function login(email, password) {
