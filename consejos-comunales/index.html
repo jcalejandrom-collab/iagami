@@ -1721,16 +1721,18 @@ function refreshMapaGeneral() {
     html: '<div style="background:#22c55e;border:2px solid #fff;border-radius:50%;width:11px;height:11px;box-shadow:0 2px 6px rgba(0,0,0,.3)"></div>',
     iconSize: [11, 11], iconAnchor: [5, 5], className: ''
   });
-  const orgs = getAllRecords().filter(o => o.latitud && o.longitud);
+  // El formulario guarda lat/lng; los datos seed pueden usar latitud/longitud → aceptamos ambos.
+  const getLat = o => o.lat != null ? o.lat : o.latitud;
+  const getLng = o => o.lng != null ? o.lng : o.longitud;
+  const orgs = getAllRecords().filter(o => getLat(o) && getLng(o) && !isNaN(parseFloat(getLat(o))) && !isNaN(parseFloat(getLng(o))));
   orgs.forEach(o => {
-    const lat = parseFloat(o.latitud), lng = parseFloat(o.longitud);
-    if (isNaN(lat) || isNaN(lng)) return;
+    const lat = parseFloat(getLat(o)), lng = parseFloat(getLng(o));
     L.marker([lat, lng], { icon: o._tipo === 'comuna' ? iconComuna : iconConsejo })
      .addTo(_mapaGeneral)
      .bindPopup(`<b>${esc(o.nombre)}</b><br><span style="font-size:11px;color:#4a6a5a">${o._tipo === 'comuna' ? 'Comuna' : 'Consejo Comunal'} · ${esc(o.parroquia || '')}</span>`);
   });
   if (orgs.length > 0) {
-    const bounds = L.latLngBounds(orgs.map(o => [parseFloat(o.latitud), parseFloat(o.longitud)]));
+    const bounds = L.latLngBounds(orgs.map(o => [parseFloat(getLat(o)), parseFloat(getLng(o))]));
     _mapaGeneral.fitBounds(bounds, { padding: [40, 40] });
   }
 }
