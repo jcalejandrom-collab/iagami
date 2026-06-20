@@ -1,0 +1,56 @@
+[
+  {
+    "id": "mensajesintr001",
+    "name": "mensajes_internos",
+    "type": "base",
+    "fields": [
+      {
+        "id": "rel_msg_001",
+        "name": "de",
+        "type": "relation",
+        "required": true,
+        "maxSelect": 1,
+        "collectionId": "sigatrabajad001",
+        "cascadeDelete": false
+      },
+      {
+        "id": "rel_msg_002",
+        "name": "para",
+        "type": "relation",
+        "required": true,
+        "maxSelect": 1,
+        "collectionId": "sigatrabajad001",
+        "cascadeDelete": false
+      },
+      {
+        "id": "text_msg_003",
+        "name": "mensaje",
+        "type": "text",
+        "required": true
+      },
+      {
+        "id": "bool_msg_004",
+        "name": "leido",
+        "type": "bool"
+      },
+      {
+        "id": "sel_msg_005",
+        "name": "tipo",
+        "type": "select",
+        "maxSelect": 1,
+        "values": ["General", "RRHH", "Actividad", "Solicitud"]
+      },
+      {
+        "id": "date_msg_006",
+        "name": "fecha",
+        "type": "date",
+        "required": true
+      }
+    ],
+    "listRule": "@request.auth.id = de.id || @request.auth.id = para.id",
+    "viewRule": "@request.auth.id = de.id || @request.auth.id = para.id",
+    "createRule": "@request.auth.id != \"\"",
+    "updateRule": "@request.auth.id = de.id || @request.auth.id = para.id",
+    "deleteRule": null
+  }
+]
