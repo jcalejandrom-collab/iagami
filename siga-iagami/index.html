@@ -220,6 +220,7 @@
         <button class="tab active" onclick="switchTab('act','mis')">📋 Mis Actividades</button>
         <button class="tab" id="tab-act-equipo-btn" onclick="switchTab('act','equipo')" style="display:none">👥 Equipo</button>
         <button class="tab" id="tab-act-global-btn" onclick="switchTab('act','global')" style="display:none">🏢 Global</button>
+        <button class="tab" id="tab-act-control-btn" onclick="switchTab('act','control');loadControlActividades()" style="display:none">🔍 Control y Seguimiento</button>
       </div>
       <div class="tab-content active" id="tab-act-mis">
         <div class="search-bar" style="margin-bottom:16px">
@@ -232,7 +233,7 @@
         </div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Fecha</th><th>Actividad</th><th>Proyecto</th><th>Inicio</th><th>Fin</th><th>Estado</th><th></th></tr></thead>
+            <thead><tr><th>Fecha</th><th>Actividad</th><th>Estado</th><th>Cumpl.%</th><th>Revisión</th><th></th></tr></thead>
             <tbody id="tabla-mis-act"></tbody>
           </table>
           <div id="mis-act-empty" class="no-rows" style="display:none">No hay actividades registradas en este período.</div>
@@ -258,6 +259,38 @@
             <tbody id="tabla-global-act"></tbody>
           </table>
           <div id="global-act-empty" class="no-rows" style="display:none">No hay actividades.</div>
+        </div>
+      </div>
+      <!-- TAB: Control y Seguimiento -->
+      <div class="tab-content" id="tab-act-control">
+        <div class="dash-grid" style="margin-bottom:16px">
+          <div class="dash-stat"><div class="ds-icon">📋</div><div class="ds-val" id="ctrl-hoy">—</div><div class="ds-lbl">Actividades hoy</div></div>
+          <div class="dash-stat amber"><div class="ds-icon">⏳</div><div class="ds-val" id="ctrl-pendientes">—</div><div class="ds-lbl">Pendientes revisión</div></div>
+          <div class="dash-stat"><div class="ds-icon">✅</div><div class="ds-val" id="ctrl-aprobadas">—</div><div class="ds-lbl">Aprobadas</div></div>
+          <div class="dash-stat red"><div class="ds-icon">❌</div><div class="ds-val" id="ctrl-rechazadas">—</div><div class="ds-lbl">Rechazadas</div></div>
+          <div class="dash-stat blue"><div class="ds-icon">📊</div><div class="ds-val" id="ctrl-cumplimiento">—</div><div class="ds-lbl">Cumpl. promedio</div></div>
+          <div class="dash-stat"><div class="ds-icon">🖼️</div><div class="ds-val" id="ctrl-sin-evidencia">—</div><div class="ds-lbl">Sin evidencia</div></div>
+        </div>
+        <div class="search-bar" style="margin-bottom:16px">
+          <input type="date" class="filter-select" id="ctrl-desde" onchange="loadControlActividades()"/>
+          <input type="date" class="filter-select" id="ctrl-hasta" onchange="loadControlActividades()"/>
+          <select class="filter-select" id="ctrl-trabajador" onchange="loadControlActividades()"><option value="">Todos los trabajadores</option></select>
+          <select class="filter-select" id="ctrl-estatus" onchange="loadControlActividades()">
+            <option value="">Todos los estatus</option>
+            <option value="Pendiente">⏳ Pendiente revisión</option>
+            <option value="Aprobada">✅ Aprobada</option>
+            <option value="Rechazada">❌ Rechazada</option>
+          </select>
+          <select class="filter-select" id="ctrl-estado" onchange="loadControlActividades()">
+            <option value="">Todos los estados</option>
+            <option>Completada</option><option>En Proceso</option><option>Pendiente</option><option>Reprogramada</option><option>Suspendida</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Trabajador</th><th>Actividad</th><th>Fecha</th><th>Estado</th><th>Cumpl.%</th><th>Revisión</th><th>Acciones</th></tr></thead>
+            <tbody id="tabla-control-act"></tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -393,6 +426,71 @@
       </div>
     </div>
 
+    <!-- ══ SEC: ASISTENCIA ══ -->
+    <div class="section" id="sec-asistencia">
+      <div class="page-header">
+        <div><div class="page-title">🕐 Control de Asistencia</div><div class="page-subtitle">Registro diario de entrada, salida y tipo de jornada</div></div>
+        <button class="btn btn-primary" onclick="abrirModalAsistencia()">+ Registrar Asistencia</button>
+      </div>
+      <!-- Stats -->
+      <div class="dash-grid" id="asist-stats" style="margin-bottom:20px">
+        <div class="dash-stat"><div class="ds-icon">📅</div><div class="ds-val" id="asist-hoy">—</div><div class="ds-lbl">Presentes hoy</div></div>
+        <div class="dash-stat amber"><div class="ds-icon">🏠</div><div class="ds-val" id="asist-remoto">—</div><div class="ds-lbl">Remoto hoy</div></div>
+        <div class="dash-stat blue"><div class="ds-icon">📋</div><div class="ds-val" id="asist-mes">—</div><div class="ds-lbl">Registros este mes</div></div>
+        <div class="dash-stat red"><div class="ds-icon">❌</div><div class="ds-val" id="asist-faltas">—</div><div class="ds-lbl">Faltas este mes</div></div>
+      </div>
+      <!-- Filtros -->
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:center">
+        <select class="filter-select" id="asist-trabajador-f" onchange="loadAsistencia()">
+          <option value="">Todos los trabajadores</option>
+        </select>
+        <input type="date" class="filter-select" id="asist-fecha-desde" onchange="loadAsistencia()"/>
+        <input type="date" class="filter-select" id="asist-fecha-hasta" onchange="loadAsistencia()"/>
+        <select class="filter-select" id="asist-tipo-f" onchange="loadAsistencia()">
+          <option value="">Todos los tipos</option>
+          <option>Presencial</option><option>Remoto</option><option>Permiso</option>
+          <option>Reposo</option><option>Vacaciones</option><option>Falta</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Trabajador</th><th>Fecha</th><th>Entrada</th><th>Salida</th><th>Tipo</th><th>Observaciones</th><th>Registrado por</th><th>Acciones</th></tr></thead>
+          <tbody id="tabla-asistencia"></tbody>
+        </table>
+        <div id="asist-empty" class="no-rows" style="display:none">Sin registros de asistencia en este período.</div>
+      </div>
+    </div>
+
+    <!-- ══ SEC: EVALUACIONES ══ -->
+    <div class="section" id="sec-evaluaciones">
+      <div class="page-header">
+        <div><div class="page-title">📊 Evaluaciones de Desempeño</div><div class="page-subtitle">Seguimiento trimestral de productividad, actitud y cumplimiento</div></div>
+        <button class="btn btn-primary" onclick="abrirModalEvaluacion()">+ Nueva Evaluación</button>
+      </div>
+      <!-- Stats -->
+      <div class="dash-grid" id="eval-stats" style="margin-bottom:20px">
+        <div class="dash-stat"><div class="ds-icon">📊</div><div class="ds-val" id="eval-total">—</div><div class="ds-lbl">Total evaluaciones</div></div>
+        <div class="dash-stat blue"><div class="ds-icon">📤</div><div class="ds-val" id="eval-enviadas">—</div><div class="ds-lbl">Enviadas</div></div>
+        <div class="dash-stat"><div class="ds-icon">✅</div><div class="ds-val" id="eval-aprobadas">—</div><div class="ds-lbl">Aprobadas</div></div>
+        <div class="dash-stat amber"><div class="ds-icon">📝</div><div class="ds-val" id="eval-promedio">—</div><div class="ds-lbl">Puntaje promedio</div></div>
+      </div>
+      <!-- Filtros -->
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:center">
+        <input type="text" class="filter-select" id="eval-q" placeholder="Buscar por período…" oninput="loadEvaluaciones()" style="min-width:180px"/>
+        <select class="filter-select" id="eval-estado-f" onchange="loadEvaluaciones()">
+          <option value="">Todos los estados</option>
+          <option>Borrador</option><option>Enviada</option><option>Aprobada</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Trabajador</th><th>Evaluador</th><th>Período</th><th>Cumplimiento</th><th>Actitud</th><th>Productividad</th><th>Total</th><th>Estado</th><th>Acciones</th></tr></thead>
+          <tbody id="tabla-evaluaciones"></tbody>
+        </table>
+        <div id="eval-empty" class="no-rows" style="display:none">Sin evaluaciones registradas.</div>
+      </div>
+    </div>
+
   </div><!-- /content -->
 </div><!-- /main -->
 
@@ -492,10 +590,43 @@
         <div class="form-section-title">Observaciones</div>
         <div class="form-group"><textarea id="a-obs" rows="2" placeholder="Dificultades, recomendaciones…"></textarea></div>
       </div>
+      <div class="form-section">
+        <div class="form-section-title">Seguimiento y Evidencia</div>
+        <div class="form-row">
+          <div class="form-group"><label>Porcentaje de cumplimiento (0-100)</label><input id="a-cumplimiento" type="number" min="0" max="100" placeholder="Ej: 80"/></div>
+          <div class="form-group"><label>Ubicación GPS (lat,lng)</label><input id="a-gps" type="text" placeholder="10.071,-69.357"/></div>
+        </div>
+        <div class="form-group"><label>Resultado obtenido</label><textarea id="a-resultado-obtenido" rows="2" placeholder="Qué se logró concretamente…"></textarea></div>
+      </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="cerrarModal('modal-actividad')">Cancelar</button>
       <button class="btn btn-primary" onclick="guardarActividad()">💾 Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Revisar Actividad (Supervisor/Director) -->
+<div class="modal-overlay" id="modal-revision-act">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <div class="modal-title">🔍 Revisar Actividad</div>
+      <button class="modal-close" onclick="cerrarModal('modal-revision-act')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="rev-detalle" style="background:var(--surface);border-radius:8px;padding:14px;margin-bottom:16px;font-size:13px;line-height:1.8"></div>
+      <div class="form-group" style="margin-bottom:12px"><label>Estatus de revisión *</label>
+        <select id="rev-estatus">
+          <option value="Aprobada">✅ Aprobar</option>
+          <option value="Rechazada">❌ Rechazar</option>
+          <option value="Pendiente">⏳ Dejar pendiente</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Observaciones del supervisor</label><textarea id="rev-obs" rows="3" placeholder="Comentarios, retroalimentación…"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="cerrarModal('modal-revision-act')">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarRevision()">💾 Guardar revisión</button>
     </div>
   </div>
 </div>
@@ -602,6 +733,81 @@
   </div>
 </div>
 
+<!-- Modal Asistencia -->
+<div class="modal-overlay" id="modal-asistencia">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-asist-title">Registrar Asistencia</div>
+      <button class="modal-close" onclick="cerrarModal('modal-asistencia')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group" style="margin-bottom:12px"><label>Trabajador *</label><select id="asist-trabajador" required></select></div>
+      <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+        <div class="form-group"><label>Fecha *</label><input id="asist-fecha" type="date" required/></div>
+        <div class="form-group"><label>Tipo *</label>
+          <select id="asist-tipo">
+            <option value="Presencial">Presencial</option>
+            <option value="Remoto">Remoto</option>
+            <option value="Permiso">Permiso</option>
+            <option value="Reposo">Reposo</option>
+            <option value="Vacaciones">Vacaciones</option>
+            <option value="Falta">Falta</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+        <div class="form-group"><label>Hora Entrada</label><input id="asist-entrada" type="time"/></div>
+        <div class="form-group"><label>Hora Salida</label><input id="asist-salida" type="time"/></div>
+      </div>
+      <div class="form-group"><label>Observaciones</label><textarea id="asist-obs" rows="3"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="cerrarModal('modal-asistencia')">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarAsistencia()">💾 Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Evaluación -->
+<div class="modal-overlay" id="modal-evaluacion">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-eval-title">Nueva Evaluación</div>
+      <button class="modal-close" onclick="cerrarModal('modal-evaluacion')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+        <div class="form-group"><label>Trabajador *</label><select id="eval-trabajador" required></select></div>
+        <div class="form-group"><label>Evaluador</label><select id="eval-evaluador"></select></div>
+      </div>
+      <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+        <div class="form-group"><label>Período *</label><input id="eval-periodo" type="text" placeholder="Ej: Q1-2025" required/></div>
+        <div class="form-group"><label>Fecha</label><input id="eval-fecha" type="date"/></div>
+      </div>
+      <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px">
+        <div class="form-group"><label>Cumplimiento (0-100)</label><input id="eval-cumplimiento" type="number" min="0" max="100"/></div>
+        <div class="form-group"><label>Actitud (0-100)</label><input id="eval-actitud" type="number" min="0" max="100"/></div>
+        <div class="form-group"><label>Productividad (0-100)</label><input id="eval-productividad" type="number" min="0" max="100"/></div>
+      </div>
+      <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+        <div class="form-group"><label>Puntaje Total (0-100)</label><input id="eval-inp-total" type="number" min="0" max="100"/></div>
+        <div class="form-group"><label>Estado</label>
+          <select id="eval-estado">
+            <option value="Borrador">Borrador</option>
+            <option value="Enviada">Enviada</option>
+            <option value="Aprobada">Aprobada</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group"><label>Observaciones</label><textarea id="eval-obs" rows="3"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="cerrarModal('modal-evaluacion')">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarEvaluacion()">💾 Guardar</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast-container"></div>
 
 <script>
@@ -639,8 +845,10 @@ const MENU_ALL = [
   { id:'planificacion', icon:'📅', label:'Planificación' },
   { section:'Gestión' },
   { id:'rrhh', icon:'👥', label:'RRHH', roles:['RRHH','DIRECTOR','PRESIDENTE','TECNOLOGIA'] },
+  { id:'asistencia', icon:'🕐', label:'Asistencia', roles:['RRHH','SUPERVISOR','DIRECTOR','PRESIDENTE'] },
+  { id:'evaluaciones', icon:'📊', label:'Evaluaciones', roles:['RRHH','DIRECTOR','PRESIDENTE'] },
   { id:'comunicaciones', icon:'📢', label:'Comunicaciones' },
-  { id:'indicadores', icon:'📊', label:'Indicadores', roles:['COORDINADOR','DIRECTOR','RRHH','PRESIDENTE','TECNOLOGIA'] },
+  { id:'indicadores', icon:'📈', label:'Indicadores', roles:['COORDINADOR','DIRECTOR','RRHH','PRESIDENTE','TECNOLOGIA'] },
   { id:'presidencia', icon:'🏛️', label:'Presidencia', roles:['PRESIDENTE','DIRECTOR'] },
   { section:'Sistema' },
   { id:'tecnologia', icon:'⚙️', label:'Tecnología', roles:['TECNOLOGIA','PRESIDENTE'] },
@@ -668,13 +876,21 @@ window.sigaNav = function(id) {
   if (document.getElementById('sidebar')?.classList.contains('open')) SIGA.toggleSidebar();
   // Cargar datos de la sección
   if (id === 'rrhh')           loadRRHH();
-  if (id === 'actividades')    loadMisActividades();
+  if (id === 'actividades') {
+    loadMisActividades();
+    const btnCtrl = document.getElementById('tab-act-control-btn');
+    if (btnCtrl) btnCtrl.style.display = ['SUPERVISOR','DIRECTOR','PRESIDENTE','RRHH','COORDINADOR'].includes(ROL) ? '' : 'none';
+    const btnGlobal = document.getElementById('tab-act-global-btn');
+    if (btnGlobal) btnGlobal.style.display = ['SUPERVISOR','DIRECTOR','PRESIDENTE','RRHH','COORDINADOR','TECNOLOGIA'].includes(ROL) ? '' : 'none';
+  }
   if (id === 'comunicaciones') loadComunicaciones();
   if (id === 'indicadores')    loadIndicadores();
   if (id === 'presidencia')    loadPresidencia();
   if (id === 'tecnologia')     loadTecnologia();
   if (id === 'planificacion')  loadPlanificacion();
   if (id === 'mi-solicitud')   loadMisSolicitudes();
+  if (id === 'asistencia')     loadAsistencia();
+  if (id === 'evaluaciones')   loadEvaluaciones();
 };
 
 /* ─── Tabs ─── */
@@ -994,17 +1210,20 @@ async function loadMisActividades() {
   const empty = document.getElementById('mis-act-empty');
   if (!items.length) { tbody.innerHTML=''; empty.style.display='block'; return; }
   empty.style.display='none';
-  tbody.innerHTML = items.map(a => `<tr>
+  tbody.innerHTML = items.map(a => {
+    const estRev = a.estatus_revision||'Pendiente';
+    const badgeRev = estRev==='Aprobada'?'badge-green':estRev==='Rechazada'?'badge-red':'badge-amber';
+    return `<tr>
     <td>${fmt(a.fecha)}</td>
     <td style="font-weight:500">${esc(a.actividad||'—')}</td>
-    <td>${esc(a.proyecto_nombre||'—')}</td>
-    <td>${esc(a.hora_inicio||'—')}</td>
-    <td>${esc(a.hora_fin||'—')}</td>
     <td><span class="badge ${estadoBadge(a.estado)}">${esc(a.estado||'—')}</span></td>
+    <td>${a.porcentaje_cumplimiento!=null?a.porcentaje_cumplimiento+'%':'—'}</td>
+    <td><span class="badge ${badgeRev}">${esc(estRev)}</span></td>
     <td class="td-actions">
       <button class="btn-icon" onclick="editarActividad('${esc(a.id)}')">✏️</button>
-      <button class="btn-icon" style="color:var(--danger)" onclick="eliminarActividad('${esc(a.id)}')">🗑️</button>
-    </td></tr>`).join('');
+      <button class="btn-icon" style="color:var(--danger)" onclick="eliminarActividad('${esc(a.id)}')">🚫</button>
+    </td></tr>`;
+  }).join('');
 }
 
 async function loadGlobalActividades() {
@@ -1369,7 +1588,7 @@ let _editActId = null;
 window.abrirModalActividad = function() {
   _editActId = null;
   document.getElementById('modal-act-title').textContent='Registrar Actividad';
-  ['a-actividad','a-descripcion','a-resultado','a-obs','a-ubicacion'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['a-actividad','a-descripcion','a-resultado','a-obs','a-ubicacion','a-cumplimiento','a-resultado-obtenido','a-gps'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('a-fecha').value = new Date().toLocaleDateString('sv-SE');
   document.getElementById('a-estado').value='Completada';
   abrirModal('modal-actividad');
@@ -1388,6 +1607,9 @@ window.editarActividad = async function(id) {
   document.getElementById('a-estado').value = a.estado||'Completada';
   document.getElementById('a-obs').value = a.observaciones||'';
   document.getElementById('a-ubicacion').value = a.ubicacion||'';
+  document.getElementById('a-cumplimiento').value = a.porcentaje_cumplimiento??'';
+  document.getElementById('a-resultado-obtenido').value = a.resultado_obtenido||'';
+  document.getElementById('a-gps').value = a.ubicacion_gps||'';
   abrirModal('modal-actividad');
 };
 window.guardarActividad = async function() {
@@ -1408,7 +1630,11 @@ window.guardarActividad = async function() {
     proyecto_nombre: proy?.nombre||null,
     comuna_id:   document.getElementById('a-comuna').value||null,
     consejo_id:  document.getElementById('a-consejo').value||null,
+    porcentaje_cumplimiento: document.getElementById('a-cumplimiento').value!==''?Number(document.getElementById('a-cumplimiento').value):null,
+    resultado_obtenido: document.getElementById('a-resultado-obtenido').value.trim()||null,
+    ubicacion_gps: document.getElementById('a-gps').value.trim()||null,
   };
+  if (!_editActId) data.estatus_revision = 'Pendiente';
   try {
     if (_editActId) await SIGA.update('actividades',_editActId,data);
     else            await SIGA.create('actividades',data);
@@ -1420,9 +1646,9 @@ window.guardarActividad = async function() {
   } catch(e) { toast('Error: '+e.message,'error'); }
 };
 window.eliminarActividad = async function(id) {
-  if (!confirm('¿Eliminar esta actividad?')) return;
-  await SIGA.remove('actividades',id).catch(e=>toast('Error: '+e.message,'error'));
-  toast('Actividad eliminada');
+  if (!confirm('¿Suspender esta actividad? No se eliminará, solo cambiará a estado Suspendida.')) return;
+  await SIGA.update('actividades', id, {estado:'Suspendida'}).catch(e=>toast('Error: '+e.message,'error'));
+  toast('Actividad suspendida');
   loadMisActividades();
 };
 window.verActividad = async function(id) {
@@ -1529,6 +1755,365 @@ window.abrirModalCapacitacion = function() {
   SIGA.create('capacitaciones',{nombre,fecha_inicio:fecha,estado:'Activa',autor_id:U.id})
     .then(()=>{ toast('Capacitación registrada'); loadCapacitaciones(); })
     .catch(e=>toast('Error: '+e.message,'error'));
+};
+
+/* ─── Control y Seguimiento de Actividades ─── */
+let _revActId = null;
+
+window.loadControlActividades = async function() {
+  const tbody = document.getElementById('tabla-control-act');
+  if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="7" class="no-rows">Cargando…</td></tr>';
+
+  if (!_allTrabajadores.length) {
+    _allTrabajadores = await SIGA.list('trabajadores',{perPage:200}).catch(()=>[]);
+  }
+
+  // Populate filtro trabajador
+  const selTrab = document.getElementById('ctrl-trabajador');
+  if (selTrab && selTrab.options.length <= 1) {
+    _allTrabajadores.forEach(t => {
+      const o = document.createElement('option');
+      o.value = t.id;
+      o.textContent = `${t.nombres||''} ${t.apellidos||''}`.trim();
+      selTrab.appendChild(o);
+    });
+  }
+
+  const recs = await SIGA.list('actividades', {perPage:500, sort:'-fecha'}).catch(()=>[]);
+
+  // Stats
+  const hoy = new Date().toISOString().slice(0,10);
+  setText('ctrl-hoy',         recs.filter(r=>r.fecha&&r.fecha.slice(0,10)===hoy).length);
+  setText('ctrl-pendientes',  recs.filter(r=>!r.estatus_revision||r.estatus_revision==='Pendiente').length);
+  setText('ctrl-aprobadas',   recs.filter(r=>r.estatus_revision==='Aprobada').length);
+  setText('ctrl-rechazadas',  recs.filter(r=>r.estatus_revision==='Rechazada').length);
+  const conCumpl = recs.filter(r=>r.porcentaje_cumplimiento>0);
+  setText('ctrl-cumplimiento', conCumpl.length
+    ? Math.round(conCumpl.reduce((s,r)=>s+(r.porcentaje_cumplimiento||0),0)/conCumpl.length)+'%'
+    : '—');
+  setText('ctrl-sin-evidencia', recs.filter(r=>!r.resultado_obtenido&&r.estado==='Completada').length);
+
+  // Filtros
+  const fDesde  = document.getElementById('ctrl-desde')?.value||'';
+  const fHasta  = document.getElementById('ctrl-hasta')?.value||'';
+  const fTrab   = document.getElementById('ctrl-trabajador')?.value||'';
+  const fEstat  = document.getElementById('ctrl-estatus')?.value||'';
+  const fEstado = document.getElementById('ctrl-estado')?.value||'';
+
+  const filtered = recs.filter(r => {
+    if (fTrab  && r.trabajador_id !== fTrab) return false;
+    if (fDesde && r.fecha&&r.fecha.slice(0,10) < fDesde) return false;
+    if (fHasta && r.fecha&&r.fecha.slice(0,10) > fHasta) return false;
+    if (fEstat && (r.estatus_revision||'Pendiente') !== fEstat) return false;
+    if (fEstado && r.estado !== fEstado) return false;
+    return true;
+  });
+
+  if (!filtered.length) {
+    tbody.innerHTML = '<tr><td colspan="7" class="no-rows">Sin actividades con los filtros aplicados.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(r => {
+    const trab = _allTrabajadores.find(t=>t.id===r.trabajador_id);
+    const nombre = trab ? `${trab.nombres||''} ${trab.apellidos||''}`.trim() : '—';
+    const estRev = r.estatus_revision||'Pendiente';
+    const badgeRev = estRev==='Aprobada'?'badge-green':estRev==='Rechazada'?'badge-red':'badge-amber';
+    return `<tr>
+      <td>${esc(nombre)}</td>
+      <td style="font-weight:500">${esc(r.actividad||'—')}</td>
+      <td>${r.fecha?r.fecha.slice(0,10):'—'}</td>
+      <td><span class="badge ${estadoBadge(r.estado)}">${esc(r.estado||'—')}</span></td>
+      <td>${r.porcentaje_cumplimiento!=null?r.porcentaje_cumplimiento+'%':'—'}</td>
+      <td><span class="badge ${badgeRev}">${esc(estRev)}</span></td>
+      <td class="td-actions">
+        <button class="btn-icon" title="Revisar" onclick="abrirRevision('${esc(r.id)}')">🔍</button>
+        <button class="btn-icon" title="Editar"  onclick="editarActividad('${esc(r.id)}')">✏️</button>
+      </td>
+    </tr>`;
+  }).join('');
+};
+
+window.abrirRevision = async function(id) {
+  _revActId = id;
+  const a = await SIGA.getOne('actividades', id).catch(()=>null);
+  if (!a) return;
+  const trab = _allTrabajadores.find(t=>t.id===a.trabajador_id);
+  const quien = trab ? `${trab.nombres||''} ${trab.apellidos||''}`.trim() : '—';
+  document.getElementById('rev-detalle').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div><strong>Trabajador:</strong> ${esc(quien)}</div>
+      <div><strong>Fecha:</strong> ${a.fecha?a.fecha.slice(0,10):'—'}</div>
+      <div><strong>Estado:</strong> ${esc(a.estado||'—')}</div>
+      <div><strong>Cumplimiento:</strong> ${a.porcentaje_cumplimiento!=null?a.porcentaje_cumplimiento+'%':'—'}</div>
+      <div style="grid-column:1/-1"><strong>Actividad:</strong> ${esc(a.actividad||'—')}</div>
+      <div style="grid-column:1/-1"><strong>Descripción:</strong> ${esc(a.descripcion||'—')}</div>
+      <div style="grid-column:1/-1"><strong>Resultado obtenido:</strong> ${esc(a.resultado_obtenido||a.resultado||'—')}</div>
+      <div style="grid-column:1/-1"><strong>Ubicación:</strong> ${esc(a.ubicacion||'—')}${a.ubicacion_gps?' 📍 '+esc(a.ubicacion_gps):''}</div>
+      ${a.observaciones?`<div style="grid-column:1/-1"><strong>Observaciones:</strong> ${esc(a.observaciones)}</div>`:''}
+    </div>`;
+  document.getElementById('rev-estatus').value = a.estatus_revision||'Aprobada';
+  document.getElementById('rev-obs').value = a.observaciones_supervisor||'';
+  abrirModal('modal-revision-act');
+};
+
+window.guardarRevision = async function() {
+  if (!_revActId) return;
+  const data = {
+    estatus_revision:         document.getElementById('rev-estatus').value,
+    observaciones_supervisor: document.getElementById('rev-obs').value.trim(),
+    supervisor_id:            U.id,
+    fecha_revision:           new Date().toISOString().slice(0,10),
+  };
+  try {
+    await SIGA.update('actividades', _revActId, data);
+    toast('Revisión guardada');
+    cerrarModal('modal-revision-act');
+    loadControlActividades();
+    registrarAuditoria('Revisar actividad','Control Actividades','OK');
+  } catch(e) { toast('Error: '+e.message,'error'); }
+};
+
+/* ─── Asistencia ─── */
+let _editAsistId = null;
+window.loadAsistencia = async function() {
+  const hoy = new Date().toISOString().slice(0,10);
+  const mes  = hoy.slice(0,7);
+  try {
+    const recs = await SIGA.list('asistencia', {expand:'trabajador,registrado_por', perPage:200});
+    // Stats
+    const todayRecs = recs.filter(r=>r.fecha&&r.fecha.slice(0,10)===hoy);
+    setText('asist-hoy',     todayRecs.filter(r=>r.tipo==='Presencial').length);
+    setText('asist-remoto',  todayRecs.filter(r=>r.tipo==='Remoto').length);
+    setText('asist-mes',     recs.filter(r=>r.fecha&&r.fecha.slice(0,7)===mes).length);
+    setText('asist-faltas',  recs.filter(r=>r.fecha&&r.fecha.slice(0,7)===mes&&r.tipo==='Falta').length);
+    // Populate trabajador filter
+    const sel = document.getElementById('asist-trabajador-f');
+    if (sel && sel.options.length <= 1) {
+      const vistos = new Set();
+      recs.forEach(r=>{
+        const tw = r.expand?.trabajador;
+        if (tw && !vistos.has(tw.id)) {
+          vistos.add(tw.id);
+          const opt = document.createElement('option');
+          opt.value = tw.id; opt.textContent = `${tw.nombres||''} ${tw.apellidos||''}`.trim();
+          sel.appendChild(opt);
+        }
+      });
+    }
+    // Apply filters
+    const fTrab  = document.getElementById('asist-trabajador-f')?.value||'';
+    const fDesde = document.getElementById('asist-fecha-desde')?.value||'';
+    const fHasta = document.getElementById('asist-fecha-hasta')?.value||'';
+    const fTipo  = document.getElementById('asist-tipo-f')?.value||'';
+    const filtered = recs.filter(r=>{
+      if (fTrab  && r.trabajador !== fTrab) return false;
+      if (fDesde && r.fecha&&r.fecha.slice(0,10) < fDesde) return false;
+      if (fHasta && r.fecha&&r.fecha.slice(0,10) > fHasta) return false;
+      if (fTipo  && r.tipo !== fTipo) return false;
+      return true;
+    });
+    const tbody = document.getElementById('tabla-asistencia');
+    if (!tbody) return;
+    if (!filtered.length) { tbody.innerHTML='<tr><td colspan="8" style="text-align:center;color:#888">Sin registros</td></tr>'; return; }
+    const canEdit = ['RRHH','DIRECTOR','PRESIDENTE'].includes(ROL);
+    tbody.innerHTML = filtered.map(r=>{
+      const tw = r.expand?.trabajador;
+      const reg = r.expand?.registrado_por;
+      const nombre = tw?`${tw.nombres||''} ${tw.apellidos||''}`.trim():'—';
+      const regNom = reg?`${reg.nombres||''} ${reg.apellidos||''}`.trim():'—';
+      return `<tr>
+        <td>${nombre}</td>
+        <td>${r.fecha?r.fecha.slice(0,10):'—'}</td>
+        <td>${r.hora_entrada||'—'}</td>
+        <td>${r.hora_salida||'—'}</td>
+        <td><span class="badge ${estadoBadge(r.tipo)}">${r.tipo||'—'}</span></td>
+        <td>${r.observaciones||'—'}</td>
+        <td>${regNom}</td>
+        <td>${canEdit?`<button class="btn btn-secondary btn-sm" onclick="editarAsistencia('${r.id}')">✏️</button>
+             <button class="btn btn-secondary btn-sm" style="color:#dc2626" onclick="eliminarAsistencia('${r.id}')">🗑️</button>`:'—'}
+        </td>
+      </tr>`;
+    }).join('');
+  } catch(e) { toast('Error cargando asistencia: '+e.message,'error'); }
+};
+
+window.abrirModalAsistencia = async function() {
+  _editAsistId = null;
+  document.getElementById('modal-asist-title').textContent = 'Registrar Asistencia';
+  document.getElementById('asist-fecha').value = new Date().toISOString().slice(0,10);
+  document.getElementById('asist-entrada').value = '';
+  document.getElementById('asist-salida').value = '';
+  document.getElementById('asist-tipo').value = 'Presencial';
+  document.getElementById('asist-obs').value = '';
+  // Populate trabajadores
+  const sel = document.getElementById('asist-trabajador');
+  sel.innerHTML = '<option value="">Seleccionar...</option>';
+  if (_allTrabajadores.length === 0) {
+    const list = await SIGA.list('trabajadores',{perPage:200});
+    _allTrabajadores = list;
+  }
+  _allTrabajadores.forEach(t=>{ const o=document.createElement('option'); o.value=t.id; o.textContent=`${t.nombres||''} ${t.apellidos||''}`.trim(); sel.appendChild(o); });
+  abrirModal('modal-asistencia');
+};
+
+window.editarAsistencia = async function(id) {
+  const r = await SIGA.getOne('asistencia', id);
+  _editAsistId = id;
+  document.getElementById('modal-asist-title').textContent = 'Editar Asistencia';
+  await window.abrirModalAsistencia();
+  _editAsistId = id;
+  document.getElementById('asist-trabajador').value = r.trabajador||'';
+  document.getElementById('asist-fecha').value = r.fecha?r.fecha.slice(0,10):'';
+  document.getElementById('asist-entrada').value = r.hora_entrada||'';
+  document.getElementById('asist-salida').value = r.hora_salida||'';
+  document.getElementById('asist-tipo').value = r.tipo||'Presencial';
+  document.getElementById('asist-obs').value = r.observaciones||'';
+};
+
+window.guardarAsistencia = async function() {
+  const data = {
+    trabajador:    document.getElementById('asist-trabajador').value,
+    fecha:         document.getElementById('asist-fecha').value,
+    hora_entrada:  document.getElementById('asist-entrada').value,
+    hora_salida:   document.getElementById('asist-salida').value,
+    tipo:          document.getElementById('asist-tipo').value,
+    observaciones: document.getElementById('asist-obs').value,
+    registrado_por: U.id,
+  };
+  if (!data.trabajador || !data.fecha) { toast('Trabajador y fecha son obligatorios','error'); return; }
+  try {
+    if (_editAsistId) await SIGA.update('asistencia', _editAsistId, data);
+    else await SIGA.create('asistencia', data);
+    toast(_editAsistId?'Registro actualizado':'Asistencia registrada');
+    cerrarModal('modal-asistencia');
+    loadAsistencia();
+  } catch(e) { toast('Error: '+e.message,'error'); }
+};
+
+window.eliminarAsistencia = async function(id) {
+  if (!confirm('¿Eliminar este registro?')) return;
+  await SIGA.remove('asistencia', id);
+  toast('Registro eliminado');
+  loadAsistencia();
+};
+
+/* ─── Evaluaciones ─── */
+let _editEvalId = null;
+window.loadEvaluaciones = async function() {
+  try {
+    const recs = await SIGA.list('evaluaciones_desempeno', {expand:'trabajador,evaluador', perPage:200});
+    setText('eval-total',    recs.length);
+    setText('eval-enviadas', recs.filter(r=>r.estado==='Enviada').length);
+    setText('eval-aprobadas',recs.filter(r=>r.estado==='Aprobada').length);
+    const puntajes = recs.filter(r=>r.puntaje_total>0).map(r=>r.puntaje_total);
+    setText('eval-promedio', puntajes.length ? (puntajes.reduce((a,b)=>a+b,0)/puntajes.length).toFixed(1) : '—');
+    // Apply filters
+    const fSearch = (document.getElementById('eval-q')?.value||'').toLowerCase();
+    const fEstado = document.getElementById('eval-estado-f')?.value||'';
+    const filtered = recs.filter(r=>{
+      if (fEstado && r.estado !== fEstado) return false;
+      if (fSearch) {
+        const tw = r.expand?.trabajador;
+        const nombre = tw?`${tw.nombres||''} ${tw.apellidos||''}`.trim().toLowerCase():'';
+        if (!nombre.includes(fSearch) && !(r.periodo||'').toLowerCase().includes(fSearch)) return false;
+      }
+      return true;
+    });
+    const tbody = document.getElementById('tabla-evaluaciones');
+    if (!tbody) return;
+    if (!filtered.length) { tbody.innerHTML='<tr><td colspan="9" style="text-align:center;color:#888">Sin evaluaciones</td></tr>'; return; }
+    const canEdit = ['RRHH','DIRECTOR','PRESIDENTE'].includes(ROL);
+    tbody.innerHTML = filtered.map(r=>{
+      const tw = r.expand?.trabajador;
+      const ev = r.expand?.evaluador;
+      const nombre = tw?`${tw.nombres||''} ${tw.apellidos||''}`.trim():'—';
+      const evalNom = ev?`${ev.nombres||''} ${ev.apellidos||''}`.trim():'—';
+      return `<tr>
+        <td>${nombre}</td>
+        <td>${evalNom}</td>
+        <td>${r.periodo||'—'}</td>
+        <td>${r.puntaje_cumplimiento??'—'}</td>
+        <td>${r.puntaje_actitud??'—'}</td>
+        <td>${r.puntaje_productividad??'—'}</td>
+        <td><strong>${r.puntaje_total??'—'}</strong></td>
+        <td><span class="badge ${estadoBadge(r.estado)}">${r.estado||'—'}</span></td>
+        <td>${canEdit?`<button class="btn btn-secondary btn-sm" onclick="editarEvaluacion('${r.id}')">✏️</button>
+             <button class="btn btn-secondary btn-sm" style="color:#dc2626" onclick="eliminarEvaluacion('${r.id}')">🗑️</button>`:'—'}
+        </td>
+      </tr>`;
+    }).join('');
+  } catch(e) { toast('Error cargando evaluaciones: '+e.message,'error'); }
+};
+
+window.abrirModalEvaluacion = async function() {
+  _editEvalId = null;
+  document.getElementById('modal-eval-title').textContent = 'Nueva Evaluación';
+  ['eval-cumplimiento','eval-actitud','eval-productividad','eval-inp-total'].forEach(id=>{ document.getElementById(id).value=''; });
+  document.getElementById('eval-periodo').value = '';
+  document.getElementById('eval-fecha').value = new Date().toISOString().slice(0,10);
+  document.getElementById('eval-estado').value = 'Borrador';
+  document.getElementById('eval-obs').value = '';
+  if (_allTrabajadores.length === 0) {
+    _allTrabajadores = await SIGA.list('trabajadores',{perPage:200});
+  }
+  const selT = document.getElementById('eval-trabajador');
+  const selE = document.getElementById('eval-evaluador');
+  selT.innerHTML = '<option value="">Seleccionar...</option>';
+  selE.innerHTML = '<option value="">Seleccionar...</option>';
+  _allTrabajadores.forEach(t=>{
+    const nombre = `${t.nombres||''} ${t.apellidos||''}`.trim();
+    [selT, selE].forEach(sel=>{ const o=document.createElement('option'); o.value=t.id; o.textContent=nombre; sel.appendChild(o); });
+  });
+  abrirModal('modal-evaluacion');
+};
+
+window.editarEvaluacion = async function(id) {
+  const r = await SIGA.getOne('evaluaciones_desempeno', id);
+  await window.abrirModalEvaluacion();
+  _editEvalId = id;
+  document.getElementById('modal-eval-title').textContent = 'Editar Evaluación';
+  document.getElementById('eval-trabajador').value = r.trabajador||'';
+  document.getElementById('eval-evaluador').value = r.evaluador||'';
+  document.getElementById('eval-periodo').value = r.periodo||'';
+  document.getElementById('eval-fecha').value = r.fecha?r.fecha.slice(0,10):'';
+  document.getElementById('eval-cumplimiento').value = r.puntaje_cumplimiento??'';
+  document.getElementById('eval-actitud').value = r.puntaje_actitud??'';
+  document.getElementById('eval-productividad').value = r.puntaje_productividad??'';
+  document.getElementById('eval-inp-total').value = r.puntaje_total??'';
+  document.getElementById('eval-estado').value = r.estado||'Borrador';
+  document.getElementById('eval-obs').value = r.observaciones||'';
+};
+
+window.guardarEvaluacion = async function() {
+  const data = {
+    trabajador:           document.getElementById('eval-trabajador').value,
+    evaluador:            document.getElementById('eval-evaluador').value||null,
+    periodo:              document.getElementById('eval-periodo').value,
+    fecha:                document.getElementById('eval-fecha').value,
+    puntaje_cumplimiento: Number(document.getElementById('eval-cumplimiento').value)||null,
+    puntaje_actitud:      Number(document.getElementById('eval-actitud').value)||null,
+    puntaje_productividad:Number(document.getElementById('eval-productividad').value)||null,
+    puntaje_total:        Number(document.getElementById('eval-inp-total').value)||null,
+    observaciones:        document.getElementById('eval-obs').value,
+    estado:               document.getElementById('eval-estado').value,
+  };
+  if (!data.trabajador || !data.periodo) { toast('Trabajador y período son obligatorios','error'); return; }
+  try {
+    if (_editEvalId) await SIGA.update('evaluaciones_desempeno', _editEvalId, data);
+    else await SIGA.create('evaluaciones_desempeno', data);
+    toast(_editEvalId?'Evaluación actualizada':'Evaluación creada');
+    cerrarModal('modal-evaluacion');
+    loadEvaluaciones();
+  } catch(e) { toast('Error: '+e.message,'error'); }
+};
+
+window.eliminarEvaluacion = async function(id) {
+  if (!confirm('¿Eliminar esta evaluación?')) return;
+  await SIGA.remove('evaluaciones_desempeno', id);
+  toast('Evaluación eliminada');
+  loadEvaluaciones();
 };
 
 /* ─── Auditoría ─── */
