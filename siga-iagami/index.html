@@ -1236,7 +1236,7 @@ window.filterTecUsers = function(items) {
 async function loadAuditoria() {
   const tbody = document.getElementById('tabla-auditoria');
   tbody.innerHTML = '<tr><td colspan="5" class="no-rows">Cargando…</td></tr>';
-  const items = await SIGA.list('auditoria_sistema','',100,1,'-created').catch(()=>[]);
+  const items = await SIGA.list('auditoria_siga','',100,1,'-created').catch(()=>[]);
   if (!items.length) { tbody.innerHTML=''; document.getElementById('audit-empty').style.display='block'; return; }
   document.getElementById('audit-empty').style.display='none';
   tbody.innerHTML = items.map(a => {
@@ -1283,7 +1283,7 @@ async function loadMonitor() {
     if (pb) pb.textContent = '❌ Offline';
     if (api) api.textContent = '—';
   }
-  const actHoy = await SIGA.list('auditoria_sistema', `created>="${new Date().toLocaleDateString('sv-SE')}"`, 1).catch(()=>[]);
+  const actHoy = await SIGA.list('auditoria_siga', `created>="${new Date().toLocaleDateString('sv-SE')}"`, 1).catch(()=>[]);
   if (usersEl) usersEl.textContent = _allTrabajadores.filter(t=>t.estado==='Activo').length;
   if (statusList) statusList.innerHTML = `
     <div style="font-size:13px;line-height:2.2">
@@ -1537,7 +1537,7 @@ window.abrirModalCapacitacion = function() {
 
 /* ─── Auditoría ─── */
 async function registrarAuditoria(accion, modulo, resultado='OK') {
-  SIGA.create('auditoria_sistema', {
+  SIGA.create('auditoria_siga', {
     usuario_id: U.id,
     accion, modulo, resultado,
   }).catch(()=>{});
