@@ -1,19 +1,66 @@
 [
   {
+    "id": "sigatrabajad001",
     "name": "trabajadores",
     "type": "auth",
     "system": false,
     "fields": [
-      { "name": "nombres", "type": "text", "required": true },
-      { "name": "apellidos", "type": "text", "required": true },
-      { "name": "cedula", "type": "text", "required": true },
-      { "name": "cargo", "type": "text" },
-      { "name": "rol", "type": "select", "required": true, "maxSelect": 1, "values": ["PRESIDENTE","DIRECTOR","COORDINADOR","RRHH","TECNOLOGIA","SUPERVISOR","TRABAJADOR"] },
-      { "name": "departamento", "type": "text" },
-      { "name": "telefono", "type": "text" },
-      { "name": "activo", "type": "bool" },
-      { "name": "fecha_ingreso", "type": "date" },
-      { "name": "foto", "type": "file", "maxSelect": 1, "maxSize": 5242880 }
+      {
+        "name": "nombres",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "apellidos",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "cedula",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "cargo",
+        "type": "text"
+      },
+      {
+        "name": "rol",
+        "type": "select",
+        "required": true,
+        "maxSelect": 1,
+        "values": [
+          "PRESIDENTE",
+          "DIRECTOR",
+          "COORDINADOR",
+          "RRHH",
+          "TECNOLOGIA",
+          "SUPERVISOR",
+          "TRABAJADOR"
+        ]
+      },
+      {
+        "name": "departamento",
+        "type": "text"
+      },
+      {
+        "name": "telefono",
+        "type": "text"
+      },
+      {
+        "name": "activo",
+        "type": "bool"
+      },
+      {
+        "name": "fecha_ingreso",
+        "type": "date"
+      },
+      {
+        "name": "foto",
+        "type": "file",
+        "maxSelect": 1,
+        "maxSize": 5242880
+      }
     ],
     "indexes": [
       "CREATE UNIQUE INDEX `idx_trab_cedula` ON `trabajadores` (`cedula`)"
@@ -25,17 +72,62 @@
     "deleteRule": null
   },
   {
+    "id": "sigaactivida001",
     "name": "actividades",
     "type": "base",
     "fields": [
-      { "name": "trabajador_id", "type": "relation", "required": true, "maxSelect": 1, "collectionId": "trabajadores", "cascadeDelete": false },
-      { "name": "fecha", "type": "date", "required": true },
-      { "name": "descripcion", "type": "text", "required": true },
-      { "name": "tipo", "type": "select", "maxSelect": 1, "values": ["CAMPO","OFICINA","VIRTUAL","CAPACITACION"] },
-      { "name": "estado", "type": "select", "maxSelect": 1, "values": ["PENDIENTE","EN_PROGRESO","COMPLETADA","CANCELADA"] },
-      { "name": "hora_inicio", "type": "text" },
-      { "name": "hora_fin", "type": "text" },
-      { "name": "observaciones", "type": "text" }
+      {
+        "name": "trabajador_id",
+        "type": "relation",
+        "required": true,
+        "maxSelect": 1,
+        "collectionId": "sigatrabajad001",
+        "cascadeDelete": false
+      },
+      {
+        "name": "fecha",
+        "type": "date",
+        "required": true
+      },
+      {
+        "name": "descripcion",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "tipo",
+        "type": "select",
+        "maxSelect": 1,
+        "values": [
+          "CAMPO",
+          "OFICINA",
+          "VIRTUAL",
+          "CAPACITACION"
+        ]
+      },
+      {
+        "name": "estado",
+        "type": "select",
+        "maxSelect": 1,
+        "values": [
+          "PENDIENTE",
+          "EN_PROGRESO",
+          "COMPLETADA",
+          "CANCELADA"
+        ]
+      },
+      {
+        "name": "hora_inicio",
+        "type": "text"
+      },
+      {
+        "name": "hora_fin",
+        "type": "text"
+      },
+      {
+        "name": "observaciones",
+        "type": "text"
+      }
     ],
     "listRule": "@request.auth.collectionName = \"trabajadores\"",
     "viewRule": "@request.auth.collectionName = \"trabajadores\"",
@@ -44,16 +136,57 @@
     "deleteRule": "trabajador_id = @request.auth.id || @request.auth.rol = \"RRHH\" || @request.auth.rol = \"DIRECTOR\""
   },
   {
+    "id": "sigasolicit0001",
     "name": "solicitudes_rrhh",
     "type": "base",
     "fields": [
-      { "name": "trabajador_id", "type": "relation", "required": true, "maxSelect": 1, "collectionId": "trabajadores", "cascadeDelete": false },
-      { "name": "tipo", "type": "select", "maxSelect": 1, "values": ["VACACIONES","PERMISO","CERTIFICADO","CONSTANCIA","OTRO"] },
-      { "name": "descripcion", "type": "text", "required": true },
-      { "name": "estado", "type": "select", "maxSelect": 1, "values": ["PENDIENTE","APROBADA","RECHAZADA"] },
-      { "name": "respuesta", "type": "text" },
-      { "name": "fecha_solicitud", "type": "date" },
-      { "name": "fecha_respuesta", "type": "date" }
+      {
+        "name": "trabajador_id",
+        "type": "relation",
+        "required": true,
+        "maxSelect": 1,
+        "collectionId": "sigatrabajad001",
+        "cascadeDelete": false
+      },
+      {
+        "name": "tipo",
+        "type": "select",
+        "maxSelect": 1,
+        "values": [
+          "VACACIONES",
+          "PERMISO",
+          "CERTIFICADO",
+          "CONSTANCIA",
+          "OTRO"
+        ]
+      },
+      {
+        "name": "descripcion",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "estado",
+        "type": "select",
+        "maxSelect": 1,
+        "values": [
+          "PENDIENTE",
+          "APROBADA",
+          "RECHAZADA"
+        ]
+      },
+      {
+        "name": "respuesta",
+        "type": "text"
+      },
+      {
+        "name": "fecha_solicitud",
+        "type": "date"
+      },
+      {
+        "name": "fecha_respuesta",
+        "type": "date"
+      }
     ],
     "listRule": "@request.auth.collectionName = \"trabajadores\"",
     "viewRule": "@request.auth.collectionName = \"trabajadores\"",
@@ -62,16 +195,48 @@
     "deleteRule": "@request.auth.rol = \"RRHH\""
   },
   {
+    "id": "sigacomunic0001",
     "name": "comunicados",
     "type": "base",
     "fields": [
-      { "name": "titulo", "type": "text", "required": true },
-      { "name": "contenido", "type": "editor" },
-      { "name": "tipo", "type": "select", "maxSelect": 1, "values": ["GENERAL","URGENTE","INFORMATIVO"] },
-      { "name": "autor_id", "type": "relation", "maxSelect": 1, "collectionId": "trabajadores", "cascadeDelete": false },
-      { "name": "destinatarios", "type": "json" },
-      { "name": "fecha_publicacion", "type": "date" },
-      { "name": "publicado", "type": "bool" }
+      {
+        "name": "titulo",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "contenido",
+        "type": "editor"
+      },
+      {
+        "name": "tipo",
+        "type": "select",
+        "maxSelect": 1,
+        "values": [
+          "GENERAL",
+          "URGENTE",
+          "INFORMATIVO"
+        ]
+      },
+      {
+        "name": "autor_id",
+        "type": "relation",
+        "maxSelect": 1,
+        "collectionId": "sigatrabajad001",
+        "cascadeDelete": false
+      },
+      {
+        "name": "destinatarios",
+        "type": "json"
+      },
+      {
+        "name": "fecha_publicacion",
+        "type": "date"
+      },
+      {
+        "name": "publicado",
+        "type": "bool"
+      }
     ],
     "listRule": "@request.auth.collectionName = \"trabajadores\"",
     "viewRule": "@request.auth.collectionName = \"trabajadores\"",
@@ -80,17 +245,56 @@
     "deleteRule": "@request.auth.rol = \"DIRECTOR\" || @request.auth.rol = \"PRESIDENTE\""
   },
   {
+    "id": "sigacapacit0001",
     "name": "capacitaciones",
     "type": "base",
     "fields": [
-      { "name": "nombre", "type": "text", "required": true },
-      { "name": "descripcion", "type": "text" },
-      { "name": "instructor", "type": "text" },
-      { "name": "fecha_inicio", "type": "date" },
-      { "name": "fecha_fin", "type": "date" },
-      { "name": "modalidad", "type": "select", "maxSelect": 1, "values": ["PRESENCIAL","VIRTUAL","MIXTA"] },
-      { "name": "estado", "type": "select", "maxSelect": 1, "values": ["PROGRAMADA","EN_CURSO","FINALIZADA","CANCELADA"] },
-      { "name": "participantes", "type": "json" }
+      {
+        "name": "nombre",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "descripcion",
+        "type": "text"
+      },
+      {
+        "name": "instructor",
+        "type": "text"
+      },
+      {
+        "name": "fecha_inicio",
+        "type": "date"
+      },
+      {
+        "name": "fecha_fin",
+        "type": "date"
+      },
+      {
+        "name": "modalidad",
+        "type": "select",
+        "maxSelect": 1,
+        "values": [
+          "PRESENCIAL",
+          "VIRTUAL",
+          "MIXTA"
+        ]
+      },
+      {
+        "name": "estado",
+        "type": "select",
+        "maxSelect": 1,
+        "values": [
+          "PROGRAMADA",
+          "EN_CURSO",
+          "FINALIZADA",
+          "CANCELADA"
+        ]
+      },
+      {
+        "name": "participantes",
+        "type": "json"
+      }
     ],
     "listRule": "@request.auth.collectionName = \"trabajadores\"",
     "viewRule": "@request.auth.collectionName = \"trabajadores\"",
@@ -99,14 +303,43 @@
     "deleteRule": "@request.auth.rol = \"RRHH\""
   },
   {
+    "id": "sigaplanific001",
     "name": "planificaciones",
     "type": "base",
     "fields": [
-      { "name": "trabajador_id", "type": "relation", "required": true, "maxSelect": 1, "collectionId": "trabajadores", "cascadeDelete": false },
-      { "name": "semana_inicio", "type": "date" },
-      { "name": "actividades_planificadas", "type": "json" },
-      { "name": "estado", "type": "select", "maxSelect": 1, "values": ["BORRADOR","ENVIADA","APROBADA"] },
-      { "name": "aprobado_por", "type": "relation", "maxSelect": 1, "collectionId": "trabajadores", "cascadeDelete": false }
+      {
+        "name": "trabajador_id",
+        "type": "relation",
+        "required": true,
+        "maxSelect": 1,
+        "collectionId": "sigatrabajad001",
+        "cascadeDelete": false
+      },
+      {
+        "name": "semana_inicio",
+        "type": "date"
+      },
+      {
+        "name": "actividades_planificadas",
+        "type": "json"
+      },
+      {
+        "name": "estado",
+        "type": "select",
+        "maxSelect": 1,
+        "values": [
+          "BORRADOR",
+          "ENVIADA",
+          "APROBADA"
+        ]
+      },
+      {
+        "name": "aprobado_por",
+        "type": "relation",
+        "maxSelect": 1,
+        "collectionId": "sigatrabajad001",
+        "cascadeDelete": false
+      }
     ],
     "listRule": "@request.auth.collectionName = \"trabajadores\"",
     "viewRule": "@request.auth.collectionName = \"trabajadores\"",
@@ -115,16 +348,61 @@
     "deleteRule": "trabajador_id = @request.auth.id || @request.auth.rol = \"DIRECTOR\""
   },
   {
+    "id": "sigatickets0001",
     "name": "tickets_soporte",
     "type": "base",
     "fields": [
-      { "name": "solicitante_id", "type": "relation", "required": true, "maxSelect": 1, "collectionId": "trabajadores", "cascadeDelete": false },
-      { "name": "titulo", "type": "text", "required": true },
-      { "name": "descripcion", "type": "text", "required": true },
-      { "name": "prioridad", "type": "select", "maxSelect": 1, "values": ["BAJA","MEDIA","ALTA","CRITICA"] },
-      { "name": "estado", "type": "select", "maxSelect": 1, "values": ["ABIERTO","EN_PROGRESO","RESUELTO","CERRADO"] },
-      { "name": "asignado_a", "type": "relation", "maxSelect": 1, "collectionId": "trabajadores", "cascadeDelete": false },
-      { "name": "resolucion", "type": "text" }
+      {
+        "name": "solicitante_id",
+        "type": "relation",
+        "required": true,
+        "maxSelect": 1,
+        "collectionId": "sigatrabajad001",
+        "cascadeDelete": false
+      },
+      {
+        "name": "titulo",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "descripcion",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "prioridad",
+        "type": "select",
+        "maxSelect": 1,
+        "values": [
+          "BAJA",
+          "MEDIA",
+          "ALTA",
+          "CRITICA"
+        ]
+      },
+      {
+        "name": "estado",
+        "type": "select",
+        "maxSelect": 1,
+        "values": [
+          "ABIERTO",
+          "EN_PROGRESO",
+          "RESUELTO",
+          "CERRADO"
+        ]
+      },
+      {
+        "name": "asignado_a",
+        "type": "relation",
+        "maxSelect": 1,
+        "collectionId": "sigatrabajad001",
+        "cascadeDelete": false
+      },
+      {
+        "name": "resolucion",
+        "type": "text"
+      }
     ],
     "listRule": "@request.auth.collectionName = \"trabajadores\"",
     "viewRule": "@request.auth.collectionName = \"trabajadores\"",
@@ -133,14 +411,34 @@
     "deleteRule": "@request.auth.rol = \"TECNOLOGIA\""
   },
   {
+    "id": "sigaauditor0001",
     "name": "auditoria_siga",
     "type": "base",
     "fields": [
-      { "name": "trabajador_id", "type": "relation", "maxSelect": 1, "collectionId": "trabajadores", "cascadeDelete": false },
-      { "name": "accion", "type": "text", "required": true },
-      { "name": "modulo", "type": "text" },
-      { "name": "detalle", "type": "json" },
-      { "name": "ip", "type": "text" }
+      {
+        "name": "trabajador_id",
+        "type": "relation",
+        "maxSelect": 1,
+        "collectionId": "sigatrabajad001",
+        "cascadeDelete": false
+      },
+      {
+        "name": "accion",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "modulo",
+        "type": "text"
+      },
+      {
+        "name": "detalle",
+        "type": "json"
+      },
+      {
+        "name": "ip",
+        "type": "text"
+      }
     ],
     "listRule": "@request.auth.rol = \"TECNOLOGIA\" || @request.auth.rol = \"PRESIDENTE\"",
     "viewRule": "@request.auth.rol = \"TECNOLOGIA\" || @request.auth.rol = \"PRESIDENTE\"",
