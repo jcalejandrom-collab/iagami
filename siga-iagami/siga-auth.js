@@ -84,9 +84,10 @@
   }
 
   /* ─── CRUD helpers ─── */
-  async function list(col, filter='', perPage=200, page=1, sort='-created') {
+  async function list(col, filter='', perPage=200, page=1, sort='-created', expand='') {
     const p = new URLSearchParams({ page, perPage, sort });
     if (filter) p.set('filter', filter);
+    if (expand) p.set('expand', expand);
     return apiFetch(`${col}/records?${p}`).then(d => d?.items || []);
   }
   async function getOne(col, id) {

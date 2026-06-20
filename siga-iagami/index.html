@@ -1002,7 +1002,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadDashboard();
   buildQuickActions();
   // Badge mensajes no leídos
-  SIGA.list('mensajes_internos',{perPage:100,sort:'-fecha'}).then(msgs=>{
+  SIGA.list('mensajes_internos','',100,1,'-fecha').then(msgs=>{
     const noLeidos = msgs.filter(m=>m.para===U.id&&!m.leido).length;
     actualizarBadge(noLeidos);
   }).catch(()=>{});
@@ -1831,7 +1831,7 @@ window.loadControlActividades = async function() {
   tbody.innerHTML = '<tr><td colspan="7" class="no-rows">Cargando…</td></tr>';
 
   if (!_allTrabajadores.length) {
-    _allTrabajadores = await SIGA.list('trabajadores',{perPage:200}).catch(()=>[]);
+    _allTrabajadores = await SIGA.list('trabajadores','',200).catch(()=>[]);
   }
 
   // Populate filtro trabajador
@@ -1845,7 +1845,7 @@ window.loadControlActividades = async function() {
     });
   }
 
-  const recs = await SIGA.list('actividades', {perPage:500, sort:'-fecha'}).catch(()=>[]);
+  const recs = await SIGA.list('actividades','',500,1,'-fecha').catch(()=>[]);
 
   // Stats
   const hoy = new Date().toISOString().slice(0,10);
@@ -1946,7 +1946,7 @@ window.loadAsistencia = async function() {
   const hoy = new Date().toISOString().slice(0,10);
   const mes  = hoy.slice(0,7);
   try {
-    const recs = await SIGA.list('asistencia', {expand:'trabajador,registrado_por', perPage:200});
+    const recs = await SIGA.list('asistencia','',200,1,'-fecha','trabajador,registrado_por');
     // Stats
     const todayRecs = recs.filter(r=>r.fecha&&r.fecha.slice(0,10)===hoy);
     setText('asist-hoy',     todayRecs.filter(r=>r.tipo==='Presencial').length);
@@ -2016,7 +2016,7 @@ window.abrirModalAsistencia = async function() {
   const sel = document.getElementById('asist-trabajador');
   sel.innerHTML = '<option value="">Seleccionar...</option>';
   if (_allTrabajadores.length === 0) {
-    const list = await SIGA.list('trabajadores',{perPage:200});
+    const list = await SIGA.list('trabajadores','',200);
     _allTrabajadores = list;
   }
   _allTrabajadores.forEach(t=>{ const o=document.createElement('option'); o.value=t.id; o.textContent=`${t.nombres||''} ${t.apellidos||''}`.trim(); sel.appendChild(o); });
@@ -2068,7 +2068,7 @@ window.eliminarAsistencia = async function(id) {
 let _editEvalId = null;
 window.loadEvaluaciones = async function() {
   try {
-    const recs = await SIGA.list('evaluaciones_desempeno', {expand:'trabajador,evaluador', perPage:200});
+    const recs = await SIGA.list('evaluaciones_desempeno','',200,1,'-fecha','trabajador,evaluador');
     setText('eval-total',    recs.length);
     setText('eval-enviadas', recs.filter(r=>r.estado==='Enviada').length);
     setText('eval-aprobadas',recs.filter(r=>r.estado==='Aprobada').length);
@@ -2121,7 +2121,7 @@ window.abrirModalEvaluacion = async function() {
   document.getElementById('eval-estado').value = 'Borrador';
   document.getElementById('eval-obs').value = '';
   if (_allTrabajadores.length === 0) {
-    _allTrabajadores = await SIGA.list('trabajadores',{perPage:200});
+    _allTrabajadores = await SIGA.list('trabajadores','',200);
   }
   const selT = document.getElementById('eval-trabajador');
   const selE = document.getElementById('eval-evaluador');
@@ -2189,10 +2189,10 @@ let _msgTodosLos = [];
 window.loadMensajes = async function() {
   // Cargar trabajadores si hace falta
   if (!_allTrabajadores.length) {
-    _allTrabajadores = await SIGA.list('trabajadores',{perPage:200}).catch(()=>[]);
+    _allTrabajadores = await SIGA.list('trabajadores','',200).catch(()=>[]);
   }
   // Cargar todos los mensajes donde soy parte
-  const todos = await SIGA.list('mensajes_internos', {perPage:500, sort:'-fecha'}).catch(()=>[]);
+  const todos = await SIGA.list('mensajes_internos','',500,1,'-fecha').catch(()=>[]);
   _msgTodosLos = todos;
 
   // Marcar como leídos los que me llegan
@@ -2304,7 +2304,7 @@ window.enviarRespuesta = async function() {
 
 window.abrirNuevoMensaje = async function() {
   if (!_allTrabajadores.length) {
-    _allTrabajadores = await SIGA.list('trabajadores',{perPage:200}).catch(()=>[]);
+    _allTrabajadores = await SIGA.list('trabajadores','',200).catch(()=>[]);
   }
   const sel = document.getElementById('nm-para');
   sel.innerHTML = '<option value="">Seleccionar destinatario…</option>';
