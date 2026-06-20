@@ -263,6 +263,7 @@
     if (reduced) return;
     // Event delegation — works on dynamically added buttons too
     document.addEventListener('click', e => {
+      if (!e.target || typeof e.target.closest !== 'function') return;
       const btn = e.target.closest('.btn-p,.btn-s,.cta-btn,[data-ripple]');
       if (!btn) return;
       const rect = btn.getBoundingClientRect();
@@ -374,6 +375,7 @@
     const SEL = '.svc-card,.news-card,.proj-card,.ev-card';
 
     document.addEventListener('mousemove', e => {
+      if (!e.target || typeof e.target.closest !== 'function') return;
       const card = e.target.closest(SEL);
       if (!card) return;
       const rect = card.getBoundingClientRect();
@@ -383,6 +385,7 @@
     });
 
     document.addEventListener('mouseleave', e => {
+      if (!e.target || typeof e.target.closest !== 'function') return;
       const card = e.target.closest(SEL);
       if (!card) return;
       card.style.transition = 'transform .4s ease';

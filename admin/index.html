@@ -4464,10 +4464,7 @@ async function renderCtrlSeguimiento() {
   // Cargar datos de SIGA (colección actividades y trabajadores)
   const [actividades, trabajadores] = await Promise.all([
     CMSDB.getAll('actividades', 500, '-fecha').catch(()=>[]),
-    CMSDB.getAll('trabajadores', 300).catch(()=>
-      fetch(`${window.PB_URL||'http://localhost:8090'}/api/collections/trabajadores/records?perPage=300`,
-        {headers:{Authorization:'Bearer '+sessionStorage.getItem('pb_token')||''}})
-        .then(r=>r.json()).then(r=>r.items||[]).catch(()=>[])),
+    CMSDB.getAll('trabajadores', 300).catch(()=>[]),
   ]);
 
   const hoy = new Date().toISOString().slice(0,10);
