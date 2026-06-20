@@ -1311,6 +1311,20 @@ input,select,textarea{font-family:inherit}
           <pre id="seed-log-pre" style="font-size:11px;line-height:1.6;margin:0;white-space:pre-wrap;word-break:break-all"></pre>
         </div>
       </div>
+
+      <!-- LIMPIEZA DE DUPLICADOS -->
+      <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:24px;max-width:680px;margin-top:18px">
+        <div style="font-family:'Poppins',sans-serif;font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px">🧹 Limpiar Organizaciones Duplicadas</div>
+        <p style="font-size:13px;color:var(--muted);margin:0 0 16px">Detecta Comunas y Consejos Comunales con el <strong>mismo nombre</strong> y elimina las copias, conservando el registro más completo. Usa primero la simulación para ver qué se borraría.</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-secondary" onclick="cleanDuplicates(true)">🔍 Simulación (sin borrar)</button>
+          <button class="btn btn-danger" onclick="cleanDuplicates(false)">🧹 Eliminar duplicados</button>
+        </div>
+        <div id="dedup-log" style="display:none;margin-top:20px;background:#f8f9fa;border-radius:8px;padding:16px;max-height:400px;overflow-y:auto">
+          <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:8px">Resultado</div>
+          <pre id="dedup-log-pre" style="font-size:11px;line-height:1.6;margin:0;white-space:pre-wrap;word-break:break-all"></pre>
+        </div>
+      </div>
     </div>
 
   </div>
@@ -3751,6 +3765,63 @@ async function runSeed(dryRun) {
     logPre.textContent = '❌ ERROR: ' + e.message;
     showToast('Error durante la siembra', 'error');
   }
+}
+
+/* ─── LIMPIEZA DE DUPLICADOS ─── */
+// Puntúa qué tan "completo" está un registro para decidir cuál conservar.
+function _orgScore(o){
+  let s=0;
+  if((o.responsable||'').trim()) s+=3;
+  if((o.telefono||'').trim()) s+=2;
+  if((o.email||'').trim()) s+=1;
+  if((o.direccion||'').trim()) s+=1;
+  if(o.lat&&o.lng) s+=2;
+  const rif=(o.rif||'').trim().toUpperCase();
+  if(rif && !rif.startsWith('S-')) s+=2; // RIF real vale más que el genérico del sistema
+  return s;
+}
+
+async function _dedupCollection(coleccion, etiqueta, dryRun, log){
+  let items=[];
+  try{ items=await CMSDB.getAll(coleccion)||[]; }catch(e){ log.push(`❌ No se pudo leer ${coleccion}: ${e.message}`); return; }
+  const norm=s=>String(s||'').trim().toUpperCase().replace(/\s+/g,' ');
+  const grupos={};
+  items.forEach(o=>{ const k=norm(o.nombre); if(!k) return; (grupos[k]=grupos[k]||[]).push(o); });
+
+  let borrados=0;
+  for(const [nombre,grupo] of Object.entries(grupos)){
+    if(grupo.length<2) continue;
+    // Conserva el más completo; en empate, el creado primero.
+    grupo.sort((a,b)=>{
+      const d=_orgScore(b)-_orgScore(a);
+      if(d!==0) return d;
+      return String(a.created||'').localeCompare(String(b.created||''));
+    });
+    const conservar=grupo[0];
+    const eliminar=grupo.slice(1);
+    log.push(`\n${etiqueta}: "${grupo[0].nombre}" → ${grupo.length} copias. Conservar 1, eliminar ${eliminar.length}.`);
+    for(const o of eliminar){
+      if(dryRun){ log.push(`   🔍 [SIMULACIÓN] se eliminaría id ${o.id}`); borrados++; continue; }
+      try{ await CMSDB.remove(coleccion,o.id); log.push(`   ✅ eliminado id ${o.id}`); borrados++; }
+      catch(e){ log.push(`   ❌ error eliminando id ${o.id}: ${e.message}`); }
+    }
+  }
+  if(!borrados) log.push(`${etiqueta}: sin duplicados. ✅`);
+}
+
+async function cleanDuplicates(dryRun){
+  const logEl=document.getElementById('dedup-log');
+  const logPre=document.getElementById('dedup-log-pre');
+  logEl.style.display='block';
+  logPre.textContent = dryRun ? '⏳ Buscando duplicados...\n' : '⏳ Eliminando duplicados...\n';
+  if(!dryRun && !confirm('¿Eliminar las organizaciones duplicadas? Esta acción no se puede deshacer.')){
+    logPre.textContent='Operación cancelada.'; return;
+  }
+  const log=[];
+  await _dedupCollection('comunas','COMUNA',dryRun,log);
+  await _dedupCollection('consejos_comunales','CONSEJO',dryRun,log);
+  logPre.textContent=log.join('\n')||'(sin resultados)';
+  if(!dryRun) showToast('Limpieza de duplicados completada','success');
 }
 
 /* ─── LOGOUT ─── */
