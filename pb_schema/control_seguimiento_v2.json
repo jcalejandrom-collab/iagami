@@ -4,8 +4,8 @@
     "name": "seguimiento_actividades",
     "type": "base",
     "fields": [
-      { "id":"rel_seg_001","name":"actividad_id","type":"relation","required":true,
-        "maxSelect":1,"collectionId":"actividadesid01","cascadeDelete":false },
+      { "id":"txt_seg_001","name":"actividad_id","type":"text","required":true },
+      { "id":"txt_seg_001b","name":"actividad_titulo","type":"text" },
       { "id":"rel_seg_002","name":"supervisor_id","type":"relation","required":true,
         "maxSelect":1,"collectionId":"sigatrabajad001","cascadeDelete":false },
       { "id":"txt_seg_003","name":"estado_anterior","type":"text" },
