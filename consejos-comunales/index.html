@@ -205,6 +205,19 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 .success-list li{color:#4a8a6a;margin-bottom:5px;padding-left:4px}
 .success-list li::before{content:'✓ ';color:#1d6b3e;font-weight:700}
 .btn-back-home{padding:10px 22px;border-radius:9px;background:#1d6b3e;color:#fff;border:none;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
+/* Buscador de organización existente */
+#org-search-wrap{background:#f0faf5;border:1px solid #cfe8da;border-radius:10px;padding:14px 16px;margin-bottom:18px}
+.org-search-results{margin-top:8px;border:1px solid #cfe8da;border-radius:9px;background:#fff;max-height:230px;overflow-y:auto;box-shadow:0 4px 16px rgba(0,0,0,.08)}
+.org-search-item{padding:10px 13px;cursor:pointer;border-bottom:1px solid #eef6f1;font-size:13px;transition:.12s}
+.org-search-item:last-child{border-bottom:none}
+.org-search-item:hover{background:#e8f5ee}
+.org-search-item strong{color:#1a3d2b}
+.org-search-item .meta{font-size:11px;color:#6a8a78;margin-top:2px}
+.org-search-item .tag{font-size:9px;font-weight:700;color:#1d6b3e;background:#e8f5ee;border:1px solid #a8dfc0;border-radius:5px;padding:1px 6px;margin-right:6px}
+.org-search-empty{padding:12px 13px;font-size:12px;color:#6a8a78}
+.org-search-hint{font-size:11px;color:#6a8a78;margin-top:7px}
+.org-selected-banner{margin-top:8px;background:#dcfce7;border:1px solid #a8dfc0;border-radius:9px;padding:10px 13px;font-size:12.5px;color:#166534;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.org-selected-banner button{background:none;border:none;color:#166534;text-decoration:underline;cursor:pointer;font-size:12px;font-family:inherit;flex-shrink:0}
 
 /* ===== DETAIL MODAL ===== */
 .detail-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:400;display:none;align-items:center;justify-content:center;padding:16px}
@@ -358,6 +371,16 @@ footer{background:#0a1f0e;color:rgba(255,255,255,.6);text-align:center;padding:2
         <!-- SECTION II -->
         <div class="form-section" id="sec-2">
           <div class="sec-title">II · Identificación</div>
+
+          <!-- Buscador: encuentra tu organización si ya está en el directorio -->
+          <div class="field-group" id="org-search-wrap">
+            <label>¿Tu organización ya está en el directorio? Búscala para completar sus datos</label>
+            <input type="text" id="f-org-search" placeholder="Escribe el nombre de tu comuna o consejo comunal…" oninput="searchExistingOrg(this.value)" autocomplete="off"/>
+            <div id="org-search-results" class="org-search-results" style="display:none"></div>
+            <div id="org-selected-banner" class="org-selected-banner" style="display:none"></div>
+            <div class="org-search-hint">Si no aparece, simplemente continúa y la registraremos como nueva.</div>
+          </div>
+
           <div class="two-col">
             <div class="field-group">
               <label>Nombre de la Organización <span class="req">*</span></label>
@@ -983,12 +1006,85 @@ function openRegModal(){
   currentStep=1;
   showSection(1);
   updateStepper();
+  clearSelectedOrg();
+  if($('f-org-search')) $('f-org-search').value='';
   $('success-screen').style.display='none';
   $('reg-form-wrap').style.display='';
   $('reg-modal').classList.add('open');
 }
 function closeRegModal(){
   $('reg-modal').classList.remove('open');
+}
+
+/* ============================================================
+   BUSCADOR — encontrar organización ya existente en el directorio
+   La persona busca por nombre; si la encuentra, prellenamos el
+   formulario y al guardar se ACTUALIZA ese registro (mismo id).
+   Si no la encuentra, continúa y se crea como nueva.
+============================================================ */
+let _selectedExistingOrg=null; // { id, tipo } cuando la persona seleccionó una existente
+
+function searchExistingOrg(q){
+  const box=$('org-search-results');
+  const term=(q||'').trim().toLowerCase();
+  // Al escribir de nuevo se descarta cualquier selección previa
+  if(_selectedExistingOrg){ _selectedExistingOrg=null; $('org-selected-banner').style.display='none'; }
+  if(term.length<2){ box.style.display='none'; box.innerHTML=''; return; }
+  const norm=s=>String(s||'').toLowerCase();
+  const pool=[
+    ..._comunas.map(o=>({o,tipo:'Comuna'})),
+    ..._consejos.map(o=>({o,tipo:'Consejo Comunal'})),
+  ].filter(x=>norm(x.o.nombre).includes(term)).slice(0,12);
+  if(!pool.length){
+    box.innerHTML=`<div class="org-search-empty">No se encontró ninguna organización con ese nombre. Continúa para registrarla como nueva.</div>`;
+    box.style.display='block'; return;
+  }
+  box.innerHTML=pool.map(x=>{
+    const id=x.o.id||x.o._localId||'';
+    const meta=[x.o.parroquia,x.o.sector].filter(Boolean).map(esc).join(' · ');
+    return `<div class="org-search-item" data-id="${esc(String(id))}" data-tipo="${esc(x.tipo)}">
+      <div><span class="tag">${x.tipo==='Comuna'?'COMUNA':'CONSEJO'}</span><strong>${esc(x.o.nombre||'—')}</strong></div>
+      ${meta?`<div class="meta">📍 ${meta}</div>`:''}
+    </div>`;
+  }).join('');
+  box.style.display='block';
+  box.querySelectorAll('.org-search-item').forEach(el=>{
+    el.addEventListener('click',()=>selectExistingOrg(el.dataset.id,el.dataset.tipo));
+  });
+}
+
+function selectExistingOrg(id,tipo){
+  const list=tipo==='Comuna'?_comunas:_consejos;
+  const o=list.find(x=>String(x.id||x._localId||'')===String(id));
+  if(!o)return;
+  _selectedExistingOrg={ id:o.id||o._localId, tipo };
+
+  // Marca el tipo y actualiza la UI dependiente
+  const radio=document.querySelector(`input[name="tipo_org"][value="${tipo==='Comuna'?'Comuna':'Consejo Comunal'}"]`);
+  if(radio){ radio.checked=true; onTipoChange(); }
+
+  // Prellena los campos con lo que ya hay guardado
+  const set=(fid,val)=>{ const el=$(fid); if(el) el.value=val==null?'':val; };
+  set('f-nombre',o.nombre); set('f-rif',o.rif); set('f-responsable',o.responsable);
+  set('f-cedula',o.cedula); set('f-telefono',o.telefono); set('f-email',o.email);
+  set('f-direccion',o.direccion); set('f-resp-sala',o.resp_sala);
+  set('f-sector',o.sector); set('f-comunidad',o.comunidad); set('f-dir-detallada',o.dir_detallada);
+  set('f-lat',o.lat); set('f-lng',o.lng);
+  if(o.parroquia && $('f-parroquia-form')) $('f-parroquia-form').value=o.parroquia;
+
+  $('org-search-results').style.display='none';
+  $('f-org-search').value=o.nombre||'';
+  const banner=$('org-selected-banner');
+  banner.innerHTML=`<span>✅ Editando: <strong>${esc(o.nombre||'')}</strong> — completa o corrige sus datos.</span>
+    <button type="button" onclick="clearSelectedOrg(true)">No es esta / crear nueva</button>`;
+  banner.style.display='flex';
+}
+
+function clearSelectedOrg(resetSearch){
+  _selectedExistingOrg=null;
+  const banner=$('org-selected-banner'); if(banner) banner.style.display='none';
+  const box=$('org-search-results'); if(box){ box.style.display='none'; box.innerHTML=''; }
+  if(resetSearch && $('f-org-search')) $('f-org-search').value='';
 }
 
 /* ============================================================
@@ -1325,11 +1421,13 @@ async function saveForm(){
   const ts=new Date().toISOString();
   const normRif = r => String(r||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
 
-  // ¿Ya existe esta organización? (mismo RIF en el directorio) → se ACTUALIZA en
-  // lugar de crear una tarjeta duplicada. Conserva su código de registro original.
-  const rifKey = normRif(($('f-rif').value||'').trim());
+  // ¿La persona seleccionó una organización existente del buscador? → se ACTUALIZA
+  // ese registro (conserva su código y fecha). Si no, se crea como nueva.
   const existingList = tipo==='Comuna' ? _comunas : _consejos;
-  const orgExistente = rifKey ? existingList.find(o => normRif(o.rif)===rifKey) : null;
+  const orgExistente = (_selectedExistingOrg && _selectedExistingOrg.tipo===tipo)
+    ? existingList.find(o => String(o.id||o._localId||'')===String(_selectedExistingOrg.id))
+    : null;
+  const rifKey = orgExistente ? normRif(orgExistente.rif) : normRif(($('f-rif').value||'').trim());
   const code = orgExistente ? (orgExistente.codigo_registro || genCode()) : genCode();
 
   const orgData={
@@ -1461,7 +1559,7 @@ async function saveForm(){
     savedItems.push(`${tipo} ${orgExistente?'actualizada':'registrada'} en el sistema.`);
   }catch(e){
     const orgArr=lsGet(collection);
-    const idx = orgExistente ? orgArr.findIndex(o=>normRif(o.rif)===rifKey) : -1;
+    const idx = orgExistente ? orgArr.findIndex(o=>String(o.id||o._localId||'')===String(orgData.id)) : -1;
     if(idx>=0) orgArr[idx]=Object.assign({},orgArr[idx],orgData);
     else orgArr.push(Object.assign({id:'local-'+Date.now()},orgData));
     lsSet(collection,orgArr);
@@ -1500,7 +1598,7 @@ async function saveForm(){
     if(i>=0) arr[i]=Object.assign({},arr[i],val); else arr.push(val);
   };
   const orgList = tipo==='Comuna' ? _comunas : _consejos;
-  if(orgExistente) replaceOrPush(orgList, o=>normRif(o.rif)===rifKey, orgData);
+  if(orgExistente) replaceOrPush(orgList, o=>String(o.id||o._localId||'')===String(orgData.id), orgData);
   else orgList.push(orgData);
   if(diagExistente) replaceOrPush(_diagnosticos, d=>normRif(d.rif_org)===rifKey, diagPayload);
   else _diagnosticos.push(diagPayload);
