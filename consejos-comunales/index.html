@@ -1419,35 +1419,62 @@ async function saveForm(){
   // Try PocketBase, fallback to localStorage
   const savedItems=[];
   const collection=tipo==='Comuna'?'comunas':'consejos_comunales';
+  const pbOn = (typeof CMSDB!=='undefined' && PB_URL);
 
+  // Las colecciones diagnosticos_ambientales / denuncias_comunitarias guardan
+  // los campos clave indexados + el resto del formulario en un campo JSON `datos`,
+  // para coincidir con el esquema de PocketBase sin tener que declarar ~40 campos.
+  const diagPayload = {
+    codigo_registro: diagData.codigo_registro,
+    tipo_org: diagData.tipo_org,
+    rif_org: diagData.rif_org,
+    fecha_registro: diagData.fecha_registro,
+    datos: diagData,
+  };
+  const denPayload = denunciaData ? {
+    codigo_registro: denunciaData.codigo_registro,
+    tipo_org: denunciaData.tipo_org,
+    rif_org: denunciaData.rif_org,
+    urgencia: denunciaData.urgencia,
+    fecha_registro: denunciaData.fecha_registro,
+    estado: 'pendiente',
+    publicado: false,
+    datos: denunciaData,
+  } : null;
+
+  // Cada save en su propio try: un fallo no arrastra los registros válidos.
   try{
-    if(typeof CMSDB!=='undefined'&&PB_URL){
-      await CMSDB.save(collection,orgData);
-      savedItems.push(`${tipo} registrada en el sistema.`);
-      await CMSDB.save('diagnosticos_ambientales',diagData);
-      savedItems.push('Diagnóstico ambiental guardado.');
-      if(denunciaData){
-        await CMSDB.save('denuncias_comunitarias',denunciaData);
-        savedItems.push('Denuncia ambiental registrada.');
-      }
-    } else throw new Error('CMSDB not available');
-  }catch(pbErr){
-    // fallback localStorage (assign a local id only for the offline copy)
+    if(!pbOn) throw new Error('CMSDB not available');
+    await CMSDB.save(collection,orgData);
+    savedItems.push(`${tipo} registrada en el sistema.`);
+  }catch(e){
     const orgArr=lsGet(collection);
     orgArr.push(Object.assign({id:'local-'+Date.now()},orgData));
     lsSet(collection,orgArr);
-    savedItems.push(`${tipo} guardada localmente.`);
+    savedItems.push(`${tipo} guardada localmente (sin conexión).`);
+  }
 
+  try{
+    if(!pbOn) throw new Error('CMSDB not available');
+    await CMSDB.save('diagnosticos_ambientales',diagPayload);
+    savedItems.push('Diagnóstico ambiental guardado.');
+  }catch(e){
     const diagArr=lsGet('diagnosticos_ambientales');
     diagArr.push(diagData);
     lsSet('diagnosticos_ambientales',diagArr);
-    savedItems.push('Diagnóstico guardado localmente.');
+    savedItems.push('Diagnóstico guardado localmente (sin conexión).');
+  }
 
-    if(denunciaData){
+  if(denPayload){
+    try{
+      if(!pbOn) throw new Error('CMSDB not available');
+      await CMSDB.save('denuncias_comunitarias',denPayload);
+      savedItems.push('Denuncia ambiental registrada.');
+    }catch(e){
       const denArr=lsGet('denuncias_comunitarias');
       denArr.push(denunciaData);
       lsSet('denuncias_comunitarias',denArr);
-      savedItems.push('Denuncia guardada localmente.');
+      savedItems.push('Denuncia guardada localmente (sin conexión).');
     }
   }
 

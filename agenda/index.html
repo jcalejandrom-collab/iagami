@@ -300,6 +300,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   cacheTodosEventos = (await CMSDB.getAll('eventos')) || [];
   allEvents = cacheTodosEventos
     .filter(e => {
+      if (e.publicado === false) return false;
       if (!e.fecha) return false;
       const d = new Date(e.fecha + 'T00:00:00');
       const t = new Date();
