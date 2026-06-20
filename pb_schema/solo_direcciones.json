@@ -1,0 +1,19 @@
+[
+  {
+    "id": "direccionesi01",
+    "name": "direcciones",
+    "type": "base",
+    "fields": [
+      { "id":"txt_dir_001","name":"nombre",      "type":"text","required":true },
+      { "id":"txt_dir_002","name":"codigo",      "type":"text" },
+      { "id":"txt_dir_003","name":"director",    "type":"text" },
+      { "id":"txt_dir_004","name":"descripcion", "type":"text" },
+      { "id":"bol_dir_005","name":"activa",      "type":"bool" }
+    ],
+    "listRule":   "@request.auth.id != \"\"",
+    "viewRule":   "@request.auth.id != \"\"",
+    "createRule": "@request.auth.rol = 'PRESIDENTE' || @request.auth.rol = 'DIRECTOR' || @request.auth.rol = 'TECNOLOGIA'",
+    "updateRule": "@request.auth.rol = 'PRESIDENTE' || @request.auth.rol = 'DIRECTOR' || @request.auth.rol = 'TECNOLOGIA'",
+    "deleteRule": "@request.auth.rol = 'PRESIDENTE' || @request.auth.rol = 'TECNOLOGIA'"
+  }
+]
