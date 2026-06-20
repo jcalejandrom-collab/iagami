@@ -100,19 +100,22 @@ function deriveEstado(i){
   return 'Operativo';
 }
 const num = v => +v || 0;
+function safeJson(s){ try{ return JSON.parse(s)||{}; }catch(e){ return {}; } }
 
 async function init(){
-  let consejos=[], comunas=[], infra=[];
+  let consejos=[], comunas=[], infra=[], diags=[];
   try{
-    [consejos,comunas,infra]=await Promise.all([
+    [consejos,comunas,infra,diags]=await Promise.all([
       CMSDB.getAll('consejos_comunales'),
       CMSDB.getAll('comunas'),
       CMSDB.getAll('infraestructura_hidrica'),
+      CMSDB.getAll('diagnosticos_ambientales'),
     ]);
   }catch(e){ /* getAll already returns [] on error */ }
   consejos=Array.isArray(consejos)?consejos:[];
   comunas=Array.isArray(comunas)?comunas:[];
   infra=Array.isArray(infra)?infra:[];
+  diags=Array.isArray(diags)?diags:[];
 
   // Solo mostrar Municipio Iribarren (Barquisimeto) en esta sala
   consejos = consejos.filter(c => !c.municipio || c.municipio === 'Iribarren');
@@ -126,6 +129,38 @@ async function init(){
     if(!k) return;
     const prev=infraPorConsejo[k];
     if(!prev || (i.fecha_actualizacion||'') > (prev.fecha_actualizacion||'')) infraPorConsejo[k]=i;
+  });
+
+  // Datos hídricos cargados por la propia comunidad en su registro público
+  // (diagnosticos_ambientales). Solo se usan para consejos que aún no tienen un
+  // registro hídrico cargado por el staff; el dato del admin siempre tiene prioridad.
+  const norm = s => String(s||'').trim().toUpperCase();
+  const consejoPorRif={}, consejoPorCodigo={};
+  consejos.forEach(c=>{
+    if(c.rif) consejoPorRif[norm(c.rif)]=c;
+    if(c.codigo_registro) consejoPorCodigo[norm(c.codigo_registro)]=c;
+  });
+  diags.forEach(d=>{
+    const datos = (d.datos && typeof d.datos==='string') ? safeJson(d.datos)
+                : (d.datos && typeof d.datos==='object') ? d.datos : d;
+    const c = consejoPorRif[norm(d.rif_org||datos.rif_org)]
+           || consejoPorCodigo[norm(d.codigo_registro||datos.codigo_registro)];
+    if(!c) return;
+    const fecha = d.fecha_registro || datos.fecha_registro || '';
+    const prev = infraPorConsejo[c.id];
+    // El registro del staff (sin marca _fuente) manda; entre comunitarios, el más reciente.
+    if(prev && prev._fuente!=='comunidad') return;
+    if(prev && (prev.fecha_actualizacion||'') >= fecha) return;
+    infraPorConsejo[c.id] = {
+      consejo_comunal: c.id,
+      pozos_activos: num(datos.pozos_activos),
+      pozos_inactivos: num(datos.pozos_inactivos),
+      tuberias_consolidadas:0, tuberias_por_consolidar:0,
+      tanques:0, estaciones_bombeo:0, familias_beneficiadas:0,
+      estado_operativo:'',
+      fecha_actualizacion: fecha,
+      _fuente:'comunidad',
+    };
   });
 
   // ── KPIs ──
@@ -159,8 +194,9 @@ async function init(){
       const i=infraPorConsejo[c.id];
       if(!i) return `<tr><td><strong>${esc(c.nombre||c.codigo_registro||'—')}</strong></td><td>${esc(comunaNombre(c.comuna))}</td><td colspan="5" style="color:#9aaea0">Sin datos hídricos</td><td><span class="badge" style="background:#eef2f0;color:#7a9a88">⚪ Sin datos</span></td></tr>`;
       const est=deriveEstado(i), m=ESTADO_META[est];
+      const fuente = i._fuente==='comunidad' ? ' <span title="Dato reportado por la comunidad en su registro" style="font-size:10px;color:#4a8a6a;background:#eef7f1;border:1px solid #cfe8da;border-radius:6px;padding:1px 5px;white-space:nowrap">👥 comunidad</span>' : '';
       return `<tr>
-        <td><strong>${esc(c.nombre||c.codigo_registro||'—')}</strong></td>
+        <td><strong>${esc(c.nombre||c.codigo_registro||'—')}</strong>${fuente}</td>
         <td>${esc(comunaNombre(c.comuna))}</td>
         <td>${num(i.pozos_activos)} / ${num(i.pozos_inactivos)}</td>
         <td>${num(i.tuberias_consolidadas)} / ${num(i.tuberias_por_consolidar)}</td>
