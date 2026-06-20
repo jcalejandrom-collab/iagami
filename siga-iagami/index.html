@@ -491,10 +491,67 @@
       </div>
     </div>
 
+    <!-- ══ SEC: MENSAJES ══ -->
+    <div class="section" id="sec-mensajes">
+      <div class="page-header">
+        <div><div class="page-title">💬 Mensajes Internos</div><div class="page-subtitle">Comunicación directa entre trabajadores, RRHH y supervisores</div></div>
+        <button class="btn btn-primary" onclick="abrirNuevoMensaje()">✉️ Nuevo Mensaje</button>
+      </div>
+      <!-- Layout chat -->
+      <div style="display:grid;grid-template-columns:280px 1fr;gap:16px;height:560px">
+        <!-- Lista conversaciones -->
+        <div style="background:var(--surface);border-radius:12px;border:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden">
+          <div style="padding:12px;border-bottom:1px solid var(--border)">
+            <input type="search" id="msg-search" placeholder="Buscar conversación…" oninput="filtrarConversaciones()" style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:var(--bg)"/>
+          </div>
+          <div id="msg-lista" style="flex:1;overflow-y:auto;padding:8px"></div>
+        </div>
+        <!-- Hilo de conversación -->
+        <div style="background:var(--surface);border-radius:12px;border:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden">
+          <div id="msg-hilo-header" style="padding:14px 16px;border-bottom:1px solid var(--border);font-weight:600;font-size:14px;display:flex;align-items:center;gap:10px">
+            <span style="color:var(--muted);font-weight:400">Selecciona una conversación</span>
+          </div>
+          <div id="msg-hilo" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px">
+            <div style="text-align:center;color:var(--muted);font-size:13px;margin-top:40px">Selecciona una conversación para ver los mensajes</div>
+          </div>
+          <div id="msg-reply-box" style="padding:12px;border-top:1px solid var(--border);display:none;gap:8px;align-items:flex-end">
+            <textarea id="msg-reply-txt" rows="2" placeholder="Escribe tu mensaje…" style="flex:1;resize:none;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;background:var(--bg)"></textarea>
+            <button class="btn btn-primary" onclick="enviarRespuesta()" style="white-space:nowrap">Enviar ↗</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div><!-- /content -->
 </div><!-- /main -->
 
 <!-- ── MODALES ── -->
+
+<!-- Modal: Nuevo Mensaje -->
+<div class="modal-overlay" id="modal-nuevo-mensaje">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title">✉️ Nuevo Mensaje</div>
+      <button class="modal-close" onclick="cerrarModal('modal-nuevo-mensaje')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group" style="margin-bottom:12px"><label>Para *</label><select id="nm-para" required></select></div>
+      <div class="form-group" style="margin-bottom:12px"><label>Tipo</label>
+        <select id="nm-tipo">
+          <option value="General">💬 General</option>
+          <option value="RRHH">👥 RRHH</option>
+          <option value="Actividad">📋 Actividad</option>
+          <option value="Solicitud">📬 Solicitud</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Mensaje *</label><textarea id="nm-texto" rows="4" placeholder="Escribe tu mensaje…"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="cerrarModal('modal-nuevo-mensaje')">Cancelar</button>
+      <button class="btn btn-primary" onclick="enviarNuevoMensaje()">✉️ Enviar</button>
+    </div>
+  </div>
+</div>
 
 <!-- Modal: Trabajador -->
 <div class="modal-overlay" id="modal-trabajador">
@@ -848,6 +905,7 @@ const MENU_ALL = [
   { id:'asistencia', icon:'🕐', label:'Asistencia', roles:['RRHH','SUPERVISOR','DIRECTOR','PRESIDENTE'] },
   { id:'evaluaciones', icon:'📊', label:'Evaluaciones', roles:['RRHH','DIRECTOR','PRESIDENTE'] },
   { id:'comunicaciones', icon:'📢', label:'Comunicaciones' },
+  { id:'mensajes', icon:'💬', label:'Mensajes', badge:'msg-badge' },
   { id:'indicadores', icon:'📈', label:'Indicadores', roles:['COORDINADOR','DIRECTOR','RRHH','PRESIDENTE','TECNOLOGIA'] },
   { id:'presidencia', icon:'🏛️', label:'Presidencia', roles:['PRESIDENTE','DIRECTOR'] },
   { section:'Sistema' },
@@ -860,8 +918,9 @@ function buildMenu() {
     if (it.section) return `<div class="sidebar-section">${esc(it.section)}</div>`;
     if (it.roles && !it.roles.includes(ROL)) return '';
     const active = it.id === _currentSection ? ' active' : '';
+    const badgeHtml = it.badge ? `<span id="${it.badge}" style="margin-left:auto;background:#dc2626;color:#fff;border-radius:999px;font-size:10px;padding:1px 6px;font-weight:700;display:none"></span>` : '';
     return `<button class="nav-item${active}" onclick="sigaNav('${it.id}')">
-      <span class="nav-icon">${it.icon}</span>${esc(it.label)}</button>`;
+      <span class="nav-icon">${it.icon}</span>${esc(it.label)}${badgeHtml}</button>`;
   }).join('');
 }
 
@@ -891,6 +950,7 @@ window.sigaNav = function(id) {
   if (id === 'mi-solicitud')   loadMisSolicitudes();
   if (id === 'asistencia')     loadAsistencia();
   if (id === 'evaluaciones')   loadEvaluaciones();
+  if (id === 'mensajes')       loadMensajes();
 };
 
 /* ─── Tabs ─── */
@@ -941,6 +1001,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadCatalogoBase();
   await loadDashboard();
   buildQuickActions();
+  // Badge mensajes no leídos
+  SIGA.list('mensajes_internos',{perPage:100,sort:'-fecha'}).then(msgs=>{
+    const noLeidos = msgs.filter(m=>m.para===U.id&&!m.leido).length;
+    actualizarBadge(noLeidos);
+  }).catch(()=>{});
 });
 
 /* ─── Tabs de equipo/global según rol ─── */
@@ -2115,6 +2180,182 @@ window.eliminarEvaluacion = async function(id) {
   toast('Evaluación eliminada');
   loadEvaluaciones();
 };
+
+/* ─── Mensajes Internos ─── */
+let _msgConversaciones = [];
+let _msgContactoActual = null;
+let _msgTodosLos = [];
+
+window.loadMensajes = async function() {
+  // Cargar trabajadores si hace falta
+  if (!_allTrabajadores.length) {
+    _allTrabajadores = await SIGA.list('trabajadores',{perPage:200}).catch(()=>[]);
+  }
+  // Cargar todos los mensajes donde soy parte
+  const todos = await SIGA.list('mensajes_internos', {perPage:500, sort:'-fecha'}).catch(()=>[]);
+  _msgTodosLos = todos;
+
+  // Marcar como leídos los que me llegan
+  todos.filter(m=>m.para===U.id&&!m.leido).forEach(m=>{
+    SIGA.update('mensajes_internos', m.id, {leido:true}).catch(()=>{});
+  });
+
+  // Agrupar por contacto (la otra persona en la conversación)
+  const contactosMap = {};
+  todos.forEach(m=>{
+    const otro = m.de===U.id ? m.para : m.de;
+    if (!contactosMap[otro]) contactosMap[otro] = {id:otro, mensajes:[], noLeidos:0};
+    contactosMap[otro].mensajes.push(m);
+    if (m.para===U.id && !m.leido) contactosMap[otro].noLeidos++;
+  });
+
+  _msgConversaciones = Object.values(contactosMap).sort((a,b)=>{
+    const ua = new Date(a.mensajes[0]?.fecha||0);
+    const ub = new Date(b.mensajes[0]?.fecha||0);
+    return ub-ua;
+  });
+
+  renderListaConversaciones(_msgConversaciones);
+  actualizarBadge(todos.filter(m=>m.para===U.id&&!m.leido).length);
+
+  // Si había un contacto activo, reabrir hilo
+  if (_msgContactoActual) abrirHilo(_msgContactoActual);
+};
+
+function renderListaConversaciones(convs) {
+  const lista = document.getElementById('msg-lista');
+  if (!lista) return;
+  if (!convs.length) {
+    lista.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px">Sin conversaciones aún</div>';
+    return;
+  }
+  lista.innerHTML = convs.map(c=>{
+    const trab = _allTrabajadores.find(t=>t.id===c.id);
+    const nombre = trab?`${trab.nombres||''} ${trab.apellidos||''}`.trim():'Desconocido';
+    const inicial = nombre[0]?.toUpperCase()||'?';
+    const ultimo = c.mensajes[0];
+    const hora = ultimo?.fecha ? new Date(ultimo.fecha).toLocaleTimeString('es-VE',{hour:'2-digit',minute:'2-digit'}) : '';
+    const activo = _msgContactoActual===c.id ? 'background:var(--primary-light,#dcfce7);' : '';
+    return `<div onclick="abrirHilo('${c.id}')" style="display:flex;gap:10px;padding:10px;border-radius:8px;cursor:pointer;align-items:center;${activo}margin-bottom:2px" onmouseover="this.style.background='var(--primary-light,#f0fdf4)'" onmouseout="this.style.background='${_msgContactoActual===c.id?'var(--primary-light,#dcfce7)':'transparent'}'">
+      <div style="width:38px;height:38px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;flex-shrink:0">${inicial}</div>
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span style="font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(nombre)}</span>
+          <span style="font-size:11px;color:var(--muted);flex-shrink:0;margin-left:4px">${hora}</span>
+        </div>
+        <div style="font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc((ultimo?.mensaje||'').slice(0,40))}</div>
+      </div>
+      ${c.noLeidos>0?`<span style="background:#dc2626;color:#fff;border-radius:999px;font-size:11px;padding:1px 7px;font-weight:700">${c.noLeidos}</span>`:''}
+    </div>`;
+  }).join('');
+}
+
+window.abrirHilo = function(contactoId) {
+  _msgContactoActual = contactoId;
+  const trab = _allTrabajadores.find(t=>t.id===contactoId);
+  const nombre = trab?`${trab.nombres||''} ${trab.apellidos||''}`.trim():'Desconocido';
+  const rol = trab?.rol||'';
+
+  const header = document.getElementById('msg-hilo-header');
+  if (header) header.innerHTML = `
+    <div style="width:34px;height:34px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700">${nombre[0]?.toUpperCase()||'?'}</div>
+    <div><div style="font-weight:600">${esc(nombre)}</div><div style="font-size:11px;color:var(--muted)">${esc(rol)}</div></div>`;
+
+  const hilo = document.getElementById('msg-hilo');
+  const conv = _msgConversaciones.find(c=>c.id===contactoId);
+  const msgs = conv ? [...conv.mensajes].reverse() : [];
+
+  if (!msgs.length) {
+    hilo.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:13px;margin-top:40px">Inicia la conversación</div>';
+  } else {
+    hilo.innerHTML = msgs.map(m=>{
+      const propio = m.de===U.id;
+      const hora = new Date(m.fecha).toLocaleString('es-VE',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+      const tipoBadge = m.tipo&&m.tipo!=='General'?`<span style="font-size:10px;background:#e0f2fe;color:#0369a1;padding:1px 6px;border-radius:8px;margin-bottom:4px;display:inline-block">${esc(m.tipo)}</span><br>`:'';
+      return `<div style="display:flex;flex-direction:column;align-items:${propio?'flex-end':'flex-start'}">
+        ${tipoBadge}
+        <div style="max-width:75%;background:${propio?'var(--primary)':'var(--surface)'};color:${propio?'#fff':'inherit'};border:${propio?'none':'1px solid var(--border)'};border-radius:${propio?'16px 16px 4px 16px':'16px 16px 16px 4px'};padding:10px 14px;font-size:13px;line-height:1.5">
+          ${esc(m.mensaje)}
+        </div>
+        <span style="font-size:11px;color:var(--muted);margin-top:3px">${hora}${propio&&m.leido?' ✓✓':''}</span>
+      </div>`;
+    }).join('');
+    setTimeout(()=>{ hilo.scrollTop = hilo.scrollHeight; }, 50);
+  }
+
+  const replyBox = document.getElementById('msg-reply-box');
+  if (replyBox) replyBox.style.display = 'flex';
+  renderListaConversaciones(_msgConversaciones);
+};
+
+window.enviarRespuesta = async function() {
+  const txt = document.getElementById('msg-reply-txt')?.value.trim();
+  if (!txt || !_msgContactoActual) return;
+  try {
+    await SIGA.create('mensajes_internos',{
+      de: U.id, para: _msgContactoActual,
+      mensaje: txt, leido: false, tipo: 'General',
+      fecha: new Date().toISOString(),
+    });
+    document.getElementById('msg-reply-txt').value = '';
+    await loadMensajes();
+  } catch(e) { toast('Error al enviar: '+e.message,'error'); }
+};
+
+window.abrirNuevoMensaje = async function() {
+  if (!_allTrabajadores.length) {
+    _allTrabajadores = await SIGA.list('trabajadores',{perPage:200}).catch(()=>[]);
+  }
+  const sel = document.getElementById('nm-para');
+  sel.innerHTML = '<option value="">Seleccionar destinatario…</option>';
+  _allTrabajadores.filter(t=>t.id!==U.id).forEach(t=>{
+    const o = document.createElement('option');
+    o.value = t.id;
+    o.textContent = `${t.nombres||''} ${t.apellidos||''}`.trim() + (t.rol?` (${t.rol})`:'');
+    sel.appendChild(o);
+  });
+  document.getElementById('nm-texto').value = '';
+  document.getElementById('nm-tipo').value = 'General';
+  abrirModal('modal-nuevo-mensaje');
+};
+
+window.enviarNuevoMensaje = async function() {
+  const para = document.getElementById('nm-para').value;
+  const txt  = document.getElementById('nm-texto').value.trim();
+  const tipo = document.getElementById('nm-tipo').value;
+  if (!para) { toast('Selecciona un destinatario','error'); return; }
+  if (!txt)  { toast('Escribe un mensaje','error'); return; }
+  try {
+    await SIGA.create('mensajes_internos',{
+      de: U.id, para, mensaje: txt, leido: false, tipo,
+      fecha: new Date().toISOString(),
+    });
+    toast('Mensaje enviado ✓');
+    cerrarModal('modal-nuevo-mensaje');
+    _msgContactoActual = para;
+    await loadMensajes();
+  } catch(e) { toast('Error: '+e.message,'error'); }
+};
+
+window.filtrarConversaciones = function() {
+  const q = (document.getElementById('msg-search')?.value||'').toLowerCase();
+  const filtradas = q ? _msgConversaciones.filter(c=>{
+    const t = _allTrabajadores.find(t=>t.id===c.id);
+    return `${t?.nombres||''} ${t?.apellidos||''}`.toLowerCase().includes(q);
+  }) : _msgConversaciones;
+  renderListaConversaciones(filtradas);
+};
+
+function actualizarBadge(n) {
+  // Actualizar badge en sidebar si existe
+  const badge = document.getElementById('msg-badge');
+  if (!badge) return;
+  badge.textContent = n > 0 ? n : '';
+  badge.style.display = n > 0 ? 'inline-flex' : 'none';
+}
+
+// Polling cada 30s para nuevos mensajes
+setInterval(()=>{ if (_currentSection==='mensajes') loadMensajes(); }, 30000);
 
 /* ─── Auditoría ─── */
 async function registrarAuditoria(accion, modulo, resultado='OK') {
