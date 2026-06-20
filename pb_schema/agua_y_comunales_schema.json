@@ -1,0 +1,80 @@
+[
+  {
+    "_note": "diagnosticos_ambientales — importar con Merge. El formulario público guarda datos en el campo JSON 'datos' + campos indexados clave.",
+    "name": "diagnosticos_ambientales",
+    "type": "base",
+    "fields": [
+      { "id":"txt_diag_001","name":"codigo_registro","type":"text" },
+      { "id":"txt_diag_002","name":"tipo_org",       "type":"text" },
+      { "id":"txt_diag_003","name":"rif_org",        "type":"text" },
+      { "id":"txt_diag_004","name":"fecha_registro", "type":"text" },
+      { "id":"txt_diag_005","name":"fuente_agua",    "type":"text" },
+      { "id":"txt_diag_006","name":"cobertura",      "type":"text" },
+      { "id":"txt_diag_007","name":"pozos_activos",  "type":"text" },
+      { "id":"txt_diag_008","name":"pozos_inactivos","type":"text" },
+      { "id":"txt_diag_009","name":"aguas_estado",   "type":"text" },
+      { "id":"jsn_diag_010","name":"datos",          "type":"json" }
+    ],
+    "listRule":   "",
+    "viewRule":   "",
+    "createRule": "",
+    "updateRule": "",
+    "deleteRule": "@request.auth.collectionName = \"admins\""
+  },
+  {
+    "_note": "denuncias_comunitarias — registro público de denuncias ambientales.",
+    "name": "denuncias_comunitarias",
+    "type": "base",
+    "fields": [
+      { "id":"txt_den_001","name":"codigo_registro","type":"text" },
+      { "id":"txt_den_002","name":"tipo_org",       "type":"text" },
+      { "id":"txt_den_003","name":"rif_org",        "type":"text" },
+      { "id":"txt_den_004","name":"urgencia",       "type":"text" },
+      { "id":"txt_den_005","name":"estado",         "type":"text" },
+      { "id":"bol_den_006","name":"publicado",      "type":"bool" },
+      { "id":"txt_den_007","name":"fecha_registro", "type":"text" },
+      { "id":"jsn_den_008","name":"datos",          "type":"json" }
+    ],
+    "listRule":   "",
+    "viewRule":   "",
+    "createRule": "",
+    "updateRule": "@request.auth.collectionName = \"admins\"",
+    "deleteRule": "@request.auth.collectionName = \"admins\""
+  },
+  {
+    "_note": "Campos adicionales para consejos_comunales que el formulario envía pero no están en el schema actual.",
+    "name": "consejos_comunales",
+    "type": "base",
+    "fields": [
+      { "id":"txt_cc_e01","name":"email",        "type":"text" },
+      { "id":"txt_cc_e02","name":"resp_sala",    "type":"text" },
+      { "id":"txt_cc_e03","name":"dir_detallada","type":"text" },
+      { "id":"txt_cc_e04","name":"estatus",      "type":"text" },
+      { "id":"txt_cc_e05","name":"tipo",         "type":"text" },
+      { "id":"txt_cc_e06","name":"comunidad",    "type":"text" }
+    ],
+    "listRule":   "",
+    "viewRule":   "",
+    "createRule": "",
+    "updateRule": "@request.auth.collectionName = \"admins\"",
+    "deleteRule": "@request.auth.collectionName = \"admins\""
+  },
+  {
+    "_note": "Campos adicionales para comunas.",
+    "name": "comunas",
+    "type": "base",
+    "fields": [
+      { "id":"txt_com_e01","name":"email",             "type":"text" },
+      { "id":"txt_com_e02","name":"num_consejos",      "type":"text" },
+      { "id":"txt_com_e03","name":"estatus",           "type":"text" },
+      { "id":"txt_com_e04","name":"tipo",              "type":"text" },
+      { "id":"txt_com_e05","name":"dir_detallada",     "type":"text" },
+      { "id":"jsn_com_e06","name":"consejos_integrantes","type":"json" }
+    ],
+    "listRule":   "",
+    "viewRule":   "",
+    "createRule": "",
+    "updateRule": "@request.auth.collectionName = \"admins\"",
+    "deleteRule": "@request.auth.collectionName = \"admins\""
+  }
+]
