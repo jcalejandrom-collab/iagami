@@ -1492,7 +1492,10 @@ async function saveForm(){
   const orgExistente = (_selectedExistingOrg && _selectedExistingOrg.tipo===tipo)
     ? existingList.find(o => String(o.id||o._localId||'')===String(_selectedExistingOrg.id))
     : null;
-  const code = orgExistente ? (orgExistente.codigo_registro || genCode()) : genCode();
+  // Esta página es pública: por seguridad NUNCA actualiza registros existentes
+  // (updateRule = admins). Siempre se crea un registro nuevo con código propio;
+  // los duplicados los reconcilia el panel admin con la herramienta de limpieza.
+  const code = genCode();
 
   // RIF: si la persona no puso uno, se conserva el que ya tenía (al editar) o se
   // asigna un RIF genérico del sistema con prefijo "S-" (formato que un RIF real
@@ -1524,8 +1527,7 @@ async function saveForm(){
     estatus: 'Activo',
     fecha_registro: orgExistente ? (orgExistente.fecha_registro || ts) : ts,
   };
-  // Si existe, usamos su id → CMSDB.save hace UPDATE (PATCH) en vez de crear.
-  if (orgExistente && orgExistente.id) orgData.id = orgExistente.id;
+  // Público: siempre POST (crear). No asignamos id para evitar PATCH (403, updateRule=admins).
 
   if(tipo==='Comuna'){
     orgData.num_consejos=$('f-num-consejos').value||0;
@@ -1610,9 +1612,9 @@ async function saveForm(){
     fecha_registro: diagData.fecha_registro,
     datos: diagData,
   };
-  // Si la organización ya tenía un diagnóstico, lo actualizamos (no duplicamos).
+  // Público: el diagnóstico también se crea siempre (no PATCH). Se mantiene la
+  // referencia local para no mostrar duplicados en pantalla hasta recargar.
   const diagExistente = rifKey ? _diagnosticos.find(d => normRif(d.rif_org)===rifKey) : null;
-  if (diagExistente && diagExistente.id) diagPayload.id = diagExistente.id;
   const denPayload = denunciaData ? {
     codigo_registro: denunciaData.codigo_registro,
     tipo_org: denunciaData.tipo_org,
@@ -1670,7 +1672,8 @@ async function saveForm(){
     if(i>=0) arr[i]=Object.assign({},arr[i],val); else arr.push(val);
   };
   const orgList = tipo==='Comuna' ? _comunas : _consejos;
-  if(orgExistente) replaceOrPush(orgList, o=>String(o.id||o._localId||'')===String(orgData.id), orgData);
+  // En pantalla emparejamos por RIF (orgData ya no lleva id porque siempre se crea nuevo).
+  if(orgExistente) replaceOrPush(orgList, o=>normRif(o.rif)===rifKey, orgData);
   else orgList.push(orgData);
   if(diagExistente) replaceOrPush(_diagnosticos, d=>normRif(d.rif_org)===rifKey, diagPayload);
   else _diagnosticos.push(diagPayload);
@@ -1718,16 +1721,18 @@ function refreshMapaGeneral() {
     html: '<div style="background:#22c55e;border:2px solid #fff;border-radius:50%;width:11px;height:11px;box-shadow:0 2px 6px rgba(0,0,0,.3)"></div>',
     iconSize: [11, 11], iconAnchor: [5, 5], className: ''
   });
-  const orgs = getAllRecords().filter(o => o.latitud && o.longitud);
+  // El formulario guarda lat/lng; los datos seed pueden usar latitud/longitud → aceptamos ambos.
+  const getLat = o => o.lat != null ? o.lat : o.latitud;
+  const getLng = o => o.lng != null ? o.lng : o.longitud;
+  const orgs = getAllRecords().filter(o => getLat(o) && getLng(o) && !isNaN(parseFloat(getLat(o))) && !isNaN(parseFloat(getLng(o))));
   orgs.forEach(o => {
-    const lat = parseFloat(o.latitud), lng = parseFloat(o.longitud);
-    if (isNaN(lat) || isNaN(lng)) return;
+    const lat = parseFloat(getLat(o)), lng = parseFloat(getLng(o));
     L.marker([lat, lng], { icon: o._tipo === 'comuna' ? iconComuna : iconConsejo })
      .addTo(_mapaGeneral)
      .bindPopup(`<b>${esc(o.nombre)}</b><br><span style="font-size:11px;color:#4a6a5a">${o._tipo === 'comuna' ? 'Comuna' : 'Consejo Comunal'} · ${esc(o.parroquia || '')}</span>`);
   });
   if (orgs.length > 0) {
-    const bounds = L.latLngBounds(orgs.map(o => [parseFloat(o.latitud), parseFloat(o.longitud)]));
+    const bounds = L.latLngBounds(orgs.map(o => [parseFloat(getLat(o)), parseFloat(getLng(o))]));
     _mapaGeneral.fitBounds(bounds, { padding: [40, 40] });
   }
 }
