@@ -48,6 +48,13 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 .navbtn:hover{background:#155c32}
 .navbtn-o{font-size:12px;padding:6px 14px;border-radius:8px;background:transparent;color:#1d6b3e;border:1.5px solid #a8dfc0;cursor:pointer;font-weight:500;transition:.15s}
 .navbtn-o:hover{background:#e8f5ee}
+.nav-burger{display:none;flex-direction:column;justify-content:center;gap:5px;width:40px;height:36px;padding:8px;background:transparent;border:1.5px solid #a8dfc0;border-radius:8px;cursor:pointer}
+.nav-burger span{display:block;height:2.5px;width:100%;background:#1d6b3e;border-radius:2px;transition:.25s}
+.nav-burger.open span:nth-child(1){transform:translateY(7.5px) rotate(45deg)}
+.nav-burger.open span:nth-child(2){opacity:0}
+.nav-burger.open span:nth-child(3){transform:translateY(-7.5px) rotate(-45deg)}
+.nav-backdrop{display:none;position:fixed;inset:0;background:rgba(3,13,6,.5);z-index:199;opacity:0;transition:.25s}
+.nav-backdrop.show{display:block;opacity:1}
 
 /* ===== ALERT BAR ===== */
 .alert-bar{background:#1a3d2b;border-bottom:1px solid #2d6a45;height:32px;display:flex;align-items:center;gap:0;font-size:11px;color:#fff;overflow:hidden}
@@ -464,6 +471,19 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 .adj-size{font-size:9px;color:#4a8a6a;text-align:center;padding-bottom:3px}
 
 /* ===== RESPONSIVE ===== */
+@media(max-width:980px){
+  .navlinks{
+    position:fixed;top:0;right:0;bottom:0;width:min(80vw,320px);
+    background:#fff;flex-direction:column;align-items:stretch;gap:0;
+    padding:72px 0 24px;box-shadow:-4px 0 24px rgba(3,13,6,.18);
+    transform:translateX(100%);transition:transform .28s ease;
+    z-index:201;overflow-y:auto;
+  }
+  .navlinks.open{transform:translateX(0)}
+  .navlinks .nl{padding:14px 22px;border-bottom:1px solid #eef6f1;border-radius:0;font-size:15px}
+  .navlinks .nl.active{background:#e8f5ee}
+  .nav-burger{display:flex}
+}
 @media(max-width:900px){
   .hero-content{grid-template-columns:1fr}
   .hero-panel{display:none}
@@ -472,10 +492,21 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
   .denuncia-grid{grid-template-columns:1fr}
 }
 @media(max-width:640px){
-  .navlinks{display:none}
+  .section{padding:34px 16px}
+  .stats-band{padding:34px 16px}
   .hero h1{font-size:22px}
   .hero-stats{grid-template-columns:repeat(3,1fr)}
   .footer-grid{grid-template-columns:1fr}
+  .navinner{padding:0 14px;gap:8px}
+  .navbtn{padding:7px 12px}
+  .navbtn-o{padding:6px 10px}
+  .logo-sub{display:none}
+  .hero-btns{flex-wrap:wrap}
+  .hero-btns .btn-p,.hero-btns .btn-s{flex:1 1 100%;justify-content:center}
+}
+@media(max-width:380px){
+  .hero-stats{grid-template-columns:1fr;gap:8px}
+  .stats-band-inner{grid-template-columns:1fr}
 }
 </style>
 </head>
@@ -498,11 +529,11 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
           <div class="logo-sub">Gestión Ambiental · Iribarren</div>
         </div>
       </a>
-      <div class="navlinks">
-        <a class="nl active" href="#" onclick="showPage('home');return false">Inicio</a>
+      <div class="navlinks" id="navlinks">
+        <a class="nl active" href="#" onclick="showPage('home');closeMobileNav();return false">Inicio</a>
         <a class="nl" href="noticias/index.html">Noticias</a>
         <a class="nl" href="revista/index.html">Revista</a>
-        <a class="nl" href="#" onclick="showPage('denuncia');return false">Denuncias</a>
+        <a class="nl" href="#" onclick="showPage('denuncia');closeMobileNav();return false">Denuncias</a>
         <a class="nl" href="tramites/index.html">Trámites</a>
         <a class="nl" href="agenda/index.html">Agenda</a>
         <a class="nl" href="transparencia/index.html">Transparencia</a>
@@ -514,9 +545,13 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
       <div class="navr">
         <button class="navbtn-o nav-admin-btn" style="display:none" onclick="window.location='admin/index.html'">Admin</button>
         <button class="navbtn" onclick="openModal('modal-login')">Acceder</button>
+        <button class="nav-burger" id="nav-burger" aria-label="Menú" aria-expanded="false" onclick="toggleMobileNav()">
+          <span></span><span></span><span></span>
+        </button>
       </div>
     </div>
   </nav>
+  <div class="nav-backdrop" id="nav-backdrop" onclick="closeMobileNav()"></div>
 
   <!-- ALERTAS DINÁMICAS -->
   <div id="alert-bar" class="alert-bar" style="display:none" role="alert" aria-live="polite">
@@ -1118,6 +1153,27 @@ function tendIcon(t) {
 }
 
 /* ─── ROUTING ─── */
+function toggleMobileNav() {
+  const links = document.getElementById('navlinks');
+  const burger = document.getElementById('nav-burger');
+  const backdrop = document.getElementById('nav-backdrop');
+  const willOpen = !links.classList.contains('open');
+  links.classList.toggle('open', willOpen);
+  burger.classList.toggle('open', willOpen);
+  backdrop.classList.toggle('show', willOpen);
+  burger.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+  document.body.style.overflow = willOpen ? 'hidden' : '';
+}
+function closeMobileNav() {
+  const links = document.getElementById('navlinks');
+  if (!links || !links.classList.contains('open')) return;
+  links.classList.remove('open');
+  document.getElementById('nav-burger').classList.remove('open');
+  document.getElementById('nav-backdrop').classList.remove('show');
+  document.getElementById('nav-burger').setAttribute('aria-expanded', 'false');
+  document.body.style.overflow = '';
+}
+
 function showPage(name) {
   const el = document.getElementById('page-' + name);
   if (!el) { toast('Página no disponible'); return; }
