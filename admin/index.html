@@ -3504,7 +3504,7 @@ async function renderHidrica() {
   let items = await CMSDB.getAll('infraestructura_hidrica');
   if (!Array.isArray(items)) items = [];
   const consejos = await CMSDB.getAll('consejos_comunales');
-  const nombreDe = id => { const c = (Array.isArray(consejos)?consejos:[]).find(x=>x.id===id); return c?(c.nombre||c.codigo_registro||id):(id||'—'); };
+  const nombreDe = id => { const c = (Array.isArray(consejos)?consejos:[]).find(x=>x.id===id); return c?(c.nombre||c.codigo||id):(id||'—'); };
   if (fEstado) items = items.filter(i => (i.estado_operativo||'') === fEstado);
   if (q) items = items.filter(i => nombreDe(i.consejo_comunal).toLowerCase().includes(q));
   const el = document.getElementById('tbl-hidrica');
@@ -3531,7 +3531,7 @@ async function _fillConsejoSelect(selected) {
   if (!sel) return;
   const consejos = await CMSDB.getAll('consejos_comunales');
   sel.innerHTML = '<option value="">— Selecciona —</option>' +
-    (Array.isArray(consejos)?consejos:[]).map(c=>`<option value="${escHtml(c.id)}" ${c.id===selected?'selected':''}>${escHtml(c.nombre||c.codigo_registro||c.id)}</option>`).join('');
+    (Array.isArray(consejos)?consejos:[]).map(c=>`<option value="${escHtml(c.id)}" ${c.id===selected?'selected':''}>${escHtml(c.nombre||c.codigo||c.id)}</option>`).join('');
 }
 
 async function openHidricaForm(item) {

@@ -433,12 +433,12 @@
           </div>
         </div>
         <div class="form-row">
-          <div class="form-group"><label>Dirección</label><select id="t-direccion"><option value="">— Seleccionar —</option></select></div>
-          <div class="form-group"><label>Coordinación</label><input id="t-coordinacion" type="text"/></div>
+          <div class="form-group"><label>Departamento</label><input id="t-departamento" type="text" placeholder="Ej: Gestión Ambiental"/></div>
+          <div class="form-group"><label>Teléfono</label><input id="t-tel2" type="text"/></div>
         </div>
         <div class="form-row">
           <div class="form-group"><label>Supervisor directo</label><select id="t-supervisor"><option value="">— Sin supervisor —</option></select></div>
-          <div class="form-group"><label>Estado</label><select id="t-estado"><option>Activo</option><option>Inactivo</option><option>Vacaciones</option><option>Reposo</option></select></div>
+          <div class="form-group"><label>Estado</label><select id="t-estado"><option>Activo</option><option>Inactivo</option></select></div>
         </div>
       </div>
       <div class="form-section" id="sec-password-field">
@@ -679,7 +679,7 @@ window.sigaNav = function(id) {
 
 /* ─── Tabs ─── */
 window.switchTab = function(prefix, id) {
-  document.querySelectorAll(`#sec-${prefix==='rrhh'?'rrhh':'actividades'==='act'?'actividades':prefix} .tab`).forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll(`#sec-${prefix==='act'?'actividades':prefix==='tec'?'tecnologia':prefix} .tab`).forEach(t=>t.classList.remove('active'));
   document.querySelectorAll(`#sec-${prefix==='act'?'actividades':prefix==='tec'?'tecnologia':prefix} .tab-content`).forEach(t=>t.classList.remove('active'));
   event.target.classList.add('active');
   const tc = document.getElementById(`tab-${prefix}-${id}`);
@@ -754,9 +754,7 @@ async function loadCatalogoBase() {
     SIGA.list('consejos_comunales').catch(()=>[]),
   ]);
   // Poblar selects
-  populateSelect('personal-dir', _allDirecciones, 'nombre', 'Todas las direcciones');
-  populateSelect('global-dir', _allDirecciones, 'nombre', 'Todas las direcciones');
-  populateSelect('t-direccion', _allDirecciones, 'nombre', '— Seleccionar —');
+  // _allDirecciones removido — colección no existe en esquema; filtro por departamento es texto libre
   populateSelect('t-supervisor', _allTrabajadores, t=>`${t.nombres} ${t.apellidos}`, '— Sin supervisor —', 'id');
   populateSelect('a-proyecto', _allProyectos, 'nombre', '— Sin proyecto —', 'id');
   populateSelect('a-comuna', _allComunas, 'nombre', '— Sin comunidad —', 'id');
@@ -794,7 +792,7 @@ async function loadDashboard() {
   const completadas = actSemana.filter(a=>a.estado==='Completada').length;
   const pct = actSemana.length ? Math.round(completadas/actSemana.length*100) : 0;
 
-  setText('st-trabajadores', _allTrabajadores.filter(t=>t.estado==='Activo').length || '—');
+  setText('st-trabajadores', _allTrabajadores.filter(t=>t.activo).length || '—');
   setText('st-hoy', actHoy.length);
   setText('st-solicitudes', solicitudes.length);
   setText('st-cumplimiento', pct+'%');
@@ -882,8 +880,8 @@ function renderPersonal(items) {
   const est   = document.getElementById('personal-estado')?.value||'';
   const filt  = items.filter(t => {
     if (q && !`${t.nombres} ${t.apellidos} ${t.cedula} ${t.cargo}`.toLowerCase().includes(q)) return false;
-    if (dir && t.direccion !== dir) return false;
-    if (est && t.estado !== est) return false;
+    if (dir && t.departamento !== dir) return false;
+    if (est && (est==='Activo' ? !t.activo : t.activo)) return false;
     return true;
   });
   const empty = document.getElementById('personal-empty');
@@ -896,8 +894,8 @@ function renderPersonal(items) {
       <div style="font-size:11px;color:var(--muted)">${esc(t.email||'')}</div></div></div></td>
     <td>${esc(t.cedula||'—')}</td>
     <td>${esc(t.cargo||'—')}</td>
-    <td>${esc(t.direccion||'—')}</td>
-    <td><span class="badge ${t.estado==='Activo'?'badge-green':t.estado==='Inactivo'?'badge-red':'badge-amber'}">${esc(t.estado||'—')}</span></td>
+    <td>${esc(t.departamento||'—')}</td>
+    <td><span class="badge ${t.activo?'badge-green':'badge-red'}">${t.activo?'Activo':'Inactivo'}</span></td>
     <td>${fmt(t.fecha_ingreso)}</td>
     <td class="td-actions">
       <button class="btn-icon" title="Editar" onclick="editarTrabajador('${esc(t.id)}')">✏️</button>
@@ -936,7 +934,7 @@ window.filterSolicitudes = loadSolicitudesRRHH;
 
 window.responderSolicitud = async (id, estado) => {
   if (!confirm(`¿${estado==='Aprobada'?'Aprobar':'Rechazar'} esta solicitud?`)) return;
-  await SIGA.update('solicitudes_rrhh', id, { estado, revisado_por: U.id, fecha_respuesta: new Date().toISOString() });
+  await SIGA.update('solicitudes_rrhh', id, { estado, respuesta: `${estado} por ${U.nombres||U.email||'RRHH'} el ${new Date().toLocaleDateString('es-VE')}` });
   toast(`Solicitud ${estado.toLowerCase()}`);
   loadSolicitudesRRHH();
   // Recargar dashboard también
@@ -1106,7 +1104,7 @@ async function loadIndicadores() {
   _allDirecciones.forEach(d => porDir[d.nombre]={total:0,completadas:0});
   actMes.forEach(a => {
     const trab = _allTrabajadores.find(t=>t.id===a.trabajador_id);
-    const dir = trab?.direccion||'Sin dirección';
+    const dir = trab?.departamento||'Sin departamento';
     if (!porDir[dir]) porDir[dir]={total:0,completadas:0};
     porDir[dir].total++;
     if (a.estado==='Completada') porDir[dir].completadas++;
@@ -1159,7 +1157,7 @@ async function loadPresidencia() {
   const actHoy = actividades.filter(a=>(a.fecha||'').startsWith(todayStr));
   const grid = document.getElementById('pres-stats');
   grid.innerHTML = [
-    {icon:'👥',val:trabajadores.filter(t=>t.estado==='Activo').length,lbl:'Trabajadores activos'},
+    {icon:'👥',val:trabajadores.filter(t=>t.activo).length,lbl:'Trabajadores activos'},
     {icon:'📋',val:actHoy.length,lbl:'Actividades hoy'},
     {icon:'📬',val:solicitudes.length,lbl:'Solicitudes RRHH pendientes',cls:'amber'},
     {icon:'🏗️',val:proyectos.filter(p=>p.estado==='En Ejecución').length,lbl:'Proyectos en ejecución'},
@@ -1175,7 +1173,7 @@ async function loadPresidencia() {
   const porDir = {};
   actividades.filter(a=>(a.fecha||'').startsWith(todayStr)).forEach(a => {
     const trab = trabajadores.find(t=>t.id===a.trabajador_id);
-    const dir = trab?.direccion||'Sin dirección';
+    const dir = trab?.departamento||'Sin departamento';
     if (!porDir[dir]) porDir[dir]={total:0,completadas:0};
     porDir[dir].total++;
     if (a.estado==='Completada') porDir[dir].completadas++;
@@ -1225,11 +1223,11 @@ window.filterTecUsers = function(items) {
       <div style="font-size:13px;font-weight:500">${esc(t.nombres||'')} ${esc(t.apellidos||'')}</div></div></td>
     <td>${esc(t.email||'—')}</td>
     <td><span class="badge badge-purple">${esc(t.rol||'TRABAJADOR')}</span></td>
-    <td><span class="badge ${t.estado==='Activo'?'badge-green':'badge-red'}">${esc(t.estado||'—')}</span></td>
+    <td><span class="badge ${t.activo?'badge-green':'badge-red'}">${t.activo?'Activo':'Inactivo'}</span></td>
     <td style="font-size:12px;color:var(--muted)">${fmt(t.updated||t.created)}</td>
     <td class="td-actions">
       <button class="btn-icon" onclick="editarTrabajador('${esc(t.id)}')">✏️</button>
-      <button class="btn-icon" onclick="toggleEstadoUser('${esc(t.id)}','${esc(t.estado||'Activo')}')">${t.estado==='Activo'?'🔒':'🔓'}</button>
+      <button class="btn-icon" onclick="toggleEstadoUser('${esc(t.id)}',${t.activo})">${t.activo?'🔒':'🔓'}</button>
     </td></tr>`).join('');
 }
 
@@ -1261,7 +1259,7 @@ async function loadTickets() {
     <td style="font-size:11px;color:var(--muted)">${esc((t.id||'').substring(0,8))}</td>
     <td style="font-weight:500">${esc(t.asunto||'—')}</td>
     <td><span class="badge ${t.prioridad==='Alta'?'badge-red':t.prioridad==='Media'?'badge-amber':'badge-gray'}">${esc(t.prioridad||'—')}</span></td>
-    <td>${esc(t.responsable||'Por asignar')}</td>
+    <td>${esc(t.asignado_a||'Por asignar')}</td>
     <td><span class="badge ${estadoBadge(t.estado)}">${esc(t.estado||'Abierto')}</span></td>
     <td style="font-size:12px">${fmt(t.created)}</td>
     <td class="td-actions">
@@ -1284,12 +1282,12 @@ async function loadMonitor() {
     if (api) api.textContent = '—';
   }
   const actHoy = await SIGA.list('auditoria_siga', `created>="${new Date().toLocaleDateString('sv-SE')}"`, 1).catch(()=>[]);
-  if (usersEl) usersEl.textContent = _allTrabajadores.filter(t=>t.estado==='Activo').length;
+  if (usersEl) usersEl.textContent = _allTrabajadores.filter(t=>t.activo).length;
   if (statusList) statusList.innerHTML = `
     <div style="font-size:13px;line-height:2.2">
       <div>🖥️ PocketBase: <strong>${pb?.textContent||'—'}</strong></div>
       <div>📡 Latencia API: <strong>${api?.textContent||'—'}</strong></div>
-      <div>👤 Trabajadores activos: <strong>${_allTrabajadores.filter(t=>t.estado==='Activo').length}</strong></div>
+      <div>👤 Trabajadores activos: <strong>${_allTrabajadores.filter(t=>t.activo).length}</strong></div>
       <div>🌐 Portal: <a href="../index.html" style="color:var(--primary)">iagami.online</a></div>
     </div>`;
 }
@@ -1299,7 +1297,7 @@ window.abrirModalTrabajador = function(fromTec) {
   _editTrabId = null;
   document.getElementById('modal-trab-title').textContent = 'Nuevo Trabajador';
   document.getElementById('sec-password-field').style.display='block';
-  ['t-nombres','t-apellidos','t-cedula','t-telefono','t-email','t-cargo','t-ingreso','t-password','t-password2','t-coordinacion'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['t-nombres','t-apellidos','t-cedula','t-telefono','t-email','t-cargo','t-ingreso','t-password','t-password2','t-departamento'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('t-rol').value='TRABAJADOR';
   document.getElementById('t-estado').value='Activo';
   abrirModal('modal-trabajador');
@@ -1318,9 +1316,8 @@ window.editarTrabajador = function(id) {
   document.getElementById('t-cargo').value = t.cargo||'';
   document.getElementById('t-ingreso').value = t.fecha_ingreso||'';
   document.getElementById('t-rol').value = t.rol||'TRABAJADOR';
-  document.getElementById('t-estado').value = t.estado||'Activo';
-  document.getElementById('t-coordinacion').value = t.coordinacion||'';
-  if (document.getElementById('t-direccion')) document.getElementById('t-direccion').value = t.direccion||'';
+  document.getElementById('t-estado').value = t.activo===false ? 'Inactivo' : 'Activo';
+  const depEl = document.getElementById('t-departamento'); if (depEl) depEl.value = t.departamento||'';
   abrirModal('modal-trabajador');
 };
 window.guardarTrabajador = async function() {
@@ -1334,9 +1331,8 @@ window.guardarTrabajador = async function() {
     cedula: document.getElementById('t-cedula').value.trim(),
     telefono: document.getElementById('t-telefono').value.trim(),
     rol: document.getElementById('t-rol').value,
-    estado: document.getElementById('t-estado').value,
-    direccion: document.getElementById('t-direccion')?.value||'',
-    coordinacion: document.getElementById('t-coordinacion').value.trim(),
+    activo: document.getElementById('t-estado').value === 'Activo',
+    departamento: document.getElementById('t-departamento')?.value?.trim()||'',
     fecha_ingreso: document.getElementById('t-ingreso').value||null,
   };
   if (!_editTrabId) {
@@ -1360,11 +1356,11 @@ window.eliminarTrabajador = async function(id) {
   try { await SIGA.remove('trabajadores',id); toast('Trabajador eliminado'); loadCatalogoBase(); loadPersonal(); }
   catch(e) { toast('Error: '+e.message,'error'); }
 };
-window.toggleEstadoUser = async function(id, estadoActual) {
-  const nuevo = estadoActual==='Activo' ? 'Inactivo' : 'Activo';
-  if (!confirm(`¿${nuevo==='Activo'?'Activar':'Bloquear'} este usuario?`)) return;
-  await SIGA.update('trabajadores',id,{estado:nuevo});
-  toast(`Usuario ${nuevo.toLowerCase()}`);
+window.toggleEstadoUser = async function(id, esActivo) {
+  const activar = !esActivo;
+  if (!confirm(`¿${activar?'Activar':'Bloquear'} este usuario?`)) return;
+  await SIGA.update('trabajadores',id,{activo: activar});
+  toast(`Usuario ${activar?'activado':'bloqueado'}`);
   await loadCatalogoBase(); loadTecUsuarios();
 };
 
