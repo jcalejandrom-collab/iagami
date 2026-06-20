@@ -826,7 +826,6 @@ input,select,textarea{font-family:inherit}
       <div class="page-header">
         <div><div class="page-title">🏘️ Consejos Comunales</div><div class="page-subtitle">Registro y gestión de consejos comunales del Municipio Iribarren</div></div>
         <button class="btn btn-primary" onclick="openConsejoForm()">+ Nuevo Consejo Comunal</button>
-        <button class="btn btn-secondary" onclick="exportConsejosPDF()" title="Descargar PDF con todos los consejos filtrados">📥 Descargar PDF</button>
       </div>
       <div class="toolbar">
         <input type="text" class="search-input" id="q-consejos" placeholder="Buscar por nombre, parroquia, comunidad..." oninput="renderConsejos()" style="flex:1;min-width:200px"/>
@@ -841,6 +840,11 @@ input,select,textarea{font-family:inherit}
       </div>
       <div id="tbl-consejos"></div>
       <div id="pg-consejos" style="display:flex;gap:6px;justify-content:center;margin-top:14px;flex-wrap:wrap"></div>
+      <div style="display:flex;justify-content:center;margin-top:12px">
+        <button class="btn btn-secondary" onclick="exportConsejosPDF()" style="gap:6px;display:flex;align-items:center;font-weight:600">
+          📥 Descargar lista completa en PDF
+        </button>
+      </div>
       <!-- FORM PANEL -->
       <div id="form-consejos" style="display:none;background:#fff;border:1px solid var(--border);border-radius:12px;padding:24px;margin-top:16px">
         <div style="font-family:'Poppins',sans-serif;font-size:16px;font-weight:700;color:var(--text);margin-bottom:20px" id="ftitle-consejos">🏘️ Nuevo Consejo Comunal</div>
@@ -2841,8 +2845,9 @@ async function renderConsejos() {
       <td>${escHtml(c.responsable||'-')}</td>
       <td>${escHtml(c.telefono||'-')}</td>
       <td><div style="display:flex;gap:4px">
-        <button class="btn btn-sm" onclick="openConsejoForm('${c.id}')">✏️</button>
-        <button class="btn btn-sm btn-danger" onclick="deleteConsejo('${c.id}')">🗑️</button>
+        <button class="btn btn-sm" onclick="openConsejoForm('${c.id}')" title="Editar">✏️</button>
+        <button class="btn btn-sm" onclick="exportConsejoSinglePDF('${c.id}')" title="Descargar PDF" style="background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0">📥</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteConsejo('${c.id}')" title="Eliminar">🗑️</button>
       </div></td>
     </tr>`).join('') : '<tr><td colspan="8" style="text-align:center;color:#888;padding:20px">Sin resultados</td></tr>'
   }</tbody></table></div>`;
@@ -2867,76 +2872,95 @@ async function renderConsejos() {
 
 function ccChangePage(p) { ccPage = p; renderConsejos(); }
 
-async function exportConsejosPDF() {
-  const search   = (document.getElementById('q-consejos')||{}).value||'';
-  const parroquia= (document.getElementById('f-consejos-par')||{}).value||'';
-  const estatus  = (document.getElementById('f-consejos-est')||{}).value||'';
-  let data = await CMSDB.getAll('consejos_comunales');
-  if (search)   { const q=search.toLowerCase(); data=data.filter(c=>(c.nombre||'').toLowerCase().includes(q)||(c.responsable||'').toLowerCase().includes(q)); }
-  if (parroquia) data = data.filter(c => c.parroquia === parroquia);
-  if (estatus)   data = data.filter(c => c.estatus === estatus);
-
+function _buildConsejosPDFHtml(data, titulo, subtitulo) {
   const fecha = new Date().toLocaleDateString('es-VE',{day:'2-digit',month:'long',year:'numeric'});
   const filas = data.map((c,i) => `
     <tr style="background:${i%2===0?'#fff':'#f8fafb'}">
-      <td>${escHtml(c.codigo_registro||c.codigo||'-')}</td>
+      <td>${escHtml(c.codigo||c.codigo_registro||'-')}</td>
       <td><strong>${escHtml(c.nombre||'-')}</strong></td>
       <td>${escHtml(c.parroquia||'-')}</td>
+      <td>${escHtml(c.municipio||'Iribarren')}</td>
       <td>${escHtml(c.comunidad||'-')}</td>
       <td>${escHtml(c.sector||'-')}</td>
       <td>${escHtml(c.responsable||'-')}</td>
       <td>${escHtml(c.cedula||'-')}</td>
       <td>${escHtml(c.telefono||'-')}</td>
-      <td>${escHtml(c.email||'-')}</td>
-      <td>${escHtml(c.direccion||'-')}</td>
-      <td style="text-align:center"><span style="background:${c.estatus==='Activo'?'#dcfce7':'#fee2e2'};color:${c.estatus==='Activo'?'#15803d':'#dc2626'};padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700">${escHtml(c.estatus||'—')}</span></td>
+      <td>${escHtml(c.email||c.correo||'-')}</td>
+      <td>${escHtml(c.direccion||c.dir_detallada||'-')}</td>
+      <td>${escHtml(c.fecha_constitucion||'-')}</td>
+      <td>${escHtml(String(c.num_familias||'-'))}</td>
+      <td style="text-align:center"><span style="background:${c.estatus==='Activo'?'#dcfce7':'#fee2e2'};color:${c.estatus==='Activo'?'#15803d':'#dc2626'};padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700">${escHtml(c.estatus||'—')}</span></td>
     </tr>`).join('');
-
-  const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"/>
-  <title>Consejos Comunales — IAGAMI</title>
+  return `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"/>
+  <title>${titulo} — IAGAMI</title>
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:Arial,sans-serif;font-size:11px;color:#1a1a1a;padding:20px}
-    .header{display:flex;align-items:center;gap:16px;margin-bottom:20px;border-bottom:3px solid #1d6b3e;padding-bottom:14px}
-    .logo{font-size:28px}
-    .org h1{font-size:18px;font-weight:700;color:#0d2d1a;margin-bottom:3px}
-    .org p{font-size:11px;color:#4a8a6a}
-    .meta{margin-bottom:14px;font-size:11px;color:#555}
+    body{font-family:Arial,sans-serif;font-size:10px;color:#1a1a1a;padding:18px}
+    .header{display:flex;align-items:center;gap:16px;margin-bottom:16px;border-bottom:3px solid #1d6b3e;padding-bottom:12px}
+    .logo{font-size:26px}
+    .org h1{font-size:16px;font-weight:700;color:#0d2d1a;margin-bottom:3px}
+    .org p{font-size:10px;color:#4a8a6a}
+    .meta{margin-bottom:12px;font-size:10px;color:#555;line-height:1.7}
     .meta span{font-weight:700;color:#1d6b3e}
-    table{width:100%;border-collapse:collapse;font-size:10px}
-    th{background:#1d6b3e;color:#fff;padding:6px 8px;text-align:left;font-size:10px;white-space:nowrap}
-    td{padding:5px 8px;border-bottom:1px solid #e8f5ec;vertical-align:top}
-    .footer{margin-top:18px;font-size:10px;color:#888;text-align:center;border-top:1px solid #e8f5ec;padding-top:10px}
-    @media print{body{padding:10px}@page{size:A4 landscape;margin:15mm}}
+    table{width:100%;border-collapse:collapse;font-size:9px}
+    th{background:#1d6b3e;color:#fff;padding:5px 7px;text-align:left;font-size:9px;white-space:nowrap}
+    td{padding:4px 7px;border-bottom:1px solid #e8f5ec;vertical-align:top;word-break:break-word}
+    .footer{margin-top:16px;font-size:9px;color:#888;text-align:center;border-top:1px solid #e8f5ec;padding-top:8px}
+    @media print{body{padding:8px}@page{size:A4 landscape;margin:10mm}}
   </style></head><body>
   <div class="header">
     <div class="logo">🌿</div>
     <div class="org">
-      <h1>IAGAMI — Instituto de Asuntos de la Gestión Ambiental</h1>
-      <p>Municipio Iribarren · Estado Lara · Venezuela</p>
+      <h1>IAGAMI — Instituto de Asuntos de la Gestión Ambiental del Municipio Iribarren</h1>
+      <p>Estado Lara · Venezuela · iagami.online</p>
     </div>
   </div>
   <div class="meta">
-    Reporte: <span>Consejos Comunales</span> &nbsp;|&nbsp;
-    Filtros: <span>${parroquia||'Todas las parroquias'} · ${estatus||'Todos los estatus'}</span> &nbsp;|&nbsp;
-    Total registros: <span>${data.length}</span> &nbsp;|&nbsp;
-    Fecha: <span>${fecha}</span>
+    <strong>Reporte:</strong> <span>${titulo}</span> &nbsp;|&nbsp;
+    <strong>Descripción:</strong> <span>${subtitulo}</span> &nbsp;|&nbsp;
+    <strong>Total registros:</strong> <span>${data.length}</span> &nbsp;|&nbsp;
+    <strong>Fecha:</strong> <span>${fecha}</span>
   </div>
   <table>
     <thead><tr>
-      <th>Código</th><th>Nombre</th><th>Parroquia</th><th>Comunidad</th><th>Sector</th>
-      <th>Responsable</th><th>Cédula</th><th>Teléfono</th><th>Correo</th><th>Dirección</th><th>Estatus</th>
+      <th>Código</th><th>Nombre</th><th>Parroquia</th><th>Municipio</th><th>Comunidad</th><th>Sector</th>
+      <th>Responsable</th><th>Cédula</th><th>Teléfono</th><th>Correo</th><th>Dirección</th>
+      <th>F. Constitución</th><th>Familias</th><th>Estatus</th>
     </tr></thead>
-    <tbody>${filas||'<tr><td colspan="11" style="text-align:center;padding:20px;color:#888">Sin registros</td></tr>'}</tbody>
+    <tbody>${filas||'<tr><td colspan="14" style="text-align:center;padding:20px;color:#888">Sin registros</td></tr>'}</tbody>
   </table>
-  <div class="footer">Documento generado por el Sistema IAGAMI · ${fecha} · Total: ${data.length} consejos comunales</div>
-  <script>window.onload=()=>{window.print();}<\/script>
+  <div class="footer">Generado por el Sistema IAGAMI · ${fecha} · ${data.length} registro(s)</div>
+  <script>window.onload=function(){setTimeout(function(){window.print();},400);}<\/script>
   </body></html>`;
+}
 
-  const w = window.open('','_blank','width=1100,height=750');
-  if (!w) { toast('Permite las ventanas emergentes para descargar el PDF','warning'); return; }
+function _openPDFWindow(html) {
+  const w = window.open('','_blank','width=1200,height=800');
+  if (!w) { toast('Permite ventanas emergentes en tu navegador para generar el PDF','warning'); return; }
+  w.document.open();
   w.document.write(html);
   w.document.close();
+}
+
+async function exportConsejosPDF() {
+  const search    = (document.getElementById('q-consejos')||{}).value||'';
+  const parroquia = (document.getElementById('f-consejos-par')||{}).value||'';
+  const estatus   = (document.getElementById('f-consejos-est')||{}).value||'';
+  let data = await CMSDB.getAll('consejos_comunales');
+  if (!Array.isArray(data)) { toast('Error al obtener datos','error'); return; }
+  if (search)    { const q=search.toLowerCase(); data=data.filter(c=>(c.nombre||'').toLowerCase().includes(q)||(c.responsable||'').toLowerCase().includes(q)||(c.codigo||'').toLowerCase().includes(q)); }
+  if (parroquia) data = data.filter(c => c.parroquia === parroquia);
+  if (estatus)   data = data.filter(c => c.estatus === estatus);
+  if (!data.length) { toast('No hay registros para exportar','warning'); return; }
+  const subtitulo = [parroquia||'Todas las parroquias', estatus||'Todos los estatus'].join(' · ');
+  _openPDFWindow(_buildConsejosPDFHtml(data, 'Consejos Comunales', subtitulo));
+}
+
+async function exportConsejoSinglePDF(id) {
+  if (!id) return;
+  const c = await CMSDB.getOne('consejos_comunales', id);
+  if (!c) { toast('Registro no encontrado','error'); return; }
+  _openPDFWindow(_buildConsejosPDFHtml([c], `Consejo Comunal: ${c.nombre||id}`, `Parroquia: ${c.parroquia||'—'}`));
 }
 
 async function openConsejoForm(id) {
