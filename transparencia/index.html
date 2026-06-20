@@ -252,7 +252,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('stat-total').textContent = _cachedDocs.length;
 
   // Get unique years
-  const years = [...new Set(_cachedDocs.map(d => d.anio).filter(Boolean))].sort((a,b) => b - a);
+  const years = [...new Set(_cachedDocs.map(d => d.year || d.anio).filter(Boolean))].sort((a,b) => b - a);
   const yearSel = document.getElementById('year-select');
   years.forEach(y => {
     const opt = document.createElement('option');
@@ -262,9 +262,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   // Latest update
-  const dates = _cachedDocs.map(d => d.fecha).filter(Boolean).sort().reverse();
+  const dates = _cachedDocs.map(d => d.fecha || d.created).filter(Boolean).sort().reverse();
   if (dates.length) {
-    const d = new Date(dates[0] + 'T00:00:00');
+    const d = new Date(String(dates[0]).replace(' ', 'T'));
     if (!isNaN(d.getTime())) {
       document.getElementById('stat-year').textContent = d.toLocaleDateString('es-VE', { month: 'short', year: 'numeric' }).replace('.','');
     }
@@ -292,7 +292,7 @@ function renderDocs() {
   let filtered = _cachedDocs.filter(d => {
     if (d.publicado === false) return false;
     const matchCat = !currentCat || d.categoria === currentCat;
-    const matchYear = !currentYear || String(d.anio) === String(currentYear);
+    const matchYear = !currentYear || String(d.year || d.anio) === String(currentYear);
     const titulo = (d.titulo || '').toLowerCase();
     const descripcion = (d.descripcion || '').toLowerCase();
     const matchSearch = !currentSearch ||
@@ -314,7 +314,8 @@ function docCardHTML(d) {
   const catClass = CAT_CLASS[d.categoria] || 'informes';
   const descripcion = d.descripcion || '';
   const desc = descripcion.length > 140 ? descripcion.slice(0, 140) + '…' : descripcion;
-  const fechaFmt = d.fecha ? new Date(d.fecha + 'T00:00:00').toLocaleDateString('es-VE', { day:'2-digit', month:'short', year:'numeric' }) : '—';
+  const fechaRaw = d.fecha || d.created;
+  const fechaFmt = fechaRaw ? new Date(String(fechaRaw).replace(' ', 'T')).toLocaleDateString('es-VE', { day:'2-digit', month:'short', year:'numeric' }) : '—';
   return `
     <div class="doc-card">
       <div class="doc-pdf-icon">
@@ -331,7 +332,7 @@ function docCardHTML(d) {
       </div>
       <div class="doc-desc">${escHtml(desc)}</div>
       <div class="doc-footer">
-        <div class="doc-meta-bottom">Año ${escHtml(String(d.anio || ''))}</div>
+        <div class="doc-meta-bottom">Año ${escHtml(String(d.year || d.anio || ""))}</div>
         <button class="download-btn" onclick="handleDownload()">⬇ Descargar PDF</button>
       </div>
     </div>`;

@@ -655,6 +655,7 @@ input,select,textarea{font-family:inherit}
               <div class="form-group form-full"><label>Nombre *</label><input type="text" name="nombre" required></div>
               <div class="form-group"><label>RIF</label><input type="text" name="rif"></div>
               <div class="form-group"><label>Categoría</label><select name="categoria"><option>Industrial</option><option>Construcción</option><option>Comercial</option><option>Servicios</option><option>Agrícola</option></select></div>
+              <div class="form-group form-full"><label>Actividad económica</label><input type="text" name="actividad" placeholder="Ej: Fabricación de bloques de concreto"></div>
               <div class="form-group"><label>Responsable</label><input type="text" name="responsable"></div>
               <div class="form-group"><label>Teléfono</label><input type="text" name="telefono"></div>
               <div class="form-group"><label>Email</label><input type="email" name="email"></div>
@@ -2027,7 +2028,6 @@ async function saveTransparencia(e) {
     descripcion: raw.descripcion,
     categoria: raw.categoria,
     year: raw.año ? parseInt(raw.año) : null,
-    anio: raw.año ? parseInt(raw.año) : null,
     publicado: raw.estado === 'publicado',
     pdf_url: raw.pdf_url,
   };
