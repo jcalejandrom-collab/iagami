@@ -38,6 +38,13 @@
     .login-back{text-align:center;margin-top:18px;font-size:12px;color:#4a8a6a}
     .login-back a{color:#1d6b3e;font-weight:600;text-decoration:none}
     .login-back a:hover{text-decoration:underline}
+    .login-register{text-align:center;margin-top:10px;font-size:13px;color:#4a8a6a;
+      padding:10px 14px;background:#f0faf4;border-radius:8px;border:1px solid #d4edd8}
+    .login-register a{color:#1d6b3e;font-weight:700;text-decoration:none}
+    .login-register a:hover{text-decoration:underline}
+    .msg-warn{margin-top:14px;padding:12px 14px;border-radius:8px;font-size:13px;text-align:center;display:none}
+    .msg-warn.pending{background:#fefce8;color:#92400e;border:1px solid #fde68a;display:block}
+    .msg-warn.rejected{background:#fee2e2;color:#991b1b;border:1px solid #fca5a5;display:block}
     .login-footer{text-align:center;margin-top:28px;font-size:11px;color:rgba(255,255,255,.5)}
     .spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;
       border-radius:50%;animation:spin .7s linear infinite}
@@ -70,6 +77,8 @@
       </button>
       <div class="login-err" id="login-err"></div>
     </form>
+    <div class="msg-warn" id="msg-warn"></div>
+    <div class="login-register">¿Eres trabajador nuevo? <a href="registro.html">Solicitar acceso aquí</a></div>
     <div class="login-back"><a href="../index.html">← Volver al Portal Ciudadano</a></div>
   </div>
   <div class="login-footer">IAGAMI · Sistema Interno · Acceso restringido al personal autorizado</div>
@@ -90,8 +99,33 @@
     err.classList.remove('show');
     btn.disabled = true;
     lbl.innerHTML = '<div class="spinner"></div>';
+    const warn = document.getElementById('msg-warn');
+    warn.className = 'msg-warn';
     try {
-      await SIGA.login(email, pass);
+      const data = await SIGA.login(email, pass);
+      const estado = (data.record?.estado_cuenta || '').toLowerCase();
+      if (estado === 'pendiente') {
+        SIGA.logout && SIGA.logout();
+        sessionStorage.removeItem('siga_token');
+        sessionStorage.removeItem('siga_user');
+        warn.textContent = '⏳ Tu cuenta está pendiente de aprobación por Recursos Humanos. Te avisarán cuando esté activa.';
+        warn.className = 'msg-warn pending';
+        lbl.textContent = 'Iniciar Sesión';
+        btn.disabled = false;
+        return;
+      }
+      if (estado === 'rechazado' || estado === 'bloqueado') {
+        SIGA.logout && SIGA.logout();
+        sessionStorage.removeItem('siga_token');
+        sessionStorage.removeItem('siga_user');
+        warn.textContent = estado === 'rechazado'
+          ? '❌ Tu solicitud de registro fue rechazada. Contacta a Recursos Humanos para más información.'
+          : '🔒 Tu cuenta ha sido bloqueada. Contacta a Recursos Humanos.';
+        warn.className = 'msg-warn rejected';
+        lbl.textContent = 'Iniciar Sesión';
+        btn.disabled = false;
+        return;
+      }
       window.location.href = 'index.html';
     } catch(e) {
       err.textContent = e.message.includes('400') || e.message.toLowerCase().includes('invalid')

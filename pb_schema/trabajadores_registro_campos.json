@@ -1,0 +1,44 @@
+[
+  {
+    "_comment": "CAMPOS A AGREGAR a la colección 'trabajadores' (Auth type) en PocketBase Admin UI → Collections → trabajadores → Edit fields",
+    "_instrucciones": [
+      "1. Ir a PocketBase Admin → Collections → trabajadores → ícono lápiz (Edit collection)",
+      "2. En la pestaña Fields, agregar los siguientes campos:",
+      "   - cedula      : Text  (required, unique)",
+      "   - telefono    : Text  (optional)",
+      "   - estado_cuenta: Select (required, values: pendiente,activo,rechazado,bloqueado) default: pendiente",
+      "   - fecha_aprobacion: Date (optional)",
+      "   - aprobado_por: Relation → trabajadores (optional, max 1)",
+      "3. En la pestaña API Rules, actualizar createRule a:  \"\"  (cadena vacía = público)",
+      "   para permitir auto-registro sin token.",
+      "4. Importar el archivo logs_acceso definido aquí abajo desde: Collections → Import collections"
+    ],
+    "nuevos_campos_trabajadores": [
+      { "name": "cedula",         "type": "text",   "required": true },
+      { "name": "telefono",       "type": "text",   "required": false },
+      { "name": "estado_cuenta",  "type": "select", "required": true,
+        "maxSelect": 1, "values": ["pendiente","activo","rechazado","bloqueado"] },
+      { "name": "fecha_aprobacion","type": "date",  "required": false },
+      { "name": "aprobado_por",   "type": "relation","required": false,
+        "maxSelect": 1, "collectionId": "sigatrabajad001", "cascadeDelete": false }
+    ]
+  },
+  {
+    "id": "logsacceso0001",
+    "name": "logs_acceso",
+    "type": "base",
+    "fields": [
+      { "id":"rel_log_001","name":"trabajador","type":"relation","required":true,
+        "maxSelect":1,"collectionId":"sigatrabajad001","cascadeDelete":false },
+      { "id":"txt_log_002","name":"ip",        "type":"text" },
+      { "id":"txt_log_003","name":"dispositivo","type":"text" },
+      { "id":"bol_log_004","name":"exitoso",   "type":"bool" },
+      { "id":"txt_log_005","name":"detalle",   "type":"text" }
+    ],
+    "listRule":   "@request.auth.rol = 'RRHH' || @request.auth.rol = 'TECNOLOGIA' || @request.auth.rol = 'PRESIDENTE'",
+    "viewRule":   "@request.auth.rol = 'RRHH' || @request.auth.rol = 'TECNOLOGIA' || @request.auth.rol = 'PRESIDENTE'",
+    "createRule": "@request.auth.id != ''",
+    "updateRule": null,
+    "deleteRule": null
+  }
+]

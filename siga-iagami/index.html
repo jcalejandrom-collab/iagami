@@ -142,6 +142,7 @@
       </div>
       <div class="tabs" id="rrhh-tabs">
         <button class="tab active" onclick="switchTab('rrhh','personal')">👤 Personal</button>
+        <button class="tab" onclick="switchTab('rrhh','registros')">🆕 Registros Pendientes <span id="badge-registros" style="background:#dc2626;color:#fff;border-radius:999px;font-size:10px;padding:1px 6px;font-weight:700;display:none;margin-left:4px">0</span></button>
         <button class="tab" onclick="switchTab('rrhh','solicitudes')">📬 Solicitudes</button>
         <button class="tab" onclick="switchTab('rrhh','comunicados')">📢 Comunicados</button>
         <button class="tab" onclick="switchTab('rrhh','capacitaciones')">🎓 Capacitaciones</button>
@@ -163,6 +164,21 @@
             <tbody id="tabla-personal"></tbody>
           </table>
           <div id="personal-empty" class="no-rows" style="display:none">No se encontraron trabajadores.</div>
+        </div>
+      </div>
+
+      <!-- Tab: Registros Pendientes -->
+      <div class="tab-content" id="tab-rrhh-registros">
+        <div style="margin-bottom:12px;display:flex;align-items:center;justify-content:space-between">
+          <p style="font-size:13px;color:var(--muted)">Trabajadores que solicitaron acceso y están esperando aprobación.</p>
+          <button class="btn btn-sm btn-secondary" onclick="loadRegistrosPendientes()">↺ Actualizar</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Nombre</th><th>Cédula</th><th>Correo</th><th>Cargo</th><th>Teléfono</th><th>Estado</th><th>Acciones</th></tr></thead>
+            <tbody id="tabla-registros"></tbody>
+          </table>
+          <div id="registros-empty" class="no-rows" style="display:none">No hay solicitudes pendientes.</div>
         </div>
       </div>
 
@@ -960,7 +976,8 @@ window.switchTab = function(prefix, id) {
   event.target.classList.add('active');
   const tc = document.getElementById(`tab-${prefix}-${id}`);
   if (tc) tc.classList.add('active');
-  if (prefix==='rrhh' && id==='personal') loadPersonal();
+  if (prefix==='rrhh' && id==='personal')  loadPersonal();
+  if (prefix==='rrhh' && id==='registros') loadRegistrosPendientes();
   if (prefix==='rrhh' && id==='solicitudes') loadSolicitudesRRHH();
   if (prefix==='rrhh' && id==='comunicados') loadComunicadosRRHH();
   if (prefix==='rrhh' && id==='capacitaciones') loadCapacitaciones();
@@ -1147,6 +1164,79 @@ function buildQuickActions() {
 /* ─── RRHH ─── */
 async function loadRRHH() {
   loadPersonal();
+  contarRegistrosPendientes();
+}
+
+async function contarRegistrosPendientes() {
+  try {
+    const items = await SIGA.list('trabajadores', 'estado_cuenta="pendiente"', 200).catch(()=>[]);
+    const badge = document.getElementById('badge-registros');
+    if (!badge) return;
+    if (items.length > 0) {
+      badge.textContent = items.length;
+      badge.style.display = 'inline';
+    } else {
+      badge.style.display = 'none';
+    }
+  } catch(_) {}
+}
+
+let _allRegistrosPendientes = [];
+async function loadRegistrosPendientes() {
+  const tbody = document.getElementById('tabla-registros');
+  const empty = document.getElementById('registros-empty');
+  if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="7" class="no-rows">Cargando…</td></tr>';
+  const todos = await SIGA.list('trabajadores', '', 500, 1, '-created').catch(()=>[]);
+  const items = todos.filter(t => ['pendiente','rechazado','bloqueado'].includes(t.estado_cuenta));
+  _allRegistrosPendientes = items;
+  const badge = document.getElementById('badge-registros');
+  const pendCount = items.filter(t=>t.estado_cuenta==='pendiente').length;
+  if (badge) { badge.textContent = pendCount; badge.style.display = pendCount>0?'inline':'none'; }
+  if (!items.length) { tbody.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display = 'none';
+  tbody.innerHTML = items.map(t => {
+    const estadoClass = t.estado_cuenta==='pendiente'?'badge-warn':t.estado_cuenta==='rechazado'?'badge-red':'badge-gray';
+    const estadoLabel = {pendiente:'⏳ Pendiente',rechazado:'❌ Rechazado',bloqueado:'🔒 Bloqueado'}[t.estado_cuenta]||t.estado_cuenta;
+    return `<tr>
+      <td><div style="font-weight:500;font-size:13px">${esc(t.nombres||'')} ${esc(t.apellidos||'')}</div></td>
+      <td>${esc(t.cedula||'—')}</td>
+      <td style="font-size:12px">${esc(t.email||'—')}</td>
+      <td>${esc(t.cargo||'—')}</td>
+      <td>${esc(t.telefono||'—')}</td>
+      <td><span class="badge ${estadoClass}">${estadoLabel}</span></td>
+      <td class="td-actions" style="display:flex;gap:6px;flex-wrap:wrap">
+        ${t.estado_cuenta==='pendiente'?`
+          <button class="btn btn-sm btn-primary" onclick="aprobarRegistro('${esc(t.id)}')">✅ Aprobar</button>
+          <button class="btn btn-sm btn-danger"  onclick="rechazarRegistro('${esc(t.id)}')">❌ Rechazar</button>
+        `:`
+          ${t.estado_cuenta!=='activo'?`<button class="btn btn-sm btn-secondary" onclick="aprobarRegistro('${esc(t.id)}')">✅ Aprobar</button>`:''}
+        `}
+      </td></tr>`;
+  }).join('');
+}
+
+async function aprobarRegistro(id) {
+  if (!confirm('¿Aprobar este trabajador y activar su cuenta?')) return;
+  const U = SIGA.getUser();
+  try {
+    await SIGA.update('trabajadores', id, {
+      estado_cuenta: 'activo',
+      fecha_aprobacion: new Date().toISOString().replace('T',' ').substring(0,19),
+      aprobado_por: U.id || ''
+    });
+    SIGA.toast('Cuenta activada correctamente.');
+    loadRegistrosPendientes();
+  } catch(e) { SIGA.toast('Error al aprobar: '+e.message,'error'); }
+}
+
+async function rechazarRegistro(id) {
+  if (!confirm('¿Rechazar esta solicitud de registro?')) return;
+  try {
+    await SIGA.update('trabajadores', id, { estado_cuenta: 'rechazado' });
+    SIGA.toast('Solicitud rechazada.','warning');
+    loadRegistrosPendientes();
+  } catch(e) { SIGA.toast('Error: '+e.message,'error'); }
 }
 async function loadPersonal() {
   const tbody = document.getElementById('tabla-personal');
