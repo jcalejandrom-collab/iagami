@@ -1,0 +1,210 @@
+[
+  {
+    "id": "inspecempr00001",
+    "name": "inspecciones_empresas",
+    "type": "base",
+    "fields": [
+      {
+        "id": "rel_insp_emp001",
+        "name": "empresa",
+        "type": "relation",
+        "required": true,
+        "maxSelect": 1,
+        "collectionId": "pbc_814944700",
+        "cascadeDelete": false
+      },
+      {
+        "id": "date_insp_001",
+        "name": "fecha",
+        "type": "date",
+        "required": true
+      },
+      {
+        "id": "text_insp_002",
+        "name": "inspector",
+        "type": "text"
+      },
+      {
+        "id": "sel_insp_003",
+        "name": "tipo",
+        "type": "select",
+        "maxSelect": 1,
+        "values": ["Ordinaria", "Extraordinaria", "Seguimiento", "Cierre"]
+      },
+      {
+        "id": "sel_insp_004",
+        "name": "resultado",
+        "type": "select",
+        "maxSelect": 1,
+        "values": ["Favorable", "Favorable con observaciones", "Desfavorable", "Pendiente"]
+      },
+      {
+        "id": "text_insp_005",
+        "name": "observaciones",
+        "type": "text"
+      },
+      {
+        "id": "sel_insp_006",
+        "name": "estado",
+        "type": "select",
+        "maxSelect": 1,
+        "values": ["Programada", "En curso", "Completada", "Cancelada"]
+      },
+      {
+        "id": "date_insp_007",
+        "name": "proxima_inspeccion",
+        "type": "date"
+      },
+      {
+        "id": "file_insp_008",
+        "name": "archivos",
+        "type": "file",
+        "maxSelect": 5,
+        "maxSize": 10485760,
+        "mimeTypes": ["application/pdf", "image/jpeg", "image/png", "image/webp"]
+      }
+    ],
+    "listRule": "@request.auth.id != \"\"",
+    "viewRule": "@request.auth.id != \"\"",
+    "createRule": "@request.auth.id != \"\"",
+    "updateRule": "@request.auth.id != \"\"",
+    "deleteRule": "@request.auth.id != \"\""
+  },
+  {
+    "id": "evaldesempe0001",
+    "name": "evaluaciones_desempeno",
+    "type": "base",
+    "fields": [
+      {
+        "id": "rel_eval_001",
+        "name": "trabajador",
+        "type": "relation",
+        "required": true,
+        "maxSelect": 1,
+        "collectionId": "sigatrabajad001",
+        "cascadeDelete": false
+      },
+      {
+        "id": "rel_eval_002",
+        "name": "evaluador",
+        "type": "relation",
+        "maxSelect": 1,
+        "collectionId": "sigatrabajad001",
+        "cascadeDelete": false
+      },
+      {
+        "id": "text_eval_003",
+        "name": "periodo",
+        "type": "text",
+        "required": true
+      },
+      {
+        "id": "num_eval_004",
+        "name": "puntaje_cumplimiento",
+        "type": "number",
+        "min": 0,
+        "max": 100
+      },
+      {
+        "id": "num_eval_005",
+        "name": "puntaje_actitud",
+        "type": "number",
+        "min": 0,
+        "max": 100
+      },
+      {
+        "id": "num_eval_006",
+        "name": "puntaje_productividad",
+        "type": "number",
+        "min": 0,
+        "max": 100
+      },
+      {
+        "id": "num_eval_007",
+        "name": "puntaje_total",
+        "type": "number",
+        "min": 0,
+        "max": 100
+      },
+      {
+        "id": "text_eval_008",
+        "name": "observaciones",
+        "type": "text"
+      },
+      {
+        "id": "sel_eval_009",
+        "name": "estado",
+        "type": "select",
+        "maxSelect": 1,
+        "values": ["Borrador", "Enviada", "Aprobada"]
+      },
+      {
+        "id": "date_eval_010",
+        "name": "fecha",
+        "type": "date"
+      }
+    ],
+    "listRule": "@request.auth.collectionName = \"trabajadores\"",
+    "viewRule": "@request.auth.collectionName = \"trabajadores\"",
+    "createRule": "@request.auth.rol = \"RRHH\" || @request.auth.rol = \"DIRECTOR\" || @request.auth.rol = \"PRESIDENTE\"",
+    "updateRule": "@request.auth.rol = \"RRHH\" || @request.auth.rol = \"DIRECTOR\" || @request.auth.rol = \"PRESIDENTE\"",
+    "deleteRule": "@request.auth.rol = \"RRHH\""
+  },
+  {
+    "id": "asistencia00001",
+    "name": "asistencia",
+    "type": "base",
+    "fields": [
+      {
+        "id": "rel_asist_001",
+        "name": "trabajador",
+        "type": "relation",
+        "required": true,
+        "maxSelect": 1,
+        "collectionId": "sigatrabajad001",
+        "cascadeDelete": false
+      },
+      {
+        "id": "date_asist_002",
+        "name": "fecha",
+        "type": "date",
+        "required": true
+      },
+      {
+        "id": "text_asist_003",
+        "name": "hora_entrada",
+        "type": "text"
+      },
+      {
+        "id": "text_asist_004",
+        "name": "hora_salida",
+        "type": "text"
+      },
+      {
+        "id": "sel_asist_005",
+        "name": "tipo",
+        "type": "select",
+        "maxSelect": 1,
+        "values": ["Presencial", "Remoto", "Permiso", "Reposo", "Vacaciones", "Falta"]
+      },
+      {
+        "id": "text_asist_006",
+        "name": "observaciones",
+        "type": "text"
+      },
+      {
+        "id": "rel_asist_007",
+        "name": "registrado_por",
+        "type": "relation",
+        "maxSelect": 1,
+        "collectionId": "sigatrabajad001",
+        "cascadeDelete": false
+      }
+    ],
+    "listRule": "@request.auth.collectionName = \"trabajadores\"",
+    "viewRule": "@request.auth.collectionName = \"trabajadores\"",
+    "createRule": "@request.auth.rol = \"RRHH\" || @request.auth.rol = \"SUPERVISOR\" || @request.auth.rol = \"DIRECTOR\" || @request.auth.rol = \"PRESIDENTE\"",
+    "updateRule": "@request.auth.rol = \"RRHH\" || @request.auth.rol = \"DIRECTOR\" || @request.auth.rol = \"PRESIDENTE\"",
+    "deleteRule": "@request.auth.rol = \"RRHH\""
+  }
+]

@@ -1292,6 +1292,172 @@ input,select,textarea{font-family:inherit}
     </div>
 
     <!-- SEED SECTION -->
+    <!-- ══════════════════════════════════════
+         SECCIÓN: COMUNAS
+    ══════════════════════════════════════ -->
+    <div id="sec-comunas" class="section">
+      <div class="page-header">
+        <div>
+          <div class="page-title">🏛️ Comunas</div>
+          <div class="page-subtitle">Registro y gestión de comunas del Municipio Iribarren</div>
+        </div>
+        <button class="btn-p" onclick="openComunaForm()">+ Nueva Comuna</button>
+      </div>
+      <div id="comunas-stats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px"></div>
+      <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:16px">
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <input id="q-comunas" type="text" placeholder="Buscar por nombre, RIF, responsable…" style="flex:1;min-width:200px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px" oninput="renderComunas()"/>
+          <select id="f-comunas-par" onchange="renderComunas()" style="padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px"><option value="">Todas las parroquias</option></select>
+          <select id="f-comunas-est" onchange="renderComunas()" style="padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px">
+            <option value="">Todos los estados</option>
+            <option>Activo</option><option>Inactivo</option>
+          </select>
+        </div>
+      </div>
+      <div id="form-comunas" style="display:none;background:#fff;border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:20px">
+        <div class="form-section-title" id="ftitle-comunas">🏛️ Nueva Comuna</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px">
+          <div><label class="form-label">Nombre *</label><input id="cm-nombre" class="form-control" placeholder="Ej: Comuna Simón Bolívar"/></div>
+          <div><label class="form-label">Código</label><input id="cm-codigo" class="form-control" placeholder="Ej: COM-IRB-001"/></div>
+          <div><label class="form-label">RIF</label><input id="cm-rif" class="form-control" placeholder="J-00000000-0"/></div>
+          <div><label class="form-label">Responsable</label><input id="cm-responsable" class="form-control"/></div>
+          <div><label class="form-label">Cédula</label><input id="cm-cedula" class="form-control"/></div>
+          <div><label class="form-label">Teléfono</label><input id="cm-telefono" class="form-control"/></div>
+          <div><label class="form-label">Correo</label><input id="cm-correo" type="email" class="form-control"/></div>
+          <div><label class="form-label">Parroquia</label>
+            <select id="cm-parroquia" class="form-control">
+              <option value="">— Seleccionar —</option>
+              <option>Catedral</option><option>Concepción</option><option>El Cují</option>
+              <option>Buena Vista</option><option>Tamaca</option><option>Santa Rosa</option>
+              <option>Aguedo Felipe Alvarado</option><option>Dionisio Cisneros</option>
+              <option>Juárez</option><option>Juan de Villegas</option><option>Unión</option>
+              <option>Xaguas</option><option>Moran</option>
+            </select>
+          </div>
+          <div><label class="form-label">Dirección</label><input id="cm-direccion" class="form-control"/></div>
+          <div><label class="form-label">Coordenadas (lat, lng)</label><input id="cm-coordenadas" class="form-control" placeholder="10.0647, -69.3570"/></div>
+          <div><label class="form-label">Estatus</label>
+            <select id="cm-estatus" class="form-control"><option>Activo</option><option>Inactivo</option></select>
+          </div>
+          <div><label class="form-label">N° Consejos asociados</label><input id="cm-num_consejos" type="number" class="form-control" min="0" value="0"/></div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:18px">
+          <button class="btn-p" onclick="saveComuna()">💾 Guardar</button>
+          <button class="btn-s" onclick="closeComunaForm()">Cancelar</button>
+        </div>
+      </div>
+      <div id="tbl-comunas"></div>
+      <div id="pg-comunas" style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:12px"></div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SECCIÓN: DIAGNÓSTICO TERRITORIAL
+    ══════════════════════════════════════ -->
+    <div id="sec-diagnostico" class="section">
+      <div class="page-header">
+        <div>
+          <div class="page-title">🌿 Diagnóstico Territorial</div>
+          <div class="page-subtitle">Situación ambiental por consejo comunal — agua, residuos, infraestructura y riesgos</div>
+        </div>
+        <button class="btn-p" onclick="openDiagForm()">+ Nuevo Diagnóstico</button>
+      </div>
+      <div id="diag-stats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px"></div>
+      <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:16px">
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <input id="q-diag" type="text" placeholder="Buscar por consejo comunal…" style="flex:1;min-width:200px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px" oninput="renderDiagnostico()"/>
+          <select id="f-diag-agua" onchange="renderDiagnostico()" style="padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px">
+            <option value="">Estado del agua</option><option>Buena</option><option>Regular</option><option>Mala</option>
+          </select>
+        </div>
+      </div>
+      <div id="form-diagnostico" style="display:none;background:#fff;border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:20px">
+        <div class="form-section-title" id="ftitle-diag">🌿 Nuevo Diagnóstico</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px">
+          <div><label class="form-label">Consejo Comunal</label>
+            <select id="dg-consejo" class="form-control"><option value="">— Seleccionar —</option></select>
+          </div>
+          <div><label class="form-label">Estado del agua</label>
+            <select id="dg-aguas_estado" class="form-control"><option>Buena</option><option>Regular</option><option>Mala</option></select>
+          </div>
+          <div><label class="form-label">Pozos activos</label><input id="dg-pozos_activos" type="number" class="form-control" min="0" value="0"/></div>
+          <div><label class="form-label">Pozos inactivos</label><input id="dg-pozos_inactivos" type="number" class="form-control" min="0" value="0"/></div>
+          <div><label class="form-label">Redes consolidadas (km)</label><input id="dg-redes_consolidadas" type="number" class="form-control" min="0" value="0" step="0.1"/></div>
+          <div><label class="form-label">Redes no consolidadas (km)</label><input id="dg-redes_no_consolidadas" type="number" class="form-control" min="0" value="0" step="0.1"/></div>
+          <div><label class="form-label">Sistemas de bombeo</label><input id="dg-sistemas_bombeo" type="number" class="form-control" min="0" value="0"/></div>
+          <div><label class="form-label">Aguas servidas</label>
+            <select id="dg-aguas_servidas" class="form-control"><option>Ninguna</option><option>Parcial</option><option>Colapso total</option></select>
+          </div>
+          <div><label class="form-label">Desechos sólidos</label>
+            <select id="dg-desechos_solidos" class="form-control"><option>Controlado</option><option>Irregular</option><option>Crítico</option></select>
+          </div>
+          <div><label class="form-label">Áreas degradadas (ha)</label><input id="dg-areas_degradadas" type="number" class="form-control" min="0" value="0" step="0.1"/></div>
+          <div><label class="form-label">Áreas reforestadas (ha)</label><input id="dg-areas_reforestadas" type="number" class="form-control" min="0" value="0" step="0.1"/></div>
+          <div><label class="form-label">Fecha del diagnóstico</label><input id="dg-fecha_registro" type="date" class="form-control"/></div>
+          <div style="grid-column:1/-1"><label class="form-label">Riesgos ambientales</label><textarea id="dg-riesgos" class="form-control" rows="2" placeholder="Describa los riesgos identificados…"></textarea></div>
+          <div style="grid-column:1/-1"><label class="form-label">Necesidades prioritarias</label><textarea id="dg-necesidades_prioritarias" class="form-control" rows="2" placeholder="Listado de necesidades urgentes…"></textarea></div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:18px">
+          <button class="btn-p" onclick="saveDiag()">💾 Guardar</button>
+          <button class="btn-s" onclick="closeDiagForm()">Cancelar</button>
+        </div>
+      </div>
+      <div id="tbl-diagnostico"></div>
+      <div id="pg-diagnostico" style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:12px"></div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SECCIÓN: GESTIÓN HUMANA (RRHH)
+    ══════════════════════════════════════ -->
+    <div id="sec-gestion_rrhh" class="section">
+      <div class="page-header">
+        <div>
+          <div class="page-title">👥 Gestión Humana</div>
+          <div class="page-subtitle">Expedientes, asistencia, evaluaciones y capacitaciones del personal</div>
+        </div>
+      </div>
+      <div id="rrhh-stats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px"></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px">
+        <button class="btn-p" onclick="rrhhTab('personal')" id="rtab-personal">👤 Personal</button>
+        <button class="btn-s" onclick="rrhhTab('asistencia')" id="rtab-asistencia">📅 Asistencia</button>
+        <button class="btn-s" onclick="rrhhTab('evaluaciones')" id="rtab-evaluaciones">📊 Evaluaciones</button>
+        <button class="btn-s" onclick="rrhhTab('solicitudes')" id="rtab-solicitudes">📬 Solicitudes</button>
+        <button class="btn-s" onclick="rrhhTab('capacitaciones')" id="rtab-capacitaciones">🎓 Capacitaciones</button>
+      </div>
+      <div id="rrhh-content"></div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SECCIÓN: CENTRO DE CONTROL PRESIDENCIAL
+    ══════════════════════════════════════ -->
+    <div id="sec-presidencial" class="section">
+      <div class="page-header">
+        <div>
+          <div class="page-title">🎯 Centro de Control</div>
+          <div class="page-subtitle">Dashboard ejecutivo institucional — KPIs en tiempo real</div>
+        </div>
+        <button class="btn-s" onclick="renderPresidencial()" style="font-size:12px">↻ Actualizar</button>
+      </div>
+      <div id="pres-kpi-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:24px"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px">
+          <div style="font-weight:700;font-size:14px;margin-bottom:14px;color:var(--primary)">📋 Actividades (este mes)</div>
+          <div id="pres-act-resumen"></div>
+        </div>
+        <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px">
+          <div style="font-weight:700;font-size:14px;margin-bottom:14px;color:var(--primary)">⚠️ Denuncias por estado</div>
+          <div id="pres-den-resumen"></div>
+        </div>
+        <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px">
+          <div style="font-weight:700;font-size:14px;margin-bottom:14px;color:var(--primary)">💧 Infraestructura Hídrica</div>
+          <div id="pres-hidrica-resumen"></div>
+        </div>
+        <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px">
+          <div style="font-weight:700;font-size:14px;margin-bottom:14px;color:var(--primary)">🏭 Empresas</div>
+          <div id="pres-empresa-resumen"></div>
+        </div>
+      </div>
+    </div>
+
     <div id="sec-seed" class="section">
       <div class="page-header">
         <div><div class="page-title">🌱 Sembrar Datos Iniciales</div><div class="page-subtitle">Importa Comunas y Consejos Comunales con coordenadas aproximadas para que aparezcan en el mapa</div></div>
@@ -1403,12 +1569,16 @@ const NAV = [
   {id:'denuncias',     icon:'⚠️',  label:'Denuncias'},
   {id:'archivos',      icon:'📁', label:'Archivos'},
   {id:'consejos',      icon:'🏘️', label:'Consejos Comunales'},
+  {id:'comunas',       icon:'🏛️', label:'Comunas'},
   {id:'hidrica',       icon:'💧', label:'Infraestructura Hídrica'},
   {id:'bienvenida',    icon:'🌟', label:'Pantalla de Bienvenida'},
   {id:'planificacion', icon:'📆', label:'Planificación'},
   {id:'revista',       icon:'📰', label:'Revista Digital'},
   {id:'chatbot',       icon:'🤖', label:'Chatbot FAQ'},
   {id:'seed',          icon:'🌱', label:'Sembrar Datos'},
+  {id:'diagnostico',   icon:'🌿', label:'Diagnóstico Territorial'},
+  {id:'gestion_rrhh',  icon:'👥', label:'Gestión Humana'},
+  {id:'presidencial',  icon:'🎯', label:'Centro de Control'},
 ];
 
 let currentSection = 'dashboard';
@@ -1457,12 +1627,16 @@ async function renderSection(name) {
     case 'denuncias':     await renderDenuncias(); break;
     case 'archivos':      await renderArchivos(); break;
     case 'consejos':      await renderConsejos(); break;
+    case 'comunas':       await renderComunas(); break;
     case 'hidrica':       await renderHidrica(); break;
     case 'bienvenida':    await renderBienvenida(); break;
     case 'planificacion': await renderPlan(); break;
     case 'revista':       await renderRevistas(); break;
     case 'chatbot':       await renderChatbot(); break;
     case 'seed':          renderSeed(); break;
+    case 'diagnostico':   await renderDiagnostico(); break;
+    case 'gestion_rrhh':  await renderGestionRRHH(); break;
+    case 'presidencial':  await renderPresidencial(); break;
   }
 }
 
@@ -3822,6 +3996,448 @@ async function cleanDuplicates(dryRun){
   await _dedupCollection('consejos_comunales','CONSEJO',dryRun,log);
   logPre.textContent=log.join('\n')||'(sin resultados)';
   if(!dryRun) showToast('Limpieza de duplicados completada','success');
+}
+
+/* ════════════════════════════════════════
+   COMUNAS
+════════════════════════════════════════ */
+let comunaPage = 1, comunaFormId = '';
+const COMUNA_PER_PAGE = 15;
+
+async function renderComunas() {
+  const search  = (document.getElementById('q-comunas')||{}).value||'';
+  const parFil  = (document.getElementById('f-comunas-par')||{}).value||'';
+  const estFil  = (document.getElementById('f-comunas-est')||{}).value||'';
+  let data = await CMSDB.getAll('comunas');
+  if (!Array.isArray(data)) data = [];
+  const consejos = await CMSDB.getAll('consejos_comunales');
+  const ccCount = id => Array.isArray(consejos) ? consejos.filter(c=>c.comuna===id).length : 0;
+  if (search) { const q=search.toLowerCase(); data=data.filter(c=>(c.nombre||'').toLowerCase().includes(q)||(c.rif||'').toLowerCase().includes(q)||(c.responsable||'').toLowerCase().includes(q)); }
+  if (parFil)  data = data.filter(c=>c.parroquia===parFil);
+  if (estFil)  data = data.filter(c=>c.estatus===estFil);
+  // stats
+  const total=data.length, activas=data.filter(c=>c.estatus==='Activo').length;
+  const statsEl=document.getElementById('comunas-stats');
+  if (statsEl) statsEl.innerHTML=[
+    {icon:'🏛️',val:total,lbl:'Total comunas',sec:'comunas'},
+    {icon:'✅',val:activas,lbl:'Activas',sec:'comunas'},
+    {icon:'❌',val:total-activas,lbl:'Inactivas',sec:'comunas'},
+    {icon:'🏘️',val:Array.isArray(consejos)?consejos.length:0,lbl:'Consejos vinculados',sec:'consejos'},
+  ].map(s=>`<div class="stat-card" onclick="showSection('${s.sec}')"><div class="stat-icon">${s.icon}</div><div class="stat-value">${s.val}</div><div class="stat-label">${s.lbl}</div></div>`).join('');
+  // pagination
+  const totalPages=Math.max(1,Math.ceil(data.length/COMUNA_PER_PAGE));
+  if (comunaPage>totalPages) comunaPage=1;
+  const slice=data.slice((comunaPage-1)*COMUNA_PER_PAGE, comunaPage*COMUNA_PER_PAGE);
+  const tbl=document.getElementById('tbl-comunas');
+  if (!tbl) return;
+  tbl.innerHTML=`<div class="table-wrap"><table><thead><tr>
+    <th>Código</th><th>Nombre</th><th>Parroquia</th><th>Responsable</th>
+    <th>RIF</th><th>Consejos</th><th>Estatus</th><th>Acciones</th>
+  </tr></thead><tbody>${slice.length ? slice.map(c=>`<tr>
+    <td><span class="badge badge-secondary">${escHtml(c.codigo||'—')}</span></td>
+    <td><strong>${escHtml(c.nombre||'')}</strong></td>
+    <td>${escHtml(c.parroquia||'—')}</td>
+    <td>${escHtml(c.responsable||'—')}</td>
+    <td style="font-size:12px;color:var(--muted)">${escHtml(c.rif||'—')}</td>
+    <td style="text-align:center"><span class="badge badge-blue">${ccCount(c.id)}</span></td>
+    <td><span class="badge ${c.estatus==='Activo'?'badge-green':'badge-red'}">${escHtml(c.estatus||'—')}</span></td>
+    <td><div style="display:flex;gap:4px">
+      <button class="btn-icon" onclick="openComunaForm('${c.id}')">✏️</button>
+      <button class="btn-icon danger" onclick="deleteComunaRec('${c.id}')">🗑️</button>
+    </div></td>
+  </tr>`).join(''):'<tr><td colspan="8" style="text-align:center;color:#888;padding:20px">Sin resultados</td></tr>'}</tbody></table></div>`;
+  // pagination bar
+  const pg=document.getElementById('pg-comunas');
+  if (pg) {
+    let h=`<span style="font-size:12px;color:#888;align-self:center">Pág. ${comunaPage}/${totalPages} — ${data.length} registros</span>`;
+    if (totalPages>1) {
+      h+=`<button class="btn btn-sm" onclick="comunaPage=${comunaPage-1};renderComunas()" ${comunaPage<=1?'disabled':''}>‹</button>`;
+      for(let i=1;i<=totalPages;i++) h+=`<button class="btn btn-sm${i===comunaPage?' btn-primary':''}" onclick="comunaPage=${i};renderComunas()">${i}</button>`;
+      h+=`<button class="btn btn-sm" onclick="comunaPage=${comunaPage+1};renderComunas()" ${comunaPage>=totalPages?'disabled':''}>›</button>`;
+    }
+    pg.innerHTML=h;
+  }
+  // populate parroquia filter
+  const pfil=document.getElementById('f-comunas-par');
+  if (pfil && pfil.options.length<=1) {
+    [...new Set(Array.isArray(data)?data.map(c=>c.parroquia).filter(Boolean):[])].sort()
+      .forEach(p=>{const o=document.createElement('option');o.value=p;o.textContent=p;pfil.appendChild(o);});
+  }
+}
+
+async function openComunaForm(id) {
+  comunaFormId=id||'';
+  const form=document.getElementById('form-comunas');
+  if (!form) return;
+  form.style.display='block'; form.scrollIntoView({behavior:'smooth',block:'start'});
+  document.getElementById('ftitle-comunas').textContent=(id?'✏️ Editar':'🏛️ Nueva')+' Comuna';
+  const c=id ? await CMSDB.getOne('comunas',id) : null;
+  ['nombre','codigo','rif','responsable','cedula','telefono','correo','direccion','coordenadas','num_consejos'].forEach(f=>{
+    const el=document.getElementById('cm-'+f); if(el) el.value=c?(c[f]??''):'';
+  });
+  const par=document.getElementById('cm-parroquia'); if(par) par.value=c?(c.parroquia||''):'';
+  const est=document.getElementById('cm-estatus');   if(est) est.value=c?(c.estatus||'Activo'):'Activo';
+}
+function closeComunaForm() { const f=document.getElementById('form-comunas'); if(f) f.style.display='none'; comunaFormId=''; renderComunas(); }
+
+async function saveComuna() {
+  const nombre=(document.getElementById('cm-nombre')||{}).value||'';
+  if (!nombre.trim()) { toast('El nombre es obligatorio','error'); return; }
+  const item={id:comunaFormId||undefined};
+  ['nombre','codigo','rif','responsable','cedula','telefono','correo','direccion','coordenadas'].forEach(f=>{
+    const el=document.getElementById('cm-'+f); if(el) item[f]=el.value;
+  });
+  item.parroquia=(document.getElementById('cm-parroquia')||{}).value||'';
+  item.estatus=(document.getElementById('cm-estatus')||{}).value||'Activo';
+  item.num_consejos=parseInt((document.getElementById('cm-num_consejos')||{}).value||'0')||0;
+  item.municipio='Iribarren'; item.estado='Lara';
+  if (item.coordenadas) {
+    const m=String(item.coordenadas).split(/[,;]/).map(s=>parseFloat(s.trim()));
+    if (m.length===2&&!isNaN(m[0])&&!isNaN(m[1])) { item.lat=m[0]; item.lng=m[1]; }
+  }
+  try { await CMSDB.save('comunas',item); toast(comunaFormId?'Comuna actualizada':'Comuna registrada'); closeComunaForm(); }
+  catch(e) { toast('Error: '+e.message,'error'); }
+}
+
+async function deleteComunaRec(id) {
+  if (!confirm('¿Eliminar esta comuna? Los consejos comunales asociados quedarán sin comuna.')) return;
+  try { await CMSDB.deleteRecord('comunas',id); toast('Comuna eliminada'); renderComunas(); }
+  catch(e) { toast('Error: '+e.message,'error'); }
+}
+
+/* ════════════════════════════════════════
+   DIAGNÓSTICO TERRITORIAL
+════════════════════════════════════════ */
+let diagPage=1, diagFormId='';
+const DIAG_PER_PAGE=15;
+
+async function renderDiagnostico() {
+  const search=(document.getElementById('q-diag')||{}).value||'';
+  const aguaFil=(document.getElementById('f-diag-agua')||{}).value||'';
+  const consejos=await CMSDB.getAll('consejos_comunales');
+  const ccName=id=>{const c=Array.isArray(consejos)?consejos.find(x=>x.id===id):null;return c?(c.nombre||id):'—';};
+  let data=await CMSDB.getAll('diagnosticos_ambientales');
+  if (!Array.isArray(data)) data=[];
+  if (search) { const q=search.toLowerCase(); data=data.filter(d=>ccName(d.consejo_comunal).toLowerCase().includes(q)); }
+  if (aguaFil) data=data.filter(d=>d.aguas_estado===aguaFil);
+  // stats
+  const statsEl=document.getElementById('diag-stats');
+  if (statsEl) statsEl.innerHTML=[
+    {icon:'📋',val:data.length,lbl:'Total diagnósticos'},
+    {icon:'🟢',val:data.filter(d=>d.aguas_estado==='Buena').length,lbl:'Agua: Buena'},
+    {icon:'🟡',val:data.filter(d=>d.aguas_estado==='Regular').length,lbl:'Agua: Regular'},
+    {icon:'🔴',val:data.filter(d=>d.aguas_estado==='Mala').length,lbl:'Agua: Mala'},
+    {icon:'💧',val:data.reduce((s,d)=>s+(+d.pozos_activos||0),0),lbl:'Pozos activos'},
+    {icon:'🔴',val:data.reduce((s,d)=>s+(+d.pozos_inactivos||0),0),lbl:'Pozos inactivos'},
+  ].map(s=>`<div class="stat-card"><div class="stat-icon">${s.icon}</div><div class="stat-value">${s.val}</div><div class="stat-label">${s.lbl}</div></div>`).join('');
+  // table
+  const totalPages=Math.max(1,Math.ceil(data.length/DIAG_PER_PAGE));
+  if (diagPage>totalPages) diagPage=1;
+  const slice=data.slice((diagPage-1)*DIAG_PER_PAGE, diagPage*DIAG_PER_PAGE);
+  const tbl=document.getElementById('tbl-diagnostico');
+  if (!tbl) return;
+  const aguaBadge=v=>v==='Buena'?'badge-green':v==='Regular'?'badge-yellow':'badge-red';
+  tbl.innerHTML=`<div class="table-wrap"><table><thead><tr>
+    <th>Consejo Comunal</th><th>Estado del Agua</th><th>Pozos Act./Inact.</th>
+    <th>Redes (km)</th><th>Áreas Degrad./Refores. (ha)</th><th>Fecha</th><th>Acciones</th>
+  </tr></thead><tbody>${slice.length?slice.map(d=>`<tr>
+    <td><strong>${escHtml(ccName(d.consejo_comunal))}</strong></td>
+    <td><span class="badge ${aguaBadge(d.aguas_estado)}">${escHtml(d.aguas_estado||'—')}</span></td>
+    <td>${(+d.pozos_activos||0)} / ${(+d.pozos_inactivos||0)}</td>
+    <td>${(+d.redes_consolidadas||0)} / ${(+d.redes_no_consolidadas||0)}</td>
+    <td>${(+d.areas_degradadas||0)} / ${(+d.areas_reforestadas||0)}</td>
+    <td style="font-size:12px;color:var(--muted)">${d.fecha_registro||'—'}</td>
+    <td><div style="display:flex;gap:4px">
+      <button class="btn-icon" onclick="openDiagForm('${d.id}')">✏️</button>
+      <button class="btn-icon danger" onclick="deleteDiag('${d.id}')">🗑️</button>
+    </div></td>
+  </tr>`).join(''):'<tr><td colspan="7" style="text-align:center;color:#888;padding:20px">Sin diagnósticos registrados</td></tr>'}</tbody></table></div>`;
+  const pg=document.getElementById('pg-diagnostico');
+  if (pg) {
+    let h=`<span style="font-size:12px;color:#888;align-self:center">Pág. ${diagPage}/${totalPages} — ${data.length} registros</span>`;
+    if (totalPages>1) {
+      h+=`<button class="btn btn-sm" onclick="diagPage=${diagPage-1};renderDiagnostico()" ${diagPage<=1?'disabled':''}>‹</button>`;
+      for(let i=1;i<=totalPages;i++) h+=`<button class="btn btn-sm${i===diagPage?' btn-primary':''}" onclick="diagPage=${i};renderDiagnostico()">${i}</button>`;
+      h+=`<button class="btn btn-sm" onclick="diagPage=${diagPage+1};renderDiagnostico()" ${diagPage>=totalPages?'disabled':''}>›</button>`;
+    }
+    pg.innerHTML=h;
+  }
+  // populate consejo select in form
+  const sel=document.getElementById('dg-consejo');
+  if (sel && sel.options.length<=1 && Array.isArray(consejos)) {
+    consejos.sort((a,b)=>(a.nombre||'').localeCompare(b.nombre||''))
+      .forEach(c=>{const o=document.createElement('option');o.value=c.id;o.textContent=c.nombre||c.id;sel.appendChild(o);});
+  }
+}
+
+async function openDiagForm(id) {
+  diagFormId=id||'';
+  const form=document.getElementById('form-diagnostico');
+  if (!form) return;
+  form.style.display='block'; form.scrollIntoView({behavior:'smooth',block:'start'});
+  document.getElementById('ftitle-diag').textContent=(id?'✏️ Editar':'🌿 Nuevo')+' Diagnóstico';
+  const d=id?await CMSDB.getOne('diagnosticos_ambientales',id):null;
+  ['pozos_activos','pozos_inactivos','redes_consolidadas','redes_no_consolidadas',
+   'sistemas_bombeo','areas_degradadas','areas_reforestadas','fecha_registro','riesgos','necesidades_prioritarias'].forEach(f=>{
+    const el=document.getElementById('dg-'+f); if(el) el.value=d?(d[f]??''):'';
+  });
+  ['aguas_estado','aguas_servidas','desechos_solidos'].forEach(f=>{
+    const el=document.getElementById('dg-'+f); if(el&&d) el.value=d[f]||el.options[0]?.value||'';
+  });
+  const sel=document.getElementById('dg-consejo'); if(sel&&d) sel.value=d.consejo_comunal||'';
+}
+function closeDiagForm() { const f=document.getElementById('form-diagnostico'); if(f) f.style.display='none'; diagFormId=''; renderDiagnostico(); }
+
+async function saveDiag() {
+  const consejo=(document.getElementById('dg-consejo')||{}).value||'';
+  if (!consejo) { toast('Selecciona un consejo comunal','error'); return; }
+  const item={id:diagFormId||undefined, consejo_comunal:consejo};
+  ['pozos_activos','pozos_inactivos','redes_consolidadas','redes_no_consolidadas','sistemas_bombeo',
+   'areas_degradadas','areas_reforestadas'].forEach(f=>{
+    const el=document.getElementById('dg-'+f); if(el) item[f]=parseFloat(el.value)||0;
+  });
+  ['aguas_estado','aguas_servidas','desechos_solidos','fecha_registro','riesgos','necesidades_prioritarias'].forEach(f=>{
+    const el=document.getElementById('dg-'+f); if(el) item[f]=el.value;
+  });
+  try { await CMSDB.save('diagnosticos_ambientales',item); toast(diagFormId?'Diagnóstico actualizado':'Diagnóstico registrado'); closeDiagForm(); }
+  catch(e) { toast('Error: '+e.message,'error'); }
+}
+async function deleteDiag(id) {
+  if (!confirm('¿Eliminar este diagnóstico?')) return;
+  try { await CMSDB.deleteRecord('diagnosticos_ambientales',id); toast('Eliminado'); renderDiagnostico(); }
+  catch(e) { toast('Error: '+e.message,'error'); }
+}
+
+/* ════════════════════════════════════════
+   GESTIÓN HUMANA (RRHH)
+════════════════════════════════════════ */
+let rrhhActiveTab='personal';
+
+async function renderGestionRRHH() {
+  // Stats globales
+  const [trabajadores, solicitudes, capacitaciones, evaluaciones, asistencia] = await Promise.all([
+    CMSDB.getAll('trabajadores').catch(()=>[]),
+    CMSDB.getAll('solicitudes_rrhh').catch(()=>[]),
+    CMSDB.getAll('capacitaciones').catch(()=>[]),
+    CMSDB.getAll('evaluaciones_desempeno').catch(()=>[]),
+    CMSDB.getAll('asistencia').catch(()=>[]),
+  ]);
+  const hoy=new Date().toLocaleDateString('sv-SE');
+  const statsEl=document.getElementById('rrhh-stats');
+  if (statsEl) statsEl.innerHTML=[
+    {icon:'👤',val:Array.isArray(trabajadores)?trabajadores.filter(t=>t.activo).length:0,lbl:'Trabajadores activos'},
+    {icon:'📬',val:Array.isArray(solicitudes)?solicitudes.filter(s=>s.estado==='Pendiente').length:0,lbl:'Solicitudes pendientes'},
+    {icon:'🎓',val:Array.isArray(capacitaciones)?capacitaciones.filter(c=>c.estado==='Activa').length:0,lbl:'Capacitaciones activas'},
+    {icon:'📊',val:Array.isArray(evaluaciones)?evaluaciones.filter(e=>e.estado==='Enviada').length:0,lbl:'Evaluaciones en revisión'},
+    {icon:'📅',val:Array.isArray(asistencia)?asistencia.filter(a=>a.fecha===hoy).length:0,lbl:'Presentes hoy'},
+  ].map(s=>`<div class="stat-card"><div class="stat-icon">${s.icon}</div><div class="stat-value">${s.val}</div><div class="stat-label">${s.lbl}</div></div>`).join('');
+  rrhhTab(rrhhActiveTab, {trabajadores, solicitudes, capacitaciones, evaluaciones, asistencia});
+}
+
+function rrhhTab(tab, cache) {
+  rrhhActiveTab=tab;
+  ['personal','asistencia','evaluaciones','solicitudes','capacitaciones'].forEach(t=>{
+    const btn=document.getElementById('rtab-'+t);
+    if (btn) { btn.className=t===tab?'btn-p':'btn-s'; }
+  });
+  const el=document.getElementById('rrhh-content'); if (!el) return;
+  if (tab==='personal') {
+    const trabs=cache?.trabajadores||[];
+    el.innerHTML=`<div class="table-wrap"><table><thead><tr>
+      <th>Nombre</th><th>Cédula</th><th>Rol</th><th>Departamento</th><th>Email</th><th>Estado</th>
+    </tr></thead><tbody>${Array.isArray(trabs)&&trabs.length
+      ? trabs.map(t=>`<tr>
+          <td><strong>${escHtml((t.nombres||'')+' '+(t.apellidos||''))}</strong></td>
+          <td style="font-size:12px">${escHtml(t.cedula||'—')}</td>
+          <td><span class="badge badge-purple">${escHtml(t.rol||'—')}</span></td>
+          <td>${escHtml(t.departamento||'—')}</td>
+          <td style="font-size:12px;color:var(--muted)">${escHtml(t.email||'—')}</td>
+          <td><span class="badge ${t.activo?'badge-green':'badge-red'}">${t.activo?'Activo':'Inactivo'}</span></td>
+        </tr>`).join('')
+      : '<tr><td colspan="6" style="text-align:center;color:#888;padding:20px">Sin trabajadores registrados en SIGA</td></tr>'
+    }</tbody></table></div>`;
+  } else if (tab==='solicitudes') {
+    const sols=cache?.solicitudes||[];
+    el.innerHTML=`<div class="table-wrap"><table><thead><tr>
+      <th>Trabajador ID</th><th>Tipo</th><th>Descripción</th><th>Desde</th><th>Hasta</th><th>Estado</th>
+    </tr></thead><tbody>${Array.isArray(sols)&&sols.length
+      ? sols.map(s=>`<tr>
+          <td style="font-size:11px;color:var(--muted)">${escHtml((s.trabajador_id||'').substring(0,10))}…</td>
+          <td>${escHtml(s.tipo||'—')}</td>
+          <td style="max-width:200px">${escHtml((s.descripcion||'').substring(0,80))}</td>
+          <td style="font-size:12px">${s.fecha_desde||'—'}</td>
+          <td style="font-size:12px">${s.fecha_hasta||'—'}</td>
+          <td><span class="badge ${s.estado==='Aprobada'?'badge-green':s.estado==='Rechazada'?'badge-red':'badge-yellow'}">${escHtml(s.estado||'Pendiente')}</span></td>
+        </tr>`).join('')
+      : '<tr><td colspan="6" style="text-align:center;color:#888;padding:20px">Sin solicitudes</td></tr>'
+    }</tbody></table></div>`;
+  } else if (tab==='capacitaciones') {
+    const caps=cache?.capacitaciones||[];
+    el.innerHTML=`<div class="table-wrap"><table><thead><tr>
+      <th>Nombre</th><th>Instructor</th><th>Modalidad</th><th>Inicio</th><th>Fin</th><th>Estado</th>
+    </tr></thead><tbody>${Array.isArray(caps)&&caps.length
+      ? caps.map(c=>`<tr>
+          <td><strong>${escHtml(c.nombre||'—')}</strong></td>
+          <td>${escHtml(c.instructor||'—')}</td>
+          <td>${escHtml(c.modalidad||'—')}</td>
+          <td style="font-size:12px">${c.fecha_inicio||'—'}</td>
+          <td style="font-size:12px">${c.fecha_fin||'—'}</td>
+          <td><span class="badge ${c.estado==='Activa'?'badge-green':c.estado==='Finalizada'?'badge-gray':'badge-yellow'}">${escHtml(c.estado||'—')}</span></td>
+        </tr>`).join('')
+      : '<tr><td colspan="6" style="text-align:center;color:#888;padding:20px">Sin capacitaciones</td></tr>'
+    }</tbody></table></div>`;
+  } else if (tab==='evaluaciones') {
+    const evals=cache?.evaluaciones||[];
+    el.innerHTML=`<div class="table-wrap"><table><thead><tr>
+      <th>Trabajador</th><th>Período</th><th>Cumplimiento</th><th>Actitud</th><th>Productividad</th><th>Total</th><th>Estado</th>
+    </tr></thead><tbody>${Array.isArray(evals)&&evals.length
+      ? evals.map(e=>`<tr>
+          <td style="font-size:11px;color:var(--muted)">${escHtml((e.trabajador||'').substring(0,10))}…</td>
+          <td>${escHtml(e.periodo||'—')}</td>
+          <td style="text-align:center">${e.puntaje_cumplimiento??'—'}</td>
+          <td style="text-align:center">${e.puntaje_actitud??'—'}</td>
+          <td style="text-align:center">${e.puntaje_productividad??'—'}</td>
+          <td style="text-align:center;font-weight:700">${e.puntaje_total??'—'}</td>
+          <td><span class="badge ${e.estado==='Aprobada'?'badge-green':e.estado==='Enviada'?'badge-yellow':'badge-gray'}">${escHtml(e.estado||'Borrador')}</span></td>
+        </tr>`).join('')
+      : '<tr><td colspan="7" style="text-align:center;color:#888;padding:20px">Sin evaluaciones registradas</td></tr>'
+    }</tbody></table></div>`;
+  } else if (tab==='asistencia') {
+    const asist=cache?.asistencia||[];
+    const hoy=new Date().toLocaleDateString('sv-SE');
+    const hoyRecs=Array.isArray(asist)?asist.filter(a=>a.fecha===hoy):[];
+    el.innerHTML=`<div style="margin-bottom:12px;font-size:13px;color:var(--muted)">Mostrando asistencia de <strong>hoy (${hoy})</strong> — ${hoyRecs.length} registros</div>
+    <div class="table-wrap"><table><thead><tr>
+      <th>Trabajador</th><th>Entrada</th><th>Salida</th><th>Tipo</th><th>Observaciones</th>
+    </tr></thead><tbody>${hoyRecs.length
+      ? hoyRecs.map(a=>`<tr>
+          <td style="font-size:11px;color:var(--muted)">${escHtml((a.trabajador||'').substring(0,10))}…</td>
+          <td>${escHtml(a.hora_entrada||'—')}</td>
+          <td>${escHtml(a.hora_salida||'—')}</td>
+          <td><span class="badge badge-blue">${escHtml(a.tipo||'—')}</span></td>
+          <td style="font-size:12px">${escHtml(a.observaciones||'—')}</td>
+        </tr>`).join('')
+      : '<tr><td colspan="5" style="text-align:center;color:#888;padding:20px">Sin registros de asistencia para hoy</td></tr>'
+    }</tbody></table></div>`;
+  }
+  // Defer data fetch if no cache
+  if (!cache) renderGestionRRHH();
+}
+
+/* ════════════════════════════════════════
+   CENTRO DE CONTROL PRESIDENCIAL
+════════════════════════════════════════ */
+async function renderPresidencial() {
+  const [
+    trabajadores, actividades, denuncias, empresas,
+    comunas, consejos, infra, solicitudes, inspecciones
+  ] = await Promise.all([
+    CMSDB.getAll('trabajadores').catch(()=>[]),
+    CMSDB.getAll('actividades').catch(()=>[]),
+    CMSDB.getAll('denuncias').catch(()=>[]),
+    CMSDB.getAll('empresas').catch(()=>[]),
+    CMSDB.getAll('comunas').catch(()=>[]),
+    CMSDB.getAll('consejos_comunales').catch(()=>[]),
+    CMSDB.getAll('infraestructura_hidrica').catch(()=>[]),
+    CMSDB.getAll('solicitudes_rrhh').catch(()=>[]),
+    CMSDB.getAll('inspecciones_empresas').catch(()=>[]),
+  ]);
+  const hoy=new Date().toLocaleDateString('sv-SE');
+  const mesInicio=new Date(); mesInicio.setDate(1);
+  const mesStr=mesInicio.toLocaleDateString('sv-SE');
+  const actMes=Array.isArray(actividades)?actividades.filter(a=>(a.fecha||'')>=mesStr):[];
+  const actCompletadas=actMes.filter(a=>a.estado==='Completada').length;
+  const cumplimiento=actMes.length?Math.round(actCompletadas/actMes.length*100):0;
+  const pozosAct=Array.isArray(infra)?infra.reduce((s,i)=>s+(+i.pozos_activos||0),0):0;
+  const pozosInact=Array.isArray(infra)?infra.reduce((s,i)=>s+(+i.pozos_inactivos||0),0):0;
+  // KPI grid
+  const kpis=[
+    {icon:'👥',val:Array.isArray(trabajadores)?trabajadores.filter(t=>t.activo).length:0,lbl:'Trabajadores activos',color:'#1d6b3e'},
+    {icon:'📋',val:actMes.length,lbl:'Actividades este mes',color:'#2563eb'},
+    {icon:'✅',val:actCompletadas,lbl:'Actividades completadas',color:'#16a34a'},
+    {icon:'📊',val:cumplimiento+'%',lbl:'Cumplimiento mensual',color:cumplimiento>=80?'#16a34a':cumplimiento>=50?'#d97706':'#dc2626'},
+    {icon:'⚠️',val:Array.isArray(denuncias)?denuncias.filter(d=>d.estado!=='cerrada').length:0,lbl:'Denuncias activas',color:'#dc2626'},
+    {icon:'🏭',val:Array.isArray(empresas)?empresas.length:0,lbl:'Empresas registradas',color:'#7c3aed'},
+    {icon:'🔍',val:Array.isArray(inspecciones)?inspecciones.length:0,lbl:'Inspecciones realizadas',color:'#0891b2'},
+    {icon:'🏛️',val:Array.isArray(comunas)?comunas.length:0,lbl:'Comunas registradas',color:'#1d6b3e'},
+    {icon:'🏘️',val:Array.isArray(consejos)?consejos.length:0,lbl:'Consejos comunales',color:'#059669'},
+    {icon:'💧',val:pozosAct,lbl:'Pozos activos',color:'#2563eb'},
+    {icon:'🔴',val:pozosInact,lbl:'Pozos inactivos',color:'#dc2626'},
+    {icon:'📬',val:Array.isArray(solicitudes)?solicitudes.filter(s=>s.estado==='Pendiente').length:0,lbl:'Solicitudes RRHH pendientes',color:'#d97706'},
+  ];
+  const kpiEl=document.getElementById('pres-kpi-grid');
+  if (kpiEl) kpiEl.innerHTML=kpis.map(k=>`
+    <div class="stat-card" style="border-top:3px solid ${k.color}">
+      <div class="stat-icon">${k.icon}</div>
+      <div class="stat-value" style="color:${k.color}">${k.val}</div>
+      <div class="stat-label">${k.lbl}</div>
+    </div>`).join('');
+  // Actividades resumen
+  const actEl=document.getElementById('pres-act-resumen');
+  if (actEl) {
+    const estados=['Completada','En progreso','Pendiente','Cancelada'];
+    actEl.innerHTML=estados.map(e=>{
+      const n=actMes.filter(a=>a.estado===e).length;
+      const pct=actMes.length?Math.round(n/actMes.length*100):0;
+      const color=e==='Completada'?'#16a34a':e==='En progreso'?'#2563eb':e==='Pendiente'?'#d97706':'#dc2626';
+      return `<div style="margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px">
+          <span>${e}</span><span style="font-weight:700;color:${color}">${n} (${pct}%)</span>
+        </div>
+        <div style="background:#f0f0f0;border-radius:4px;height:6px">
+          <div style="background:${color};width:${pct}%;height:6px;border-radius:4px"></div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  // Denuncias resumen
+  const denEl=document.getElementById('pres-den-resumen');
+  if (denEl && Array.isArray(denuncias)) {
+    const estados2=['recibida','revision','inspeccion','cerrada'];
+    const labels={'recibida':'Recibida','revision':'En revisión','inspeccion':'En inspección','cerrada':'Cerrada'};
+    denEl.innerHTML=estados2.map(e=>{
+      const n=denuncias.filter(d=>(d.estado||'recibida')===e).length;
+      const colors={'recibida':'#d97706','revision':'#2563eb','inspeccion':'#7c3aed','cerrada':'#16a34a'};
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #f0f0f0;font-size:13px">
+        <span>${labels[e]||e}</span>
+        <span class="badge" style="background:${colors[e]}20;color:${colors[e]};border:1px solid ${colors[e]}40">${n}</span>
+      </div>`;
+    }).join('');
+  }
+  // Hídrica resumen
+  const hidEl=document.getElementById('pres-hidrica-resumen');
+  if (hidEl) {
+    const total=Array.isArray(infra)?infra.length:0;
+    const op=Array.isArray(infra)?infra.filter(i=>i.estado_operativo==='Operativo').length:0;
+    const parc=Array.isArray(infra)?infra.filter(i=>i.estado_operativo==='Parcial').length:0;
+    const crit=Array.isArray(infra)?infra.filter(i=>i.estado_operativo==='Critico').length:0;
+    hidEl.innerHTML=`
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+        <div style="text-align:center;padding:10px;background:#f0fdf4;border-radius:8px">
+          <div style="font-size:22px;font-weight:800;color:#16a34a">${pozosAct}</div>
+          <div style="font-size:11px;color:#666">Pozos activos</div>
+        </div>
+        <div style="text-align:center;padding:10px;background:#fef2f2;border-radius:8px">
+          <div style="font-size:22px;font-weight:800;color:#dc2626">${pozosInact}</div>
+          <div style="font-size:11px;color:#666">Pozos inactivos</div>
+        </div>
+      </div>
+      <div style="font-size:13px">
+        <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #f0f0f0"><span>Operativo</span><span class="badge badge-green">${op}</span></div>
+        <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #f0f0f0"><span>Parcial</span><span class="badge badge-yellow">${parc}</span></div>
+        <div style="display:flex;justify-content:space-between;padding:4px 0"><span>Crítico</span><span class="badge badge-red">${crit}</span></div>
+      </div>`;
+  }
+  // Empresas resumen
+  const empEl=document.getElementById('pres-empresa-resumen');
+  if (empEl && Array.isArray(empresas)) {
+    const porEstado={};
+    empresas.forEach(e=>{ const k=e.estado_permiso||'Sin estado'; porEstado[k]=(porEstado[k]||0)+1; });
+    empEl.innerHTML=Object.entries(porEstado).map(([k,v])=>`
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #f0f0f0;font-size:13px">
+        <span>${escHtml(k)}</span><span class="badge badge-blue">${v}</span>
+      </div>`).join('')||'<div style="color:#888;font-size:13px">Sin empresas registradas</div>';
+  }
 }
 
 /* ─── LOGOUT ─── */
