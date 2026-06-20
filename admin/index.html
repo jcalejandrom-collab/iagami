@@ -1493,6 +1493,19 @@ input,select,textarea{font-family:inherit}
       </div>
     </div>
 
+    <!-- ══════════════════════════════════════
+         SECCIÓN: CONTROL Y SEGUIMIENTO
+    ══════════════════════════════════════ -->
+    <div id="sec-ctrl_seguimiento" class="section">
+      <div class="page-header">
+        <div>
+          <div class="page-title">🔍 Control y Seguimiento Institucional</div>
+          <div class="page-subtitle">Vista consolidada de actividades del personal</div>
+        </div>
+      </div>
+      <div id="ctrl-seg-body"><p style="color:#888;text-align:center;padding:40px">Cargando…</p></div>
+    </div>
+
   </div>
 </div>
 
@@ -1579,6 +1592,7 @@ const NAV = [
   {id:'diagnostico',   icon:'🌿', label:'Diagnóstico Territorial'},
   {id:'gestion_rrhh',  icon:'👥', label:'Gestión Humana'},
   {id:'presidencial',  icon:'🎯', label:'Centro de Control'},
+  {id:'ctrl_seguimiento', icon:'🔍', label:'Control y Seguimiento'},
 ];
 
 let currentSection = 'dashboard';
@@ -1635,8 +1649,9 @@ async function renderSection(name) {
     case 'chatbot':       await renderChatbot(); break;
     case 'seed':          renderSeed(); break;
     case 'diagnostico':   await renderDiagnostico(); break;
-    case 'gestion_rrhh':  await renderGestionRRHH(); break;
-    case 'presidencial':  await renderPresidencial(); break;
+    case 'gestion_rrhh':     await renderGestionRRHH(); break;
+    case 'presidencial':     await renderPresidencial(); break;
+    case 'ctrl_seguimiento': await renderCtrlSeguimiento(); break;
   }
 }
 
@@ -4439,6 +4454,193 @@ async function renderPresidencial() {
       </div>`).join('')||'<div style="color:#888;font-size:13px">Sin empresas registradas</div>';
   }
 }
+
+/* ─── CONTROL Y SEGUIMIENTO ─── */
+async function renderCtrlSeguimiento() {
+  const body = document.getElementById('ctrl-seg-body');
+  if (!body) return;
+  body.innerHTML = '<p style="color:#888;text-align:center;padding:40px">Cargando datos…</p>';
+
+  // Cargar datos de SIGA (colección actividades y trabajadores)
+  const [actividades, trabajadores] = await Promise.all([
+    CMSDB.getAll('actividades', 500, '-fecha').catch(()=>[]),
+    CMSDB.getAll('trabajadores', 300).catch(()=>
+      fetch(`${window.PB_URL||'http://localhost:8090'}/api/collections/trabajadores/records?perPage=300`,
+        {headers:{Authorization:'Bearer '+sessionStorage.getItem('pb_token')||''}})
+        .then(r=>r.json()).then(r=>r.items||[]).catch(()=>[])),
+  ]);
+
+  const hoy = new Date().toISOString().slice(0,10);
+  const mes = hoy.slice(0,7);
+
+  const actHoy    = actividades.filter(a=>a.fecha&&a.fecha.slice(0,10)===hoy);
+  const actMes    = actividades.filter(a=>a.fecha&&a.fecha.slice(0,7)===mes);
+  const pendRev   = actividades.filter(a=>!a.estatus_revision||a.estatus_revision==='Pendiente');
+  const aprobadas = actividades.filter(a=>a.estatus_revision==='Aprobada');
+  const rechazadas= actividades.filter(a=>a.estatus_revision==='Rechazada');
+  const conCumpl  = actividades.filter(a=>a.porcentaje_cumplimiento>0);
+  const promCumpl = conCumpl.length
+    ? Math.round(conCumpl.reduce((s,a)=>s+(a.porcentaje_cumplimiento||0),0)/conCumpl.length)
+    : 0;
+  const sinEvid   = actividades.filter(a=>!a.resultado_obtenido&&a.estado==='Completada');
+
+  // Ranking por trabajador
+  const porTrab = {};
+  actividades.forEach(a => {
+    if (!a.trabajador_id) return;
+    if (!porTrab[a.trabajador_id]) porTrab[a.trabajador_id] = {total:0,aprobadas:0,cumpl:[]};
+    porTrab[a.trabajador_id].total++;
+    if (a.estatus_revision==='Aprobada') porTrab[a.trabajador_id].aprobadas++;
+    if (a.porcentaje_cumplimiento>0)     porTrab[a.trabajador_id].cumpl.push(a.porcentaje_cumplimiento);
+  });
+  const ranking = Object.entries(porTrab).map(([id,d])=>({
+    id, ...d,
+    promCumpl: d.cumpl.length ? Math.round(d.cumpl.reduce((a,b)=>a+b,0)/d.cumpl.length) : 0,
+    nombre: (()=>{ const t=trabajadores.find(t=>t.id===id); return t?`${t.nombres||''} ${t.apellidos||''}`.trim():'—'; })(),
+    dept: (trabajadores.find(t=>t.id===id)||{}).departamento||'—',
+  })).sort((a,b)=>b.promCumpl-a.promCumpl).slice(0,10);
+
+  body.innerHTML = `<!-- KPIs -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:20px">
+    ${[
+      ['📋','Actividades hoy',   actHoy.length,   ''],
+      ['📆','Este mes',          actMes.length,   ''],
+      ['⏳','Pendientes revisión',pendRev.length,  'amber'],
+      ['✅','Aprobadas',         aprobadas.length,'green'],
+      ['❌','Rechazadas',        rechazadas.length,'red'],
+      ['📊','Cumpl. promedio',   promCumpl+'%',   promCumpl>=80?'green':promCumpl>=50?'amber':'red'],
+      ['🖼️','Sin evidencia',     sinEvid.length,  sinEvid.length>0?'amber':''],
+    ].map(([ico,lbl,val,col])=>`
+      <div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px;text-align:center">
+        <div style="font-size:22px">${ico}</div>
+        <div style="font-size:22px;font-weight:700;color:${col==='green'?'#16a34a':col==='amber'?'#d97706':col==='red'?'#dc2626':'#111'}">${val}</div>
+        <div style="font-size:11px;color:#6b7280;margin-top:2px">${lbl}</div>
+      </div>`).join('')}
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+    <!-- Ranking productividad -->
+    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:16px">
+      <div style="font-weight:600;margin-bottom:12px;font-size:14px">🏆 Ranking de Productividad</div>
+      ${ranking.length ? ranking.map((t,i)=>`
+        <div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid #f3f4f6;font-size:13px">
+          <span style="font-weight:700;color:#6b7280;width:20px">${i+1}</span>
+          <div style="flex:1">
+            <div style="font-weight:500">${escHtml(t.nombre)}</div>
+            <div style="color:#9ca3af;font-size:11px">${escHtml(t.dept)}</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-weight:700;color:${t.promCumpl>=80?'#16a34a':t.promCumpl>=50?'#d97706':'#dc2626'}">${t.promCumpl}%</div>
+            <div style="color:#9ca3af;font-size:11px">${t.total} act.</div>
+          </div>
+        </div>`).join('')
+      : '<div style="color:#888;font-size:13px;padding:8px 0">Sin datos de cumplimiento aún.</div>'}
+    </div>
+    <!-- Resumen por estatus -->
+    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:16px">
+      <div style="font-weight:600;margin-bottom:12px;font-size:14px">📊 Distribución por Estado</div>
+      ${(()=>{
+        const estados = {};
+        actividades.forEach(a=>{ const e=a.estado||'Sin estado'; estados[e]=(estados[e]||0)+1; });
+        const total = actividades.length||1;
+        return Object.entries(estados).sort((a,b)=>b[1]-a[1]).map(([e,n])=>`
+          <div style="margin-bottom:10px">
+            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px">
+              <span>${escHtml(e)}</span><span style="font-weight:600">${n}</span>
+            </div>
+            <div style="background:#f3f4f6;border-radius:4px;height:6px">
+              <div style="background:${e==='Completada'?'#16a34a':e==='En Proceso'?'#2563eb':e==='Suspendida'?'#dc2626':'#d97706'};border-radius:4px;height:6px;width:${Math.round(n/total*100)}%"></div>
+            </div>
+          </div>`).join('');
+      })()}
+    </div>
+  </div>
+
+  <!-- Filtros tabla -->
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center">
+    <input type="date" id="csa-desde" class="input-sm" onchange="filtrarCtrl()" style="padding:6px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px"/>
+    <input type="date" id="csa-hasta" class="input-sm" onchange="filtrarCtrl()" style="padding:6px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px"/>
+    <select id="csa-trab" onchange="filtrarCtrl()" style="padding:6px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px">
+      <option value="">Todos los trabajadores</option>
+      ${trabajadores.map(t=>`<option value="${t.id}">${escHtml(`${t.nombres||''} ${t.apellidos||''}`.trim())}</option>`).join('')}
+    </select>
+    <select id="csa-rev" onchange="filtrarCtrl()" style="padding:6px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px">
+      <option value="">Todos los estatus</option>
+      <option value="Pendiente">⏳ Pendiente</option>
+      <option value="Aprobada">✅ Aprobada</option>
+      <option value="Rechazada">❌ Rechazada</option>
+    </select>
+    <select id="csa-estado" onchange="filtrarCtrl()" style="padding:6px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px">
+      <option value="">Todos los estados</option>
+      <option>Completada</option><option>En Proceso</option><option>Pendiente</option><option>Reprogramada</option><option>Suspendida</option>
+    </select>
+  </div>
+
+  <!-- Tabla actividades -->
+  <div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden">
+    <table style="width:100%;border-collapse:collapse;font-size:13px">
+      <thead style="background:#f9fafb">
+        <tr>${['Trabajador','Actividad','Fecha','Estado','Cumpl.%','Resultado','Revisión','Supervisor'].map(h=>`<th style="padding:10px 12px;text-align:left;font-weight:600;color:#374151;border-bottom:1px solid #e5e7eb">${h}</th>`).join('')}</tr>
+      </thead>
+      <tbody id="csa-tbody"></tbody>
+    </table>
+  </div>`;
+
+  // Guardar datos para filtrar sin re-fetch
+  window._csaData = { actividades, trabajadores };
+  filtrarCtrl();
+}
+
+window.filtrarCtrl = function() {
+  const { actividades=[], trabajadores=[] } = window._csaData||{};
+  const fDesde  = document.getElementById('csa-desde')?.value||'';
+  const fHasta  = document.getElementById('csa-hasta')?.value||'';
+  const fTrab   = document.getElementById('csa-trab')?.value||'';
+  const fRev    = document.getElementById('csa-rev')?.value||'';
+  const fEstado = document.getElementById('csa-estado')?.value||'';
+
+  const filtered = actividades.filter(a=>{
+    if (fTrab   && a.trabajador_id !== fTrab) return false;
+    if (fDesde  && a.fecha&&a.fecha.slice(0,10) < fDesde) return false;
+    if (fHasta  && a.fecha&&a.fecha.slice(0,10) > fHasta) return false;
+    if (fRev    && (a.estatus_revision||'Pendiente') !== fRev) return false;
+    if (fEstado && a.estado !== fEstado) return false;
+    return true;
+  });
+
+  const tbody = document.getElementById('csa-tbody');
+  if (!tbody) return;
+  if (!filtered.length) {
+    tbody.innerHTML = `<tr><td colspan="8" style="padding:20px;text-align:center;color:#888">Sin actividades con los filtros aplicados.</td></tr>`;
+    return;
+  }
+
+  const colorBadge = (v,map) => {
+    const c = map[v]||'#6b7280';
+    return `<span style="background:${c}22;color:${c};padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600">${escHtml(v||'—')}</span>`;
+  };
+  const estadoC = {'Completada':'#16a34a','En Proceso':'#2563eb','Suspendida':'#dc2626','Pendiente':'#d97706','Reprogramada':'#7c3aed'};
+  const revC    = {'Aprobada':'#16a34a','Rechazada':'#dc2626','Pendiente':'#d97706'};
+
+  tbody.innerHTML = filtered.slice(0,200).map(a=>{
+    const trab = trabajadores.find(t=>t.id===a.trabajador_id);
+    const sup  = trabajadores.find(t=>t.id===a.supervisor_id);
+    const nombre = trab?`${trab.nombres||''} ${trab.apellidos||''}`.trim():'—';
+    const supNom = sup?`${sup.nombres||''} ${sup.apellidos||''}`.trim():'—';
+    const cumpl  = a.porcentaje_cumplimiento!=null?a.porcentaje_cumplimiento+'%':'—';
+    const rev    = a.estatus_revision||'Pendiente';
+    return `<tr style="border-bottom:1px solid #f3f4f6">
+      <td style="padding:9px 12px;font-weight:500">${escHtml(nombre)}</td>
+      <td style="padding:9px 12px;max-width:200px">${escHtml(a.actividad||'—')}</td>
+      <td style="padding:9px 12px;white-space:nowrap">${a.fecha?a.fecha.slice(0,10):'—'}</td>
+      <td style="padding:9px 12px">${colorBadge(a.estado||'—',estadoC)}</td>
+      <td style="padding:9px 12px;font-weight:600;color:${a.porcentaje_cumplimiento>=80?'#16a34a':a.porcentaje_cumplimiento>=50?'#d97706':'#374151'}">${cumpl}</td>
+      <td style="padding:9px 12px;max-width:160px;color:#6b7280">${escHtml(a.resultado_obtenido||a.resultado||'—')}</td>
+      <td style="padding:9px 12px">${colorBadge(rev,revC)}</td>
+      <td style="padding:9px 12px;color:#6b7280">${escHtml(supNom)}</td>
+    </tr>`;
+  }).join('');
+};
 
 /* ─── LOGOUT ─── */
 async function doLogout() {
