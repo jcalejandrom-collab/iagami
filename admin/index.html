@@ -1355,10 +1355,9 @@ function renderTopbarUser() {
   const pbUrl = (window.__IAGAMI_CONFIG__ && window.__IAGAMI_CONFIG__.PB_URL) || '';
   if (user.avatar && user.id && pbUrl) {
     const src = `${pbUrl}/api/files/admins/${user.id}/${user.avatar}`;
-    avEl.style.backgroundImage = `url("${src}")`;
-    avEl.style.backgroundSize = 'cover';
-    avEl.style.backgroundPosition = 'center';
-    avEl.textContent = '';
+    avEl.style.backgroundImage = 'none';
+    avEl.innerHTML = `<img src="${src}" alt="${nombre}" style="width:100%;height:100%;object-fit:cover;object-position:center top;display:block">`;
+    avEl.title = nombre;
   } else {
     avEl.textContent = (nombre.trim()[0] || 'A').toUpperCase();
   }
