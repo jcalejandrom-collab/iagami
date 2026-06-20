@@ -1,6 +1,5 @@
 [
   {
-    "_note": "diagnosticos_ambientales — importar con Merge. El formulario público guarda datos en el campo JSON 'datos' + campos indexados clave.",
     "name": "diagnosticos_ambientales",
     "type": "base",
     "fields": [
@@ -22,7 +21,6 @@
     "deleteRule": "@request.auth.collectionName = \"admins\""
   },
   {
-    "_note": "denuncias_comunitarias — registro público de denuncias ambientales.",
     "name": "denuncias_comunitarias",
     "type": "base",
     "fields": [
@@ -42,7 +40,6 @@
     "deleteRule": "@request.auth.collectionName = \"admins\""
   },
   {
-    "_note": "Campos adicionales para consejos_comunales que el formulario envía pero no están en el schema actual.",
     "name": "consejos_comunales",
     "type": "base",
     "fields": [
@@ -50,8 +47,7 @@
       { "id":"txt_cc_e02","name":"resp_sala",    "type":"text" },
       { "id":"txt_cc_e03","name":"dir_detallada","type":"text" },
       { "id":"txt_cc_e04","name":"estatus",      "type":"text" },
-      { "id":"txt_cc_e05","name":"tipo",         "type":"text" },
-      { "id":"txt_cc_e06","name":"comunidad",    "type":"text" }
+      { "id":"txt_cc_e05","name":"tipo",         "type":"text" }
     ],
     "listRule":   "",
     "viewRule":   "",
@@ -60,15 +56,14 @@
     "deleteRule": "@request.auth.collectionName = \"admins\""
   },
   {
-    "_note": "Campos adicionales para comunas.",
     "name": "comunas",
     "type": "base",
     "fields": [
-      { "id":"txt_com_e01","name":"email",             "type":"text" },
-      { "id":"txt_com_e02","name":"num_consejos",      "type":"text" },
-      { "id":"txt_com_e03","name":"estatus",           "type":"text" },
-      { "id":"txt_com_e04","name":"tipo",              "type":"text" },
-      { "id":"txt_com_e05","name":"dir_detallada",     "type":"text" },
+      { "id":"txt_com_e01","name":"email",              "type":"text" },
+      { "id":"txt_com_e02","name":"num_consejos",       "type":"text" },
+      { "id":"txt_com_e03","name":"estatus",            "type":"text" },
+      { "id":"txt_com_e04","name":"tipo",               "type":"text" },
+      { "id":"txt_com_e05","name":"dir_detallada",      "type":"text" },
       { "id":"jsn_com_e06","name":"consejos_integrantes","type":"json" }
     ],
     "listRule":   "",
