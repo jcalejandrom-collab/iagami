@@ -2851,7 +2851,7 @@ async function loadSegObservaciones() {
     const act = s.expand?.actividad_id || {};
     const sup = s.expand?.supervisor_id || {};
     return `<tr>
-      <td>${esc(act.titulo||s.actividad_id||'—')}</td>
+      <td>${esc(s.actividad_titulo||s.actividad_id||'—')}</td>
       <td>${esc(`${sup.nombres||''} ${sup.apellidos||''}`.trim()||s.supervisor_id||'—')}</td>
       <td><span class="badge badge-gray">${esc(s.estado_anterior||'—')}</span></td>
       <td><span class="badge badge-blue">${esc(s.estado_nuevo||'—')}</span></td>
@@ -2880,8 +2880,11 @@ async function guardarObservacion() {
   const texto    = document.getElementById('obs-texto').value.trim();
   if (!texto) { SIGA.toast('Escribe una observación.','error'); return; }
   try {
+    const actData = _segActividades.find(a=>a.id===actId);
     await SIGA.create('seguimiento_actividades', {
-      actividad_id: actId, supervisor_id: U.id,
+      actividad_id: actId,
+      actividad_titulo: actData?.titulo || '',
+      supervisor_id: U.id,
       estado_anterior: estAntes, estado_nuevo: estNuevo,
       observacion: texto, porcentaje_avance: avance,
       fecha: new Date().toISOString().substring(0,10)
