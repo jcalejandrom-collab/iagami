@@ -1335,8 +1335,31 @@ input,select,textarea{font-family:inherit}
   const ok = await CMSDB.verifyToken();
   if (!ok) {
     window.location.replace('../index.html#login');
+    return;
   }
+  renderTopbarUser();
 })();
+
+/* Muestra el nombre y avatar reales del admin logueado en la barra superior */
+function renderTopbarUser() {
+  const user = CMSDB.getCurrentUser();
+  if (!user) return;
+  const nombre = user.name || user.email || 'Administrador';
+  const nameEl = document.querySelector('.topbar-user span');
+  if (nameEl) nameEl.textContent = nombre;
+  const avEl = document.querySelector('.topbar-avatar');
+  if (!avEl) return;
+  const pbUrl = (window.__IAGAMI_CONFIG__ && window.__IAGAMI_CONFIG__.PB_URL) || '';
+  if (user.avatar && user.id && pbUrl) {
+    const src = `${pbUrl}/api/files/admins/${user.id}/${user.avatar}`;
+    avEl.style.backgroundImage = `url("${src}")`;
+    avEl.style.backgroundSize = 'cover';
+    avEl.style.backgroundPosition = 'center';
+    avEl.textContent = '';
+  } else {
+    avEl.textContent = (nombre.trim()[0] || 'A').toUpperCase();
+  }
+}
 
 window.addEventListener('sigap:session-expired', () => {
   window.location.replace('../index.html#login');
