@@ -825,7 +825,7 @@ input,select,textarea{font-family:inherit}
     <div class="section" id="sec-consejos">
       <div class="page-header">
         <div><div class="page-title">🏘️ Consejos Comunales</div><div class="page-subtitle">Registro y gestión de consejos comunales del Municipio Iribarren</div></div>
-        <button class="btn btn-primary" onclick="openConsejoForm()">+ Nuevo Consejo Comunal</button>
+        <button class="btn btn-primary" onclick="openOrgModal('Consejo Comunal')">+ Nuevo Consejo Comunal</button>
       </div>
       <div class="toolbar">
         <input type="text" class="search-input" id="q-consejos" placeholder="Buscar por nombre, parroquia, comunidad..." oninput="renderConsejos()" style="flex:1;min-width:200px"/>
@@ -1306,7 +1306,7 @@ input,select,textarea{font-family:inherit}
           <div class="page-title">🏛️ Comunas</div>
           <div class="page-subtitle">Registro y gestión de comunas del Municipio Iribarren</div>
         </div>
-        <button class="btn-p" onclick="openComunaForm()">+ Nueva Comuna</button>
+        <button class="btn-p" onclick="openOrgModal('Comuna')">+ Nueva Comuna</button>
       </div>
       <div id="comunas-stats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px"></div>
       <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:16px">
@@ -2888,7 +2888,7 @@ async function renderConsejos() {
       <td>${escHtml(c.responsable||'-')}</td>
       <td>${escHtml(c.telefono||'-')}</td>
       <td><div style="display:flex;gap:4px">
-        <button class="btn btn-sm" onclick="openConsejoForm('${c.id}')" title="Editar">✏️</button>
+        <button class="btn btn-sm" onclick="openOrgModal('Consejo Comunal','${c.id}')" title="Editar">✏️</button>
         <button class="btn btn-sm" onclick="exportConsejoSinglePDF('${c.id}')" title="Descargar PDF" style="background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0">📥</button>
         <button class="btn btn-sm btn-danger" onclick="deleteConsejo('${c.id}')" title="Eliminar">🗑️</button>
       </div></td>
@@ -4236,7 +4236,7 @@ async function renderComunas() {
     <td style="text-align:center"><span class="badge badge-blue">${ccCount(c.id)}</span></td>
     <td><span class="badge ${c.estatus==='Activo'?'badge-green':'badge-red'}">${escHtml(c.estatus||'—')}</span></td>
     <td><div style="display:flex;gap:4px">
-      <button class="btn-icon" onclick="openComunaForm('${c.id}')" title="Editar">✏️</button>
+      <button class="btn-icon" onclick="openOrgModal('Comuna','${c.id}')" title="Editar">✏️</button>
       <button class="btn-icon" onclick="exportComunaSinglePDF('${c.id}')" title="Descargar PDF" style="background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0">📥</button>
       <button class="btn-icon danger" onclick="deleteComunaRec('${c.id}')" title="Eliminar">🗑️</button>
     </div></td>
@@ -4992,6 +4992,507 @@ async function doLogout() {
 /* ─── INIT ─── */
 showSection('dashboard');
 setMediaFilter('all');
+
+/* ══════════════════════════════════════════════════════════════
+   FORMULARIO UNIFICADO 9 PASOS — REGISTRAR ORGANIZACIÓN POPULAR
+   ══════════════════════════════════════════════════════════════ */
+let _orgStep = 1;
+let _orgType = 'Consejo Comunal'; // 'Comuna' | 'Consejo Comunal'
+let _orgEditId = ''; // id del registro si es edición
+let _orgDiagId = ''; // id del diagnostico_ambiental existente
+
+const ORG_STEPS = [
+  {num:1, label:'I Tipo'},
+  {num:2, label:'II Identificación'},
+  {num:3, label:'III Ubicación'},
+  {num:4, label:'IV Hídrico'},
+  {num:5, label:'V Ag. Servidas'},
+  {num:6, label:'VI Diagnóstico'},
+  {num:7, label:'VII Riesgos'},
+  {num:8, label:'VIII Gestión'},
+  {num:9, label:'IX Denuncia'}
+];
+
+function _orgStepHTML(step) {
+  const fld = (id, label, type='text', placeholder='', extra='') =>
+    `<div style="display:flex;flex-direction:column;gap:5px">
+       <label style="font-size:11px;font-weight:600;color:#6b7280;text-transform:uppercase">${label}</label>
+       <input type="${type}" id="org-${id}" placeholder="${placeholder}" ${extra} style="padding:9px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;outline:none;font-family:inherit"/>
+     </div>`;
+  const sel = (id, label, opts, extra='') =>
+    `<div style="display:flex;flex-direction:column;gap:5px">
+       <label style="font-size:11px;font-weight:600;color:#6b7280;text-transform:uppercase">${label}</label>
+       <select id="org-${id}" ${extra} style="padding:9px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;outline:none;background:#fff">
+         ${opts.map(o=>typeof o==='string'?`<option>${o}</option>`:`<option value="${o.v}">${o.t}</option>`).join('')}
+       </select>
+     </div>`;
+  const txt = (id, label, placeholder='') =>
+    `<div style="display:flex;flex-direction:column;gap:5px;grid-column:1/-1">
+       <label style="font-size:11px;font-weight:600;color:#6b7280;text-transform:uppercase">${label}</label>
+       <textarea id="org-${id}" rows="3" placeholder="${placeholder}" style="padding:9px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;outline:none;resize:vertical;font-family:inherit"></textarea>
+     </div>`;
+  const chk = (id, label, opts) =>
+    `<div style="display:flex;flex-direction:column;gap:6px;grid-column:1/-1">
+       <label style="font-size:11px;font-weight:600;color:#6b7280;text-transform:uppercase">${label}</label>
+       <div style="display:flex;flex-wrap:wrap;gap:8px">${opts.map(o=>`<label style="display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer"><input type="checkbox" name="${id}" value="${o}" style="cursor:pointer"/> ${o}</label>`).join('')}</div>
+     </div>`;
+  const rad = (id, label, opts) =>
+    `<div style="display:flex;flex-direction:column;gap:6px">
+       <label style="font-size:11px;font-weight:600;color:#6b7280;text-transform:uppercase">${label}</label>
+       <div style="display:flex;flex-wrap:wrap;gap:8px">${opts.map(o=>`<label style="display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer"><input type="radio" name="org-${id}" value="${o}" style="cursor:pointer"/> ${o}</label>`).join('')}</div>
+     </div>`;
+  const sec = t => `<div style="font-size:11px;font-weight:700;text-transform:uppercase;color:#1d6b3e;background:#f0fdf4;padding:6px 10px;border-radius:6px;margin:14px 0 10px;letter-spacing:.5px;grid-column:1/-1">${t}</div>`;
+  const grid2 = content => `<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">${content}</div>`;
+
+  switch(step) {
+    case 1: return `
+      <div class="sec-title" style="font-size:16px;font-weight:700;color:#1d6b3e;margin-bottom:16px">I · Tipo de Organización Popular</div>
+      <p style="font-size:13px;color:#6b7280;margin-bottom:16px">Seleccione el tipo de organización que desea registrar.</p>
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <label style="display:flex;align-items:center;gap:10px;padding:16px 24px;border:2px solid #d1d5db;border-radius:10px;cursor:pointer;font-size:15px;font-weight:600;transition:.2s" id="lbl-tipo-com" onclick="_orgSetTipo('Comuna')">
+          <input type="radio" name="org-tipo" value="Comuna" style="display:none"/> 🏛️ Comuna
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;padding:16px 24px;border:2px solid #d1d5db;border-radius:10px;cursor:pointer;font-size:15px;font-weight:600;transition:.2s" id="lbl-tipo-cc" onclick="_orgSetTipo('Consejo Comunal')">
+          <input type="radio" name="org-tipo" value="Consejo Comunal" style="display:none"/> 🏘️ Consejo Comunal
+        </label>
+      </div>`;
+
+    case 2: return `
+      <div style="font-size:16px;font-weight:700;color:#1d6b3e;margin-bottom:16px">II · Identificación</div>
+      ${grid2(`
+        ${fld('nombre','Nombre *','text','Nombre de la organización')}
+        ${fld('codigo','Código','text','Ej: COM-IRB-001')}
+        ${fld('rif','RIF','text','J-00000000-0')}
+        ${sel('estatus','Estatus',[{v:'Activo',t:'Activo'},{v:'Inactivo',t:'Inactivo'}])}
+        ${fld('responsable','Vocero/a Principal *','text','Nombre completo')}
+        ${fld('cedula','Cédula','text','V-12345678')}
+        ${fld('telefono','Teléfono','tel','+58 412 000-0000')}
+        ${fld('correo','Correo electrónico','email','correo@gmail.com')}
+        ${fld('num_familias','N° Familias','number','0')}
+        ${fld('num_habitantes','N° Habitantes','number','0')}
+        ${fld('fecha_constitucion','Fecha de constitución','date')}
+      `)}`;
+
+    case 3: return `
+      <div style="font-size:16px;font-weight:700;color:#1d6b3e;margin-bottom:16px">III · Ubicación Geográfica</div>
+      ${grid2(`
+        ${sel('parroquia','Parroquia *',[{v:'',t:'— Seleccionar —'},'Catedral','Concepción','El Cují','Buena Vista','Tamaca','Santa Rosa','Aguedo Felipe Alvarado','Dionisio Cisneros','Juárez','Juan de Villegas','Unión','Xaguas','Moran'])}
+        ${fld('municipio','Municipio','text','Iribarren')}
+        ${fld('estado_org','Estado','text','Lara')}
+        ${fld('comunidad','Comunidad/Sector','text','Nombre de la comunidad')}
+        <div style="grid-column:1/-1">${fld('direccion','Dirección completa','text','Calle, Urb., referencias...')}</div>
+        ${fld('lat','Latitud','number','10.0647','step="any"')}
+        ${fld('lng','Longitud','number','-69.3567','step="any"')}
+      `)}`;
+
+    case 4: return `
+      <div style="font-size:16px;font-weight:700;color:#1d6b3e;margin-bottom:16px">IV · Diagnóstico Hídrico</div>
+      ${grid2(`
+        ${sec('💧 Fuentes de Agua')}
+        ${rad('fuente_agua','¿Principal fuente de abastecimiento?',['Red pública (hidrant)','Pipa/camión cisterna','Pozo profundo','Quebrada/río','Lluvia/cosecha','Otra'])}
+        ${sec('🔧 Infraestructura de Agua Potable')}
+        ${rad('red_dist','Estado de la red de distribución',['Buena','Regular','Deteriorada','Inexistente'])}
+        ${rad('cobertura','Porcentaje de cobertura',['< 25%','25-50%','50-75%','> 75%'])}
+        ${rad('frecuencia','Frecuencia de suministro',['Diaria','Interdiaria','Semanal','Quincenal','Mensual o menos'])}
+        ${sec('⛏️ Pozos')}
+        ${fld('pozos_activos','Pozos activos','number','0')}
+        ${fld('pozos_inactivos','Pozos inactivos','number','0')}
+        ${rad('mant_pozos','¿Pozos con mantenimiento periódico?',['Sí','No'])}
+        ${rad('riesgo_pozos','¿Riesgo de contaminación de pozos?',['Sí','No'])}
+        ${txt('riesgo_pozos_desc','Explique el riesgo (si aplica)')}
+        ${sec('💦 Acuíferos')}
+        ${rad('acuiferos','¿Conoce acuíferos cercanos?',['Sí','No'])}
+        ${fld('acuiferos_txt','Nombre o ubicación aproximada (si aplica)','text','Nombre o ubicación')}
+        ${rad('proteg_acuiferos','¿Considera que están protegidos?',['Sí','No','No sabe'])}
+      `)}`;
+
+    case 5: return `
+      <div style="font-size:16px;font-weight:700;color:#1d6b3e;margin-bottom:16px">V · Aguas Servidas</div>
+      ${grid2(`
+        ${rad('aguas_estado','Estado del sistema de aguas servidas',['Buena','Regular','Colapsado','Inexistente'])}
+        ${rad('desbord','¿Desbordamientos frecuentes?',['Sí','No'])}
+        ${rad('descargas','¿Descargas directas a quebradas / ríos / terrenos?',['Sí','No'])}
+        ${txt('aguas_desc','Describa la situación del sistema de aguas servidas','Describa...')}
+      `)}`;
+
+    case 6: return `
+      <div style="font-size:16px;font-weight:700;color:#1d6b3e;margin-bottom:16px">VI · Diagnóstico Ambiental</div>
+      ${grid2(`
+        ${sec('🌫️ Contaminación Atmosférica')}
+        ${rad('cont_atm','¿Percibe contaminación atmosférica?',['Sí','No'])}
+        ${chk('org-cont-atm-src','¿Qué la genera?',['Vehículos','Quemas','Industria','Polvo','Otro'])}
+        ${txt('cont_atm_desc','Describa la contaminación atmosférica','Describa...')}
+        ${sec('💧 Contaminación del Agua')}
+        ${rad('cont_agua','¿Percibe contaminación de cuerpos de agua?',['Sí','No'])}
+        ${chk('org-cont-agua-src','¿Qué la genera?',['Aguas negras','Residuos sólidos','Industria','Agroquímicos','Otro'])}
+        ${txt('cont_agua_desc','Describa','Describa...')}
+        ${sec('🌱 Contaminación del Suelo')}
+        ${rad('cont_suelo','¿Percibe contaminación del suelo?',['Sí','No'])}
+        ${chk('org-cont-suelo-src','Causas',['Vertederos improvisados','Escombros','Hidrocarburos','Químicos','Otro'])}
+        ${txt('cont_suelo_desc','Explique','Explique...')}
+        ${sec('🔊 Contaminación Sónica')}
+        ${rad('cont_ruido','¿Percibe contaminación por ruido?',['Sí','No'])}
+        ${chk('org-cont-ruido-src','Fuentes',['Tráfico','Industria','Comercio','Fiestas/eventos','Otro'])}
+        ${txt('cont_ruido_desc','Explique','Explique...')}
+      `)}`;
+
+    case 7: return `
+      <div style="font-size:16px;font-weight:700;color:#1d6b3e;margin-bottom:16px">VII · Riesgos Ambientales</div>
+      ${grid2(`
+        ${chk('org-riesgos','¿Existen zonas vulnerables?',['Inundaciones','Deslizamientos','Sismos','Sequías','Contaminación de agua','Incendios forestales','Otro'])}
+        ${txt('riesgos_desc','Describa las zonas vulnerables y los riesgos identificados','Describa...')}
+      `)}`;
+
+    case 8: return `
+      <div style="font-size:16px;font-weight:700;color:#1d6b3e;margin-bottom:16px">VIII · Gestión Ambiental Comunitaria</div>
+      ${grid2(`
+        ${rad('brigada','¿Existe Brigada Ambiental?',['Sí','No'])}
+        ${rad('comite','¿Existe Comité Ambiental?',['Sí','No'])}
+        ${chk('org-jornadas','Jornadas realizadas',['Limpieza','Reforestación','Reciclaje','Educación ambiental','Otra'])}
+      `)}`;
+
+    case 9: return `
+      <div style="font-size:16px;font-weight:700;color:#1d6b3e;margin-bottom:16px">IX · Denuncia Ambiental</div>
+      ${grid2(`
+        ${rad('tiene_denuncia','¿Desea reportar una problemática ambiental?',['Sí','No'])}
+        <div id="org-sub-denuncia" style="grid-column:1/-1;display:none">
+          ${chk('org-denuncia-tipo','Tipo de denuncia',['Contaminación de agua','Contaminación del aire','Contaminación del suelo','Ruido','Tala ilegal','Quemas','Vertedero ilegal','Otro'])}
+          ${txt('denuncia_desc','Descripción detallada','Describa detalladamente la problemática ambiental...')}
+          ${fld('denuncia_ubic','Ubicación exacta','text','Dirección o referencia de ubicación')}
+          ${rad('urgencia','Nivel de urgencia',['Baja','Media','Alta','Crítica'])}
+        </div>
+      `)}`;
+  }
+  return '';
+}
+
+function _orgSetTipo(tipo) {
+  _orgType = tipo;
+  const lc = document.getElementById('lbl-tipo-com');
+  const lcc = document.getElementById('lbl-tipo-cc');
+  if (lc) lc.style.cssText = lc.style.cssText.replace(/border:[^;]+/,'') + (tipo==='Comuna'?';border:2px solid #1d6b3e;background:#f0fdf4;color:#1d6b3e':';border:2px solid #d1d5db;background:#fff;color:#111');
+  if (lcc) lcc.style.cssText = lcc.style.cssText.replace(/border:[^;]+/,'') + (tipo==='Consejo Comunal'?';border:2px solid #1d6b3e;background:#f0fdf4;color:#1d6b3e':';border:2px solid #d1d5db;background:#fff;color:#111');
+}
+
+function _orgV(id) {
+  const el = document.getElementById('org-'+id);
+  return el ? el.value.trim() : '';
+}
+function _orgRadio(name) {
+  const el = document.querySelector(`input[name="org-${name}"]:checked`);
+  return el ? el.value : '';
+}
+function _orgChecks(name) {
+  return Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(e=>e.value);
+}
+
+function _orgRenderStep() {
+  const body = document.getElementById('org-form-body');
+  if (!body) return;
+  body.innerHTML = _orgStepHTML(_orgStep);
+  // Wire denuncia toggle
+  if (_orgStep === 9) {
+    const radios = document.querySelectorAll('input[name="org-tiene_denuncia"]');
+    radios.forEach(r => r.addEventListener('change', () => {
+      const sub = document.getElementById('org-sub-denuncia');
+      if (sub) sub.style.display = r.value==='Sí'&&r.checked ? 'block' : 'none';
+    }));
+  }
+  // Restore tipo selection highlight
+  if (_orgStep === 1) setTimeout(() => _orgSetTipo(_orgType), 50);
+  // Fill saved values
+  _orgFillStep();
+  // Stepper
+  const track = document.getElementById('org-stepper');
+  if (track) {
+    track.innerHTML = ORG_STEPS.map((s,i) => `
+      ${i>0?`<div style="width:18px;height:2px;background:${s.num<=_orgStep?'#dcfce7':'#d4edd8'};margin:0 2px;flex-shrink:0;align-self:center"></div>`:''}
+      <div style="display:flex;align-items:center;gap:5px">
+        <div style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;
+          background:${s.num<_orgStep?'#dcfce7':s.num===_orgStep?'#1d6b3e':'#f0faf5'};
+          color:${s.num<_orgStep?'#166534':s.num===_orgStep?'#fff':'#4a8a6a'}">${s.num}</div>
+        <span style="font-size:10px;white-space:nowrap;font-weight:600;color:${s.num===_orgStep?'#1d6b3e':s.num<_orgStep?'#166534':'#4a8a6a'}">${s.label}</span>
+      </div>
+    `).join('');
+  }
+  // Counter & buttons
+  const counter = document.getElementById('org-step-counter');
+  if (counter) counter.textContent = `Paso ${_orgStep} de ${ORG_STEPS.length}`;
+  const prev = document.getElementById('btn-org-prev');
+  const next = document.getElementById('btn-org-next');
+  const save = document.getElementById('btn-org-save');
+  if (prev) prev.style.display = _orgStep > 1 ? 'inline-block' : 'none';
+  if (next) next.style.display = _orgStep < 9 ? 'inline-block' : 'none';
+  if (save) save.style.display = _orgStep === 9 ? 'inline-block' : 'none';
+}
+
+// Store step values in memory so they survive re-renders
+let _orgData = {};
+
+function _orgSaveStep() {
+  const d = _orgData;
+  if (_orgStep === 1) { d.tipo = _orgType; }
+  if (_orgStep === 2) {
+    ['nombre','codigo','rif','estatus','responsable','cedula','telefono','correo','num_familias','num_habitantes','fecha_constitucion'].forEach(f => d[f]=_orgV(f));
+  }
+  if (_orgStep === 3) {
+    ['parroquia','municipio','estado_org','comunidad','direccion','lat','lng'].forEach(f => d[f]=_orgV(f));
+    d.estado = d.estado_org;
+  }
+  if (_orgStep === 4) {
+    d.fuente_agua = _orgRadio('fuente_agua');
+    d.red_dist = _orgRadio('red_dist');
+    d.cobertura = _orgRadio('cobertura');
+    d.frecuencia = _orgRadio('frecuencia');
+    ['pozos_activos','pozos_inactivos','riesgo_pozos_desc','acuiferos_txt'].forEach(f=>d[f]=_orgV(f));
+    d.mant_pozos = _orgRadio('mant_pozos');
+    d.riesgo_pozos = _orgRadio('riesgo_pozos');
+    d.acuiferos = _orgRadio('acuiferos');
+    d.proteg_acuiferos = _orgRadio('proteg_acuiferos');
+  }
+  if (_orgStep === 5) {
+    d.aguas_estado = _orgRadio('aguas_estado');
+    d.desbord = _orgRadio('desbord');
+    d.descargas = _orgRadio('descargas');
+    d.aguas_desc = _orgV('aguas_desc');
+  }
+  if (_orgStep === 6) {
+    d.cont_atm = _orgRadio('cont_atm');
+    d.cont_atm_fuentes = _orgChecks('org-cont-atm-src').join(', ');
+    d.cont_atm_desc = _orgV('cont_atm_desc');
+    d.cont_agua = _orgRadio('cont_agua');
+    d.cont_agua_fuentes = _orgChecks('org-cont-agua-src').join(', ');
+    d.cont_agua_desc = _orgV('cont_agua_desc');
+    d.cont_suelo = _orgRadio('cont_suelo');
+    d.cont_suelo_fuentes = _orgChecks('org-cont-suelo-src').join(', ');
+    d.cont_suelo_desc = _orgV('cont_suelo_desc');
+    d.cont_ruido = _orgRadio('cont_ruido');
+    d.cont_ruido_fuentes = _orgChecks('org-cont-ruido-src').join(', ');
+    d.cont_ruido_desc = _orgV('cont_ruido_desc');
+  }
+  if (_orgStep === 7) {
+    d.zonas_vulnerables = _orgChecks('org-riesgos').join(', ');
+    d.riesgos_desc = _orgV('riesgos_desc');
+  }
+  if (_orgStep === 8) {
+    d.brigada = _orgRadio('brigada');
+    d.comite = _orgRadio('comite');
+    d.jornadas = _orgChecks('org-jornadas').join(', ');
+  }
+  if (_orgStep === 9) {
+    d.tiene_denuncia = _orgRadio('tiene_denuncia');
+    d.denuncia_tipo = _orgChecks('org-denuncia-tipo').join(', ');
+    d.denuncia_desc = _orgV('denuncia_desc');
+    d.denuncia_ubic = _orgV('denuncia_ubic');
+    d.urgencia = _orgRadio('urgencia');
+  }
+}
+
+function _orgFillStep() {
+  const d = _orgData;
+  const set = (id, val) => { const el=document.getElementById('org-'+id); if(el) el.value=val||''; };
+  const setRadio = (name, val) => { const el=document.querySelector(`input[name="org-${name}"][value="${val}"]`); if(el) el.checked=true; };
+  const setChecks = (name, vals) => {
+    const arr = vals ? vals.split(', ') : [];
+    document.querySelectorAll(`input[name="${name}"]`).forEach(c => { c.checked = arr.includes(c.value); });
+  };
+  if (_orgStep === 2) {
+    ['nombre','codigo','rif','responsable','cedula','telefono','correo','num_familias','num_habitantes','fecha_constitucion'].forEach(f=>set(f,d[f]));
+    setRadio('estatus', d.estatus||'Activo');
+  }
+  if (_orgStep === 3) {
+    ['parroquia','municipio','comunidad','direccion','lat','lng'].forEach(f=>set(f,d[f]));
+    set('estado_org', d.estado||d.estado_org||'Lara');
+    if (!d.municipio) set('municipio','Iribarren');
+  }
+  if (_orgStep === 4) {
+    setRadio('fuente_agua',d.fuente_agua); setRadio('red_dist',d.red_dist);
+    setRadio('cobertura',d.cobertura); setRadio('frecuencia',d.frecuencia);
+    setRadio('mant_pozos',d.mant_pozos); setRadio('riesgo_pozos',d.riesgo_pozos);
+    setRadio('acuiferos',d.acuiferos); setRadio('proteg_acuiferos',d.proteg_acuiferos);
+    ['pozos_activos','pozos_inactivos','riesgo_pozos_desc','acuiferos_txt'].forEach(f=>set(f,d[f]));
+  }
+  if (_orgStep === 5) {
+    setRadio('aguas_estado',d.aguas_estado); setRadio('desbord',d.desbord); setRadio('descargas',d.descargas);
+    set('aguas_desc',d.aguas_desc);
+  }
+  if (_orgStep === 6) {
+    setRadio('cont_atm',d.cont_atm); setChecks('org-cont-atm-src',d.cont_atm_fuentes); set('cont_atm_desc',d.cont_atm_desc);
+    setRadio('cont_agua',d.cont_agua); setChecks('org-cont-agua-src',d.cont_agua_fuentes); set('cont_agua_desc',d.cont_agua_desc);
+    setRadio('cont_suelo',d.cont_suelo); setChecks('org-cont-suelo-src',d.cont_suelo_fuentes); set('cont_suelo_desc',d.cont_suelo_desc);
+    setRadio('cont_ruido',d.cont_ruido); setChecks('org-cont-ruido-src',d.cont_ruido_fuentes); set('cont_ruido_desc',d.cont_ruido_desc);
+  }
+  if (_orgStep === 7) {
+    setChecks('org-riesgos',d.zonas_vulnerables); set('riesgos_desc',d.riesgos_desc);
+  }
+  if (_orgStep === 8) {
+    setRadio('brigada',d.brigada); setRadio('comite',d.comite); setChecks('org-jornadas',d.jornadas);
+  }
+  if (_orgStep === 9) {
+    setRadio('tiene_denuncia',d.tiene_denuncia);
+    setChecks('org-denuncia-tipo',d.denuncia_tipo);
+    ['denuncia_desc','denuncia_ubic'].forEach(f=>set(f,d[f]));
+    setRadio('urgencia',d.urgencia);
+    if (d.tiene_denuncia==='Sí') { const sub=document.getElementById('org-sub-denuncia'); if(sub) sub.style.display='block'; }
+  }
+}
+
+function openOrgModal(tipo, editId) {
+  _orgType = tipo || 'Consejo Comunal';
+  _orgEditId = editId || '';
+  _orgDiagId = '';
+  _orgStep = 1;
+  _orgData = { tipo: _orgType };
+  const modal = document.getElementById('modal-org');
+  if (modal) { modal.style.display = 'flex'; document.body.style.overflow = 'hidden'; }
+  const tit = document.getElementById('modal-org-titulo');
+  if (tit) tit.textContent = (editId ? 'Editar' : 'Registrar') + ' Organización Popular';
+  _orgRenderStep();
+  // Pre-fill if editing
+  if (editId) _orgLoadEdit(tipo, editId);
+}
+
+async function _orgLoadEdit(tipo, id) {
+  const col = tipo==='Comuna' ? 'comunas' : 'consejos_comunales';
+  const rec = await CMSDB.getOne(col, id).catch(()=>null);
+  if (!rec) return;
+  const d = _orgData;
+  // Basic fields
+  Object.assign(d, {
+    nombre: rec.nombre||'', codigo: rec.codigo||'', rif: rec.rif||'',
+    estatus: rec.estatus||'Activo', responsable: rec.responsable||'',
+    cedula: rec.cedula||'', telefono: rec.telefono||'', correo: rec.correo||rec.email||'',
+    num_familias: rec.num_familias||'', num_habitantes: rec.num_habitantes||'',
+    fecha_constitucion: rec.fecha_constitucion||'',
+    parroquia: rec.parroquia||'', municipio: rec.municipio||'Iribarren',
+    estado: rec.estado||'Lara', comunidad: rec.comunidad||rec.sector||'',
+    direccion: rec.direccion||'', lat: rec.lat||'', lng: rec.lng||''
+  });
+  // Diagnostic data from diagnosticos_ambientales
+  try {
+    const diags = await CMSDB.getAll('diagnosticos_ambientales');
+    const rif = rec.rif || rec.codigo || '';
+    const diag = diags.find(x => x.rif_org===rif || x.consejo_comunal===id);
+    if (diag) {
+      _orgDiagId = diag.id;
+      const datos = typeof diag.datos==='string' ? JSON.parse(diag.datos||'{}') : (diag.datos||{});
+      Object.assign(d, datos);
+    }
+  } catch(e) {}
+  // If currently on step 1, refresh
+  if (_orgStep === 1) { setTimeout(()=>{ _orgSetTipo(_orgType); }, 50); }
+}
+
+function closeOrgModal() {
+  const modal = document.getElementById('modal-org');
+  if (modal) modal.style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function orgNext() {
+  _orgSaveStep();
+  if (_orgStep < 9) { _orgStep++; _orgRenderStep(); }
+}
+
+function orgPrev() {
+  _orgSaveStep();
+  if (_orgStep > 1) { _orgStep--; _orgRenderStep(); }
+}
+
+async function saveOrgForm() {
+  _orgSaveStep();
+  const d = _orgData;
+  if (!d.nombre) { toast('El nombre es obligatorio', 'error'); return; }
+  const btn = document.getElementById('btn-org-save');
+  if (btn) { btn.disabled=true; btn.textContent='Guardando…'; }
+  try {
+    const col = _orgType==='Comuna' ? 'comunas' : 'consejos_comunales';
+    // Build main record
+    const rec = {
+      id: _orgEditId||undefined,
+      nombre: d.nombre, codigo: d.codigo, rif: d.rif,
+      estatus: d.estatus||'Activo', responsable: d.responsable,
+      cedula: d.cedula, telefono: d.telefono,
+      correo: d.correo, email: d.correo,
+      parroquia: d.parroquia, municipio: d.municipio||'Iribarren',
+      estado: d.estado||'Lara', comunidad: d.comunidad, sector: d.comunidad,
+      direccion: d.direccion, dir_detallada: d.direccion,
+      lat: d.lat, lng: d.lng,
+      num_familias: d.num_familias, num_habitantes: d.num_habitantes,
+      fecha_constitucion: d.fecha_constitucion,
+      // agua summary fields for comunas
+      aguas_estado: d.aguas_estado,
+      pozos_activos: String(parseInt(d.pozos_activos)||0),
+      pozos_inactivos: String(parseInt(d.pozos_inactivos)||0),
+      fecha_diagnostico: new Date().toISOString().slice(0,10)
+    };
+    if (d.lat && d.lng) rec.coordenadas = `${d.lat}, ${d.lng}`;
+    const saved = await CMSDB.save(col, rec);
+    // Build diagnostico record
+    const diagDatos = {
+      fuente_agua: d.fuente_agua, estado_red: d.red_dist,
+      cobertura: d.cobertura, frecuencia_suministro: d.frecuencia,
+      pozos_mantenimiento: d.mant_pozos, riesgo_cont_pozos: d.riesgo_pozos,
+      riesgo_pozos_desc: d.riesgo_pozos_desc, acuiferos: d.acuiferos,
+      acuiferos_txt: d.acuiferos_txt, proteg_acuiferos: d.proteg_acuiferos,
+      aguas_servidas: d.aguas_estado, aguas_desbord: d.desbord,
+      aguas_descargas: d.descargas, aguas_desc: d.aguas_desc,
+      cont_atmosferica: d.cont_atm, cont_atmosferica_fuentes: d.cont_atm_fuentes,
+      cont_atmosferica_desc: d.cont_atm_desc, cont_agua: d.cont_agua,
+      cont_agua_fuentes: d.cont_agua_fuentes, cont_agua_desc: d.cont_agua_desc,
+      cont_suelo: d.cont_suelo, cont_suelo_fuentes: d.cont_suelo_fuentes,
+      cont_suelo_desc: d.cont_suelo_desc, cont_sonica: d.cont_ruido,
+      cont_sonica_fuentes: d.cont_ruido_fuentes, cont_sonica_desc: d.cont_ruido_desc,
+      zonas_vulnerables: d.zonas_vulnerables, riesgos_desc: d.riesgos_desc,
+      brigada_ambiental: d.brigada, comite_ambiental: d.comite, jornadas: d.jornadas,
+      tiene_denuncia: d.tiene_denuncia, denuncia_tipo: d.denuncia_tipo,
+      denuncia_desc: d.denuncia_desc, denuncia_ubic: d.denuncia_ubic, urgencia: d.urgencia
+    };
+    const diagRec = {
+      id: _orgDiagId||undefined,
+      rif_org: d.rif || d.codigo || '',
+      consejo_comunal: _orgType==='Consejo Comunal' ? (saved.id||_orgEditId) : undefined,
+      tipo_org: _orgType,
+      datos: JSON.stringify(diagDatos)
+    };
+    if (!diagRec.id) delete diagRec.id;
+    if (!diagRec.consejo_comunal) delete diagRec.consejo_comunal;
+    await CMSDB.save('diagnosticos_ambientales', diagRec).catch(()=>{});
+    toast(_orgEditId ? 'Registro actualizado ✓' : 'Organización registrada ✓');
+    closeOrgModal();
+    if (_orgType==='Comuna') { CMSDB.clearCache(); renderComunas(); }
+    else { CMSDB.clearCache(); renderConsejos(); }
+  } catch(e) {
+    toast('Error al guardar: ' + (e.message||e), 'error');
+  } finally {
+    if (btn) { btn.disabled=false; btn.textContent='💾 Guardar'; }
+  }
+}
 </script>
+
+<!-- MODAL UNIFICADO 9 PASOS -->
+<div id="modal-org" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.5);overflow-y:auto;padding:20px;align-items:flex-start;justify-content:center">
+  <div style="max-width:800px;width:100%;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.3)">
+    <div style="background:linear-gradient(135deg,#1d6b3e,#2d9d5f);padding:24px;color:#fff;position:relative">
+      <div style="font-size:18px;font-weight:700;font-family:'Poppins',sans-serif" id="modal-org-titulo">Registrar Organización Popular</div>
+      <div style="font-size:13px;opacity:.85;margin-top:4px">Observatorio Ambiental Comunitario · IAGAMI · Municipio Iribarren</div>
+      <button onclick="closeOrgModal()" style="position:absolute;top:16px;right:16px;background:rgba(255,255,255,.2);border:none;color:#fff;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center">×</button>
+    </div>
+    <div style="padding:12px 24px 0;overflow-x:auto;border-bottom:1px solid #e2e8f0">
+      <div id="org-stepper" style="display:flex;align-items:center;min-width:max-content;padding-bottom:12px"></div>
+    </div>
+    <div style="padding:24px">
+      <div id="org-form-body"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:20px;padding-top:16px;border-top:1px solid #e2e8f0">
+        <span id="org-step-counter" style="font-size:12px;color:#64748b">Paso 1 de 9</span>
+        <div style="display:flex;gap:10px">
+          <button id="btn-org-prev" onclick="orgPrev()" style="display:none;padding:9px 20px;border:1px solid #d1d5db;border-radius:8px;background:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">← Anterior</button>
+          <button id="btn-org-next" onclick="orgNext()" style="padding:9px 20px;border:none;border-radius:8px;background:#1d6b3e;color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">Siguiente →</button>
+          <button id="btn-org-save" onclick="saveOrgForm()" style="display:none;padding:9px 20px;border:none;border-radius:8px;background:#1d6b3e;color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">💾 Guardar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 </body>
 </html>
