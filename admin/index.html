@@ -719,21 +719,28 @@ input,select,textarea{font-family:inherit}
       <!-- LISTA -->
       <div id="multas-list-view">
         <div class="toolbar">
-          <div class="toolbar-search"><input type="text" placeholder="Buscar por cédula, RIF, nombre, infracción..." id="multas-search" oninput="renderMultas()"></div>
+          <div class="toolbar-search"><input type="text" placeholder="Buscar por cédula, RIF, nombre, infracción, referencia..." id="multas-search" oninput="renderMultas()"></div>
           <select id="multas-estado" onchange="renderMultas()">
             <option value="">Todos los estados</option>
-            <option>Pendiente</option><option>En Proceso</option><option>Pagada</option><option>Anulada</option>
+            <option>Pendiente</option><option>En Proceso</option><option>Pagada</option><option>Liquidada</option><option>Anulada</option>
           </select>
           <select id="multas-pub" onchange="renderMultas()">
             <option value="">Publicadas y privadas</option>
             <option value="1">Solo publicadas</option>
             <option value="0">Solo privadas</option>
           </select>
+          <button class="btn" onclick="exportarMultasCSV()" title="Exportar todos a CSV">📥 CSV</button>
+          <button class="btn" onclick="exportarMultasCSVporDoc()" title="Exportar por documento">📄 Por Doc.</button>
         </div>
+        <div style="display:flex;gap:8px;margin-bottom:8px">
+          <button class="btn" style="font-size:12px;padding:4px 10px" onclick="switchMultasTab('expedientes')" id="tab-expedientes">⚖️ Expedientes</button>
+          <button class="btn" style="font-size:12px;padding:4px 10px;background:#f1f5f9" onclick="switchMultasTab('pagos')" id="tab-pagos">💳 Pagos Reportados</button>
+        </div>
+        <div id="multas-tab-expedientes">
         <div class="table-wrap">
           <table>
             <thead><tr>
-              <th>Expediente</th><th>Documento</th><th>Token TUC</th><th>Nombre / Empresa</th>
+              <th></th><th>Expediente</th><th>Documento</th><th>Token TUC</th><th>Nombre / Empresa</th>
               <th>Infracción</th><th>Monto</th><th>Estado</th>
               <th>Pública</th><th>Acciones</th>
             </tr></thead>
@@ -741,6 +748,28 @@ input,select,textarea{font-family:inherit}
           </table>
         </div>
         <div id="multas-pagination" class="pagination"></div>
+        </div>
+        <div id="multas-tab-pagos" style="display:none">
+          <div class="toolbar" style="margin-bottom:8px">
+            <div class="toolbar-search"><input type="text" placeholder="Buscar por expediente, referencia, nombre..." id="pagos-search" oninput="renderPagosReportados()"></div>
+            <select id="pagos-estado" onchange="renderPagosReportados()">
+              <option value="">Todos</option>
+              <option value="pendiente_verificacion">Pendiente verificación</option>
+              <option value="verificado">Verificado</option>
+              <option value="rechazado">Rechazado</option>
+            </select>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr>
+                <th>Código RPG</th><th>Expediente</th><th>Nombre</th><th>Banco</th>
+                <th>Referencia</th><th>Monto</th><th>Fecha Pago</th><th>Estado</th><th>Acciones</th>
+              </tr></thead>
+              <tbody id="pagos-tbody"></tbody>
+            </table>
+          </div>
+          <div id="pagos-pagination" class="pagination"></div>
+        </div>
       </div>
       <!-- FORMULARIO -->
       <div id="multas-form-view" style="display:none">
@@ -1978,11 +2007,20 @@ function estadoBadge(estado) {
     'Vigente':'badge-green', 'Completado':'badge-blue', 'Planificado':'badge-blue',
     borrador:'badge-gray', inactivo:'badge-gray', 'Suspendido':'badge-gray',
     'Vencido':'badge-red', 'Pendiente':'badge-yellow', 'En Proceso':'badge-yellow',
-    'Pagada':'badge-green', 'Anulada':'badge-gray', programado:'badge-blue',
-    cancelado:'badge-red'
+    'Pagada':'badge-green', 'Liquidada':'badge-green', 'Anulada':'badge-gray',
+    programado:'badge-blue', cancelado:'badge-red',
+    pendiente_verificacion:'badge-yellow', verificado:'badge-green', rechazado:'badge-red'
   };
   const cls = map[estado] || 'badge-gray';
   return `<span class="badge ${cls}">${estado||'—'}</span>`;
+}
+
+function semaforo(estado) {
+  if (!estado) return '🔴';
+  const e = estado.toLowerCase();
+  if (e.includes('liquid') || e.includes('pagad') || e.includes('verif') && !e.includes('pend')) return '🟢';
+  if (e.includes('proceso') || e.includes('verificacion') || e.includes('pend_verif')) return '🟡';
+  return '🔴';
 }
 
 function tendenciaBadge(t) {
@@ -2579,6 +2617,7 @@ async function renderMultas() {
   tbody.innerHTML = !page.length
     ? emptyState('No hay multas registradas')
     : page.map(m => `<tr>
+      <td style="font-size:18px;text-align:center" title="${escHtml(m.estado||'Pendiente')}">${semaforo(m.estado)}</td>
       <td style="font-family:monospace;font-size:12px">${escHtml(m.expediente||'—')}</td>
       <td style="font-size:12px">${escHtml(m.documento||'—')}</td>
       <td style="font-family:monospace;font-size:11px;white-space:nowrap">
@@ -2591,6 +2630,7 @@ async function renderMultas() {
       <td>${pubBadge(m.publicado)}</td>
       <td><div style="display:flex;gap:4px;flex-wrap:wrap">
         <button class="btn btn-sm" onclick="openMultaForm('${m.id}')" title="Editar">✏️</button>
+        <button class="btn btn-sm" onclick="pdfMulta('${m.id}')" title="Descargar PDF">📄</button>
         <button class="btn btn-sm" onclick="toggleMultaPublicado('${m.id}')" title="${m.publicado?'Despublicar':'Publicar'}">${m.publicado?'🔒':'📢'}</button>
         <button class="btn btn-sm btn-danger" onclick="deleteMulta('${m.id}')" title="Eliminar">🗑️</button>
       </div></td>
@@ -2675,6 +2715,140 @@ async function saveMultas() {
   toast(item.id ? 'Multa actualizada' : 'Multa registrada');
   closeMultaForm();
   renderMultas();
+}
+
+function switchMultasTab(tab) {
+  document.getElementById('multas-tab-expedientes').style.display = tab==='expedientes' ? '' : 'none';
+  document.getElementById('multas-tab-pagos').style.display = tab==='pagos' ? '' : 'none';
+  document.getElementById('tab-expedientes').style.background = tab==='expedientes' ? '' : '#f1f5f9';
+  document.getElementById('tab-pagos').style.background = tab==='pagos' ? '' : '#f1f5f9';
+  if (tab==='pagos') renderPagosReportados();
+}
+
+async function renderPagosReportados() {
+  const tbody = document.getElementById('pagos-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:20px">Cargando...</td></tr>';
+  let items = await CMSDB.getAll('pagos').catch(()=>[]);
+  const search = (document.getElementById('pagos-search')||{}).value||'';
+  const estado = (document.getElementById('pagos-estado')||{}).value||'';
+  if (search) {
+    const q = search.toLowerCase();
+    items = items.filter(p =>
+      (p.expediente||'').toLowerCase().includes(q) ||
+      (p.referencia||'').toLowerCase().includes(q) ||
+      (p.nombre||'').toLowerCase().includes(q) ||
+      (p.codigo||'').toLowerCase().includes(q)
+    );
+  }
+  if (estado) items = items.filter(p => p.estado === estado);
+  items.sort((a,b) => (b.created||b.created_at||'').localeCompare(a.created||a.created_at||''));
+  const PB_URL = (window.__IAGAMI_CONFIG__&&window.__IAGAMI_CONFIG__.PB_URL)||'https://api.iagami.online';
+  const bancos = {'0102':'BDV','0105':'Mercantil','0134':'Banesco','0104':'Venezolano','0108':'BBVA','0114':'Bancaribe','0134':'Banesco','0172':'Bancamiga','0175':'Bicentenario','0177':'Banfanb'};
+  if (!items.length) {
+    tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state"><div class="empty-icon">💳</div>No hay pagos reportados aún.</div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = items.map(p => `<tr>
+    <td style="font-family:monospace;font-size:11px">${escHtml(p.codigo||'—')}</td>
+    <td style="font-family:monospace;font-size:12px">${escHtml(p.expediente||'—')}</td>
+    <td>${escHtml(p.nombre||'—')}</td>
+    <td style="font-size:12px">${escHtml(bancos[p.banco]||p.banco||'—')}</td>
+    <td style="font-family:monospace">${escHtml(p.referencia||'—')}</td>
+    <td style="font-weight:600">${p.monto ? 'Bs. '+Number(p.monto).toLocaleString('es-VE',{minimumFractionDigits:2}) : '—'}</td>
+    <td style="font-size:12px">${escHtml(p.fecha_pago||'—')}</td>
+    <td>${estadoBadge(p.estado||'pendiente_verificacion')}</td>
+    <td><div style="display:flex;gap:4px;flex-wrap:wrap">
+      ${p.comprobante ? `<a href="${PB_URL}/api/files/pagos/${p.id}/${encodeURIComponent(p.comprobante)}" target="_blank" class="btn btn-sm" title="Ver comprobante">🖼️</a>` : ''}
+      <button class="btn btn-sm" style="background:#dcfce7;color:#166534" onclick="verificarPago('${p.id}','verificado')" title="Aprobar">✅</button>
+      <button class="btn btn-sm btn-danger" onclick="verificarPago('${p.id}','rechazado')" title="Rechazar">❌</button>
+    </div></td>
+  </tr>`).join('');
+}
+
+async function verificarPago(id, estado) {
+  const p = await CMSDB.getOne('pagos', id).catch(()=>null);
+  if (!p) { toast('No se encontró el pago','error'); return; }
+  await CMSDB.save('pagos', { id, estado });
+  toast(estado==='verificado' ? '✅ Pago aprobado' : '❌ Pago rechazado');
+  CMSDB.clearCache('pagos');
+  renderPagosReportados();
+}
+
+async function pdfMulta(id) {
+  const m = await CMSDB.getOne('multas', id).catch(()=>null);
+  if (!m) { toast('No se encontró el expediente','error'); return; }
+  const html = `<!DOCTYPE html><html><head><meta charset="utf-8">
+  <title>Expediente ${escHtml(m.expediente||id)}</title>
+  <style>body{font-family:Arial,sans-serif;padding:40px;color:#1a3d2b;max-width:700px;margin:0 auto}
+  h1{color:#1a472a;border-bottom:3px solid #1a472a;padding-bottom:8px;font-size:20px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:20px 0}
+  .field label{font-size:10px;color:#666;font-weight:700;text-transform:uppercase;display:block}
+  .field p{margin:2px 0;font-size:14px;font-weight:500}
+  .estado{display:inline-block;padding:4px 14px;border-radius:20px;font-size:13px;font-weight:700;
+    background:${(m.estado==='Liquidada'||m.estado==='Pagada')?'#dcfce7':m.estado==='Pendiente'?'#fee2e2':'#fef3c7'};
+    color:${(m.estado==='Liquidada'||m.estado==='Pagada')?'#166534':m.estado==='Pendiente'?'#991b1b':'#92400e'}}
+  .footer{margin-top:50px;border-top:1px solid #ddd;padding-top:14px;font-size:11px;color:#888}
+  @media print{body{padding:20px}}</style></head><body>
+  <h1>⚖️ Expediente de Multa Ambiental — IAGAMI</h1>
+  <p><strong>N° Expediente:</strong> ${escHtml(m.expediente||'—')} &nbsp;|&nbsp;
+     <strong>Fecha:</strong> ${escHtml(m.fecha||'—')} &nbsp;|&nbsp;
+     Estado: <span class="estado">${escHtml(m.estado||'Pendiente')}</span></p>
+  <div class="grid">
+    <div class="field"><label>Infractor / Empresa</label><p>${escHtml(m.nombre||'—')}</p></div>
+    <div class="field"><label>Cédula / RIF</label><p>${escHtml(m.documento||'—')}</p></div>
+    <div class="field"><label>Tipo de Infracción</label><p>${escHtml(m.tipo||'—')}</p></div>
+    <div class="field"><label>Monto</label><p>Bs. ${m.monto?Number(m.monto).toLocaleString('es-VE',{minimumFractionDigits:2}):'—'}</p></div>
+    <div class="field"><label>Token TUC</label><p style="font-family:monospace;font-size:12px">${escHtml(m.token_tuc||'—')}</p></div>
+    <div class="field"><label>Publicado</label><p>${m.publicado?'Sí — Visible al público':'No — Privado'}</p></div>
+  </div>
+  ${m.descripcion?`<p><strong>Descripción de la infracción:</strong></p><div style="background:#f8f9fa;padding:12px;border-radius:6px;font-size:13px;line-height:1.6">${escHtml(m.descripcion)}</div>`:''}
+  ${m.observaciones?`<p style="margin-top:12px"><strong>Observaciones:</strong></p><div style="background:#fffbeb;padding:12px;border-radius:6px;font-size:13px">${escHtml(m.observaciones)}</div>`:''}
+  <div class="footer">Documento generado por el sistema SIGAP — IAGAMI · Instituto Autónomo de Gestión Ambiental del Municipio Iribarren · Barquisimeto, Estado Lara</div>
+  </body></html>`;
+  const win = window.open('','_blank');
+  win.document.write(html);
+  win.document.close();
+  win.print();
+}
+
+async function exportarMultasCSV() {
+  const items = await CMSDB.getAll('multas').catch(()=>[]);
+  if (!items.length) { toast('No hay multas para exportar','error'); return; }
+  const cols = ['expediente','documento','nombre','tipo','monto','fecha','estado','token_tuc','publicado','descripcion','observaciones'];
+  const header = cols.join(',');
+  const rows = items.map(m => cols.map(c => {
+    const v = m[c]===undefined||m[c]===null?'':String(m[c]);
+    return `"${v.replace(/"/g,'""')}"`;
+  }).join(','));
+  const csv = [header, ...rows].join('\n');
+  const blob = new Blob(['﻿'+csv], {type:'text/csv;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `multas_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  toast('CSV descargado');
+}
+
+async function exportarMultasCSVporDoc() {
+  const doc = prompt('Ingresa la cédula o RIF para filtrar:');
+  if (!doc) return;
+  const items = await CMSDB.getAll('multas').catch(()=>[]);
+  const filtrados = items.filter(m => (m.documento||'').toLowerCase().includes(doc.toLowerCase().trim()));
+  if (!filtrados.length) { toast('No se encontraron multas para ese documento','error'); return; }
+  const cols = ['expediente','documento','nombre','tipo','monto','fecha','estado','token_tuc'];
+  const header = cols.join(',');
+  const rows = filtrados.map(m => cols.map(c => {
+    const v = m[c]===undefined||m[c]===null?'':String(m[c]);
+    return `"${v.replace(/"/g,'""')}"`;
+  }).join(','));
+  const csv = [header, ...rows].join('\n');
+  const blob = new Blob(['﻿'+csv], {type:'text/csv;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `multas_${doc.replace(/[^a-z0-9]/gi,'_')}.csv`;
+  a.click();
+  toast(`${filtrados.length} multa(s) exportada(s)`);
 }
 
 async function toggleMultaPublicado(id) {
