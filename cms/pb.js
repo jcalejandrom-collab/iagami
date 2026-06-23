@@ -66,6 +66,14 @@ const CMSDB = (function () {
   }
 
   /* ─── GET ALL (con paginación automática) ─── */
+  async function _fetchPage(coleccion, page, perPage, sort, headers, signal) {
+    const res = await fetch(
+      `${PB_URL}/api/collections/${coleccion}/records?page=${page}&perPage=${perPage}&sort=${sort}`,
+      { headers, signal }
+    );
+    return res;
+  }
+
   async function getAll(coleccion) {
     const cached = _cacheGet(coleccion);
     if (cached) return cached;
@@ -81,23 +89,32 @@ const CMSDB = (function () {
       const MAX_ITEMS = 1000;
       let allItems = [];
       let totalPages = 1;
+      // Fallback sort orders: try -created first, then id, then no sort
+      const sortCandidates = ['-created', 'id', ''];
 
       do {
         const token = getToken();
         const headers = { 'ngrok-skip-browser-warning': '1' };
         if (token) headers['Authorization'] = token;
 
-        const res = await fetch(
-          `${PB_URL}/api/collections/${coleccion}/records?page=${page}&perPage=${perPage}&sort=-created`,
-          { headers, signal }
-        );
+        let res = null;
+        for (const sort of sortCandidates) {
+          const url = sort
+            ? `${PB_URL}/api/collections/${coleccion}/records?page=${page}&perPage=${perPage}&sort=${sort}`
+            : `${PB_URL}/api/collections/${coleccion}/records?page=${page}&perPage=${perPage}`;
+          res = await fetch(url, { headers, signal });
+          if (res.status !== 400) break;
+        }
 
         if (res.status === 404) {
           console.warn(`[SIGAP] Colección "${coleccion}" no existe en PocketBase`);
           return [];
         }
         _handleAuthError(res.status);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        if (!res.ok) {
+          const body = await res.json().catch(()=>({}));
+          throw new Error(`HTTP ${res.status}: ${body.message||JSON.stringify(body)}`);
+        }
 
         const data = await res.json();
         allItems = allItems.concat(data.items || []);
