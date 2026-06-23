@@ -4323,114 +4323,143 @@ async function deleteComunaRec(id) {
   catch(e) { toast('Error: '+e.message,'error'); }
 }
 
-function _fichaComunaHTML(c) {
+function _renderDatos(datos) {
+  if (!datos) return '';
+  let d = datos;
+  if (typeof d === 'string') { try { d = JSON.parse(d); } catch(e) { return `<div class="campo full"><span class="val">${escHtml(datos)}</span></div>`; } }
+  if (typeof d !== 'object') return '';
+  const arr = (v) => Array.isArray(v) ? v.join(', ') : (v||'—');
+  const si  = (v) => v===true||v==='si'||v==='Sí'||v==='sí'||v===1?'Sí':'No';
+  const rows = [
+    ['Fuente principal de agua',         arr(d.fuente_agua)],
+    ['Estado de la red de distribución', d.estado_red],
+    ['Porcentaje de cobertura',          d.cobertura],
+    ['Frecuencia de suministro',         d.frecuencia_suministro],
+    ['Pozos activos',                    d.pozos_activos],
+    ['Pozos inactivos',                  d.pozos_inactivos],
+    ['Pozos con mantenimiento periódico',si(d.pozos_mantenimiento)],
+    ['Riesgo de contaminación de pozos', si(d.riesgo_cont_pozos)],
+    ['Acuíferos cercanos',               si(d.acuiferos)],
+    ['Acuíferos protegidos',             si(d.acuiferos_protegidos)],
+    ['Situación aguas servidas',         d.aguas_servidas||arr(d.tipo_aguas_servidas)],
+    ['Contaminación atmosférica',        si(d.cont_atmosferica)],
+    ['Fuentes de contaminación atm.',    arr(d.cont_atmosferica_fuentes)],
+    ['Descripción contaminación atm.',   d.cont_atmosferica_desc],
+    ['Contaminación del agua',           si(d.cont_agua)],
+    ['Contaminación del suelo',          si(d.cont_suelo)],
+    ['Contaminación sónica',             si(d.cont_sonica)],
+    ['Zonas vulnerables',                arr(d.zonas_vulnerables)],
+    ['Descripción de riesgos',           d.riesgos_desc||d.riesgos],
+    ['Brigada Ambiental',                si(d.brigada_ambiental)],
+    ['Comité Ambiental',                 si(d.comite_ambiental)],
+    ['Jornadas realizadas',              arr(d.jornadas)],
+    ['Denuncia ambiental',               si(d.denuncia_ambiental)],
+    ['Descripción de denuncia',          d.denuncia_desc],
+  ].filter(([,v]) => v && v !== '—' && v !== 'No' && v !== 'undefined' && v !== 'null');
+  if (!rows.length) return '';
+  return rows.map(([l,v]) => `<div class="campo"><span class="lbl">${escHtml(l)}</span><span class="val">${escHtml(String(v||'—'))}</span></div>`).join('');
+}
+
+function _fichaComunaHTML(c, diag) {
   const v = (val, fb) => escHtml(String(val||'')||fb||'—');
   const estColor = c.estatus==='Activo'?'#15803d':'#dc2626';
   const estBg    = c.estatus==='Activo'?'#dcfce7':'#fee2e2';
-  const aguaColor= c.aguas_estado==='Buena'?'#15803d':c.aguas_estado==='Regular'?'#92400e':'#dc2626';
-  const aguaBg   = c.aguas_estado==='Buena'?'#dcfce7':c.aguas_estado==='Regular'?'#fef3c7':'#fee2e2';
+  const d = diag || {};
+  const datos = d.datos || {};
   return `<div class="ficha">
     <div class="ficha-header">
       <div>
-        <div class="ficha-titulo">${v(c.nombre)} <span style="font-size:10px;font-weight:400;color:#a7d4ba">${v(c.codigo)}</span></div>
+        <div class="ficha-titulo">${v(c.nombre)} <span style="font-size:10px;font-weight:400;color:#a7d4ba">${v(c.codigo||c.rif)}</span></div>
         <div class="ficha-sub">${v(c.parroquia)} · ${v(c.municipio,'Iribarren')} · ${v(c.estado,'Lara')}</div>
       </div>
       <span style="background:${estBg};color:${estColor};padding:3px 12px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap">${v(c.estatus)}</span>
     </div>
-    <div class="sec-titulo">📍 Identificación y Ubicación</div>
+    <div class="sec-titulo">📍 I · Identificación y Ubicación</div>
     <div class="grid3">
       <div class="campo"><span class="lbl">Código</span><span class="val">${v(c.codigo)}</span></div>
-      <div class="campo"><span class="lbl">RIF</span><span class="val">${v(c.rif)}</span></div>
+      <div class="campo"><span class="lbl">RIF</span><span class="val">${v(c.rif||d.rif_org)}</span></div>
       <div class="campo"><span class="lbl">Parroquia</span><span class="val">${v(c.parroquia)}</span></div>
       <div class="campo"><span class="lbl">Municipio</span><span class="val">${v(c.municipio,'Iribarren')}</span></div>
       <div class="campo"><span class="lbl">Estado</span><span class="val">${v(c.estado,'Lara')}</span></div>
       <div class="campo"><span class="lbl">N° Consejos asociados</span><span class="val">${v(c.num_consejos)}</span></div>
       <div class="campo full"><span class="lbl">Dirección</span><span class="val">${v(c.direccion||c.dir_detallada)}</span></div>
       <div class="campo"><span class="lbl">Coordenadas GPS</span><span class="val">${v(c.coordenadas)}</span></div>
+      <div class="campo"><span class="lbl">Fecha de registro</span><span class="val">${v(d.fecha_registro||c.fecha_diagnostico)}</span></div>
     </div>
-    <div class="sec-titulo">👤 Responsable</div>
+    <div class="sec-titulo">👤 II · Responsable</div>
     <div class="grid3">
-      <div class="campo"><span class="lbl">Nombre del responsable</span><span class="val">${v(c.responsable)}</span></div>
+      <div class="campo"><span class="lbl">Responsable / Vocero</span><span class="val">${v(c.responsable)}</span></div>
       <div class="campo"><span class="lbl">Cédula</span><span class="val">${v(c.cedula)}</span></div>
       <div class="campo"><span class="lbl">Teléfono</span><span class="val">${v(c.telefono)}</span></div>
       <div class="campo"><span class="lbl">Correo electrónico</span><span class="val">${v(c.correo||c.email)}</span></div>
     </div>
-    <div class="sec-titulo">💧 Diagnóstico de Agua y Saneamiento</div>
+    <div class="sec-titulo">💧 IV · Diagnóstico Hídrico y Agua</div>
     <div class="grid3">
-      <div class="campo"><span class="lbl">Estado general del agua</span><span class="val" style="font-weight:700;color:${aguaColor};background:${aguaBg};padding:1px 8px;border-radius:10px;display:inline-block">${v(c.aguas_estado)}</span></div>
-      <div class="campo"><span class="lbl">Pozos activos</span><span class="val">${v(c.pozos_activos,'0')}</span></div>
-      <div class="campo"><span class="lbl">Pozos inactivos</span><span class="val">${v(c.pozos_inactivos,'0')}</span></div>
-      <div class="campo"><span class="lbl">Redes consolidadas (km)</span><span class="val">${v(c.redes_consolidadas,'0')}</span></div>
-      <div class="campo"><span class="lbl">Redes no consolidadas (km)</span><span class="val">${v(c.redes_no_consolidadas,'0')}</span></div>
-      <div class="campo"><span class="lbl">Sistemas de bombeo</span><span class="val">${v(c.sistemas_bombeo,'0')}</span></div>
-      <div class="campo"><span class="lbl">Situación aguas servidas</span><span class="val">${v(c.aguas_servidas)}</span></div>
-      <div class="campo"><span class="lbl">Fecha del diagnóstico</span><span class="val">${v(c.fecha_diagnostico)}</span></div>
-    </div>
-    <div class="sec-titulo">🌿 Diagnóstico Ambiental</div>
-    <div class="grid3">
-      <div class="campo"><span class="lbl">Manejo de desechos sólidos</span><span class="val">${v(c.desechos_solidos)}</span></div>
-      <div class="campo"><span class="lbl">Áreas degradadas (ha)</span><span class="val">${v(c.areas_degradadas,'0')}</span></div>
-      <div class="campo"><span class="lbl">Áreas reforestadas (ha)</span><span class="val">${v(c.areas_reforestadas,'0')}</span></div>
-      <div class="campo full"><span class="lbl">Riesgos ambientales identificados</span><span class="val">${v(c.riesgos)}</span></div>
-      <div class="campo full"><span class="lbl">Necesidades prioritarias</span><span class="val">${v(c.necesidades_prioritarias)}</span></div>
+      <div class="campo"><span class="lbl">Fuente de agua</span><span class="val">${v(d.fuente_agua)}</span></div>
+      <div class="campo"><span class="lbl">Cobertura</span><span class="val">${v(d.cobertura||c.cobertura)}</span></div>
+      <div class="campo"><span class="lbl">Pozos activos</span><span class="val">${v(d.pozos_activos||c.pozos_activos,'0')}</span></div>
+      <div class="campo"><span class="lbl">Pozos inactivos</span><span class="val">${v(d.pozos_inactivos||c.pozos_inactivos,'0')}</span></div>
+      <div class="campo"><span class="lbl">Estado del agua</span><span class="val">${v(d.aguas_estado||c.aguas_estado)}</span></div>
+      ${_renderDatos(datos)}
     </div>
   </div>`;
 }
 
-function _buildComunasPDFHtml(comunas, titulo, subtitulo) {
+function _buildComunasPDFHtml(comunas, diags, titulo, subtitulo) {
   const fecha = new Date().toLocaleDateString('es-VE',{day:'2-digit',month:'long',year:'numeric'});
-  const fichas = comunas.map(c => _fichaComunaHTML(c)).join('');
+  const diagMap = {};
+  if (Array.isArray(diags)) diags.forEach(d => { if (d.rif_org) diagMap[d.rif_org] = d; });
+  const fichas = comunas.map(c => _fichaComunaHTML(c, diagMap[c.rif])).join('');
   return `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"/>
   <title>${escHtml(titulo)} — IAGAMI</title>
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
     body{font-family:Arial,sans-serif;font-size:10px;color:#1a1a1a;background:#f0f4f0;padding:14px}
     .doc-header{display:flex;align-items:center;gap:14px;background:#fff;border-bottom:3px solid #1d6b3e;padding:12px 16px;border-radius:10px 10px 0 0}
-    .doc-logo{font-size:28px}
-    .doc-org h1{font-size:14px;font-weight:700;color:#0d2d1a;margin-bottom:2px}
-    .doc-org p{font-size:9px;color:#4a8a6a}
-    .doc-meta{font-size:9px;color:#555;background:#f0fdf4;padding:7px 16px;border:1px solid #c8e6d4;border-top:none;margin-bottom:14px;border-radius:0 0 8px 8px}
-    .doc-meta b{color:#1d6b3e}
+    .doc-logo{font-size:28px}.doc-org h1{font-size:14px;font-weight:700;color:#0d2d1a;margin-bottom:2px}.doc-org p{font-size:9px;color:#4a8a6a}
+    .doc-meta{font-size:9px;color:#555;background:#f0fdf4;padding:7px 16px;border:1px solid #c8e6d4;border-top:none;margin-bottom:14px;border-radius:0 0 8px 8px}.doc-meta b{color:#1d6b3e}
     .ficha{background:#fff;border:1px solid #c8e6d4;border-radius:10px;margin-bottom:16px;overflow:hidden;page-break-inside:avoid}
     .ficha-header{display:flex;justify-content:space-between;align-items:center;gap:12px;background:#0d2d1a;padding:9px 14px}
-    .ficha-titulo{font-size:12px;font-weight:700;color:#fff}
-    .ficha-sub{font-size:9px;color:#a7d4ba;margin-top:2px}
+    .ficha-titulo{font-size:12px;font-weight:700;color:#fff}.ficha-sub{font-size:9px;color:#a7d4ba;margin-top:2px}
     .sec-titulo{font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#1d6b3e;background:#f0fdf4;padding:4px 14px;border-top:1px solid #c8e6d4;border-bottom:1px solid #e0ede6}
     .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;padding:4px 10px 2px}
-    .campo{padding:4px 6px;border-bottom:1px dotted #dde8e0}
-    .campo.full{grid-column:1/-1}
+    .campo{padding:4px 6px;border-bottom:1px dotted #dde8e0}.campo.full{grid-column:1/-1}
     .lbl{display:block;font-size:7.5px;font-weight:700;text-transform:uppercase;color:#6b7280;margin-bottom:1px}
     .val{display:block;font-size:9.5px;color:#1a1a1a;min-height:12px}
     .footer{font-size:8px;color:#888;text-align:center;border-top:1px solid #dde8e0;padding-top:8px;margin-top:12px}
     @media print{body{background:#fff;padding:5px}@page{size:A4 portrait;margin:10mm}.ficha{page-break-inside:avoid;margin-bottom:12px}}
   </style></head><body>
   <div class="doc-header"><div class="doc-logo">🌿</div><div class="doc-org"><h1>IAGAMI — Instituto de Asuntos de la Gestión Ambiental del Municipio Iribarren</h1><p>Estado Lara · Venezuela · iagami.online</p></div></div>
-  <div class="doc-meta"><b>Reporte:</b> ${escHtml(titulo)} &nbsp;·&nbsp; <b>Filtro:</b> ${escHtml(subtitulo)} &nbsp;·&nbsp; <b>Total:</b> ${comunas.length} comuna(s) &nbsp;·&nbsp; <b>Fecha:</b> ${fecha}</div>
+  <div class="doc-meta"><b>Reporte:</b> ${escHtml(titulo)} &nbsp;·&nbsp; <b>Filtro:</b> ${escHtml(subtitulo)} &nbsp;·&nbsp; <b>Total:</b> ${comunas.length} &nbsp;·&nbsp; <b>Fecha:</b> ${fecha}</div>
   ${fichas||'<p style="text-align:center;color:#888;padding:30px">Sin registros</p>'}
-  <div class="footer">Documento generado por el Sistema IAGAMI · ${fecha} · ${comunas.length} comuna(s)</div>
+  <div class="footer">Generado por el Sistema IAGAMI · ${fecha} · ${comunas.length} comuna(s)</div>
   <script>window.onload=function(){setTimeout(function(){window.print();},500);}<\/script>
   </body></html>`;
 }
 
 async function exportComunasPDF() {
-  const search  = (document.getElementById('q-comunas')||{}).value||'';
-  const parFil  = (document.getElementById('f-comunas-par')||{}).value||'';
-  const estFil  = (document.getElementById('f-comunas-est')||{}).value||'';
+  const search = (document.getElementById('q-comunas')||{}).value||'';
+  const parFil = (document.getElementById('f-comunas-par')||{}).value||'';
+  const estFil = (document.getElementById('f-comunas-est')||{}).value||'';
   let data = await CMSDB.getAll('comunas');
   if (!Array.isArray(data)) { toast('Error al obtener datos','error'); return; }
-  if (search)  { const q=search.toLowerCase(); data=data.filter(c=>(c.nombre||'').toLowerCase().includes(q)||(c.rif||'').toLowerCase().includes(q)||(c.responsable||'').toLowerCase().includes(q)); }
-  if (parFil)  data = data.filter(c=>c.parroquia===parFil);
-  if (estFil)  data = data.filter(c=>c.estatus===estFil);
+  if (search) { const q=search.toLowerCase(); data=data.filter(c=>(c.nombre||'').toLowerCase().includes(q)||(c.rif||'').toLowerCase().includes(q)||(c.responsable||'').toLowerCase().includes(q)); }
+  if (parFil) data = data.filter(c=>c.parroquia===parFil);
+  if (estFil) data = data.filter(c=>c.estatus===estFil);
   if (!data.length) { toast('No hay registros para exportar','warning'); return; }
+  let diags = [];
+  try { diags = await CMSDB.getAll('diagnosticos_ambientales'); } catch(e) {}
   const subtitulo = [parFil||'Todas las parroquias', estFil||'Todos los estados'].join(' · ');
-  _openPDFWindow(_buildComunasPDFHtml(data, 'Comunas', subtitulo));
+  _openPDFWindow(_buildComunasPDFHtml(data, diags, 'Comunas', subtitulo));
 }
 
 async function exportComunaSinglePDF(id) {
   if (!id) return;
   const c = await CMSDB.getOne('comunas', id);
   if (!c) { toast('Registro no encontrado','error'); return; }
-  _openPDFWindow(_buildComunasPDFHtml([c], `Comuna: ${c.nombre||id}`, `Parroquia: ${c.parroquia||'—'}`));
+  let diags = [];
+  try { diags = await CMSDB.getAll('diagnosticos_ambientales'); } catch(e) {}
+  _openPDFWindow(_buildComunasPDFHtml([c], diags, `Comuna: ${c.nombre||id}`, `Parroquia: ${c.parroquia||'—'}`));
 }
 
 /* ════════════════════════════════════════
