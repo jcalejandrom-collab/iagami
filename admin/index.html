@@ -5440,26 +5440,36 @@ async function saveOrgForm() {
   if (btn) { btn.disabled=true; btn.textContent='Guardando…'; }
   try {
     const col = _orgType==='Comuna' ? 'comunas' : 'consejos_comunales';
-    // Build main record
+    // Build main record — omit empty optional fields to avoid PocketBase type errors
+    const num = v => { const n = parseFloat(v); return isNaN(n) ? null : n; };
+    const str = v => (v && String(v).trim()) || null;
     const rec = {
-      id: _orgEditId||undefined,
-      nombre: d.nombre, codigo: d.codigo, rif: d.rif,
-      estatus: d.estatus||'Activo', responsable: d.responsable,
-      cedula: d.cedula, telefono: d.telefono,
-      correo: d.correo, email: d.correo,
-      parroquia: d.parroquia, municipio: d.municipio||'Iribarren',
-      estado: d.estado||'Lara', comunidad: d.comunidad, sector: d.comunidad,
-      direccion: d.direccion, dir_detallada: d.direccion,
-      lat: d.lat, lng: d.lng,
-      num_familias: d.num_familias, num_habitantes: d.num_habitantes,
-      fecha_constitucion: d.fecha_constitucion,
-      // agua summary fields for comunas
-      aguas_estado: d.aguas_estado,
-      pozos_activos: String(parseInt(d.pozos_activos)||0),
-      pozos_inactivos: String(parseInt(d.pozos_inactivos)||0),
+      nombre: d.nombre.trim(),
+      estatus: d.estatus||'Activo',
+      responsable: str(d.responsable),
+      parroquia: str(d.parroquia),
+      municipio: d.municipio||'Iribarren',
+      estado: d.estado||'Lara',
       fecha_diagnostico: new Date().toISOString().slice(0,10)
     };
-    if (d.lat && d.lng) rec.coordenadas = `${d.lat}, ${d.lng}`;
+    if (_orgEditId) rec.id = _orgEditId;
+    if (str(d.codigo))  rec.codigo  = str(d.codigo);
+    if (str(d.rif))     rec.rif     = str(d.rif);
+    if (str(d.cedula))  rec.cedula  = str(d.cedula);
+    if (str(d.telefono)) rec.telefono = str(d.telefono);
+    if (str(d.correo))  { rec.correo = str(d.correo); rec.email = str(d.correo); }
+    if (str(d.comunidad)) { rec.comunidad = str(d.comunidad); rec.sector = str(d.comunidad); }
+    if (str(d.direccion)) { rec.direccion = str(d.direccion); rec.dir_detallada = str(d.direccion); }
+    if (num(d.lat) !== null && num(d.lng) !== null) { rec.lat = num(d.lat); rec.lng = num(d.lng); rec.coordenadas = `${d.lat}, ${d.lng}`; }
+    if (num(d.num_familias) !== null) rec.num_familias = num(d.num_familias);
+    if (num(d.num_habitantes) !== null) rec.num_habitantes = num(d.num_habitantes);
+    if (str(d.fecha_constitucion)) rec.fecha_constitucion = str(d.fecha_constitucion);
+    if (str(d.aguas_estado)) rec.aguas_estado = str(d.aguas_estado);
+    const pa = parseInt(d.pozos_activos)||0;
+    const pi = parseInt(d.pozos_inactivos)||0;
+    if (pa) rec.pozos_activos = String(pa);
+    if (pi) rec.pozos_inactivos = String(pi);
+    if (_orgType==='Comuna' && d.num_consejos) rec.num_consejos = str(d.num_consejos);
     const saved = await CMSDB.save(col, rec);
     // Build diagnostico record
     const diagDatos = {
@@ -5498,6 +5508,7 @@ async function saveOrgForm() {
     if (_orgType==='Comuna') { CMSDB.clearCache(); renderComunas(); }
     else { CMSDB.clearCache(); renderConsejos(); }
   } catch(e) {
+    console.error('[saveOrgForm] error:', e);
     toast('Error al guardar: ' + (e.message||e), 'error');
   } finally {
     if (btn) { btn.disabled=false; btn.textContent='💾 Guardar'; }
