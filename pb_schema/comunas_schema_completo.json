@@ -1,0 +1,33 @@
+[
+  {
+    "name": "comunas",
+    "type": "base",
+    "fields": [
+      { "name": "nombre",        "type": "text", "required": true },
+      { "name": "codigo",        "type": "text" },
+      { "name": "rif",           "type": "text" },
+      { "name": "responsable",   "type": "text" },
+      { "name": "cedula",        "type": "text" },
+      { "name": "telefono",      "type": "text" },
+      { "name": "correo",        "type": "text" },
+      { "name": "email",         "type": "text" },
+      { "name": "parroquia",     "type": "text" },
+      { "name": "municipio",     "type": "text" },
+      { "name": "estado",        "type": "text" },
+      { "name": "direccion",     "type": "text" },
+      { "name": "dir_detallada", "type": "text" },
+      { "name": "coordenadas",   "type": "text" },
+      { "name": "lat",           "type": "text" },
+      { "name": "lng",           "type": "text" },
+      { "name": "num_consejos",  "type": "text" },
+      { "name": "estatus",       "type": "text" },
+      { "name": "tipo",          "type": "text" },
+      { "name": "consejos_integrantes", "type": "json" }
+    ],
+    "listRule":   "",
+    "viewRule":   "",
+    "createRule": "",
+    "updateRule": "",
+    "deleteRule": "@request.auth.collectionName = \"admins\""
+  }
+]

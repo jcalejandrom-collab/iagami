@@ -4240,14 +4240,22 @@ async function saveComuna() {
   });
   item.parroquia=(document.getElementById('cm-parroquia')||{}).value||'';
   item.estatus=(document.getElementById('cm-estatus')||{}).value||'Activo';
-  item.num_consejos=parseInt((document.getElementById('cm-num_consejos')||{}).value||'0')||0;
+  item.num_consejos=String(parseInt((document.getElementById('cm-num_consejos')||{}).value||'0')||0);
   item.municipio='Iribarren'; item.estado='Lara';
+  item.email=item.correo||'';
+  item.dir_detallada=item.direccion||'';
   if (item.coordenadas) {
     const m=String(item.coordenadas).split(/[,;]/).map(s=>parseFloat(s.trim()));
-    if (m.length===2&&!isNaN(m[0])&&!isNaN(m[1])) { item.lat=m[0]; item.lng=m[1]; }
+    if (m.length===2&&!isNaN(m[0])&&!isNaN(m[1])) { item.lat=String(m[0]); item.lng=String(m[1]); }
   }
-  try { await CMSDB.save('comunas',item); toast(comunaFormId?'Comuna actualizada':'Comuna registrada'); closeComunaForm(); }
-  catch(e) { toast('Error: '+e.message,'error'); }
+  try {
+    await CMSDB.save('comunas',item);
+    toast(comunaFormId?'Comuna actualizada':'Comuna registrada');
+    closeComunaForm();
+  } catch(e) {
+    toast('Error al guardar: '+e.message,'error');
+    console.error('[saveComuna]', e);
+  }
 }
 
 async function deleteComunaRec(id) {
