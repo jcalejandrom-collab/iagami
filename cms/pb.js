@@ -91,6 +91,7 @@ const CMSDB = (function () {
       let totalPages = 1;
       // Fallback sort orders: try -created first, then id, then no sort
       const sortCandidates = ['-created', 'id', ''];
+      let workingSort = null; // cache the sort that works
 
       do {
         const token = getToken();
@@ -98,12 +99,13 @@ const CMSDB = (function () {
         if (token) headers['Authorization'] = token;
 
         let res = null;
-        for (const sort of sortCandidates) {
+        const sortsToTry = workingSort !== null ? [workingSort] : sortCandidates;
+        for (const sort of sortsToTry) {
           const url = sort
             ? `${PB_URL}/api/collections/${coleccion}/records?page=${page}&perPage=${perPage}&sort=${sort}`
             : `${PB_URL}/api/collections/${coleccion}/records?page=${page}&perPage=${perPage}`;
           res = await fetch(url, { headers, signal });
-          if (res.status !== 400) break;
+          if (res.status !== 400) { workingSort = sort; break; }
           const errBody = await res.clone().json().catch(()=>({}));
           console.error(`[SIGAP] ${coleccion} sort="${sort}" → 400:`, errBody.message||JSON.stringify(errBody));
         }
