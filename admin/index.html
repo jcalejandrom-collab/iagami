@@ -4203,10 +4203,6 @@ async function renderComunas() {
   const parFil  = (document.getElementById('f-comunas-par')||{}).value||'';
   const estFil  = (document.getElementById('f-comunas-est')||{}).value||'';
   let data = await CMSDB.getAll('comunas');
-  // Filtra registros sin nombre (vacíos) y los elimina silenciosamente
-  const vacios = data.filter(c=>c.id && (!c.nombre||c.nombre.trim()===''));
-  for(const v of vacios){ try{ await CMSDB.deleteRecord('comunas',v.id); }catch(e){} }
-  if(vacios.length>0){ CMSDB.clearCache(); data=await CMSDB.getAll('comunas'); }
   if (!Array.isArray(data)) data = [];
   const consejos = await CMSDB.getAll('consejos_comunales');
   const ccCount = id => Array.isArray(consejos) ? consejos.filter(c=>c.comuna===id).length : 0;
