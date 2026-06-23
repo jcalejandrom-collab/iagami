@@ -298,7 +298,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 
 /* ===== MAGAZINE NEWS GRID ===== */
 .news-grid-magazine{display:grid!important;grid-template-columns:2fr 1fr!important;gap:16px!important}
-.news-grid-magazine .news-card:first-child .news-img{height:220px}
+.news-grid-magazine .news-card:first-child .news-img{height:280px}
 @media(max-width:700px){.news-grid-magazine{grid-template-columns:1fr!important}}
 
 /* ===== PREMIUM FOOTER ===== */
@@ -341,8 +341,8 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 .news-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
 .news-card{background:#fff;border:1px solid #d4edd8;border-radius:13px;overflow:hidden;cursor:pointer;transition:.2s;display:block;text-decoration:none}
 .news-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(29,107,62,.1);border-color:#a8dfc0}
-.news-img{height:115px;display:flex;align-items:center;justify-content:center;font-size:36px;position:relative;overflow:hidden}
-.news-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.news-img{height:200px;display:flex;align-items:center;justify-content:center;font-size:36px;position:relative;overflow:hidden;background:#f0fdf4}
+.news-img img{width:100%;height:100%;object-fit:contain;position:absolute;inset:0}
 .news-body{padding:13px}
 .news-cat{font-size:10px;font-weight:700;background:#e8f5ee;color:#1d6b3e;border-radius:20px;padding:2px 9px;display:inline-block;margin-bottom:6px}
 .news-title{font-size:12px;font-weight:600;color:#1a3d2b;line-height:1.45;margin-bottom:5px}
@@ -355,7 +355,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 .proj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
 .proj-card{background:#fff;border:1px solid #d4edd8;border-radius:13px;overflow:hidden;transition:.2s;display:block;text-decoration:none}
 .proj-card:hover{box-shadow:0 6px 20px rgba(29,107,62,.1);border-color:#a8dfc0}
-.proj-img{height:80px;display:flex;align-items:center;justify-content:center;font-size:28px}
+.proj-img{height:160px;display:flex;align-items:center;justify-content:center;font-size:28px;background:#f0fdf4}
 .proj-body{padding:13px}
 .ps{display:inline-block;font-size:10px;font-weight:700;border-radius:20px;padding:2px 9px;margin-bottom:6px}
 .ps-exec{background:#dbeafe;color:#1e40af}
@@ -1700,7 +1700,7 @@ async function renderHomeNoticias() {
     const imgUrl = (n.imagen && n.id && (n.collectionName || n.collectionId)) ? `${PB}/api/files/${n.collectionName||n.collectionId}/${n.id}/${n.imagen}` : '';
     return `<a class="news-card" href="noticias/index.html">
       <div class="news-img" style="background:${bgMap[n.categoria] || '#e8f5ee'}">
-        ${imgUrl ? `<img src="${escHtml(imgUrl)}" alt="${escHtml(n.titulo)}" loading="lazy" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0"/>` : ''}
+        ${imgUrl ? `<img src="${escHtml(imgUrl)}" alt="${escHtml(n.titulo)}" loading="lazy" style="width:100%;height:100%;object-fit:contain;position:absolute;inset:0"/>` : ''}
         ${icon}
       </div>
       <div class="news-body">
@@ -1736,7 +1736,7 @@ async function renderHomeProyectos() {
     const imgUrl = (p.imagen && p.id && (p.collectionName || p.collectionId)) ? `${PB}/api/files/${p.collectionName||p.collectionId}/${p.id}/${p.imagen}` : '';
     return `<a class="proj-card" href="proyectos/index.html">
       <div class="proj-img" style="background:${gradMap[p.estado] || 'linear-gradient(135deg,#f1f5f9,#e2e8f0)'};position:relative;overflow:hidden">
-        ${imgUrl ? `<img src="${escHtml(imgUrl)}" alt="${escHtml(p.nombre)}" loading="lazy" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0"/>` : proyIcon(p.nombre)}
+        ${imgUrl ? `<img src="${escHtml(imgUrl)}" alt="${escHtml(p.nombre)}" loading="lazy" style="width:100%;height:100%;object-fit:contain;position:absolute;inset:0"/>` : proyIcon(p.nombre)}
       </div>
       <div class="proj-body">
         <span class="ps ${escHtml(cls)}">${escHtml(label)}</span>
@@ -1799,7 +1799,7 @@ async function renderHomeRevista() {
     const _rawBg = firstBlock?.color_fondo || '';
     const bg = /^#[0-9a-fA-F]{3,8}$/.test(_rawBg) ? _rawBg : '#1d6b3e';
     const coverHtml = r.portada_url
-      ? `<img src="${escHtml(r.portada_url)}" alt="${escHtml(r.titulo)}" style="width:100%;height:100%;object-fit:cover;display:block" loading="lazy"/>`
+      ? `<img src="${escHtml(r.portada_url)}" alt="${escHtml(r.titulo)}" style="width:100%;height:100%;object-fit:contain;display:block" loading="lazy"/>`
       : `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:16px;text-align:center">
            <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.6);letter-spacing:.1em;margin-bottom:6px">EDICIÓN Nº ${r.numero_edicion}</div>
            <div style="font-family:'Poppins',sans-serif;font-size:14px;font-weight:800;color:#fff;line-height:1.25">${r.titulo}</div>
