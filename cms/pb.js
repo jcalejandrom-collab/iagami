@@ -89,8 +89,9 @@ const CMSDB = (function () {
       const MAX_ITEMS = 1000;
       let allItems = [];
       let totalPages = 1;
-      // Fallback sort orders: try -created first, then id, then no sort
-      const sortCandidates = ['-created', 'id', ''];
+      // Algunas colecciones legacy (ej: comunas) no soportan sort=-created
+      const noSortCollections = ['comunas'];
+      const sortCandidates = noSortCollections.includes(coleccion) ? [''] : ['-created', 'id', ''];
       let workingSort = null; // cache the sort that works
 
       do {
