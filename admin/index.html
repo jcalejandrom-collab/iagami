@@ -5436,36 +5436,32 @@ async function saveOrgForm() {
   if (btn) { btn.disabled=true; btn.textContent='Guardando…'; }
   try {
     const col = _orgType==='Comuna' ? 'comunas' : 'consejos_comunales';
-    // Build main record — omit empty optional fields to avoid PocketBase type errors
-    const num = v => { const n = parseFloat(v); return isNaN(n) ? null : n; };
-    const str = v => (v && String(v).trim()) || null;
+    // Build main record — all TEXT NOT NULL DEFAULT '' in comunas, so send '' for empty
+    const s = v => String(v||'').trim();
     const rec = {
-      nombre: d.nombre.trim(),
-      estatus: d.estatus||'Activo',
-      responsable: str(d.responsable),
-      parroquia: str(d.parroquia),
-      municipio: d.municipio||'Iribarren',
-      estado: d.estado||'Lara',
+      nombre: s(d.nombre),
+      estatus: s(d.estatus)||'Activo',
+      responsable: s(d.responsable),
+      parroquia: s(d.parroquia),
+      municipio: s(d.municipio)||'Iribarren',
+      estado: s(d.estado)||'Lara',
+      correo: s(d.correo),
+      cedula: s(d.cedula),
+      telefono: s(d.telefono),
+      codigo: s(d.codigo),
+      rif: s(d.rif),
+      comunidad: s(d.comunidad),
+      sector: s(d.comunidad),
+      direccion: s(d.direccion),
+      lat: s(d.lat),
+      lng: s(d.lng),
+      aguas_estado: s(d.aguas_estado),
+      pozos_activos: s(d.pozos_activos),
+      pozos_inactivos: s(d.pozos_inactivos),
       fecha_diagnostico: new Date().toISOString().slice(0,10)
     };
     if (_orgEditId) rec.id = _orgEditId;
-    if (str(d.codigo))  rec.codigo  = str(d.codigo);
-    if (str(d.rif))     rec.rif     = str(d.rif);
-    if (str(d.cedula))  rec.cedula  = str(d.cedula);
-    if (str(d.telefono)) rec.telefono = str(d.telefono);
-    if (str(d.correo))  { rec.correo = str(d.correo); rec.email = str(d.correo); }
-    if (str(d.comunidad)) { rec.comunidad = str(d.comunidad); rec.sector = str(d.comunidad); }
-    if (str(d.direccion)) { rec.direccion = str(d.direccion); rec.dir_detallada = str(d.direccion); }
-    if (num(d.lat) !== null && num(d.lng) !== null) { rec.lat = num(d.lat); rec.lng = num(d.lng); rec.coordenadas = `${d.lat}, ${d.lng}`; }
-    if (num(d.num_familias) !== null) rec.num_familias = num(d.num_familias);
-    if (num(d.num_habitantes) !== null) rec.num_habitantes = num(d.num_habitantes);
-    if (str(d.fecha_constitucion)) rec.fecha_constitucion = str(d.fecha_constitucion);
-    if (str(d.aguas_estado)) rec.aguas_estado = str(d.aguas_estado);
-    const pa = parseInt(d.pozos_activos)||0;
-    const pi = parseInt(d.pozos_inactivos)||0;
-    if (pa) rec.pozos_activos = String(pa);
-    if (pi) rec.pozos_inactivos = String(pi);
-    if (_orgType==='Comuna' && d.num_consejos) rec.num_consejos = str(d.num_consejos);
+    if (d.lat && d.lng) rec.coordenadas = `${d.lat}, ${d.lng}`;
     const saved = await CMSDB.save(col, rec);
     // Build diagnostico record
     const diagDatos = {
