@@ -2791,21 +2791,30 @@ async function verDenuncia(id) {
     <div style="margin-bottom:12px"><label style="font-size:11px;color:#666;font-weight:600">UBICACIÓN</label><p style="margin:2px 0;font-size:14px">${escHtml(d.ubicacion||d.direccion||'—')}</p></div>
     <div style="margin-bottom:16px"><label style="font-size:11px;color:#666;font-weight:600">DESCRIPCIÓN</label><p style="margin:4px 0;font-size:14px;line-height:1.5;white-space:pre-wrap;background:#f8f9fa;padding:10px;border-radius:6px">${escHtml(d.descripcion||d.contenido||'—')}</p></div>
     ${(()=>{
+      const PB_URL = (window.__IAGAMI_CONFIG__&&window.__IAGAMI_CONFIG__.PB_URL)||'https://api.iagami.online';
+      const evs = Array.isArray(d.evidencias) ? d.evidencias : (d.evidencias ? [d.evidencias] : []);
       let adj = d.adjuntos;
       if (typeof adj === 'string') { try { adj = JSON.parse(adj); } catch(e) { adj = []; } }
-      if (!Array.isArray(adj) || !adj.length) return '';
-      const iconos = {'image/jpeg':'🖼️','image/png':'🖼️','image/gif':'🖼️','application/pdf':'📄','video/mp4':'🎥','video/quicktime':'🎥'};
-      const fmtSize = b => b>1048576 ? (b/1048576).toFixed(1)+'MB' : b>1024 ? (b/1024).toFixed(0)+'KB' : b+'B';
-      return `<div style="margin-bottom:16px">
-        <label style="font-size:11px;color:#666;font-weight:600">EVIDENCIAS ADJUNTAS (${adj.length})</label>
-        <div style="margin-top:6px;display:flex;flex-direction:column;gap:6px">
-          ${adj.map(f=>`<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:#f1f5f9;border-radius:6px;font-size:13px">
-            <span style="font-size:18px">${iconos[f.type]||'📎'}</span>
+      if (!Array.isArray(adj)) adj = [];
+      if (!evs.length && !adj.length) return '';
+      const iconos = n => /\.(pdf)$/i.test(n)?'📄':/\.(jpe?g|png|gif|webp)$/i.test(n)?'🖼️':'📎';
+      const fmtSize = b => b>1048576?(b/1048576).toFixed(1)+'MB':b>1024?(b/1024).toFixed(0)+'KB':b+'B';
+      const fileUrl = name => `${PB_URL}/api/files/denuncias/${d.id}/${encodeURIComponent(name)}`;
+      const rows = evs.length
+        ? evs.map(name=>`<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:#f1f5f9;border-radius:6px;font-size:13px">
+            <span style="font-size:18px">${iconos(name)}</span>
+            <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(name)}</span>
+            <a href="${fileUrl(name)}" target="_blank" download style="font-size:12px;color:#1a472a;font-weight:600;white-space:nowrap;text-decoration:none">⬇️ Descargar</a>
+          </div>`).join('')
+        : adj.map(f=>`<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:#f1f5f9;border-radius:6px;font-size:13px">
+            <span style="font-size:18px">${iconos(f.name||'')}</span>
             <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(f.name||'archivo')}</span>
             <span style="font-size:11px;color:#888;white-space:nowrap">${fmtSize(f.size||0)}</span>
-          </div>`).join('')}
-        </div>
-        <p style="font-size:11px;color:#f59e0b;margin:6px 0 0">⚠️ Los archivos fueron enviados pero requieren configuración adicional para descarga directa.</p>
+          </div>`).join('');
+      return `<div style="margin-bottom:16px">
+        <label style="font-size:11px;color:#666;font-weight:600">EVIDENCIAS ADJUNTAS (${evs.length||adj.length})</label>
+        <div style="margin-top:6px;display:flex;flex-direction:column;gap:6px">${rows}</div>
+        ${!evs.length?`<p style="font-size:11px;color:#f59e0b;margin:6px 0 0">⚠️ Estas evidencias son de registros anteriores. Las nuevas denuncias incluirán descarga directa.</p>`:''}
       </div>`;
     })()}
     ${d.notas?`<div style="margin-bottom:16px"><label style="font-size:11px;color:#666;font-weight:600">NOTAS DEL ADMIN</label><p style="margin:4px 0;font-size:14px;white-space:pre-wrap;background:#fffbeb;padding:10px;border-radius:6px">${escHtml(d.notas)}</p></div>`:''}
