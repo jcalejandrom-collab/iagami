@@ -4337,29 +4337,39 @@ function _renderDatos(datos) {
   const si  = (v) => v===true||v==='si'||v==='Sí'||v==='sí'||v===1?'Sí':'No';
   const rows = [
     ['Fuente principal de agua',         arr(d.fuente_agua)],
-    ['Estado de la red de distribución', d.estado_red],
+    ['Estado de la red de distribución', d.red_dist||d.estado_red],
     ['Porcentaje de cobertura',          d.cobertura],
-    ['Frecuencia de suministro',         d.frecuencia_suministro],
+    ['Frecuencia de suministro',         d.frecuencia||d.frecuencia_suministro],
     ['Pozos activos',                    d.pozos_activos],
     ['Pozos inactivos',                  d.pozos_inactivos],
-    ['Pozos con mantenimiento periódico',si(d.pozos_mantenimiento)],
-    ['Riesgo de contaminación de pozos', si(d.riesgo_cont_pozos)],
-    ['Acuíferos cercanos',               si(d.acuiferos)],
-    ['Acuíferos protegidos',             si(d.acuiferos_protegidos)],
-    ['Situación aguas servidas',         d.aguas_servidas||arr(d.tipo_aguas_servidas)],
-    ['Contaminación atmosférica',        si(d.cont_atmosferica)],
-    ['Fuentes de contaminación atm.',    arr(d.cont_atmosferica_fuentes)],
-    ['Descripción contaminación atm.',   d.cont_atmosferica_desc],
+    ['Pozos con mantenimiento periódico',si(d.mant_pozos||d.pozos_mantenimiento)],
+    ['Riesgo de contaminación de pozos', si(d.riesgo_pozos||d.riesgo_cont_pozos)],
+    ['Descripción riesgo pozos',         d.riesgo_pozos_txt||d.riesgo_pozos_desc],
+    ['Acuíferos cercanos',               si(d.acuiferos_conoce||d.acuiferos)],
+    ['Descripción acuíferos',            d.acuiferos_txt],
+    ['Acuíferos protegidos',             si(d.acuiferos_proteg||d.proteg_acuiferos||d.acuiferos_protegidos)],
+    ['Situación aguas servidas',         d.aguas_estado||d.aguas_servidas],
+    ['Desbordamiento de aguas',          si(d.desbord)],
+    ['Descargas directas',               si(d.descargas)],
+    ['Contaminación atmosférica',        si(d.cont_atm||d.cont_atmosferica)],
+    ['Fuentes de contaminación atm.',    arr(d.cont_atm_causas||d.cont_atm_fuentes||d.cont_atmosferica_fuentes)],
+    ['Descripción contaminación atm.',   d.cont_atm_desc||d.cont_atmosferica_desc],
     ['Contaminación del agua',           si(d.cont_agua)],
+    ['Fuentes contaminación agua',       arr(d.cont_agua_causas||d.cont_agua_fuentes)],
     ['Contaminación del suelo',          si(d.cont_suelo)],
-    ['Contaminación sónica',             si(d.cont_sonica)],
+    ['Fuentes contaminación suelo',      arr(d.cont_suelo_causas||d.cont_suelo_fuentes)],
+    ['Contaminación sónica',             si(d.cont_ruido||d.cont_sonica)],
+    ['Fuentes contaminación sónica',     arr(d.cont_ruido_fuentes||d.cont_sonica_fuentes)],
     ['Zonas vulnerables',                arr(d.zonas_vulnerables)],
     ['Descripción de riesgos',           d.riesgos_desc||d.riesgos],
-    ['Brigada Ambiental',                si(d.brigada_ambiental)],
-    ['Comité Ambiental',                 si(d.comite_ambiental)],
+    ['Brigada Ambiental',                si(d.brigada||d.brigada_ambiental)],
+    ['Comité Ambiental',                 si(d.comite||d.comite_ambiental)],
     ['Jornadas realizadas',              arr(d.jornadas)],
-    ['Denuncia ambiental',               si(d.denuncia_ambiental)],
+    ['Denuncia ambiental',               si(d.tiene_denuncia||d.denuncia_ambiental)],
+    ['Tipo de denuncia',                 arr(d.denuncia_tipo)],
     ['Descripción de denuncia',          d.denuncia_desc],
+    ['Ubicación de denuncia',            d.denuncia_ubic],
+    ['Urgencia',                         d.urgencia],
   ].filter(([,v]) => v && v !== '—' && v !== 'No' && v !== 'undefined' && v !== 'null');
   if (!rows.length) return '';
   return rows.map(([l,v]) => `<div class="campo"><span class="lbl">${escHtml(l)}</span><span class="val">${escHtml(String(v||'—'))}</span></div>`).join('');
@@ -5382,6 +5392,24 @@ async function _orgLoadEdit(tipo, id) {
       _orgDiagId = diag.id;
       const datos = typeof diag.datos==='string' ? JSON.parse(diag.datos||'{}') : (diag.datos||{});
       Object.assign(d, datos);
+      // Normalize: map portal field names → admin _orgData field names
+      d.red_dist = d.red_dist || d.estado_red;
+      d.mant_pozos = d.mant_pozos || d.pozos_mantenimiento;
+      d.riesgo_pozos = d.riesgo_pozos || d.riesgo_cont_pozos;
+      d.riesgo_pozos_desc = d.riesgo_pozos_desc || d.riesgo_pozos_txt;
+      d.acuiferos = d.acuiferos || d.acuiferos_conoce;
+      d.proteg_acuiferos = d.proteg_acuiferos || d.acuiferos_proteg;
+      d.aguas_estado = d.aguas_estado || d.aguas_servidas;
+      d.cont_atm = d.cont_atm || d.cont_atmosferica;
+      d.cont_atm_fuentes = d.cont_atm_fuentes || d.cont_atm_causas || d.cont_atmosferica_fuentes;
+      d.cont_atm_desc = d.cont_atm_desc || d.cont_atmosferica_desc;
+      d.cont_agua_fuentes = d.cont_agua_fuentes || d.cont_agua_causas;
+      d.cont_suelo_fuentes = d.cont_suelo_fuentes || d.cont_suelo_causas;
+      d.cont_ruido = d.cont_ruido || d.cont_sonica;
+      d.cont_ruido_fuentes = d.cont_ruido_fuentes || d.cont_sonica_fuentes;
+      d.brigada = d.brigada || d.brigada_ambiental;
+      d.comite = d.comite || d.comite_ambiental;
+      d.frecuencia = d.frecuencia || d.frecuencia_suministro;
     }
   } catch(e) {}
   // If currently on step 1, refresh
@@ -5435,21 +5463,23 @@ async function saveOrgForm() {
     const saved = await CMSDB.save(col, rec);
     // Build diagnostico record
     const diagDatos = {
-      fuente_agua: d.fuente_agua, estado_red: d.red_dist,
-      cobertura: d.cobertura, frecuencia_suministro: d.frecuencia,
-      pozos_mantenimiento: d.mant_pozos, riesgo_cont_pozos: d.riesgo_pozos,
-      riesgo_pozos_desc: d.riesgo_pozos_desc, acuiferos: d.acuiferos,
-      acuiferos_txt: d.acuiferos_txt, proteg_acuiferos: d.proteg_acuiferos,
-      aguas_servidas: d.aguas_estado, aguas_desbord: d.desbord,
-      aguas_descargas: d.descargas, aguas_desc: d.aguas_desc,
-      cont_atmosferica: d.cont_atm, cont_atmosferica_fuentes: d.cont_atm_fuentes,
-      cont_atmosferica_desc: d.cont_atm_desc, cont_agua: d.cont_agua,
-      cont_agua_fuentes: d.cont_agua_fuentes, cont_agua_desc: d.cont_agua_desc,
-      cont_suelo: d.cont_suelo, cont_suelo_fuentes: d.cont_suelo_fuentes,
-      cont_suelo_desc: d.cont_suelo_desc, cont_sonica: d.cont_ruido,
-      cont_sonica_fuentes: d.cont_ruido_fuentes, cont_sonica_desc: d.cont_ruido_desc,
+      fuente_agua: d.fuente_agua, red_dist: d.red_dist,
+      cobertura: d.cobertura, frecuencia: d.frecuencia,
+      mant_pozos: d.mant_pozos, riesgo_pozos: d.riesgo_pozos,
+      riesgo_pozos_txt: d.riesgo_pozos_desc||d.riesgo_pozos_txt,
+      pozos_activos: d.pozos_activos, pozos_inactivos: d.pozos_inactivos,
+      acuiferos_conoce: d.acuiferos, acuiferos_txt: d.acuiferos_txt,
+      acuiferos_proteg: d.proteg_acuiferos,
+      aguas_estado: d.aguas_estado, desbord: d.desbord,
+      descargas: d.descargas, aguas_desc: d.aguas_desc,
+      cont_atm: d.cont_atm, cont_atm_causas: d.cont_atm_fuentes,
+      cont_atm_desc: d.cont_atm_desc, cont_agua: d.cont_agua,
+      cont_agua_causas: d.cont_agua_fuentes, cont_agua_desc: d.cont_agua_desc,
+      cont_suelo: d.cont_suelo, cont_suelo_causas: d.cont_suelo_fuentes,
+      cont_suelo_desc: d.cont_suelo_desc, cont_ruido: d.cont_ruido,
+      cont_ruido_fuentes: d.cont_ruido_fuentes, cont_ruido_desc: d.cont_ruido_desc,
       zonas_vulnerables: d.zonas_vulnerables, riesgos_desc: d.riesgos_desc,
-      brigada_ambiental: d.brigada, comite_ambiental: d.comite, jornadas: d.jornadas,
+      brigada: d.brigada, comite: d.comite, jornadas: d.jornadas,
       tiene_denuncia: d.tiene_denuncia, denuncia_tipo: d.denuncia_tipo,
       denuncia_desc: d.denuncia_desc, denuncia_ubic: d.denuncia_ubic, urgencia: d.urgencia
     };
