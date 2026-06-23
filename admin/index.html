@@ -2763,7 +2763,11 @@ async function updateDenunciaStatus(id, estado) {
 }
 
 async function verDenuncia(id) {
-  const d = await CMSDB.getOne('denuncias', id);
+  let d = await CMSDB.getOne('denuncias', id).catch(()=>null);
+  if (!d) {
+    const all = await CMSDB.getAll('denuncias').catch(()=>[]);
+    d = all.find(x=>x.id===id);
+  }
   if (!d) { toast('No se encontró la denuncia','error'); return; }
   const estadoLbl = {recibida:'Recibida',revision:'En revisión',inspeccion:'En inspección',cerrada:'Cerrada'};
   const fecha = d.fecha || d.created_at || d.fecha_denuncia || d.created || '—';
@@ -2789,10 +2793,21 @@ async function verDenuncia(id) {
     ${d.notas?`<div style="margin-bottom:16px"><label style="font-size:11px;color:#666;font-weight:600">NOTAS DEL ADMIN</label><p style="margin:4px 0;font-size:14px;white-space:pre-wrap;background:#fffbeb;padding:10px;border-radius:6px">${escHtml(d.notas)}</p></div>`:''}
     <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
       <button onclick="document.getElementById('modal-denuncia-detalle').remove()" style="padding:8px 18px;border:1px solid #ddd;border-radius:6px;background:#fff;cursor:pointer">Cerrar</button>
+      <button onclick="eliminarDenuncia('${id}')" style="padding:8px 18px;border:none;border-radius:6px;background:#dc2626;color:#fff;cursor:pointer">🗑️ Eliminar</button>
       <button onclick="imprimirDenuncia('${id}')" style="padding:8px 18px;border:none;border-radius:6px;background:#1a472a;color:#fff;cursor:pointer">⬇️ Descargar PDF</button>
     </div>
   </div>`;
   document.body.appendChild(modal);
+}
+
+async function eliminarDenuncia(id) {
+  if (!confirm('¿Seguro que deseas eliminar esta denuncia? Esta acción no se puede deshacer.')) return;
+  try {
+    await CMSDB.deleteRecord('denuncias', id);
+    document.getElementById('modal-denuncia-detalle')?.remove();
+    toast('Denuncia eliminada');
+    await renderDenuncias();
+  } catch(e) { toast('Error al eliminar: ' + e.message, 'error'); }
 }
 
 async function imprimirDenuncia(id) {
