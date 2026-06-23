@@ -104,6 +104,8 @@ const CMSDB = (function () {
             : `${PB_URL}/api/collections/${coleccion}/records?page=${page}&perPage=${perPage}`;
           res = await fetch(url, { headers, signal });
           if (res.status !== 400) break;
+          const errBody = await res.clone().json().catch(()=>({}));
+          console.error(`[SIGAP] ${coleccion} sort="${sort}" → 400:`, errBody.message||JSON.stringify(errBody));
         }
 
         if (res.status === 404) {

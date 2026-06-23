@@ -1647,7 +1647,7 @@ async function renderHeroPanel() {
 
 async function renderHeroStats() {
   const [_consejosR, _empresasR] = await Promise.all([
-    CMSDB.getAll('consejos'),
+    CMSDB.getAll('consejos_comunales'),
     CMSDB.getAll('empresas')
   ]);
   const consejos = Array.isArray(_consejosR) ? _consejosR : [];
