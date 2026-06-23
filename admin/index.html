@@ -2790,6 +2790,24 @@ async function verDenuncia(id) {
     </div>
     <div style="margin-bottom:12px"><label style="font-size:11px;color:#666;font-weight:600">UBICACIÓN</label><p style="margin:2px 0;font-size:14px">${escHtml(d.ubicacion||d.direccion||'—')}</p></div>
     <div style="margin-bottom:16px"><label style="font-size:11px;color:#666;font-weight:600">DESCRIPCIÓN</label><p style="margin:4px 0;font-size:14px;line-height:1.5;white-space:pre-wrap;background:#f8f9fa;padding:10px;border-radius:6px">${escHtml(d.descripcion||d.contenido||'—')}</p></div>
+    ${(()=>{
+      let adj = d.adjuntos;
+      if (typeof adj === 'string') { try { adj = JSON.parse(adj); } catch(e) { adj = []; } }
+      if (!Array.isArray(adj) || !adj.length) return '';
+      const iconos = {'image/jpeg':'🖼️','image/png':'🖼️','image/gif':'🖼️','application/pdf':'📄','video/mp4':'🎥','video/quicktime':'🎥'};
+      const fmtSize = b => b>1048576 ? (b/1048576).toFixed(1)+'MB' : b>1024 ? (b/1024).toFixed(0)+'KB' : b+'B';
+      return `<div style="margin-bottom:16px">
+        <label style="font-size:11px;color:#666;font-weight:600">EVIDENCIAS ADJUNTAS (${adj.length})</label>
+        <div style="margin-top:6px;display:flex;flex-direction:column;gap:6px">
+          ${adj.map(f=>`<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:#f1f5f9;border-radius:6px;font-size:13px">
+            <span style="font-size:18px">${iconos[f.type]||'📎'}</span>
+            <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(f.name||'archivo')}</span>
+            <span style="font-size:11px;color:#888;white-space:nowrap">${fmtSize(f.size||0)}</span>
+          </div>`).join('')}
+        </div>
+        <p style="font-size:11px;color:#f59e0b;margin:6px 0 0">⚠️ Los archivos fueron enviados pero requieren configuración adicional para descarga directa.</p>
+      </div>`;
+    })()}
     ${d.notas?`<div style="margin-bottom:16px"><label style="font-size:11px;color:#666;font-weight:600">NOTAS DEL ADMIN</label><p style="margin:4px 0;font-size:14px;white-space:pre-wrap;background:#fffbeb;padding:10px;border-radius:6px">${escHtml(d.notas)}</p></div>`:''}
     <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
       <button onclick="document.getElementById('modal-denuncia-detalle').remove()" style="padding:8px 18px;border:1px solid #ddd;border-radius:6px;background:#fff;cursor:pointer">Cerrar</button>
@@ -2835,6 +2853,12 @@ async function imprimirDenuncia(id) {
   </div>
   <p><strong>Ubicación:</strong> ${escHtml(d.ubicacion||d.direccion||'—')}</p>
   <p><strong>Descripción:</strong></p><div class="desc">${escHtml(d.descripcion||d.contenido||'—')}</div>
+  ${(()=>{
+    let adj = d.adjuntos;
+    if (typeof adj === 'string') { try { adj = JSON.parse(adj); } catch(e) { adj = []; } }
+    if (!Array.isArray(adj) || !adj.length) return '';
+    return `<p><strong>Evidencias adjuntas (${adj.length}):</strong></p><ul>${adj.map(f=>`<li>${escHtml(f.name||'archivo')} — ${f.size ? (f.size>1048576?(f.size/1048576).toFixed(1)+'MB':(f.size/1024).toFixed(0)+'KB') : ''}</li>`).join('')}</ul>`;
+  })()}
   ${d.notas?`<p><strong>Notas del administrador:</strong></p><div class="desc">${escHtml(d.notas)}</div>`:''}
   <div class="footer">Documento generado por el sistema IAGAMI — Instituto Autónomo de Gestión Ambiental del Municipio Iribarren</div>
   </body></html>`;
