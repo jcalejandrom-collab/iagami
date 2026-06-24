@@ -3339,7 +3339,9 @@ window.guardarPresencia = async function() {
     });
     if (!res.ok) {
       const errData = await res.json().catch(()=>({}));
-      throw new Error(errData?.message || 'HTTP ' + res.status);
+      const campos = errData?.data ? ' — Campos: ' + Object.entries(errData.data).map(([k,v])=>`${k}: ${v?.message||v}`).join(', ') : '';
+      console.error('PocketBase error:', JSON.stringify(errData));
+      throw new Error((errData?.message || 'HTTP ' + res.status) + campos);
     }
     toast('✅ Presencia registrada correctamente');
     cerrarPresencia();
