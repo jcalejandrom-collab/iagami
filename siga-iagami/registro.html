@@ -180,6 +180,18 @@
         return;
       }
 
+      // Notificar a RRHH vía alerta del sistema (silencioso si falla)
+      fetch(`${PB_URL}/api/collections/alertas_sistema/records`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': '1' },
+        body: JSON.stringify({
+          tipo:    'rrhh',
+          mensaje: `Nuevo registro pendiente de aprobación: ${nombres} ${apellidos} — Cédula: ${cedula} — Cargo: ${cargo||'No especificado'} — Correo: ${email}`,
+          visto:   false,
+          fecha:   new Date().toISOString().substring(0,10)
+        })
+      }).catch(()=>{});
+
       // Éxito: ocultar formulario y mostrar pantalla pendiente
       document.getElementById('reg-form').style.display = 'none';
       document.getElementById('pending-ok').style.display = 'block';

@@ -649,6 +649,58 @@
       <div id="lista-alertas"><p style="color:var(--muted);font-size:13px">Cargando alertas…</p></div>
     </div>
 
+    <!-- ══ SEC: REGISTRO DE PRESENCIA (GPS + CÁMARA) ══ -->
+    <div class="section" id="sec-presencia">
+      <div class="page-header">
+        <div>
+          <div class="page-title">📍 Registro de Presencia</div>
+          <div class="page-subtitle">Control de asistencia con evidencia fotográfica y ubicación GPS en tiempo real</div>
+        </div>
+        <button class="btn btn-primary" onclick="abrirPresencia()">📍 Registrar Presencia</button>
+      </div>
+      <!-- Stats -->
+      <div class="dash-grid" style="margin-bottom:20px">
+        <div class="dash-stat"><div class="ds-icon">📍</div><div class="ds-val" id="pres-hoy">—</div><div class="ds-lbl">Registros hoy</div></div>
+        <div class="dash-stat blue"><div class="ds-icon">📅</div><div class="ds-val" id="pres-semana">—</div><div class="ds-lbl">Esta semana</div></div>
+        <div class="dash-stat"><div class="ds-icon">✅</div><div class="ds-val" id="pres-verificados">—</div><div class="ds-lbl">Verificados</div></div>
+        <div class="dash-stat amber"><div class="ds-icon">⏳</div><div class="ds-val" id="pres-pendientes">—</div><div class="ds-lbl">Pendientes verificación</div></div>
+      </div>
+      <!-- Tabs -->
+      <div class="tabs" id="presencia-tabs">
+        <button class="tab active" onclick="switchTab('pres','mis')">📍 Mis Registros</button>
+        <button class="tab" id="tab-pres-equipo-btn" onclick="switchTab('pres','equipo')" style="display:none">👥 Vista Equipo</button>
+      </div>
+      <!-- Mis registros -->
+      <div class="tab-content active" id="tab-pres-mis">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Fecha y Hora</th><th>Tipo</th><th>Fotografía</th><th>Ubicación GPS</th><th>Precisión</th><th>Observaciones</th><th>Verificado</th></tr></thead>
+            <tbody id="tabla-mis-presencia"></tbody>
+          </table>
+          <div id="mis-pres-empty" class="no-rows" style="display:none">No tienes registros de presencia aún. Usa el botón "Registrar Presencia".</div>
+        </div>
+      </div>
+      <!-- Vista equipo (supervisores/RRHH) -->
+      <div class="tab-content" id="tab-pres-equipo">
+        <div class="search-bar" style="margin-bottom:16px">
+          <select class="filter-select" id="pres-trab-f" onchange="loadPresenciaEquipo()"><option value="">Todos los trabajadores</option></select>
+          <input type="date" class="filter-select" id="pres-fecha-f" onchange="loadPresenciaEquipo()"/>
+          <select class="filter-select" id="pres-tipo-f" onchange="loadPresenciaEquipo()">
+            <option value="">Todos los tipos</option>
+            <option>Entrada</option><option>Salida</option><option>Trabajo en Campo</option>
+            <option>Supervisión</option><option>Inspección</option><option>Reunión</option><option>Visita Técnica</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Trabajador</th><th>Fecha y Hora</th><th>Tipo</th><th>Fotografía</th><th>Ubicación GPS</th><th>Estado</th><th>Acciones</th></tr></thead>
+            <tbody id="tabla-equipo-presencia"></tbody>
+          </table>
+          <div id="equipo-pres-empty" class="no-rows" style="display:none">Sin registros del equipo en este período.</div>
+        </div>
+      </div>
+    </div>
+
   </div><!-- /content -->
 </div><!-- /main -->
 
@@ -1066,6 +1118,56 @@
   </div>
 </div>
 
+<!-- Modal: Registro de Presencia (GPS + Cámara) -->
+<div class="modal-overlay" id="modal-presencia">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <div class="modal-title">📍 Registrar Presencia</div>
+      <button class="modal-close" onclick="cerrarPresencia()">✕</button>
+    </div>
+    <div class="modal-body">
+      <!-- Vista de cámara en vivo / foto capturada -->
+      <div style="text-align:center;margin-bottom:14px;background:#000;border-radius:12px;overflow:hidden;min-height:200px;display:flex;align-items:center;justify-content:center">
+        <video id="cam-preview" autoplay playsinline muted style="width:100%;max-width:400px;display:block;border-radius:12px"></video>
+        <canvas id="cam-canvas" style="display:none"></canvas>
+        <img id="cam-foto" style="display:none;width:100%;max-width:400px;border-radius:12px"/>
+      </div>
+      <!-- Estado GPS -->
+      <div id="gps-status" style="text-align:center;padding:10px 14px;background:#f0fdf4;border:1px solid #86efac;border-radius:8px;font-size:13px;margin-bottom:14px;color:#166534;line-height:1.5">
+        📡 Solicitando ubicación GPS…
+      </div>
+      <!-- Reloj en vivo -->
+      <div id="presencia-reloj" style="text-align:center;font-size:18px;font-weight:700;color:var(--primary);margin-bottom:14px;font-family:'Poppins',sans-serif"></div>
+      <!-- Tipo de registro -->
+      <div class="form-group" style="margin-bottom:12px">
+        <label>Tipo de registro *</label>
+        <select id="pres-tipo">
+          <option>Entrada</option>
+          <option>Salida</option>
+          <option>Trabajo en Campo</option>
+          <option>Supervisión</option>
+          <option>Inspección</option>
+          <option>Reunión</option>
+          <option>Visita Técnica</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Observaciones</label>
+        <textarea id="pres-obs" rows="2" placeholder="Lugar, actividad, notas adicionales…"></textarea>
+      </div>
+      <!-- Acciones de cámara -->
+      <div style="text-align:center;margin-top:12px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+        <button class="btn btn-primary" id="btn-tomar-foto" onclick="tomarFotoPresencia()">📸 Tomar Selfie</button>
+        <button class="btn btn-secondary" id="btn-retomar-foto" onclick="retomarFotoPresencia()" style="display:none">↺ Retomar Foto</button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="cerrarPresencia()">Cancelar</button>
+      <button class="btn btn-primary" id="btn-guardar-presencia" disabled onclick="guardarPresencia()">💾 Guardar Registro</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast-container"></div>
 
 <script>
@@ -1100,6 +1202,7 @@ const MENU_ALL = [
   { section:'Personal' },
   { id:'actividades', icon:'📋', label:'Mis Actividades' },
   { id:'mi-solicitud', icon:'📬', label:'Mis Solicitudes' },
+  { id:'presencia', icon:'📍', label:'Registro de Presencia' },
   { id:'planificacion', icon:'📅', label:'Planificación' },
   { section:'Gestión' },
   { id:'rrhh', icon:'👥', label:'RRHH', roles:['RRHH','DIRECTOR','PRESIDENTE','TECNOLOGIA'] },
@@ -1152,6 +1255,7 @@ window.sigaNav = function(id) {
   if (id === 'tecnologia')     loadTecnologia();
   if (id === 'planificacion')  loadPlanificacion();
   if (id === 'mi-solicitud')   loadMisSolicitudes();
+  if (id === 'presencia')      loadPresencia();
   if (id === 'asistencia')     loadAsistencia();
   if (id === 'evaluaciones')   loadEvaluaciones();
   if (id === 'mensajes')       loadMensajes();
@@ -1162,8 +1266,8 @@ window.sigaNav = function(id) {
 
 /* ─── Tabs ─── */
 window.switchTab = function(prefix, id) {
-  document.querySelectorAll(`#sec-${prefix==='act'?'actividades':prefix==='tec'?'tecnologia':prefix} .tab`).forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll(`#sec-${prefix==='act'?'actividades':prefix==='tec'?'tecnologia':prefix} .tab-content`).forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll(`#sec-${prefix==='act'?'actividades':prefix==='tec'?'tecnologia':prefix==='pres'?'presencia':prefix} .tab`).forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll(`#sec-${prefix==='act'?'actividades':prefix==='tec'?'tecnologia':prefix==='pres'?'presencia':prefix} .tab-content`).forEach(t=>t.classList.remove('active'));
   event.target.classList.add('active');
   const tc = document.getElementById(`tab-${prefix}-${id}`);
   if (tc) tc.classList.add('active');
@@ -1178,7 +1282,8 @@ window.switchTab = function(prefix, id) {
   if (prefix==='tec' && id==='usuarios') loadTecUsuarios();
   if (prefix==='tec' && id==='auditoria') loadAuditoria();
   if (prefix==='tec' && id==='tickets') loadTickets();
-  if (prefix==='tec' && id==='monitor') loadMonitor();
+  if (prefix==='tec' && id==='monitor')  loadMonitor();
+  if (prefix==='pres' && id==='equipo') loadPresenciaEquipo();
 };
 
 /* ─── Modal helpers ─── */
@@ -2977,6 +3082,275 @@ async function enviarAlerta() {
 /* ── Arrancar polling de alertas ── */
 setTimeout(pollAlertasBadge, 3000);
 setInterval(pollAlertasBadge, 60000);
+
+/* ═══════════════════════════════════════════════════════
+   REGISTRO DE PRESENCIA — GPS + Cámara en Tiempo Real
+══════════════════════════════════════════════════════ */
+const PB_URL_SIGA = document.querySelector('meta[name="pb-url"]')?.content || 'https://api.iagami.online';
+let _camStream          = null;
+let _camBlob            = null;
+let _gpsCoords          = null;
+let _presenciaRelojTimer = null;
+
+async function loadPresencia() {
+  // Mostrar pestaña equipo solo para supervisores
+  const btnEquipo = document.getElementById('tab-pres-equipo-btn');
+  if (btnEquipo) btnEquipo.style.display = ['SUPERVISOR','DIRECTOR','RRHH','PRESIDENTE','COORDINADOR'].includes(ROL) ? '' : 'none';
+
+  const tbody = document.getElementById('tabla-mis-presencia');
+  const empty = document.getElementById('mis-pres-empty');
+  if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="7" class="no-rows">Cargando…</td></tr>';
+
+  const hoy      = new Date().toISOString().slice(0,10);
+  const semInicio = (() => { const d=new Date(); d.setDate(d.getDate()-d.getDay()); return d.toISOString().slice(0,10); })();
+
+  const items = await SIGA.list('control_seguimiento', `trabajador_id="${U.id}"`, 200, 1, '-fecha_hora').catch(()=>[]);
+
+  setText('pres-hoy',        items.filter(i=>i.fecha_hora&&i.fecha_hora.slice(0,10)===hoy).length);
+  setText('pres-semana',     items.filter(i=>i.fecha_hora&&i.fecha_hora.slice(0,10)>=semInicio).length);
+  setText('pres-verificados',items.filter(i=>i.verificado).length);
+  setText('pres-pendientes', items.filter(i=>!i.verificado).length);
+
+  if (!items.length) { tbody.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = items.map(r => {
+    const fotoUrl = r.foto ? `${PB_URL_SIGA}/api/files/control_seguimiento/${r.id}/${r.foto}` : null;
+    const fotoHtml = fotoUrl
+      ? `<a href="${esc(fotoUrl)}" target="_blank"><img src="${esc(fotoUrl)}" style="width:48px;height:48px;border-radius:6px;object-fit:cover;border:1px solid var(--border)"/></a>`
+      : '—';
+    const lat = r.latitud  ? parseFloat(r.latitud).toFixed(5)  : null;
+    const lng = r.longitud ? parseFloat(r.longitud).toFixed(5) : null;
+    const gpsHtml = lat
+      ? `<a href="https://maps.google.com/?q=${lat},${lng}" target="_blank" style="color:var(--primary);font-size:12px;white-space:nowrap">📍 ${lat},${lng}</a>`
+      : '<span style="color:var(--muted);font-size:12px">Sin GPS</span>';
+    return `<tr>
+      <td style="white-space:nowrap;font-size:13px">${fmtH(r.fecha_hora)}</td>
+      <td><span class="badge badge-blue">${esc(r.tipo||'—')}</span></td>
+      <td>${fotoHtml}</td>
+      <td>${gpsHtml}</td>
+      <td style="font-size:12px;color:var(--muted)">${r.precision_gps!=null?'±'+Math.round(r.precision_gps)+'m':'—'}</td>
+      <td style="max-width:160px;font-size:12px">${esc((r.observaciones||'—').substring(0,80))}</td>
+      <td><span class="badge ${r.verificado?'badge-green':'badge-amber'}">${r.verificado?'✅ Verificado':'⏳ Pendiente'}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+async function loadPresenciaEquipo() {
+  const tbody = document.getElementById('tabla-equipo-presencia');
+  const empty = document.getElementById('equipo-pres-empty');
+  if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="7" class="no-rows">Cargando…</td></tr>';
+
+  // Poblar filtro de trabajadores si aún no
+  const sel = document.getElementById('pres-trab-f');
+  if (sel && sel.options.length <= 1 && _allTrabajadores.length) {
+    _allTrabajadores.forEach(t => {
+      const o = document.createElement('option');
+      o.value = t.id;
+      o.textContent = `${t.nombres||''} ${t.apellidos||''}`.trim();
+      sel.appendChild(o);
+    });
+  }
+
+  const fTrab  = document.getElementById('pres-trab-f')?.value||'';
+  const fFecha = document.getElementById('pres-fecha-f')?.value||'';
+  const fTipo  = document.getElementById('pres-tipo-f')?.value||'';
+
+  let filter = '';
+  if (fTrab)  filter += (filter?'&&':'')+`trabajador_id="${fTrab}"`;
+  if (fFecha) filter += (filter?'&&':'')+`fecha_hora>="${fFecha} 00:00:00"&&fecha_hora<="${fFecha} 23:59:59"`;
+  if (fTipo)  filter += (filter?'&&':'')+`tipo="${fTipo}"`;
+
+  const items = await SIGA.list('control_seguimiento', filter, 300, 1, '-fecha_hora').catch(()=>[]);
+  if (!items.length) { tbody.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display = 'none';
+
+  const canVerify = ['RRHH','SUPERVISOR','DIRECTOR','PRESIDENTE'].includes(ROL);
+  tbody.innerHTML = items.map(r => {
+    const trab = _allTrabajadores.find(t=>t.id===r.trabajador_id);
+    const nombre = trab ? `${esc(trab.nombres||'')} ${esc(trab.apellidos||'')}` : '—';
+    const fotoUrl = r.foto ? `${PB_URL_SIGA}/api/files/control_seguimiento/${r.id}/${r.foto}` : null;
+    const fotoHtml = fotoUrl
+      ? `<a href="${esc(fotoUrl)}" target="_blank"><img src="${esc(fotoUrl)}" style="width:48px;height:48px;border-radius:6px;object-fit:cover;border:1px solid var(--border)"/></a>`
+      : '—';
+    const lat = r.latitud  ? parseFloat(r.latitud).toFixed(5)  : null;
+    const lng = r.longitud ? parseFloat(r.longitud).toFixed(5) : null;
+    const gpsHtml = lat
+      ? `<a href="https://maps.google.com/?q=${lat},${lng}" target="_blank" style="color:var(--primary);font-size:12px;white-space:nowrap">📍 ${lat},${lng}</a>`
+      : '<span style="color:var(--muted);font-size:12px">Sin GPS</span>';
+    return `<tr>
+      <td><div style="font-weight:500;font-size:13px">${nombre}</div></td>
+      <td style="white-space:nowrap;font-size:13px">${fmtH(r.fecha_hora)}</td>
+      <td><span class="badge badge-blue">${esc(r.tipo||'—')}</span></td>
+      <td>${fotoHtml}</td>
+      <td>${gpsHtml}</td>
+      <td><span class="badge ${r.verificado?'badge-green':'badge-amber'}">${r.verificado?'✅ Verificado':'⏳ Pendiente'}</span></td>
+      <td class="td-actions">
+        ${canVerify&&!r.verificado
+          ? `<button class="btn btn-sm btn-primary" onclick="verificarPresencia('${esc(r.id)}')">✅ Verificar</button>`
+          : r.verificado?'<span style="font-size:12px;color:var(--muted)">Ya verificado</span>':'—'}
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+window.verificarPresencia = async function(id) {
+  try {
+    await SIGA.update('control_seguimiento', id, { verificado: true, supervisor_id: U.id });
+    toast('Registro verificado correctamente');
+    loadPresenciaEquipo();
+    registrarAuditoria('Verificar presencia', 'Control Seguimiento', 'OK');
+  } catch(e) { toast('Error: '+e.message, 'error'); }
+};
+
+window.abrirPresencia = async function() {
+  _camBlob   = null;
+  _gpsCoords = null;
+
+  // Reset UI
+  document.getElementById('btn-guardar-presencia').disabled = true;
+  document.getElementById('btn-tomar-foto').style.display   = 'inline-flex';
+  document.getElementById('btn-retomar-foto').style.display = 'none';
+  const fotoEl = document.getElementById('cam-foto');
+  const prevEl = document.getElementById('cam-preview');
+  fotoEl.style.display = 'none';
+  prevEl.style.display = 'block';
+  document.getElementById('pres-obs').value = '';
+  const gpsEl = document.getElementById('gps-status');
+  gpsEl.style.background = '#f0fdf4';
+  gpsEl.style.color      = '#166534';
+  gpsEl.textContent      = '📡 Solicitando ubicación GPS…';
+
+  // Reloj en tiempo real
+  function tickReloj() {
+    const now = new Date();
+    const el  = document.getElementById('presencia-reloj');
+    if (el) el.textContent = now.toLocaleTimeString('es-VE') + '  ·  '
+      + now.toLocaleDateString('es-VE',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  }
+  tickReloj();
+  _presenciaRelojTimer = setInterval(tickReloj, 1000);
+
+  // Cámara frontal
+  try {
+    _camStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'user', width:{ideal:640}, height:{ideal:480} },
+      audio: false
+    });
+    prevEl.srcObject = _camStream;
+  } catch(e) {
+    gpsEl.style.background = '#fee2e2';
+    gpsEl.style.color      = '#dc2626';
+    gpsEl.textContent      = '❌ Cámara no disponible: ' + e.message + '. Puedes igualmente registrar sin foto.';
+    document.getElementById('btn-guardar-presencia').disabled = false;
+  }
+
+  // GPS de alta precisión
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        _gpsCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude, acc: pos.coords.accuracy };
+        const el = document.getElementById('gps-status');
+        if (el) {
+          el.innerHTML = `✅ <strong>Ubicación obtenida</strong><br>
+            Latitud: ${_gpsCoords.lat.toFixed(6)} &nbsp;|&nbsp; Longitud: ${_gpsCoords.lng.toFixed(6)}<br>
+            Precisión: ±${Math.round(_gpsCoords.acc)} metros`;
+        }
+      },
+      err => {
+        const el = document.getElementById('gps-status');
+        if (el) {
+          el.style.background = '#fef9c3';
+          el.style.color      = '#92400e';
+          el.innerHTML = `⚠️ GPS no disponible: ${err.message}<br><em>El registro se guardará sin coordenadas.</em>`;
+        }
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+    );
+  }
+
+  abrirModal('modal-presencia');
+};
+
+window.tomarFotoPresencia = function() {
+  const video  = document.getElementById('cam-preview');
+  const canvas = document.getElementById('cam-canvas');
+  const fotoEl = document.getElementById('cam-foto');
+  if (!video.videoWidth) { toast('Cámara aún no lista, espera un momento','warning'); return; }
+  canvas.width  = video.videoWidth;
+  canvas.height = video.videoHeight;
+  canvas.getContext('2d').drawImage(video, 0, 0);
+  canvas.toBlob(blob => {
+    _camBlob      = blob;
+    fotoEl.src    = URL.createObjectURL(blob);
+    fotoEl.style.display  = 'block';
+    video.style.display   = 'none';
+    document.getElementById('btn-tomar-foto').style.display   = 'none';
+    document.getElementById('btn-retomar-foto').style.display = 'inline-flex';
+    document.getElementById('btn-guardar-presencia').disabled  = false;
+  }, 'image/jpeg', 0.85);
+};
+
+window.retomarFotoPresencia = function() {
+  _camBlob = null;
+  document.getElementById('cam-foto').style.display         = 'none';
+  document.getElementById('cam-preview').style.display      = 'block';
+  document.getElementById('btn-tomar-foto').style.display   = 'inline-flex';
+  document.getElementById('btn-retomar-foto').style.display = 'none';
+  document.getElementById('btn-guardar-presencia').disabled  = true;
+};
+
+window.cerrarPresencia = function() {
+  if (_camStream) { _camStream.getTracks().forEach(t => t.stop()); _camStream = null; }
+  if (_presenciaRelojTimer) { clearInterval(_presenciaRelojTimer); _presenciaRelojTimer = null; }
+  cerrarModal('modal-presencia');
+};
+
+window.guardarPresencia = async function() {
+  const tipo = document.getElementById('pres-tipo').value;
+  const obs  = document.getElementById('pres-obs').value.trim();
+  const now  = new Date();
+  const token = sessionStorage.getItem('siga_token') || '';
+
+  const fd = new FormData();
+  fd.append('trabajador_id', U.id);
+  fd.append('tipo',          tipo);
+  fd.append('fecha_hora',    now.toISOString().replace('T',' ').substring(0,19));
+  fd.append('observaciones', obs);
+  fd.append('verificado',    'false');
+  if (_camBlob) {
+    fd.append('foto', _camBlob, `presencia_${U.id}_${now.getTime()}.jpg`);
+  }
+  if (_gpsCoords) {
+    fd.append('latitud',      String(_gpsCoords.lat));
+    fd.append('longitud',     String(_gpsCoords.lng));
+    fd.append('precision_gps', String(Math.round(_gpsCoords.acc)));
+  }
+
+  const btnGuardar = document.getElementById('btn-guardar-presencia');
+  btnGuardar.disabled = true;
+  try {
+    const res = await fetch(`${PB_URL_SIGA}/api/collections/control_seguimiento/records`, {
+      method:  'POST',
+      headers: { 'Authorization': token, 'ngrok-skip-browser-warning': '1' },
+      body:    fd
+    });
+    if (!res.ok) {
+      const errData = await res.json().catch(()=>({}));
+      throw new Error(errData?.message || 'HTTP ' + res.status);
+    }
+    toast('✅ Presencia registrada correctamente');
+    cerrarPresencia();
+    loadPresencia();
+    registrarAuditoria('Registro de presencia ' + tipo, 'Control Seguimiento', 'OK');
+  } catch(e) {
+    toast('Error al guardar: ' + e.message, 'error');
+  } finally {
+    btnGuardar.disabled = false;
+  }
+};
 </script>
 </body>
 </html>
