@@ -1455,7 +1455,8 @@ async function loadRRHH() {
 
 async function contarRegistrosPendientes() {
   try {
-    const items = await SIGA.list('trabajadores', "estado_cuenta='pendiente'", 200).catch(()=>[]);
+    const todos = await SIGA.list('trabajadores', '', 200).catch(()=>[]);
+    const items = todos.filter(t => t.estado_cuenta === 'pendiente');
     const badge = document.getElementById('badge-registros');
     if (!badge) return;
     if (items.length > 0) {
