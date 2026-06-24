@@ -1356,12 +1356,11 @@ function populateSelect(id, items, labelFn, placeholder, valField='nombre') {
 
 /* ─── DASHBOARD ─── */
 async function loadDashboard() {
-  const [actividades, solicitudes, denuncias, comunas] = await Promise.all([
+  const [actividades, solicitudes] = await Promise.all([
     SIGA.list('actividades', ROL==='TRABAJADOR'?`trabajador_id="${U.id}"`:'', 100).catch(()=>[]),
     SIGA.list('solicitudes_rrhh','estado="Pendiente"',50).catch(()=>[]),
-    SIGA.list('denuncias','publicado=true',10).catch(()=>[]),
-    SIGA.list('comunas','',10).catch(()=>[]),
   ]);
+  const denuncias = [], comunas = [];
 
   const todayStr = new Date().toLocaleDateString('sv-SE');
   const actHoy = actividades.filter(a => (a.fecha||'').startsWith(todayStr));
@@ -1804,15 +1803,12 @@ async function loadIndicadores() {
 
 /* ─── PRESIDENCIA ─── */
 async function loadPresidencia() {
-  const [trabajadores, actividades, solicitudes, denuncias, proyectos, comunas, consejos] = await Promise.all([
+  const [trabajadores, actividades, solicitudes] = await Promise.all([
     SIGA.list('trabajadores').catch(()=>[]),
     SIGA.list('actividades','',500).catch(()=>[]),
     SIGA.list('solicitudes_rrhh','estado="Pendiente"').catch(()=>[]),
-    SIGA.list('denuncias','publicado=true').catch(()=>[]),
-    SIGA.list('proyectos','publicado=true').catch(()=>[]),
-    SIGA.list('comunas').catch(()=>[]),
-    SIGA.list('consejos_comunales').catch(()=>[]),
   ]);
+  const denuncias = [], proyectos = [], comunas = [], consejos = [];
   const todayStr = new Date().toLocaleDateString('sv-SE');
   const actHoy = actividades.filter(a=>(a.fecha||'').startsWith(todayStr));
   const grid = document.getElementById('pres-stats');
