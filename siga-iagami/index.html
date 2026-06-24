@@ -1357,8 +1357,8 @@ function populateSelect(id, items, labelFn, placeholder, valField='nombre') {
 /* ─── DASHBOARD ─── */
 async function loadDashboard() {
   const [actividades, solicitudes] = await Promise.all([
-    SIGA.list('actividades', ROL==='TRABAJADOR'?`trabajador_id="${U.id}"`:'', 100).catch(()=>[]),
-    SIGA.list('solicitudes_rrhh','estado="Pendiente"',50).catch(()=>[]),
+    SIGA.list('actividades', ROL==='TRABAJADOR'?`trabajador_id='${U.id}'`:'', 100).catch(()=>[]),
+    SIGA.list('solicitudes_rrhh',"estado='Pendiente'",50).catch(()=>[]),
   ]);
   const denuncias = [], comunas = [];
 
@@ -1455,7 +1455,7 @@ async function loadRRHH() {
 
 async function contarRegistrosPendientes() {
   try {
-    const items = await SIGA.list('trabajadores', 'estado_cuenta="pendiente"', 200).catch(()=>[]);
+    const items = await SIGA.list('trabajadores', "estado_cuenta='pendiente'", 200).catch(()=>[]);
     const badge = document.getElementById('badge-registros');
     if (!badge) return;
     if (items.length > 0) {
@@ -1640,13 +1640,13 @@ async function loadCapacitaciones() {
 async function loadMisActividades() {
   const tbody = document.getElementById('tabla-mis-act');
   tbody.innerHTML = '<tr><td colspan="7" class="no-rows">Cargando…</td></tr>';
-  let filter = `trabajador_id="${U.id}"`;
+  let filter = `trabajador_id='${U.id}'`;
   const desde = document.getElementById('act-fecha-desde')?.value;
   const hasta = document.getElementById('act-fecha-hasta')?.value;
   const est   = document.getElementById('act-estado-f')?.value;
-  if (desde) filter += ` && fecha>="${desde}"`;
-  if (hasta) filter += ` && fecha<="${hasta}"`;
-  if (est)   filter += ` && estado="${est}"`;
+  if (desde) filter += ` && fecha>='${desde}'`;
+  if (hasta) filter += ` && fecha<='${hasta}'`;
+  if (est)   filter += ` && estado='${est}'`;
   const items = await SIGA.list('actividades', filter, 200, 1, '-fecha').catch(()=>[]);
   const empty = document.getElementById('mis-act-empty');
   if (!items.length) { tbody.innerHTML=''; empty.style.display='block'; return; }
@@ -1698,7 +1698,7 @@ async function loadGlobalActividades() {
 async function loadPlanificacion() {
   const el = document.getElementById('plan-semanas');
   el.innerHTML = '<p style="color:var(--muted);font-size:13px">Cargando…</p>';
-  const filter = ROL==='TRABAJADOR' ? `trabajador_id="${U.id}"` : '';
+  const filter = ROL==='TRABAJADOR' ? `trabajador_id='${U.id}'` : '';
   const items = await SIGA.list('planificaciones', filter, 100, 1, '-semana_inicio').catch(()=>[]);
   if (!items.length) {
     el.innerHTML = `<div class="empty-state"><div class="es-icon">📅</div><div class="es-title">Sin planificaciones</div>
@@ -1720,7 +1720,7 @@ async function loadPlanificacion() {
 /* ─── MIS SOLICITUDES ─── */
 async function loadMisSolicitudes() {
   const tbody = document.getElementById('tabla-mis-solicitudes');
-  const filter = `trabajador_id="${U.id}"`;
+  const filter = `trabajador_id='${U.id}'`;
   const items = await SIGA.list('solicitudes_rrhh', filter, 100).catch(()=>[]);
   const empty = document.getElementById('mis-sol-empty');
   if (!items.length) { tbody.innerHTML=''; empty.style.display='block'; return; }
@@ -1738,7 +1738,7 @@ async function loadMisSolicitudes() {
 async function loadIndicadores() {
   const [actividades, capacitaciones] = await Promise.all([
     SIGA.list('actividades','',500).catch(()=>[]),
-    SIGA.list('capacitaciones','estado="Activa"').catch(()=>[]),
+    SIGA.list('capacitaciones',"estado='Activa'").catch(()=>[]),
   ]);
   const mes = new Date().getMonth();
   const año = new Date().getFullYear();
@@ -1806,7 +1806,7 @@ async function loadPresidencia() {
   const [trabajadores, actividades, solicitudes] = await Promise.all([
     SIGA.list('trabajadores').catch(()=>[]),
     SIGA.list('actividades','',500).catch(()=>[]),
-    SIGA.list('solicitudes_rrhh','estado="Pendiente"').catch(()=>[]),
+    SIGA.list('solicitudes_rrhh',"estado='Pendiente'").catch(()=>[]),
   ]);
   const denuncias = [], proyectos = [], comunas = [], consejos = [];
   const todayStr = new Date().toLocaleDateString('sv-SE');
@@ -1937,7 +1937,7 @@ async function loadMonitor() {
     if (pb) pb.textContent = '❌ Offline';
     if (api) api.textContent = '—';
   }
-  const actHoy = await SIGA.list('auditoria_siga', `created>="${new Date().toLocaleDateString('sv-SE')}"`, 1).catch(()=>[]);
+  const actHoy = await SIGA.list('auditoria_siga', `created>='${new Date().toLocaleDateString('sv-SE')}'`, 1).catch(()=>[]);
   if (usersEl) usersEl.textContent = _allTrabajadores.filter(t=>t.activo).length;
   if (statusList) statusList.innerHTML = `
     <div style="font-size:13px;line-height:2.2">
@@ -2757,7 +2757,7 @@ async function loadReporteDiario() {
   const empty = document.getElementById('reportes-empty');
   if (!tbody) return;
   tbody.innerHTML = '<tr><td colspan="6" class="no-rows">Cargando…</td></tr>';
-  const items = await SIGA.list('reportes_diarios', `user_id="${U.id}"`, 100, 1, '-fecha').catch(()=>[]);
+  const items = await SIGA.list('reportes_diarios', `user_id='${U.id}'`, 100, 1, '-fecha').catch(()=>[]);
   _misReportes = items;
   const total    = items.length;
   const validados = items.filter(r => r.validado_rrhh).length;
@@ -2991,7 +2991,7 @@ async function loadAlertas() {
   const btnNuevaAlerta = document.getElementById('btn-nueva-alerta');
   if (btnNuevaAlerta) btnNuevaAlerta.style.display = ['RRHH','SUPERVISOR','DIRECTOR','PRESIDENTE'].includes(ROL) ? '' : 'none';
   lista.innerHTML = '<p style="color:var(--muted);font-size:13px">Cargando…</p>';
-  const filtro = ['RRHH','TECNOLOGIA','DIRECTOR','PRESIDENTE'].includes(ROL) ? '' : `user_id="${U.id}"`;
+  const filtro = ['RRHH','TECNOLOGIA','DIRECTOR','PRESIDENTE'].includes(ROL) ? '' : `user_id='${U.id}'`;
   const items = await SIGA.list('alertas_siga', filtro, 100, 1, '-fecha').catch(()=>[]);
   setText('alerta-urgentes', items.filter(a=>a.tipo==='urgente').length);
   setText('alerta-rrhh',     items.filter(a=>a.tipo==='rrhh').length);
@@ -3031,7 +3031,7 @@ function actualizarAlertasBadge(items) {
 async function pollAlertasBadge() {
   const U = SIGA.getUser();
   if (!U.id) return;
-  const items = await SIGA.list('alertas_siga', `user_id="${U.id}"`, 50, 1, '-fecha').catch(()=>[]);
+  const items = await SIGA.list('alertas_siga', `user_id='${U.id}'`, 50, 1, '-fecha').catch(()=>[]);
   actualizarAlertasBadge(items);
 }
 
@@ -3085,7 +3085,7 @@ async function loadPresencia() {
   const hoy      = new Date().toISOString().slice(0,10);
   const semInicio = (() => { const d=new Date(); d.setDate(d.getDate()-d.getDay()); return d.toISOString().slice(0,10); })();
 
-  const items = await SIGA.list('control_seguimiento', `trabajador_id="${U.id}"`, 200, 1, '-fecha_hora').catch(()=>[]);
+  const items = await SIGA.list('control_seguimiento', `trabajador_id='${U.id}'`, 200, 1, '-fecha_hora').catch(()=>[]);
 
   setText('pres-hoy',        items.filter(i=>i.fecha_hora&&i.fecha_hora.slice(0,10)===hoy).length);
   setText('pres-semana',     items.filter(i=>i.fecha_hora&&i.fecha_hora.slice(0,10)>=semInicio).length);
@@ -3139,9 +3139,9 @@ async function loadPresenciaEquipo() {
   const fTipo  = document.getElementById('pres-tipo-f')?.value||'';
 
   let filter = '';
-  if (fTrab)  filter += (filter?'&&':'')+`trabajador_id="${fTrab}"`;
-  if (fFecha) filter += (filter?'&&':'')+`fecha_hora>="${fFecha} 00:00:00"&&fecha_hora<="${fFecha} 23:59:59"`;
-  if (fTipo)  filter += (filter?'&&':'')+`tipo="${fTipo}"`;
+  if (fTrab)  filter += (filter?'&&':'')+`trabajador_id='${fTrab}'`;
+  if (fFecha) filter += (filter?'&&':'')+`fecha_hora>='${fFecha} 00:00:00'&&fecha_hora<='${fFecha} 23:59:59'`;
+  if (fTipo)  filter += (filter?'&&':'')+`tipo='${fTipo}'`;
 
   const items = await SIGA.list('control_seguimiento', filter, 300, 1, '-fecha_hora').catch(()=>[]);
   if (!items.length) { tbody.innerHTML=''; empty.style.display='block'; return; }
