@@ -181,7 +181,7 @@
       }
 
       // Notificar a RRHH vía alerta del sistema (silencioso si falla)
-      fetch(`${PB_URL}/api/collections/alertas_sistema/records`, {
+      fetch(`${PB_URL}/api/collections/alertas_siga/records`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': '1' },
         body: JSON.stringify({

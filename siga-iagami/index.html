@@ -2990,7 +2990,7 @@ async function loadAlertas() {
   if (!lista) return;
   lista.innerHTML = '<p style="color:var(--muted);font-size:13px">Cargando…</p>';
   const filtro = ['RRHH','TECNOLOGIA','DIRECTOR','PRESIDENTE'].includes(ROL) ? '' : `user_id="${U.id}"`;
-  const items = await SIGA.list('alertas_sistema', filtro, 100, 1, '-fecha').catch(()=>[]);
+  const items = await SIGA.list('alertas_siga', filtro, 100, 1, '-fecha').catch(()=>[]);
   setText('alerta-urgentes', items.filter(a=>a.tipo==='urgente').length);
   setText('alerta-rrhh',     items.filter(a=>a.tipo==='rrhh').length);
   setText('alerta-actividad',items.filter(a=>a.tipo==='actividad').length);
@@ -3015,7 +3015,7 @@ async function loadAlertas() {
 }
 
 async function marcarAlertaVista(id) {
-  try { await SIGA.update('alertas_sistema', id, { visto: true }); loadAlertas(); } catch(_) {}
+  try { await SIGA.update('alertas_siga', id, { visto: true }); loadAlertas(); } catch(_) {}
 }
 
 function actualizarAlertasBadge(items) {
@@ -3029,7 +3029,7 @@ function actualizarAlertasBadge(items) {
 async function pollAlertasBadge() {
   const U = SIGA.getUser();
   if (!U.id) return;
-  const items = await SIGA.list('alertas_sistema', `user_id="${U.id}"`, 50, 1, '-fecha').catch(()=>[]);
+  const items = await SIGA.list('alertas_siga', `user_id="${U.id}"`, 50, 1, '-fecha').catch(()=>[]);
   actualizarAlertasBadge(items);
 }
 
@@ -3048,7 +3048,7 @@ async function enviarAlerta() {
   const msg  = document.getElementById('alerta-msg').value.trim();
   if (!para || !msg) { SIGA.toast('Completa todos los campos.','error'); return; }
   try {
-    await SIGA.create('alertas_sistema', {
+    await SIGA.create('alertas_siga', {
       tipo, mensaje: msg, user_id: para, visto: false,
       fecha: new Date().toISOString().substring(0,10)
     });
