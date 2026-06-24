@@ -816,8 +816,8 @@ input,select,textarea{font-family:inherit}
             <div class="form-group form-full"><label>Descripción de la infracción</label><textarea id="mf-descripcion" rows="3" placeholder="Detalle de los hechos que motivaron la multa..."></textarea></div>
             <div class="form-group form-full"><label>Observaciones públicas</label><textarea id="mf-observaciones" rows="2" placeholder="Información visible al ciudadano al consultar esta multa..."></textarea></div>
             <div class="form-group form-full" id="mf-constancia-wrap" style="display:none;background:#f0fdf4;border:1px dashed #86efac;border-radius:8px;padding:14px">
-              <label style="color:#166534;font-weight:700">📄 Constancia de Pago / Solvencia <span style="font-size:11px;font-weight:400">(PDF o imagen — el ciudadano podrá descargarla)</span></label>
-              <input type="file" id="mf-constancia" accept=".pdf,.jpg,.jpeg,.png" style="margin-top:8px;font-size:13px"/>
+              <label style="color:#166534;font-weight:700">📄 Constancia de Pago / Solvencia <span style="font-size:11px;font-weight:400">(PDF de varias páginas o múltiples archivos — el ciudadano podrá descargarlos)</span></label>
+              <input type="file" id="mf-constancia" accept=".pdf,.jpg,.jpeg,.png" multiple style="margin-top:8px;font-size:13px"/>
               <div id="mf-constancia-actual" style="font-size:12px;color:#166534;margin-top:6px"></div>
             </div>
           </div>
@@ -2669,9 +2669,12 @@ async function openMultaForm(id) {
   document.getElementById('multas-form-title').textContent = m ? '✏️ Editar Multa' : '+ Nueva Multa';
   // Mostrar constancia existente
   const actDiv = document.getElementById('mf-constancia-actual');
-  if (actDiv) actDiv.innerHTML = (m && m.constancia)
-    ? `✅ Constancia actual: <a href="${PB_URL}/api/files/multas/${m.id}/${encodeURIComponent(m.constancia)}" target="_blank" style="color:#166534">Ver/Descargar</a> — Sube un nuevo archivo para reemplazarla.`
-    : '';
+  if (actDiv) {
+    const archivos = m && m.constancia ? (Array.isArray(m.constancia) ? m.constancia : [m.constancia]) : [];
+    actDiv.innerHTML = archivos.length
+      ? `✅ Archivos actuales: ${archivos.map((f,i)=>`<a href="${PB_URL}/api/files/multas/${m.id}/${encodeURIComponent(f)}" target="_blank" style="color:#166534;margin-right:8px">📄 Archivo ${i+1}</a>`).join('')}<br><span style="color:#888">Sube nuevos archivos para agregar más.</span>`
+      : '';
+  }
   if (document.getElementById('mf-constancia')) document.getElementById('mf-constancia').value = '';
   toggleConstanciaField();
 }
@@ -2716,7 +2719,7 @@ async function saveMultas() {
   if (!nom) { toast('El nombre o empresa es obligatorio','error'); return; }
   if (!tip) { toast('Selecciona el tipo de infracción','error'); return; }
   if (!fec) { toast('La fecha es obligatoria','error'); return; }
-  const constanciaFile = document.getElementById('mf-constancia')?.files?.[0] || null;
+  const constanciaFiles = Array.from(document.getElementById('mf-constancia')?.files || []);
   const item = {
     id:           document.getElementById('mf-id').value || undefined,
     expediente:   exp,
@@ -2730,7 +2733,7 @@ async function saveMultas() {
     publicado:    document.getElementById('mf-publicado').checked,
     descripcion:  document.getElementById('mf-descripcion').value.trim(),
     observaciones:document.getElementById('mf-observaciones').value.trim(),
-    ...(constanciaFile ? { constancia: constanciaFile } : {})
+    ...(constanciaFiles.length ? { constancia: constanciaFiles } : {})
   };
   await CMSDB.save('multas', item);
   toast(item.id ? 'Multa actualizada' : 'Multa registrada');

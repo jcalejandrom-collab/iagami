@@ -444,17 +444,23 @@ function mostrarResultados(resultados, _tokenBuscado) {
         <div class="multa-obs-lbl">📋 Observaciones</div>
         <div class="multa-obs-box">${escHtml(m.observaciones)}</div>
       </div>` : ''}
-      ${constanciaUrl ? `
-      <div style="padding:12px 20px;border-top:1px solid #f0faf5">
-        <a href="${constanciaUrl}" target="_blank" download
-          style="display:inline-flex;align-items:center;gap:8px;background:#1d6b3e;color:#fff;padding:10px 20px;border-radius:9px;font-size:13px;font-weight:700;text-decoration:none;font-family:'Poppins',sans-serif">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Descargar Constancia de Pago
-        </a>
-      </div>` : pagada ? `
-      <div style="padding:10px 20px;border-top:1px solid #f0faf5;font-size:12px;color:#4a8a6a">
-        📋 La constancia de pago estará disponible próximamente. Comunícate con IAGAMI para solicitarla.
-      </div>` : ''}
+      ${(()=>{
+        if (!pagada) return '';
+        const archivos = Array.isArray(m.constancia) ? m.constancia : (m.constancia ? [m.constancia] : []);
+        if (!archivos.length) return `<div style="padding:10px 20px;border-top:1px solid #f0faf5;font-size:12px;color:#4a8a6a">📋 La constancia de pago estará disponible próximamente. Comunícate con IAGAMI para solicitarla.</div>`;
+        const icono = n => /\.pdf$/i.test(n) ? '📄' : '🖼️';
+        const links = archivos.map((name,i) =>
+          `<a href="${PB_URL}/api/files/multas/${m.id}/${encodeURIComponent(name)}" target="_blank" download
+            style="display:inline-flex;align-items:center;gap:7px;background:#1d6b3e;color:#fff;padding:9px 16px;border-radius:9px;font-size:13px;font-weight:700;text-decoration:none;font-family:'Poppins',sans-serif">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            ${icono(name)} ${archivos.length > 1 ? 'Constancia '+(i+1) : 'Descargar Constancia de Pago'}
+          </a>`
+        ).join('');
+        return `<div style="padding:14px 20px;border-top:1px solid #f0faf5">
+          <div style="font-size:11px;color:#4a8a6a;font-weight:600;margin-bottom:8px">📄 CONSTANCIA DE PAGO OFICIAL</div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px">${links}</div>
+        </div>`;
+      })()}
     </div>`;
   }).join('');
 
