@@ -888,11 +888,11 @@
               <option>Completada</option><option>En Proceso</option><option>Pendiente</option><option>Reprogramada</option><option>Suspendida</option>
             </select>
           </div>
-          <div class="form-group"><label>Proyecto asociado</label><select id="a-proyecto"><option value="">— Sin proyecto —</option></select></div>
+          <div class="form-group"><label>Proyecto asociado</label><input id="a-proyecto" type="text" placeholder="Nombre del proyecto (si aplica)"/></div>
         </div>
         <div class="form-row">
-          <div class="form-group"><label>Comuna (si aplica)</label><select id="a-comuna"><option value="">— Sin comunidad —</option></select></div>
-          <div class="form-group"><label>Consejo Comunal</label><select id="a-consejo"><option value="">— Sin consejo —</option></select></div>
+          <div class="form-group"><label>Comuna (si aplica)</label><input id="a-comuna" type="text" placeholder="Nombre de la comunidad"/></div>
+          <div class="form-group"><label>Consejo Comunal</label><input id="a-consejo" type="text" placeholder="Nombre del consejo comunal"/></div>
         </div>
         <div class="form-group"><label>Ubicación / Dirección</label><input id="a-ubicacion" type="text" placeholder="Lugar donde se realizó la actividad"/></div>
       </div>
@@ -1187,10 +1187,6 @@ const fmt = SIGA.fmtFecha;
 const fmtH = SIGA.fmtFechaHora;
 let _currentSection = 'dashboard';
 let _allTrabajadores = [];
-let _allDirecciones  = [];
-let _allProyectos    = [];
-let _allComunas      = [];
-let _allConsejos     = [];
 let _editTrabId      = null;
 
 /* ─── Toast global ─── */
@@ -1343,19 +1339,8 @@ function showTabBtnsForRole() {
 
 /* ─── Catálogo base ─── */
 async function loadCatalogoBase() {
-  [_allTrabajadores, _allDirecciones, _allProyectos, _allComunas, _allConsejos] = await Promise.all([
-    SIGA.list('trabajadores').catch(()=>[]),
-    SIGA.list('direcciones').catch(()=>[]),
-    SIGA.list('proyectos','publicado=true').catch(()=>[]),
-    SIGA.list('comunas').catch(()=>[]),
-    SIGA.list('consejos_comunales').catch(()=>[]),
-  ]);
-  // Poblar selects
-  // _allDirecciones removido — colección no existe en esquema; filtro por departamento es texto libre
+  _allTrabajadores = await SIGA.list('trabajadores').catch(()=>[]);
   populateSelect('t-supervisor', _allTrabajadores, t=>`${t.nombres} ${t.apellidos}`, '— Sin supervisor —', 'id');
-  populateSelect('a-proyecto', _allProyectos, 'nombre', '— Sin proyecto —', 'id');
-  populateSelect('a-comuna', _allComunas, 'nombre', '— Sin comunidad —', 'id');
-  populateSelect('a-consejo', _allConsejos, 'nombre', '— Sin consejo —', 'id');
 }
 
 function populateSelect(id, items, labelFn, placeholder, valField='nombre') {
@@ -1777,7 +1762,6 @@ async function loadIndicadores() {
 
   // Por dirección
   const porDir = {};
-  _allDirecciones.forEach(d => porDir[d.nombre]={total:0,completadas:0});
   actMes.forEach(a => {
     const trab = _allTrabajadores.find(t=>t.id===a.trabajador_id);
     const dir = trab?.departamento||'Sin departamento';
@@ -2073,7 +2057,6 @@ window.guardarActividad = async function() {
   const actividad = document.getElementById('a-actividad').value.trim();
   const fecha     = document.getElementById('a-fecha').value;
   if (!actividad||!fecha) { toast('Actividad y fecha son obligatorias','error'); return; }
-  const proy = _allProyectos.find(p=>p.id===document.getElementById('a-proyecto').value);
   const data = {
     trabajador_id: U.id, fecha, actividad,
     descripcion: document.getElementById('a-descripcion').value.trim(),
@@ -2083,10 +2066,9 @@ window.guardarActividad = async function() {
     estado:      document.getElementById('a-estado').value,
     observaciones: document.getElementById('a-obs').value.trim(),
     ubicacion:   document.getElementById('a-ubicacion').value.trim(),
-    proyecto_id: document.getElementById('a-proyecto').value||null,
-    proyecto_nombre: proy?.nombre||null,
-    comuna_id:   document.getElementById('a-comuna').value||null,
-    consejo_id:  document.getElementById('a-consejo').value||null,
+    proyecto_nombre: document.getElementById('a-proyecto').value.trim()||null,
+    comuna_nombre:   document.getElementById('a-comuna').value.trim()||null,
+    consejo_nombre:  document.getElementById('a-consejo').value.trim()||null,
     porcentaje_cumplimiento: document.getElementById('a-cumplimiento').value!==''?Number(document.getElementById('a-cumplimiento').value):null,
     resultado_obtenido: document.getElementById('a-resultado-obtenido').value.trim()||null,
     ubicacion_gps: document.getElementById('a-gps').value.trim()||null,
