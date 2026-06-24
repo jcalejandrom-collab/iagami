@@ -1473,7 +1473,7 @@ async function loadRegistrosPendientes() {
   const empty = document.getElementById('registros-empty');
   if (!tbody) return;
   tbody.innerHTML = '<tr><td colspan="7" class="no-rows">Cargando…</td></tr>';
-  const todos = await SIGA.list('trabajadores', '', 500, 1, '-created').catch(()=>[]);
+  const todos = await SIGA.list('trabajadores', '', 500).catch(()=>[]);
   const items = todos.filter(t => ['pendiente','rechazado','bloqueado'].includes(t.estado_cuenta));
   _allRegistrosPendientes = items;
   const badge = document.getElementById('badge-registros');
@@ -1564,7 +1564,7 @@ window.filterPersonal = () => renderPersonal(_allTrabajadores);
 async function loadSolicitudesRRHH() {
   const tbody = document.getElementById('tabla-solicitudes');
   tbody.innerHTML = '<tr><td colspan="6" class="no-rows">Cargando…</td></tr>';
-  const items = await SIGA.list('solicitudes_rrhh','',200,1,'-created').catch(()=>[]);
+  const items = await SIGA.list('solicitudes_rrhh','',200).catch(()=>[]);
   const tipo = document.getElementById('sol-tipo')?.value||'';
   const est  = document.getElementById('sol-estado')?.value||'';
   const filt = items.filter(s => (!tipo||s.tipo===tipo) && (!est||s.estado===est));
@@ -1599,11 +1599,11 @@ window.responderSolicitud = async (id, estado) => {
 };
 
 async function loadComunicadosRRHH() {
-  const items = await SIGA.list('comunicados','',100,1,'-created').catch(()=>[]);
+  const items = await SIGA.list('comunicados','',100).catch(()=>[]);
   renderComunicados(items, 'lista-comunicados');
 }
 async function loadComunicaciones() {
-  const items = await SIGA.list('comunicados','',100,1,'-created').catch(()=>[]);
+  const items = await SIGA.list('comunicados','',100).catch(()=>[]);
   renderComunicados(items, 'lista-comunicaciones');
 }
 function renderComunicados(items, containerId) {
@@ -1721,7 +1721,7 @@ async function loadPlanificacion() {
 async function loadMisSolicitudes() {
   const tbody = document.getElementById('tabla-mis-solicitudes');
   const filter = `trabajador_id="${U.id}"`;
-  const items = await SIGA.list('solicitudes_rrhh', filter, 100, 1, '-created').catch(()=>[]);
+  const items = await SIGA.list('solicitudes_rrhh', filter, 100).catch(()=>[]);
   const empty = document.getElementById('mis-sol-empty');
   if (!items.length) { tbody.innerHTML=''; empty.style.display='block'; return; }
   empty.style.display='none';
@@ -1890,7 +1890,7 @@ window.filterTecUsers = function(items) {
 async function loadAuditoria() {
   const tbody = document.getElementById('tabla-auditoria');
   tbody.innerHTML = '<tr><td colspan="5" class="no-rows">Cargando…</td></tr>';
-  const items = await SIGA.list('auditoria_siga','',100,1,'-created').catch(()=>[]);
+  const items = await SIGA.list('auditoria_siga','',100).catch(()=>[]);
   if (!items.length) { tbody.innerHTML=''; document.getElementById('audit-empty').style.display='block'; return; }
   document.getElementById('audit-empty').style.display='none';
   tbody.innerHTML = items.map(a => {
@@ -1908,7 +1908,7 @@ async function loadAuditoria() {
 async function loadTickets() {
   const tbody = document.getElementById('tabla-tickets');
   tbody.innerHTML = '<tr><td colspan="7" class="no-rows">Cargando…</td></tr>';
-  const items = await SIGA.list('tickets_soporte','',100,1,'-created').catch(()=>[]);
+  const items = await SIGA.list('tickets_soporte','',100).catch(()=>[]);
   if (!items.length) { tbody.innerHTML=''; document.getElementById('tickets-empty').style.display='block'; return; }
   document.getElementById('tickets-empty').style.display='none';
   tbody.innerHTML = items.map(t => `<tr>

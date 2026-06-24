@@ -187,6 +187,7 @@
         body: JSON.stringify({
           tipo:    'rrhh',
           mensaje: `Nuevo registro pendiente de aprobación: ${nombres} ${apellidos} — Cédula: ${cedula} — Cargo: ${cargo||'No especificado'} — Correo: ${email}`,
+          user_id: 'RRHH',
           visto:   false,
           fecha:   new Date().toISOString().substring(0,10)
         })
