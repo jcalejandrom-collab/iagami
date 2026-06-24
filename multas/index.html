@@ -410,7 +410,13 @@ function mostrarResultados(resultados, _tokenBuscado) {
   // No se muestra el documento de identidad (cédula/RIF): el token ya
   // identifica de forma exclusiva al titular del expediente, por lo
   // que no es necesario exponer ese dato adicional en la respuesta.
-  const cards = lista.map(m => `
+  const PB_URL = document.querySelector('meta[name="pb-url"]')?.content || 'https://api.iagami.online';
+  const cards = lista.map(m => {
+    const pagada = m.estado === 'Pagada' || m.estado === 'Liquidada';
+    const constanciaUrl = (pagada && m.constancia)
+      ? `${PB_URL}/api/files/multas/${m.id}/${encodeURIComponent(m.constancia)}`
+      : null;
+    return `
     <div class="multa-card">
       <div class="multa-header">
         <div>
@@ -438,7 +444,19 @@ function mostrarResultados(resultados, _tokenBuscado) {
         <div class="multa-obs-lbl">📋 Observaciones</div>
         <div class="multa-obs-box">${escHtml(m.observaciones)}</div>
       </div>` : ''}
-    </div>`).join('');
+      ${constanciaUrl ? `
+      <div style="padding:12px 20px;border-top:1px solid #f0faf5">
+        <a href="${constanciaUrl}" target="_blank" download
+          style="display:inline-flex;align-items:center;gap:8px;background:#1d6b3e;color:#fff;padding:10px 20px;border-radius:9px;font-size:13px;font-weight:700;text-decoration:none;font-family:'Poppins',sans-serif">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Descargar Constancia de Pago
+        </a>
+      </div>` : pagada ? `
+      <div style="padding:10px 20px;border-top:1px solid #f0faf5;font-size:12px;color:#4a8a6a">
+        📋 La constancia de pago estará disponible próximamente. Comunícate con IAGAMI para solicitarla.
+      </div>` : ''}
+    </div>`;
+  }).join('');
 
   const pendCount = resultados.filter(m => m.estado === 'Pendiente' || m.estado === 'En Proceso').length;
   const aviso = pendCount > 0

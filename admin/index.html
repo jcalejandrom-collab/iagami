@@ -803,8 +803,8 @@ input,select,textarea{font-family:inherit}
             <div class="form-group"><label>Monto (Bs.) *</label><input type="number" id="mf-monto" placeholder="0.00" min="0" step="0.01"/></div>
             <div class="form-group"><label>Fecha de la multa *</label><input type="date" id="mf-fecha"/></div>
             <div class="form-group"><label>Estado</label>
-              <select id="mf-estado">
-                <option>Pendiente</option><option>En Proceso</option><option>Pagada</option><option>Anulada</option>
+              <select id="mf-estado" onchange="toggleConstanciaField()">
+                <option>Pendiente</option><option>En Proceso</option><option>Pagada</option><option>Liquidada</option><option>Anulada</option>
               </select>
             </div>
             <div class="form-group" style="display:flex;align-items:center;gap:10px;padding-top:22px">
@@ -815,6 +815,11 @@ input,select,textarea{font-family:inherit}
             </div>
             <div class="form-group form-full"><label>Descripción de la infracción</label><textarea id="mf-descripcion" rows="3" placeholder="Detalle de los hechos que motivaron la multa..."></textarea></div>
             <div class="form-group form-full"><label>Observaciones públicas</label><textarea id="mf-observaciones" rows="2" placeholder="Información visible al ciudadano al consultar esta multa..."></textarea></div>
+            <div class="form-group form-full" id="mf-constancia-wrap" style="display:none;background:#f0fdf4;border:1px dashed #86efac;border-radius:8px;padding:14px">
+              <label style="color:#166534;font-weight:700">📄 Constancia de Pago / Solvencia <span style="font-size:11px;font-weight:400">(PDF o imagen — el ciudadano podrá descargarla)</span></label>
+              <input type="file" id="mf-constancia" accept=".pdf,.jpg,.jpeg,.png" style="margin-top:8px;font-size:13px"/>
+              <div id="mf-constancia-actual" style="font-size:12px;color:#166534;margin-top:6px"></div>
+            </div>
           </div>
           <input type="hidden" id="mf-id"/>
           <div class="form-actions">
@@ -2638,10 +2643,17 @@ async function renderMultas() {
   renderPagination('multas-pagination','multas',total,current,'renderMultas');
 }
 
+function toggleConstanciaField() {
+  const estado = (document.getElementById('mf-estado')||{}).value||'';
+  const wrap = document.getElementById('mf-constancia-wrap');
+  if (wrap) wrap.style.display = (estado==='Pagada'||estado==='Liquidada') ? '' : 'none';
+}
+
 async function openMultaForm(id) {
   document.getElementById('multas-list-view').style.display = 'none';
   document.getElementById('multas-form-view').style.display  = 'block';
   const m = id ? await CMSDB.getOne('multas', id) : null;
+  const PB_URL = (window.__IAGAMI_CONFIG__&&window.__IAGAMI_CONFIG__.PB_URL)||'https://api.iagami.online';
   document.getElementById('mf-id').value           = m ? m.id : '';
   document.getElementById('mf-expediente').value   = m ? (m.expediente||'') : '';
   document.getElementById('mf-documento').value    = m ? (m.documento||'') : '';
@@ -2655,6 +2667,13 @@ async function openMultaForm(id) {
   document.getElementById('mf-descripcion').value  = m ? (m.descripcion||'') : '';
   document.getElementById('mf-observaciones').value= m ? (m.observaciones||'') : '';
   document.getElementById('multas-form-title').textContent = m ? '✏️ Editar Multa' : '+ Nueva Multa';
+  // Mostrar constancia existente
+  const actDiv = document.getElementById('mf-constancia-actual');
+  if (actDiv) actDiv.innerHTML = (m && m.constancia)
+    ? `✅ Constancia actual: <a href="${PB_URL}/api/files/multas/${m.id}/${encodeURIComponent(m.constancia)}" target="_blank" style="color:#166534">Ver/Descargar</a> — Sube un nuevo archivo para reemplazarla.`
+    : '';
+  if (document.getElementById('mf-constancia')) document.getElementById('mf-constancia').value = '';
+  toggleConstanciaField();
 }
 
 function closeMultaForm() {
@@ -2697,6 +2716,7 @@ async function saveMultas() {
   if (!nom) { toast('El nombre o empresa es obligatorio','error'); return; }
   if (!tip) { toast('Selecciona el tipo de infracción','error'); return; }
   if (!fec) { toast('La fecha es obligatoria','error'); return; }
+  const constanciaFile = document.getElementById('mf-constancia')?.files?.[0] || null;
   const item = {
     id:           document.getElementById('mf-id').value || undefined,
     expediente:   exp,
@@ -2709,7 +2729,8 @@ async function saveMultas() {
     estado:       document.getElementById('mf-estado').value,
     publicado:    document.getElementById('mf-publicado').checked,
     descripcion:  document.getElementById('mf-descripcion').value.trim(),
-    observaciones:document.getElementById('mf-observaciones').value.trim()
+    observaciones:document.getElementById('mf-observaciones').value.trim(),
+    ...(constanciaFile ? { constancia: constanciaFile } : {})
   };
   await CMSDB.save('multas', item);
   toast(item.id ? 'Multa actualizada' : 'Multa registrada');
