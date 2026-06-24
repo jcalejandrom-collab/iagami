@@ -636,7 +636,7 @@
           <div class="page-subtitle">Notificaciones, instrucciones y avisos institucionales</div>
         </div>
         <div style="display:flex;gap:8px">
-          ${['RRHH','SUPERVISOR','DIRECTOR','PRESIDENTE'].includes('__ROL__')?`<button class="btn btn-primary" style="background:#dc2626" onclick="abrirModalNuevaAlerta()">🚨 Nueva Alerta</button>`:''}
+          <button id="btn-nueva-alerta" class="btn btn-primary" style="background:#dc2626;display:none" onclick="abrirModalNuevaAlerta()">🚨 Nueva Alerta</button>
           <button class="btn btn-sm btn-secondary" onclick="loadAlertas()">↺ Actualizar</button>
         </div>
       </div>
@@ -2988,6 +2988,8 @@ async function loadAlertas() {
   const U = SIGA.getUser();
   const lista = document.getElementById('lista-alertas');
   if (!lista) return;
+  const btnNuevaAlerta = document.getElementById('btn-nueva-alerta');
+  if (btnNuevaAlerta) btnNuevaAlerta.style.display = ['RRHH','SUPERVISOR','DIRECTOR','PRESIDENTE'].includes(ROL) ? '' : 'none';
   lista.innerHTML = '<p style="color:var(--muted);font-size:13px">Cargando…</p>';
   const filtro = ['RRHH','TECNOLOGIA','DIRECTOR','PRESIDENTE'].includes(ROL) ? '' : `user_id="${U.id}"`;
   const items = await SIGA.list('alertas_siga', filtro, 100, 1, '-fecha').catch(()=>[]);
