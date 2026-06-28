@@ -46,8 +46,15 @@ const reporteDiarioValidation = [
   body('fecha').notEmpty().withMessage('El campo fecha es requerido.').isDate().withMessage('La fecha no tiene un formato válido (YYYY-MM-DD).'),
   body('institucion').trim().notEmpty().withMessage('El campo institución es requerido.'),
   body('hora_fin').optional().custom((val, { req }) => {
-    if (req.body.hora_inicio && val && val <= req.body.hora_inicio) {
-      throw new Error('hora_fin debe ser posterior a hora_inicio.');
+    if (req.body.hora_inicio && val) {
+      // Parse HH:MM into minutes to compare numerically, not lexicographically.
+      const toMinutes = (t) => {
+        const [h, m] = String(t).split(':').map(Number);
+        return h * 60 + (m || 0);
+      };
+      if (toMinutes(val) <= toMinutes(req.body.hora_inicio)) {
+        throw new Error('hora_fin debe ser posterior a hora_inicio.');
+      }
     }
     return true;
   }),

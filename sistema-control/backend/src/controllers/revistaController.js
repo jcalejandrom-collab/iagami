@@ -72,7 +72,7 @@ async function getRevistasPublicas(req, res) {
     const sql = `
       SELECT
         id, titulo, descripcion, numero_edicion, categoria,
-        fecha_publicacion, portada_url, pdf_url,
+        fecha_publicacion, portada_url,
         visualizaciones, descargas, destacada, estado,
         created_at, updated_at
       FROM revistas r
