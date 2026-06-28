@@ -168,13 +168,13 @@ const CMSDB = (function () {
 
       const perPage = opciones.perPage || 50;
       const page = opciones.page || 1;
-      const sort = opciones.sort || '-created';
+      const sort = opciones.sort !== undefined ? opciones.sort : '-created';
 
       const params = new URLSearchParams({
         page: String(page),
-        perPage: String(perPage),
-        sort
+        perPage: String(perPage)
       });
+      if (sort) params.set('sort', sort);
       if (filtro) params.set('filter', filtro);
 
       // Parámetros adicionales que algunas API Rules necesitan referenciar
