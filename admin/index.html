@@ -2097,7 +2097,7 @@ async function renderDashboard() {
     CMSDB.count('proyectos'),
     CMSDB.count('empresas'),
     CMSDB.count('alertas', 'activa=true'),
-    CMSDB.count('multas', 'estado="Pendiente"'),
+    CMSDB.count('multas', "estado='Pendiente'"),
   ]);
   const stats = [
     {icon:'📰', label:'Noticias', val: noticias, sec:'noticias'},
@@ -2229,7 +2229,7 @@ async function toggleEstado(key, id, field, val1, val2) {
     }
     await CMSDB.save(key, item);
     renderSection(currentSection);
-  } catch(e) { console.error('toggleEstado error:', e); }
+  } catch(e) { toast('Error al cambiar estado: '+e.message,'error'); }
 }
 
 /* ════════════════════════════════════════
@@ -3122,7 +3122,7 @@ async function renderArchivos() {
         <div class="media-name" title="${escHtml(f.nombre||'')}">${escHtml(f.nombre||'')}</div>
         <div class="media-meta">${formatSize(f.tamaño)} · ${f.fecha ? new Date(f.fecha).toLocaleDateString('es-VE') : '—'}</div>
         <div class="media-actions">
-          <button class="btn-icon btn-sm" title="Copiar enlace" onclick="showMediaInfo()">🔗</button>
+          <button class="btn-icon btn-sm" title="Copiar enlace" onclick="copyMediaLink('${f.id}','${escHtml(f.nombre||'')}')">🔗</button>
           <button class="btn-icon danger btn-sm" onclick="deleteMedia('${f.id}')">🗑️</button>
         </div>
       </div>
@@ -3162,8 +3162,13 @@ async function deleteMedia(id) {
   });
 }
 
-function showMediaInfo() {
-  toast('Los archivos se almacenan localmente en este navegador', 'warning');
+function copyMediaLink(id, nombre) {
+  const PB_URL = (window.__IAGAMI_CONFIG__&&window.__IAGAMI_CONFIG__.PB_URL)||'https://api.iagami.online';
+  const url = `${PB_URL}/api/files/media/${id}/${encodeURIComponent(nombre)}`;
+  navigator.clipboard.writeText(url).then(
+    () => toast('Enlace copiado al portapapeles'),
+    () => toast('No se pudo copiar el enlace', 'error')
+  );
 }
 
 /* ─── CONSEJOS COMUNALES ─── */
@@ -3359,21 +3364,6 @@ async function exportConsejoSinglePDF(id) {
   _openPDFWindow(_buildConsejosPDFHtml([c], diagnosticos, `Consejo Comunal: ${c.nombre||id}`, `Parroquia: ${c.parroquia||'—'}`));
 }
 
-async function openConsejoForm(id) {
-  const form = document.getElementById('form-consejos');
-  if (!form) return;
-  form.style.display = 'block';
-  form.scrollIntoView({behavior:'smooth', block:'start'});
-  ccFormId = id||'';
-  const cc = id ? await CMSDB.getOne('consejos_comunales', id) : null;
-  const fields = ['nombre','codigo','estatus','estado','municipio','parroquia','comunidad','direccion','fecha_constitucion','num_familias','num_habitantes','responsable','cedula','telefono','email','coordenadas','observaciones'];
-  fields.forEach(f => {
-    const el = document.getElementById('fc-'+f);
-    if (el) el.value = cc ? (cc[f]||'') : (f==='estado'?'Lara': f==='municipio'?'Iribarren': f==='estatus'?'Activo':'');
-  });
-  const title = document.getElementById('ftitle-consejos');
-  if (title) title.textContent = (id ? '✏️ Editar' : '🏘️ Nuevo') + ' Consejo Comunal';
-}
 
 async function saveConsejo() {
   const nombre = (document.getElementById('fc-nombre')||{}).value||'';
@@ -3814,7 +3804,6 @@ async function savePlan() {
     if (_editPlanId) { await CMSDB.save('planificacion', Object.assign({}, data, {id: _editPlanId})); }
     else { await CMSDB.save('planificacion', data); }
   } catch (e) {
-    console.error('[admin] savePlan error:', e.message);
     showToast('Error al guardar la actividad', 'error');
     return;
   }
@@ -3877,7 +3866,6 @@ async function addPlanUpdate(id) {
   try {
     item = await CMSDB.getOne('planificacion', id);
   } catch (e) {
-    console.error('[admin] addPlanUpdate getOne error:', e.message);
     showToast('Error al cargar la actividad', 'error');
     return;
   }
@@ -3890,7 +3878,6 @@ async function addPlanUpdate(id) {
   try {
     await CMSDB.save('planificacion', Object.assign({}, item, { avance, historial: hist }));
   } catch (e) {
-    console.error('[admin] addPlanUpdate save error:', e.message);
     showToast('Error al registrar la actualización', 'error');
     return;
   }
@@ -3912,7 +3899,7 @@ async function renderRevistas() {
   const fEst = document.getElementById('f-revista-estado')?.value || '';
   const fCat = document.getElementById('f-revista-cat')?.value || '';
   let items;
-  try { items = await CMSDB.getAll('revistas'); } catch(e) { items = []; console.error('CMSDB revistas error:', e); }
+  try { items = await CMSDB.getAll('revistas'); } catch(e) { items = []; }
   if (q)    items = items.filter(r => ((r.titulo||'')+(r.numero_edicion||'')+(r.descripcion||'')).toLowerCase().includes(q));
   if (fEst) items = items.filter(r => r.estado === fEst);
   if (fCat) items = items.filter(r => r.categoria === fCat);
@@ -4249,7 +4236,7 @@ async function saveHidrica() {
   const consejo = document.getElementById('hid-consejo').value;
   if (!consejo) { showToast('Selecciona un consejo comunal','error'); return; }
   const id = document.getElementById('hid-id').value;
-  const numF = id => parseFloat(document.getElementById(id).value)||0;
+  const numF = id => Math.max(0, parseFloat(document.getElementById(id).value)||0);
   const payload = {
     consejo_comunal: consejo,
     pozos_activos: numF('hid-pozos_activos'),
@@ -4627,7 +4614,6 @@ async function saveComuna() {
     closeComunaForm();
   } catch(e) {
     toast('Error al guardar: '+e.message,'error');
-    console.error('[saveComuna]', e);
   }
 }
 
@@ -5814,7 +5800,6 @@ async function saveOrgForm() {
     if (_orgType==='Comuna') { CMSDB.clearCache(); renderComunas(); }
     else { CMSDB.clearCache(); renderConsejos(); }
   } catch(e) {
-    console.error('[saveOrgForm] error:', e);
     toast('Error al guardar: ' + (e.message||e), 'error');
   } finally {
     if (btn) { btn.disabled=false; btn.textContent='💾 Guardar'; }
