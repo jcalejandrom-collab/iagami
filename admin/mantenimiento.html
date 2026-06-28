@@ -1507,10 +1507,15 @@ function fmtDateTime(iso) {
 /* ═══════════════════════════════════════════════
    INIT
 ═══════════════════════════════════════════════ */
-(function init() {
-  const adminSess = sessionStorage.getItem('iagami_admin_session');
-  if (!adminSess) { window.location.replace('index.html'); return; }
-  const sess = getCurrentUser() || {username:'admin', role:'admin', nombre:'Administrador'};
+(async function init() {
+  const ok = await CMSDB.verifyToken();
+  if (!ok) { window.location.replace('index.html'); return; }
+  const pbUser = CMSDB.getCurrentUser() || {};
+  const sess = {
+    username: pbUser.email || pbUser.name || 'admin',
+    role: 'admin',
+    nombre: pbUser.name || pbUser.email || 'Administrador'
+  };
   startApp(sess);
 })();
 </script>
