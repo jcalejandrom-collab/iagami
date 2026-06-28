@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, Component } from 'react';
 import {
   BrowserRouter,
   Routes,
@@ -26,6 +26,48 @@ import SubmissionDetail from './components/admin/SubmissionDetail.jsx';
 // Admin revistas
 import RevistasAdmin from './components/admin/revistas/RevistasAdmin.jsx';
 import RevistaForm   from './components/admin/revistas/RevistaForm.jsx';
+
+/* ============================================================
+   Error Boundary — catches render errors anywhere in the tree
+   ============================================================ */
+class ErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{
+          minHeight: '100vh', display: 'flex', flexDirection: 'column',
+          alignItems: 'center', justifyContent: 'center', gap: '1rem',
+          padding: '2rem', background: '#f5f7f5', textAlign: 'center',
+        }}>
+          <div style={{ fontSize: '3rem' }}>⚠️</div>
+          <h1 style={{ fontFamily: 'Poppins, sans-serif', fontSize: '1.3rem', color: '#1a3d2b' }}>
+            Ocurrió un error inesperado
+          </h1>
+          <p style={{ color: '#4a8a6a', maxWidth: '400px', fontSize: '.9rem' }}>
+            Recarga la página para continuar. Si el problema persiste, contacta al administrador.
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            style={{
+              padding: '.6rem 1.4rem', background: '#1d6b3e', color: '#fff',
+              border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '.9rem',
+            }}
+          >
+            Recargar página
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 /* ============================================================
    Toast Context
@@ -143,6 +185,7 @@ function PrivateRoute({ children }) {
    ============================================================ */
 export default function App() {
   return (
+    <ErrorBoundary>
     <BrowserRouter>
       <AuthProvider>
         <ToastProvider>
@@ -233,6 +276,7 @@ export default function App() {
         </ToastProvider>
       </AuthProvider>
     </BrowserRouter>
+    </ErrorBoundary>
   );
 }
 

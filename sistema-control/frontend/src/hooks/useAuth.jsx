@@ -7,12 +7,17 @@ const AuthContext = createContext(null);
 const TOKEN_KEY = 'iagami_token';
 const USER_KEY  = 'iagami_user';
 
+/* sessionStorage keeps the token in memory only for this tab; it is
+   not readable by other tabs and is cleared when the tab closes,
+   reducing the XSS exposure window compared to localStorage. */
+const store = sessionStorage;
+
 /* ---- Provider ---- */
 export function AuthProvider({ children }) {
-  const [token, setToken]     = useState(() => localStorage.getItem(TOKEN_KEY) || null);
+  const [token, setToken]     = useState(() => store.getItem(TOKEN_KEY) || null);
   const [user, setUser]       = useState(() => {
     try {
-      const stored = localStorage.getItem(USER_KEY);
+      const stored = store.getItem(USER_KEY);
       return stored ? JSON.parse(stored) : null;
     } catch {
       return null;
@@ -23,7 +28,7 @@ export function AuthProvider({ children }) {
      las rutas protegidas muestren un estado de carga en vez de redirigir
      prematuramente a login cuando el token existe pero el perfil aún no se
      ha resuelto. */
-  const [authChecked, setAuthChecked] = useState(() => !(localStorage.getItem(TOKEN_KEY) && !localStorage.getItem(USER_KEY)));
+  const [authChecked, setAuthChecked] = useState(() => !(store.getItem(TOKEN_KEY) && !store.getItem(USER_KEY)));
 
   /* On mount: if we have a token but no user, fetch profile */
   useEffect(() => {
@@ -33,13 +38,13 @@ export function AuthProvider({ children }) {
         if (!error && data) {
           const profile = data.user || data;
           setUser(profile);
-          localStorage.setItem(USER_KEY, JSON.stringify(profile));
+          store.setItem(USER_KEY, JSON.stringify(profile));
         } else {
           // Token invalid — clear
           setToken(null);
           setUser(null);
-          localStorage.removeItem(TOKEN_KEY);
-          localStorage.removeItem(USER_KEY);
+          store.removeItem(TOKEN_KEY);
+          store.removeItem(USER_KEY);
         }
       }).finally(() => {
         setLoading(false);
@@ -67,8 +72,8 @@ export function AuthProvider({ children }) {
       return { error: 'Respuesta inesperada del servidor.' };
     }
 
-    localStorage.setItem(TOKEN_KEY, receivedToken);
-    localStorage.setItem(USER_KEY, JSON.stringify(receivedUser));
+    store.setItem(TOKEN_KEY, receivedToken);
+    store.setItem(USER_KEY, JSON.stringify(receivedUser));
     setToken(receivedToken);
     setUser(receivedUser);
 
@@ -79,8 +84,8 @@ export function AuthProvider({ children }) {
    * logout() — clears state and storage
    */
   const logout = useCallback(() => {
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(USER_KEY);
+    store.removeItem(TOKEN_KEY);
+    store.removeItem(USER_KEY);
     setToken(null);
     setUser(null);
   }, []);

@@ -370,12 +370,22 @@ function fmtNum(n) {
   return Number(n).toLocaleString('es-ES');
 }
 
-/* Devuelve la URL solo si usa un esquema seguro (http/https o ruta
-   absoluta del mismo origen); en caso contrario null. Evita cargar
-   esquemas peligrosos (javascript:, data:) en el src del iframe. */
+/* Devuelve la URL solo si apunta a un dominio autorizado o es una ruta
+   relativa del mismo origen. Rechaza esquemas peligrosos (javascript:,
+   data:) y dominios externos desconocidos. */
+const ALLOWED_PDF_HOSTS = ['api.iagami.online', window.location.hostname];
 function safePdfUrl(url) {
   if (!url || typeof url !== 'string') return null;
-  return /^(https?:\/\/|\/)/i.test(url.trim()) ? url.trim() : null;
+  const s = url.trim();
+  if (/^\//.test(s)) return s; // relative path — same origin
+  try {
+    const parsed = new URL(s);
+    if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return null;
+    if (!ALLOWED_PDF_HOSTS.includes(parsed.hostname)) return null;
+    return s;
+  } catch {
+    return null;
+  }
 }
 
 /* ============================================================
