@@ -387,8 +387,8 @@ const SYS_USERS = 'iagami_sys_users';
 const SYS_SESSION = 'iagami_sys_session';
 const SYS_LOGS = 'iagami_sys_logs';
 const SYS_BACKUPS = 'iagami_sys_backups';
-const CMS_MODULES = ['noticias','tramites','eventos','documentos','org','proyectos','indicadores','empresas','alertas','multas','denuncias','media','consejos'];
-const MODULE_LABELS = {noticias:'Noticias',tramites:'Trámites',eventos:'Eventos',documentos:'Documentos',org:'Organigrama',proyectos:'Proyectos',indicadores:'Indicadores',empresas:'Empresas',alertas:'Alertas',multas:'Multas',denuncias:'Denuncias',media:'Media',consejos:'Consejos'};
+const CMS_MODULES = ['noticias','tramites','eventos','documentos','org','proyectos','indicadores','empresas','alertas','multas','denuncias','media','consejos_comunales'];
+const MODULE_LABELS = {noticias:'Noticias',tramites:'Trámites',eventos:'Eventos',documentos:'Documentos',org:'Organigrama',proyectos:'Proyectos',indicadores:'Indicadores',empresas:'Empresas',alertas:'Alertas',multas:'Multas',denuncias:'Denuncias',media:'Media',consejos_comunales:'Consejos'};
 let _monitorInterval = null;
 let _logPage = 1;
 const LOGS_PER_PAGE = 20;
@@ -566,7 +566,7 @@ async function runDiagnostic() {
   checks.push({text:`Empresas: ${empresas.length} registros${expiredPermisos > 0 ? `, ${expiredPermisos} con permisos vencidos` : ''}`, status: expiredPermisos > 0 ? 'warn' : 'ok'});
 
   // 7. Consejos
-  const consejos = await CMSDB.getAll('consejos').catch(()=>[]);
+  const consejos = await CMSDB.getAll('consejos_comunales').catch(()=>[]);
   const activeConsejos = consejos.filter(c => c.activo !== false).length;
   checks.push({text:`Consejos: ${consejos.length} total, ${activeConsejos} activos`, status: consejos.length > 0 ? 'ok' : 'warn'});
 
@@ -1176,7 +1176,7 @@ async function runAudit() {
   results.empresas = {total:emps.length, permisoVencido:empExpired.length, venceSoon:empSoon.length};
 
   // Consejos
-  const cons = await CMSDB.getAll('consejos');
+  const cons = await CMSDB.getAll('consejos_comunales');
   const consActive = cons.filter(c => c.activo !== false);
   const consMissingContact = cons.filter(c => !c.email && !c.telefono && !c.contacto);
   results.consejos = {total:cons.length, activos:consActive.length, sinContacto:consMissingContact.length};
