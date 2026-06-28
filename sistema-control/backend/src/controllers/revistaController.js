@@ -418,25 +418,22 @@ async function toggleEstado(req, res) {
   try {
     const { id } = req.params;
 
-    const existing = await db.query(
-      'SELECT id, estado FROM revistas WHERE id = $1',
+    // Single atomic UPDATE avoids TOCTOU between a SELECT and a separate UPDATE.
+    const { rows } = await db.query(
+      `UPDATE revistas
+       SET estado = CASE WHEN estado = 'publicada' THEN 'borrador' ELSE 'publicada' END
+       WHERE id = $1
+       RETURNING *`,
       [id]
     );
-    if (existing.rows.length === 0) {
+
+    if (rows.length === 0) {
       return res.status(404).json({ error: 'Revista no encontrada' });
     }
 
-    const current = existing.rows[0];
-    const nuevoEstado = current.estado === 'publicada' ? 'borrador' : 'publicada';
-
-    const { rows } = await db.query(
-      'UPDATE revistas SET estado = $1 WHERE id = $2 RETURNING *',
-      [nuevoEstado, id]
-    );
-
     await recordAuditLog(req, 'revista_estado_changed', {
       userId: req.user.id, email: req.user.email, role: req.user.role,
-      detail: `id=${id} estado=${current.estado}→${nuevoEstado}`,
+      detail: `id=${id} estado→${rows[0].estado}`,
     });
 
     return res.json(rows[0]);
@@ -454,24 +451,19 @@ async function toggleDestacada(req, res) {
   try {
     const { id } = req.params;
 
-    const existing = await db.query(
-      'SELECT id, destacada FROM revistas WHERE id = $1',
+    // Single atomic UPDATE avoids TOCTOU between a SELECT and a separate UPDATE.
+    const { rows } = await db.query(
+      'UPDATE revistas SET destacada = NOT destacada WHERE id = $1 RETURNING *',
       [id]
     );
-    if (existing.rows.length === 0) {
+
+    if (rows.length === 0) {
       return res.status(404).json({ error: 'Revista no encontrada' });
     }
 
-    const current = existing.rows[0];
-
-    const { rows } = await db.query(
-      'UPDATE revistas SET destacada = $1 WHERE id = $2 RETURNING *',
-      [!current.destacada, id]
-    );
-
     await recordAuditLog(req, 'revista_destacada_changed', {
       userId: req.user.id, email: req.user.email, role: req.user.role,
-      detail: `id=${id} destacada=${current.destacada}→${!current.destacada}`,
+      detail: `id=${id} destacada→${rows[0].destacada}`,
     });
 
     return res.json(rows[0]);

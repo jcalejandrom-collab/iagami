@@ -304,6 +304,11 @@ const getSubmissions = async (req, res) => {
 const getSubmission = async (req, res) => {
   const { id } = req.params;
 
+  const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!UUID_RE.test(id)) {
+    return res.status(400).json({ error: 'ID inválido', message: 'El ID de la entrega no es válido.' });
+  }
+
   try {
     const submissionResult = await query(
       `SELECT
@@ -411,6 +416,11 @@ const updateStatus = async (req, res) => {
  */
 const uploadEvidences = async (req, res) => {
   const { id } = req.params;
+
+  const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!UUID_RE.test(id)) {
+    return res.status(400).json({ error: 'ID inválido', message: 'El ID de la entrega no es válido.' });
+  }
 
   if (!req.files || req.files.length === 0) {
     return res.status(400).json({
