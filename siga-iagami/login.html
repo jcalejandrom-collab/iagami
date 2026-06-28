@@ -126,11 +126,21 @@
         btn.disabled = false;
         return;
       }
+      if (estado !== 'activo') {
+        SIGA.logout && SIGA.logout();
+        sessionStorage.removeItem('siga_token');
+        sessionStorage.removeItem('siga_user');
+        warn.textContent = '⚠️ Tu cuenta no está activa. Contacta a Recursos Humanos.';
+        warn.className = 'msg-warn rejected';
+        lbl.textContent = 'Iniciar Sesión';
+        btn.disabled = false;
+        return;
+      }
       window.location.href = 'index.html';
     } catch(e) {
       err.textContent = e.message.includes('400') || e.message.toLowerCase().includes('invalid')
         ? 'Credenciales incorrectas. Verifica tu correo y contraseña.'
-        : `Error de conexión: ${e.message}`;
+        : 'Error de conexión. Intenta de nuevo en unos momentos.';
       err.classList.add('show');
       lbl.textContent = 'Iniciar Sesión';
       btn.disabled = false;

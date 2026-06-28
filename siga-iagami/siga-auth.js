@@ -28,11 +28,17 @@
 
   /* ─── Login contra colección trabajadores ─── */
   async function login(email, password) {
-    const res = await fetch(`${PB()}/api/collections/trabajadores/auth-with-password`, {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ identity: email, password })
-    });
+    const ctrl = new AbortController();
+    const tid = setTimeout(() => ctrl.abort(), 15000);
+    let res;
+    try {
+      res = await fetch(`${PB()}/api/collections/trabajadores/auth-with-password`, {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ identity: email, password }),
+        signal: ctrl.signal
+      });
+    } finally { clearTimeout(tid); }
     if (!res.ok) {
       const err = await res.json().catch(()=>({}));
       throw new Error(err.message || `HTTP ${res.status}`);

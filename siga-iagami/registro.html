@@ -145,6 +145,9 @@
     msg.className = 'msg';
     msg.style.display = 'none';
 
+    if (!/^[VEPJGveepjg]-?\d{6,9}$/.test(cedula.replace(/\s/g,''))) {
+      showErr('Cédula inválida. Usa el formato V-12345678 o E-12345678.'); return;
+    }
     if (pass !== pass2) {
       showErr('Las contraseñas no coinciden.'); return;
     }
@@ -180,7 +183,7 @@
         return;
       }
 
-      // Notificar a RRHH vía alerta del sistema (silencioso si falla)
+      // Notificar a RRHH vía alerta del sistema
       fetch(`${PB_URL}/api/collections/alertas_siga/records`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -191,7 +194,9 @@
           visto:   false,
           fecha:   new Date().toISOString().substring(0,10)
         })
-      }).catch(()=>{});
+      }).catch(()=>{
+        // La notificación falló pero el registro sí se creó; RRHH puede ver el listado de pendientes
+      });
 
       // Éxito: ocultar formulario y mostrar pantalla pendiente
       document.getElementById('reg-form').style.display = 'none';
