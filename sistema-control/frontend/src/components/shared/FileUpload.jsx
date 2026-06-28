@@ -7,7 +7,7 @@ import React, { useRef, useState, useCallback } from 'react';
      maxSizeMB     : number (default 5)
    ============================================================ */
 
-export default function FileUpload({ onFilesChange, maxSizeMB = 5 }) {
+export default function FileUpload({ onFilesChange, maxSizeMB = 5, maxFiles = 10 }) {
   const [files, setFiles]       = useState([]);
   const [dragging, setDragging] = useState(false);
   const [errors, setErrors]     = useState([]);
@@ -40,13 +40,21 @@ export default function FileUpload({ onFilesChange, maxSizeMB = 5 }) {
 
       if (valid.length > 0) {
         setFiles((prev) => {
-          const combined = [...prev, ...valid];
+          const remaining = maxFiles - prev.length;
+          if (remaining <= 0) {
+            setErrors((e) => [...e, `Límite de ${maxFiles} archivos alcanzado.`]);
+            return prev;
+          }
+          const combined = [...prev, ...valid.slice(0, remaining)];
+          if (valid.length > remaining) {
+            setErrors((e) => [...e, `Solo se agregaron ${remaining} archivo(s). Límite: ${maxFiles}.`]);
+          }
           onFilesChange(combined);
           return combined;
         });
       }
     },
-    [maxBytes, maxSizeMB, onFilesChange]
+    [maxBytes, maxSizeMB, maxFiles, onFilesChange]
   );
 
   function removeFile(index) {
@@ -130,7 +138,7 @@ export default function FileUpload({ onFilesChange, maxSizeMB = 5 }) {
             : 'Arrastra archivos aquí o haz clic para seleccionar'}
         </p>
         <p className="file-upload__sub-text">
-          Imágenes (JPG, PNG, WEBP) y PDF · Máximo {maxSizeMB} MB por archivo
+          Imágenes (JPG, PNG, WEBP) y PDF · Máximo {maxSizeMB} MB por archivo · Hasta {maxFiles} archivos
         </p>
       </div>
 
@@ -147,7 +155,7 @@ export default function FileUpload({ onFilesChange, maxSizeMB = 5 }) {
       {files.length > 0 && (
         <ul className="file-upload__list">
           {files.map((file, idx) => (
-            <li key={idx} className="file-upload__file">
+            <li key={`${file.name}-${file.size}-${idx}`} className="file-upload__file">
               <span className="file-upload__file-icon">{fileIcon(file)}</span>
               <div className="file-upload__file-info">
                 <span className="file-upload__file-name">{file.name}</span>

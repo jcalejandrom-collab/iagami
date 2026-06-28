@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../hooks/useAuth.jsx';
 import { revistas as revistasApi } from '../../../services/api.js';
@@ -111,8 +111,9 @@ export default function RevistasAdmin() {
   // Confirm dialog
   const [deleteTarget, setDeleteTarget] = useState(null);
 
-  // Action loading
+  // Action loading — tracks one in-flight action at a time to prevent races
   const [actionLoading, setActionLoading] = useState(null);
+  const inFlight = useRef(false);
 
   // Fetch stats
   useEffect(() => {
@@ -155,18 +156,24 @@ export default function RevistasAdmin() {
   }
 
   async function handleToggleEstado(id) {
+    if (inFlight.current) return;
+    inFlight.current = true;
     setActionLoading(`estado-${id}`);
-    const { data, error } = await revistasApi.toggleEstado(id);
+    const { error } = await revistasApi.toggleEstado(id);
     setActionLoading(null);
+    inFlight.current = false;
     if (error) { addToast('Error al cambiar estado: ' + error, 'error'); return; }
     addToast('Estado actualizado.', 'success');
     fetchList(appliedFilters);
   }
 
   async function handleToggleDestacada(id) {
+    if (inFlight.current) return;
+    inFlight.current = true;
     setActionLoading(`dest-${id}`);
-    const { data, error } = await revistasApi.toggleDestacada(id);
+    const { error } = await revistasApi.toggleDestacada(id);
     setActionLoading(null);
+    inFlight.current = false;
     if (error) { addToast('Error al cambiar destacada: ' + error, 'error'); return; }
     addToast('Actualizado.', 'success');
     fetchList(appliedFilters);

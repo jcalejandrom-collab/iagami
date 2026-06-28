@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import DynamicList from '../shared/DynamicList.jsx';
 import FileUpload from '../shared/FileUpload.jsx';
 import { submissions as submissionsApi } from '../../services/api.js';
@@ -38,6 +38,8 @@ export default function ReporteDiario() {
   const [submitting, setSubmitting] = useState(false);
   const [globalError, setGlobalError] = useState('');
   const [success, setSuccess]       = useState(null); // { id }
+  const mountedRef = useRef(true);
+  useEffect(() => { mountedRef.current = true; return () => { mountedRef.current = false; }; }, []);
 
   function handleField(e) {
     const { name, value } = e.target;
@@ -76,8 +78,7 @@ export default function ReporteDiario() {
     const { data, error } = await submissionsApi.createReporte(payload);
 
     if (error) {
-      setGlobalError(error);
-      setSubmitting(false);
+      if (mountedRef.current) { setGlobalError(error); setSubmitting(false); }
       return;
     }
 
@@ -89,16 +90,16 @@ export default function ReporteDiario() {
       files.forEach((file) => formData.append('files', file));
       const { error: uploadError } = await submissionsApi.uploadEvidences(submissionId, formData);
       if (uploadError) {
-        // Non-fatal: we still show success but warn about files
-        setGlobalError(`Reporte enviado, pero hubo un problema al subir archivos: ${uploadError}`);
-        setSubmitting(false);
-        setSuccess({ id: submissionId, uploadWarning: true });
+        if (mountedRef.current) {
+          setGlobalError(`Reporte enviado, pero hubo un problema al subir archivos: ${uploadError}`);
+          setSubmitting(false);
+          setSuccess({ id: submissionId, uploadWarning: true });
+        }
         return;
       }
     }
 
-    setSubmitting(false);
-    setSuccess({ id: submissionId });
+    if (mountedRef.current) { setSubmitting(false); setSuccess({ id: submissionId }); }
   }
 
   /* ---- Success screen ---- */

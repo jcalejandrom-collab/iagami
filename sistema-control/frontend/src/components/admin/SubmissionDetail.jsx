@@ -96,8 +96,10 @@ export default function SubmissionDetail() {
 
   useEffect(() => {
     if (!id) return;
+    let cancelled = false;
     setLoading(true);
     submissionsApi.getOne(id).then(({ data, error: err }) => {
+      if (cancelled) return;
       if (err) {
         setError(err);
       } else {
@@ -108,6 +110,7 @@ export default function SubmissionDetail() {
       }
       setLoading(false);
     });
+    return () => { cancelled = true; };
   }, [id]);
 
   function showToast(type, msg) {

@@ -46,18 +46,21 @@ export default function Dashboard() {
   const [loadingRecent, setLoadingRecent] = useState(true);
 
   useEffect(() => {
+    let cancelled = false;
     submissionsApi.getStats().then(({ data }) => {
+      if (cancelled) return;
       if (data) setStats(data);
       setLoadingStats(false);
     });
-
     submissionsApi.getAll({ limit: 5, page: 1 }).then(({ data }) => {
+      if (cancelled) return;
       if (data) {
         const list = Array.isArray(data) ? data : (data.submissions || data.data || []);
         setRecent(list.slice(0, 5));
       }
       setLoadingRecent(false);
     });
+    return () => { cancelled = true; };
   }, []);
 
   function handleLogout() {

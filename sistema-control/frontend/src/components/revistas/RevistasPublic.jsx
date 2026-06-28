@@ -694,6 +694,8 @@ function FeaturedRevista({ revista, onDownload, downloading }) {
 /* ============================================================
    Main component
    ============================================================ */
+const PAGE_SIZE = 9;
+
 export default function RevistasPublic() {
   const { addToast } = useToast();
 
@@ -715,7 +717,6 @@ export default function RevistasPublic() {
   const [downloading, setDownloading] = useState(null);
 
   // Pagination
-  const PAGE_SIZE = 9;
   const [page, setPage]           = useState(1);
   const [total, setTotal]         = useState(0);
   const totalPages = Math.ceil(total / PAGE_SIZE);
