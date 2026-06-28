@@ -1,6 +1,8 @@
 const { Router } = require('express');
 const path = require('path');
+const fs = require('fs');
 const multer = require('multer');
+const { v4: uuidv4 } = require('uuid');
 const { requireAuth, requireAdmin } = require('../middleware/auth');
 const { submissionLimiter, evidenceLimiter } = require('../middleware/rateLimit');
 const { isValidFileSignature } = require('../utils/fileSignature');
@@ -18,6 +20,14 @@ const {
 } = require('../controllers/submissionController');
 
 const router = Router();
+
+// ─── Upload directory ─────────────────────────────────────────────────────────
+
+const UPLOAD_BASE = process.env.UPLOAD_DIR || path.resolve(__dirname, '..', 'uploads');
+const EVIDENCES_DIR = path.join(UPLOAD_BASE, 'evidences');
+if (!fs.existsSync(EVIDENCES_DIR)) {
+  fs.mkdirSync(EVIDENCES_DIR, { recursive: true });
+}
 
 // ─── Multer configuration ─────────────────────────────────────────────────────
 
@@ -46,13 +56,19 @@ const fileFilter = (_req, file, cb) => {
   }
 };
 
-// memoryStorage: los archivos viven en Buffer en RAM, sin escritura a disco.
-// Compatible con Vercel serverless y con PC fija.
+// diskStorage: cada archivo se escribe en EVIDENCES_DIR con nombre UUID.
+// file.filename y file.path quedan disponibles para el controller y para
+// la verificación por magic-bytes.
+const evidenceStorage = multer.diskStorage({
+  destination: (_req, _file, cb) => cb(null, EVIDENCES_DIR),
+  filename: (_req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    cb(null, `${uuidv4()}${ext}`);
+  },
+});
+
 const upload = multer({
-  storage: multer.memoryStorage(),
-  // fileSize: tope por archivo; files: tope de cantidad. Ambos acotan la
-  // memoria máxima que un request puede retener (memoryStorage mantiene
-  // cada archivo en RAM): 10 × MAX_FILE_SIZE_BYTES como cota superior.
+  storage: evidenceStorage,
   limits: { fileSize: MAX_FILE_SIZE_BYTES, files: 10 },
   fileFilter,
 });
@@ -61,6 +77,8 @@ const upload = multer({
 const handleUpload = (req, res, next) => {
   upload.array('files', 10)(req, res, (err) => {
     if (err instanceof multer.MulterError) {
+      // Clean up any files already written to disk before responding
+      if (req.files) req.files.forEach((f) => { try { fs.unlinkSync(f.path); } catch (_) {} });
       if (err.code === 'LIMIT_FILE_SIZE') {
         return res.status(413).json({
           error: 'Archivo demasiado grande',
@@ -73,6 +91,7 @@ const handleUpload = (req, res, next) => {
       });
     }
     if (err) {
+      if (req.files) req.files.forEach((f) => { try { fs.unlinkSync(f.path); } catch (_) {} });
       return res.status(400).json({
         error: 'Error al subir archivo',
         message: err.message,
@@ -86,17 +105,24 @@ const handleUpload = (req, res, next) => {
    `req.files` es el que el navegador/cliente DECLARÓ, no lo que el
    archivo realmente contiene. Sin esto, basta con renombrar/etiquetar
    un .html o .svg con script embebido como "image/png" para que pase
-   el filtro y quede servido públicamente desde /uploads. Se lee la
-   cabecera binaria real de cada archivo guardado y, si no coincide con
-   la firma esperada para su mimetype declarado, se borra y se rechaza
-   toda la solicitud. */
-// Con memoryStorage los bytes están en file.buffer — sin lectura de disco.
+   el filtro y quede servido públicamente desde /uploads. Se leen los
+   primeros 12 bytes del archivo ya guardado en disco y, si no coinciden
+   con la firma esperada para su mimetype declarado, se eliminan todos
+   los archivos del request y se rechaza la solicitud completa. */
 const verifyFileSignatures = (req, res, next) => {
   if (!req.files || req.files.length === 0) return next();
 
+  const unlinkAll = () => {
+    req.files.forEach((f) => { try { fs.unlinkSync(f.path); } catch (_) {} });
+  };
+
   for (const file of req.files) {
-    const header = file.buffer.slice(0, 12);
-    if (!isValidFileSignature(header, file.mimetype)) {
+    const buf = Buffer.alloc(12);
+    const fd = fs.openSync(file.path, 'r');
+    fs.readSync(fd, buf, 0, 12, 0);
+    fs.closeSync(fd);
+    if (!isValidFileSignature(buf, file.mimetype)) {
+      unlinkAll();
       return res.status(400).json({
         error: 'Archivo inválido',
         message: `El contenido de "${file.originalname}" no coincide con el tipo de archivo declarado.`,

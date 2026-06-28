@@ -8,6 +8,7 @@ const helmet = require('helmet');
 const path = require('path');
 
 const { testConnection, query } = require('./config/db');
+const { requireAuth } = require('./middleware/auth');
 const authRouter = require('./routes/auth');
 const submissionsRouter = require('./routes/submissions');
 const revistasRouter = require('./routes/revistas');
@@ -75,6 +76,13 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // ─── Static files (uploads) ───────────────────────────────────────────────────
 
 const uploadDir = path.resolve(process.env.UPLOAD_DIR || 'src/uploads');
+
+// Evidence files are internal (submission reports) — require authentication.
+// This route must be registered BEFORE the public /uploads handler so that
+// /uploads/evidences/** never falls through to the unauthenticated static server.
+app.use('/uploads/evidences', requireAuth, express.static(path.join(uploadDir, 'evidences')));
+
+// Revistas (PDFs, portadas) are public content — no auth required.
 app.use('/uploads', express.static(uploadDir));
 
 // ─── Routes ───────────────────────────────────────────────────────────────────
