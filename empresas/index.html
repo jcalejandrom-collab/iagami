@@ -517,7 +517,6 @@ async function init() {
   try {
     allEmpresas = await CMSDB.getAll('empresas') || [];
   } catch(e) {
-    console.error('Error loading empresas:', e);
     allEmpresas = [];
     toast('Error al cargar el directorio', 'error');
   }
@@ -597,7 +596,6 @@ async function submitEmpresa(ev) {
     closeRegEmpresa();
     toast('✅ Empresa registrada correctamente');
   } catch (e) {
-    console.error('Error registrando empresa:', e);
     toast('No se pudo registrar la empresa. Intenta de nuevo.', 'error');
   } finally {
     btn.disabled = false; btn.textContent = 'Registrar empresa';

@@ -420,7 +420,7 @@ async function descargarRevista(id) {
   try {
     r = await CMSDB.getOne('revistas', id);
   } catch(e) {
-    toast('Error al iniciar descarga', 'error');
+    toast('Error al iniciar descarga. Intenta nuevamente.');
     return;
   }
   if (!r) return;
@@ -429,7 +429,6 @@ async function descargarRevista(id) {
     const updated = Object.assign({}, r, {descargas: (r.descargas||0)+1});
     await CMSDB.save('revistas', updated);
   } catch(e) {
-    console.warn('[revista] No se pudo actualizar contador de descargas:', e.message);
   }
   toast('⬇️ Descarga iniciada correctamente');
 
@@ -456,7 +455,6 @@ async function renderPage() {
   try {
     all = await CMSDB.getAll('revistas');
   } catch (e) {
-    console.error('[revista] Error cargando revistas:', e.message);
     const grid = document.getElementById('editions-grid');
     if (grid) grid.innerHTML = '<div class="empty-state"><div class="empty-ico">📰</div><h3>Error al cargar</h3><p>No se pudieron cargar las ediciones. Intente más tarde.</p></div>';
     return;

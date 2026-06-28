@@ -268,7 +268,7 @@ footer p{margin-bottom:4px}
 const PER_PAGE = 10;
 function getImgUrl(n) {
   if (!n.imagen || !n.id || !(n.collectionName || n.collectionId)) return '';
-  const base = (window.__IAGAMI_CONFIG__ && window.__IAGAMI_CONFIG__.PB_URL) || 'http://127.0.0.1:8090';
+  const base = (window.__IAGAMI_CONFIG__ && window.__IAGAMI_CONFIG__.PB_URL) || 'https://api.iagami.online';
   return `${base}/api/files/${n.collectionName || n.collectionId}/${n.id}/${n.imagen}`;
 }
 

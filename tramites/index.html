@@ -455,7 +455,6 @@ async function openDetail(id) {
   try {
     t = await CMSDB.getOne('tramites', id);
   } catch(e) {
-    console.error('[tramites] openDetail error:', e.message);
     toast('Error al cargar el trámite', 'error');
     return;
   }

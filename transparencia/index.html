@@ -243,7 +243,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const raw = await CMSDB.getFiltered('documentos', 'publicado=true', { perPage: 200 });
     _cachedDocs = Array.isArray(raw) ? raw : [];
   } catch (e) {
-    console.error('[transparencia] Error cargando documentos:', e.message);
     _cachedDocs = [];
     if (typeof toast === 'function') toast('Error al cargar documentos. Intente más tarde.');
   }

@@ -374,7 +374,6 @@ async function init() {
   try {
     allIndicadores = await CMSDB.getAll('indicadores') || [];
   } catch(e) {
-    console.error('Error loading indicadores:', e);
     allIndicadores = [];
     toast('Error al cargar indicadores', 'error');
   }

@@ -260,7 +260,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     await buildOrgTree();
     await renderDirectory();
   } catch (err) {
-    console.error('[organizacion] Init falló:', err.message);
   }
 });
 
@@ -275,7 +274,7 @@ function switchTab(tab) {
 
 // ── Build Org Tree ──
 async function buildOrgTree() {
-  const raw = await CMSDB.getAll('org');
+  const raw = await CMSDB.getAll('org').catch(() => []);
   const units = Array.isArray(raw) ? raw : [];
   _orgUnits = units;
   if (units.length === 0) return;
@@ -342,7 +341,6 @@ async function openUnit(id) {
       _orgUnits = Array.isArray(raw) ? raw : [];
       unit = _orgUnits.find(u => u.id === id);
     } catch (e) {
-      console.error('[organizacion] openUnit error:', e.message);
     }
   }
   if (!unit) return;

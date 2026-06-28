@@ -508,7 +508,6 @@ async function init() {
     document.getElementById('count-badge').textContent = _filtered.length + ' plan' + (_filtered.length !== 1 ? 'es' : '');
     renderLista();
   } catch (err) {
-    console.error('[SIGAP] init() falló:', err);
     _allPlanes = [];
     _filtered  = [];
     renderStats([]);

@@ -527,7 +527,7 @@ function viewReport(id) {
     <div class="form-footer">
       <button class="btn-cancel" onclick="renderDashboard()">← Volver</button>
       <div class="spacer"></div>
-      <button class="btn-draft" onclick="openFormReport('${report.id}')">✏️ Editar</button>
+      <button class="btn-draft" onclick="openFormReport('${escHtml(report.id)}')">✏️ Editar</button>
       ${report.estado === 'borrador'
         ? `<button class="btn-submit" onclick="sendReport('${report.id}');renderDashboard()">📤 Enviar</button>`
         : ''}
