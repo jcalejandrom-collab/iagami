@@ -424,9 +424,9 @@ function startApp(session) {
    LOGS
 ═══════════════════════════════════════════════ */
 function getLogs() { try { return JSON.parse(localStorage.getItem(SYS_LOGS)||'[]'); } catch(e){return[];} }
-function saveLogs(l) { localStorage.setItem(SYS_LOGS, JSON.stringify(l)); }
+function saveLogs(l) { try { localStorage.setItem(SYS_LOGS, JSON.stringify(l)); } catch(e){} }
 function getUsers() { try { return JSON.parse(localStorage.getItem(SYS_USERS)||'[]'); } catch(e){return[];} }
-function saveUsers(u) { localStorage.setItem(SYS_USERS, JSON.stringify(u)); }
+function saveUsers(u) { try { localStorage.setItem(SYS_USERS, JSON.stringify(u)); } catch(e){} }
 function hashPwd(pwd) {
   // Simple deterministic hash for password storage (not cryptographic — localStorage only)
   let h = 0x811c9dc5;
@@ -488,11 +488,13 @@ async function renderDashboard() {
   let totalRecords = 0;
   let activeModules = 0;
   for (const k of CMS_MODULES) {
-    const arr = await CMSDB.getAll(k);
-    totalRecords += arr.length;
-    if (arr.length > 0) activeModules++;
+    try {
+      const arr = await CMSDB.getAll(k);
+      totalRecords += arr.length;
+      if (arr.length > 0) activeModules++;
+    } catch(e) {}
   }
-  const alertas = (await CMSDB.getAll('alertas')).filter(a => a.activa !== false).length;
+  const alertas = await CMSDB.getAll('alertas').then(a => a.filter(x => x.activa !== false).length).catch(()=>0);
 
   const stats = [
     {label:'Sistema',val:lsOk?'OK':'ERROR',status:lsOk?'ok':'err'},
@@ -534,45 +536,46 @@ async function runDiagnostic() {
   const lsOk = (() => { try { localStorage.setItem('_t','1'); localStorage.removeItem('_t'); return true; } catch(e){return false;} })();
   checks.push({text:'localStorage disponible', status: lsOk ? 'ok' : 'err'});
 
+  const now = new Date();
+
   // 2. Noticias
-  const noticias = await CMSDB.getAll('noticias');
+  const noticias = await CMSDB.getAll('noticias').catch(()=>[]);
   const notsPublicadas = noticias.filter(n => n.publicada || n.estado === 'publicada').length;
   const notsMissingFields = noticias.filter(n => !n.titulo || !n.fecha).length;
   checks.push({text:`Noticias: ${noticias.length} registros, ${notsPublicadas} publicadas`, status: noticias.length > 0 ? 'ok' : 'warn'});
   if (notsMissingFields > 0) checks.push({text:`Noticias: ${notsMissingFields} con campos faltantes (titulo/fecha)`, status:'warn'});
 
   // 3. Proyectos
-  const proyectos = await CMSDB.getAll('proyectos');
+  const proyectos = await CMSDB.getAll('proyectos').catch(()=>[]);
   const projMissingAvance = proyectos.filter(p => p.porcentaje_avance === undefined && p.avance === undefined).length;
   checks.push({text:`Proyectos: ${proyectos.length} registros${projMissingAvance > 0 ? `, ${projMissingAvance} sin porcentaje_avance` : ''}`, status: proyectos.length > 0 ? (projMissingAvance > 0 ? 'warn' : 'ok') : 'warn'});
 
   // 4. Eventos
-  const eventos = await CMSDB.getAll('eventos');
-  const now = new Date();
+  const eventos = await CMSDB.getAll('eventos').catch(()=>[]);
   const upcoming = eventos.filter(e => e.fecha && new Date(e.fecha) > now).length;
   checks.push({text:`Eventos: ${eventos.length} registros, ${upcoming} próximos`, status: eventos.length > 0 ? 'ok' : 'warn'});
 
   // 5. Alertas vencidas
-  const alertas = await CMSDB.getAll('alertas');
+  const alertas = await CMSDB.getAll('alertas').catch(()=>[]);
   const expiredActive = alertas.filter(a => a.activa !== false && a.fecha_expiracion && new Date(a.fecha_expiracion) < now).length;
   checks.push({text:`Alertas: ${alertas.length} total${expiredActive > 0 ? `, ${expiredActive} activas vencidas` : ', ninguna vencida activa'}`, status: expiredActive > 0 ? 'warn' : 'ok'});
 
   // 6. Empresas permisos
-  const empresas = await CMSDB.getAll('empresas');
+  const empresas = await CMSDB.getAll('empresas').catch(()=>[]);
   const expiredPermisos = empresas.filter(e => e.permiso_vencimiento && new Date(e.permiso_vencimiento) < now).length;
   checks.push({text:`Empresas: ${empresas.length} registros${expiredPermisos > 0 ? `, ${expiredPermisos} con permisos vencidos` : ''}`, status: expiredPermisos > 0 ? 'warn' : 'ok'});
 
   // 7. Consejos
-  const consejos = await CMSDB.getAll('consejos');
+  const consejos = await CMSDB.getAll('consejos').catch(()=>[]);
   const activeConsejos = consejos.filter(c => c.activo !== false).length;
   checks.push({text:`Consejos: ${consejos.length} total, ${activeConsejos} activos`, status: consejos.length > 0 ? 'ok' : 'warn'});
 
   // 8. Indicadores
-  const indicadores = await CMSDB.getAll('indicadores');
+  const indicadores = await CMSDB.getAll('indicadores').catch(()=>[]);
   checks.push({text:`Indicadores: ${indicadores.length}/6 registros`, status: indicadores.length >= 6 ? 'ok' : (indicadores.length > 0 ? 'warn' : 'err')});
 
   // 9. Trámites
-  const tramites = await CMSDB.getAll('tramites');
+  const tramites = await CMSDB.getAll('tramites').catch(()=>[]);
   checks.push({text:`Trámites: ${tramites.length} registros`, status: tramites.length > 0 ? 'ok' : 'warn'});
 
   // 10. localStorage quota
@@ -646,8 +649,10 @@ async function renderMonitor() {
   // Pre-fetch module counts before building HTML (await cannot be used inside .map())
   const moduleCounts = {};
   for (const k of CMS_MODULES) {
-    const items = await CMSDB.getAll(k);
-    moduleCounts[k] = items.length;
+    try {
+      const items = await CMSDB.getAll(k);
+      moduleCounts[k] = items.length;
+    } catch(e) { moduleCounts[k] = 0; }
   }
 
   const html = `
@@ -738,7 +743,7 @@ function cleanCache(btn) {
     const k = localStorage.key(i);
     if (!allowed.has(k) && k.startsWith('iagami_')) toRemove.push(k);
   }
-  toRemove.forEach(k => localStorage.removeItem(k));
+  try { toRemove.forEach(k => localStorage.removeItem(k)); } catch(e) {}
   setActionResult('cleanCache', `${toRemove.length} claves eliminadas`);
   logAction('cleanCache','sistema',`${toRemove.length} claves temporales eliminadas`,'success');
   toast(`Caché limpiado: ${toRemove.length} claves eliminadas`, 'success');
@@ -748,15 +753,20 @@ function cleanCache(btn) {
 async function removeExpiredAlerts(btn) {
   if (!confirm('¿Eliminar alertas inactivas con más de 30 días?')) return;
   btn.disabled = true;
-  const cutoff = new Date(Date.now() - 30 * 86400000);
-  const all = await CMSDB.getAll('alertas');
-  const toKeep = all.filter(a => !(a.activa === false && a.fecha && new Date(a.fecha) < cutoff));
-  const removed = all.length - toKeep.length;
-  for (const a of await CMSDB.getAll('alertas')) { if (!toKeep.find(t => t.id === a.id)) await CMSDB.remove('alertas', a.id); }
-  setActionResult('removeExpiredAlerts', `${removed} alertas eliminadas`);
-  logAction('removeExpiredAlerts','alertas',`${removed} alertas vencidas eliminadas`,'success');
-  toast(`${removed} alertas vencidas eliminadas`, 'success');
-  btn.disabled = false;
+  try {
+    const cutoff = new Date(Date.now() - 30 * 86400000);
+    const all = await CMSDB.getAll('alertas');
+    const toRemove = all.filter(a => a.activa === false && a.fecha && new Date(a.fecha) < cutoff);
+    for (const a of toRemove) await CMSDB.remove('alertas', a.id);
+    const removed = toRemove.length;
+    setActionResult('removeExpiredAlerts', `${removed} alertas eliminadas`);
+    logAction('removeExpiredAlerts','alertas',`${removed} alertas vencidas eliminadas`,'success');
+    toast(`${removed} alertas vencidas eliminadas`, 'success');
+  } catch(e) {
+    toast('Error al eliminar alertas: '+e.message, 'error');
+  } finally {
+    btn.disabled = false;
+  }
 }
 
 async function deduplicateDenuncias(btn) {
@@ -856,7 +866,7 @@ async function createBackup(tipo) {
   // Save metadata
   const backups = getBackups();
   backups.push({id:'bk-'+Date.now(), fecha:new Date().toISOString(), tipo, modules:modules.join(','), size: Math.round(blob.size/1024)+'KB', estado:'completado'});
-  localStorage.setItem(SYS_BACKUPS, JSON.stringify(backups));
+  try { localStorage.setItem(SYS_BACKUPS, JSON.stringify(backups)); } catch(e) {}
   renderBackupHistory();
   logAction('backup','sistema',`Respaldo ${tipo} creado: ${modules.join(',')}`, 'success');
   toast(`Respaldo ${tipo} descargado exitosamente`, 'success');
@@ -1022,7 +1032,7 @@ function renderUsers() {
       <td><div style="display:flex;gap:4px;flex-wrap:wrap">
         ${isLocked ? `<button class="btn btn-secondary btn-sm" onclick="unlockUser('${u.id}')">Desbloquear</button>` : ''}
         <button class="btn btn-secondary btn-sm" onclick="toggleUserActive('${u.id}')">${u.activo?'Desactivar':'Activar'}</button>
-        <button class="btn btn-secondary btn-sm" onclick="openChangeUserPwd('${u.id}','${u.username}')">Cambiar Pwd</button>
+        <button class="btn btn-secondary btn-sm" onclick="openChangeUserPwd('${u.id}','${escHtml(u.username)}')">Cambiar Pwd</button>
       </div></td>
     </tr>`;
   }).join('');
