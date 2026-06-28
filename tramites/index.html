@@ -423,7 +423,7 @@ function renderCards() {
         <div class="tr-card-top" style="background:${s.accent}"></div>
         <div class="tr-card-body">
           <div class="tr-icon">${s.icon}</div>
-          <span class="cat-badge" style="background:${s.bg};color:${s.text}">${t.categoria}</span>
+          <span class="cat-badge" style="background:${s.bg};color:${s.text}">${escHtml(t.categoria)}</span>
           <div class="tr-name">${escHtml(t.nombre)}</div>
           <div class="tr-meta">
             <div class="tr-meta-row">
@@ -469,7 +469,7 @@ async function openDetail(id) {
 
   /* header */
   document.getElementById('modalCat').innerHTML =
-    `<span class="cat-badge" style="background:${s.bg};color:${s.text}">${t.categoria}</span>`;
+    `<span class="cat-badge" style="background:${s.bg};color:${s.text}">${escHtml(t.categoria)}</span>`;
   document.getElementById('modalTitleEl').textContent = t.nombre;
 
   /* body */

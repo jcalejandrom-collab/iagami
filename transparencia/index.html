@@ -333,13 +333,15 @@ function docCardHTML(d) {
       <div class="doc-desc">${escHtml(desc)}</div>
       <div class="doc-footer">
         <div class="doc-meta-bottom">Año ${escHtml(String(d.year || d.anio || ""))}</div>
-        <button class="download-btn" onclick="handleDownload()">⬇ Descargar PDF</button>
+        ${d.archivo ? `<button class="download-btn" onclick="handleDownload('${escHtml(d.collectionId||d.collectionName||'documentos')}','${escHtml(d.id)}','${escHtml(d.archivo)}')">⬇ Descargar PDF</button>` : `<span class="doc-no-archivo">Sin archivo</span>`}
       </div>
     </div>`;
 }
 
-function handleDownload() {
-  toast('Documento disponible para descarga. Contacte: transparencia@iagami.gob.ve');
+function handleDownload(col, id, archivo) {
+  const pbUrl = document.querySelector('meta[name="pb-url"]')?.content || 'https://api.iagami.online';
+  const url = `${pbUrl}/api/files/${col}/${id}/${encodeURIComponent(archivo)}`;
+  window.open(url, '_blank', 'noopener');
 }
 
 function toast(msg) {

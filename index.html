@@ -1540,7 +1540,6 @@ async function enviarDenuncia() {
     }
   } catch(e) {
     toast('⚠ Error al guardar la denuncia. Intenta nuevamente.');
-    console.error('enviarDenuncia error:', e);
   } finally {
     _enviandoDenuncia = false;
     if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = originalText; }
