@@ -7,7 +7,7 @@
 ═══════════════════════════════════════════════════ */
 (function(w){
 
-  const PB = () => w.__SIGACFG_URL || document.querySelector('meta[name="pb-url"]')?.content?.trim() || 'http://127.0.0.1:8090';
+  const PB = () => w.__SIGACFG_URL || document.querySelector('meta[name="pb-url"]')?.content?.trim() || 'https://api.iagami.online';
 
   const KEY_TOKEN = 'siga_token';
   const KEY_USER  = 'siga_user';

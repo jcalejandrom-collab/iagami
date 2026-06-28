@@ -125,7 +125,7 @@
   const PB_URL = (() => {
     if (window.__SIGACFG_URL) return window.__SIGACFG_URL;
     const m = document.querySelector('meta[name="pb-url"]');
-    return m?.content?.trim() || 'http://127.0.0.1:8090';
+    return m?.content?.trim() || 'https://api.iagami.online';
   })();
 
   async function doRegistro(ev) {

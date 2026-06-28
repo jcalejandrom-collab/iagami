@@ -2785,7 +2785,7 @@ function abrirModalReporte() {
   document.getElementById('rep-resumen').value = '';
   document.getElementById('rep-logros').value = '';
   document.getElementById('rep-dificultades').value = '';
-  document.getElementById('modal-reporte').classList.add('active');
+  abrirModal('modal-reporte');
 }
 
 async function submitReporteDiario() {
@@ -2952,7 +2952,7 @@ function abrirObservacion(actId, estadoActual) {
   document.getElementById('obs-est-nuevo').value = estadoActual;
   document.getElementById('obs-avance').value = '';
   document.getElementById('obs-texto').value = '';
-  document.getElementById('modal-obs-actividad').classList.add('active');
+  abrirModal('modal-obs-actividad');
 }
 
 async function guardarObservacion() {
@@ -3042,7 +3042,7 @@ function abrirModalNuevaAlerta() {
     sel.innerHTML = ts.map(t => `<option value="${esc(t.id)}">${esc(t.nombres||'')} ${esc(t.apellidos||'')} (${esc(t.rol||'TRABAJADOR')})</option>`).join('');
   }).catch(()=>{});
   document.getElementById('alerta-msg').value='';
-  document.getElementById('modal-nueva-alerta').classList.add('active');
+  abrirModal('modal-nueva-alerta');
 }
 
 async function enviarAlerta() {

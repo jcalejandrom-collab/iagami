@@ -18,6 +18,8 @@
   --topbar-h:56px;
   --radius:10px;
   --shadow:0 2px 12px rgba(0,0,0,.08);
+  --surface:#f0faf5;
+  --bg:#fff;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Inter',sans-serif;background:#f8fcfa;color:var(--text);min-height:100vh}
@@ -176,6 +178,7 @@ tr:hover td{background:var(--primary-lighter)}
 .modal-footer{padding:14px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
 .modal-lg{max-width:780px}
 .modal-xl{max-width:1000px}
+.modal-box{background:#fff;border-radius:14px;width:100%;max-width:540px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.25)}
 
 /* ── Timeline ── */
 .timeline{border-left:2px solid var(--border);padding-left:20px;margin-left:8px}
