@@ -1556,7 +1556,7 @@ function renderPersonal(items) {
     <td><span class="badge ${t.activo?'badge-green':'badge-red'}">${t.activo?'Activo':'Inactivo'}</span></td>
     <td>${fmt(t.fecha_ingreso)}</td>
     <td class="td-actions">
-      <button class="btn-icon" title="Editar" onclick="editarTrabajador('${esc(t.id)}')">✏️</button>
+      ${['RRHH','DIRECTOR','PRESIDENTE','TECNOLOGIA'].includes(ROL)?`<button class="btn-icon" title="Editar" onclick="editarTrabajador('${esc(t.id)}')">✏️</button>`:''}
       ${ROL==='TECNOLOGIA'||ROL==='PRESIDENTE'?`<button class="btn-icon btn-danger" title="Eliminar" onclick="eliminarTrabajador('${esc(t.id)}')">🗑️</button>`:''}
     </td></tr>`).join('');
 }
@@ -3315,13 +3315,12 @@ window.guardarPresencia = async function() {
   try {
     const res = await fetch(`${PB_URL_SIGA}/api/collections/control_seguimiento/records`, {
       method:  'POST',
-      headers: { 'Authorization': token, 'ngrok-skip-browser-warning': '1' },
+      headers: { 'Authorization': token },
       body:    fd
     });
     if (!res.ok) {
       const errData = await res.json().catch(()=>({}));
       const campos = errData?.data ? ' — Campos: ' + Object.entries(errData.data).map(([k,v])=>`${k}: ${v?.message||v}`).join(', ') : '';
-      console.error('PocketBase error:', JSON.stringify(errData));
       throw new Error((errData?.message || 'HTTP ' + res.status) + campos);
     }
     toast('✅ Presencia registrada correctamente');

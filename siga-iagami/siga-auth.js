@@ -30,7 +30,7 @@
   async function login(email, password) {
     const res = await fetch(`${PB()}/api/collections/trabajadores/auth-with-password`, {
       method:'POST',
-      headers:{'Content-Type':'application/json','ngrok-skip-browser-warning':'1'},
+      headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ identity: email, password })
     });
     if (!res.ok) {
@@ -65,7 +65,7 @@
   /* ─── Fetch autenticado a PocketBase ─── */
   async function apiFetch(path, opts = {}) {
     const token = getToken();
-    const headers = { 'ngrok-skip-browser-warning':'1', ...( opts.headers || {} ) };
+    const headers = { ...( opts.headers || {} ) };
     if (token) headers['Authorization'] = token;
     if (opts.json) {
       headers['Content-Type'] = 'application/json';
@@ -89,7 +89,7 @@
     if (sort) p.set('sort', sort);
     if (filter) p.set('filter', filter);
     if (expand) p.set('expand', expand);
-    return apiFetch(`${col}/records?${p}`).then(d => d?.items || []);
+    return apiFetch(`${col}/records?${p}`).then(d => d?.items || []).catch(e => { throw e; });
   }
   async function getOne(col, id) {
     return apiFetch(`${col}/records/${id}`);
@@ -111,7 +111,7 @@
     if (!chip) return;
     const initials = ((u.nombres||'').charAt(0) + (u.apellidos||'').charAt(0)).toUpperCase() || 'U';
     chip.innerHTML = `
-      <div class="uc-av">${initials}</div>
+      <div class="uc-av">${escSiga(initials)}</div>
       <div class="uc-info">
         <div class="uc-name">${escSiga(u.nombres||'')} ${escSiga(u.apellidos||'')}</div>
         <div class="uc-role">${escSiga(u.rol||'TRABAJADOR')}</div>
@@ -125,8 +125,8 @@
     if (!nav) return;
     nav.innerHTML = items.map(it => {
       if (it.section) return `<div class="sidebar-section">${escSiga(it.section)}</div>`;
-      return `<button class="nav-item${it.id===activeId?' active':''}" onclick="sigaNav('${it.id}')" title="${escSiga(it.label)}">
-        <span class="nav-icon">${it.icon}</span>${escSiga(it.label)}</button>`;
+      return `<button class="nav-item${it.id===activeId?' active':''}" onclick="sigaNav('${escSiga(it.id)}')" title="${escSiga(it.label)}">
+        <span class="nav-icon">${escSiga(it.icon||'')}</span>${escSiga(it.label)}</button>`;
     }).join('');
   }
 

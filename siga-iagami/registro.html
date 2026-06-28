@@ -158,7 +158,7 @@
     try {
       const res = await fetch(`${PB_URL}/api/collections/trabajadores/records`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': '1' },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email,
           password: pass,
@@ -183,7 +183,7 @@
       // Notificar a RRHH vía alerta del sistema (silencioso si falla)
       fetch(`${PB_URL}/api/collections/alertas_siga/records`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': '1' },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           tipo:    'rrhh',
           mensaje: `Nuevo registro pendiente de aprobación: ${nombres} ${apellidos} — Cédula: ${cedula} — Cargo: ${cargo||'No especificado'} — Correo: ${email}`,
