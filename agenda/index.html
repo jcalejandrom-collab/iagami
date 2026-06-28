@@ -431,7 +431,7 @@ async function renderCalendar() {
     }
 
     const pillsHTML = dayEvents.slice(0, 2).map(e =>
-      `<div class="cal-pill ${(e.tipo || 'otro').toLowerCase()}">${e.titulo || ''}</div>`
+      `<div class="cal-pill ${escHtml((e.tipo || 'otro').toLowerCase())}">${escHtml(e.titulo || '')}</div>`
     ).join('') + (dayEvents.length > 2 ? `<div class="cal-pill otro">+${dayEvents.length - 2} más</div>` : '');
 
     el.innerHTML = `<div class="cal-day-num">${cell.date.getDate()}</div><div class="cal-pills">${pillsHTML}</div>`;

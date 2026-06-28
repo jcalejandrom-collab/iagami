@@ -403,14 +403,14 @@ function renderGrid() {
     const s       = catStyle(n.categoria);
     const excerpt = (n.contenido || '').replace(/\n\n/g,' ').slice(0, 120) + '…';
     return `
-      <article class="news-card" onclick="openDetail('${n.id}')" tabindex="0"
-               onkeydown="if(event.key==='Enter')openDetail('${n.id}')" aria-label="${escAttr(n.titulo)}">
+      <article class="news-card" onclick="openDetail('${escHtml(n.id)}')" tabindex="0"
+               onkeydown="if(event.key==='Enter')openDetail('${escHtml(n.id)}')" aria-label="${escAttr(n.titulo)}">
         ${getImgUrl(n)
           ? `<img class="card-img" src="${escHtml(getImgUrl(n))}" alt="${escAttr(n.titulo)}" loading="lazy">`
           : `<div class="card-img-placeholder" style="background:${s.bg}">${s.emoji}</div>`}
         <div class="card-body">
           <div class="card-cat">
-            <span class="cat-badge" style="background:${s.bg};color:${s.text}">${n.categoria}</span>
+            <span class="cat-badge" style="background:${s.bg};color:${s.text}">${escHtml(n.categoria)}</span>
           </div>
           <div class="card-title">${escHtml(n.titulo)}</div>
           <div class="card-excerpt">${escHtml(excerpt)}</div>
@@ -420,7 +420,7 @@ function renderGrid() {
             <span class="card-meta"><span>📅 ${formatDate(n.fecha)}</span></span>
             <span class="card-meta"><span>✍ ${escHtml(n.autor)}</span></span>
           </div>
-          <button class="btn-leer" onclick="event.stopPropagation();openDetail('${n.id}')">Leer más →</button>
+          <button class="btn-leer" onclick="event.stopPropagation();openDetail('${escHtml(n.id)}')">Leer más →</button>
         </div>
       </article>`;
   }).join('');

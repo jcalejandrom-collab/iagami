@@ -377,7 +377,7 @@ async function buscarMulta() {
       // `filter`) porque la API Rule de la colección lo referencia explícitamente
       // vía @request.query.token — el filtro por sí solo no es de fiar como
       // mecanismo de autorización (el cliente lo controla por completo).
-      const encontrados = await CMSDB.getFiltered('multas', `token_tuc="${safeToken}" && publicado=true`, {
+      const encontrados = await CMSDB.getFiltered('multas', `token_tuc='${safeToken}' && publicado=true`, {
         perPage: 1,
         params: { token: safeToken }
       });

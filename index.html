@@ -1299,6 +1299,10 @@ function findFaqResponse(text, faqs) {
   return null;
 }
 
+function sanitizeChatHtml(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/&lt;(\/?(strong|b|br\s?\/?))&gt;/gi, '<$1>');
+}
 function addChatBubble(msgs, html, isUser) {
   const b = document.createElement('div');
   if (isUser) {
@@ -1306,7 +1310,7 @@ function addChatBubble(msgs, html, isUser) {
     b.textContent = html;
   } else {
     b.className = 'chat-bubble';
-    b.innerHTML = html;
+    b.innerHTML = sanitizeChatHtml(html);
   }
   msgs.appendChild(b);
   msgs.scrollTop = msgs.scrollHeight;
