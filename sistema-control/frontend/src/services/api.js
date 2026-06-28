@@ -8,7 +8,7 @@ const BASE_URL = import.meta.env.VITE_API_URL || '/api';
  * Build headers. Includes Authorization if a token is stored.
  */
 function getHeaders() {
-  const token = localStorage.getItem('iagami_token');
+  const token = sessionStorage.getItem('iagami_token');
   const headers = {
     'Content-Type': 'application/json',
   };
@@ -114,7 +114,7 @@ export const submissions = {
    * Sends FormData (multipart) — does NOT use JSON headers.
    */
   async uploadEvidences(submissionId, formData) {
-    const token = localStorage.getItem('iagami_token');
+    const token = sessionStorage.getItem('iagami_token');
     const headers = {};
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
@@ -212,7 +212,7 @@ export const revistas = {
 
   /** POST /revistas/admin — create magazine with multipart FormData */
   create: (formData) => {
-    const token = localStorage.getItem('iagami_token');
+    const token = sessionStorage.getItem('iagami_token');
     return fetch(`${BASE_URL}/revistas/admin`, {
       method: 'POST',
       headers: token ? { Authorization: `Bearer ${token}` } : {},
@@ -225,12 +225,12 @@ export const revistas = {
         return { data: null, error: message, status: r.status };
       }
       return { data, error: null, status: r.status };
-    }).catch((err) => ({ data: null, error: err.message || 'Error de red.', status: 0 }));
+    }).catch(() => ({ data: null, error: 'Error de conexión. Intenta de nuevo.', status: 0 }));
   },
 
   /** PUT /revistas/admin/:id — update magazine with multipart FormData */
   update: (id, formData) => {
-    const token = localStorage.getItem('iagami_token');
+    const token = sessionStorage.getItem('iagami_token');
     return fetch(`${BASE_URL}/revistas/admin/${id}`, {
       method: 'PUT',
       headers: token ? { Authorization: `Bearer ${token}` } : {},
@@ -243,7 +243,7 @@ export const revistas = {
         return { data: null, error: message, status: r.status };
       }
       return { data, error: null, status: r.status };
-    }).catch((err) => ({ data: null, error: err.message || 'Error de red.', status: 0 }));
+    }).catch(() => ({ data: null, error: 'Error de conexión. Intenta de nuevo.', status: 0 }));
   },
 
   /** DELETE /revistas/admin/:id */
