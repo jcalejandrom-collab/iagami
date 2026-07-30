@@ -1610,8 +1610,26 @@ input,select,textarea{font-family:inherit}
 'use strict';
 
 // Verificación de autenticación al cargar
+/* ─── Loader de autenticación ─── */
+(function() {
+  const ov = document.createElement('div');
+  ov.id = 'auth-loader';
+  ov.style.cssText = 'position:fixed;inset:0;background:#f0faf5;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;font-family:Inter,sans-serif';
+  ov.innerHTML = '<div style="width:40px;height:40px;border:3px solid #d4edd8;border-top-color:#1d6b3e;border-radius:50%;animation:spin .7s linear infinite"></div><span style="font-size:13px;color:#4a8a6a" id="auth-loader-msg">Verificando sesión…</span><style>@keyframes spin{to{transform:rotate(360deg)}}</style>';
+  document.body.appendChild(ov);
+})();
+
 (async function checkAuth() {
+  const msgEl = document.getElementById('auth-loader-msg');
+
+  window.addEventListener('sigap:reconnecting', e => {
+    if (msgEl) msgEl.textContent = `Sin conexión. Reintentando (${e.detail.attempt})…`;
+  }, { once: false });
+
   const ok = await CMSDB.verifyToken();
+  const loader = document.getElementById('auth-loader');
+  if (loader) loader.remove();
+
   if (!ok) {
     window.location.replace('../index.html#login');
     return;
@@ -1648,6 +1666,19 @@ function renderTopbarUser() {
 
 window.addEventListener('sigap:session-expired', () => {
   window.location.replace('../index.html#login');
+});
+
+window.addEventListener('sigap:access-denied', e => {
+  const col = e.detail && e.detail.coleccion ? ` (${e.detail.coleccion})` : '';
+  showToast(`Sin permisos para acceder a este recurso${col}. Contacta al administrador.`, 'warn');
+});
+
+window.addEventListener('sigap:offline', () => {
+  showToast('Sin conexión. Trabajando con datos en caché.', 'warn');
+});
+
+window.addEventListener('sigap:online', () => {
+  showToast('Conexión restablecida.', 'ok');
 });
 
 /* ─── NAVIGATION ─── */
