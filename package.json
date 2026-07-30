@@ -7,7 +7,9 @@
   "scripts": {
     "lint": "eslint \"**/*.js\" --max-warnings 0",
     "lint:report": "eslint \"**/*.js\" --format json -o lint-report.json || true",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "repository": {
     "type": "git",
@@ -18,10 +20,13 @@
   "license": "ISC",
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@vitest/coverage-v8": "^4.1.10",
     "eslint": "^9.39.5",
     "eslint-plugin-promise": "^7.3.0",
     "eslint-plugin-security": "^4.0.1",
     "eslint-plugin-sonarjs": "^4.2.0",
-    "globals": "^17.8.0"
+    "globals": "^17.8.0",
+    "jsdom": "^30.0.1",
+    "vitest": "^4.1.10"
   }
 }
