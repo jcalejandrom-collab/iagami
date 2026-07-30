@@ -1,15 +1,6 @@
 'use strict';
 
 const CMSDB = (function () {
-  /* La URL de PocketBase se inyecta desde el HTML mediante
-     window.__IAGAMI_CONFIG__ (ver ejemplo abajo) para permitir distintos
-     valores por entorno (local / staging / producción) sin tocar este
-     archivo ni hardcodear endpoints en el bundle público:
-
-       <script>window.__IAGAMI_CONFIG__ = { PB_URL: 'https://pb.iagami.gob.ve' };</script>
-       <script src="cms/pb.js"></script>
-
-     El valor por defecto solo aplica para desarrollo local. */
   const PB_URL = (typeof window !== 'undefined' && window.__IAGAMI_CONFIG__ && window.__IAGAMI_CONFIG__.PB_URL)
     || 'http://127.0.0.1:8090';
 
@@ -36,22 +27,32 @@ const CMSDB = (function () {
     _cache[key] = { data, ts: Date.now() };
   }
 
-  /* ─── AbortController por colección ─── */
+  /* ─── AbortController con timeout y clearTimeout automático ─── */
+  function _makeCtrl(timeoutMs = 10000) {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), timeoutMs);
+    return { signal: ctrl.signal, cancel: () => clearTimeout(t) };
+  }
+
+  /* ─── AbortController por clave (para getAll) ─── */
   const _controllers = {};
-  const _timeouts = {};
 
   function _abort(key, timeoutMs = 10000) {
-    if (_controllers[key]) { _controllers[key].abort(); }
-    if (_timeouts[key]) { clearTimeout(_timeouts[key]); }
+    if (_controllers[key]) {
+      _controllers[key].ctrl.abort();
+      clearTimeout(_controllers[key].t);
+    }
     const ctrl = new AbortController();
-    _controllers[key] = ctrl;
-    _timeouts[key] = setTimeout(() => ctrl.abort(), timeoutMs);
+    const t = setTimeout(() => ctrl.abort(), timeoutMs);
+    _controllers[key] = { ctrl, t };
     return ctrl.signal;
   }
 
   function _abortDone(key) {
-    if (_timeouts[key]) { clearTimeout(_timeouts[key]); delete _timeouts[key]; }
-    delete _controllers[key];
+    if (_controllers[key]) {
+      clearTimeout(_controllers[key].t);
+      delete _controllers[key];
+    }
   }
 
   /* ─── Promesas en vuelo para deduplicar peticiones concurrentes ─── */
@@ -63,110 +64,107 @@ const CMSDB = (function () {
       window.dispatchEvent(new CustomEvent('sigap:session-expired'));
       logout();
     }
+    if (status === 403) {
+      window.dispatchEvent(new CustomEvent('sigap:access-denied'));
+    }
   }
 
-  /* ─── GET ALL (con paginación automática) ─── */
-  async function _fetchPage(coleccion, page, perPage, sort, headers, signal) {
-    const res = await fetch(
-      `${PB_URL}/api/collections/${coleccion}/records?page=${page}&perPage=${perPage}&sort=${sort}`,
-      { headers, signal }
-    );
-    return res;
-  }
-
+  /* ─── GET ALL (con paginación automática y deduplicación) ─── */
   async function getAll(coleccion) {
     const cached = _cacheGet(coleccion);
     if (cached) return cached;
 
-    /* Si ya hay una petición en vuelo para esta colección, reutilizarla */
     if (_inflight[coleccion]) return _inflight[coleccion];
 
     const _key = 'getAll_' + coleccion;
     const signal = _abort(_key);
-    _inflight[coleccion] = (async () => { try {
-      let page = 1;
-      const perPage = 200;
-      const MAX_ITEMS = 1000;
-      let allItems = [];
-      let totalPages = 1;
-      // Algunas colecciones legacy (ej: comunas) no soportan sort=-created
-      const noSortCollections = ['comunas'];
-      const sortCandidates = noSortCollections.includes(coleccion) ? [''] : ['-created', 'id', ''];
-      let workingSort = null; // cache the sort that works
 
-      do {
-        const token = getToken();
-        const headers = { 'ngrok-skip-browser-warning': '1' };
-        if (token) headers['Authorization'] = token;
+    _inflight[coleccion] = (async () => {
+      try {
+        let page = 1;
+        const perPage = 200;
+        const MAX_ITEMS = 1000;
+        let allItems = [];
+        let totalPages = 1;
+        const noSortCollections = ['comunas'];
+        const sortCandidates = noSortCollections.includes(coleccion) ? [''] : ['-created', 'id', ''];
+        let workingSort = null;
 
-        let res = null;
-        const sortsToTry = workingSort !== null ? [workingSort] : sortCandidates;
-        for (const sort of sortsToTry) {
-          const url = sort
-            ? `${PB_URL}/api/collections/${coleccion}/records?page=${page}&perPage=${perPage}&sort=${sort}`
-            : `${PB_URL}/api/collections/${coleccion}/records?page=${page}&perPage=${perPage}`;
-          res = await fetch(url, { headers, signal });
-          if (res.status !== 400) { workingSort = sort; break; }
-          const errBody = await res.clone().json().catch(()=>({}));
-          console.error(`[SIGAP] ${coleccion} sort="${sort}" → 400:`, errBody.message||JSON.stringify(errBody));
-        }
+        do {
+          const token = getToken();
+          const headers = { 'ngrok-skip-browser-warning': '1' };
+          if (token) headers['Authorization'] = token;
 
-        if (res.status === 404) {
-          console.warn(`[SIGAP] Colección "${coleccion}" no existe en PocketBase`);
-          return [];
-        }
-        if (res.status === 403) {
-          console.warn(`[SIGAP] Acceso denegado a "${coleccion}" (API Rules). Verifica permisos en PocketBase.`);
-          window.dispatchEvent(new CustomEvent('sigap:access-denied', { detail: { coleccion } }));
-          return [];
-        }
-        _handleAuthError(res.status);
-        if (!res.ok) {
-          const body = await res.json().catch(()=>({}));
-          throw new Error(`HTTP ${res.status}: ${body.message||JSON.stringify(body)}`);
-        }
+          let res = null;
+          const sortsToTry = workingSort !== null ? [workingSort] : sortCandidates;
+          for (const sort of sortsToTry) {
+            const url = sort
+              ? `${PB_URL}/api/collections/${coleccion}/records?page=${page}&perPage=${perPage}&sort=${sort}`
+              : `${PB_URL}/api/collections/${coleccion}/records?page=${page}&perPage=${perPage}`;
+            res = await fetch(url, { headers, signal });
+            if (res.status !== 400) { workingSort = sort; break; }
+            const errBody = await res.clone().json().catch(() => ({}));
+            console.error(`[SIGAP] ${coleccion} sort="${sort}" → 400:`, errBody.message || JSON.stringify(errBody));
+          }
 
-        const data = await res.json();
-        allItems = allItems.concat(data.items || []);
-        totalPages = data.totalPages || 1;
-        page++;
-        if (allItems.length >= MAX_ITEMS) break;
-      } while (page <= totalPages);
+          if (res.status === 404) {
+            console.warn(`[SIGAP] Colección "${coleccion}" no existe en PocketBase`);
+            return [];
+          }
+          if (res.status === 403) {
+            console.warn(`[SIGAP] Acceso denegado a "${coleccion}". Verifica API Rules en PocketBase.`);
+            window.dispatchEvent(new CustomEvent('sigap:access-denied', { detail: { coleccion } }));
+            return [];
+          }
+          _handleAuthError(res.status);
+          if (!res.ok) {
+            const body = await res.json().catch(() => ({}));
+            throw new Error(`HTTP ${res.status}: ${body.message || JSON.stringify(body)}`);
+          }
 
-      _cacheSet(coleccion, allItems);
-      return allItems;
+          const data = await res.json();
+          allItems = allItems.concat(data.items || []);
+          totalPages = data.totalPages || 1;
+          page++;
+          if (allItems.length >= MAX_ITEMS) break;
+        } while (page <= totalPages);
 
-    } catch (err) {
-      if (err.name === 'AbortError') return [];
-      console.error(`[SIGAP] getAll("${coleccion}") falló:`, err.message);
-      window.dispatchEvent(new CustomEvent('sigap:collection-error', { detail: { coleccion, error: err.message } }));
-      return [];
-    } finally {
-      _abortDone(_key);
-      delete _inflight[coleccion];
-    }
+        _cacheSet(coleccion, allItems);
+        return allItems;
+
+      } catch (err) {
+        if (err.name === 'AbortError') return [];
+        console.error(`[SIGAP] getAll("${coleccion}") falló:`, err.message);
+        window.dispatchEvent(new CustomEvent('sigap:collection-error', { detail: { coleccion, error: err.message } }));
+        return [];
+      } finally {
+        _abortDone(_key);
+        delete _inflight[coleccion];
+      }
     })();
+
     return _inflight[coleccion];
   }
 
-  /* ─── GET FILTERED (consulta server-side, sin descargar la colección completa) ─── */
+  /* ─── GET FILTERED ─── */
   async function count(coleccion, filtro = '') {
+    const { signal, cancel } = _makeCtrl(10000);
     try {
       const token = getToken();
       const headers = { 'ngrok-skip-browser-warning': '1' };
       if (token) headers['Authorization'] = token;
       let url = `${PB_URL}/api/collections/${coleccion}/records?page=1&perPage=1`;
       if (filtro) url += `&filter=${encodeURIComponent(filtro)}`;
-      const ctrl = new AbortController();
-      setTimeout(() => ctrl.abort(), 10000);
-      const res = await fetch(url, { headers, signal: ctrl.signal });
+      const res = await fetch(url, { headers, signal });
       if (!res.ok) return 0;
       const json = await res.json();
       return json.totalItems || 0;
     } catch { return 0; }
+    finally { cancel(); }
   }
 
   async function getFiltered(coleccion, filtro, opciones = {}) {
+    const { signal, cancel } = _makeCtrl(10000);
     try {
       const token = getToken();
       const headers = { 'ngrok-skip-browser-warning': '1' };
@@ -176,34 +174,28 @@ const CMSDB = (function () {
       const page = opciones.page || 1;
       const sort = opciones.sort !== undefined ? opciones.sort : '-created';
 
-      const params = new URLSearchParams({
-        page: String(page),
-        perPage: String(perPage)
-      });
+      const params = new URLSearchParams({ page: String(page), perPage: String(perPage) });
       if (sort) params.set('sort', sort);
       if (filtro) params.set('filter', filtro);
-
-      // Parámetros adicionales que algunas API Rules necesitan referenciar
-      // explícitamente (ej. ?token=... evaluado vía @request.query.token en
-      // la regla, para validar consultas públicas por token sin exponer
-      // listados — ver listRule de `multas`/`denuncias`).
       if (opciones.params) {
         Object.entries(opciones.params).forEach(([k, v]) => params.set(k, v));
       }
 
-      const _ctrl = new AbortController();
-      setTimeout(() => _ctrl.abort(), 10000);
       const res = await fetch(
         `${PB_URL}/api/collections/${coleccion}/records?${params.toString()}`,
-        { headers, signal: _ctrl.signal }
+        { headers, signal }
       );
 
       if (res.status === 404) {
         console.warn(`[SIGAP] Colección "${coleccion}" no existe en PocketBase`);
         return [];
       }
-      if (res.status === 401 || res.status === 403) {
-        console.warn(`[SIGAP] Acceso denegado a "${coleccion}" (consulta rechazada por API Rules)`);
+      if (res.status === 403) {
+        console.warn(`[SIGAP] Acceso denegado a "${coleccion}" (API Rules)`);
+        window.dispatchEvent(new CustomEvent('sigap:access-denied', { detail: { coleccion } }));
+        return [];
+      }
+      if (res.status === 401) {
         _handleAuthError(res.status);
         return [];
       }
@@ -213,22 +205,25 @@ const CMSDB = (function () {
       return data.items || [];
 
     } catch (err) {
-      console.error(`[SIGAP] getFiltered("${coleccion}") falló:`, err.message);
+      if (err.name !== 'AbortError') {
+        console.error(`[SIGAP] getFiltered("${coleccion}") falló:`, err.message);
+      }
       return [];
+    } finally {
+      cancel();
     }
   }
 
-  /* ─── SAVE (POST / PATCH — JSON o multipart) ─── */
+  /* ─── SAVE (POST / PATCH) ─── */
   async function save(coleccion, item) {
+    const { signal, cancel } = _makeCtrl(10000);
     try {
       const isUpdate = !!item.id;
       const endpoint = isUpdate
         ? `${PB_URL}/api/collections/${coleccion}/records/${item.id}`
         : `${PB_URL}/api/collections/${coleccion}/records`;
 
-      const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
-
-      /* Detectar si hay archivos File/Blob en el item */
+      const MAX_FILE_SIZE = 10 * 1024 * 1024;
       const tieneArchivos = Object.values(item).some(
         v => v instanceof File || v instanceof Blob ||
           (Array.isArray(v) && v.some(f => f instanceof File || f instanceof Blob))
@@ -238,7 +233,6 @@ const CMSDB = (function () {
       const token = getToken();
       if (token) headers['Authorization'] = token;
 
-      /* Campos de sistema que PocketBase rechaza en el body de PATCH */
       const PB_READONLY = new Set(['id', 'created', 'updated', 'collectionId', 'collectionName', 'expand']);
 
       if (tieneArchivos) {
@@ -247,15 +241,13 @@ const CMSDB = (function () {
           if (isUpdate && PB_READONLY.has(key)) return;
           if (Array.isArray(val)) {
             val.forEach(v => {
-              if ((v instanceof File || v instanceof Blob) && v.size > MAX_FILE_SIZE) {
+              if ((v instanceof File || v instanceof Blob) && v.size > MAX_FILE_SIZE)
                 throw new Error(`Archivo demasiado grande (máx 10 MB): ${v.name || key}`);
-              }
               fd.append(key, v);
             });
           } else if (val !== undefined && val !== null) {
-            if ((val instanceof File || val instanceof Blob) && val.size > MAX_FILE_SIZE) {
+            if ((val instanceof File || val instanceof Blob) && val.size > MAX_FILE_SIZE)
               throw new Error(`Archivo demasiado grande (máx 10 MB): ${val.name || key}`);
-            }
             fd.append(key, val instanceof File || val instanceof Blob
               ? val
               : val instanceof Date ? val.toISOString()
@@ -269,31 +261,20 @@ const CMSDB = (function () {
         if (isUpdate) PB_READONLY.forEach(k => delete payload[k]);
         Object.keys(payload).forEach(k => {
           const v = payload[k];
-          if (v instanceof Date) {
-            payload[k] = v.toISOString();
-          } else if (typeof v === 'object' && v !== null && !(v instanceof File) && !(v instanceof Blob)) {
+          if (v instanceof Date) payload[k] = v.toISOString();
+          else if (typeof v === 'object' && v !== null && !(v instanceof File) && !(v instanceof Blob))
             payload[k] = JSON.stringify(v);
-          }
         });
         body = JSON.stringify(payload);
         headers['Content-Type'] = 'application/json';
       }
 
-      const _saveCtrl = new AbortController();
-      setTimeout(() => _saveCtrl.abort(), 10000);
-      const res = await fetch(endpoint, {
-        method: isUpdate ? 'PATCH' : 'POST',
-        headers,
-        body,
-        signal: _saveCtrl.signal
-      });
+      const res = await fetch(endpoint, { method: isUpdate ? 'PATCH' : 'POST', headers, body, signal });
 
       if (!res.ok) {
         const errData = await res.json().catch(() => ({}));
         console.error('[SIGAP] PocketBase error data:', JSON.stringify(errData));
-        throw new Error(
-          `HTTP ${res.status}: ${errData.message || JSON.stringify(errData.data || {})}`
-        );
+        throw new Error(`HTTP ${res.status}: ${errData.message || JSON.stringify(errData.data || {})}`);
       }
 
       clearCache(coleccion);
@@ -302,87 +283,80 @@ const CMSDB = (function () {
     } catch (err) {
       console.error(`[SIGAP] save("${coleccion}") falló:`, err.message);
       throw err;
+    } finally {
+      cancel();
     }
   }
 
   /* ─── DELETE ─── */
   async function deleteRecord(coleccion, id) {
+    const { signal, cancel } = _makeCtrl(10000);
     try {
       const token = getToken();
       const headers = { 'ngrok-skip-browser-warning': '1' };
       if (token) headers['Authorization'] = token;
-      const _delCtrl = new AbortController();
-      setTimeout(() => _delCtrl.abort(), 10000);
       const res = await fetch(
         `${PB_URL}/api/collections/${coleccion}/records/${id}`,
-        { method: 'DELETE', headers, signal: _delCtrl.signal }
+        { method: 'DELETE', headers, signal }
       );
-      if (!res.ok && res.status !== 204)
-        throw new Error(`HTTP ${res.status}`);
+      if (!res.ok && res.status !== 204) throw new Error(`HTTP ${res.status}`);
       clearCache(coleccion);
       return true;
     } catch (err) {
       console.error(`[SIGAP] deleteRecord("${coleccion}", "${id}") falló:`, err.message);
       throw err;
+    } finally {
+      cancel();
     }
   }
 
-  /* Alias para compatibilidad con código existente que usa CMSDB.remove() */
   async function remove(coleccion, id) {
     return deleteRecord(coleccion, id);
   }
 
   /* ─── GET ONE ─── */
   async function getOne(coleccion, id) {
+    const { signal, cancel } = _makeCtrl(10000);
     try {
       const token = getToken();
       const headers = { 'ngrok-skip-browser-warning': '1' };
       if (token) headers['Authorization'] = token;
-      const _oneCtrl = new AbortController();
-      setTimeout(() => _oneCtrl.abort(), 10000);
       const res = await fetch(
         `${PB_URL}/api/collections/${coleccion}/records/${id}`,
-        { headers, signal: _oneCtrl.signal }
+        { headers, signal }
       );
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       return await res.json();
     } catch (err) {
       console.error(`[SIGAP] getOne("${coleccion}", "${id}") falló:`, err.message);
       return null;
+    } finally {
+      cancel();
     }
   }
 
   /* ─── HEALTH CHECK ─── */
   async function ping() {
+    const { signal, cancel } = _makeCtrl(3000);
     try {
-      const ctrl = new AbortController();
-      setTimeout(() => ctrl.abort(), 3000);
-      const res = await fetch(`${PB_URL}/api/health`, { signal: ctrl.signal });
+      const res = await fetch(`${PB_URL}/api/health`, { signal });
       return res.ok;
     } catch {
       return false;
+    } finally {
+      cancel();
     }
   }
 
-  /* ─── AUTH ───
-     Se autentica contra la colección `admins` (auth collection dedicada
-     para el panel institucional), NO contra `_superusers`. Un token de
-     _superusers ignora TODAS las API Rules del resto de colecciones, así
-     que usarlo desde el frontend público convierte cualquier fuga de ese
-     token en acceso administrativo total a la base de datos completa.
-     `admins` es una colección de autenticación normal: sus tokens solo
-     dan los permisos que las API Rules de cada colección le concedan
-     explícitamente a `@request.auth.collectionName = "admins"` (o por
-     campo `role`), permitiendo RBAC mínimo sin exponer el superusuario. */
+  /* ─── AUTH ─── */
   async function login(email, password) {
+    const { signal, cancel } = _makeCtrl(10000);
     try {
-      const _loginCtrl = new AbortController();
-      setTimeout(() => _loginCtrl.abort(), 10000);
       const res = await fetch(`${PB_URL}/api/collections/admins/auth-with-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': '1' },
         body: JSON.stringify({ identity: email, password }),
-        signal: _loginCtrl.signal
+        signal
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
@@ -392,12 +366,15 @@ const CMSDB = (function () {
     } catch (err) {
       console.error('[SIGAP] login falló:', err.message);
       throw err;
+    } finally {
+      cancel();
     }
   }
 
   function logout() {
     sessionStorage.removeItem('pb_token');
     sessionStorage.removeItem('pb_user');
+    clearCache();
   }
 
   function getToken() {
@@ -416,48 +393,76 @@ const CMSDB = (function () {
     }
   }
 
-  /* RBAC mínimo: la colección `admins` debe tener un campo `role`
-     (ej. "superadmin", "editor", "soporte"). Las vistas del panel
-     consultan hasRole() para mostrar/ocultar acciones; la autorización
-     real sigue residiendo en las API Rules de PocketBase. */
   function hasRole(...roles) {
     const user = getCurrentUser();
     return !!user && roles.includes(user.role);
   }
 
+  /* ─── verifyToken con reintentos exponenciales y detección offline ─── */
   let _refreshPromise = null;
   async function verifyToken() {
     const token = getToken();
     if (!token) return false;
     if (_refreshPromise) return _refreshPromise;
+
     _refreshPromise = (async () => {
-      try {
-        const _refCtrl = new AbortController();
-        setTimeout(() => _refCtrl.abort(), 10000);
-        const res = await fetch(`${PB_URL}/api/collections/admins/auth-refresh`, {
-          method: 'POST',
-          headers: { 'Authorization': token, 'ngrok-skip-browser-warning': '1' },
-          signal: _refCtrl.signal
-        });
-        if (!res.ok) { logout(); return false; }
-        const data = await res.json();
-        sessionStorage.setItem('pb_token', data.token);
-        return true;
-      } catch (err) {
-        // Solo cerrar sesión si el token fue explícitamente rechazado (401).
-        // Errores de red (timeout, offline) no invalidan el token.
-        if (err.name !== 'AbortError' && !(err instanceof TypeError)) {
-          logout();
+      const MAX_RETRIES = 3;
+      let lastIsNetworkError = false;
+
+      for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+        if (attempt > 0) {
+          const delay = Math.pow(2, attempt) * 1000; // 2s, 4s
+          window.dispatchEvent(new CustomEvent('sigap:reconnecting', { detail: { attempt, delay } }));
+          await new Promise(r => setTimeout(r, delay));
         }
-        return false;
-      } finally {
-        _refreshPromise = null;
+
+        const { signal, cancel } = _makeCtrl(10000);
+        try {
+          const res = await fetch(`${PB_URL}/api/collections/admins/auth-refresh`, {
+            method: 'POST',
+            headers: { 'Authorization': token, 'ngrok-skip-browser-warning': '1' },
+            signal
+          });
+          cancel();
+          lastIsNetworkError = false;
+
+          if (res.status === 401) {
+            // Token explícitamente rechazado por el servidor
+            logout();
+            return false;
+          }
+          if (!res.ok) {
+            // Otro error HTTP — no cerrar sesión, podría ser temporal
+            throw new Error(`HTTP ${res.status}`);
+          }
+
+          const data = await res.json();
+          sessionStorage.setItem('pb_token', data.token);
+          window.dispatchEvent(new CustomEvent('sigap:online'));
+          return true;
+
+        } catch (err) {
+          cancel();
+          const isNetworkError = err.name === 'AbortError' || err instanceof TypeError;
+          lastIsNetworkError = isNetworkError;
+          if (!isNetworkError) break; // Error no de red → no reintentar
+        }
       }
-    })();
+
+      if (lastIsNetworkError) {
+        // Sin internet pero token localmente presente → mantener sesión
+        window.dispatchEvent(new CustomEvent('sigap:offline'));
+        return true;
+      }
+
+      logout();
+      return false;
+    })().finally(() => { _refreshPromise = null; });
+
     return _refreshPromise;
   }
 
-  /* ─── HELPERS (compatibilidad con código que los usa) ─── */
+  /* ─── HELPERS ─── */
   function uid() { return crypto.randomUUID(); }
   function now() { return new Date().toISOString(); }
 
@@ -488,5 +493,10 @@ const CMSDB = (function () {
     }
   }
 
-  return { getAll, getFiltered, count, save, deleteRecord, remove, getOne, clearCache, ping, uid, now, login, logout, getToken, isAuthenticated, getCurrentUser, hasRole, verifyToken, logAudit };
+  return {
+    getAll, getFiltered, count, save, deleteRecord, remove, getOne,
+    clearCache, ping, uid, now,
+    login, logout, getToken, isAuthenticated, getCurrentUser, hasRole, verifyToken,
+    logAudit
+  };
 })();
