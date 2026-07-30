@@ -91,6 +91,11 @@ export async function mockCollections(page) {
   await page.route(`${PB}/api/collections/**`, route => {
     const url = route.request().url();
 
+    // Pasar endpoints de autenticación al handler específico registrado después
+    if (url.includes('/auth-refresh') || url.includes('/auth-with-password')) {
+      return route.fallback();
+    }
+
     // Identificar la colección por la URL
     const match = url.match(/\/api\/collections\/([^/]+)\/records/);
     const col = match ? match[1] : null;
@@ -108,13 +113,17 @@ export async function mockCollections(page) {
  * Simula error 500 del servidor en todas las peticiones a colecciones.
  */
 export async function mockCollections500(page) {
-  await page.route(`${PB}/api/collections/**`, route =>
-    route.fulfill({
+  await page.route(`${PB}/api/collections/**`, route => {
+    const url = route.request().url();
+    if (url.includes('/auth-refresh') || url.includes('/auth-with-password')) {
+      return route.fallback();
+    }
+    return route.fulfill({
       status: 500,
       contentType: 'application/json',
       body: JSON.stringify({ message: 'Error interno del servidor.' }),
-    })
-  );
+    });
+  });
 }
 
 /**

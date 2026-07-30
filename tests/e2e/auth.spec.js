@@ -54,10 +54,12 @@ test.describe('Guardas de ruta', () => {
     // Sin inyectar sesión ni token
     await mockAuthRefresh401(page);
 
-    await page.goto('/admin/index.html');
+    // waitUntil:'commit' evita esperar el load event que nunca llega
+    // (window.location.replace dispara antes del load cuando no hay token)
+    await page.goto('/admin/index.html', { waitUntil: 'commit' });
 
     // Debe redirigir fuera del admin
-    await expect(page).not.toHaveURL(/admin\/index\.html$/, { timeout: 6_000 });
+    await expect(page).not.toHaveURL(/admin\/index\.html$/, { timeout: 8_000 });
   });
 
   test('acceder al admin CON token válido muestra el dashboard', async ({ page }) => {
