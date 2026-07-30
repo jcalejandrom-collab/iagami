@@ -1,94 +1,237 @@
 'use strict';
 
+/* ════════════════════════════════════════════════════════════════════
+   CMSDB — Cliente PocketBase para SIGAP / IAGAMI
+   Versión robusta: Circuit Breaker · Event Bus · Request Manager
+                    Structured Logger · Offline Queue · CSP-safe
+   ════════════════════════════════════════════════════════════════════ */
+
 const CMSDB = (function () {
-  const PB_URL = (typeof window !== 'undefined' && window.__IAGAMI_CONFIG__ && window.__IAGAMI_CONFIG__.PB_URL)
+
+  /* ─── Configuración ─── */
+  const PB_URL = (typeof window !== 'undefined' &&
+    window.__IAGAMI_CONFIG__ && window.__IAGAMI_CONFIG__.PB_URL)
     || 'http://127.0.0.1:8090';
 
-  /* ─── CACHÉ EN MEMORIA con TTL de 2 minutos ─── */
-  const _cache = {};
-  const _cacheTTL = 2 * 60 * 1000;
+  const CFG = {
+    cacheTTL:       2 * 60 * 1000,   // 2 min
+    fetchTimeout:   10_000,           // 10 s
+    pingTimeout:    3_000,
+    maxRetries:     3,
+    retryBaseMs:    1_000,            // backoff: 1 s × 2^attempt
+    cbThreshold:    3,                // fallos para abrir circuit
+    cbResetMs:      30_000,           // tiempo antes de half-open
+    maxItems:       1_000,
+    perPage:        200,
+    maxFileSize:    10 * 1024 * 1024, // 10 MB
+  };
 
-  function clearCache(coleccion) {
-    if (coleccion) {
-      delete _cache[coleccion];
+  /* ══════════════════════════════════════════════════════════════════
+     LOGGER ESTRUCTURADO
+     ══════════════════════════════════════════════════════════════════ */
+  const Logger = {
+    _fmt: (lvl, mod, msg, meta) =>
+      `[SIGAP:${lvl}] ${mod}: ${msg}` + (meta ? ' ' + JSON.stringify(meta) : ''),
+    info:     (mod, msg, meta) => console.info(Logger._fmt('INFO', mod, msg, meta)),
+    warn:     (mod, msg, meta) => console.warn(Logger._fmt('WARN', mod, msg, meta)),
+    error:    (mod, msg, meta) => console.error(Logger._fmt('ERROR', mod, msg, meta)),
+    critical: (mod, msg, meta) => {
+      console.error(Logger._fmt('CRITICAL', mod, msg, meta));
+      Bus.emit('sigap:critical-error', { mod, msg, meta });
+    },
+  };
+
+  /* ══════════════════════════════════════════════════════════════════
+     EVENT BUS — pub/sub centralizado sin estado global
+     ══════════════════════════════════════════════════════════════════ */
+  const Bus = {
+    emit: (name, detail = {}) =>
+      window.dispatchEvent(new CustomEvent(name, { detail, bubbles: false })),
+    on: (name, fn, opts) =>
+      window.addEventListener(name, fn, opts),
+    off: (name, fn) =>
+      window.removeEventListener(name, fn),
+  };
+
+  /* ══════════════════════════════════════════════════════════════════
+     CIRCUIT BREAKER
+     Estados: closed → open (tras N fallos) → half-open (tras reset) → closed
+     ══════════════════════════════════════════════════════════════════ */
+  const _cb = { failures: 0, state: 'closed', openedAt: 0 };
+
+  function _cbRecord(ok) {
+    if (ok) {
+      _cb.failures = 0;
+      _cb.state = 'closed';
     } else {
-      Object.keys(_cache).forEach(k => delete _cache[k]);
+      _cb.failures++;
+      if (_cb.failures >= CFG.cbThreshold) {
+        _cb.state = 'open';
+        _cb.openedAt = Date.now();
+        Logger.warn('CircuitBreaker', 'Circuito abierto por fallos repetidos');
+        Bus.emit('sigap:circuit-open');
+      }
     }
   }
 
+  function _cbAllow() {
+    if (_cb.state === 'closed') return true;
+    if (_cb.state === 'open') {
+      if (Date.now() - _cb.openedAt >= CFG.cbResetMs) {
+        _cb.state = 'half-open';
+        Logger.info('CircuitBreaker', 'Half-open — probando reconexión');
+        return true;
+      }
+      return false;
+    }
+    return true; // half-open: permite un intento
+  }
+
+  /* ══════════════════════════════════════════════════════════════════
+     HELPER AbortController + clearTimeout automático
+     ══════════════════════════════════════════════════════════════════ */
+  function _makeCtrl(ms = CFG.fetchTimeout) {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), ms);
+    return { signal: ctrl.signal, cancel: () => clearTimeout(t) };
+  }
+
+  /* ──────────────────────────────────────────────────────────────────
+     AbortController por clave (para getAll multi-página)
+     ────────────────────────────────────────────────────────────────── */
+  const _ctrlMap = {};
+  function _abortKey(key, ms = CFG.fetchTimeout) {
+    const prev = _ctrlMap[key];
+    if (prev) { prev.ctrl.abort(); clearTimeout(prev.t); }
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), ms);
+    _ctrlMap[key] = { ctrl, t };
+    return ctrl.signal;
+  }
+  function _abortKeyDone(key) {
+    const prev = _ctrlMap[key];
+    if (prev) { clearTimeout(prev.t); delete _ctrlMap[key]; }
+  }
+
+  /* ══════════════════════════════════════════════════════════════════
+     CACHÉ con TTL y stale-while-revalidate
+     ══════════════════════════════════════════════════════════════════ */
+  const _cache = {};
+
+  function clearCache(col) {
+    if (col) delete _cache[col];
+    else Object.keys(_cache).forEach(k => delete _cache[k]);
+  }
+
   function _cacheGet(key) {
-    const entry = _cache[key];
-    if (!entry) return null;
-    if (Date.now() - entry.ts > _cacheTTL) { delete _cache[key]; return null; }
-    return entry.data;
+    const e = _cache[key];
+    if (!e) return { data: null, stale: false };
+    const age = Date.now() - e.ts;
+    if (age <= CFG.cacheTTL) return { data: e.data, stale: false };
+    if (age <= CFG.cacheTTL * 3) return { data: e.data, stale: true }; // stale-while-revalidate
+    delete _cache[key];
+    return { data: null, stale: false };
   }
 
   function _cacheSet(key, data) {
     _cache[key] = { data, ts: Date.now() };
   }
 
-  /* ─── AbortController con timeout y clearTimeout automático ─── */
-  function _makeCtrl(timeoutMs = 10000) {
-    const ctrl = new AbortController();
-    const t = setTimeout(() => ctrl.abort(), timeoutMs);
-    return { signal: ctrl.signal, cancel: () => clearTimeout(t) };
-  }
-
-  /* ─── AbortController por clave (para getAll) ─── */
-  const _controllers = {};
-
-  function _abort(key, timeoutMs = 10000) {
-    if (_controllers[key]) {
-      _controllers[key].ctrl.abort();
-      clearTimeout(_controllers[key].t);
-    }
-    const ctrl = new AbortController();
-    const t = setTimeout(() => ctrl.abort(), timeoutMs);
-    _controllers[key] = { ctrl, t };
-    return ctrl.signal;
-  }
-
-  function _abortDone(key) {
-    if (_controllers[key]) {
-      clearTimeout(_controllers[key].t);
-      delete _controllers[key];
-    }
-  }
-
-  /* ─── Promesas en vuelo para deduplicar peticiones concurrentes ─── */
+  /* ══════════════════════════════════════════════════════════════════
+     REQUEST MANAGER — deduplicación y Promise Lock por clave
+     ══════════════════════════════════════════════════════════════════ */
   const _inflight = {};
 
-  /* ─── Interceptor global de errores de auth ─── */
-  function _handleAuthError(status) {
-    if (status === 401 && getToken()) {
-      window.dispatchEvent(new CustomEvent('sigap:session-expired'));
-      logout();
-    }
-    if (status === 403) {
-      window.dispatchEvent(new CustomEvent('sigap:access-denied'));
+  function _dedupe(key, fn) {
+    if (_inflight[key]) return _inflight[key];
+    _inflight[key] = fn().finally(() => delete _inflight[key]);
+    return _inflight[key];
+  }
+
+  /* ══════════════════════════════════════════════════════════════════
+     SANITIZACIÓN CENTRALIZADA (CSP-safe, sin innerHTML inseguro)
+     ══════════════════════════════════════════════════════════════════ */
+  function escapeHTML(s) {
+    if (s == null) return '';
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#x27;');
+  }
+
+  /* ══════════════════════════════════════════════════════════════════
+     MANEJADOR DE ERRORES HTTP DIFERENCIADO
+     ══════════════════════════════════════════════════════════════════ */
+  function _handleHttpError(status, coleccion, context = '') {
+    const meta = { coleccion, context, ts: new Date().toISOString() };
+    switch (status) {
+      case 401:
+        if (getToken()) {
+          Logger.warn('Auth', 'Token rechazado por el servidor — cerrando sesión', meta);
+          Bus.emit('sigap:session-expired', meta);
+          logout();
+        }
+        break;
+      case 403:
+        Logger.warn('Auth', 'Acceso denegado (403)', meta);
+        Bus.emit('sigap:access-denied', { ...meta, message: 'Sin permisos para acceder a este recurso.' });
+        break;
+      case 404:
+        Logger.warn('PocketBase', `Colección "${coleccion}" no encontrada`, meta);
+        Bus.emit('sigap:not-found', meta);
+        break;
+      case 500:
+      case 502:
+      case 503:
+        Logger.critical('PocketBase', `Error de servidor (${status})`, meta);
+        Bus.emit('sigap:server-error', { ...meta, status });
+        break;
+      default:
+        Logger.error('PocketBase', `Error HTTP ${status}`, meta);
     }
   }
 
-  /* ─── GET ALL (con paginación automática y deduplicación) ─── */
+  /* ══════════════════════════════════════════════════════════════════
+     OFFLINE LOGOUT QUEUE
+     ══════════════════════════════════════════════════════════════════ */
+  const _logoutQueue = [];
+
+  function _flushLogoutQueue() {
+    if (!_logoutQueue.length) return;
+    const token = _logoutQueue.shift();
+    if (!token) return;
+    fetch(`${PB_URL}/api/collections/admins/auth-refresh`, {
+      method: 'POST',
+      headers: { 'Authorization': token, 'ngrok-skip-browser-warning': '1' }
+    }).catch(() => {});
+  }
+
+  window.addEventListener('online', () => {
+    Bus.emit('sigap:online');
+    _flushLogoutQueue();
+  });
+
+  /* ══════════════════════════════════════════════════════════════════
+     GET ALL (paginación, deduplicación, stale-while-revalidate)
+     ══════════════════════════════════════════════════════════════════ */
   async function getAll(coleccion) {
-    const cached = _cacheGet(coleccion);
-    if (cached) return cached;
+    const { data: cached, stale } = _cacheGet(coleccion);
+    if (cached && !stale) return cached;
 
-    if (_inflight[coleccion]) return _inflight[coleccion];
+    const fetcher = async () => {
+      if (!_cbAllow()) {
+        Logger.warn('CircuitBreaker', 'Petición bloqueada — circuito abierto', { coleccion });
+        return cached || [];
+      }
 
-    const _key = 'getAll_' + coleccion;
-    const signal = _abort(_key);
-
-    _inflight[coleccion] = (async () => {
+      const _key = 'getAll_' + coleccion;
+      const signal = _abortKey(_key);
       try {
-        let page = 1;
-        const perPage = 200;
-        const MAX_ITEMS = 1000;
-        let allItems = [];
-        let totalPages = 1;
-        const noSortCollections = ['comunas'];
-        const sortCandidates = noSortCollections.includes(coleccion) ? [''] : ['-created', 'id', ''];
-        let workingSort = null;
+        const noSortCols = ['comunas'];
+        const sortCandidates = noSortCols.includes(coleccion) ? [''] : ['-created', 'id', ''];
+        let workingSort = null, page = 1, allItems = [], totalPages = 1;
 
         do {
           const token = getToken();
@@ -96,59 +239,65 @@ const CMSDB = (function () {
           if (token) headers['Authorization'] = token;
 
           let res = null;
-          const sortsToTry = workingSort !== null ? [workingSort] : sortCandidates;
-          for (const sort of sortsToTry) {
-            const url = sort
-              ? `${PB_URL}/api/collections/${coleccion}/records?page=${page}&perPage=${perPage}&sort=${sort}`
-              : `${PB_URL}/api/collections/${coleccion}/records?page=${page}&perPage=${perPage}`;
-            res = await fetch(url, { headers, signal });
+          for (const sort of (workingSort !== null ? [workingSort] : sortCandidates)) {
+            const qs = sort ? `sort=${sort}&` : '';
+            res = await fetch(
+              `${PB_URL}/api/collections/${coleccion}/records?${qs}page=${page}&perPage=${CFG.perPage}`,
+              { headers, signal }
+            );
             if (res.status !== 400) { workingSort = sort; break; }
-            const errBody = await res.clone().json().catch(() => ({}));
-            console.error(`[SIGAP] ${coleccion} sort="${sort}" → 400:`, errBody.message || JSON.stringify(errBody));
+            const eb = await res.clone().json().catch(() => ({}));
+            Logger.warn('getAll', `sort="${sort}" → 400`, { coleccion, msg: eb.message });
           }
 
-          if (res.status === 404) {
-            console.warn(`[SIGAP] Colección "${coleccion}" no existe en PocketBase`);
-            return [];
+          if (!res || res.status === 404 || res.status === 403) {
+            _handleHttpError(res?.status || 0, coleccion, 'getAll');
+            _cbRecord(false);
+            return cached || [];
           }
-          if (res.status === 403) {
-            console.warn(`[SIGAP] Acceso denegado a "${coleccion}". Verifica API Rules en PocketBase.`);
-            window.dispatchEvent(new CustomEvent('sigap:access-denied', { detail: { coleccion } }));
-            return [];
-          }
-          _handleAuthError(res.status);
           if (!res.ok) {
-            const body = await res.json().catch(() => ({}));
-            throw new Error(`HTTP ${res.status}: ${body.message || JSON.stringify(body)}`);
+            _handleHttpError(res.status, coleccion, 'getAll');
+            _cbRecord(false);
+            return cached || [];
           }
 
           const data = await res.json();
           allItems = allItems.concat(data.items || []);
           totalPages = data.totalPages || 1;
           page++;
-          if (allItems.length >= MAX_ITEMS) break;
+          if (allItems.length >= CFG.maxItems) break;
         } while (page <= totalPages);
 
+        _cbRecord(true);
         _cacheSet(coleccion, allItems);
         return allItems;
 
       } catch (err) {
-        if (err.name === 'AbortError') return [];
-        console.error(`[SIGAP] getAll("${coleccion}") falló:`, err.message);
-        window.dispatchEvent(new CustomEvent('sigap:collection-error', { detail: { coleccion, error: err.message } }));
-        return [];
+        _abortKeyDone(_key);
+        if (err.name === 'AbortError') return cached || [];
+        Logger.error('getAll', err.message, { coleccion });
+        Bus.emit('sigap:collection-error', { coleccion, error: err.message, ts: new Date().toISOString() });
+        _cbRecord(false);
+        return cached || [];
       } finally {
-        _abortDone(_key);
-        delete _inflight[coleccion];
+        _abortKeyDone(_key);
       }
-    })();
+    };
 
-    return _inflight[coleccion];
+    if (cached && stale) {
+      // Devuelve caché stale inmediatamente y revalida en background
+      _dedupe('getAll_' + coleccion, fetcher);
+      return cached;
+    }
+
+    return _dedupe('getAll_' + coleccion, fetcher);
   }
 
-  /* ─── GET FILTERED ─── */
+  /* ══════════════════════════════════════════════════════════════════
+     COUNT
+     ══════════════════════════════════════════════════════════════════ */
   async function count(coleccion, filtro = '') {
-    const { signal, cancel } = _makeCtrl(10000);
+    const { signal, cancel } = _makeCtrl();
     try {
       const token = getToken();
       const headers = { 'ngrok-skip-browser-warning': '1' };
@@ -163,102 +312,90 @@ const CMSDB = (function () {
     finally { cancel(); }
   }
 
+  /* ══════════════════════════════════════════════════════════════════
+     GET FILTERED
+     ══════════════════════════════════════════════════════════════════ */
   async function getFiltered(coleccion, filtro, opciones = {}) {
-    const { signal, cancel } = _makeCtrl(10000);
+    const { signal, cancel } = _makeCtrl();
     try {
       const token = getToken();
       const headers = { 'ngrok-skip-browser-warning': '1' };
       if (token) headers['Authorization'] = token;
 
       const perPage = opciones.perPage || 50;
-      const page = opciones.page || 1;
-      const sort = opciones.sort !== undefined ? opciones.sort : '-created';
+      const page    = opciones.page    || 1;
+      const sort    = opciones.sort !== undefined ? opciones.sort : '-created';
 
       const params = new URLSearchParams({ page: String(page), perPage: String(perPage) });
-      if (sort) params.set('sort', sort);
-      if (filtro) params.set('filter', filtro);
-      if (opciones.params) {
+      if (sort)           params.set('sort', sort);
+      if (filtro)         params.set('filter', filtro);
+      if (opciones.params)
         Object.entries(opciones.params).forEach(([k, v]) => params.set(k, v));
-      }
 
       const res = await fetch(
-        `${PB_URL}/api/collections/${coleccion}/records?${params.toString()}`,
+        `${PB_URL}/api/collections/${coleccion}/records?${params}`,
         { headers, signal }
       );
 
-      if (res.status === 404) {
-        console.warn(`[SIGAP] Colección "${coleccion}" no existe en PocketBase`);
+      if (!res.ok) {
+        _handleHttpError(res.status, coleccion, 'getFiltered');
         return [];
       }
-      if (res.status === 403) {
-        console.warn(`[SIGAP] Acceso denegado a "${coleccion}" (API Rules)`);
-        window.dispatchEvent(new CustomEvent('sigap:access-denied', { detail: { coleccion } }));
-        return [];
-      }
-      if (res.status === 401) {
-        _handleAuthError(res.status);
-        return [];
-      }
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
       const data = await res.json();
       return data.items || [];
 
     } catch (err) {
-      if (err.name !== 'AbortError') {
-        console.error(`[SIGAP] getFiltered("${coleccion}") falló:`, err.message);
-      }
+      if (err.name !== 'AbortError')
+        Logger.error('getFiltered', err.message, { coleccion });
       return [];
-    } finally {
-      cancel();
-    }
+    } finally { cancel(); }
   }
 
-  /* ─── SAVE (POST / PATCH) ─── */
+  /* ══════════════════════════════════════════════════════════════════
+     SAVE (POST / PATCH)
+     ══════════════════════════════════════════════════════════════════ */
   async function save(coleccion, item) {
-    const { signal, cancel } = _makeCtrl(10000);
+    const { signal, cancel } = _makeCtrl();
     try {
       const isUpdate = !!item.id;
       const endpoint = isUpdate
         ? `${PB_URL}/api/collections/${coleccion}/records/${item.id}`
         : `${PB_URL}/api/collections/${coleccion}/records`;
 
-      const MAX_FILE_SIZE = 10 * 1024 * 1024;
       const tieneArchivos = Object.values(item).some(
         v => v instanceof File || v instanceof Blob ||
           (Array.isArray(v) && v.some(f => f instanceof File || f instanceof Blob))
       );
 
-      let body, headers = { 'ngrok-skip-browser-warning': '1' };
+      let body;
+      const headers = { 'ngrok-skip-browser-warning': '1' };
       const token = getToken();
       if (token) headers['Authorization'] = token;
 
-      const PB_READONLY = new Set(['id', 'created', 'updated', 'collectionId', 'collectionName', 'expand']);
+      const RO = new Set(['id', 'created', 'updated', 'collectionId', 'collectionName', 'expand']);
 
       if (tieneArchivos) {
         const fd = new FormData();
         Object.entries(item).forEach(([key, val]) => {
-          if (isUpdate && PB_READONLY.has(key)) return;
+          if (isUpdate && RO.has(key)) return;
           if (Array.isArray(val)) {
             val.forEach(v => {
-              if ((v instanceof File || v instanceof Blob) && v.size > MAX_FILE_SIZE)
+              if ((v instanceof File || v instanceof Blob) && v.size > CFG.maxFileSize)
                 throw new Error(`Archivo demasiado grande (máx 10 MB): ${v.name || key}`);
               fd.append(key, v);
             });
           } else if (val !== undefined && val !== null) {
-            if ((val instanceof File || val instanceof Blob) && val.size > MAX_FILE_SIZE)
+            if ((val instanceof File || val instanceof Blob) && val.size > CFG.maxFileSize)
               throw new Error(`Archivo demasiado grande (máx 10 MB): ${val.name || key}`);
-            fd.append(key, val instanceof File || val instanceof Blob
-              ? val
+            fd.append(key, val instanceof File || val instanceof Blob ? val
               : val instanceof Date ? val.toISOString()
-              : typeof val === 'object' ? JSON.stringify(val) : String(val)
-            );
+              : typeof val === 'object' ? JSON.stringify(val) : String(val));
           }
         });
         body = fd;
       } else {
         const payload = { ...item };
-        if (isUpdate) PB_READONLY.forEach(k => delete payload[k]);
+        if (isUpdate) RO.forEach(k => delete payload[k]);
         Object.keys(payload).forEach(k => {
           const v = payload[k];
           if (v instanceof Date) payload[k] = v.toISOString();
@@ -270,27 +407,25 @@ const CMSDB = (function () {
       }
 
       const res = await fetch(endpoint, { method: isUpdate ? 'PATCH' : 'POST', headers, body, signal });
-
       if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        console.error('[SIGAP] PocketBase error data:', JSON.stringify(errData));
-        throw new Error(`HTTP ${res.status}: ${errData.message || JSON.stringify(errData.data || {})}`);
+        const err = await res.json().catch(() => ({}));
+        Logger.error('save', `HTTP ${res.status}`, { coleccion, data: err });
+        throw new Error(`HTTP ${res.status}: ${err.message || JSON.stringify(err.data || {})}`);
       }
-
       clearCache(coleccion);
       return await res.json();
 
     } catch (err) {
-      console.error(`[SIGAP] save("${coleccion}") falló:`, err.message);
+      Logger.error('save', err.message, { coleccion });
       throw err;
-    } finally {
-      cancel();
-    }
+    } finally { cancel(); }
   }
 
-  /* ─── DELETE ─── */
+  /* ══════════════════════════════════════════════════════════════════
+     DELETE
+     ══════════════════════════════════════════════════════════════════ */
   async function deleteRecord(coleccion, id) {
-    const { signal, cancel } = _makeCtrl(10000);
+    const { signal, cancel } = _makeCtrl();
     try {
       const token = getToken();
       const headers = { 'ngrok-skip-browser-warning': '1' };
@@ -303,20 +438,18 @@ const CMSDB = (function () {
       clearCache(coleccion);
       return true;
     } catch (err) {
-      console.error(`[SIGAP] deleteRecord("${coleccion}", "${id}") falló:`, err.message);
+      Logger.error('deleteRecord', err.message, { coleccion, id });
       throw err;
-    } finally {
-      cancel();
-    }
+    } finally { cancel(); }
   }
 
-  async function remove(coleccion, id) {
-    return deleteRecord(coleccion, id);
-  }
+  async function remove(coleccion, id) { return deleteRecord(coleccion, id); }
 
-  /* ─── GET ONE ─── */
+  /* ══════════════════════════════════════════════════════════════════
+     GET ONE
+     ══════════════════════════════════════════════════════════════════ */
   async function getOne(coleccion, id) {
-    const { signal, cancel } = _makeCtrl(10000);
+    const { signal, cancel } = _makeCtrl();
     try {
       const token = getToken();
       const headers = { 'ngrok-skip-browser-warning': '1' };
@@ -325,32 +458,31 @@ const CMSDB = (function () {
         `${PB_URL}/api/collections/${coleccion}/records/${id}`,
         { headers, signal }
       );
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      if (!res.ok) { _handleHttpError(res.status, coleccion, 'getOne'); return null; }
       return await res.json();
     } catch (err) {
-      console.error(`[SIGAP] getOne("${coleccion}", "${id}") falló:`, err.message);
+      Logger.error('getOne', err.message, { coleccion, id });
       return null;
-    } finally {
-      cancel();
-    }
+    } finally { cancel(); }
   }
 
-  /* ─── HEALTH CHECK ─── */
+  /* ══════════════════════════════════════════════════════════════════
+     HEALTH CHECK
+     ══════════════════════════════════════════════════════════════════ */
   async function ping() {
-    const { signal, cancel } = _makeCtrl(3000);
+    const { signal, cancel } = _makeCtrl(CFG.pingTimeout);
     try {
       const res = await fetch(`${PB_URL}/api/health`, { signal });
       return res.ok;
-    } catch {
-      return false;
-    } finally {
-      cancel();
-    }
+    } catch { return false; }
+    finally { cancel(); }
   }
 
-  /* ─── AUTH ─── */
+  /* ══════════════════════════════════════════════════════════════════
+     AUTH — login
+     ══════════════════════════════════════════════════════════════════ */
   async function login(email, password) {
-    const { signal, cancel } = _makeCtrl(10000);
+    const { signal, cancel } = _makeCtrl();
     try {
       const res = await fetch(`${PB_URL}/api/collections/admins/auth-with-password`, {
         method: 'POST',
@@ -362,43 +494,42 @@ const CMSDB = (function () {
       const data = await res.json();
       sessionStorage.setItem('pb_token', data.token);
       sessionStorage.setItem('pb_user', JSON.stringify(data.record || {}));
+      _cbRecord(true);
       return data;
     } catch (err) {
-      console.error('[SIGAP] login falló:', err.message);
+      Logger.error('login', err.message);
       throw err;
-    } finally {
-      cancel();
-    }
+    } finally { cancel(); }
   }
 
+  /* ══════════════════════════════════════════════════════════════════
+     AUTH — logout (cierre local inmediato + cola offline para remoto)
+     ══════════════════════════════════════════════════════════════════ */
   function logout() {
+    const token = getToken();
+    if (token) _logoutQueue.push(token); // intento remoto en background
     sessionStorage.removeItem('pb_token');
     sessionStorage.removeItem('pb_user');
     clearCache();
+    if (navigator.onLine) _flushLogoutQueue();
   }
 
-  function getToken() {
-    return sessionStorage.getItem('pb_token');
-  }
-
-  function isAuthenticated() {
-    return !!sessionStorage.getItem('pb_token');
-  }
+  function getToken()       { return sessionStorage.getItem('pb_token'); }
+  function isAuthenticated(){ return !!getToken(); }
 
   function getCurrentUser() {
-    try {
-      return JSON.parse(sessionStorage.getItem('pb_user') || 'null');
-    } catch {
-      return null;
-    }
+    try { return JSON.parse(sessionStorage.getItem('pb_user') || 'null'); }
+    catch { return null; }
   }
 
   function hasRole(...roles) {
-    const user = getCurrentUser();
-    return !!user && roles.includes(user.role);
+    const u = getCurrentUser();
+    return !!u && roles.includes(u.role);
   }
 
-  /* ─── verifyToken con reintentos exponenciales y detección offline ─── */
+  /* ══════════════════════════════════════════════════════════════════
+     verifyToken — Circuit Breaker + reintentos + offline
+     ══════════════════════════════════════════════════════════════════ */
   let _refreshPromise = null;
   async function verifyToken() {
     const token = getToken();
@@ -406,17 +537,19 @@ const CMSDB = (function () {
     if (_refreshPromise) return _refreshPromise;
 
     _refreshPromise = (async () => {
-      const MAX_RETRIES = 3;
-      let lastIsNetworkError = false;
-
-      for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+      for (let attempt = 0; attempt < CFG.maxRetries; attempt++) {
         if (attempt > 0) {
-          const delay = Math.pow(2, attempt) * 1000; // 2s, 4s
-          window.dispatchEvent(new CustomEvent('sigap:reconnecting', { detail: { attempt, delay } }));
+          const delay = CFG.retryBaseMs * Math.pow(2, attempt);
+          Bus.emit('sigap:reconnecting', { attempt, delay });
           await new Promise(r => setTimeout(r, delay));
         }
 
-        const { signal, cancel } = _makeCtrl(10000);
+        if (!_cbAllow()) {
+          Bus.emit('sigap:offline');
+          return true; // mantener sesión — circuit abierto
+        }
+
+        const { signal, cancel } = _makeCtrl();
         try {
           const res = await fetch(`${PB_URL}/api/collections/admins/auth-refresh`, {
             method: 'POST',
@@ -424,54 +557,56 @@ const CMSDB = (function () {
             signal
           });
           cancel();
-          lastIsNetworkError = false;
 
           if (res.status === 401) {
-            // Token explícitamente rechazado por el servidor
+            _cbRecord(false);
             logout();
-            return false;
+            return false; // Token inválido confirmado
           }
           if (!res.ok) {
-            // Otro error HTTP — no cerrar sesión, podría ser temporal
+            _cbRecord(false);
             throw new Error(`HTTP ${res.status}`);
           }
 
           const data = await res.json();
           sessionStorage.setItem('pb_token', data.token);
-          window.dispatchEvent(new CustomEvent('sigap:online'));
+          _cbRecord(true);
+          Bus.emit('sigap:online');
           return true;
 
         } catch (err) {
           cancel();
-          const isNetworkError = err.name === 'AbortError' || err instanceof TypeError;
-          lastIsNetworkError = isNetworkError;
-          if (!isNetworkError) break; // Error no de red → no reintentar
+          const isNet = err.name === 'AbortError' || err instanceof TypeError;
+          _cbRecord(false);
+          if (!isNet) break; // error no de red → no reintentar
+          Logger.warn('verifyToken', `Error de red (intento ${attempt + 1})`, { err: err.message });
         }
       }
 
-      if (lastIsNetworkError) {
-        // Sin internet pero token localmente presente → mantener sesión
-        window.dispatchEvent(new CustomEvent('sigap:offline'));
-        return true;
-      }
+      // Agotados los reintentos por error de red → mantener sesión
+      Bus.emit('sigap:offline');
+      Logger.warn('verifyToken', 'Sin conexión — sesión mantenida localmente');
+      return true;
 
-      logout();
-      return false;
     })().finally(() => { _refreshPromise = null; });
 
     return _refreshPromise;
   }
 
-  /* ─── HELPERS ─── */
+  /* ══════════════════════════════════════════════════════════════════
+     HELPERS
+     ══════════════════════════════════════════════════════════════════ */
   function uid() { return crypto.randomUUID(); }
   function now() { return new Date().toISOString(); }
 
-  /* ─── AUDITORÍA ─── */
+  /* ══════════════════════════════════════════════════════════════════
+     AUDITORÍA ESTRUCTURADA
+     ══════════════════════════════════════════════════════════════════ */
   async function logAudit(accion, modulo, detalle = '', nivel = 'info') {
     try {
       const token = getToken();
-      const user = sessionStorage.getItem('pb_user');
-      const userData = user ? JSON.parse(user) : {};
+      const userData = getCurrentUser() || {};
+      const { signal, cancel } = _makeCtrl(5000);
       await fetch(`${PB_URL}/api/collections/iagami_sys_logs/records`, {
         method: 'POST',
         headers: {
@@ -481,22 +616,31 @@ const CMSDB = (function () {
         body: JSON.stringify({
           accion,
           modulo,
-          detalle: String(detalle).replace(/[<>"'&]/g, '').slice(0, 500),
+          detalle: escapeHTML(String(detalle)).slice(0, 500),
           usuario: userData.email || 'anonimo',
           nivel,
           ip: '',
           fecha: new Date().toISOString()
-        })
+        }),
+        signal
       });
+      cancel();
     } catch (err) {
-      console.error('[SIGAP] logAudit falló:', err.message);
+      Logger.warn('logAudit', err.message);
     }
   }
 
+  /* ══════════════════════════════════════════════════════════════════
+     API PÚBLICA
+     ══════════════════════════════════════════════════════════════════ */
   return {
-    getAll, getFiltered, count, save, deleteRecord, remove, getOne,
-    clearCache, ping, uid, now,
+    // Datos
+    getAll, getFiltered, count, save, deleteRecord, remove, getOne, clearCache, ping,
+    // Auth
     login, logout, getToken, isAuthenticated, getCurrentUser, hasRole, verifyToken,
-    logAudit
+    // Utilidades
+    uid, now, escapeHTML, logAudit,
+    // Internos expuestos para módulos que los necesiten
+    Bus, Logger,
   };
 })();
