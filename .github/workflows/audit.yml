@@ -21,3 +21,6 @@ jobs:
 
       - name: Auditar vulnerabilidades
         run: npm audit --audit-level=high
+
+      - name: Dependencias desactualizadas (informativo)
+        run: npm outdated || true   # no falla el workflow — solo informa

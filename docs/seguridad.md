@@ -107,10 +107,29 @@ upgrade-insecure-requests
 ```
 
 ### Fase 2 (pendiente): Enforcement
-Cuando el período de observación confirme cero violaciones legítimas:
-1. Renombrar `Content-Security-Policy-Report-Only` → `Content-Security-Policy`
-2. Agregar `report-uri` o `report-to` para captura continua
-3. Evaluar eliminar `'unsafe-inline'` migrando a nonces o hashes
+
+**NO activar sin evidencia.** Cambiar Report-Only → Enforcement hace que el navegador **bloquee** en lugar de solo registrar. Un recurso no listado dejará de cargar en producción.
+
+**Condiciones para activar:**
+1. ≥ 7 días de tráfico real sin violaciones legítimas en la consola del navegador
+2. Revisión manual de reportes (DevTools → Console → CSP violations)
+3. Quality Gate CI verde con todos los E2E pasando
+4. Backup de `_headers` actual antes de cambiar
+
+**Cambio a realizar en `_headers` cuando se cumplan las condiciones:**
+
+```diff
+- Content-Security-Policy-Report-Only: default-src 'self'; script-src 'self' 'unsafe-inline' https://browser.sentry-cdn.com; ...
++ Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://browser.sentry-cdn.com; ...
+```
+
+**Recursos bajo CSP que deben verificarse sin violaciones antes de activar:**
+- Google Fonts (`fonts.googleapis.com`, `fonts.gstatic.com`)
+- PocketBase API (`api.iagami.online`)
+- Sentry SDK CDN (`browser.sentry-cdn.com`) — solo si `SENTRY_DSN` configurado
+- `'unsafe-inline'` para scripts y estilos inline actuales
+
+**PR dedicada:** cuando las condiciones se cumplan, abrir PR #72 — CSP Enforcement con un único cambio de línea en `_headers`. No mezclar con otras modificaciones.
 
 ---
 
