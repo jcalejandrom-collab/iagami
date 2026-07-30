@@ -220,10 +220,11 @@ const CMSDB = (function () {
     }).catch(() => {});
   }
 
-  window.addEventListener('online', () => {
+  function _onOnline() {
     Bus.emit('sigap:online');
     _flushLogoutQueue();
-  });
+  }
+  window.addEventListener('online', _onOnline);
 
   /* ══════════════════════════════════════════════════════════════════
      GET ALL (paginación, deduplicación, stale-while-revalidate)
@@ -588,6 +589,11 @@ const CMSDB = (function () {
           }
 
           const data = await res.json();
+          if (!data.token) {
+            Logger.error('verifyToken', 'Respuesta de autenticación sin token', data);
+            Bus.emit('sigap:auth-error', { reason: 'missing-token' });
+            return false;
+          }
           sessionStorage.setItem('pb_token', data.token);
           _cbRecord(true);
           Bus.emit('sigap:online');
@@ -661,5 +667,10 @@ const CMSDB = (function () {
     uid, now, escapeHTML, logAudit,
     // Internos expuestos para módulos que los necesiten
     Bus, Logger,
+    // Limpieza de recursos (útil en tests y recarga SPA)
+    destroy() { window.removeEventListener('online', _onOnline); },
   };
 })();
+
+// Exposición global para compatibilidad con módulos legacy y pruebas automatizadas con jsdom
+if (typeof window !== 'undefined' && !window.CMSDB) { window.CMSDB = CMSDB; }

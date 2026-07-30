@@ -1,0 +1,37 @@
+name: Pruebas unitarias (Vitest)
+
+on:
+  push:
+    branches: [main, "claude/**"]
+    paths:
+      - "cms/pb.js"
+      - "tests/**"
+      - "vitest.config.js"
+      - "package.json"
+  pull_request:
+    branches: [main]
+    paths:
+      - "cms/pb.js"
+      - "tests/**"
+      - "vitest.config.js"
+      - "package.json"
+
+jobs:
+  test:
+    name: Vitest — módulos críticos
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Ejecutar pruebas
+        run: npm test
