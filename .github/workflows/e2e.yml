@@ -1,0 +1,55 @@
+name: Pruebas E2E (Playwright)
+
+on:
+  push:
+    branches: [main, "claude/**"]
+    paths:
+      - "**/*.html"
+      - "cms/**"
+      - "admin/**"
+      - "tests/e2e/**"
+      - "playwright.config.js"
+      - "package.json"
+  pull_request:
+    branches: [main]
+    paths:
+      - "**/*.html"
+      - "cms/**"
+      - "admin/**"
+      - "tests/e2e/**"
+      - "playwright.config.js"
+
+jobs:
+  e2e:
+    name: Playwright — flujos críticos
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Instalar Playwright + Chromium
+        run: npx playwright install chromium --with-deps
+
+      - name: Ejecutar tests E2E
+        run: npm run e2e
+        env:
+          # En CI, chromium viene del paso anterior (no del entorno remoto)
+          PLAYWRIGHT_CHROMIUM_PATH: ""
+
+      - name: Subir reporte si hay fallos
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7

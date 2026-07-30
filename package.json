@@ -9,7 +9,9 @@
     "lint:report": "eslint \"**/*.js\" --format json -o lint-report.json || true",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "e2e": "playwright test",
+    "e2e:report": "playwright show-report"
   },
   "repository": {
     "type": "git",
@@ -20,6 +22,7 @@
   "license": "ISC",
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.62.0",
     "@vitest/coverage-v8": "^4.1.10",
     "eslint": "^9.39.5",
     "eslint-plugin-promise": "^7.3.0",
@@ -27,6 +30,7 @@
     "eslint-plugin-sonarjs": "^4.2.0",
     "globals": "^17.8.0",
     "jsdom": "^30.0.1",
+    "serve": "^14.2.6",
     "vitest": "^4.1.10"
   }
 }
