@@ -1,4 +1,8 @@
 'use strict';
+/* exported doConfirm, switchTab, openFormPlan, removeRow, savePlan, sendPlan,
+            deletePlanConfirm, viewPlan, openFormReport, handleFileInput,
+            removeFile, saveReport, sendReport, deleteReportConfirm,
+            viewReport, openEvidencia */
 
 /* ══════════════════════════════════════════════
    STATE
@@ -16,7 +20,7 @@ let confirmCallback = null;
 function showView(name) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   const el = document.getElementById('view-' + name);
-  if (el) el.classList.add('active');
+  if (el) {el.classList.add('active');}
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -45,7 +49,7 @@ function closeConfirm() {
   confirmCallback = null;
 }
 function doConfirm() {
-  if (confirmCallback) confirmCallback();
+  if (confirmCallback) {confirmCallback();}
   closeConfirm();
 }
 
@@ -55,7 +59,7 @@ function doConfirm() {
 const DAYS = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
 
 function weekLabel(w) {
-  if (!w) return '—';
+  if (!w) {return '—';}
   const [y, wn] = w.split('-W').map(Number);
   const jan4 = new Date(y, 0, 4);
   const mon  = new Date(jan4);
@@ -66,21 +70,21 @@ function weekLabel(w) {
 }
 
 function fmtDate(iso) {
-  if (!iso) return '—';
+  if (!iso) {return '—';}
   const d = new Date(iso + 'T00:00:00');
   return d.toLocaleDateString('es-VE', { day:'2-digit', month:'short', year:'numeric' });
 }
 
 function fmtDateTime(iso) {
-  if (!iso) return '—';
+  if (!iso) {return '—';}
   const d = new Date(iso);
   return d.toLocaleDateString('es-VE', { day:'2-digit', month:'short', year:'numeric' })
        + ' ' + d.toLocaleTimeString('es-VE', { hour:'2-digit', minute:'2-digit' });
 }
 
 function fileSize(bytes) {
-  if (bytes < 1024) return bytes + ' B';
-  if (bytes < 1024*1024) return (bytes/1024).toFixed(1) + ' KB';
+  if (bytes < 1024) {return bytes + ' B';}
+  if (bytes < 1024*1024) {return (bytes/1024).toFixed(1) + ' KB';}
   return (bytes/(1024*1024)).toFixed(1) + ' MB';
 }
 
@@ -109,8 +113,8 @@ function switchTab(tab) {
 }
 
 function renderActiveTab() {
-  if (activeTab === 'plans') renderPlansList();
-  else renderReportsList();
+  if (activeTab === 'plans') {renderPlansList();}
+  else {renderReportsList();}
 }
 
 function renderPlansList() {
@@ -188,8 +192,8 @@ function openFormPlan(id = null) {
   // Clear and fill activities
   document.getElementById('plan-activities-body').innerHTML = '';
   const acts = plan?.actividades || [];
-  if (acts.length) acts.forEach(a => addPlanRow(a));
-  else addPlanRow();
+  if (acts.length) {acts.forEach(a => addPlanRow(a));}
+  else {addPlanRow();}
 
   showView('form-plan');
 }
@@ -211,7 +215,7 @@ function addPlanRow(data = {}) {
 function removeRow(btn) {
   const tbody = btn.closest('tbody');
   btn.closest('tr').remove();
-  if (!tbody.children.length) addPlanRow();
+  if (!tbody.children.length) {addPlanRow();}
 }
 
 function collectPlanActivities() {
@@ -246,7 +250,7 @@ function savePlan(estado) {
 
 function sendPlan(id) {
   const plan = DB.getPlan(id);
-  if (!plan) return;
+  if (!plan) {return;}
   plan.estado = 'enviado';
   DB.savePlan(plan);
   toast('✅ Planificación enviada');
@@ -266,7 +270,7 @@ function deletePlanConfirm(id) {
 ══════════════════════════════════════════════ */
 function viewPlan(id) {
   const plan = DB.getPlan(id);
-  if (!plan) return;
+  if (!plan) {return;}
 
   const relReports = DB.getReports().filter(r => r.planificacionId === id);
 
@@ -351,8 +355,8 @@ function openFormReport(id = null) {
   // Activities
   document.getElementById('report-activities-body').innerHTML = '';
   const acts = report?.actividades || [];
-  if (acts.length) acts.forEach(a => addReportActivity(a));
-  else addReportActivity();
+  if (acts.length) {acts.forEach(a => addReportActivity(a));}
+  else {addReportActivity();}
 
   // Files
   pendingFiles = report?.evidencias ? [...report.evidencias] : [];
@@ -446,7 +450,7 @@ function saveReport(estado) {
 
 function sendReport(id) {
   const report = DB.getReport(id);
-  if (!report) return;
+  if (!report) {return;}
   report.estado = 'enviado';
   DB.saveReport(report);
   toast('✅ Reporte enviado');
@@ -466,7 +470,7 @@ function deleteReportConfirm(id) {
 ══════════════════════════════════════════════ */
 function viewReport(id) {
   const report = DB.getReport(id);
-  if (!report) return;
+  if (!report) {return;}
 
   const plan = report.planificacionId ? DB.getPlan(report.planificacionId) : null;
   const done = report.actividades?.filter(a => a.completada).length || 0;
@@ -538,8 +542,10 @@ function viewReport(id) {
 
 function openEvidencia(idx, reportId) {
   const report = DB.getReport(reportId);
-  if (!report?.evidencias?.[idx]) return;
+  /* eslint-disable security/detect-object-injection */
+  if (!report?.evidencias?.[idx]) { return; }
   const ev = report.evidencias[idx];
+  /* eslint-enable security/detect-object-injection */
   let win;
   try { win = window.open(); } catch { win = null; }
   if (!win) {

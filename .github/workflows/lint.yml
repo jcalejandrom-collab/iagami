@@ -1,0 +1,29 @@
+name: Análisis estático (ESLint)
+
+on:
+  push:
+    branches: [main, "claude/**"]
+    paths: ["**/*.js", "eslint.config.js", "package.json"]
+  pull_request:
+    branches: [main]
+    paths: ["**/*.js", "eslint.config.js", "package.json"]
+
+jobs:
+  lint:
+    name: ESLint — seguridad y calidad
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Ejecutar ESLint
+        run: npm run lint

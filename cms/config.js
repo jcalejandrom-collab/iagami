@@ -2,7 +2,7 @@
 
 (function () {
   function isValidUrl(str) {
-    try { new URL(str); return true; } catch (_) { return false; }
+    try { new URL(str); return true; } catch { return false; }
   }
 
   const hostname = window.location.hostname;

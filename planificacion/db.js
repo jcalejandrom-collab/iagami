@@ -1,4 +1,5 @@
 'use strict';
+/* exported DB */
 
 const DB = (() => {
   const PLANS_KEY   = 'iagami_plans';
@@ -41,7 +42,8 @@ const DB = (() => {
       if (!plan.id) { plan.id = uid('PLAN'); plan.createdAt = now(); }
       plan.updatedAt = now();
       const i = all.findIndex(p => p.id === plan.id);
-      if (i >= 0) all[i] = plan; else all.unshift(plan);
+      // eslint-disable-next-line security/detect-object-injection
+      if (i >= 0) { all[i] = plan; } else { all.unshift(plan); } // array index, not user input
       write(PLANS_KEY, all);
       return plan;
     },
@@ -59,7 +61,8 @@ const DB = (() => {
       if (!report.id) { report.id = uid('REP'); report.createdAt = now(); }
       report.updatedAt = now();
       const i = all.findIndex(r => r.id === report.id);
-      if (i >= 0) all[i] = report; else all.unshift(report);
+      // eslint-disable-next-line security/detect-object-injection
+      if (i >= 0) { all[i] = report; } else { all.unshift(report); }
       write(REPORTS_KEY, all);
       return report;
     },
