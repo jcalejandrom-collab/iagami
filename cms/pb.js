@@ -434,8 +434,12 @@ const CMSDB = (function () {
         const data = await res.json();
         sessionStorage.setItem('pb_token', data.token);
         return true;
-      } catch {
-        logout();
+      } catch (err) {
+        // Solo cerrar sesión si el token fue explícitamente rechazado (401).
+        // Errores de red (timeout, offline) no invalidan el token.
+        if (err.name !== 'AbortError' && !(err instanceof TypeError)) {
+          logout();
+        }
         return false;
       } finally {
         _refreshPromise = null;

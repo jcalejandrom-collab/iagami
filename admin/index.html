@@ -2983,7 +2983,7 @@ async function verDenuncia(id) {
       <div><label style="font-size:11px;color:#666;font-weight:600">TELÉFONO</label><p style="margin:2px 0;font-size:14px">${escHtml(d.telefono||'—')}</p></div>
       <div><label style="font-size:11px;color:#666;font-weight:600">TIPO</label><p style="margin:2px 0;font-size:14px">${escHtml(d.tipo||d.categoria||'—')}</p></div>
       <div><label style="font-size:11px;color:#666;font-weight:600">URGENCIA</label><p style="margin:2px 0;font-size:14px">${escHtml(d.urgencia||'—')}</p></div>
-      <div><label style="font-size:11px;color:#666;font-weight:600">ESTADO</label><p style="margin:2px 0;font-size:14px">${estadoLbl[d.estado]||d.estado||'Recibida'}</p></div>
+      <div><label style="font-size:11px;color:#666;font-weight:600">ESTADO</label><p style="margin:2px 0;font-size:14px">${estadoLbl[d.estado]||escHtml(d.estado||'Recibida')}</p></div>
       <div><label style="font-size:11px;color:#666;font-weight:600">FECHA</label><p style="margin:2px 0;font-size:14px">${escHtml(fecha)}</p></div>
     </div>
     <div style="margin-bottom:12px"><label style="font-size:11px;color:#666;font-weight:600">UBICACIÓN</label><p style="margin:2px 0;font-size:14px">${escHtml(d.ubicacion||d.direccion||'—')}</p></div>
@@ -5294,7 +5294,7 @@ window.filtrarCtrl = function() {
 
 /* ─── LOGOUT ─── */
 async function doLogout() {
-  await CMSDB.logAudit('logout', 'admin', 'sesion cerrada');
+  try { await CMSDB.logAudit('logout', 'admin', 'sesion cerrada'); } catch {}
   CMSDB.logout();
   sessionStorage.removeItem('iagami_admin_session');
   window.location.replace('../index.html');
