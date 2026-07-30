@@ -1300,8 +1300,10 @@ function findFaqResponse(text, faqs) {
 }
 
 function sanitizeChatHtml(s) {
+  // Escapa todo primero, luego re-habilita solo etiquetas básicas sin atributos.
+  // La regex captura únicamente el nombre de la etiqueta (sin atributos posibles).
   return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-    .replace(/&lt;(\/?(strong|b|br\s?\/?))&gt;/gi, '<$1>');
+    .replace(/&lt;(\/?(strong|b|br\s?\/?))&gt;/gi, (_, tag) => `<${tag.replace(/[^a-z /]/gi,'')}>`);
 }
 function addChatBubble(msgs, html, isUser) {
   const b = document.createElement('div');
@@ -2002,6 +2004,14 @@ window.onerror = function(msg, src, line, col, err) {
 };
 window.addEventListener('unhandledrejection', function(e) {
   console.error('[IAGAMI] Promesa rechazada sin capturar:', e.reason);
+});
+
+window.addEventListener('sigap:session-expired', function() {
+  document.querySelectorAll('.nav-admin-btn').forEach(b => b.style.display = 'none');
+});
+
+window.addEventListener('sigap:collection-error', function(e) {
+  console.warn('[IAGAMI] Colección con error:', e.detail);
 });
 
 async function initPortal() {

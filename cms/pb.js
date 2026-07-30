@@ -38,16 +38,19 @@ const CMSDB = (function () {
 
   /* ─── AbortController por colección ─── */
   const _controllers = {};
+  const _timeouts = {};
 
   function _abort(key, timeoutMs = 10000) {
     if (_controllers[key]) { _controllers[key].abort(); }
+    if (_timeouts[key]) { clearTimeout(_timeouts[key]); }
     const ctrl = new AbortController();
     _controllers[key] = ctrl;
-    setTimeout(() => ctrl.abort(), timeoutMs);
+    _timeouts[key] = setTimeout(() => ctrl.abort(), timeoutMs);
     return ctrl.signal;
   }
 
   function _abortDone(key) {
+    if (_timeouts[key]) { clearTimeout(_timeouts[key]); delete _timeouts[key]; }
     delete _controllers[key];
   }
 
@@ -112,6 +115,11 @@ const CMSDB = (function () {
           console.warn(`[SIGAP] Colección "${coleccion}" no existe en PocketBase`);
           return [];
         }
+        if (res.status === 403) {
+          console.warn(`[SIGAP] Acceso denegado a "${coleccion}" (API Rules). Verifica permisos en PocketBase.`);
+          window.dispatchEvent(new CustomEvent('sigap:access-denied', { detail: { coleccion } }));
+          return [];
+        }
         _handleAuthError(res.status);
         if (!res.ok) {
           const body = await res.json().catch(()=>({}));
@@ -131,6 +139,7 @@ const CMSDB = (function () {
     } catch (err) {
       if (err.name === 'AbortError') return [];
       console.error(`[SIGAP] getAll("${coleccion}") falló:`, err.message);
+      window.dispatchEvent(new CustomEvent('sigap:collection-error', { detail: { coleccion, error: err.message } }));
       return [];
     } finally {
       _abortDone(_key);

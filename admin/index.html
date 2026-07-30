@@ -1617,6 +1617,8 @@ input,select,textarea{font-family:inherit}
     return;
   }
   renderTopbarUser();
+  showSection('dashboard');
+  setMediaFilter('all');
 })();
 
 /* Muestra el nombre y avatar reales del admin logueado en la barra superior */
@@ -5300,9 +5302,7 @@ async function doLogout() {
   window.location.replace('../index.html');
 }
 
-/* ─── INIT ─── */
-showSection('dashboard');
-setMediaFilter('all');
+/* ─── INIT: el dashboard se carga dentro de checkAuth() tras verificar token ─── */
 
 /* ══════════════════════════════════════════════════════════════
    FORMULARIO UNIFICADO 9 PASOS — REGISTRAR ORGANIZACIÓN POPULAR
