@@ -1,0 +1,41 @@
+/*
+  # ─── Cabeceras de seguridad HTTP ─── SIGAP / IAGAMI ────────────────────────
+  # Aplicadas a todas las rutas via Cloudflare Pages.
+  #
+  # FASE 1 — CSP en Report-Only (no bloquea, solo reporta a la consola).
+  # Cuando se confirme que no hay falsos positivos durante ~7 días,
+  # renombrar Content-Security-Policy-Report-Only → Content-Security-Policy.
+  # ─────────────────────────────────────────────────────────────────────────────
+
+  # ── Fuerza HTTPS durante 1 año (seguro: Cloudflare Pages = siempre HTTPS) ──
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+
+  # ── Bloquea ataques de clickjacking via iframes ───────────────────────────
+  X-Frame-Options: DENY
+
+  # ── Previene MIME sniffing (evita que el navegador "adivine" tipos) ───────
+  X-Content-Type-Options: nosniff
+
+  # ── No filtra la URL del sitio al seguir enlaces externos ─────────────────
+  Referrer-Policy: strict-origin-when-cross-origin
+
+  # ── Deshabilita APIs del navegador no utilizadas ──────────────────────────
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()
+
+  # ── Aislamiento de origen (mitiga Spectre y ataques entre procesos) ───────
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Resource-Policy: same-origin
+  Origin-Agent-Cluster: ?1
+
+  # ── CSP en modo OBSERVACIÓN (Report-Only) ────────────────────────────────
+  # No bloquea nada. Si algo aparece como "violación" en la consola del
+  # navegador, agrégalo a la lista antes de pasar a la fase definitiva.
+  #
+  # Recursos auditados en el proyecto:
+  #   • Scripts:   solo archivos propios (cms/, admin/) — sin CDN externos
+  #   • Estilos:   propios + Google Fonts (fonts.googleapis.com)
+  #   • Fuentes:   fonts.gstatic.com
+  #   • Conexión:  api.iagami.online (PocketBase via Cloudflare Tunnel)
+  #   • Imágenes:  propias + api.iagami.online (fotos subidas a PocketBase)
+  #   • Sin:       Google Maps, analytics, Cloudflare Insights, scripts de terceros
+  Content-Security-Policy-Report-Only: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://api.iagami.online; img-src 'self' https://api.iagami.online data: blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
