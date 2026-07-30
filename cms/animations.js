@@ -48,13 +48,13 @@
       const progress = Math.min(elapsed / duration, 1);
       const value    = target * easeOut(progress);
       el.textContent = value.toFixed(decimals) + suffix;
-      if (progress < 1) requestAnimationFrame(tick);
+      if (progress < 1) {requestAnimationFrame(tick);}
     }
     requestAnimationFrame(tick);
   }
 
   function initCounters() {
-    if (reduced) return;
+    if (reduced) {return;}
     const io = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
@@ -73,7 +73,7 @@
   ────────────────────────────────────────────────────────────────────────── */
   function initNavShrink() {
     const nav = document.querySelector('.nav');
-    if (!nav) return;
+    if (!nav) {return;}
 
     let ticking = false;
     function onScroll() {
@@ -93,7 +93,7 @@
      y se animan al target cuando entran en el viewport.
   ────────────────────────────────────────────────────────────────────────── */
   function initProgressBars() {
-    if (reduced) return;
+    if (reduced) {return;}
     const io = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
@@ -139,7 +139,7 @@
 
     const io = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
-        if (!entry.isIntersecting) return;
+        if (!entry.isIntersecting) {return;}
         const grid  = entry.target;
         const items = Array.from(grid.querySelectorAll(':scope > *'));
         const base  = parseInt(grid.dataset.staggerDelay || '60', 10);
@@ -173,7 +173,7 @@
   }
 
   function staggerChildren(container) {
-    if (reduced) return;
+    if (reduced) {return;}
     const base  = 55;
     const items = Array.from(container.querySelectorAll(':scope > *'));
     items.forEach(el => { el.style.opacity = '0'; el.style.transform = 'translateY(16px)'; });
@@ -204,7 +204,7 @@
       group.appendChild(indicator);
 
       function moveIndicator(activeBtn) {
-        if (!activeBtn) return;
+        if (!activeBtn) {return;}
         const gRect = group.getBoundingClientRect();
         const bRect = activeBtn.getBoundingClientRect();
         indicator.style.width     = bRect.width + 'px';
@@ -212,11 +212,11 @@
       }
 
       const active = group.querySelector('.active, [aria-selected="true"]');
-      if (active) moveIndicator(active);
+      if (active) {moveIndicator(active);}
 
       group.addEventListener('click', e => {
         const btn = e.target.closest('button, [role="tab"]');
-        if (!btn || !group.contains(btn)) return;
+        if (!btn || !group.contains(btn)) {return;}
         requestAnimationFrame(() => moveIndicator(btn));
       });
     });
@@ -230,14 +230,14 @@
     if (reduced || !el) { el.textContent = newVal; return; }
     const from = parseFloat(el.textContent) || 0;
     const to   = parseFloat(newVal) || 0;
-    if (from === to) return;
+    if (from === to) {return;}
     const dur   = 400;
     const start = performance.now();
     function tick(now) {
       const p = Math.min((now - start) / dur, 1);
       const ease = 1 - Math.pow(1 - p, 3);
       el.textContent = Math.round(from + (to - from) * ease);
-      if (p < 1) requestAnimationFrame(tick);
+      if (p < 1) {requestAnimationFrame(tick);}
     }
     requestAnimationFrame(tick);
   }
@@ -250,7 +250,7 @@
        outEl : elemento .page que sale (opcional, si null solo fade in)
        inEl  : elemento .page que entra
   ────────────────────────────────────────────────────────────────────────── */
-  function pageFade(inEl, outEl) {
+  function pageFade(inEl, _outEl) {
     if (reduced || !inEl) { return; }
     inEl.style.animation = 'pageIn .32s cubic-bezier(.4,0,.2,1) forwards';
   }
@@ -260,12 +260,12 @@
      la clase .btn-p, .btn-s, .cta-btn, o atributo data-ripple.
   ────────────────────────────────────────────────────────────────────────── */
   function initRipple() {
-    if (reduced) return;
+    if (reduced) {return;}
     // Event delegation — works on dynamically added buttons too
     document.addEventListener('click', e => {
-      if (!e.target || typeof e.target.closest !== 'function') return;
+      if (!e.target || typeof e.target.closest !== 'function') {return;}
       const btn = e.target.closest('.btn-p,.btn-s,.cta-btn,[data-ripple]');
-      if (!btn) return;
+      if (!btn) {return;}
       const rect = btn.getBoundingClientRect();
       const size = Math.max(rect.width, rect.height) * 2;
       const x    = e.clientX - rect.left - size / 2;
@@ -275,7 +275,7 @@
         width:${size}px;height:${size}px;left:${x}px;top:${y}px;
         background:rgba(255,255,255,.28);transform:scale(0);
         animation:rippleAnim .55s ease-out forwards;`;
-      if (getComputedStyle(btn).position === 'static') btn.style.position = 'relative';
+      if (getComputedStyle(btn).position === 'static') {btn.style.position = 'relative';}
       btn.style.overflow = 'hidden';
       btn.appendChild(r);
       setTimeout(() => r.remove(), 600);
@@ -288,7 +288,7 @@
      El texto original del elemento es el que se escribe.
   ────────────────────────────────────────────────────────────────────────── */
   function initTypewriter() {
-    if (reduced) return;
+    if (reduced) {return;}
     document.querySelectorAll('[data-typewriter]').forEach(el => {
       const text  = el.textContent.trim();
       const speed = parseInt(el.dataset.twSpeed || '55', 10);
@@ -297,7 +297,7 @@
       el.style.paddingRight = '2px';
 
       const io = new IntersectionObserver((entries) => {
-        if (!entries[0].isIntersecting) return;
+        if (!entries[0].isIntersecting) {return;}
         io.disconnect();
         let i = 0;
         const delay = parseInt(el.dataset.twDelay || '0', 10);
@@ -320,16 +320,16 @@
      dando sensación de profundidad respecto a la imagen de fondo.
   ────────────────────────────────────────────────────────────────────────── */
   function initHeroParallax() {
-    if (reduced || window.innerWidth < 768) return;
+    if (reduced || window.innerWidth < 768) {return;}
     const heroLeft = document.querySelector('.hero-left');
-    if (!heroLeft) return;
+    if (!heroLeft) {return;}
     let ticking = false;
     window.addEventListener('scroll', () => {
       if (!ticking) {
         requestAnimationFrame(() => {
           const y = window.scrollY;
-          if (y < 600) heroLeft.style.transform = `translateY(${y * 0.12}px)`;
-          else heroLeft.style.transform = '';
+          if (y < 600) {heroLeft.style.transform = `translateY(${y * 0.12}px)`;}
+          else {heroLeft.style.transform = '';}
           ticking = false;
         });
         ticking = true;
@@ -345,14 +345,14 @@
   ────────────────────────────────────────────────────────────────────────── */
   function openModalAnim(id) {
     const m = document.getElementById(id);
-    if (!m) return;
+    if (!m) {return;}
     m.classList.remove('closing');
     m.classList.add('open');
   }
 
   function closeModalAnim(id) {
     const m = document.getElementById(id);
-    if (!m) return;
+    if (!m) {return;}
     if (reduced) { m.classList.remove('open'); return; }
     // Remove .open so backdrop fades, add .closing so modal plays exit animation
     // .closing needs display:flex to be visible during the animation
@@ -370,14 +370,14 @@
      Máximo 8° de rotación.
   ────────────────────────────────────────────────────────────────────────── */
   function initCardTilt() {
-    if (reduced) return;
+    if (reduced) {return;}
     const MAX = 8;
     const SEL = '.svc-card,.news-card,.proj-card,.ev-card';
 
     document.addEventListener('mousemove', e => {
-      if (!e.target || typeof e.target.closest !== 'function') return;
+      if (!e.target || typeof e.target.closest !== 'function') {return;}
       const card = e.target.closest(SEL);
-      if (!card) return;
+      if (!card) {return;}
       const rect = card.getBoundingClientRect();
       const dx   = (e.clientX - rect.left - rect.width  / 2) / (rect.width  / 2);
       const dy   = (e.clientY - rect.top  - rect.height / 2) / (rect.height / 2);
@@ -385,9 +385,9 @@
     });
 
     document.addEventListener('mouseleave', e => {
-      if (!e.target || typeof e.target.closest !== 'function') return;
+      if (!e.target || typeof e.target.closest !== 'function') {return;}
       const card = e.target.closest(SEL);
-      if (!card) return;
+      if (!card) {return;}
       card.style.transition = 'transform .4s ease';
       card.style.transform  = '';
       setTimeout(() => { card.style.transition = ''; }, 400);
@@ -398,9 +398,9 @@
      Un resplandor verde translúcido sigue el cursor dentro del hero.
   ────────────────────────────────────────────────────────────────────────── */
   function initCursorGlow() {
-    if (reduced) return;
+    if (reduced) {return;}
     const hero = document.querySelector('.hero');
-    if (!hero) return;
+    if (!hero) {return;}
     const glow = document.createElement('div');
     glow.className = 'hero-cursor-glow';
     hero.appendChild(glow);
@@ -420,7 +420,7 @@
      en el viewport.
   ────────────────────────────────────────────────────────────────────────── */
   function initWordReveal() {
-    if (reduced) return;
+    if (reduced) {return;}
     document.querySelectorAll('[data-word-reveal]').forEach(el => {
       const words = el.textContent.trim().split(/\s+/);
       el.classList.add('word-reveal');
@@ -429,7 +429,7 @@
       ).join(' ');
 
       const io = new IntersectionObserver(entries => {
-        if (!entries[0].isIntersecting) return;
+        if (!entries[0].isIntersecting) {return;}
         el.classList.add('revealed');
         io.disconnect();
       }, { threshold: 0.5 });
@@ -442,9 +442,9 @@
      Se llama desde la función toast() de cada página.
   ────────────────────────────────────────────────────────────────────────── */
   function addToastBar(toastEl) {
-    if (reduced || !toastEl) return;
+    if (reduced || !toastEl) {return;}
     const old = toastEl.querySelector('.toast-bar');
-    if (old) old.remove();
+    if (old) {old.remove();}
     const bar = document.createElement('span');
     bar.className = 'toast-bar';
     toastEl.style.position = 'relative';
