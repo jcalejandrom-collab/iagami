@@ -1,0 +1,78 @@
+name: Quality Gate — PR
+
+on:
+  pull_request:
+    branches: [main]
+
+# Un solo PR no puede lanzar múltiples gates simultáneos
+concurrency:
+  group: quality-gate-${{ github.head_ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ── Fase 1: Análisis estático ──────────────────────────────────────────────
+  lint:
+    name: "1/3 · ESLint"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - run: npm ci
+
+      - name: ESLint — seguridad y calidad
+        run: npm run lint
+
+  # ── Fase 2: Pruebas unitarias ──────────────────────────────────────────────
+  unit-tests:
+    name: "2/3 · Vitest"
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - run: npm ci
+
+      - name: Vitest — módulos críticos
+        run: npm test
+
+  # ── Fase 3: Pruebas E2E ────────────────────────────────────────────────────
+  e2e:
+    name: "3/3 · Playwright"
+    needs: unit-tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - run: npm ci
+
+      - name: Instalar Playwright + Chromium
+        run: npx playwright install chromium --with-deps
+
+      - name: Playwright — flujos críticos + seguridad de sesión
+        run: npm run e2e
+        env:
+          PLAYWRIGHT_CHROMIUM_PATH: ""
+
+      - name: Subir reporte si hay fallos
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-${{ github.run_id }}
+          path: playwright-report/
+          retention-days: 7
