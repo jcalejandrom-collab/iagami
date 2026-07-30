@@ -138,14 +138,48 @@ Las colecciones se gestionan desde la interfaz de PocketBase. Reglas a respetar 
 
 ---
 
-## Monitoreo (futuro — PR #69)
+## Monitoreo (cms/monitoring.js)
 
-Estado actual: **sin monitoreo de producción**.
+Integración opcional con Sentry. **No activa sin `SENTRY_DSN`** — sin DSN el módulo es completamente no-op.
 
-Previsto:
-- Sentry para captura de errores con stack trace
-- Correlación: error en producción → reproducción con Playwright
-- Métricas: errores API, latencia, fallos de auth por período
+### Activar en producción
+
+En `cms/config.js`, añadir al objeto `window.__IAGAMI_CONFIG__`:
+
+```javascript
+window.__IAGAMI_CONFIG__ = {
+  PB_URL:      'https://api.iagami.online',
+  SENTRY_DSN:  'https://<key>@o<org>.ingest.sentry.io/<project>',
+  ENV:         'production',   // 'staging' | 'production'
+  VERSION:     '1.0.0',        // etiqueta de release en Sentry
+};
+```
+
+### Comportamiento
+
+| Condición | Resultado |
+|---|---|
+| Sin `SENTRY_DSN` | API no-op (`isReady: false`), cero efectos secundarios |
+| Con `SENTRY_DSN` | Carga Sentry SDK desde CDN, captura errores y breadcrumbs |
+| CDN bloqueado / sin red | Script `onerror` silencioso, app sigue funcionando |
+
+### API pública — `window.SIGAP_MONITORING`
+
+```javascript
+SIGAP_MONITORING.captureError(error, { url: '/admin/noticias' });
+SIGAP_MONITORING.captureMessage('Mensaje informativo');
+SIGAP_MONITORING.setUser({ id, email, rol });
+SIGAP_MONITORING.addBreadcrumb({ message, category, level });
+SIGAP_MONITORING.isReady; // true solo tras carga exitosa de Sentry
+```
+
+### CSP
+
+El archivo `_headers` ya incluye los dominios de Sentry en `Content-Security-Policy-Report-Only`:
+- `script-src`: `https://browser.sentry-cdn.com`
+- `connect-src`: `https://*.ingest.sentry.io`
+
+Al pasar a enforcement (Fase 2 CSP), estos dominios deben mantenerse.
 
 ---
 

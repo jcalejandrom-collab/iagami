@@ -32,10 +32,10 @@
   # navegador, agrégalo a la lista antes de pasar a la fase definitiva.
   #
   # Recursos auditados en el proyecto:
-  #   • Scripts:   solo archivos propios (cms/, admin/) — sin CDN externos
+  #   • Scripts:   propios (cms/, admin/) + Sentry SDK CDN (opcional, solo si SENTRY_DSN configurado)
   #   • Estilos:   propios + Google Fonts (fonts.googleapis.com)
   #   • Fuentes:   fonts.gstatic.com
-  #   • Conexión:  api.iagami.online (PocketBase via Cloudflare Tunnel)
+  #   • Conexión:  api.iagami.online (PocketBase) + sentry.io (telemetría de errores, opcional)
   #   • Imágenes:  propias + api.iagami.online (fotos subidas a PocketBase)
-  #   • Sin:       Google Maps, analytics, Cloudflare Insights, scripts de terceros
-  Content-Security-Policy-Report-Only: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://api.iagami.online; img-src 'self' https://api.iagami.online data: blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
+  #   • Sin:       Google Maps, analytics, Cloudflare Insights
+  Content-Security-Policy-Report-Only: default-src 'self'; script-src 'self' 'unsafe-inline' https://browser.sentry-cdn.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://api.iagami.online https://*.ingest.sentry.io; img-src 'self' https://api.iagami.online data: blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
