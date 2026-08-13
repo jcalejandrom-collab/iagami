@@ -48,7 +48,6 @@ test.describe('Permisos y roles', () => {
   });
 
   test('distintos usuarios tienen distintos datos en sesión', async ({ page: page1, browser }) => {
-    test.setTimeout(50_000); // Dos flujos de auth completos en contextos separados
     // Contexto 1 — Presidente
     await injectSession(page1, USERS.presidente);
     await mockAuthRefreshOk(page1, USERS.presidente);
