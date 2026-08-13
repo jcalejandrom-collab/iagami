@@ -86,10 +86,17 @@ export async function mockAuthRefreshOffline(page) {
 
 /**
  * Intercepta todas las consultas a colecciones y devuelve datos de prueba.
+ * LIFO safety: cede auth endpoints al mock específico registrado antes.
  */
 export async function mockCollections(page) {
   await page.route(`${PB}/api/collections/**`, route => {
     const url = route.request().url();
+
+    // Ceder auth endpoints al mock específico (LIFO: este handler tiene prioridad
+    // sobre los registrados antes, así que hacemos fallback para que lleguen a ellos)
+    if (url.includes('/auth-refresh') || url.includes('/auth-with-password')) {
+      return route.fallback();
+    }
 
     // Identificar la colección por la URL
     const match = url.match(/\/api\/collections\/([^/]+)\/records/);
