@@ -243,7 +243,8 @@ const CMSDB = (function () {
       const signal = _abortKey(_key);
       try {
         const noSortCols = ['comunas'];
-        const sortCandidates = noSortCols.includes(coleccion) ? [''] : ['-created', 'id', ''];
+        const idSortCols = ['trabajadores','solicitudes_rrhh','capacitaciones','evaluaciones_desempeno','asistencia','actividades','inspecciones_empresas'];
+        const sortCandidates = noSortCols.includes(coleccion) ? [''] : idSortCols.includes(coleccion) ? ['id',''] : ['-created','id',''];
         let workingSort = null, page = 1, allItems = [], totalPages = 1;
 
         do {
