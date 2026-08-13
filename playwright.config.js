@@ -17,10 +17,12 @@ export default defineConfig({
     headless: true,
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
-    // Chromium pre-instalado en el entorno de CI
     launchOptions: {
-      executablePath: process.env.PLAYWRIGHT_CHROMIUM_PATH
-        || '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
+      // Si PLAYWRIGHT_CHROMIUM_PATH tiene valor, se usa esa ruta explícita.
+      // Si está vacío o no existe, Playwright descubre el binario automáticamente.
+      ...(process.env.PLAYWRIGHT_CHROMIUM_PATH
+        ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_PATH }
+        : {}),
       args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
     },
   },
