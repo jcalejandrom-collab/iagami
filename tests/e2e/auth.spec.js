@@ -121,17 +121,20 @@ test.describe('Modo offline', () => {
     await mockAuthRefreshOffline(page);
     await mockCollections(page);
 
-    // Capturar el evento antes de navegar
-    const offlineEmitted = page.evaluate(() =>
-      new Promise(resolve => {
-        window.addEventListener('sigap:offline', () => resolve(true), { once: true });
-        // Fallback por si el evento ya ocurrió
-        setTimeout(() => resolve(false), 8_000);
-      })
-    );
+    // addInitScript inyecta el listener en el nuevo contexto de página, antes
+    // de que cualquier script de la app ejecute. Así el listener sobrevive la
+    // navegación y no hay condición de carrera con page.evaluate().
+    await page.addInitScript(() => {
+      window.__sigapOfflineEmitted = false;
+      window.addEventListener('sigap:offline', () => {
+        window.__sigapOfflineEmitted = true;
+      }, { once: true });
+    });
 
     await page.goto('/admin/index.html');
-    const emitted = await offlineEmitted;
+    await page.waitForSelector('#auth-loader', { state: 'detached', timeout: 8_000 });
+
+    const emitted = await page.evaluate(() => window.__sigapOfflineEmitted);
     expect(emitted).toBe(true);
   });
 });
