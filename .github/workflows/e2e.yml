@@ -38,18 +38,15 @@ jobs:
         run: npm ci
 
       - name: Instalar Playwright + Chromium
-        run: npx playwright install chromium --with-deps
-        env:
-          # Anular PLAYWRIGHT_BROWSERS_PATH del runner (puede apuntar a /opt/pw-browsers,
-          # ruta del sistema no escribible en GitHub Actions). Con "" Playwright usa
-          # su ruta por defecto (~/.cache/ms-playwright), que sí es escribible.
-          PLAYWRIGHT_BROWSERS_PATH: ""
+        run: |
+          unset PLAYWRIGHT_BROWSERS_PATH
+          npx playwright install chromium --with-deps
 
       - name: Ejecutar tests E2E
-        run: npm run e2e
+        run: |
+          unset PLAYWRIGHT_BROWSERS_PATH
+          npm run e2e
         env:
-          # Misma ruta que el paso de instalación para que Playwright encuentre el binario.
-          PLAYWRIGHT_BROWSERS_PATH: ""
           PLAYWRIGHT_CHROMIUM_PATH: ""
 
       - name: Subir reporte si hay fallos
