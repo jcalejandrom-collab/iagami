@@ -3688,7 +3688,9 @@ async function exportConsejosPDF() {
   if (estatus)   data = data.filter(c => c.estatus === estatus);
   if (!data.length) { toast('No hay registros para exportar','warning'); return; }
   let diagnosticos = [];
-  try { diagnosticos = await CMSDB.getAll('diagnosticos_ambientales'); } catch(e) {}
+  try { diagnosticos = await CMSDB.getAll('diagnosticos_ambientales'); } catch(e) {
+    toast('Advertencia: los datos de Diagnóstico Territorial no pudieron cargarse. El PDF puede estar incompleto.', 'warning');
+  }
   const subtitulo = [parroquia||'Todas las parroquias', estatus||'Todos los estatus'].join(' · ');
   _openPDFWindow(_buildConsejosPDFHtml(data, diagnosticos, 'Consejos Comunales', subtitulo));
 }
@@ -3698,7 +3700,9 @@ async function exportConsejoSinglePDF(id) {
   const c = await CMSDB.getOne('consejos_comunales', id);
   if (!c) { toast('Registro no encontrado','error'); return; }
   let diagnosticos = [];
-  try { diagnosticos = await CMSDB.getAll('diagnosticos_ambientales'); } catch(e) {}
+  try { diagnosticos = await CMSDB.getAll('diagnosticos_ambientales'); } catch(e) {
+    toast('Advertencia: los datos de Diagnóstico Territorial no pudieron cargarse. El PDF puede estar incompleto.', 'warning');
+  }
   _openPDFWindow(_buildConsejosPDFHtml([c], diagnosticos, `Consejo Comunal: ${c.nombre||id}`, `Parroquia: ${c.parroquia||'—'}`));
 }
 
@@ -5139,7 +5143,9 @@ async function exportComunasPDF() {
   if (estFil) data = data.filter(c=>c.estatus===estFil);
   if (!data.length) { toast('No hay registros para exportar','warning'); return; }
   let diags = [];
-  try { diags = await CMSDB.getAll('diagnosticos_ambientales'); } catch(e) {}
+  try { diags = await CMSDB.getAll('diagnosticos_ambientales'); } catch(e) {
+    toast('Advertencia: los datos de Diagnóstico Territorial no pudieron cargarse. El PDF puede estar incompleto.', 'warning');
+  }
   const subtitulo = [parFil||'Todas las parroquias', estFil||'Todos los estados'].join(' · ');
   _openPDFWindow(_buildComunasPDFHtml(data, diags, 'Comunas', subtitulo));
 }
@@ -5149,7 +5155,9 @@ async function exportComunaSinglePDF(id) {
   const c = await CMSDB.getOne('comunas', id);
   if (!c) { toast('Registro no encontrado','error'); return; }
   let diags = [];
-  try { diags = await CMSDB.getAll('diagnosticos_ambientales'); } catch(e) {}
+  try { diags = await CMSDB.getAll('diagnosticos_ambientales'); } catch(e) {
+    toast('Advertencia: los datos de Diagnóstico Territorial no pudieron cargarse. El PDF puede estar incompleto.', 'warning');
+  }
   _openPDFWindow(_buildComunasPDFHtml([c], diags, `Comuna: ${c.nombre||id}`, `Parroquia: ${c.parroquia||'—'}`));
 }
 
