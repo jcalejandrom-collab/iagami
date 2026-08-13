@@ -5438,32 +5438,70 @@ window.filtrarCtrl = function() {
 async function renderCtrlPresencia() {
   const body = document.getElementById('ctrl-pres-body');
   if (!body) return;
-  if (body.dataset.loaded === '1') { filtrarPresencia(); return; } // evitar re-fetch si ya cargó
+  if (body.dataset.loaded === '1') { filtrarPresencia(); return; }
   body.innerHTML = '<p style="color:#888;text-align:center;padding:40px">Cargando registros de presencia…</p>';
 
-  const [presencia, trabajadores] = await Promise.all([
-    CMSDB.getAll('control_seguimiento', 500, '-fecha_hora').catch(()=>[]),
-    CMSDB.getAll('trabajadores', 300).catch(()=>[]),
-  ]);
+  const PB_URL = window.__IAGAMI_CONFIG__?.PB_URL || 'https://api.iagami.online';
+  const token  = sessionStorage.getItem('pb_token') || '';
 
-  const hoy = new Date().toISOString().slice(0,10);
+  // ── Diagnóstico: leer 1 registro para capturar el código HTTP real ──────────
+  let probeStatus = 0;
+  let probeMsg    = '';
+  try {
+    const probe = await fetch(
+      `${PB_URL}/api/collections/control_seguimiento/records?perPage=1`,
+      { headers: { Authorization: token } }
+    );
+    probeStatus = probe.status;
+    if (!probe.ok) {
+      const err = await probe.json().catch(() => ({}));
+      probeMsg = err.message || `HTTP ${probeStatus}`;
+    }
+  } catch (netErr) {
+    probeStatus = 0;
+    probeMsg = netErr.message || 'Error de red';
+  }
+
+  // ── Si no es 200, mostrar el error concreto y detener ─────────────────────
+  if (probeStatus !== 200) {
+    const info = {
+      0:   { color:'#dc2626', icon:'🔌', titulo:'Sin conexión con PocketBase',    desc:`No se pudo llegar al servidor. Detalle: ${probeMsg}` },
+      401: { color:'#d97706', icon:'🔑', titulo:'No autenticado (401)',            desc:'El token de sesión fue rechazado. Cierra sesión y vuelve a entrar.' },
+      403: { color:'#dc2626', icon:'🚫', titulo:'Acceso denegado (403)',           desc:'La regla API de control_seguimiento no permite lectura a este usuario. Revisa la regla List en PocketBase.' },
+      404: { color:'#6b7280', icon:'❓', titulo:'Colección no encontrada (404)',   desc:'La colección "control_seguimiento" no existe en PocketBase.' },
+    }[probeStatus] || { color:'#dc2626', icon:'⚠️', titulo:`Error del servidor (${probeStatus})`, desc: probeMsg };
+
+    body.innerHTML = `
+      <div style="background:#fff;border:2px solid ${info.color};border-radius:10px;padding:28px;text-align:center;max-width:480px;margin:40px auto">
+        <div style="font-size:36px;margin-bottom:12px">${info.icon}</div>
+        <div style="font-size:16px;font-weight:700;color:${info.color};margin-bottom:8px">${info.titulo}</div>
+        <div style="font-size:13px;color:#6b7280;line-height:1.6">${escHtml(info.desc)}</div>
+        <button onclick="renderCtrlPresencia()" style="margin-top:16px;background:${info.color};color:#fff;border:none;border-radius:6px;padding:8px 20px;font-size:13px;cursor:pointer;font-weight:600">↻ Reintentar</button>
+      </div>`;
+    body.dataset.loaded = '0';
+    return;
+  }
+
+  // ── 200: cargar datos completos ────────────────────────────────────────────
+  const presencia    = await CMSDB.getAll('control_seguimiento', 500, '-fecha_hora');
+  const trabajadores = await CMSDB.getAll('trabajadores', 300);
+
+  const hoy      = new Date().toISOString().slice(0,10);
   const semInicio = (() => { const d=new Date(); d.setDate(d.getDate()-d.getDay()); return d.toISOString().slice(0,10); })();
 
-  const totalHoy      = presencia.filter(r=>r.fecha_hora&&r.fecha_hora.slice(0,10)===hoy).length;
-  const totalSemana   = presencia.filter(r=>r.fecha_hora&&r.fecha_hora.slice(0,10)>=semInicio).length;
-  const verificados   = presencia.filter(r=>r.verificado).length;
-  const pendientes    = presencia.filter(r=>!r.verificado).length;
-
-  const PB_URL = window.__IAGAMI_CONFIG__?.PB_URL || 'https://api.iagami.online';
+  const totalHoy    = presencia.filter(r=>r.fecha_hora&&r.fecha_hora.slice(0,10)===hoy).length;
+  const totalSemana = presencia.filter(r=>r.fecha_hora&&r.fecha_hora.slice(0,10)>=semInicio).length;
+  const verificados = presencia.filter(r=>r.verificado).length;
+  const pendientes  = presencia.filter(r=>!r.verificado).length;
 
   body.innerHTML = `
   <!-- KPIs presencia -->
   <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:20px">
     ${[
-      ['📅','Registros hoy',    totalHoy,   ''],
-      ['📆','Esta semana',      totalSemana, ''],
-      ['✅','Verificados',      verificados, 'green'],
-      ['⏳','Pendientes',       pendientes,  pendientes>0?'amber':''],
+      ['📅','Registros hoy',  totalHoy,   ''],
+      ['📆','Esta semana',    totalSemana, ''],
+      ['✅','Verificados',    verificados, 'green'],
+      ['⏳','Pendientes',     pendientes,  pendientes>0?'amber':''],
     ].map(([ico,lbl,val,col])=>`
       <div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px;text-align:center">
         <div style="font-size:22px">${ico}</div>
@@ -5474,8 +5512,8 @@ async function renderCtrlPresencia() {
 
   <!-- Filtros -->
   <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center">
-    <input type="date" id="cpres-desde" class="input-sm" onchange="filtrarPresencia()" style="padding:6px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px"/>
-    <input type="date" id="cpres-hasta" class="input-sm" onchange="filtrarPresencia()" style="padding:6px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px"/>
+    <input type="date" id="cpres-desde" onchange="filtrarPresencia()" style="padding:6px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px"/>
+    <input type="date" id="cpres-hasta" onchange="filtrarPresencia()" style="padding:6px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px"/>
     <select id="cpres-trab" onchange="filtrarPresencia()" style="padding:6px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px">
       <option value="">Todos los trabajadores</option>
       ${trabajadores.map(t=>`<option value="${t.id}">${escHtml(`${t.nombres||''} ${t.apellidos||''}`.trim())}</option>`).join('')}
@@ -5494,7 +5532,7 @@ async function renderCtrlPresencia() {
     </select>
   </div>
 
-  <!-- Tabla presencia -->
+  <!-- Tabla presencia (solo lectura) -->
   <div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;overflow:auto">
     <table style="width:100%;border-collapse:collapse;font-size:13px">
       <thead style="background:#f9fafb">
@@ -5518,13 +5556,13 @@ window.filtrarPresencia = function() {
   const fVerif = document.getElementById('cpres-verif')?.value||'';
 
   const filtered = presencia.filter(r=>{
-    const fecha = r.fecha_hora?r.fecha_hora.slice(0,10):'';
+    const fecha = r.fecha_hora ? r.fecha_hora.slice(0,10) : '';
     if (fTrab  && r.trabajador_id !== fTrab) return false;
     if (fDesde && fecha < fDesde) return false;
     if (fHasta && fecha > fHasta) return false;
     if (fTipo  && r.tipo !== fTipo) return false;
-    if (fVerif === '1' && !r.verificado)  return false;
-    if (fVerif === '0' &&  r.verificado)  return false;
+    if (fVerif === '1' && !r.verificado) return false;
+    if (fVerif === '0' &&  r.verificado) return false;
     return true;
   });
 
@@ -5537,13 +5575,11 @@ window.filtrarPresencia = function() {
   }
 
   tbody.innerHTML = filtered.slice(0,300).map(r=>{
-    const trab = trabajadores.find(t=>t.id===r.trabajador_id);
+    const trab   = trabajadores.find(t=>t.id===r.trabajador_id);
     const nombre = trab ? `${trab.nombres||''} ${trab.apellidos||''}`.trim() : '—';
     const fotoUrl = r.foto ? `${PB_URL}/api/files/control_seguimiento/${r.id}/${r.foto}` : null;
     const fotoHtml = fotoUrl
-      ? `<a href="${escHtml(fotoUrl)}" target="_blank" rel="noopener">
-           <img src="${escHtml(fotoUrl)}" style="width:48px;height:48px;border-radius:6px;object-fit:cover;border:1px solid #e5e7eb" loading="lazy"/>
-         </a>`
+      ? `<a href="${escHtml(fotoUrl)}" target="_blank" rel="noopener"><img src="${escHtml(fotoUrl)}" style="width:48px;height:48px;border-radius:6px;object-fit:cover;border:1px solid #e5e7eb" loading="lazy"/></a>`
       : '<span style="color:#9ca3af;font-size:12px">—</span>';
     const lat = r.latitud  ? parseFloat(r.latitud).toFixed(5)  : null;
     const lng = r.longitud ? parseFloat(r.longitud).toFixed(5) : null;
@@ -5554,7 +5590,6 @@ window.filtrarPresencia = function() {
     const tipoColor = {Entrada:'#16a34a',Salida:'#dc2626',Visita:'#2563eb',Pausa:'#d97706'};
     const color = tipoColor[r.tipo]||'#6b7280';
     const fecha = r.fecha_hora ? r.fecha_hora.replace('T',' ').substring(0,16) : '—';
-    const verified = r.verificado;
     return `<tr style="border-bottom:1px solid #f3f4f6">
       <td style="padding:9px 12px;font-weight:500">${escHtml(nombre)}</td>
       <td style="padding:9px 12px"><span style="background:${color}22;color:${color};padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600">${escHtml(r.tipo||'—')}</span></td>
@@ -5564,24 +5599,10 @@ window.filtrarPresencia = function() {
       <td style="padding:9px 12px;font-size:12px;color:#6b7280">${escHtml(precHtml)}</td>
       <td style="padding:9px 12px;max-width:180px;font-size:12px;color:#6b7280">${escHtml((r.observaciones||'—').substring(0,100))}</td>
       <td style="padding:9px 12px">
-        ${verified
-          ? `<span style="background:#16a34a22;color:#16a34a;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600">✅ Verificado</span>`
-          : `<button onclick="verificarPresencia('${r.id}')" style="background:#d97706;color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;font-weight:600">⏳ Verificar</button>`}
+        <span style="background:${r.verificado?'#16a34a22':'#d9780622'};color:${r.verificado?'#16a34a':'#d97706'};padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600">${r.verificado?'✅ Verificado':'⏳ Pendiente'}</span>
       </td>
     </tr>`;
   }).join('');
-};
-
-window.verificarPresencia = async function(id) {
-  try {
-    await CMSDB.save('control_seguimiento', { id, verificado: true });
-    const { presencia=[] } = window._cpresData||{};
-    const rec = presencia.find(r=>r.id===id);
-    if (rec) rec.verificado = true;
-    filtrarPresencia();
-  } catch(e) {
-    alert('Error al verificar: ' + e.message);
-  }
 };
 
 /* ─── LOGOUT ─── */
