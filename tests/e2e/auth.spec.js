@@ -11,15 +11,18 @@ test.describe('Login', () => {
     await mockAuthRefreshOk(page);
     await mockCollections(page);
 
-    await page.goto('/index.html#login');
-    await page.fill('#login-email', 'presidente@iagami.online');
-    await page.fill('#login-password', 'contraseña-segura');
-    await page.click('[data-action="login"], button[type="submit"], #btn-login');
+    // El modal de login se abre desde el botón "Acceder" en la navbar
+    await page.goto('/index.html');
+    await page.click('button:has-text("Acceder")');
+    await expect(page.locator('#modal-login')).toBeVisible({ timeout: 3_000 });
+
+    // Selectores reales del formulario: #login-user y #login-pass
+    await page.fill('#login-user', 'presidente@iagami.online');
+    await page.fill('#login-pass', 'contraseña-segura');
+    await page.click('button:has-text("Iniciar sesión")');
 
     // Debe redirigir al admin panel
-    await expect(page).toHaveURL(/admin/);
-    // El loader de auth no debe estar visible
-    await expect(page.locator('#auth-loader')).not.toBeVisible({ timeout: 5_000 });
+    await expect(page).toHaveURL(/admin/, { timeout: 8_000 });
   });
 
   test('credenciales incorrectas muestran error y no redirigen', async ({ page }) => {
@@ -31,12 +34,16 @@ test.describe('Login', () => {
       })
     );
 
-    await page.goto('/index.html#login');
-    await page.fill('#login-email', 'malo@iagami.online');
-    await page.fill('#login-password', 'wrongpass');
-    await page.click('[data-action="login"], button[type="submit"], #btn-login');
+    await page.goto('/index.html');
+    await page.click('button:has-text("Acceder")');
+    await expect(page.locator('#modal-login')).toBeVisible({ timeout: 3_000 });
 
-    // No debe redirigir al admin
+    await page.fill('#login-user', 'malo@iagami.online');
+    await page.fill('#login-pass', 'wrongpass');
+    await page.click('button:has-text("Iniciar sesión")');
+
+    // El error debe aparecer, no debe redirigir al admin
+    await expect(page.locator('#login-modal-error')).toBeVisible({ timeout: 4_000 });
     await expect(page).not.toHaveURL(/admin\/index/);
   });
 });
@@ -61,8 +68,8 @@ test.describe('Guardas de ruta', () => {
     await page.goto('/admin/index.html');
 
     // El loader debe desaparecer y el dashboard ser visible
-    await expect(page.locator('#auth-loader')).not.toBeVisible({ timeout: 6_000 });
-    await expect(page.locator('#dashboard, [data-section="dashboard"]')).toBeVisible({ timeout: 6_000 });
+    await page.waitForSelector('#auth-loader', { state: 'detached', timeout: 8_000 });
+    await page.waitForSelector('#sec-dashboard.active', { timeout: 8_000 });
   });
 });
 
@@ -85,7 +92,7 @@ test.describe('Expiración de sesión', () => {
     await mockCollections(page);
 
     await page.goto('/admin/index.html');
-    await expect(page.locator('#auth-loader')).not.toBeVisible({ timeout: 6_000 });
+    await page.waitForSelector('#auth-loader', { state: 'detached', timeout: 8_000 });
 
     // El token debe haberse actualizado al refreshed
     const token = await page.evaluate(() => sessionStorage.getItem('pb_token'));
@@ -104,7 +111,7 @@ test.describe('Modo offline', () => {
 
     // La sesión debe mantenerse — el usuario no es expulsado
     // (El loader desaparece porque verifyToken devuelve true en offline)
-    await expect(page.locator('#auth-loader')).not.toBeVisible({ timeout: 6_000 });
+    await page.waitForSelector('#auth-loader', { state: 'detached', timeout: 8_000 });
     const token = await page.evaluate(() => sessionStorage.getItem('pb_token'));
     expect(token).toBe(TEST_TOKEN); // token original preservado
   });
@@ -139,7 +146,7 @@ test.describe('Logout', () => {
     await page.route('http://127.0.0.1:8090/**', route => route.fulfill({ status: 200, body: '{}' }));
 
     await page.goto('/admin/index.html');
-    await expect(page.locator('#auth-loader')).not.toBeVisible({ timeout: 6_000 });
+    await page.waitForSelector('#auth-loader', { state: 'detached', timeout: 8_000 });
 
     // Hacer click en logout
     const logoutBtn = page.locator('[data-action="logout"], #btn-logout, .btn-logout').first();

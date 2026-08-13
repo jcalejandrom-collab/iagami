@@ -3562,7 +3562,15 @@ async function renderBienvenida() {
     const freq = current.frecuencia || 'siempre';
     const radios = document.querySelectorAll('input[name="fb-frecuencia"]');
     radios.forEach(r => { r.checked = r.value === freq; });
-    if (current.imagen) { bienvenidaLoadPreview(current.imagen); } else { bienvenidaRemoveImg(); }
+    if (current.imagen) {
+      // current.imagen es el nombre de archivo devuelto por PocketBase.
+      // Construir la URL completa para que el preview no quede relativo a /admin/.
+      const _PB_URL = (window.__IAGAMI_CONFIG__ && window.__IAGAMI_CONFIG__.PB_URL) || 'https://api.iagami.online';
+      const imgSrc = current.imagen.startsWith('data:') || current.imagen.startsWith('http')
+        ? current.imagen
+        : `${_PB_URL}/api/files/${current.collectionName || current.collectionId || 'bienvenida'}/${current.id}/${encodeURIComponent(current.imagen)}`;
+      bienvenidaLoadPreview(imgSrc);
+    } else { bienvenidaRemoveImg(); }
   }
   // Historial
   const hist = document.getElementById('bv-historial');
