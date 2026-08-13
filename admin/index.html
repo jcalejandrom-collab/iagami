@@ -1561,7 +1561,7 @@ input,select,textarea{font-family:inherit}
           <label for="seed-skip" style="font-size:13px;cursor:pointer">Omitir registros que ya existen (recomendado)</label>
         </div>
         <div style="display:flex;gap:10px;flex-wrap:wrap">
-          <button class="btn btn-primary" onclick="runSeed(false)">🌱 Sembrar Datos</button>
+          <button class="btn btn-primary" id="btn-seed-run" onclick="runSeed(false)">🌱 Sembrar Datos</button>
           <button class="btn btn-secondary" onclick="runSeed(true)">🔍 Simulación (sin guardar)</button>
         </div>
         <div id="seed-log" style="display:none;margin-top:20px;background:#f8f9fa;border-radius:8px;padding:16px;max-height:400px;overflow-y:auto">
@@ -4761,7 +4761,20 @@ function renderSeed() {
   if (log) log.style.display = 'none';
 }
 
+let _seedRunning = false;
+
 async function runSeed(dryRun) {
+  if (_seedRunning) return;
+  if (!dryRun && !confirm(
+    '¿Confirmas la siembra de datos en producción?\n\n' +
+    'Se insertarán registros en las colecciones comunas y consejos_comunales.\n' +
+    'Activa "Omitir registros que ya existen" para evitar duplicados.'
+  )) return;
+
+  _seedRunning = true;
+  const btn = document.getElementById('btn-seed-run');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Sembrando…'; }
+
   const skipExisting = document.getElementById('seed-skip').checked;
   const logEl   = document.getElementById('seed-log');
   const logPre  = document.getElementById('seed-log-pre');
@@ -4775,6 +4788,9 @@ async function runSeed(dryRun) {
   } catch(e) {
     logPre.textContent = '❌ ERROR: ' + e.message;
     showToast('Error durante la siembra', 'error');
+  } finally {
+    _seedRunning = false;
+    if (btn) { btn.disabled = false; btn.textContent = '🌱 Sembrar Datos'; }
   }
 }
 
