@@ -2201,10 +2201,14 @@ async function deleteRecord(section, id) {
   confirmDelete(async () => {
     const keyMap = {agenda:'eventos', transparencia:'documentos', organizacion:'org'};
     const dbKey = keyMap[section] || section;
-    await CMSDB.remove(dbKey, id);
-    await CMSDB.logAudit('delete', section, id);
-    toast('Eliminado correctamente', 'success');
-    renderSection(section);
+    try {
+      await CMSDB.remove(dbKey, id);
+      await CMSDB.logAudit('delete', section, id);
+      toast('Eliminado correctamente', 'success');
+      renderSection(section);
+    } catch(e) {
+      toast('Error al eliminar: ' + (e.message || 'revisa la conexión'), 'error');
+    }
   });
 }
 
@@ -3116,7 +3120,7 @@ async function updateDenunciaStatus(id, estado) {
       const list = raw ? JSON.parse(raw) : [];
       item = list.find(d=>d.id===id);
       if (item) { item.estado = estado; localStorage.setItem('iagami_denuncias', JSON.stringify(list)); toast('Estado actualizado'); return; }
-    } catch(e) {}
+    } catch(e) { toast('Error al actualizar la denuncia. Verifique la conexión e intente nuevamente.', 'error'); return; }
   }
   if (item) {
     item.estado = estado;
@@ -3250,7 +3254,7 @@ async function saveDenunciaNota(id, notas) {
       const list = raw ? JSON.parse(raw) : [];
       item = list.find(d=>d.id===id);
       if (item) { item.notas = notas; localStorage.setItem('iagami_denuncias', JSON.stringify(list)); return; }
-    } catch(e) {}
+    } catch(e) { toast('Error al guardar la nota. Verifique la conexión e intente nuevamente.', 'error'); return; }
   }
   if (item) { item.notas = notas; await CMSDB.save('denuncias', item); }
 }
@@ -4734,8 +4738,14 @@ function _jitter(base,idx){
 async function _seedIagami({dryRun=false,skipExisting=true}={}) {
   const log=[];
   let existingComunas=[],existingConsejos=[];
-  try{ existingComunas=await CMSDB.getAll('comunas')||[]; }catch(e){}
-  try{ existingConsejos=await CMSDB.getAll('consejos_comunales')||[]; }catch(e){}
+  let _preflight_ok=true;
+  try{ existingComunas=await CMSDB.getAll('comunas')||[]; }catch(e){ _preflight_ok=false; }
+  try{ existingConsejos=await CMSDB.getAll('consejos_comunales')||[]; }catch(e){ _preflight_ok=false; }
+  if(skipExisting&&!_preflight_ok){
+    return['❌ ABORTADO: No se pudo verificar registros existentes en PocketBase. '+
+           'Un error de conexión no equivale a "no hay registros". '+
+           'Verifique la conexión y vuelva a intentarlo.'];
+  }
   const exC=new Set(existingComunas.map(c=>c.nombre?.toUpperCase()));
   const exCC=new Set(existingConsejos.map(c=>c.nombre?.toUpperCase()));
   const comunaIdMap={};
