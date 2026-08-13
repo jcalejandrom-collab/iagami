@@ -59,8 +59,10 @@ test.describe('PRESIDENTE — acceso a Auditoría', () => {
     await mockCollections(page);
     await mockAuditLogs(page);   // registrado después → LIFO: toma prioridad para iagami_sys_logs
     await page.goto('/admin/index.html');
-    await expect(page.locator('#auth-loader')).not.toBeVisible({ timeout: 8_000 });
-    await expect(page.locator('#sec-dashboard')).toBeVisible({ timeout: 6_000 });
+    // auth-loader se elimina del DOM con .remove() al terminar — esperar que desaparezca
+    await page.waitForSelector('#auth-loader', { state: 'detached', timeout: 10_000 });
+    // Dar tiempo a showSection('dashboard') para activar el panel
+    await page.waitForSelector('#sec-dashboard.active', { timeout: 8_000 });
   });
 
   test('ve el ítem Auditoría en el sidebar', async ({ page }) => {
@@ -111,8 +113,10 @@ test.describe('DIRECTOR — acceso a Auditoría', () => {
     await mockCollections(page);
     await mockAuditLogs(page);
     await page.goto('/admin/index.html');
-    await expect(page.locator('#auth-loader')).not.toBeVisible({ timeout: 8_000 });
-    await expect(page.locator('#sec-dashboard')).toBeVisible({ timeout: 6_000 });
+    // auth-loader se elimina del DOM con .remove() al terminar — esperar que desaparezca
+    await page.waitForSelector('#auth-loader', { state: 'detached', timeout: 10_000 });
+    // Dar tiempo a showSection('dashboard') para activar el panel
+    await page.waitForSelector('#sec-dashboard.active', { timeout: 8_000 });
     await irAuditoria(page);
     await expect(page.locator('#audit-tabla-wrap')).toBeVisible({ timeout: 6_000 });
     await expect(page.locator('#audit-tbody tr')).toHaveCount(3, { timeout: 6_000 });
@@ -127,8 +131,10 @@ test.describe('TRABAJADOR — acceso denegado a Auditoría', () => {
     await mockCollections(page);
     await mockAuditLogs(page);
     await page.goto('/admin/index.html');
-    await expect(page.locator('#auth-loader')).not.toBeVisible({ timeout: 8_000 });
-    await expect(page.locator('#sec-dashboard')).toBeVisible({ timeout: 6_000 });
+    // auth-loader se elimina del DOM con .remove() al terminar — esperar que desaparezca
+    await page.waitForSelector('#auth-loader', { state: 'detached', timeout: 10_000 });
+    // Dar tiempo a showSection('dashboard') para activar el panel
+    await page.waitForSelector('#sec-dashboard.active', { timeout: 8_000 });
   });
 
   test('muestra el panel de acceso denegado', async ({ page }) => {
