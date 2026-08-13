@@ -1,0 +1,26 @@
+name: Auditoría de Dependencias
+
+on:
+  push:
+    paths:
+      - 'package.json'
+      - 'package-lock.json'
+  schedule:
+    - cron: '0 8 * * 1'   # Lunes a las 08:00 UTC
+  workflow_dispatch:
+
+jobs:
+  npm-audit:
+    name: npm audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Auditar vulnerabilidades
+        run: npm audit --audit-level=high
+
+      - name: Dependencias desactualizadas (informativo)
+        run: npm outdated || true   # no falla el workflow — solo informa

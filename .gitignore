@@ -24,6 +24,11 @@ yarn-error.log*
 # Claude Code session context
 .claude/
 
+# Playwright test artifacts
+playwright-report/
+test-results/
+/blob-report/
+
 # Uploads (archivos subidos por usuarios — no pertenecen al repo)
 sistema-control/backend/src/uploads/*
 !sistema-control/backend/src/uploads/.gitkeep

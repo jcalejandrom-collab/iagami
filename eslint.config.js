@@ -18,6 +18,12 @@ export default [
       'cms/db.js',
       // La propia config de ESLint es ES module, no script de browser
       'eslint.config.js',
+      // Infraestructura de tests — entorno Node.js / ES modules (Vitest, Playwright)
+      'tests/**',
+      'vitest.config.js',
+      'playwright.config.js',
+      // Scripts de utilidad — entorno Node.js / ES modules
+      'scripts/**',
     ],
   },
 
@@ -39,7 +45,7 @@ export default [
 
     rules: {
       // ── Calidad general ────────────────────────────────────────────────────
-      'no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+      'no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' }],
       'no-console': ['warn', { allow: ['info', 'warn', 'error'] }],
       'no-eval': 'error',
       'no-implied-eval': 'error',
@@ -121,6 +127,17 @@ export default [
     files: ['cms/config.js'],
     rules: {
       'sonarjs/no-ignored-exceptions': 'off',
+    },
+  },
+
+  // ── cms/monitoring.js: Sentry es un global cargado desde CDN en runtime ────
+  {
+    files: ['cms/monitoring.js'],
+    languageOptions: {
+      globals: { Sentry: 'readonly' },
+    },
+    rules: {
+      'sonarjs/no-ignored-exceptions': 'off',  // catch(_e) intencional — sessionStorage puede ser inaccesible
     },
   },
 ];

@@ -224,43 +224,6 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 .stat-v{font-family:'Poppins',sans-serif;font-size:24px;font-weight:800;color:#4ade80;text-shadow:0 0 20px rgba(74,222,128,.4)}
 .stat-l{font-size:10px;color:rgba(255,255,255,.6);margin-top:2px;line-height:1.4}
 
-/* ===== PANEL SIGAP ===== */
-.hero-panel{
-  background:rgba(8,20,12,.88);
-  border:1px solid rgba(74,222,128,.28);
-  border-radius:16px;
-  backdrop-filter:blur(14px);
-  overflow:hidden;
-  box-shadow:0 8px 40px rgba(0,0,0,.35);
-}
-.panel-bar{
-  height:32px;background:linear-gradient(90deg,#1a5a30,#2d7a4f);
-  display:flex;align-items:center;padding:0 14px;gap:5px;
-}
-.pdot{width:9px;height:9px;border-radius:50%}
-.panel-title{font-size:10px;color:rgba(255,255,255,.72);margin-left:7px;font-family:'Courier New',monospace;letter-spacing:.05em}
-.plive{margin-left:auto;font-size:9px;color:rgba(255,255,255,.5);display:flex;align-items:center;gap:4px}
-.panel-body{padding:14px;display:grid;grid-template-columns:1fr 1fr;gap:9px}
-.mc{background:rgba(255,255,255,.05);border:1px solid rgba(74,222,128,.18);border-radius:9px;padding:10px 11px}
-.mc-lbl{font-size:9px;color:rgba(74,222,128,.78);font-family:'Courier New',monospace;letter-spacing:.06em;margin-bottom:3px}
-.mc-val{font-family:'Poppins',sans-serif;font-size:18px;font-weight:700;color:#4ade80}
-.mc-unit{font-size:9px;color:rgba(255,255,255,.42);margin-left:2px}
-.mc-sub{font-size:9px;margin-top:2px;color:rgba(255,255,255,.45)}
-.mc-blue{border-color:rgba(96,184,240,.2)}
-.mc-blue .mc-lbl{color:rgba(96,184,240,.8)}
-.mc-blue .mc-val{color:#60b8f0}
-.bar-sec{grid-column:1/-1;background:rgba(255,255,255,.04);border:1px solid rgba(96,184,240,.14);border-radius:9px;padding:10px 11px}
-.bar-lbl-top{font-size:9px;color:rgba(96,184,240,.78);font-family:'Courier New',monospace;letter-spacing:.06em;margin-bottom:8px}
-.bar-row{display:flex;align-items:center;gap:8px;margin-bottom:5px}
-.bar-name{font-size:9px;color:rgba(255,255,255,.5);width:52px;flex-shrink:0}
-.bar-track{flex:1;height:4px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden}
-.bar-fill{height:100%;border-radius:2px;transition:width 1s ease}
-.bar-pct{font-size:9px;font-weight:600;width:26px;text-align:right}
-.sys-row{grid-column:1/-1;background:rgba(0,0,0,.28);border:1px solid rgba(42,154,238,.12);border-radius:9px;padding:8px 11px}
-.sys-top{font-size:9px;color:#4ac9e3;font-family:'Courier New',monospace;font-weight:700;letter-spacing:.08em;margin-bottom:4px;display:flex;align-items:center;gap:5px}
-.sys-line{font-size:9px;color:#4ade80;font-family:'Courier New',monospace;opacity:.78;padding:1.5px 0}
-.sys-line2{font-size:9px;color:#60b8f0;font-family:'Courier New',monospace;opacity:.65;padding:1.5px 0}
-
 /* ===== CHAT FAB ===== */
 .chat-fab{
   position:absolute;bottom:20px;right:20px;z-index:3;
@@ -486,7 +449,6 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 }
 @media(max-width:900px){
   .hero-content{grid-template-columns:1fr}
-  .hero-panel{display:none}
   .hero h1{font-size:26px}
   .footer-grid{grid-template-columns:1fr 1fr}
   .denuncia-grid{grid-template-columns:1fr}
@@ -598,22 +560,9 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
           </div>
         </div>
 
-        <!-- PANEL SIGAP DERECHA -->
-        <div class="hero-panel" aria-hidden="true">
-          <div class="panel-bar">
-            <div class="pdot" style="background:rgba(255,255,255,.55)"></div>
-            <div class="pdot" style="background:rgba(255,255,255,.35)"></div>
-            <div class="pdot" style="background:rgba(255,255,255,.2)"></div>
-            <span class="panel-title">SIGAP · MONITOR AMBIENTAL v3.0</span>
-            <span class="plive"><span style="width:6px;height:6px;background:#4ade80;border-radius:50%;display:inline-block;animation:pulse 2s infinite"></span> EN LÍNEA</span>
-          </div>
-          <div class="panel-body" id="hero-panel-body">
-            <!-- Populated by renderHeroPanel() -->
-          </div>
-        </div>
 
       </div>
-      <button class="chat-fab" title="Romina — Asistente Virtual IAGAMI" aria-label="Abrir asistente virtual Romina" onclick="toggleChat()">
+      <button class="chat-fab" title="Semeruquito — Asistente Virtual IAGAMI" aria-label="Abrir asistente virtual Semeruquito" onclick="toggleChat()">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
         <div class="chat-fab-dot"></div>
       </button>
@@ -743,7 +692,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
     <div class="section">
       <div class="sec-head">
         <div class="sec-tag">INDICADORES AMBIENTALES</div>
-        <h2>Estado del medio ambiente en Iribarren</h2>
+        <h2>Estado del ambiente en Iribarren</h2>
         <p>Datos del monitoreo ambiental municipal actualizados desde el sistema SIGAP</p>
       </div>
       <div id="home-indicadores-grid" class="ind-grid">
@@ -1089,16 +1038,16 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 </div>
 
 <!-- ===== CHAT PANEL ===== -->
-<div id="chat-panel" class="chat-panel" role="dialog" aria-label="Asistente virtual Romina">
+<div id="chat-panel" class="chat-panel" role="dialog" aria-label="Asistente virtual Semeruquito">
   <div class="chat-head">
-    <span>💬 Romina — Asistente IAGAMI</span>
+    <span>🌿 Semeruquito — Asistente IAGAMI</span>
     <button class="chat-close" onclick="toggleChat()" aria-label="Cerrar chat">×</button>
   </div>
   <div class="chat-msgs" id="chat-msgs" aria-live="polite">
-    <div class="chat-bubble">Hola, soy Romina 👋 Asistente virtual de IAGAMI. ¿En qué puedo ayudarte hoy?</div>
+    <div class="chat-bubble">Hola, soy Semeruquito 🌿 Asistente virtual de IAGAMI. ¿En qué puedo ayudarte hoy?</div>
   </div>
   <div class="chat-input-row">
-    <input id="chat-input" placeholder="Escribe tu consulta…" aria-label="Mensaje para Romina" onkeydown="if(event.key==='Enter')sendChat()"/>
+    <input id="chat-input" placeholder="Escribe tu consulta…" aria-label="Mensaje para Semeruquito" onkeydown="if(event.key==='Enter')sendChat()"/>
     <button onclick="sendChat()" aria-label="Enviar mensaje">➤</button>
   </div>
 </div>
@@ -1318,6 +1267,32 @@ function addChatBubble(msgs, html, isUser) {
   msgs.scrollTop = msgs.scrollHeight;
 }
 
+/* ─── SEMERUQUITO — Configuración de API IA ─── */
+// Para activar la IA externa: asignar la URL del endpoint aquí.
+// El endpoint debe aceptar POST con { "message": "...", "session_id": "..." }
+// y responder con { "reply": "..." }
+// Mientras SEMERUQUITO_API_URL sea null, se usa el modo FAQ local como fallback.
+const SEMERUQUITO_API_URL = null; // Ejemplo: 'https://api.tuservicio.com/chat'
+
+let _chatSessionId = null;
+function getChatSessionId() {
+  if (!_chatSessionId) {
+    _chatSessionId = 'sess_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+  }
+  return _chatSessionId;
+}
+
+async function sendChatToApi(text) {
+  const res = await fetch(SEMERUQUITO_API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message: text, session_id: getChatSessionId() }),
+  });
+  if (!res.ok) { throw new Error('API ' + res.status); }
+  const data = await res.json();
+  return data.reply || data.response || data.message || data.text || '';
+}
+
 async function sendChat() {
   const inp = document.getElementById('chat-input');
   const msgs = document.getElementById('chat-msgs');
@@ -1326,12 +1301,35 @@ async function sendChat() {
   inp.value = '';
   addChatBubble(msgs, txt, true);
 
-  const faqs = await loadChatFaqs();
-  const respuesta = findFaqResponse(txt, faqs);
+  // Indicador "escribiendo…"
+  const typing = document.createElement('div');
+  typing.className = 'chat-bubble';
+  typing.textContent = '…';
+  typing.style.opacity = '0.5';
+  msgs.appendChild(typing);
+  msgs.scrollTop = msgs.scrollHeight;
 
-  setTimeout(() => {
-    addChatBubble(msgs, respuesta || 'No encontré información exacta sobre eso. Para atención personalizada: 📞 (0251) 000-0000 o ✉ info@iagami.gob.ve — también puede usar el formulario de <strong>Denuncias</strong>.', false);
-  }, 700);
+  let respuesta = '';
+  try {
+    if (SEMERUQUITO_API_URL) {
+      // Modo IA externa
+      respuesta = await sendChatToApi(txt);
+    } else {
+      // Modo FAQ local (fallback mientras no hay API configurada)
+      await new Promise(r => setTimeout(r, 700));
+      const faqs = await loadChatFaqs();
+      respuesta = findFaqResponse(txt, faqs) ||
+        'No encontré información exacta sobre eso. Para atención personalizada: 📞 (0251) 000-0000 o ✉ info@iagami.gob.ve — también puede usar el formulario de <strong>Denuncias</strong>.';
+    }
+  } catch (_e) {
+    // Si la API falla, caer al modo FAQ
+    const faqs = await loadChatFaqs();
+    respuesta = findFaqResponse(txt, faqs) ||
+      'En este momento no puedo conectarme al asistente. Por favor intenta de nuevo o contáctanos: 📞 (0251) 000-0000';
+  }
+
+  msgs.removeChild(typing);
+  addChatBubble(msgs, respuesta, false);
 }
 
 /* ─── IA ANÁLISIS ─── */
@@ -1573,81 +1571,6 @@ async function renderAlertBar() {
   ticker.innerHTML = alertas.length > 1
     ? items + '<span style="padding:0 24px">·</span>' + items
     : items;
-}
-
-async function renderHeroPanel() {
-  const body = document.getElementById('hero-panel-body');
-  if (!body) return;
-  // `denuncias` requiere autenticación bajo las nuevas API Rules (contiene
-  // PII de denunciantes); un visitante anónimo no puede listarla ni contar
-  // casos pendientes. Esa cifra debe publicarse como agregado desde el panel
-  // admin (autenticado), nunca calculada descargando la colección completa.
-  const [_indsR, _tramitesR, _proyectosR, _alertasR] = await Promise.all([
-    CMSDB.getAll('indicadores'),
-    CMSDB.getAll('tramites'),
-    CMSDB.getAll('proyectos'),
-    CMSDB.getAll('alertas')
-  ]);
-  const inds = Array.isArray(_indsR) ? _indsR : [];
-  const tramites = Array.isArray(_tramitesR) ? _tramitesR : [];
-  const proyectos = Array.isArray(_proyectosR) ? _proyectosR : [];
-  const alertas = Array.isArray(_alertasR) ? _alertasR : [];
-  const aire = inds.find(i => i.nombre?.toLowerCase().includes('aire'));
-  const agua = inds.find(i => i.nombre?.toLowerCase().includes('agua'));
-  const dens = '—';
-  const execPct = proyectos.length
-    ? Math.round(proyectos.reduce((s, p) => s + (p.porcentaje_avance || 0), 0) / proyectos.length)
-    : 0;
-  const alertasActivas = alertas.filter(a => a.activa).length;
-
-  body.innerHTML = `
-    <div class="mc">
-      <div class="mc-lbl">CALIDAD AIRE</div>
-      <div class="mc-val">${escHtml(aire?.valor_actual ?? '—')}<span class="mc-unit">${escHtml(aire?.unidad ?? '')}</span></div>
-      <div class="mc-sub" style="color:#4ade80">↑ mejora continua</div>
-    </div>
-    <div class="mc">
-      <div class="mc-lbl">CALIDAD AGUA</div>
-      <div class="mc-val">${escHtml(agua?.valor_actual ?? '—')}<span class="mc-unit">${escHtml(agua?.unidad ?? '')}</span></div>
-      <div class="mc-sub" style="color:#64748b">— monitoreo activo</div>
-    </div>
-    <div class="mc mc-blue">
-      <div class="mc-lbl">DENUNCIAS ACTIVAS</div>
-      <div class="mc-val">${dens}<span class="mc-unit"> casos</span></div>
-      <div class="mc-sub">→ en proceso</div>
-    </div>
-    <div class="mc mc-blue">
-      <div class="mc-lbl">TRÁMITES VIGENTES</div>
-      <div class="mc-val">${tramites.length}<span class="mc-unit"> tipos</span></div>
-      <div class="mc-sub">→ disponibles</div>
-    </div>
-    <div class="bar-sec">
-      <div class="bar-lbl-top">ACTIVIDADES SIGAP — AVANCE PROMEDIO</div>
-      <div class="bar-row">
-        <span class="bar-name">Proyectos</span>
-        <div class="bar-track"><div class="bar-fill" style="width:${execPct}%;background:#4ade80"></div></div>
-        <span class="bar-pct" style="color:#4ade80">${execPct}%</span>
-      </div>
-      <div class="bar-row">
-        <span class="bar-name">Agua</span>
-        <div class="bar-track"><div class="bar-fill" style="width:${Math.min(100,Math.max(0,parseFloat(agua?.valor_actual)||72))}%;background:#60b8f0"></div></div>
-        <span class="bar-pct" style="color:#60b8f0">${Math.min(100,Math.max(0,parseFloat(agua?.valor_actual)||72))}%</span>
-      </div>
-      <div class="bar-row">
-        <span class="bar-name">Aire</span>
-        <div class="bar-track"><div class="bar-fill" style="width:${Math.min(100,Math.max(0,parseFloat(aire?.valor_actual)||87))}%;background:#eea82a"></div></div>
-        <span class="bar-pct" style="color:#eea82a">${Math.min(100,Math.max(0,parseFloat(aire?.valor_actual)||87))}%</span>
-      </div>
-    </div>
-    <div class="sys-row">
-      <div class="sys-top">
-        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#4ac9e3" stroke-width="2" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-        SYS MONITOR · IAGAMI
-        <span style="width:5px;height:5px;background:#4ade80;border-radius:50%;margin-left:auto;animation:pulse 2s infinite;display:inline-block"></span>
-      </div>
-      <div class="sys-line">SYS.ENV › status: ONLINE · uptime: 99.97% · CPU: 23%</div>
-      <div class="sys-line2">ENV_INDEX: 0.87 · SIGAP: running · ALERTS: ${alertasActivas} activas</div>
-    </div>`;
 }
 
 async function renderHeroStats() {
@@ -2023,7 +1946,6 @@ async function initPortal() {
   const tasks = [
     checkBienvenida,
     renderAlertBar,
-    renderHeroPanel,
     renderHeroStats,
     renderHomeIndicadores,
     renderHomeNoticias,

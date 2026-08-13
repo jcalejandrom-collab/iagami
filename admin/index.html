@@ -1588,6 +1588,90 @@ input,select,textarea{font-family:inherit}
       <div id="ctrl-seg-body"><p style="color:#888;text-align:center;padding:40px">Cargando…</p></div>
     </div>
 
+    <!-- ══════════════════════════════════════
+         SECCIÓN: AUDITORÍA INSTITUCIONAL
+    ══════════════════════════════════════ -->
+    <div id="sec-auditoria" class="section">
+      <div class="page-header">
+        <div>
+          <div class="page-title">🛡️ Auditoría Institucional</div>
+          <div class="page-subtitle">Bitácora de eventos del sistema — solo lectura</div>
+        </div>
+        <button class="btn-s" onclick="renderAuditoria()" style="font-size:12px">↻ Actualizar</button>
+      </div>
+
+      <!-- Acceso restringido -->
+      <div id="audit-acceso-denegado" style="display:none;background:#fff;border:1px solid var(--border);border-radius:12px;padding:40px;text-align:center;color:var(--muted)">
+        <div style="font-size:36px;margin-bottom:12px">🔒</div>
+        <div style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:6px">Acceso restringido</div>
+        <div style="font-size:13px">Este módulo está disponible únicamente para PRESIDENTE y DIRECTOR.</div>
+      </div>
+
+      <!-- Filtros -->
+      <div id="audit-filtros" style="display:none;background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:16px">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;align-items:end">
+          <div>
+            <label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">Módulo</label>
+            <select id="audit-f-modulo" class="form-control" style="font-size:13px">
+              <option value="">Todos</option>
+              <option>auth</option><option>noticias</option><option>tramites</option>
+              <option>agenda</option><option>proyectos</option><option>indicadores</option>
+              <option>empresas</option><option>denuncias</option><option>alertas</option>
+              <option>multas</option><option>transparencia</option><option>archivos</option>
+              <option>consejos</option><option>comunas</option><option>hidrica</option>
+              <option>planificacion</option><option>revista</option><option>chatbot</option>
+              <option>rrhh</option><option>admin</option><option>sistema</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">Nivel</label>
+            <select id="audit-f-nivel" class="form-control" style="font-size:13px">
+              <option value="">Todos</option>
+              <option>info</option><option>warning</option><option>error</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">Usuario</label>
+            <input id="audit-f-usuario" class="form-control" style="font-size:13px" placeholder="email o nombre…" />
+          </div>
+          <div>
+            <label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">Desde</label>
+            <input id="audit-f-desde" type="date" class="form-control" style="font-size:13px" />
+          </div>
+          <div>
+            <label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">Hasta</label>
+            <input id="audit-f-hasta" type="date" class="form-control" style="font-size:13px" />
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-primary" style="font-size:13px" onclick="auditBuscar()">Buscar</button>
+            <button class="btn btn-secondary" style="font-size:13px" onclick="auditLimpiar()">Limpiar</button>
+            <button class="btn btn-secondary" style="font-size:13px" onclick="auditExportarCSV()">⬇ CSV</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabla -->
+      <div id="audit-tabla-wrap" style="display:none;background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden">
+        <div style="overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse;font-size:13px">
+            <thead>
+              <tr style="background:var(--primary-light);text-align:left">
+                <th style="padding:10px 14px;font-weight:600;color:var(--text);white-space:nowrap">Fecha</th>
+                <th style="padding:10px 14px;font-weight:600;color:var(--text)">Usuario</th>
+                <th style="padding:10px 14px;font-weight:600;color:var(--text)">Módulo</th>
+                <th style="padding:10px 14px;font-weight:600;color:var(--text)">Acción</th>
+                <th style="padding:10px 14px;font-weight:600;color:var(--text)">Nivel</th>
+                <th style="padding:10px 14px;font-weight:600;color:var(--text)">Detalle</th>
+              </tr>
+            </thead>
+            <tbody id="audit-tbody"></tbody>
+          </table>
+        </div>
+        <div id="audit-estado" style="padding:12px 14px;font-size:12px;color:var(--muted);border-top:1px solid var(--border)"></div>
+        <div id="audit-pagination" style="display:flex;align-items:center;gap:6px;padding:10px 14px;border-top:1px solid var(--border)"></div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -1708,6 +1792,7 @@ const NAV = [
   {id:'gestion_rrhh',  icon:'👥', label:'Gestión Humana'},
   {id:'presidencial',  icon:'🎯', label:'Centro de Control'},
   {id:'ctrl_seguimiento', icon:'🔍', label:'Control y Seguimiento'},
+  {id:'auditoria',        icon:'🛡️', label:'Auditoría'},
 ];
 
 let currentSection = 'dashboard';
@@ -1767,6 +1852,7 @@ async function renderSection(name) {
     case 'gestion_rrhh':     await renderGestionRRHH(); break;
     case 'presidencial':     await renderPresidencial(); break;
     case 'ctrl_seguimiento': await renderCtrlSeguimiento(); break;
+    case 'auditoria':        await renderAuditoria(); break;
   }
 }
 
@@ -5834,6 +5920,168 @@ async function saveOrgForm() {
     toast('Error al guardar: ' + (e.message||e), 'error');
   } finally {
     if (btn) { btn.disabled=false; btn.textContent='💾 Guardar'; }
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   AUDITORÍA INSTITUCIONAL — iagami_sys_logs (solo lectura)
+   Acceso: PRESIDENTE, DIRECTOR
+   ══════════════════════════════════════════════════════════════════ */
+const AUDIT_PER_PAGE = 25;
+let _auditPage = 1;
+let _auditHasNext = false;
+const AUDIT_ROLES = ['PRESIDENTE', 'DIRECTOR'];
+
+function _auditGetRol() {
+  try {
+    const raw = sessionStorage.getItem('pb_user');
+    if (!raw) { return ''; }
+    return (JSON.parse(raw).rol || '').toUpperCase();
+  } catch (_e) { return ''; }
+}
+
+function _auditCanAccess() {
+  return AUDIT_ROLES.includes(_auditGetRol());
+}
+
+function _auditBuildFilter() {
+  const partes = [];
+  const modulo  = (document.getElementById('audit-f-modulo')  || {}).value || '';
+  const nivel   = (document.getElementById('audit-f-nivel')   || {}).value || '';
+  const usuario = (document.getElementById('audit-f-usuario') || {}).value.trim() || '';
+  const desde   = (document.getElementById('audit-f-desde')   || {}).value || '';
+  const hasta   = (document.getElementById('audit-f-hasta')   || {}).value || '';
+  if (modulo)  { partes.push(`modulo="${modulo}"`); }
+  if (nivel)   { partes.push(`nivel="${nivel}"`); }
+  if (usuario) { partes.push(`usuario~"${usuario.replace(/"/g,'')}"`);}
+  if (desde)   { partes.push(`fecha>="${desde} 00:00:00"`); }
+  if (hasta)   { partes.push(`fecha<="${hasta} 23:59:59"`); }
+  return partes.join('&&');
+}
+
+async function renderAuditoria() {
+  const denegado   = document.getElementById('audit-acceso-denegado');
+  const filtros    = document.getElementById('audit-filtros');
+  const tablaWrap  = document.getElementById('audit-tabla-wrap');
+
+  if (!_auditCanAccess()) {
+    if (denegado)  { denegado.style.display  = 'block'; }
+    if (filtros)   { filtros.style.display   = 'none'; }
+    if (tablaWrap) { tablaWrap.style.display = 'none'; }
+    return;
+  }
+
+  if (denegado)  { denegado.style.display  = 'none'; }
+  if (filtros)   { filtros.style.display   = 'block'; }
+  if (tablaWrap) { tablaWrap.style.display = 'block'; }
+
+  const tbody  = document.getElementById('audit-tbody');
+  const estado = document.getElementById('audit-estado');
+  if (tbody)  { tbody.innerHTML  = '<tr><td colspan="6" style="padding:20px;text-align:center;color:#888">Cargando…</td></tr>'; }
+  if (estado) { estado.textContent = ''; }
+
+  const filtro = _auditBuildFilter();
+  // Pedir perPage+1 para detectar si hay página siguiente
+  const items = await CMSDB.getFiltered('iagami_sys_logs', filtro, {
+    page:    _auditPage,
+    perPage: AUDIT_PER_PAGE + 1,
+    sort:    '-fecha',
+  });
+
+  _auditHasNext = items.length > AUDIT_PER_PAGE;
+  const pagina  = _auditHasNext ? items.slice(0, AUDIT_PER_PAGE) : items;
+
+  if (!tbody) { return; }
+
+  if (!pagina.length) {
+    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state" style="padding:32px;text-align:center;color:#888">
+      <div style="font-size:28px;margin-bottom:8px">📋</div>
+      <div>Sin registros para los filtros seleccionados.</div>
+    </div></td></tr>`;
+    if (estado) { estado.textContent = ''; }
+    _auditRenderPaginacion();
+    return;
+  }
+
+  const nivelBadge = { info:'#16a34a', warning:'#d97706', error:'#dc2626' };
+  tbody.innerHTML = pagina.map(r => {
+    const badge = nivelBadge[r.nivel] || '#6b7280';
+    const fecha = r.fecha ? r.fecha.replace('T',' ').substring(0,19) : '—';
+    return `<tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:9px 14px;font-size:12px;white-space:nowrap;color:var(--muted)">${escHtml(fecha)}</td>
+      <td style="padding:9px 14px;font-size:12px;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(r.usuario||'—')}</td>
+      <td style="padding:9px 14px;font-size:12px">${escHtml(r.modulo||'—')}</td>
+      <td style="padding:9px 14px;font-size:12px">${escHtml(r.accion||'—')}</td>
+      <td style="padding:9px 14px">
+        <span style="background:${badge};color:#fff;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;text-transform:uppercase">${escHtml(r.nivel||'info')}</span>
+      </td>
+      <td style="padding:9px 14px;font-size:12px;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escHtml(r.detalle||'')}">${escHtml(r.detalle||'—')}</td>
+    </tr>`;
+  }).join('');
+
+  const inicio = (_auditPage - 1) * AUDIT_PER_PAGE + 1;
+  const fin    = inicio + pagina.length - 1;
+  if (estado) { estado.textContent = `Mostrando registros ${inicio}–${fin}`; }
+
+  _auditRenderPaginacion();
+}
+
+function _auditRenderPaginacion() {
+  const el = document.getElementById('audit-pagination');
+  if (!el) { return; }
+  const html = [];
+  html.push(`<button onclick="_auditIrPag(${_auditPage-1})" ${_auditPage<=1?'disabled':''} style="padding:4px 12px;border:1px solid var(--border);border-radius:6px;background:#fff;cursor:pointer;font-size:13px">‹</button>`);
+  html.push(`<span style="font-size:13px;color:var(--muted);padding:0 8px">Página ${_auditPage}</span>`);
+  html.push(`<button onclick="_auditIrPag(${_auditPage+1})" ${!_auditHasNext?'disabled':''} style="padding:4px 12px;border:1px solid var(--border);border-radius:6px;background:#fff;cursor:pointer;font-size:13px">›</button>`);
+  el.innerHTML = html.join('');
+}
+
+function _auditIrPag(p) {
+  if (p < 1) { return; }
+  if (p > _auditPage && !_auditHasNext) { return; }
+  _auditPage = p;
+  renderAuditoria();
+}
+
+function auditBuscar() {
+  _auditPage = 1;
+  renderAuditoria();
+}
+
+function auditLimpiar() {
+  ['audit-f-modulo','audit-f-nivel','audit-f-usuario','audit-f-desde','audit-f-hasta'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.value = ''; }
+  });
+  _auditPage = 1;
+  renderAuditoria();
+}
+
+async function auditExportarCSV() {
+  if (!_auditCanAccess()) { return; }
+  const btn = document.querySelector('[onclick="auditExportarCSV()"]');
+  if (btn) { btn.textContent = '⏳ Exportando…'; btn.disabled = true; }
+  try {
+    const filtro = _auditBuildFilter();
+    // Cargar hasta 2000 registros para el CSV
+    const items = await CMSDB.getFiltered('iagami_sys_logs', filtro, {
+      page: 1, perPage: 2000, sort: '-fecha',
+    });
+    const cabecera = ['fecha','usuario','modulo','accion','nivel','detalle'];
+    const filas = items.map(r => cabecera.map(k => {
+      const val = String(r[k] || '').replace(/"/g, '""');
+      return `"${val}"`;
+    }).join(','));
+    const csv  = [cabecera.join(','), ...filas].join('\r\n');
+    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = `auditoria_${new Date().toLocaleDateString('sv-SE')}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  } finally {
+    if (btn) { btn.textContent = '⬇ CSV'; btn.disabled = false; }
   }
 }
 </script>
