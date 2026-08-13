@@ -1571,8 +1571,8 @@ async function renderAlertBar() {
   const _alertasRaw = await CMSDB.getAll('alertas');
   const alertas = (Array.isArray(_alertasRaw) ? _alertasRaw : []).filter(a => {
     if (!a.activa) return false;
-    if (a.fecha_fin && a.fecha_fin < today) return false;
-    if (a.fecha_inicio && a.fecha_inicio > today) return false;
+    if (a.fecha_fin && a.fecha_fin.slice(0,10) < today) return false;
+    if (a.fecha_inicio && a.fecha_inicio.slice(0,10) > today) return false;
     return true;
   });
   if (!alertas.length) { bar.style.display = 'none'; return; }
