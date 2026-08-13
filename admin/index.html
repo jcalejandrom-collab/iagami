@@ -5222,6 +5222,8 @@ async function deleteDiag(id) {
    GESTIÓN HUMANA (RRHH)
 ════════════════════════════════════════ */
 let rrhhActiveTab='personal';
+let _rrhhCache = null;
+let _rrhhAsistFecha = new Date().toLocaleDateString('sv-SE');
 
 async function renderGestionRRHH() {
   // Stats globales
@@ -5241,7 +5243,8 @@ async function renderGestionRRHH() {
     {icon:'📊',val:Array.isArray(evaluaciones)?evaluaciones.filter(e=>e.estado==='Enviada').length:0,lbl:'Evaluaciones en revisión'},
     {icon:'📅',val:Array.isArray(asistencia)?asistencia.filter(a=>a.fecha===hoy).length:0,lbl:'Presentes hoy'},
   ].map(s=>`<div class="stat-card"><div class="stat-icon">${s.icon}</div><div class="stat-value">${s.val}</div><div class="stat-label">${s.lbl}</div></div>`).join('');
-  rrhhTab(rrhhActiveTab, {trabajadores, solicitudes, capacitaciones, evaluaciones, asistencia});
+  _rrhhCache = {trabajadores, solicitudes, capacitaciones, evaluaciones, asistencia};
+  rrhhTab(rrhhActiveTab, _rrhhCache);
 }
 
 function rrhhTab(tab, cache) {
@@ -5268,11 +5271,13 @@ function rrhhTab(tab, cache) {
     }</tbody></table></div>`;
   } else if (tab==='solicitudes') {
     const sols=cache?.solicitudes||[];
+    const trabs=cache?.trabajadores||[];
+    const nombreTrab = id => { const t=trabs.find(t=>t.id===id); return t?`${t.nombres||''} ${t.apellidos||''}`.trim()||t.email||id:'—'; };
     el.innerHTML=`<div class="table-wrap"><table><thead><tr>
-      <th>Trabajador ID</th><th>Tipo</th><th>Descripción</th><th>Desde</th><th>Hasta</th><th>Estado</th>
+      <th>Trabajador</th><th>Tipo</th><th>Descripción</th><th>Desde</th><th>Hasta</th><th>Estado</th>
     </tr></thead><tbody>${Array.isArray(sols)&&sols.length
       ? sols.map(s=>`<tr>
-          <td style="font-size:11px;color:var(--muted)">${escHtml((s.trabajador_id||'').substring(0,10))}…</td>
+          <td style="font-size:13px">${escHtml(nombreTrab(s.trabajador_id))}</td>
           <td>${escHtml(s.tipo||'—')}</td>
           <td style="max-width:200px">${escHtml((s.descripcion||'').substring(0,80))}</td>
           <td style="font-size:12px">${s.fecha_desde||'—'}</td>
@@ -5298,11 +5303,13 @@ function rrhhTab(tab, cache) {
     }</tbody></table></div>`;
   } else if (tab==='evaluaciones') {
     const evals=cache?.evaluaciones||[];
+    const trabs=cache?.trabajadores||[];
+    const nombreTrab = id => { const t=trabs.find(t=>t.id===id); return t?`${t.nombres||''} ${t.apellidos||''}`.trim()||t.email||id:'—'; };
     el.innerHTML=`<div class="table-wrap"><table><thead><tr>
       <th>Trabajador</th><th>Período</th><th>Cumplimiento</th><th>Actitud</th><th>Productividad</th><th>Total</th><th>Estado</th>
     </tr></thead><tbody>${Array.isArray(evals)&&evals.length
       ? evals.map(e=>`<tr>
-          <td style="font-size:11px;color:var(--muted)">${escHtml((e.trabajador||'').substring(0,10))}…</td>
+          <td style="font-size:13px">${escHtml(nombreTrab(e.trabajador))}</td>
           <td>${escHtml(e.periodo||'—')}</td>
           <td style="text-align:center">${e.puntaje_cumplimiento??'—'}</td>
           <td style="text-align:center">${e.puntaje_actitud??'—'}</td>
@@ -5314,20 +5321,30 @@ function rrhhTab(tab, cache) {
     }</tbody></table></div>`;
   } else if (tab==='asistencia') {
     const asist=cache?.asistencia||[];
+    const trabs=cache?.trabajadores||[];
+    const nombreTrab = id => { const t=trabs.find(t=>t.id===id); return t?`${t.nombres||''} ${t.apellidos||''}`.trim()||t.email||id:'—'; };
     const hoy=new Date().toLocaleDateString('sv-SE');
-    const hoyRecs=Array.isArray(asist)?asist.filter(a=>a.fecha===hoy):[];
-    el.innerHTML=`<div style="margin-bottom:12px;font-size:13px;color:var(--muted)">Mostrando asistencia de <strong>hoy (${hoy})</strong> — ${hoyRecs.length} registros</div>
+    const ayer=(()=>{const d=new Date();d.setDate(d.getDate()-1);return d.toLocaleDateString('sv-SE');})();
+    const fecha=_rrhhAsistFecha||hoy;
+    const recs=Array.isArray(asist)?asist.filter(a=>a.fecha===fecha):[];
+    const fechaLabel=fecha===hoy?`hoy (${hoy})`:fecha===ayer?`ayer (${fecha})`:fecha;
+    el.innerHTML=`<div style="margin-bottom:12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <button class="btn-${fecha===hoy?'p':'s'}" style="font-size:12px;padding:4px 10px" onclick="_rrhhAsistFecha='${hoy}';rrhhTab('asistencia',_rrhhCache)">Hoy</button>
+      <button class="btn-${fecha===ayer?'p':'s'}" style="font-size:12px;padding:4px 10px" onclick="_rrhhAsistFecha='${ayer}';rrhhTab('asistencia',_rrhhCache)">Ayer</button>
+      <input type="date" value="${fecha}" style="font-size:12px;padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text)" onchange="_rrhhAsistFecha=this.value;rrhhTab('asistencia',_rrhhCache)">
+      <span style="font-size:13px;color:var(--muted)">— ${recs.length} registros para <strong>${fechaLabel}</strong></span>
+    </div>
     <div class="table-wrap"><table><thead><tr>
       <th>Trabajador</th><th>Entrada</th><th>Salida</th><th>Tipo</th><th>Observaciones</th>
-    </tr></thead><tbody>${hoyRecs.length
-      ? hoyRecs.map(a=>`<tr>
-          <td style="font-size:11px;color:var(--muted)">${escHtml((a.trabajador||'').substring(0,10))}…</td>
+    </tr></thead><tbody>${recs.length
+      ? recs.map(a=>`<tr>
+          <td style="font-size:13px">${escHtml(nombreTrab(a.trabajador))}</td>
           <td>${escHtml(a.hora_entrada||'—')}</td>
           <td>${escHtml(a.hora_salida||'—')}</td>
           <td><span class="badge badge-blue">${escHtml(a.tipo||'—')}</span></td>
           <td style="font-size:12px">${escHtml(a.observaciones||'—')}</td>
         </tr>`).join('')
-      : '<tr><td colspan="5" style="text-align:center;color:#888;padding:20px">Sin registros de asistencia para hoy</td></tr>'
+      : `<tr><td colspan="5" style="text-align:center;color:#888;padding:20px">Sin registros de asistencia para ${fechaLabel}</td></tr>`
     }</tbody></table></div>`;
   }
   // Defer data fetch if no cache
