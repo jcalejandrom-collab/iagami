@@ -3862,11 +3862,15 @@ async function _bvBuildData(estado, activa) {
   const current = await _bvGetCurrent();
   const histEntry = { fecha: new Date().toLocaleString('es-VE'), accion: estado === 'publicada' ? '🚀 Publicada' : estado === 'borrador' ? '💾 Borrador guardado' : '⏹ Desactivada', usuario: 'Admin' };
   const hist = (current && current.historial) ? [...current.historial, histEntry] : [histEntry];
+  const imgVal = (document.getElementById('fb-imagen')||{}).value||'';
+  // Si el valor es la URL del archivo existente en PocketBase (no una imagen nueva en base64),
+  // no incluir "imagen" en el payload para que PocketBase conserve el archivo sin modificarlo.
+  const imgPayload = imgVal.startsWith('http') ? {} : { imagen: imgVal };
   return {
     id: current ? current.id : undefined,
     titulo: titulo.trim(),
     mensaje: (document.getElementById('fb-mensaje')||{}).value||'',
-    imagen: (document.getElementById('fb-imagen')||{}).value||'',
+    ...imgPayload,
     color_fondo: (document.getElementById('fb-color_fondo')||{}).value||'#1d6b3e',
     frecuencia,
     activa,
@@ -3880,22 +3884,30 @@ async function _bvBuildData(estado, activa) {
 async function publicarBienvenida() {
   const data = await _bvBuildData('publicada', true);
   if (!data) return;
-  // Deactivate all others
-  const bvAll = await CMSDB.getAll('bienvenida');
-  for (const b of (Array.isArray(bvAll) ? bvAll : [])) {
-    if (b.id !== data.id && b.activa) { await CMSDB.save('bienvenida', Object.assign({}, b, {activa: false, estado: 'desactivada'})); }
+  try {
+    // Deactivate all others
+    const bvAll = await CMSDB.getAll('bienvenida');
+    for (const b of (Array.isArray(bvAll) ? bvAll : [])) {
+      if (b.id !== data.id && b.activa) { await CMSDB.save('bienvenida', Object.assign({}, b, {activa: false, estado: 'desactivada'})); }
+    }
+    await CMSDB.save('bienvenida', data);
+    showToast('¡Bienvenida publicada correctamente!', 'success');
+    renderBienvenida();
+  } catch(err) {
+    showToast('Error al publicar: ' + (err.message || 'revisa la consola'), 'error');
   }
-  await CMSDB.save('bienvenida', data);
-  showToast('¡Bienvenida publicada correctamente!', 'success');
-  renderBienvenida();
 }
 
 async function guardarBorrador() {
   const data = await _bvBuildData('borrador', false);
   if (!data) return;
-  await CMSDB.save('bienvenida', data);
-  showToast('Borrador guardado', 'success');
-  renderBienvenida();
+  try {
+    await CMSDB.save('bienvenida', data);
+    showToast('Borrador guardado', 'success');
+    renderBienvenida();
+  } catch(err) {
+    showToast('Error al guardar: ' + (err.message || 'revisa la consola'), 'error');
+  }
 }
 
 async function desactivarBienvenida() {
