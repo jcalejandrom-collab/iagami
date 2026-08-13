@@ -1571,8 +1571,8 @@ async function renderAlertBar() {
   const _alertasRaw = await CMSDB.getAll('alertas');
   const alertas = (Array.isArray(_alertasRaw) ? _alertasRaw : []).filter(a => {
     if (!a.activa) return false;
-    if (a.fecha_fin && a.fecha_fin < today) return false;
-    if (a.fecha_inicio && a.fecha_inicio > today) return false;
+    if (a.fecha_fin && a.fecha_fin.slice(0,10) < today) return false;
+    if (a.fecha_inicio && a.fecha_inicio.slice(0,10) > today) return false;
     return true;
   });
   if (!alertas.length) { bar.style.display = 'none'; return; }
@@ -1749,8 +1749,8 @@ async function renderHomeRevista() {
     const coverHtml = r.portada_url
       ? `<img src="${escHtml(r.portada_url)}" alt="${escHtml(r.titulo)}" style="width:100%;height:100%;object-fit:contain;display:block" loading="lazy"/>`
       : `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:16px;text-align:center">
-           <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.6);letter-spacing:.1em;margin-bottom:6px">EDICIÓN Nº ${r.numero_edicion}</div>
-           <div style="font-family:'Poppins',sans-serif;font-size:14px;font-weight:800;color:#fff;line-height:1.25">${r.titulo}</div>
+           <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.6);letter-spacing:.1em;margin-bottom:6px">EDICIÓN Nº ${escHtml(r.numero_edicion)}</div>
+           <div style="font-family:'Poppins',sans-serif;font-size:14px;font-weight:800;color:#fff;line-height:1.25">${escHtml(r.titulo)}</div>
          </div>`;
     return `<div style="background:#fff;border:1px solid #d4edd8;border-radius:14px;overflow:hidden;transition:.2s;display:flex;flex-direction:column"
         onmouseover="this.style.boxShadow='0 6px 24px rgba(29,107,62,.12)';this.style.transform='translateY(-2px)'"
