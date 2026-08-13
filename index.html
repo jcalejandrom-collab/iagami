@@ -562,7 +562,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 
 
       </div>
-      <button class="chat-fab" title="Romina — Asistente Virtual IAGAMI" aria-label="Abrir asistente virtual Romina" onclick="toggleChat()">
+      <button class="chat-fab" title="Semeruquito — Asistente Virtual IAGAMI" aria-label="Abrir asistente virtual Semeruquito" onclick="toggleChat()">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
         <div class="chat-fab-dot"></div>
       </button>
@@ -692,7 +692,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
     <div class="section">
       <div class="sec-head">
         <div class="sec-tag">INDICADORES AMBIENTALES</div>
-        <h2>Estado del medio ambiente en Iribarren</h2>
+        <h2>Estado del ambiente en Iribarren</h2>
         <p>Datos del monitoreo ambiental municipal actualizados desde el sistema SIGAP</p>
       </div>
       <div id="home-indicadores-grid" class="ind-grid">
@@ -1038,16 +1038,16 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 </div>
 
 <!-- ===== CHAT PANEL ===== -->
-<div id="chat-panel" class="chat-panel" role="dialog" aria-label="Asistente virtual Romina">
+<div id="chat-panel" class="chat-panel" role="dialog" aria-label="Asistente virtual Semeruquito">
   <div class="chat-head">
-    <span>💬 Romina — Asistente IAGAMI</span>
+    <span>🌿 Semeruquito — Asistente IAGAMI</span>
     <button class="chat-close" onclick="toggleChat()" aria-label="Cerrar chat">×</button>
   </div>
   <div class="chat-msgs" id="chat-msgs" aria-live="polite">
-    <div class="chat-bubble">Hola, soy Romina 👋 Asistente virtual de IAGAMI. ¿En qué puedo ayudarte hoy?</div>
+    <div class="chat-bubble">Hola, soy Semeruquito 🌿 Asistente virtual de IAGAMI. ¿En qué puedo ayudarte hoy?</div>
   </div>
   <div class="chat-input-row">
-    <input id="chat-input" placeholder="Escribe tu consulta…" aria-label="Mensaje para Romina" onkeydown="if(event.key==='Enter')sendChat()"/>
+    <input id="chat-input" placeholder="Escribe tu consulta…" aria-label="Mensaje para Semeruquito" onkeydown="if(event.key==='Enter')sendChat()"/>
     <button onclick="sendChat()" aria-label="Enviar mensaje">➤</button>
   </div>
 </div>
@@ -1267,6 +1267,32 @@ function addChatBubble(msgs, html, isUser) {
   msgs.scrollTop = msgs.scrollHeight;
 }
 
+/* ─── SEMERUQUITO — Configuración de API IA ─── */
+// Para activar la IA externa: asignar la URL del endpoint aquí.
+// El endpoint debe aceptar POST con { "message": "...", "session_id": "..." }
+// y responder con { "reply": "..." }
+// Mientras SEMERUQUITO_API_URL sea null, se usa el modo FAQ local como fallback.
+const SEMERUQUITO_API_URL = null; // Ejemplo: 'https://api.tuservicio.com/chat'
+
+let _chatSessionId = null;
+function getChatSessionId() {
+  if (!_chatSessionId) {
+    _chatSessionId = 'sess_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+  }
+  return _chatSessionId;
+}
+
+async function sendChatToApi(text) {
+  const res = await fetch(SEMERUQUITO_API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message: text, session_id: getChatSessionId() }),
+  });
+  if (!res.ok) { throw new Error('API ' + res.status); }
+  const data = await res.json();
+  return data.reply || data.response || data.message || data.text || '';
+}
+
 async function sendChat() {
   const inp = document.getElementById('chat-input');
   const msgs = document.getElementById('chat-msgs');
@@ -1275,12 +1301,35 @@ async function sendChat() {
   inp.value = '';
   addChatBubble(msgs, txt, true);
 
-  const faqs = await loadChatFaqs();
-  const respuesta = findFaqResponse(txt, faqs);
+  // Indicador "escribiendo…"
+  const typing = document.createElement('div');
+  typing.className = 'chat-bubble';
+  typing.textContent = '…';
+  typing.style.opacity = '0.5';
+  msgs.appendChild(typing);
+  msgs.scrollTop = msgs.scrollHeight;
 
-  setTimeout(() => {
-    addChatBubble(msgs, respuesta || 'No encontré información exacta sobre eso. Para atención personalizada: 📞 (0251) 000-0000 o ✉ info@iagami.gob.ve — también puede usar el formulario de <strong>Denuncias</strong>.', false);
-  }, 700);
+  let respuesta = '';
+  try {
+    if (SEMERUQUITO_API_URL) {
+      // Modo IA externa
+      respuesta = await sendChatToApi(txt);
+    } else {
+      // Modo FAQ local (fallback mientras no hay API configurada)
+      await new Promise(r => setTimeout(r, 700));
+      const faqs = await loadChatFaqs();
+      respuesta = findFaqResponse(txt, faqs) ||
+        'No encontré información exacta sobre eso. Para atención personalizada: 📞 (0251) 000-0000 o ✉ info@iagami.gob.ve — también puede usar el formulario de <strong>Denuncias</strong>.';
+    }
+  } catch (_e) {
+    // Si la API falla, caer al modo FAQ
+    const faqs = await loadChatFaqs();
+    respuesta = findFaqResponse(txt, faqs) ||
+      'En este momento no puedo conectarme al asistente. Por favor intenta de nuevo o contáctanos: 📞 (0251) 000-0000';
+  }
+
+  msgs.removeChild(typing);
+  addChatBubble(msgs, respuesta, false);
 }
 
 /* ─── IA ANÁLISIS ─── */

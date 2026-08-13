@@ -22,6 +22,8 @@ export default [
       'tests/**',
       'vitest.config.js',
       'playwright.config.js',
+      // Scripts de utilidad — entorno Node.js / ES modules
+      'scripts/**',
     ],
   },
 
