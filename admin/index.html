@@ -1582,10 +1582,16 @@ input,select,textarea{font-family:inherit}
       <div class="page-header">
         <div>
           <div class="page-title">🔍 Control y Seguimiento Institucional</div>
-          <div class="page-subtitle">Vista consolidada de actividades del personal</div>
+          <div class="page-subtitle">Actividades del personal y control de presencia</div>
         </div>
       </div>
+      <!-- Pestañas -->
+      <div class="tabs" style="margin-bottom:16px">
+        <button class="tab active" id="tab-cs-act-btn" onclick="switchTabCS('act')">📋 Actividades</button>
+        <button class="tab" id="tab-cs-pres-btn" onclick="switchTabCS('pres')">📍 Control de Presencia</button>
+      </div>
       <div id="ctrl-seg-body"><p style="color:#888;text-align:center;padding:40px">Cargando…</p></div>
+      <div id="ctrl-pres-body" style="display:none"></div>
     </div>
 
     <!-- ══════════════════════════════════════
@@ -5236,6 +5242,15 @@ async function renderPresidencial() {
 }
 
 /* ─── CONTROL Y SEGUIMIENTO ─── */
+/* ─── Switcher de pestañas Control y Seguimiento ─── */
+window.switchTabCS = function(tab) {
+  document.getElementById('ctrl-seg-body').style.display  = tab === 'act'  ? '' : 'none';
+  document.getElementById('ctrl-pres-body').style.display = tab === 'pres' ? '' : 'none';
+  document.getElementById('tab-cs-act-btn').classList.toggle('active',  tab === 'act');
+  document.getElementById('tab-cs-pres-btn').classList.toggle('active', tab === 'pres');
+  if (tab === 'pres') renderCtrlPresencia();
+};
+
 async function renderCtrlSeguimiento() {
   const body = document.getElementById('ctrl-seg-body');
   if (!body) return;
@@ -5415,6 +5430,177 @@ window.filtrarCtrl = function() {
       <td style="padding:9px 12px;max-width:160px;color:#6b7280">${escHtml(a.resultado_obtenido||a.resultado||'—')}</td>
       <td style="padding:9px 12px">${colorBadge(rev,revC)}</td>
       <td style="padding:9px 12px;color:#6b7280">${escHtml(supNom)}</td>
+    </tr>`;
+  }).join('');
+};
+
+/* ─── CONTROL DE PRESENCIA (control_seguimiento) ─── */
+async function renderCtrlPresencia() {
+  const body = document.getElementById('ctrl-pres-body');
+  if (!body) return;
+  if (body.dataset.loaded === '1') { filtrarPresencia(); return; }
+  body.innerHTML = '<p style="color:#888;text-align:center;padding:40px">Cargando registros de presencia…</p>';
+
+  const PB_URL = window.__IAGAMI_CONFIG__?.PB_URL || 'https://api.iagami.online';
+  const token  = sessionStorage.getItem('pb_token') || '';
+
+  // ── Diagnóstico: leer 1 registro para capturar el código HTTP real ──────────
+  let probeStatus = 0;
+  let probeMsg    = '';
+  try {
+    const probe = await fetch(
+      `${PB_URL}/api/collections/control_seguimiento/records?perPage=1`,
+      { headers: { Authorization: token } }
+    );
+    probeStatus = probe.status;
+    if (!probe.ok) {
+      const err = await probe.json().catch(() => ({}));
+      probeMsg = err.message || `HTTP ${probeStatus}`;
+    }
+  } catch (netErr) {
+    probeStatus = 0;
+    probeMsg = netErr.message || 'Error de red';
+  }
+
+  // ── Si no es 200, mostrar el error concreto y detener ─────────────────────
+  if (probeStatus !== 200) {
+    const info = {
+      0:   { color:'#dc2626', icon:'🔌', titulo:'Sin conexión con PocketBase',    desc:`No se pudo llegar al servidor. Detalle: ${probeMsg}` },
+      401: { color:'#d97706', icon:'🔑', titulo:'No autenticado (401)',            desc:'El token de sesión fue rechazado. Cierra sesión y vuelve a entrar.' },
+      403: { color:'#dc2626', icon:'🚫', titulo:'Acceso denegado (403)',           desc:'La regla API de control_seguimiento no permite lectura a este usuario. Revisa la regla List en PocketBase.' },
+      404: { color:'#6b7280', icon:'❓', titulo:'Colección no encontrada (404)',   desc:'La colección "control_seguimiento" no existe en PocketBase.' },
+    }[probeStatus] || { color:'#dc2626', icon:'⚠️', titulo:`Error del servidor (${probeStatus})`, desc: probeMsg };
+
+    body.innerHTML = `
+      <div style="background:#fff;border:2px solid ${info.color};border-radius:10px;padding:28px;text-align:center;max-width:480px;margin:40px auto">
+        <div style="font-size:36px;margin-bottom:12px">${info.icon}</div>
+        <div style="font-size:16px;font-weight:700;color:${info.color};margin-bottom:8px">${info.titulo}</div>
+        <div style="font-size:13px;color:#6b7280;line-height:1.6">${escHtml(info.desc)}</div>
+        <button onclick="renderCtrlPresencia()" style="margin-top:16px;background:${info.color};color:#fff;border:none;border-radius:6px;padding:8px 20px;font-size:13px;cursor:pointer;font-weight:600">↻ Reintentar</button>
+      </div>`;
+    body.dataset.loaded = '0';
+    return;
+  }
+
+  // ── 200: cargar datos completos ────────────────────────────────────────────
+  const presencia    = await CMSDB.getAll('control_seguimiento', 500, '-fecha_hora');
+  const trabajadores = await CMSDB.getAll('trabajadores', 300);
+
+  const hoy      = new Date().toISOString().slice(0,10);
+  const semInicio = (() => { const d=new Date(); d.setDate(d.getDate()-d.getDay()); return d.toISOString().slice(0,10); })();
+
+  const totalHoy    = presencia.filter(r=>r.fecha_hora&&r.fecha_hora.slice(0,10)===hoy).length;
+  const totalSemana = presencia.filter(r=>r.fecha_hora&&r.fecha_hora.slice(0,10)>=semInicio).length;
+  const verificados = presencia.filter(r=>r.verificado).length;
+  const pendientes  = presencia.filter(r=>!r.verificado).length;
+
+  body.innerHTML = `
+  <!-- KPIs presencia -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:20px">
+    ${[
+      ['📅','Registros hoy',  totalHoy,   ''],
+      ['📆','Esta semana',    totalSemana, ''],
+      ['✅','Verificados',    verificados, 'green'],
+      ['⏳','Pendientes',     pendientes,  pendientes>0?'amber':''],
+    ].map(([ico,lbl,val,col])=>`
+      <div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px;text-align:center">
+        <div style="font-size:22px">${ico}</div>
+        <div style="font-size:22px;font-weight:700;color:${col==='green'?'#16a34a':col==='amber'?'#d97706':'#111'}">${val}</div>
+        <div style="font-size:11px;color:#6b7280;margin-top:2px">${lbl}</div>
+      </div>`).join('')}
+  </div>
+
+  <!-- Filtros -->
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center">
+    <input type="date" id="cpres-desde" onchange="filtrarPresencia()" style="padding:6px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px"/>
+    <input type="date" id="cpres-hasta" onchange="filtrarPresencia()" style="padding:6px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px"/>
+    <select id="cpres-trab" onchange="filtrarPresencia()" style="padding:6px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px">
+      <option value="">Todos los trabajadores</option>
+      ${trabajadores.map(t=>`<option value="${t.id}">${escHtml(`${t.nombres||''} ${t.apellidos||''}`.trim())}</option>`).join('')}
+    </select>
+    <select id="cpres-tipo" onchange="filtrarPresencia()" style="padding:6px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px">
+      <option value="">Todos los tipos</option>
+      <option value="Entrada">Entrada</option>
+      <option value="Salida">Salida</option>
+      <option value="Visita">Visita</option>
+      <option value="Pausa">Pausa</option>
+    </select>
+    <select id="cpres-verif" onchange="filtrarPresencia()" style="padding:6px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px">
+      <option value="">Todos</option>
+      <option value="1">✅ Verificados</option>
+      <option value="0">⏳ Pendientes</option>
+    </select>
+  </div>
+
+  <!-- Tabla presencia (solo lectura) -->
+  <div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;overflow:auto">
+    <table style="width:100%;border-collapse:collapse;font-size:13px">
+      <thead style="background:#f9fafb">
+        <tr>${['Trabajador','Tipo','Fecha / Hora','Foto','Ubicación GPS','Precisión','Observaciones','Estado'].map(h=>`<th style="padding:10px 12px;text-align:left;font-weight:600;color:#374151;border-bottom:1px solid #e5e7eb;white-space:nowrap">${h}</th>`).join('')}</tr>
+      </thead>
+      <tbody id="cpres-tbody"></tbody>
+    </table>
+  </div>`;
+
+  window._cpresData = { presencia, trabajadores, PB_URL };
+  body.dataset.loaded = '1';
+  filtrarPresencia();
+}
+
+window.filtrarPresencia = function() {
+  const { presencia=[], trabajadores=[], PB_URL='' } = window._cpresData||{};
+  const fDesde = document.getElementById('cpres-desde')?.value||'';
+  const fHasta = document.getElementById('cpres-hasta')?.value||'';
+  const fTrab  = document.getElementById('cpres-trab')?.value||'';
+  const fTipo  = document.getElementById('cpres-tipo')?.value||'';
+  const fVerif = document.getElementById('cpres-verif')?.value||'';
+
+  const filtered = presencia.filter(r=>{
+    const fecha = r.fecha_hora ? r.fecha_hora.slice(0,10) : '';
+    if (fTrab  && r.trabajador_id !== fTrab) return false;
+    if (fDesde && fecha < fDesde) return false;
+    if (fHasta && fecha > fHasta) return false;
+    if (fTipo  && r.tipo !== fTipo) return false;
+    if (fVerif === '1' && !r.verificado) return false;
+    if (fVerif === '0' &&  r.verificado) return false;
+    return true;
+  });
+
+  const tbody = document.getElementById('cpres-tbody');
+  if (!tbody) return;
+
+  if (!filtered.length) {
+    tbody.innerHTML = `<tr><td colspan="8" style="padding:20px;text-align:center;color:#888">Sin registros con los filtros aplicados.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.slice(0,300).map(r=>{
+    const trab   = trabajadores.find(t=>t.id===r.trabajador_id);
+    const nombre = trab ? `${trab.nombres||''} ${trab.apellidos||''}`.trim() : '—';
+    const fotoUrl = r.foto ? `${PB_URL}/api/files/control_seguimiento/${r.id}/${r.foto}` : null;
+    const fotoHtml = fotoUrl
+      ? `<a href="${escHtml(fotoUrl)}" target="_blank" rel="noopener"><img src="${escHtml(fotoUrl)}" style="width:48px;height:48px;border-radius:6px;object-fit:cover;border:1px solid #e5e7eb" loading="lazy"/></a>`
+      : '<span style="color:#9ca3af;font-size:12px">—</span>';
+    const lat = r.latitud  ? parseFloat(r.latitud).toFixed(5)  : null;
+    const lng = r.longitud ? parseFloat(r.longitud).toFixed(5) : null;
+    const gpsHtml = lat
+      ? `<a href="https://maps.google.com/?q=${lat},${lng}" target="_blank" rel="noopener" style="color:#1d6b3e;font-size:12px;white-space:nowrap">📍 ${lat},${lng}</a>`
+      : '<span style="color:#9ca3af;font-size:12px">Sin GPS</span>';
+    const precHtml = r.precision_gps!=null ? `±${Math.round(r.precision_gps)}m` : '—';
+    const tipoColor = {Entrada:'#16a34a',Salida:'#dc2626',Visita:'#2563eb',Pausa:'#d97706'};
+    const color = tipoColor[r.tipo]||'#6b7280';
+    const fecha = r.fecha_hora ? r.fecha_hora.replace('T',' ').substring(0,16) : '—';
+    return `<tr style="border-bottom:1px solid #f3f4f6">
+      <td style="padding:9px 12px;font-weight:500">${escHtml(nombre)}</td>
+      <td style="padding:9px 12px"><span style="background:${color}22;color:${color};padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600">${escHtml(r.tipo||'—')}</span></td>
+      <td style="padding:9px 12px;white-space:nowrap;font-size:12px">${escHtml(fecha)}</td>
+      <td style="padding:9px 12px">${fotoHtml}</td>
+      <td style="padding:9px 12px">${gpsHtml}</td>
+      <td style="padding:9px 12px;font-size:12px;color:#6b7280">${escHtml(precHtml)}</td>
+      <td style="padding:9px 12px;max-width:180px;font-size:12px;color:#6b7280">${escHtml((r.observaciones||'—').substring(0,100))}</td>
+      <td style="padding:9px 12px">
+        <span style="background:${r.verificado?'#16a34a22':'#d9780622'};color:${r.verificado?'#16a34a':'#d97706'};padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600">${r.verificado?'✅ Verificado':'⏳ Pendiente'}</span>
+      </td>
     </tr>`;
   }).join('');
 };
