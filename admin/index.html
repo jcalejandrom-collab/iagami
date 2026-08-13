@@ -1770,11 +1770,11 @@ window.addEventListener('sigap:session-expired', () => {
 
 window.addEventListener('sigap:access-denied', e => {
   const col = e.detail && e.detail.coleccion ? ` (${e.detail.coleccion})` : '';
-  showToast(`Sin permisos para acceder a este recurso${col}. Contacta al administrador.`, 'warn');
+  showToast(`Sin permisos para acceder a este recurso${col}. Contacta al administrador.`, 'warning');
 });
 
 window.addEventListener('sigap:offline', () => {
-  showToast('Sin conexión. Trabajando con datos en caché.', 'warn');
+  showToast('Sin conexión. Trabajando con datos en caché.', 'warning');
 });
 
 window.addEventListener('sigap:online', () => {
@@ -2928,8 +2928,40 @@ async function renderPagosReportados() {
 async function verificarPago(id, estado) {
   const p = await CMSDB.getOne('pagos', id).catch(()=>null);
   if (!p) { toast('No se encontró el pago','error'); return; }
+
+  // 1. Actualizar estado del pago
   await CMSDB.save('pagos', { id, estado });
-  toast(estado==='verificado' ? '✅ Pago aprobado' : '❌ Pago rechazado');
+
+  if (estado !== 'verificado') {
+    toast('❌ Pago rechazado');
+    CMSDB.clearCache('pagos');
+    renderPagosReportados();
+    return;
+  }
+
+  // 2. Solo al verificar: sincronizar multa correspondiente
+  const exp = (p.expediente || '').trim();
+  if (!exp) {
+    toast('✅ Pago verificado — sin número de expediente para sincronizar multa', 'warning');
+    CMSDB.clearCache('pagos');
+    renderPagosReportados();
+    return;
+  }
+
+  // Buscar multas con perPage=2 para detectar duplicados
+  const multas = await CMSDB.getFiltered('multas', `expediente="${exp}"`, { perPage: 2, sort: '' });
+
+  if (multas.length === 0) {
+    toast(`✅ Pago verificado — ⚠️ no se encontró multa con expediente "${exp}"`, 'warning');
+  } else if (multas.length > 1) {
+    toast(`✅ Pago verificado — ⚠️ existen múltiples multas con expediente "${exp}", actualiza manualmente`, 'warning');
+  } else {
+    // Exactamente 1 multa → actualizar estado
+    await CMSDB.save('multas', { id: multas[0].id, estado: 'Pagada' });
+    CMSDB.clearCache('multas');
+    toast(`✅ Pago verificado y multa "${exp}" marcada como Pagada`);
+  }
+
   CMSDB.clearCache('pagos');
   renderPagosReportados();
 }
