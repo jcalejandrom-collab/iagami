@@ -2201,10 +2201,14 @@ async function deleteRecord(section, id) {
   confirmDelete(async () => {
     const keyMap = {agenda:'eventos', transparencia:'documentos', organizacion:'org'};
     const dbKey = keyMap[section] || section;
-    await CMSDB.remove(dbKey, id);
-    await CMSDB.logAudit('delete', section, id);
-    toast('Eliminado correctamente', 'success');
-    renderSection(section);
+    try {
+      await CMSDB.remove(dbKey, id);
+      await CMSDB.logAudit('delete', section, id);
+      toast('Eliminado correctamente', 'success');
+      renderSection(section);
+    } catch(e) {
+      toast('Error al eliminar: ' + (e.message || 'revisa la conexión'), 'error');
+    }
   });
 }
 
@@ -3116,7 +3120,7 @@ async function updateDenunciaStatus(id, estado) {
       const list = raw ? JSON.parse(raw) : [];
       item = list.find(d=>d.id===id);
       if (item) { item.estado = estado; localStorage.setItem('iagami_denuncias', JSON.stringify(list)); toast('Estado actualizado'); return; }
-    } catch(e) {}
+    } catch(e) { toast('Error al actualizar la denuncia. Verifique la conexión e intente nuevamente.', 'error'); return; }
   }
   if (item) {
     item.estado = estado;
@@ -3250,7 +3254,7 @@ async function saveDenunciaNota(id, notas) {
       const list = raw ? JSON.parse(raw) : [];
       item = list.find(d=>d.id===id);
       if (item) { item.notas = notas; localStorage.setItem('iagami_denuncias', JSON.stringify(list)); return; }
-    } catch(e) {}
+    } catch(e) { toast('Error al guardar la nota. Verifique la conexión e intente nuevamente.', 'error'); return; }
   }
   if (item) { item.notas = notas; await CMSDB.save('denuncias', item); }
 }
@@ -3684,7 +3688,9 @@ async function exportConsejosPDF() {
   if (estatus)   data = data.filter(c => c.estatus === estatus);
   if (!data.length) { toast('No hay registros para exportar','warning'); return; }
   let diagnosticos = [];
-  try { diagnosticos = await CMSDB.getAll('diagnosticos_ambientales'); } catch(e) {}
+  try { diagnosticos = await CMSDB.getAll('diagnosticos_ambientales'); } catch(e) {
+    toast('Advertencia: los datos de Diagnóstico Territorial no pudieron cargarse. El PDF puede estar incompleto.', 'warning');
+  }
   const subtitulo = [parroquia||'Todas las parroquias', estatus||'Todos los estatus'].join(' · ');
   _openPDFWindow(_buildConsejosPDFHtml(data, diagnosticos, 'Consejos Comunales', subtitulo));
 }
@@ -3694,7 +3700,9 @@ async function exportConsejoSinglePDF(id) {
   const c = await CMSDB.getOne('consejos_comunales', id);
   if (!c) { toast('Registro no encontrado','error'); return; }
   let diagnosticos = [];
-  try { diagnosticos = await CMSDB.getAll('diagnosticos_ambientales'); } catch(e) {}
+  try { diagnosticos = await CMSDB.getAll('diagnosticos_ambientales'); } catch(e) {
+    toast('Advertencia: los datos de Diagnóstico Territorial no pudieron cargarse. El PDF puede estar incompleto.', 'warning');
+  }
   _openPDFWindow(_buildConsejosPDFHtml([c], diagnosticos, `Consejo Comunal: ${c.nombre||id}`, `Parroquia: ${c.parroquia||'—'}`));
 }
 
@@ -4734,8 +4742,14 @@ function _jitter(base,idx){
 async function _seedIagami({dryRun=false,skipExisting=true}={}) {
   const log=[];
   let existingComunas=[],existingConsejos=[];
-  try{ existingComunas=await CMSDB.getAll('comunas')||[]; }catch(e){}
-  try{ existingConsejos=await CMSDB.getAll('consejos_comunales')||[]; }catch(e){}
+  let _preflight_ok=true;
+  try{ existingComunas=await CMSDB.getAll('comunas')||[]; }catch(e){ _preflight_ok=false; }
+  try{ existingConsejos=await CMSDB.getAll('consejos_comunales')||[]; }catch(e){ _preflight_ok=false; }
+  if(skipExisting&&!_preflight_ok){
+    return['❌ ABORTADO: No se pudo verificar registros existentes en PocketBase. '+
+           'Un error de conexión no equivale a "no hay registros". '+
+           'Verifique la conexión y vuelva a intentarlo.'];
+  }
   const exC=new Set(existingComunas.map(c=>c.nombre?.toUpperCase()));
   const exCC=new Set(existingConsejos.map(c=>c.nombre?.toUpperCase()));
   const comunaIdMap={};
@@ -5129,7 +5143,9 @@ async function exportComunasPDF() {
   if (estFil) data = data.filter(c=>c.estatus===estFil);
   if (!data.length) { toast('No hay registros para exportar','warning'); return; }
   let diags = [];
-  try { diags = await CMSDB.getAll('diagnosticos_ambientales'); } catch(e) {}
+  try { diags = await CMSDB.getAll('diagnosticos_ambientales'); } catch(e) {
+    toast('Advertencia: los datos de Diagnóstico Territorial no pudieron cargarse. El PDF puede estar incompleto.', 'warning');
+  }
   const subtitulo = [parFil||'Todas las parroquias', estFil||'Todos los estados'].join(' · ');
   _openPDFWindow(_buildComunasPDFHtml(data, diags, 'Comunas', subtitulo));
 }
@@ -5139,7 +5155,9 @@ async function exportComunaSinglePDF(id) {
   const c = await CMSDB.getOne('comunas', id);
   if (!c) { toast('Registro no encontrado','error'); return; }
   let diags = [];
-  try { diags = await CMSDB.getAll('diagnosticos_ambientales'); } catch(e) {}
+  try { diags = await CMSDB.getAll('diagnosticos_ambientales'); } catch(e) {
+    toast('Advertencia: los datos de Diagnóstico Territorial no pudieron cargarse. El PDF puede estar incompleto.', 'warning');
+  }
   _openPDFWindow(_buildComunasPDFHtml([c], diags, `Comuna: ${c.nombre||id}`, `Parroquia: ${c.parroquia||'—'}`));
 }
 
