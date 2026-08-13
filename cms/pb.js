@@ -244,7 +244,10 @@ const CMSDB = (function () {
       try {
         const noSortCols = ['comunas'];
         const idSortCols = ['trabajadores','solicitudes_rrhh','capacitaciones','evaluaciones_desempeno','asistencia','actividades','inspecciones_empresas'];
-        const sortCandidates = noSortCols.includes(coleccion) ? [''] : idSortCols.includes(coleccion) ? ['id',''] : ['-created','id',''];
+        let sortCandidates;
+        if (noSortCols.includes(coleccion)) { sortCandidates = ['']; }
+        else if (idSortCols.includes(coleccion)) { sortCandidates = ['id','']; }
+        else { sortCandidates = ['-created','id','']; }
         let workingSort = null, page = 1, allItems = [], totalPages = 1;
 
         do {
