@@ -581,11 +581,11 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
   <div class="stats-band" data-reveal>
     <div class="stats-band-inner">
       <div class="sband-item">
-        <div class="sband-num" data-counter="47" data-counter-duration="1400">0</div>
+        <div class="sband-num" id="sband-consejos" data-counter="47" data-counter-duration="1400">0</div>
         <div class="sband-desc">Consejos Comunales</div>
       </div>
       <div class="sband-item">
-        <div class="sband-num" data-counter="320" data-counter-suffix="+" data-counter-duration="1600">0</div>
+        <div class="sband-num" id="sband-empresas" data-counter="320" data-counter-suffix="+" data-counter-duration="1600">0</div>
         <div class="sband-desc">Empresas Registradas</div>
       </div>
       <div class="sband-item">
@@ -1594,10 +1594,16 @@ async function renderHeroStats() {
   ]);
   const consejos = Array.isArray(_consejosR) ? _consejosR : [];
   const empresas = Array.isArray(_empresasR) ? _empresasR : [];
+  const nConsejos = consejos.filter(c => c.estatus === 'Activo').length;
+  const nEmpresas = empresas.length;
   const sc = document.getElementById('stat-consejos');
   const se = document.getElementById('stat-empresas');
-  if (sc) sc.textContent = consejos.filter(c => c.estatus === 'Activo').length;
-  if (se) se.textContent = empresas.length;
+  if (sc) sc.textContent = nConsejos;
+  if (se) se.textContent = nEmpresas;
+  const sbc = document.getElementById('sband-consejos');
+  const sbe = document.getElementById('sband-empresas');
+  if (sbc) sbc.textContent = nConsejos;
+  if (sbe) sbe.textContent = nEmpresas;
 }
 
 async function renderHomeIndicadores() {
