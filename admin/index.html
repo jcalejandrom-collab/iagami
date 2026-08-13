@@ -5272,7 +5272,7 @@ function rrhhTab(tab, cache) {
   } else if (tab==='solicitudes') {
     const sols=cache?.solicitudes||[];
     const trabs=cache?.trabajadores||[];
-    const nombreTrab = id => { const t=trabs.find(t=>t.id===id); return t?`${t.nombres||''} ${t.apellidos||''}`.trim()||t.email||id:'—'; };
+    const nombreTrab = id => { const t=trabs.find(t=>t.id===id); return t?`${t.nombres||''} ${t.apellidos||''}`.trim()||t.email||id:(id||'—'); };
     el.innerHTML=`<div class="table-wrap"><table><thead><tr>
       <th>Trabajador</th><th>Tipo</th><th>Descripción</th><th>Desde</th><th>Hasta</th><th>Estado</th>
     </tr></thead><tbody>${Array.isArray(sols)&&sols.length
@@ -5304,7 +5304,7 @@ function rrhhTab(tab, cache) {
   } else if (tab==='evaluaciones') {
     const evals=cache?.evaluaciones||[];
     const trabs=cache?.trabajadores||[];
-    const nombreTrab = id => { const t=trabs.find(t=>t.id===id); return t?`${t.nombres||''} ${t.apellidos||''}`.trim()||t.email||id:'—'; };
+    const nombreTrab = id => { const t=trabs.find(t=>t.id===id); return t?`${t.nombres||''} ${t.apellidos||''}`.trim()||t.email||id:(id||'—'); };
     el.innerHTML=`<div class="table-wrap"><table><thead><tr>
       <th>Trabajador</th><th>Período</th><th>Cumplimiento</th><th>Actitud</th><th>Productividad</th><th>Total</th><th>Estado</th>
     </tr></thead><tbody>${Array.isArray(evals)&&evals.length
@@ -5322,7 +5322,7 @@ function rrhhTab(tab, cache) {
   } else if (tab==='asistencia') {
     const asist=cache?.asistencia||[];
     const trabs=cache?.trabajadores||[];
-    const nombreTrab = id => { const t=trabs.find(t=>t.id===id); return t?`${t.nombres||''} ${t.apellidos||''}`.trim()||t.email||id:'—'; };
+    const nombreTrab = id => { const t=trabs.find(t=>t.id===id); return t?`${t.nombres||''} ${t.apellidos||''}`.trim()||t.email||id:(id||'—'); };
     const hoy=new Date().toLocaleDateString('sv-SE');
     const ayer=(()=>{const d=new Date();d.setDate(d.getDate()-1);return d.toLocaleDateString('sv-SE');})();
     const fecha=_rrhhAsistFecha||hoy;
