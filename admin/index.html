@@ -4372,12 +4372,13 @@ async function saveRevistaMeta() {
       _revistaEditId = saved.id;
     }
   } catch (err) {
-    showToast('Error al guardar la revista: ' + err.message, 'error');
+    alert('❌ Error al guardar la revista:\n' + err.message);
+    showToast('Error al guardar la revista', 'error');
     return;
   }
 
-  showToast('Datos guardados. Abre el editor de bloques.', 'success');
-  openRevistaEditor(_revistaEditId);
+  showToast('✅ Datos guardados correctamente.', 'success');
+  closeRevistaMetaForm();
 }
 
 /* ── BLOCK EDITOR ── */
