@@ -1702,9 +1702,9 @@ async function renderHomeAgenda() {
   const today = new Date().toLocaleDateString('sv-SE');
   const _eventos = await CMSDB.getFiltered('eventos', 'publicado=true', { perPage: 100 });
   const todos = Array.isArray(_eventos) ? _eventos : [];
-  const futuros = todos.filter(e => e.fecha && e.fecha >= today && e.publicado === true);
+  const futuros = todos.filter(e => e.fecha_inicio && e.fecha_inicio >= today && e.publicado === true);
   const eventos = (futuros.length ? futuros : todos)
-    .sort((a, b) => (a.fecha || '').localeCompare(b.fecha || ''))
+    .sort((a, b) => (a.fecha_inicio || '').localeCompare(b.fecha_inicio || ''))
     .slice(0, 20);
 
   if (!eventos.length) {
@@ -1712,7 +1712,7 @@ async function renderHomeAgenda() {
     return;
   }
   container.innerHTML = eventos.map(e => {
-    const { dia, mes } = fmtDiaMes(e.fecha);
+    const { dia, mes } = fmtDiaMes(e.fecha_inicio);
     const hora = e.hora_inicio ? e.hora_inicio.slice(0, 5) : '';
     return `<div class="ev-card">
       <div class="ev-date">
