@@ -267,7 +267,7 @@ function toast(msg) {
 function renderStats(all) {
   const pub = all.filter(r => r.estado === 'publicada');
   document.getElementById('stat-total').textContent = pub.length;
-  document.getElementById('stat-descargas').textContent = pub.reduce((s,r) => s+(r.descargas||0), 0);
+  document.getElementById('stat-descargas').textContent = pub.reduce((s,r) => s+(r.descarga||0), 0);
   const cats = new Set(pub.map(r => r.categoria).filter(Boolean));
   document.getElementById('stat-categorias').textContent = cats.size;
 }
@@ -338,8 +338,8 @@ function renderFeatured(all) {
       </div>
       <div class="featured-meta">
         <span>📅 ${fmtFecha(featured.fecha)}</span>
-        <span>📥 ${featured.descargas||0} descargas</span>
-        <span>👁 ${featured.visualizaciones||0} vistas</span>
+        <span>📥 ${featured.descarga||0} descargas</span>
+        <span>👁 ${featured.vistas||0} vistas</span>
       </div>
       <div class="featured-actions">
         <a class="btn-ver" href="visor.html?id=${featured.id}">
@@ -427,7 +427,7 @@ async function descargarRevista(id) {
   if (!r) return;
 
   try {
-    const updated = Object.assign({}, r, {descargas: (r.descargas||0)+1});
+    const updated = Object.assign({}, r, {descarga: (r.descarga||0)+1});
     await CMSDB.save('revistas', updated);
   } catch(e) {
   }
