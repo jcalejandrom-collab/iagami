@@ -291,7 +291,8 @@ function filterRevistas(cat) {
 
 /* ─── COVER HTML ─── */
 function coverHTML(r, size) {
-  const safePortada = safeImageUrl(r.portada_url);
+  const _pbBase = document.querySelector('meta[name="pb-url"]')?.content || 'https://api.iagami.online';
+  const safePortada = r.portada ? `${_pbBase}/api/files/revistas/${r.id}/${encodeURIComponent(r.portada)}` : '';
   if (safePortada) {
     return `<img src="${escHtml(safePortada)}" alt="Portada ${escHtml(r.titulo)}" loading="lazy" onerror="this.style.display='none'"/>`;
   }
@@ -433,9 +434,10 @@ async function descargarRevista(id) {
   toast('⬇️ Descarga iniciada correctamente');
 
   const titulo = r.titulo || 'Revista';
-  if (r.pdf_url) {
+  const _pbBasePdf = document.querySelector('meta[name="pb-url"]')?.content || 'https://api.iagami.online';
+  if (r.pdf) {
     const a = document.createElement('a');
-    a.href = r.pdf_url;
+    a.href = `${_pbBasePdf}/api/files/revistas/${r.id}/${encodeURIComponent(r.pdf)}`;
     a.download = `IAGAMI_Revista_${r.edicion}_${titulo.replace(/\s+/g,'_').slice(0,40)}.pdf`;
     a.target = '_blank';
     document.body.appendChild(a);

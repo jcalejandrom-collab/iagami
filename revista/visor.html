@@ -582,9 +582,10 @@ async function descargar() {
   _revista = Object.assign({}, _revista, {descargas: (_revista.descargas||0)+1});
   await CMSDB.save('revistas', _revista);
   toast('⬇️ Descarga iniciada');
-  if (_revista.pdf_url) {
+  const _pbBase = document.querySelector('meta[name="pb-url"]')?.content || 'https://api.iagami.online';
+  if (_revista.pdf) {
     const a = document.createElement('a');
-    a.href = _revista.pdf_url;
+    a.href = `${_pbBase}/api/files/revistas/${_revista.id}/${encodeURIComponent(_revista.pdf)}`;
     a.download = `IAGAMI_Revista_${_revista.edicion||'1'}.pdf`;
     a.target = '_blank';
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
