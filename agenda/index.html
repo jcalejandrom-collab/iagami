@@ -302,13 +302,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   allEvents = cacheTodosEventos
     .filter(e => {
       if (e.publicado !== true) return false;
-      if (!e.fecha) return false;
-      const d = new Date(e.fecha + 'T00:00:00');
+      if (!e.fecha_inicio) return false;
+      const d = new Date(e.fecha_inicio + 'T00:00:00');
       const t = new Date();
       t.setHours(0,0,0,0);
       return d >= t;
     })
-    .sort((a, b) => (a.fecha || '').localeCompare(b.fecha || ''));
+    .sort((a, b) => (a.fecha_inicio || '').localeCompare(b.fecha_inicio || ''));
 
   filteredEvents = [...allEvents];
   renderList();
@@ -348,7 +348,7 @@ function renderList() {
 }
 
 function eventCardHTML(e) {
-  const d = new Date((e.fecha || '2000-01-01') + 'T00:00:00');
+  const d = new Date((e.fecha_inicio || '2000-01-01') + 'T00:00:00');
   const day = d.getDate();
   const month = MONTHS_SHORT[d.getMonth()];
   const tipoClass = (e.tipo || 'otro').toLowerCase();
@@ -414,7 +414,7 @@ async function renderCalendar() {
   const todosEventos = cacheTodosEventos;
   for (const cell of cells) {
     const dateStr = formatDate(cell.date);
-    const dayEvents = todosEventos.filter(e => e.fecha === dateStr);
+    const dayEvents = todosEventos.filter(e => e.fecha_inicio === dateStr);
     const isToday = cell.date.getTime() === today.getTime();
     const hasEvents = dayEvents.length > 0;
     const isSelected = selectedDay === dateStr;
@@ -479,7 +479,7 @@ async function openDetail(id) {
   const e = cacheTodosEventos.find(ev => ev.id === id);
   if (!e) return;
 
-  const d = new Date((e.fecha || '2000-01-01') + 'T00:00:00');
+  const d = new Date((e.fecha_inicio || '2000-01-01') + 'T00:00:00');
   const fechaFmt = `${d.getDate()} de ${MONTHS_ES[d.getMonth()]} de ${d.getFullYear()}, ${e.hora_inicio||e.hora||''} hrs`;
 
   document.getElementById('modal-title').textContent = e.titulo || '';

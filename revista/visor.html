@@ -555,7 +555,7 @@ function renderMagazine(revista) {
         <div class="ph-meta">
           ${revista.fecha ? `<span>📅 ${escHtml(revista.fecha)}</span>` : ''}
           ${revista.categoria ? `<span>🏷️ ${escHtml(revista.categoria)}</span>` : ''}
-          <span>👁️ ${revista.visualizaciones||0} visualizaciones</span>
+          <span>👁️ ${revista.vistas||0} visualizaciones</span>
         </div>
       </div>
     </div>`;
@@ -579,12 +579,13 @@ function renderMagazine(revista) {
 /* ── DOWNLOAD ── */
 async function descargar() {
   if (!_revista) return;
-  _revista = Object.assign({}, _revista, {descargas: (_revista.descargas||0)+1});
+  _revista = Object.assign({}, _revista, {descarga: (_revista.descarga||0)+1});
   await CMSDB.save('revistas', _revista);
   toast('⬇️ Descarga iniciada');
-  if (_revista.pdf_url) {
+  const _pbBase = document.querySelector('meta[name="pb-url"]')?.content || 'https://api.iagami.online';
+  if (_revista.pdf) {
     const a = document.createElement('a');
-    a.href = _revista.pdf_url;
+    a.href = `${_pbBase}/api/files/revistas/${_revista.id}/${encodeURIComponent(_revista.pdf)}`;
     a.download = `IAGAMI_Revista_${_revista.edicion||'1'}.pdf`;
     a.target = '_blank';
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
@@ -649,7 +650,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('nav-title').textContent = `${_revista.titulo} · Nº${_revista.edicion||'1'}`;
 
   if (!isPrint) {
-    _revista = Object.assign({}, _revista, {visualizaciones: (_revista.visualizaciones||0)+1});
+    _revista = Object.assign({}, _revista, {vistas: (_revista.vistas||0)+1});
     try { await CMSDB.save('revistas', _revista); } catch(e) { /* no-op: counter update is non-critical */ }
   }
 
