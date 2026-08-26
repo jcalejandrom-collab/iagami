@@ -4310,7 +4310,7 @@ async function openRevistaForm(id) {
   document.getElementById('rv-numero').value      = r ? (r.numero_edicion || '') : '';
   document.getElementById('rv-fecha').value       = r ? r.fecha       : new Date().toISOString().slice(0,10);
   document.getElementById('rv-categoria').value   = r ? r.categoria   : 'Ambiental';
-  document.getElementById('rv-estado').value      = r ? r.estado      : 'borrador';
+  document.getElementById('rv-estado').value      = r ? (r.estado || 'borrador').toLowerCase() : 'borrador';
   document.getElementById('rv-descripcion').value = r ? r.descripcion : '';
   if (document.getElementById('rv-portada-file')) document.getElementById('rv-portada-file').value = '';
   if (document.getElementById('rv-pdf-file')) document.getElementById('rv-pdf-file').value = '';
