@@ -4254,7 +4254,7 @@ async function renderRevistas() {
   const fCat = document.getElementById('f-revista-cat')?.value || '';
   let items;
   try { items = await CMSDB.getAll('revistas'); } catch(e) { items = []; }
-  if (q)    items = items.filter(r => ((r.titulo||'')+(r.numero_edicion||'')+(r.descripcion||'')).toLowerCase().includes(q));
+  if (q)    items = items.filter(r => ((r.titulo||'')+(r.edicion||'')+(r.descripcion||'')).toLowerCase().includes(q));
   if (fEst) items = items.filter(r => r.estado === fEst);
   if (fCat) items = items.filter(r => r.categoria === fCat);
 
@@ -4269,7 +4269,7 @@ async function renderRevistas() {
   const estadoClr = {borrador:'#fef3c7;color:#92400e',publicada:'#dcfce7;color:#166534',archivada:'#f1f5f9;color:#475569'};
   el.innerHTML = `<table class="table"><thead><tr><th>N°</th><th>Título</th><th>Categoría</th><th>Fecha</th><th>Estado</th><th>Destacada</th><th>Des.</th><th style="width:140px">Acciones</th></tr></thead><tbody>
   ${items.map(r => `<tr>
-    <td style="font-weight:700;color:var(--primary)">${r.numero_edicion||'—'}</td>
+    <td style="font-weight:700;color:var(--primary)">${r.edicion||'—'}</td>
     <td style="font-weight:600;max-width:220px">${r.titulo||'—'}</td>
     <td><span style="font-size:11px">${r.categoria||'—'}</span></td>
     <td style="font-size:12px">${r.fecha||'—'}</td>
@@ -4299,7 +4299,7 @@ async function openRevistaForm(id) {
 
   document.getElementById('revista-meta-title').textContent = id ? '✏️ Editar datos de revista' : '📰 Nueva Revista';
   document.getElementById('rv-titulo').value      = r ? r.titulo      : '';
-  document.getElementById('rv-numero').value      = r ? (r.numero_edicion || '') : '';
+  document.getElementById('rv-numero').value      = r ? (r.edicion || '') : '';
   document.getElementById('rv-fecha').value       = r ? r.fecha       : new Date().toISOString().slice(0,10);
   document.getElementById('rv-categoria').value   = r ? r.categoria   : 'Ambiental';
   document.getElementById('rv-estado').value      = r ? (r.estado || 'borrador').toLowerCase() : 'borrador';
@@ -4351,7 +4351,7 @@ async function saveRevistaMeta() {
 
   const data = {
     titulo,
-    numero_edicion: numero,
+    edicion: numero,
     fecha:          document.getElementById('rv-fecha').value,
     categoria:      document.getElementById('rv-categoria').value,
     estado:         document.getElementById('rv-estado').value,
