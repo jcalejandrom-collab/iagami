@@ -1204,8 +1204,8 @@ input,select,textarea{font-family:inherit}
           <div style="display:flex;flex-direction:column;gap:5px"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Categoría</label><select id="rv-categoria" style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none"><option value="Ambiental">Ambiental</option><option value="Institucional">Institucional</option><option value="Educativa">Educativa</option><option value="Técnica">Técnica</option><option value="Especial">Especial</option></select></div>
           <div style="display:flex;flex-direction:column;gap:5px"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Estado</label><select id="rv-estado" style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none"><option value="borrador">Borrador</option><option value="publicada">Publicada</option><option value="archivada">Archivada</option></select></div>
           <div style="display:flex;flex-direction:column;gap:5px;grid-column:1/-1"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Descripción</label><textarea id="rv-descripcion" rows="3" placeholder="Descripción breve de esta edición..." style="padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none;resize:vertical;font-family:inherit"></textarea></div>
-          <div style="display:flex;flex-direction:column;gap:5px;grid-column:1/-1"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Portada (imagen)</label><input type="file" id="rv-portada-file" accept="image/*" style="padding:6px;border:1px solid var(--border);border-radius:8px;font-size:13px"/></div>
-          <div style="display:flex;flex-direction:column;gap:5px;grid-column:1/-1"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Archivo PDF</label><input type="file" id="rv-pdf-file" accept="application/pdf" style="padding:6px;border:1px solid var(--border);border-radius:8px;font-size:13px"/></div>
+          <div style="display:flex;flex-direction:column;gap:5px;grid-column:1/-1"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Portada (imagen)</label><div id="rv-portada-info" style="display:none;font-size:12px;color:var(--muted)"></div><div style="display:flex;gap:8px;align-items:center"><input type="file" id="rv-portada-file" accept="image/*" style="padding:6px;border:1px solid var(--border);border-radius:8px;font-size:13px;flex:1"/><button type="button" onclick="rvClearFile('rv-portada-file')" title="Quitar selección" style="padding:4px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;cursor:pointer;background:#fff;color:var(--muted)">✕</button></div></div>
+          <div style="display:flex;flex-direction:column;gap:5px;grid-column:1/-1"><label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase">Archivo PDF</label><div id="rv-pdf-info" style="display:none;font-size:12px;color:var(--muted)"></div><div style="display:flex;gap:8px;align-items:center"><input type="file" id="rv-pdf-file" accept="application/pdf" onchange="rvCheckPdfSize(this)" style="padding:6px;border:1px solid var(--border);border-radius:8px;font-size:13px;flex:1"/><button type="button" onclick="rvClearFile('rv-pdf-file')" title="Quitar selección" style="padding:4px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;cursor:pointer;background:#fff;color:var(--muted)">✕</button></div></div>
           <div style="display:flex;align-items:center;gap:10px"><input type="checkbox" id="rv-destacada" style="width:16px;height:16px;cursor:pointer"/><label for="rv-destacada" style="font-size:13px;cursor:pointer">Marcar como revista destacada</label></div>
         </div>
         <div style="display:flex;gap:10px;margin-top:20px">
@@ -4314,6 +4314,10 @@ async function openRevistaForm(id) {
   document.getElementById('rv-descripcion').value = r ? r.descripcion : '';
   if (document.getElementById('rv-portada-file')) document.getElementById('rv-portada-file').value = '';
   if (document.getElementById('rv-pdf-file')) document.getElementById('rv-pdf-file').value = '';
+  const portadaInfo = document.getElementById('rv-portada-info');
+  if (portadaInfo) { if (r?.portada) { portadaInfo.textContent = '🖼️ Portada actual: ' + r.portada; portadaInfo.style.display = 'block'; } else { portadaInfo.style.display = 'none'; } }
+  const pdfInfo = document.getElementById('rv-pdf-info');
+  if (pdfInfo) { if (r?.pdf) { pdfInfo.textContent = '📄 PDF actual: ' + r.pdf; pdfInfo.style.display = 'block'; } else { pdfInfo.style.display = 'none'; } }
   document.getElementById('rv-destacada').checked = r ? !!r.destacada      : false;
 
   document.getElementById('revista-list-view').style.display  = 'none';
@@ -4333,6 +4337,19 @@ function backToRevistaMeta() {
   document.getElementById('revista-list-view').style.display  = 'none';
   document.getElementById('revista-meta-form').style.display  = 'block';
   document.getElementById('revista-editor').style.display     = 'none';
+}
+
+function rvClearFile(inputId) {
+  const el = document.getElementById(inputId);
+  if (el) el.value = '';
+}
+
+function rvCheckPdfSize(input) {
+  const MAX = 5 * 1024 * 1024;
+  if (input.files?.[0]?.size > MAX) {
+    showToast('El PDF supera el límite de 5 MB. Selecciona un archivo más pequeño.', 'error');
+    input.value = '';
+  }
 }
 
 async function saveRevistaMeta() {
