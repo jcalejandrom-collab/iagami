@@ -4277,6 +4277,7 @@ async function renderRevistas() {
     <td style="text-align:center">${r.destacada?'⭐':'—'}</td>
     <td style="font-size:12px">${r.descargas||0}</td>
     <td><div style="display:flex;gap:5px;flex-wrap:wrap">
+      <button class="btn btn-secondary" style="padding:4px 8px;font-size:11px" onclick="openRevistaForm('${escHtml(r.id)}')">✏️ Editar</button>
       <button class="btn btn-secondary" style="padding:4px 8px;font-size:11px" onclick="openRevistaEditor('${escHtml(r.id)}')">🎨 Editor Canva</button>
       <button class="btn btn-danger"    style="padding:4px 8px;font-size:11px" onclick="confirmDelete(()=>deleteRevista('${escHtml(r.id)}'))">🗑️</button>
     </div></td>
