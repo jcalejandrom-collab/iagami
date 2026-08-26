@@ -540,7 +540,7 @@ async function runDiagnostic() {
 
   // 2. Noticias
   const noticias = await CMSDB.getAll('noticias').catch(()=>[]);
-  const notsPublicadas = noticias.filter(n => n.publicada || n.estado === 'publicada').length;
+  const notsPublicadas = noticias.filter(n => n.publicado || n.estado === 'publicada').length;
   const notsMissingFields = noticias.filter(n => !n.titulo || !n.fecha).length;
   checks.push({text:`Noticias: ${noticias.length} registros, ${notsPublicadas} publicadas`, status: noticias.length > 0 ? 'ok' : 'warn'});
   if (notsMissingFields > 0) checks.push({text:`Noticias: ${notsMissingFields} con campos faltantes (titulo/fecha)`, status:'warn'});
@@ -1150,7 +1150,7 @@ async function runAudit() {
 
   // Noticias
   const nots = await CMSDB.getAll('noticias');
-  const notsPub = nots.filter(n => n.publicada || n.estado === 'publicada');
+  const notsPub = nots.filter(n => n.publicado || n.estado === 'publicada');
   const notsImg = nots.filter(n => !n.imagen && !n.img);
   const notsAge = nots.length > 0 ? Math.round(nots.reduce((s,n) => s + (n.fecha ? (now - new Date(n.fecha)) / 86400000 : 0), 0) / nots.length) : 0;
   results.noticias = {total:nots.length, publicadas:notsPub.length, sinImagen:notsImg.length, edadPromedioD:notsAge};
