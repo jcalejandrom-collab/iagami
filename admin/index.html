@@ -4299,7 +4299,7 @@ async function openRevistaForm(id) {
 
   document.getElementById('revista-meta-title').textContent = id ? '✏️ Editar datos de revista' : '📰 Nueva Revista';
   document.getElementById('rv-titulo').value      = r ? r.titulo      : '';
-  document.getElementById('rv-numero').value      = r ? r.numero_edicion : '';
+  document.getElementById('rv-numero').value      = r ? (r.numero_edicion || '') : '';
   document.getElementById('rv-fecha').value       = r ? r.fecha       : new Date().toISOString().slice(0,10);
   document.getElementById('rv-categoria').value   = r ? r.categoria   : 'Ambiental';
   document.getElementById('rv-estado').value      = r ? r.estado      : 'borrador';
