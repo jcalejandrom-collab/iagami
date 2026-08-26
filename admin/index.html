@@ -3525,7 +3525,7 @@ async function renderConsejos() {
     data = data.filter(c => (c.nombre||'').toLowerCase().includes(q) || (c.codigo||'').toLowerCase().includes(q) || (c.responsable||'').toLowerCase().includes(q));
   }
   if (parroquia) data = data.filter(c => c.parroquia === parroquia);
-  if (estatus) data = data.filter(c => c.estatus === estatus);
+  if (estatus) data = data.filter(c => estatus === 'Activo' ? c.activo === true : c.activo !== true);
   const total = data.length;
   const totalPages = Math.max(1, Math.ceil(total / CC_PER_PAGE));
   if (ccPage > totalPages) ccPage = totalPages;
@@ -3541,7 +3541,7 @@ async function renderConsejos() {
       <td><strong>${escHtml(c.nombre||'')}</strong></td>
       <td>${escHtml(c.parroquia||'-')}</td>
       <td>${escHtml(c.comunidad||'-')}</td>
-      <td><span class="badge ${c.estatus==='Activo'?'badge-green':'badge-red'}">${escHtml(c.estatus||'-')}</span></td>
+      <td><span class="badge ${c.activo===true?'badge-green':'badge-red'}">${c.activo===true?'Activo':'Inactivo'}</span></td>
       <td>${escHtml(c.responsable||'-')}</td>
       <td>${escHtml(c.telefono||'-')}</td>
       <td><div style="display:flex;gap:4px">
@@ -3583,8 +3583,8 @@ function _openPDFWindow(html) {
 function _fichaConsejoHTML(c, diag) {
   const d = diag || {};
   const v = (val, fallback) => escHtml(String(val||'')||fallback||'—');
-  const estColor = c.estatus==='Activo'?'#15803d':'#dc2626';
-  const estBg    = c.estatus==='Activo'?'#dcfce7':'#fee2e2';
+  const estColor = c.activo===true?'#15803d':'#dc2626';
+  const estBg    = c.activo===true?'#dcfce7':'#fee2e2';
   const aguaColor= d.aguas_estado==='Buena'?'#15803d':d.aguas_estado==='Regular'?'#92400e':'#dc2626';
   const aguaBg   = d.aguas_estado==='Buena'?'#dcfce7':d.aguas_estado==='Regular'?'#fef3c7':'#fee2e2';
   return `<div class="ficha">
@@ -3593,7 +3593,7 @@ function _fichaConsejoHTML(c, diag) {
         <div class="ficha-titulo">${v(c.nombre)} <span style="font-size:10px;font-weight:400;color:#a7d4ba">${v(c.codigo)}</span></div>
         <div class="ficha-sub">${v(c.parroquia)} · ${v(c.municipio,'Iribarren')} · ${v(c.estado,'Lara')}</div>
       </div>
-      <span style="background:${estBg};color:${estColor};padding:3px 12px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap">${v(c.estatus)}</span>
+      <span style="background:${estBg};color:${estColor};padding:3px 12px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap">${c.activo===true?'Activo':'Inactivo'}</span>
     </div>
     <div class="sec-titulo">📍 Identificación y Ubicación</div>
     <div class="grid3">
@@ -3685,7 +3685,7 @@ async function exportConsejosPDF() {
   if (!Array.isArray(data)) { toast('Error al obtener datos','error'); return; }
   if (search)    { const q=search.toLowerCase(); data=data.filter(c=>(c.nombre||'').toLowerCase().includes(q)||(c.responsable||'').toLowerCase().includes(q)||(c.codigo||'').toLowerCase().includes(q)); }
   if (parroquia) data = data.filter(c => c.parroquia === parroquia);
-  if (estatus)   data = data.filter(c => c.estatus === estatus);
+  if (estatus)   data = data.filter(c => estatus === 'Activo' ? c.activo === true : c.activo !== true);
   if (!data.length) { toast('No hay registros para exportar','warning'); return; }
   let diagnosticos = [];
   try { diagnosticos = await CMSDB.getAll('diagnosticos_ambientales'); } catch(e) {
@@ -6273,7 +6273,7 @@ async function _orgLoadEdit(tipo, id) {
   // Basic fields
   Object.assign(d, {
     nombre: rec.nombre||'', codigo: rec.codigo||'', rif: rec.rif||'',
-    estatus: rec.estatus||'Activo', responsable: rec.responsable||'',
+    estatus: col==='consejos_comunales' ? (rec.activo===true?'Activo':'Inactivo') : (rec.estatus||'Activo'), responsable: rec.responsable||'',
     cedula: rec.cedula||'', telefono: rec.telefono||'', correo: rec.correo||rec.email||'',
     num_familias: rec.num_familias||'', num_habitantes: rec.num_habitantes||'',
     fecha_constitucion: rec.fecha_constitucion||'',
@@ -6342,7 +6342,7 @@ async function saveOrgForm() {
     const s = v => String(v||'').trim();
     const rec = {
       nombre: s(d.nombre),
-      estatus: s(d.estatus)||'Activo',
+      ...(col==='consejos_comunales' ? {activo: d.estatus!=='Inactivo'} : {estatus: s(d.estatus)||'Activo'}),
       responsable: s(d.responsable),
       parroquia: s(d.parroquia),
       municipio: s(d.municipio)||'Iribarren',
