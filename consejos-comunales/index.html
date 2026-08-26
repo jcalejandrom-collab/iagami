@@ -1750,7 +1750,7 @@ async function init(){
   buildStepper();
   initFormFields();
 
-  try{await loadAll();}
+  try{await loadAll();}catch(e){console.error('Error cargando datos:',e);}
 
   updateStats();
   render();
