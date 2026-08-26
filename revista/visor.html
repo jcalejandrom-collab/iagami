@@ -549,7 +549,7 @@ function renderMagazine(revista) {
       ${imgTag}
       <div class="ph-overlay"></div>
       <div class="ph-content">
-        <div class="ph-sup">IAGAMI · Revista Digital · Edición ${escHtml(revista.numero_edicion||'')}</div>
+        <div class="ph-sup">IAGAMI · Revista Digital · Edición ${escHtml(revista.edicion||'')}</div>
         <div class="ph-titulo">${escHtml(portadaBlock.titulo||revista.titulo||'Revista IAGAMI')}</div>
         ${portadaBlock.subtitulo ? `<div class="ph-line"></div><div class="ph-sub">${escHtml(portadaBlock.subtitulo)}</div>` : ''}
         <div class="ph-meta">
@@ -585,7 +585,7 @@ async function descargar() {
   if (_revista.pdf_url) {
     const a = document.createElement('a');
     a.href = _revista.pdf_url;
-    a.download = `IAGAMI_Revista_${_revista.numero_edicion||'1'}.pdf`;
+    a.download = `IAGAMI_Revista_${_revista.edicion||'1'}.pdf`;
     a.target = '_blank';
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
   } else {
@@ -646,7 +646,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   document.title = `${_revista.titulo} — Revista IAGAMI`;
-  document.getElementById('nav-title').textContent = `${_revista.titulo} · Nº${_revista.numero_edicion||'1'}`;
+  document.getElementById('nav-title').textContent = `${_revista.titulo} · Nº${_revista.edicion||'1'}`;
 
   if (!isPrint) {
     _revista = Object.assign({}, _revista, {visualizaciones: (_revista.visualizaciones||0)+1});

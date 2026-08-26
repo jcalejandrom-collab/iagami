@@ -299,14 +299,14 @@ function coverHTML(r, size) {
   const bg = safeColor(firstBlock?.color_fondo);
   if (size === 'large') {
     return `<div class="featured-cover-placeholder" style="background:linear-gradient(160deg,${bg},${bg}99)">
-      <div class="cover-number">EDICIÓN Nº ${escHtml(r.numero_edicion)}</div>
+      <div class="cover-number">EDICIÓN Nº ${escHtml(r.edicion)}</div>
       <div class="cover-title">${escHtml(r.titulo)}</div>
       <div class="cover-sub">${escHtml(r.categoria||'Ambiental')} · ${fmtFecha(r.fecha)}</div>
       <div class="cover-badge">📰 IAGAMI</div>
     </div>`;
   }
   return `<div class="rev-cover-ph" style="background:linear-gradient(160deg,${bg},${bg}99)">
-    <div class="rc-num">Nº ${escHtml(r.numero_edicion)}</div>
+    <div class="rc-num">Nº ${escHtml(r.edicion)}</div>
     <div class="rc-title">${escHtml(r.titulo)}</div>
   </div>`;
 }
@@ -331,7 +331,7 @@ function renderFeatured(all) {
         <div class="featured-tag">⭐ Edición destacada · ${escHtml(featured.categoria||'Ambiental')}</div>
       </div>
       <div>
-        <div class="featured-label">Edición Nº ${escHtml(featured.numero_edicion)}</div>
+        <div class="featured-label">Edición Nº ${escHtml(featured.edicion)}</div>
         <div class="featured-title">${escHtml(featured.titulo)}</div>
         <div class="featured-desc">${escHtml(featured.descripcion||'')}</div>
       </div>
@@ -375,7 +375,7 @@ function renderGrid(all) {
         <div class="rev-cat">${escHtml(r.categoria||'—')}</div>
         <div class="rev-title">${escHtml(r.titulo)}</div>
         ${r.descripcion ? `<div class="rev-desc">${escHtml(r.descripcion)}</div>` : ''}
-        <div class="rev-date">📅 ${fmtFecha(r.fecha)} · Nº ${escHtml(r.numero_edicion)}</div>
+        <div class="rev-date">📅 ${fmtFecha(r.fecha)} · Nº ${escHtml(r.edicion)}</div>
         <div class="rev-actions">
           <a class="btn-sm-ver" href="visor.html?id=${r.id}">
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
@@ -436,7 +436,7 @@ async function descargarRevista(id) {
   if (r.pdf_url) {
     const a = document.createElement('a');
     a.href = r.pdf_url;
-    a.download = `IAGAMI_Revista_${r.numero_edicion}_${titulo.replace(/\s+/g,'_').slice(0,40)}.pdf`;
+    a.download = `IAGAMI_Revista_${r.edicion}_${titulo.replace(/\s+/g,'_').slice(0,40)}.pdf`;
     a.target = '_blank';
     document.body.appendChild(a);
     a.click();
