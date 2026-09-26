@@ -1288,7 +1288,7 @@ function addChatBubble(msgs, html, isUser) {
 // El endpoint debe aceptar POST con { "message": "...", "session_id": "..." }
 // y responder con { "reply": "..." }
 // Mientras SEMERUQUITO_API_URL sea null, se usa el modo FAQ local como fallback.
-const SEMERUQUITO_API_URL = null; // Ejemplo: 'https://api.tuservicio.com/chat'
+const SEMERUQUITO_API_URL = 'https://api.iagami.online/chat';
 
 let _chatSessionId = null;
 function getChatSessionId() {
