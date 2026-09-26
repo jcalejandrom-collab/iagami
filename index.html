@@ -1111,7 +1111,9 @@ function fmtFecha(isoStr) {
 
 function fmtDiaMes(isoStr) {
   if (!isoStr) return { dia: '--', mes: '---' };
-  const d = new Date(isoStr + 'T12:00:00');
+  const s = (isoStr.includes('T') || isoStr.includes(' ')) ? isoStr : isoStr + 'T12:00:00';
+  const d = new Date(s);
+  if (isNaN(d.getTime())) return { dia: '--', mes: '---' };
   return { dia: d.getDate(), mes: MESES_CORTO[d.getMonth()].toUpperCase() };
 }
 
