@@ -1312,10 +1312,23 @@ async function sendChatToApi(text) {
 
 async function sendChat() {
   const inp = document.getElementById('chat-input');
+  const btn = inp.nextElementSibling;
   const msgs = document.getElementById('chat-msgs');
   const txt = inp.value.trim();
-  if (!txt) return;
+  if (!txt || inp.disabled) return;
   inp.value = '';
+
+  // Deshabilitar input 4s para evitar rate limit de Gemini
+  inp.disabled = true;
+  btn.disabled = true;
+  btn.textContent = '…';
+  setTimeout(() => {
+    inp.disabled = false;
+    btn.disabled = false;
+    btn.textContent = '➤';
+    inp.focus();
+  }, 4000);
+
   addChatBubble(msgs, txt, true);
 
   // Indicador "escribiendo…"
@@ -1329,17 +1342,14 @@ async function sendChat() {
   let respuesta = '';
   try {
     if (SEMERUQUITO_API_URL) {
-      // Modo IA externa
       respuesta = await sendChatToApi(txt);
     } else {
-      // Modo FAQ local (fallback mientras no hay API configurada)
       await new Promise(r => setTimeout(r, 700));
       const faqs = await loadChatFaqs();
       respuesta = findFaqResponse(txt, faqs) ||
         'No encontré información exacta sobre eso. Para atención personalizada: 📞 (0251) 000-0000 o ✉ info@iagami.gob.ve — también puede usar el formulario de <strong>Denuncias</strong>.';
     }
   } catch (_e) {
-    // Si la API falla, caer al modo FAQ
     const faqs = await loadChatFaqs();
     respuesta = findFaqResponse(txt, faqs) ||
       'En este momento no puedo conectarme al asistente. Por favor intenta de nuevo o contáctanos: 📞 (0251) 000-0000';
