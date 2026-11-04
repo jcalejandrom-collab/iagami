@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
+<title>Denuncia Ambiental — IAGAMI</title>
+<meta name="description" content="Presenta tu denuncia ambiental al IAGAMI del Municipio Iribarren, Estado Lara, Venezuela."/>
+<meta name="theme-color" content="#1d6b3e"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Denuncia IAGAMI"/>
+<link rel="manifest" href="manifest.json"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--verde:#1d6b3e;--verde-dark:#1a3d2b;--verde-light:#e8f5ee;--verde-border:#d4edd8;--bg:#f5f7f5;--text:#1f2937}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100dvh;display:flex;flex-direction:column}
+
+/* HEADER */
+.app-header{background:var(--verde);color:#fff;padding:env(safe-area-inset-top,0) 0 0;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.2)}
+.app-header-inner{display:flex;align-items:center;gap:12px;padding:14px 18px}
+.app-logo{width:36px;height:36px;border-radius:8px;object-fit:contain;background:rgba(255,255,255,.12);padding:3px;flex-shrink:0}
+.app-logo-fallback{width:36px;height:36px;border-radius:8px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.app-header-text h1{font-family:'Poppins',sans-serif;font-size:15px;font-weight:700;line-height:1.2}
+.app-header-text p{font-size:11px;opacity:.8;margin-top:1px}
+
+/* MAIN */
+main{flex:1;padding:20px 16px 32px;max-width:600px;width:100%;margin:0 auto}
+
+/* SECTION TAG */
+.sec-tag{font-size:10px;font-weight:700;letter-spacing:.08em;color:var(--verde);background:var(--verde-light);border:1px solid var(--verde-border);border-radius:20px;display:inline-block;padding:3px 10px;margin-bottom:10px}
+.sec-title{font-family:'Poppins',sans-serif;font-size:20px;font-weight:700;color:var(--verde-dark);margin-bottom:6px}
+.sec-desc{font-size:12px;color:#4a6a5a;margin-bottom:20px;line-height:1.6}
+
+/* FORM CARD */
+.dform{background:#fff;border:1px solid var(--verde-border);border-radius:16px;padding:20px}
+.fg{margin-bottom:16px}
+.flabel{font-size:12px;font-weight:600;color:var(--verde-dark);display:block;margin-bottom:5px}
+.flabel-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.fselect,.finput,.ftextarea{width:100%;padding:11px 13px;border:1px solid var(--verde-border);border-radius:9px;font-size:13px;color:var(--verde-dark);background:#fff;outline:none;transition:.15s;font-family:'Inter',sans-serif;-webkit-appearance:none;appearance:none}
+.fselect:focus,.finput:focus,.ftextarea:focus{border-color:var(--verde);box-shadow:0 0 0 3px rgba(29,107,62,.08)}
+.ftextarea{resize:vertical;min-height:110px}
+.fgrid2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.fnote{background:var(--verde-light);border:1px solid var(--verde-border);border-radius:9px;padding:10px 13px;font-size:11px;color:var(--verde);margin-bottom:16px;line-height:1.6}
+
+/* AI BTN */
+.ai-btn{font-size:11px;padding:4px 11px;border-radius:6px;border:1px solid #a8dfc0;background:var(--verde-light);color:var(--verde);cursor:pointer;display:flex;align-items:center;gap:4px;transition:.15s;font-family:'Inter',sans-serif}
+.ai-btn:hover{background:#d0ebdb}
+
+/* AI BOX */
+.ai-box{background:#fef9eb;border:1px solid #fcd34d;border-radius:9px;padding:11px 13px;font-size:12px;color:#92400e;margin-bottom:16px;display:none;gap:9px;line-height:1.6}
+.ai-box.show{display:flex}
+
+/* DROP ZONE */
+.drop-zone{border:2px dashed #a8dfc0;border-radius:10px;padding:22px 16px;text-align:center;cursor:pointer;transition:.2s;background:var(--bg);user-select:none}
+.drop-zone:hover,.drop-zone.over{border-color:var(--verde);background:var(--verde-light)}
+.dz-icon{font-size:28px;margin-bottom:6px}
+.dz-text{font-size:13px;color:var(--verde-dark);margin-bottom:3px}
+.dz-sub{font-size:11px;color:#4a8a6a}
+.adjuntos-preview{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+.adj-item{position:relative;border:1px solid var(--verde-border);border-radius:8px;overflow:hidden;background:#fff;width:90px;flex-shrink:0}
+.adj-img{width:90px;height:70px;object-fit:cover;display:block}
+.adj-file{width:90px;height:70px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:10px;color:#4a8a6a;padding:4px}
+.adj-file-ico{font-size:26px}
+.adj-name{font-size:9px;color:#4a8a6a;text-align:center;padding:3px 4px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;max-width:88px}
+.adj-remove{position:absolute;top:2px;right:2px;width:18px;height:18px;background:rgba(220,38,38,.9);border:none;border-radius:50%;color:#fff;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1}
+.adj-size{font-size:9px;color:#4a8a6a;text-align:center;padding-bottom:3px}
+
+/* SUBMIT */
+.fsubmit{width:100%;padding:14px;background:var(--verde);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;font-family:'Poppins',sans-serif;transition:.15s;-webkit-tap-highlight-color:transparent}
+.fsubmit:hover{background:#155c32}
+.fsubmit:disabled{opacity:.6;cursor:not-allowed}
+
+/* INFO CARDS */
+.dinfo-card{background:#fff;border:1px solid var(--verde-border);border-radius:16px;padding:18px;margin-top:16px}
+.dinfo-card h4{font-size:13px;font-weight:600;color:var(--verde-dark);margin-bottom:10px}
+.dinfo-row{display:flex;align-items:flex-start;gap:8px;margin-bottom:7px;font-size:12px;color:#4a8a6a}
+.dinfo-ico{font-size:14px;flex-shrink:0;margin-top:1px}
+
+/* TOAST */
+.toast{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 24px);left:50%;transform:translateX(-50%) translateY(80px);background:#1a3d2b;color:#fff;padding:11px 22px;border-radius:10px;font-size:13px;font-weight:500;z-index:9999;opacity:0;transition:.3s;pointer-events:none;white-space:nowrap;box-shadow:0 4px 24px rgba(0,0,0,.25);max-width:90vw;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;display:none;align-items:center;justify-content:center;padding:16px}
+.modal-bg.open{display:flex}
+.modal{background:#fff;border-radius:16px;padding:28px;max-width:380px;width:100%;position:relative;box-shadow:0 8px 40px rgba(0,0,0,.2);text-align:center}
+.modal h3{font-family:'Poppins',sans-serif;font-size:18px;font-weight:700;color:var(--verde-dark);margin-bottom:6px}
+.modal p{font-size:12px;color:#4a8a6a;margin-bottom:10px}
+.modal-close{position:absolute;top:14px;right:16px;background:none;border:none;font-size:20px;cursor:pointer;color:#4a8a6a;line-height:1}
+
+/* FOOTER */
+.app-footer{text-align:center;padding:16px;font-size:11px;color:#4a8a6a;border-top:1px solid var(--verde-border);background:#fff;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 16px)}
+
+@media(max-width:420px){.fgrid2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="app-header-inner">
+    <img class="app-logo" src="/assets/images/logo-iagami.png" alt="IAGAMI"
+      onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
+    <div class="app-logo-fallback" style="display:none">🌿</div>
+    <div class="app-header-text">
+      <h1>Denuncia Ambiental</h1>
+      <p>IAGAMI · Municipio Iribarren</p>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="sec-tag">PARTICIPACIÓN CIUDADANA</div>
+  <h2 class="sec-title">Presentar Denuncia Ambiental</h2>
+  <p class="sec-desc">Tu denuncia es procesada automáticamente con IA para asignar prioridad y área competente</p>
+
+  <div class="dform">
+    <!-- Tipo -->
+    <div class="fg">
+      <label class="flabel" for="den-tipo">Tipo de Denuncia *</label>
+      <select id="den-tipo" class="fselect">
+        <option value="">Selecciona el tipo...</option>
+        <option>Contaminación del Agua</option>
+        <option>Contaminación del Aire</option>
+        <option>Deforestación</option>
+        <option>Residuos Sólidos</option>
+        <option>Quema Ilegal</option>
+        <option>Contaminación Sonora</option>
+        <option>Otro</option>
+      </select>
+    </div>
+
+    <!-- Descripción -->
+    <div class="fg">
+      <div class="flabel-row">
+        <label class="flabel" for="den-desc" style="margin:0">Descripción de los hechos *</label>
+        <button class="ai-btn" onclick="analizarIA()">✨ Analizar con IA</button>
+      </div>
+      <textarea id="den-desc" class="ftextarea" placeholder="Describe detalladamente lo que observas: qué pasa, desde cuándo, qué está siendo afectado..."></textarea>
+    </div>
+    <div id="ai-box" class="ai-box" role="status">
+      <span>⚠️</span>
+      <span><strong>Análisis IA activo:</strong> Prioridad alta detectada — posible afectación hídrica al Río Turbio. Área competente: Dirección de Calidad Ambiental.</span>
+    </div>
+
+    <!-- Ubicación -->
+    <div class="fg">
+      <div class="flabel-row">
+        <label class="flabel" for="input-ubicacion" style="margin:0">Ubicación del hecho</label>
+        <button class="ai-btn" onclick="getGPS()">📍 Mi ubicación GPS</button>
+      </div>
+      <input id="input-ubicacion" class="finput" placeholder="Dirección, coordenadas o referencia del lugar"/>
+    </div>
+
+    <!-- Datos del denunciante -->
+    <div class="fg">
+      <label class="flabel">Datos del denunciante</label>
+      <div class="fgrid2">
+        <input id="den-nombre" class="finput" placeholder="Nombre completo *"/>
+        <input id="den-email" class="finput" type="email" placeholder="Correo electrónico" inputmode="email"/>
+        <input id="den-tel" class="finput" type="tel" placeholder="Teléfono" inputmode="tel"/>
+        <input id="den-cedula" class="finput" placeholder="Cédula de identidad"/>
+      </div>
+    </div>
+
+    <!-- Adjuntos -->
+    <div class="fg">
+      <label class="flabel">Fotos o documentos adjuntos <span style="font-weight:400;color:#4a8a6a">(opcional)</span></label>
+      <div id="drop-zone" class="drop-zone"
+        onclick="document.getElementById('den-archivos').click()"
+        ondragover="dzOver(event)" ondragleave="dzLeave(event)" ondrop="dzDrop(event)"
+        role="button" tabindex="0" aria-label="Zona para adjuntar archivos"
+        onkeydown="if(event.key==='Enter')this.click()">
+        <div class="dz-icon">📎</div>
+        <div class="dz-text">Toca para seleccionar archivos</div>
+        <div class="dz-sub">JPG, PNG, PDF · Máx. 5 archivos · 10 MB cada uno</div>
+        <input id="den-archivos" type="file" multiple accept="image/*,.pdf,.doc,.docx,.mp4,.mov" style="display:none" onchange="handleFiles(this.files)" capture="environment"/>
+      </div>
+      <div id="adjuntos-preview" class="adjuntos-preview"></div>
+    </div>
+
+    <div class="fnote">🔒 Tu identidad es <strong>confidencial</strong>. La denuncia es analizada automáticamente por IAGAMI IA y asignada al área competente. Número de caso generado al enviar.</div>
+
+    <button class="fsubmit" id="btn-enviar" onclick="enviarDenuncia()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+      Enviar Denuncia
+    </button>
+  </div>
+
+  <!-- Info cards -->
+  <div class="dinfo-card">
+    <h4>¿Qué tipos de denuncias atendemos?</h4>
+    <div class="dinfo-row"><span class="dinfo-ico">💧</span><span>Contaminación del agua y vertidos ilegales</span></div>
+    <div class="dinfo-row"><span class="dinfo-ico">💨</span><span>Contaminación del aire y emisiones</span></div>
+    <div class="dinfo-row"><span class="dinfo-ico">🌳</span><span>Deforestación y tala ilegal</span></div>
+    <div class="dinfo-row"><span class="dinfo-ico">🗑️</span><span>Manejo inadecuado de residuos sólidos</span></div>
+    <div class="dinfo-row"><span class="dinfo-ico">🔥</span><span>Quemas ilegales en zonas protegidas</span></div>
+    <div class="dinfo-row"><span class="dinfo-ico">📢</span><span>Contaminación sonora industrial</span></div>
+  </div>
+
+  <div class="dinfo-card">
+    <h4>Tiempo de respuesta</h4>
+    <div class="dinfo-row"><span class="dinfo-ico">🚨</span><span><strong>Urgente:</strong> 24 horas hábiles</span></div>
+    <div class="dinfo-row"><span class="dinfo-ico">⚠️</span><span><strong>Alta:</strong> 2–3 días hábiles</span></div>
+    <div class="dinfo-row"><span class="dinfo-ico">📋</span><span><strong>Media/Baja:</strong> 5–7 días hábiles</span></div>
+  </div>
+
+  <div class="dinfo-card">
+    <h4>Contacto directo</h4>
+    <div class="dinfo-row"><span class="dinfo-ico">📞</span><span>+58 (251) 000-0000</span></div>
+    <div class="dinfo-row"><span class="dinfo-ico">✉️</span><span>denuncias@iagami.gob.ve</span></div>
+    <div class="dinfo-row"><span class="dinfo-ico">🕐</span><span>Lun–Vie 8:00 AM – 4:00 PM</span></div>
+  </div>
+</main>
+
+<footer class="app-footer">
+  IAGAMI · Instituto Autónomo de Gestión Ambiental · Municipio Iribarren
+</footer>
+
+<!-- MODAL ÉXITO -->
+<div id="modal-ok" class="modal-bg" onclick="if(event.target===this)cerrarModal()" role="dialog" aria-modal="true">
+  <div class="modal">
+    <button class="modal-close" onclick="cerrarModal()" aria-label="Cerrar">×</button>
+    <div style="font-size:48px;margin-bottom:12px">✅</div>
+    <h3>¡Denuncia enviada!</h3>
+    <p>Tu caso ha sido registrado y asignado al área competente.</p>
+    <p id="modal-caso-num" style="font-size:12px;color:var(--verde);font-weight:700;margin-bottom:4px"></p>
+    <p style="font-size:11px;color:#4a8a6a">Recibirás respuesta en el tiempo establecido según la prioridad asignada.</p>
+    <button class="fsubmit" style="margin-top:18px" onclick="cerrarModal()">Aceptar</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const PB_URL = 'https://api.iagami.online';
+let adjuntosData = [];
+let _enviando = false;
+
+/* ── Toast ── */
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+/* ── Modal ── */
+function cerrarModal() {
+  document.getElementById('modal-ok').classList.remove('open');
+}
+
+/* ── GPS ── */
+function getGPS() {
+  if (!navigator.geolocation) { toast('GPS no disponible en este dispositivo'); return; }
+  toast('Obteniendo ubicación…');
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      document.getElementById('input-ubicacion').value =
+        pos.coords.latitude.toFixed(6) + ', ' + pos.coords.longitude.toFixed(6);
+      toast('📍 Ubicación obtenida');
+    },
+    () => toast('⚠ No se pudo obtener la ubicación')
+  );
+}
+
+/* ── Adjuntos ── */
+function dzOver(e) { e.preventDefault(); document.getElementById('drop-zone').classList.add('over'); }
+function dzLeave()  { document.getElementById('drop-zone').classList.remove('over'); }
+function dzDrop(e)  { e.preventDefault(); dzLeave(); handleFiles(e.dataTransfer.files); }
+
+function handleFiles(files) {
+  const MAX = 5, MB10 = 10 * 1024 * 1024;
+  for (const f of files) {
+    if (adjuntosData.length >= MAX) { toast('⚠ Máximo 5 archivos'); break; }
+    if (f.size > MB10)              { toast('⚠ ' + f.name + ' supera 10 MB'); continue; }
+    const reader = new FileReader();
+    reader.onload = ev => {
+      adjuntosData.push({ name: f.name, type: f.type, size: f.size, file: ev.target.result });
+      renderAdjuntos();
+    };
+    reader.readAsDataURL(f);
+  }
+}
+
+function renderAdjuntos() {
+  const wrap = document.getElementById('adjuntos-preview');
+  wrap.innerHTML = '';
+  adjuntosData.forEach((f, i) => {
+    const div = document.createElement('div');
+    div.className = 'adj-item';
+    const isImg = f.type.startsWith('image/');
+    div.innerHTML = isImg
+      ? `<img class="adj-img" src="${f.file}" alt="${f.name}"/>`
+      : `<div class="adj-file"><div class="adj-file-ico">${f.type.includes('pdf') ? '📄' : '📎'}</div><div>${f.type.split('/')[1]?.toUpperCase() || 'ARCH'}</div></div>`;
+    div.innerHTML += `<div class="adj-name">${f.name}</div>
+      <div class="adj-size">${(f.size/1024).toFixed(0)} KB</div>
+      <button class="adj-remove" onclick="removeAdj(${i})" aria-label="Eliminar">×</button>`;
+    wrap.appendChild(div);
+  });
+}
+
+function removeAdj(idx) {
+  adjuntosData.splice(idx, 1);
+  renderAdjuntos();
+}
+
+/* ── Análisis IA (placeholder) ── */
+function analizarIA() {
+  const desc = document.getElementById('den-desc').value.trim();
+  if (!desc) { toast('⚠ Escribe la descripción antes de analizar'); return; }
+  const box = document.getElementById('ai-box');
+  box.classList.add('show');
+  box.querySelector('span:last-child').innerHTML =
+    '<strong>Análisis IA activo:</strong> Denuncia recibida. Será analizada y priorizada por el equipo IAGAMI.';
+}
+
+/* ── Número de caso ── */
+function generarNumeroCaso() {
+  const d = new Date();
+  return 'DEN-' + d.getFullYear() +
+    String(d.getMonth()+1).padStart(2,'0') +
+    String(d.getDate()).padStart(2,'0') + '-' +
+    Math.floor(1000 + Math.random() * 9000);
+}
+
+/* ── Enviar Denuncia ── */
+async function enviarDenuncia() {
+  if (_enviando) return;
+  const tipo   = document.getElementById('den-tipo').value;
+  const desc   = document.getElementById('den-desc').value.trim();
+  const nombre = document.getElementById('den-nombre').value.trim();
+  const email  = document.getElementById('den-email').value.trim();
+  const tel    = document.getElementById('den-tel').value.trim();
+  const cedula = document.getElementById('den-cedula').value.trim();
+
+  if (!tipo)             { toast('⚠ Selecciona el tipo de denuncia'); return; }
+  if (desc.length < 20) { toast('⚠ La descripción debe tener al menos 20 caracteres'); return; }
+  if (!nombre)           { toast('⚠ Ingresa tu nombre completo'); return; }
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))    { toast('⚠ El correo no es válido'); return; }
+  if (tel   && !/^\+?[\d\s\-()]{7,20}$/.test(tel))           { toast('⚠ El teléfono no es válido'); return; }
+  if (cedula && !/^[VEJPGvejpg]?[\-\d]{5,12}$/.test(cedula)) { toast('⚠ La cédula no es válida'); return; }
+
+  _enviando = true;
+  const btn = document.getElementById('btn-enviar');
+  btn.disabled = true;
+  btn.textContent = '⏳ Enviando...';
+
+  try {
+    const num = generarNumeroCaso();
+    const item = {
+      caso:        num,
+      tipo,
+      descripcion: desc,
+      nombre,
+      email,
+      telefono:    tel,
+      cedula,
+      ubicacion:   document.getElementById('input-ubicacion').value,
+      estado:      'recibida',
+      publicado:   true,
+      fecha:       new Date().toLocaleDateString('sv-SE'),
+      historial:   [{ estado:'recibida', fecha: new Date().toLocaleDateString('sv-SE'), comentario:'Denuncia registrada desde la app IAGAMI.' }],
+      adjuntos:    adjuntosData.map(f => ({ name: f.name, type: f.type, size: f.size })),
+      ...(adjuntosData.length > 0 ? { evidencias: adjuntosData.map(f => f.file) } : {})
+    };
+
+    const res = await fetch(PB_URL + '/api/collections/denuncias/records', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(item)
+    });
+
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+
+    document.getElementById('modal-caso-num').textContent = 'Número de caso: ' + num;
+    document.getElementById('modal-ok').classList.add('open');
+    toast('✅ Denuncia registrada · Caso ' + num);
+
+    // Limpiar formulario
+    ['den-tipo','den-desc','den-nombre','den-email','den-tel','den-cedula','input-ubicacion'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+    document.getElementById('ai-box').classList.remove('show');
+    adjuntosData = [];
+    renderAdjuntos();
+
+  } catch(e) {
+    toast('⚠ Error al enviar. Verifica tu conexión e intenta nuevamente.');
+  } finally {
+    _enviando = false;
+    btn.disabled = false;
+    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg> Enviar Denuncia`;
+  }
+}
+
+/* ── Service Worker ── */
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/denuncia-app/sw.js');
+}
+</script>
+</body>
+</html>
