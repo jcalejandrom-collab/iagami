@@ -7804,6 +7804,231 @@ async function auditExportarCSV() {
     if (btn) { btn.textContent = '⬇ CSV'; btn.disabled = false; }
   }
 }
+
+// ════════════════════════════════════════
+// FASE 7 — ZOOM API (via VPS hook)
+// Las credenciales OAuth NUNCA se exponen en el navegador.
+// Todas las llamadas pasan por endpoints del VPS: /api/zoom/...
+// El VPS hook gestiona Client ID, Client Secret y tokens de acceso.
+// ════════════════════════════════════════
+
+const ZOOM_API_BASE = 'https://api.iagami.online/api/zoom';
+
+function _zoomHeaders() {
+  return {
+    'Authorization': 'Admin ' + (sessionStorage.getItem('pb_token') || ''),
+    'Content-Type': 'application/json'
+  };
+}
+
+async function _zoomFetch(path, opts = {}) {
+  const url = ZOOM_API_BASE + path;
+  const res = await fetch(url, { ...opts, headers: { ..._zoomHeaders(), ...(opts.headers||{}) } });
+  if (res.status === 503) throw new Error('Zoom no está configurado en el servidor. Verificar VPS hook.');
+  if (res.status === 401) throw new Error('Sin autorización. Verificar sesión de administrador.');
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.message || `Error ${res.status}`);
+  }
+  return res.json();
+}
+
+async function zoomAdminInit() {
+  await checkZoomStatus();
+  await loadZoomMeetings();
+  await loadZoomRecordings();
+}
+
+async function checkZoomStatus() {
+  const dot  = document.getElementById('zoom-status-dot');
+  const txt  = document.getElementById('zoom-status-text');
+  const acc  = document.getElementById('zoom-status-account');
+  if (!dot) return;
+  try {
+    const data = await _zoomFetch('/status');
+    if (data.connected) {
+      dot.style.background = '#16a34a';
+      txt.textContent = '● Conectado';
+      acc.textContent = data.account ? `Cuenta: ${esc(data.account)}` : '';
+    } else {
+      dot.style.background = '#dc2626';
+      txt.textContent = '○ Desconectado';
+      acc.textContent = 'Zoom no está autorizado. Configurar en el VPS.';
+    }
+  } catch(e) {
+    dot.style.background = '#94a3b8';
+    txt.textContent = '⚠ No se puede verificar la conexión';
+    acc.textContent = e.message;
+  }
+}
+
+async function loadZoomMeetings() {
+  const el = document.getElementById('zoom-meetings-list');
+  if (!el) return;
+  try {
+    const data = await _zoomFetch('/meetings');
+    renderZoomMeetings(data.meetings || data || []);
+  } catch(e) {
+    el.innerHTML = `<div style="text-align:center;padding:30px;color:var(--muted);font-size:13px">
+      ${e.message.includes('configurado') ? '⚙️ ' + esc(e.message) : '⚠️ No se pudieron cargar las reuniones: ' + esc(e.message)}
+    </div>`;
+  }
+}
+
+function renderZoomMeetings(meetings) {
+  const el = document.getElementById('zoom-meetings-list');
+  if (!el) return;
+  if (!meetings.length) {
+    el.innerHTML = '<div style="text-align:center;padding:30px;color:var(--muted);font-size:13px">No hay reuniones programadas.</div>';
+    return;
+  }
+  const estadoBadge = s => {
+    const m = {waiting:'⏳ Pendiente', started:'🟢 En vivo', finished:'✅ Finalizada'};
+    return `<span style="font-size:11px;padding:2px 8px;border-radius:20px;background:${s==='started'?'#dcfce7':s==='finished'?'#f1f5f9':'#fef9c3'};color:${s==='started'?'#166534':s==='finished'?'#475569':'#854d0e'};font-weight:600">${m[s]||s}</span>`;
+  };
+  el.innerHTML = `<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">
+    <thead><tr style="border-bottom:2px solid var(--border)">
+      <th style="text-align:left;padding:8px 12px;color:var(--muted);font-weight:600">Tema</th>
+      <th style="text-align:left;padding:8px 12px;color:var(--muted);font-weight:600">Curso / Profesor</th>
+      <th style="text-align:left;padding:8px 12px;color:var(--muted);font-weight:600">Fecha y Hora</th>
+      <th style="text-align:left;padding:8px 12px;color:var(--muted);font-weight:600">Estado</th>
+      <th style="text-align:right;padding:8px 12px;color:var(--muted);font-weight:600">Acciones</th>
+    </tr></thead>
+    <tbody>
+    ${meetings.map(m => `<tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:10px 12px"><div style="font-weight:600">${esc(m.topic||'')}</div><div style="font-size:11px;color:var(--muted)">ID: ${esc(String(m.id||''))}</div></td>
+      <td style="padding:10px 12px"><div>${esc(m.agenda_curso||'—')}</div><div style="font-size:12px;color:var(--muted)">${esc(m.agenda_profesor||'')}</div></td>
+      <td style="padding:10px 12px;white-space:nowrap">${m.start_time ? new Date(m.start_time).toLocaleString('es-VE',{dateStyle:'short',timeStyle:'short'}) : '—'}<br><span style="font-size:12px;color:var(--muted)">${m.duration||60} min</span></td>
+      <td style="padding:10px 12px">${estadoBadge(m.status||'waiting')}</td>
+      <td style="padding:10px 12px;text-align:right">
+        <button class="btn btn-secondary" style="font-size:11px;padding:4px 10px;margin-right:4px" onclick="editZoomMeeting('${esc(String(m.id||''))}')">✏️ Editar</button>
+        <button style="font-size:11px;padding:4px 10px;border:1px solid #fca5a5;border-radius:6px;background:#fff;color:#dc2626;cursor:pointer;font-family:inherit;font-weight:600" onclick="cancelZoomMeeting('${esc(String(m.id||''))}','${esc(m.topic||'')}')">🗑 Cancelar</button>
+      </td>
+    </tr>`).join('')}
+    </tbody></table></div>`;
+}
+
+function openZoomMeetingForm() {
+  document.getElementById('zoom-edit-id').value = '';
+  document.getElementById('zoom-tema').value = '';
+  document.getElementById('zoom-curso').value = '';
+  document.getElementById('zoom-profesor').value = '';
+  document.getElementById('zoom-fecha').value = '';
+  document.getElementById('zoom-hora').value = '';
+  document.getElementById('zoom-duracion').value = '60';
+  document.getElementById('zoom-agenda').value = '';
+  document.getElementById('zoom-form-title').textContent = '🎥 Crear Reunión en Zoom';
+  document.getElementById('zoom-form-btn').textContent = '🎥 Crear en Zoom';
+  document.getElementById('zoom-meeting-form').style.display = 'block';
+}
+
+function closeZoomMeetingForm() {
+  document.getElementById('zoom-meeting-form').style.display = 'none';
+}
+
+async function editZoomMeeting(zoomId) {
+  try {
+    const data = await _zoomFetch('/meetings/' + zoomId);
+    const m = data.meeting || data;
+    document.getElementById('zoom-edit-id').value = zoomId;
+    document.getElementById('zoom-tema').value = m.topic || '';
+    document.getElementById('zoom-curso').value = m.agenda_curso || '';
+    document.getElementById('zoom-profesor').value = m.agenda_profesor || '';
+    if (m.start_time) {
+      const d = new Date(m.start_time);
+      document.getElementById('zoom-fecha').value = d.toISOString().slice(0,10);
+      document.getElementById('zoom-hora').value = d.toTimeString().slice(0,5);
+    }
+    document.getElementById('zoom-duracion').value = m.duration || 60;
+    document.getElementById('zoom-agenda').value = m.agenda || '';
+    document.getElementById('zoom-form-title').textContent = '✏️ Editar Reunión';
+    document.getElementById('zoom-form-btn').textContent = '💾 Guardar Cambios';
+    document.getElementById('zoom-meeting-form').style.display = 'block';
+    document.getElementById('zoom-meeting-form').scrollIntoView({behavior:'smooth'});
+  } catch(e) {
+    toast('Error al cargar reunión: ' + e.message);
+  }
+}
+
+async function submitZoomMeetingForm() {
+  const btn = document.getElementById('zoom-form-btn');
+  const tema = document.getElementById('zoom-tema').value.trim();
+  const fecha = document.getElementById('zoom-fecha').value;
+  const hora = document.getElementById('zoom-hora').value;
+  if (!tema) { toast('El tema es obligatorio'); return; }
+  if (!fecha || !hora) { toast('Fecha y hora son obligatorias'); return; }
+  const zoomId = document.getElementById('zoom-edit-id').value;
+  const payload = {
+    topic: tema,
+    start_time: fecha + 'T' + hora + ':00',
+    duration: parseInt(document.getElementById('zoom-duracion').value) || 60,
+    agenda: document.getElementById('zoom-agenda').value.trim(),
+    agenda_curso: document.getElementById('zoom-curso').value.trim(),
+    agenda_profesor: document.getElementById('zoom-profesor').value.trim()
+  };
+  btn.disabled = true; btn.textContent = '⏳ Procesando...';
+  try {
+    if (zoomId) {
+      await _zoomFetch('/meetings/' + zoomId, {method:'PATCH', body: JSON.stringify(payload)});
+      toast('Reunión actualizada en Zoom');
+    } else {
+      await _zoomFetch('/meetings', {method:'POST', body: JSON.stringify(payload)});
+      toast('Reunión creada en Zoom ✅');
+    }
+    closeZoomMeetingForm();
+    await loadZoomMeetings();
+  } catch(e) {
+    toast('Error: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = zoomId ? '💾 Guardar Cambios' : '🎥 Crear en Zoom';
+  }
+}
+
+async function cancelZoomMeeting(zoomId, topic) {
+  if (!confirm(`¿Cancelar la reunión "${topic}"?\n\nEsta acción eliminará la reunión de Zoom.`)) return;
+  try {
+    await _zoomFetch('/meetings/' + zoomId, {method:'DELETE'});
+    toast('Reunión cancelada');
+    await loadZoomMeetings();
+  } catch(e) {
+    toast('Error al cancelar: ' + e.message);
+  }
+}
+
+async function loadZoomRecordings() {
+  const el = document.getElementById('zoom-recordings-list');
+  if (!el) return;
+  try {
+    const data = await _zoomFetch('/recordings');
+    const recs = data.recordings || data || [];
+    if (!recs.length) {
+      el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px">No hay grabaciones disponibles.</div>';
+      return;
+    }
+    el.innerHTML = `<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">
+      <thead><tr style="border-bottom:2px solid var(--border)">
+        <th style="text-align:left;padding:8px 12px;color:var(--muted);font-weight:600">Tema</th>
+        <th style="text-align:left;padding:8px 12px;color:var(--muted);font-weight:600">Fecha</th>
+        <th style="text-align:left;padding:8px 12px;color:var(--muted);font-weight:600">Duración</th>
+        <th style="text-align:right;padding:8px 12px;color:var(--muted);font-weight:600">Acceso</th>
+      </tr></thead>
+      <tbody>
+      ${recs.map(r => `<tr style="border-bottom:1px solid var(--border)">
+        <td style="padding:10px 12px;font-weight:600">${esc(r.topic||'')}</td>
+        <td style="padding:10px 12px">${r.start_time ? new Date(r.start_time).toLocaleDateString('es-VE') : '—'}</td>
+        <td style="padding:10px 12px">${r.duration ? Math.floor(r.duration/60)+'h '+((r.duration%60)||'')+'m' : '—'}</td>
+        <td style="padding:10px 12px;text-align:right">
+          ${r.play_url ? `<a href="${esc(r.play_url)}" target="_blank" class="btn btn-secondary" style="font-size:11px;padding:4px 10px;text-decoration:none">▶ Ver grabación</a>` : '<span style="font-size:12px;color:var(--muted)">No disponible</span>'}
+        </td>
+      </tr>`).join('')}
+      </tbody></table></div>`;
+  } catch(e) {
+    el.innerHTML = `<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px">
+      ${e.message.includes('configurado') ? '⚙️ ' + esc(e.message) : '⚠️ No se pudieron cargar las grabaciones: ' + esc(e.message)}
+    </div>`;
+  }
+}
 </script>
 
 <!-- MODAL UNIFICADO 9 PASOS -->
