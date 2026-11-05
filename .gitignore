@@ -32,3 +32,8 @@ test-results/
 # Uploads (archivos subidos por usuarios — no pertenecen al repo)
 sistema-control/backend/src/uploads/*
 !sistema-control/backend/src/uploads/.gitkeep
+
+# Zoom / Gemini secrets (VPS only — nunca commitear)
+pb_hooks/zoom_secrets.js
+pb_hooks/gemini_secrets.js
+pb_data/zoom_token.json

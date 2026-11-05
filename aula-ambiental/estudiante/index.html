@@ -872,6 +872,7 @@ function showSec(id) {
   if (id==='calificaciones')  renderCalificaciones();
   if (id==='asistencia')      renderAsistenciaEst();
   if (id==='certificados')    renderCertificados();
+  if (id==='ia-estudiante')   { switchIATab('chat'); }
   if (id==='perfil')          renderPerfil();
 }
 function toggleSidebar(){ document.getElementById('sidebar').classList.toggle('open'); }
@@ -1005,11 +1006,13 @@ function renderCursoClases() {
 /* ─── CLASES VIRTUALES ─── */
 function switchClasesTab(tab) {
   _claseTab = tab;
-  ['proximas','pasadas'].forEach(t => {
-    document.getElementById('cltab-'+t).classList.toggle('active', t===tab);
+  ['proximas','pasadas','grabaciones'].forEach(t => {
+    const p = document.getElementById('cltab-'+t);
+    if (p) p.classList.toggle('active', t===tab);
     document.querySelectorAll(`[onclick="switchClasesTab('${t}')"]`).forEach(b=>b.classList.toggle('active',t===tab));
   });
-  renderClases();
+  if (tab === 'grabaciones') renderGrabaciones();
+  else renderClases();
 }
 
 function renderClases() {
@@ -1022,6 +1025,7 @@ function renderClases() {
   else pEl.innerHTML = prox.map(c => renderClaseCard(c)).join('');
   if (!past.length) dEl.innerHTML = '<div class="empty"><div class="ico">🕐</div><p>Sin clases realizadas</p></div>';
   else dEl.innerHTML = past.map(c => renderClaseCard(c, true)).join('');
+  setTimeout(activarCountdowns, 50);
 }
 
 function puedeAccederClase(c) {
@@ -1571,6 +1575,191 @@ async function renderAsistenciaEst() {
     const msg = (e.message && (e.message.includes('404') || e.message.includes('not found')))
       ? _PROX : 'Error: ' + esc(e.message);
     el.innerHTML = `<div class="empty"><div class="ico">✅</div><p>${msg}</p></div>`;
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   FASE 7 — ZOOM: COUNTDOWN + GRABACIONES
+   ═══════════════════════════════════════════════════ */
+
+function getClaseEstado(c) {
+  if (!c.fecha) return 'proxima';
+  const fechaClase = new Date(c.fecha + (c.hora ? 'T'+c.hora : 'T00:00'));
+  const ahora = new Date();
+  const diff = (fechaClase - ahora) / 60000;
+  if (diff > 15)   return 'proxima';
+  if (diff >= -120) return 'en_curso';
+  return 'finalizada';
+}
+
+function renderClaseCard(c, pasada=false) {
+  const acceder = puedeAccederClase(c);
+  const estado = getClaseEstado(c);
+  const badgeMap = {proxima:['badge-blue','Próxima'], en_curso:['badge-green','🔴 En curso'], finalizada:['badge-gray','Finalizada'], cancelada:['badge-red','Cancelada']};
+  const [badgeCls, badgeTxt] = badgeMap[c.estado_zoom||estado] || ['badge-gray','—'];
+  const platIco = {Zoom:'🔵','Google Meet':'🟢',Teams:'🟣','YouTube Live':'🔴',Otro:'🎥'};
+  const countdownId = 'cd-'+c.id;
+  const html = `<div class="clase-card" id="card-${c.id}">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+      <div style="font-size:14px;font-weight:600">${platIco[c.plataforma]||'🎥'} ${esc(c.nombre)}</div>
+      <span class="badge ${badgeCls}">${badgeTxt}</span>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:6px">
+      📅 ${c.fecha||'—'} ${c.hora?'· '+c.hora:''} · ${esc(c.plataforma||'')} · ${esc(c.curso||'General')}
+      ${c.duracion ? ' · ⏱ '+esc(String(c.duracion))+' min' : ''}
+    </div>
+    ${c.descripcion?`<div style="font-size:13px;color:var(--text);margin-bottom:8px">${esc(c.descripcion)}</div>`:''}
+    ${estado==='proxima' && c.fecha ? `<div style="font-size:12px;color:var(--primary);font-weight:600;margin-bottom:8px" id="${countdownId}">⏳ Calculando...</div>` : ''}
+    ${acceder
+      ? `<a href="${esc(c.enlace_zoom)}" target="_blank" rel="noopener" class="btn btn-primary btn-sm">🔗 Unirse a la clase ${c.contrasena?'· Contraseña: '+esc(c.contrasena):''}</a>`
+      : (c.enlace_zoom && estado==='proxima'
+        ? `<div style="font-size:12px;color:var(--muted);background:#f8fafc;padding:8px 12px;border-radius:8px">🔒 El botón de acceso aparecerá 15 minutos antes del inicio</div>`
+        : (estado==='finalizada' ? `<div style="font-size:12px;color:var(--muted)">🕐 Clase finalizada</div>` : ''))
+    }
+  </div>`;
+  return html;
+}
+
+function activarCountdowns() {
+  _misClases.forEach(c => {
+    const el = document.getElementById('cd-'+c.id);
+    if (!el || !c.fecha) return;
+    const fechaClase = new Date(c.fecha + (c.hora ? 'T'+c.hora : 'T00:00'));
+    function actualizar() {
+      const diff = fechaClase - new Date();
+      if (diff <= 0) { el.textContent = ''; return; }
+      const h = Math.floor(diff/3600000);
+      const m = Math.floor((diff%3600000)/60000);
+      el.textContent = h > 0 ? `⏳ Comienza en ${h}h ${m}m` : `⏳ Comienza en ${m} minutos`;
+    }
+    actualizar();
+    setInterval(actualizar, 60000);
+  });
+}
+
+
+async function renderGrabaciones() {
+  const el = document.getElementById('clases-grab');
+  el.innerHTML = '<div class="loading-ai"><div class="spinner"></div><p>Buscando grabaciones...</p></div>';
+  try {
+    // Llama al VPS hook que filtra por cursos del estudiante y devuelve solo play_url
+    const cursoIds = _misCursos.map(c=>c.id).join(',');
+    const res = await fetch('/api/zoom/recordings?cursos='+encodeURIComponent(cursoIds), {
+      headers: { 'Authorization': 'Bearer ' + (_token||''), 'Content-Type': 'application/json' }
+    });
+    if (!res.ok) throw new Error('HTTP '+res.status);
+    const data = await res.json();
+    const grabaciones = data.recordings || [];
+    if (!grabaciones.length) {
+      el.innerHTML = '<div class="empty"><div class="ico">🎬</div><p>No hay grabaciones disponibles para tus cursos.</p></div>'; return;
+    }
+    el.innerHTML = grabaciones.map(g => `
+      <div class="clase-card">
+        <div style="font-size:14px;font-weight:600;margin-bottom:4px">🎬 ${esc(g.topic||g.tema||'Grabación')}</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:8px">📅 ${esc(g.fecha||g.start_time||'—')} · ⏱ ${esc(String(g.duracion||g.duration||'—'))} min</div>
+        <a href="${esc(g.play_url)}" target="_blank" rel="noopener" class="btn btn-secondary btn-sm">▶️ Ver grabación</a>
+      </div>`).join('');
+  } catch(e) {
+    el.innerHTML = `<div class="empty"><div class="ico">🎬</div><p>Las grabaciones estarán disponibles cuando se configure la integración con Zoom.<br><small style="color:var(--muted)">Las credenciales se configuran en el servidor VPS.</small></p></div>`;
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   FASE 12 — IA GEMINI (PROXY VPS)
+   ═══════════════════════════════════════════════════ */
+
+let _iaContador = 0;
+const _IA_MAX = 10;
+const API_VPS = ''; // El VPS está en la misma origen o se configura en el hook
+
+function switchIATab(tab) {
+  ['chat','recomendar'].forEach(t => {
+    document.getElementById('iatab-'+t).classList.toggle('active', t===tab);
+    document.querySelectorAll(`[onclick="switchIATab('${t}')"]`).forEach(b=>b.classList.toggle('active',t===tab));
+  });
+}
+
+async function hacerPreguntaIA(preguntaFija) {
+  if (_iaContador >= _IA_MAX) {
+    toast('Alcanzaste el límite de preguntas por sesión ('+_IA_MAX+')', 'error'); return;
+  }
+  const inputEl = document.getElementById('ia-pregunta');
+  const pregunta = preguntaFija || inputEl.value.trim();
+  if (!pregunta) { toast('Escribe una pregunta primero', 'error'); return; }
+
+  const chatEl = document.getElementById('ia-chat-box');
+  const btn    = document.getElementById('ia-btn');
+
+  // Agregar burbuja del usuario
+  chatEl.insertAdjacentHTML('beforeend', `<div class="ai-msg user">${esc(pregunta)}</div>`);
+  chatEl.insertAdjacentHTML('beforeend', `<div class="ai-msg bot" id="ia-resp-${_iaContador}"><div class="spinner" style="width:20px;height:20px;border-width:2px;margin:0"></div></div>`);
+  chatEl.scrollTop = chatEl.scrollHeight;
+  inputEl.value = '';
+  btn.disabled = true;
+
+  try {
+    // Llama al VPS hook que usa Gemini API server-side — credenciales NUNCA en el navegador
+    const res = await fetch('/api/gemini/content-generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer '+(_token||'') },
+      body: JSON.stringify({
+        tema: pregunta,
+        tipo: 'respuesta',
+        nivel: _estudiante?.tipo || 'adulto',
+        idioma: 'es'
+      })
+    });
+
+    const data = await res.json();
+    const respuesta = data.respuesta || data.text || data.content || data.candidates?.[0]?.content?.parts?.[0]?.text || 'No se pudo obtener respuesta.';
+    const respEl = document.getElementById('ia-resp-'+_iaContador);
+    if (respEl) respEl.innerHTML = esc(respuesta).replace(/\n/g,'<br>');
+    _iaContador++;
+    document.getElementById('ia-counter').textContent = _iaContador;
+    if (_iaContador >= _IA_MAX) document.getElementById('ia-counter-msg').style.color = 'var(--danger)';
+  } catch(e) {
+    const respEl = document.getElementById('ia-resp-'+_iaContador);
+    if (respEl) respEl.innerHTML = '⚠️ El asistente IA estará disponible cuando se configure la conexión con el servidor. <small>Las credenciales Gemini se configuran en el VPS.</small>';
+    _iaContador++;
+    document.getElementById('ia-counter').textContent = _iaContador;
+  } finally {
+    btn.disabled = false;
+    chatEl.scrollTop = chatEl.scrollHeight;
+  }
+}
+
+async function cargarRecomendaciones() {
+  const el  = document.getElementById('rec-resultado');
+  const btn = document.getElementById('rec-btn');
+  el.innerHTML = '<div class="loading-ai"><div class="spinner"></div><p>Analizando tu progreso...</p></div>';
+  btn.disabled = true;
+  try {
+    const res = await fetch('/api/gemini/course-recommend', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer '+(_token||'') },
+      body: JSON.stringify({
+        estudiante_id: _estudiante?.id,
+        tipo: _estudiante?.tipo || 'adulto',
+        cursos_inscritos: _misCursos.map(c => c.nombre),
+        parroquia: _estudiante?.parroquia || ''
+      })
+    });
+    const data = await res.json();
+    const recomendaciones = data.recomendaciones || data.recommendations || [];
+    if (!recomendaciones.length) {
+      el.innerHTML = '<div class="empty"><div class="ico">🎯</div><p>Completa más cursos para recibir recomendaciones personalizadas.</p></div>';
+    } else {
+      el.innerHTML = recomendaciones.map((r, i) => `
+        <div class="card" style="margin-bottom:10px">
+          <div style="font-size:14px;font-weight:600;margin-bottom:4px">🎓 ${esc(r.nombre_curso||r.curso||r.title||'Curso '+( i+1))}</div>
+          <div style="font-size:13px;color:var(--text);margin-bottom:6px">${esc(r.razon||r.reason||r.description||'')}</div>
+          <div>${'⭐'.repeat(Math.min(Math.round(r.compatibilidad||r.score||3),5))}${'☆'.repeat(5-Math.min(Math.round(r.compatibilidad||r.score||3),5))}</div>
+        </div>`).join('');
+    }
+  } catch(e) {
+    el.innerHTML = '<div class="empty"><div class="ico">🎯</div><p>Las recomendaciones estarán disponibles cuando se configure la IA.<br><small>La API Gemini se ejecuta desde el servidor VPS, nunca desde el navegador.</small></p></div>';
+  } finally {
+    btn.disabled = false;
   }
 }
 
