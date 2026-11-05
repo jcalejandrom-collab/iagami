@@ -2558,6 +2558,274 @@ async function updateConsentimiento(id, estado) {
 }
 
 /* ═══════════════════════════════════════
+   BRIGADAS — COMANDANTES / REPRESENTANTES / BRIGADAS / CONVOCATORIAS / SOLICITUDES / ESTADÍSTICAS
+═══════════════════════════════════════ */
+
+function esc(s){ const d=document.createElement('div');d.textContent=s??'';return d.innerHTML; }
+
+async function brig_loadComandantes() {
+  const el = document.getElementById('brig-cmd-list');
+  if (!el) return;
+  try {
+    const res = await pb.collection('comandantes_brigadas').getList(1, 200, {sort: '-created'});
+    _brigComandantes = res.items || [];
+    if (!_brigComandantes.length) { el.innerHTML = '<div style="text-align:center;padding:32px;color:var(--muted)">No hay comandantes registrados</div>'; return; }
+    el.innerHTML = `<div style="background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden"><table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr style="background:#f8fcfa;border-bottom:1px solid var(--border)"><th style="padding:10px 14px;text-align:left">Nombre</th><th style="padding:10px 14px;text-align:left">Email</th><th style="padding:10px 14px;text-align:left">Cargo</th><th style="padding:10px 14px;text-align:left">Parroquia</th><th style="padding:10px 14px;text-align:left">Estado</th><th style="padding:10px 14px;text-align:left">Acción</th></tr></thead><tbody>${_brigComandantes.map(c=>`<tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 14px;font-weight:600">${esc(c.nombres)} ${esc(c.apellidos)}</td><td style="padding:10px 14px">${esc(c.email)}</td><td style="padding:10px 14px">${esc(c.cargo)||'—'}</td><td style="padding:10px 14px">${esc(c.parroquia_asignada)||'Municipal'}</td><td style="padding:10px 14px">${estadoBrigBadge(c.estado||'activo')}</td><td style="padding:10px 14px"><button onclick="brig_toggleComandante('${c.id}','${c.estado==='activo'?'suspendido':'activo'}')" style="font-size:11px;padding:4px 10px;border-radius:6px;border:1px solid var(--border);cursor:pointer;background:#fff">${c.estado==='activo'?'Suspender':'Activar'}</button></td></tr>`).join('')}</tbody></table></div>`;
+  } catch(e) { el.innerHTML = '<div style="color:var(--danger);padding:16px">Error al cargar comandantes</div>'; }
+}
+
+async function brig_saveComandante() {
+  const nombres = document.getElementById('cmd-nombres')?.value.trim();
+  const apellidos = document.getElementById('cmd-apellidos')?.value.trim();
+  const email = document.getElementById('cmd-email')?.value.trim();
+  const pass = document.getElementById('cmd-pass')?.value;
+  if (!nombres || !apellidos || !email || !pass) { toast('Completa los campos obligatorios', 'error'); return; }
+  if (pass.length < 8) { toast('La contraseña debe tener mínimo 8 caracteres', 'error'); return; }
+  try {
+    await pb.collection('comandantes_brigadas').create({
+      nombres, apellidos, email, password: pass, passwordConfirm: pass,
+      cargo: document.getElementById('cmd-cargo')?.value.trim() || 'Comandante Municipal',
+      telefono: document.getElementById('cmd-tel')?.value.trim(),
+      parroquia_asignada: document.getElementById('cmd-parroquia')?.value || 'Municipal',
+      estado: 'activo'
+    });
+    toast('Comandante creado exitosamente');
+    document.getElementById('brig-cmd-form').style.display = 'none';
+    ['cmd-nombres','cmd-apellidos','cmd-email','cmd-pass','cmd-cargo','cmd-tel'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+    brig_loadComandantes();
+  } catch(e) { toast('Error al crear comandante: ' + (e.message||''), 'error'); }
+}
+
+async function brig_toggleComandante(id, nuevoEstado) {
+  try {
+    await pb.collection('comandantes_brigadas').update(id, {estado: nuevoEstado});
+    toast('Estado actualizado');
+    brig_loadComandantes();
+  } catch(e) { toast('Error al actualizar', 'error'); }
+}
+
+async function brig_loadRepresentantes() {
+  const el = document.getElementById('brig-rep-list');
+  if (!el) return;
+  const tipo = document.getElementById('brig-f-tipo-rep')?.value || '';
+  const estado = document.getElementById('brig-f-estado-rep')?.value || '';
+  let filter = [];
+  if (tipo) filter.push(`tipo="${tipo}"`);
+  if (estado) filter.push(`estado="${estado}"`);
+  try {
+    const res = await pb.collection('representantes_brigadas').getList(1, 300, {sort: '-created', filter: filter.join('&&') || ''});
+    _brigRepresentantes = res.items || [];
+    if (!_brigRepresentantes.length) { el.innerHTML = '<div style="text-align:center;padding:32px;color:var(--muted)">No se encontraron representantes</div>'; return; }
+    el.innerHTML = `<div style="background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden"><table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr style="background:#f8fcfa;border-bottom:1px solid var(--border)"><th style="padding:10px 14px;text-align:left">Nombre</th><th style="padding:10px 14px;text-align:left">Email</th><th style="padding:10px 14px;text-align:left">Tipo</th><th style="padding:10px 14px;text-align:left">Parroquia</th><th style="padding:10px 14px;text-align:left">Estado</th><th style="padding:10px 14px;text-align:left">Acciones</th></tr></thead><tbody>${_brigRepresentantes.map(r=>`<tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 14px;font-weight:600">${esc(r.nombres)} ${esc(r.apellidos)}</td><td style="padding:10px 14px">${esc(r.email)}</td><td style="padding:10px 14px;font-size:11px">${r.tipo==='representante_comuna'?'Rep. Comuna':'Rep. C. Comunal'}</td><td style="padding:10px 14px">${esc(r.parroquia)||'—'}</td><td style="padding:10px 14px">${estadoBrigBadge(r.estado||'pendiente')}</td><td style="padding:10px 14px;display:flex;gap:6px">${r.estado==='pendiente'?`<button onclick="brig_aprobarRep('${r.id}')" style="font-size:11px;padding:4px 10px;border-radius:6px;border:none;background:#ecfdf5;color:#059669;font-weight:600;cursor:pointer">Aprobar</button>`:''}${r.estado!=='suspendido'?`<button onclick="brig_toggleRep('${r.id}','suspendido')" style="font-size:11px;padding:4px 10px;border-radius:6px;border:1px solid var(--border);cursor:pointer;background:#fff">Suspender</button>`:`<button onclick="brig_toggleRep('${r.id}','activo')" style="font-size:11px;padding:4px 10px;border-radius:6px;border:1px solid var(--border);cursor:pointer;background:#fff">Activar</button>`}</td></tr>`).join('')}</tbody></table></div>`;
+  } catch(e) { el.innerHTML = '<div style="color:var(--danger);padding:16px">Error al cargar representantes</div>'; }
+}
+
+async function brig_saveRepresentante() {
+  const nombres = document.getElementById('rep-nombres')?.value.trim();
+  const apellidos = document.getElementById('rep-apellidos')?.value.trim();
+  const email = document.getElementById('rep-email')?.value.trim();
+  const pass = document.getElementById('rep-pass')?.value;
+  if (!nombres || !apellidos || !email || !pass) { toast('Completa los campos obligatorios', 'error'); return; }
+  if (pass.length < 8) { toast('La contraseña debe tener mínimo 8 caracteres', 'error'); return; }
+  try {
+    await pb.collection('representantes_brigadas').create({
+      nombres, apellidos, email, password: pass, passwordConfirm: pass,
+      tipo: document.getElementById('rep-tipo')?.value || 'representante_consejo_comunal',
+      parroquia: document.getElementById('rep-parroquia')?.value,
+      cargo: document.getElementById('rep-cargo')?.value.trim(),
+      telefono: document.getElementById('rep-tel')?.value.trim(),
+      fecha_designacion: document.getElementById('rep-fecha')?.value,
+      estado: 'activo'
+    });
+    toast('Representante creado exitosamente');
+    document.getElementById('brig-rep-form').style.display = 'none';
+    ['rep-nombres','rep-apellidos','rep-email','rep-pass','rep-cargo','rep-tel','rep-fecha'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+    brig_loadRepresentantes();
+  } catch(e) { toast('Error al crear representante: ' + (e.message||''), 'error'); }
+}
+
+async function brig_aprobarRep(id) {
+  try {
+    await pb.collection('representantes_brigadas').update(id, {estado: 'activo'});
+    toast('Representante aprobado');
+    brig_loadRepresentantes();
+  } catch(e) { toast('Error al aprobar', 'error'); }
+}
+
+async function brig_toggleRep(id, nuevoEstado) {
+  try {
+    await pb.collection('representantes_brigadas').update(id, {estado: nuevoEstado});
+    toast('Estado actualizado');
+    brig_loadRepresentantes();
+  } catch(e) { toast('Error al actualizar', 'error'); }
+}
+
+async function brig_loadBrigadas() {
+  const el = document.getElementById('brig-brigadas-list');
+  if (!el) return;
+  try {
+    const res = await pb.collection('brigadas').getList(1, 500, {sort: '-created'});
+    _brigBrigadasList = res.items || [];
+    brig_filterBrigadas();
+  } catch(e) { el.innerHTML = '<div style="color:var(--danger);padding:16px">Error al cargar brigadas</div>'; }
+}
+
+function brig_filterBrigadas() {
+  const el = document.getElementById('brig-brigadas-list');
+  if (!el) return;
+  const q = (document.getElementById('brig-search-nom')?.value || '').toLowerCase();
+  const parr = document.getElementById('brig-f-parroquia-b')?.value || '';
+  const est = document.getElementById('brig-f-estado-b')?.value || '';
+  const list = _brigBrigadasList.filter(b =>
+    (!q || (b.nombre + ' ' + (b.codigo||'')).toLowerCase().includes(q)) &&
+    (!parr || b.parroquia === parr) &&
+    (!est || b.estado === est)
+  );
+  if (!list.length) { el.innerHTML = '<div style="text-align:center;padding:32px;color:var(--muted)">No se encontraron brigadas</div>'; return; }
+  el.innerHTML = `<div style="background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden"><table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr style="background:#f8fcfa;border-bottom:1px solid var(--border)"><th style="padding:10px 14px;text-align:left">Nombre</th><th style="padding:10px 14px;text-align:left">Parroquia</th><th style="padding:10px 14px;text-align:left">Área</th><th style="padding:10px 14px;text-align:left">Conformación</th><th style="padding:10px 14px;text-align:left">Estado</th><th style="padding:10px 14px;text-align:left">Acción</th></tr></thead><tbody>${list.map(b=>`<tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 14px;font-weight:600">${esc(b.nombre)}</td><td style="padding:10px 14px">${esc(b.parroquia)||'—'}</td><td style="padding:10px 14px;font-size:11px;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(b.area_actuacion)||'—'}</td><td style="padding:10px 14px">${b.fecha_conformacion?new Date(b.fecha_conformacion).toLocaleDateString('es-VE'):'—'}</td><td style="padding:10px 14px">${estadoBrigBadge(b.estado||'en_formacion')}</td><td style="padding:10px 14px"><select style="font-size:11px;padding:3px 6px;border:1px solid var(--border);border-radius:6px" onchange="brig_cambiarEstadoBrigada('${b.id}',this.value)"><option value="en_formacion" ${b.estado==='en_formacion'?'selected':''}>En formación</option><option value="activa" ${b.estado==='activa'?'selected':''}>Activa</option><option value="en_planificacion" ${b.estado==='en_planificacion'?'selected':''}>En planificación</option><option value="suspendida" ${b.estado==='suspendida'?'selected':''}>Suspendida</option><option value="inactiva" ${b.estado==='inactiva'?'selected':''}>Inactiva</option></select></td></tr>`).join('')}</tbody></table></div>`;
+}
+
+async function brig_saveBrigada() {
+  const nombre = document.getElementById('brig-n-nombre')?.value.trim();
+  const parroquia = document.getElementById('brig-n-parroquia')?.value;
+  if (!nombre || !parroquia) { toast('Nombre y parroquia son obligatorios', 'error'); return; }
+  try {
+    await pb.collection('brigadas').create({
+      nombre, parroquia,
+      fecha_conformacion: document.getElementById('brig-n-fecha')?.value || null,
+      estado: document.getElementById('brig-n-estado')?.value || 'en_formacion',
+      area_actuacion: document.getElementById('brig-n-area')?.value.trim(),
+      objetivos: document.getElementById('brig-n-obj')?.value.trim()
+    });
+    toast('Brigada registrada exitosamente');
+    document.getElementById('brig-new-form').style.display = 'none';
+    ['brig-n-nombre','brig-n-fecha','brig-n-area','brig-n-obj'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+    brig_loadBrigadas();
+  } catch(e) { toast('Error al guardar brigada: ' + (e.message||''), 'error'); }
+}
+
+async function brig_cambiarEstadoBrigada(id, estado) {
+  try {
+    await pb.collection('brigadas').update(id, {estado});
+    toast('Estado actualizado');
+    brig_loadBrigadas();
+  } catch(e) { toast('Error al actualizar', 'error'); }
+}
+
+async function brig_loadConvocatorias() {
+  const el = document.getElementById('brig-conv-list');
+  if (!el) return;
+  try {
+    const res = await pb.collection('comunicados_brigadas').getList(1, 100, {sort: '-created'});
+    _brigConvocatorias = res.items || [];
+    if (!_brigConvocatorias.length) { el.innerHTML = '<div style="text-align:center;padding:32px;color:var(--muted)">No hay comunicados enviados</div>'; return; }
+    el.innerHTML = _brigConvocatorias.map(c=>`<div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px"><div style="flex:1"><div style="font-size:13px;font-weight:600">${esc(c.asunto)}</div><div style="font-size:11px;color:var(--muted);margin-top:4px">${new Date(c.created).toLocaleDateString('es-VE')} · ${c.prioridad==='urgente'?'<span style="color:#dc2626;font-weight:700">🔴 URGENTE</span>':'Normal'}</div><div style="font-size:12px;margin-top:8px;color:var(--text)">${esc(c.contenido)}</div></div></div></div>`).join('');
+  } catch(e) { el.innerHTML = '<div style="color:var(--danger);padding:16px">Error al cargar comunicados</div>'; }
+}
+
+async function brig_sendConvocatoria() {
+  const asunto = document.getElementById('conv-asunto')?.value.trim();
+  const contenido = document.getElementById('conv-contenido')?.value.trim();
+  if (!asunto || !contenido) { toast('Asunto y contenido son obligatorios', 'error'); return; }
+  try {
+    await pb.collection('comunicados_brigadas').create({
+      asunto, contenido,
+      destinatarios: document.getElementById('conv-dest')?.value || 'todos',
+      prioridad: document.getElementById('conv-prioridad')?.value || 'normal',
+      fecha_envio: new Date().toISOString()
+    });
+    toast('Comunicado enviado exitosamente');
+    document.getElementById('brig-conv-form').style.display = 'none';
+    ['conv-asunto','conv-contenido'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+    brig_loadConvocatorias();
+  } catch(e) { toast('Error al enviar comunicado: ' + (e.message||''), 'error'); }
+}
+
+async function brig_loadSolicitudes() {
+  const el = document.getElementById('brig-sol-list');
+  if (!el) return;
+  const estado = document.getElementById('brig-f-sol-estado')?.value || '';
+  const tipo = document.getElementById('brig-f-sol-tipo')?.value || '';
+  let filter = [];
+  if (estado) filter.push(`estado="${estado}"`);
+  if (tipo) filter.push(`tipo_apoyo="${tipo}"`);
+  try {
+    const res = await pb.collection('solicitudes_apoyo').getList(1, 200, {sort: '-created', filter: filter.join('&&') || '', expand: 'brigada_id'});
+    _brigSolicitudes = res.items || [];
+    if (!_brigSolicitudes.length) { el.innerHTML = '<div style="text-align:center;padding:32px;color:var(--muted)">No hay solicitudes</div>'; return; }
+    const estadoColors = {pendiente:['#f59e0b','#fffbeb'],en_proceso:['#2563eb','#eff6ff'],aprobada:['#059669','#ecfdf5'],rechazada:['#dc2626','#fef2f2'],entregada:['#6b7280','#f9fafb']};
+    el.innerHTML = _brigSolicitudes.map(s=>{
+      const [color,bg] = estadoColors[s.estado] || ['#6b7280','#f9fafb'];
+      return `<div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px"><div style="flex:1"><div style="font-size:13px;font-weight:600">${esc(s.tipo_apoyo||'Solicitud de apoyo')}</div><div style="font-size:11px;color:var(--muted);margin-top:2px">${new Date(s.created).toLocaleDateString('es-VE')} · <span style="background:${bg};color:${color};font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px">${s.estado}</span></div><div style="font-size:12px;margin-top:6px">${esc(s.descripcion)}</div>${s.respuesta_institucional?`<div style="font-size:11px;margin-top:6px;color:#059669;font-weight:600">↳ ${esc(s.respuesta_institucional)}</div>`:''}</div><button onclick="document.getElementById('brig-sol-id').value='${s.id}';document.getElementById('brig-sol-resp-form').style.display='block'" style="font-size:11px;padding:6px 12px;border:1px solid var(--border);border-radius:8px;cursor:pointer;background:#fff;white-space:nowrap">Responder</button></div>`;
+    }).join('');
+  } catch(e) { el.innerHTML = '<div style="color:var(--danger);padding:16px">Error al cargar solicitudes</div>'; }
+}
+
+async function brig_responderSolicitud(id) {
+  if (!id) { toast('ID no encontrado', 'error'); return; }
+  const estado = document.getElementById('brig-sol-nuevo-estado')?.value;
+  const respuesta = document.getElementById('brig-sol-respuesta')?.value.trim();
+  try {
+    await pb.collection('solicitudes_apoyo').update(id, {estado, respuesta_institucional: respuesta, fecha_respuesta: new Date().toISOString()});
+    toast('Respuesta guardada');
+    document.getElementById('brig-sol-resp-form').style.display = 'none';
+    document.getElementById('brig-sol-respuesta').value = '';
+    brig_loadSolicitudes();
+  } catch(e) { toast('Error al guardar respuesta', 'error'); }
+}
+
+async function brig_loadEstadisticas() {
+  const el = document.getElementById('brig-stats-content');
+  if (!el) return;
+  el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted)">Calculando estadísticas...</div>';
+  try {
+    const [resB, resA, resM, resBrig, resAct] = await Promise.all([
+      pb.collection('brigadistas').getList(1,1,{}).catch(()=>({totalItems:0})),
+      pb.collection('brigadistas').getList(1,1,{filter:'estado="activo"'}).catch(()=>({totalItems:0})),
+      pb.collection('brigadistas_menores').getList(1,1,{}).catch(()=>({totalItems:0})),
+      pb.collection('brigadas').getList(1,1,{filter:'estado="activa"'}).catch(()=>({totalItems:0})),
+      pb.collection('actividades_brigadas').getList(1,1,{}).catch(()=>({totalItems:0}))
+    ]);
+    const stats = [
+      {label:'Total brigadistas adultos',val:resB.totalItems,icon:'👥'},
+      {label:'Brigadistas activos',val:resA.totalItems,icon:'✅'},
+      {label:'Brigadistas menores',val:resM.totalItems,icon:'🧒'},
+      {label:'Brigadas activas',val:resBrig.totalItems,icon:'🌿'},
+      {label:'Actividades registradas',val:resAct.totalItems,icon:'📋'}
+    ];
+    el.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:24px">${stats.map(s=>`<div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center"><div style="font-size:28px;margin-bottom:8px">${s.icon}</div><div style="font-size:28px;font-weight:700;color:var(--primary)">${s.val}</div><div style="font-size:12px;color:var(--muted);margin-top:4px">${s.label}</div></div>`).join('')}</div><div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px"><div style="font-size:13px;font-weight:600;margin-bottom:12px">Distribución por parroquia</div><div id="brig-dist-parr">Calculando...</div></div>`;
+    const resAll = await pb.collection('brigadistas').getList(1, 500, {}).catch(()=>({items:[]}));
+    const resAllM = await pb.collection('brigadistas_menores').getList(1, 500, {}).catch(()=>({items:[]}));
+    const all = [...(resAll.items||[]), ...(resAllM.items||[])];
+    const byP = {};
+    all.forEach(b => { byP[b.parroquia||'Sin parroquia'] = (byP[b.parroquia||'Sin parroquia']||0)+1; });
+    const sorted = Object.entries(byP).sort((a,b)=>b[1]-a[1]);
+    const max = sorted[0]?sorted[0][1]:1;
+    const distEl = document.getElementById('brig-dist-parr');
+    if (distEl) distEl.innerHTML = sorted.length?sorted.map(([p,n])=>`<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><div style="width:160px;font-size:12px">${esc(p)}</div><div style="flex:1;background:#f0faf5;border-radius:4px;height:16px;overflow:hidden"><div style="background:var(--primary);height:100%;width:${Math.round(n/max*100)}%;border-radius:4px"></div></div><div style="width:28px;text-align:right;font-size:12px;font-weight:600">${n}</div></div>`).join(''):'<span style="color:var(--muted)">Sin datos</span>';
+  } catch(e) { el.innerHTML = '<div style="color:var(--danger);padding:16px">Error al cargar estadísticas</div>'; }
+}
+
+async function brig_exportCensoCSV() {
+  try {
+    const [resA, resM] = await Promise.all([
+      pb.collection('brigadistas').getList(1, 2000, {sort: 'apellidos'}),
+      pb.collection('brigadistas_menores').getList(1, 2000, {sort: 'apellidos'})
+    ]);
+    const adultos = (resA.items||[]).map(b=>['Adulto',b.nombres,b.apellidos,b.cedula||'',b.email||'',b.telefono||'',b.parroquia||'',b.disponibilidad||'',b.estado||''].join(','));
+    const menores = (resM.items||[]).map(b=>['Menor',b.nombres,b.apellidos,b.cedula||'',b.email||'','',b.parroquia||'',b.categoria||'',b.estado||''].join(','));
+    const header = 'Tipo,Nombres,Apellidos,Cédula,Email,Teléfono,Parroquia,Categoría/Disponibilidad,Estado';
+    const csv = [header, ...adultos, ...menores].join('\n');
+    const blob = new Blob(['﻿'+csv], {type:'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `censo_brigadistas_${new Date().toISOString().slice(0,10)}.csv`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+    toast('Censo exportado exitosamente');
+  } catch(e) { toast('Error al exportar censo', 'error'); }
+}
+
+/* ═══════════════════════════════════════
    AULA AMBIENTAL — ADMIN
 ═══════════════════════════════════════ */
 let _aulaRecursos = [], _aulaVisitas = [];

@@ -1,0 +1,187 @@
+[
+  {
+    "name": "comandantes_brigadas",
+    "type": "auth",
+    "fields": [
+      {"name": "nombres", "type": "text", "required": true},
+      {"name": "apellidos", "type": "text", "required": true},
+      {"name": "cargo", "type": "text"},
+      {"name": "telefono", "type": "text"},
+      {"name": "parroquia_asignada", "type": "text"},
+      {"name": "estado", "type": "select", "required": true, "options": {"values": ["activo", "suspendido", "inactivo"]}},
+      {"name": "foto", "type": "file", "options": {"maxSelect": 1, "maxSize": 5242880, "mimeTypes": ["image/jpeg", "image/png", "image/webp"]}},
+      {"name": "fecha_designacion", "type": "date"}
+    ],
+    "listRule": "@request.auth.id != ''",
+    "viewRule": "@request.auth.id != ''",
+    "createRule": "@request.auth.collectionName = 'admins'",
+    "updateRule": "@request.auth.collectionName = 'admins' || @request.auth.id = id",
+    "deleteRule": "@request.auth.collectionName = 'admins'"
+  },
+  {
+    "name": "representantes_brigadas",
+    "type": "auth",
+    "fields": [
+      {"name": "nombres", "type": "text", "required": true},
+      {"name": "apellidos", "type": "text", "required": true},
+      {"name": "tipo", "type": "select", "required": true, "options": {"values": ["representante_comuna", "representante_consejo_comunal"]}},
+      {"name": "parroquia", "type": "text"},
+      {"name": "comuna_id", "type": "relation", "options": {"collectionId": "comunas", "cascadeDelete": false, "minSelect": null, "maxSelect": 1}},
+      {"name": "consejo_comunal_id", "type": "relation", "options": {"collectionId": "consejos_comunales", "cascadeDelete": false, "minSelect": null, "maxSelect": 1}},
+      {"name": "cargo", "type": "text"},
+      {"name": "telefono", "type": "text"},
+      {"name": "estado", "type": "select", "required": true, "options": {"values": ["pendiente", "activo", "suspendido"]}},
+      {"name": "fecha_designacion", "type": "date"}
+    ],
+    "listRule": "@request.auth.id != ''",
+    "viewRule": "@request.auth.id != ''",
+    "createRule": "@request.auth.collectionName = 'admins' || @request.auth.collectionName = 'comandantes_brigadas'",
+    "updateRule": "@request.auth.collectionName = 'admins' || @request.auth.collectionName = 'comandantes_brigadas' || @request.auth.id = id",
+    "deleteRule": "@request.auth.collectionName = 'admins'"
+  },
+  {
+    "name": "brigadas",
+    "type": "base",
+    "fields": [
+      {"name": "nombre", "type": "text", "required": true},
+      {"name": "codigo", "type": "text"},
+      {"name": "parroquia", "type": "text", "required": true},
+      {"name": "comuna_id", "type": "relation", "options": {"collectionId": "comunas", "cascadeDelete": false, "minSelect": null, "maxSelect": 1}},
+      {"name": "consejo_comunal_id", "type": "relation", "options": {"collectionId": "consejos_comunales", "cascadeDelete": false, "minSelect": null, "maxSelect": 1}},
+      {"name": "representante_id", "type": "relation", "options": {"collectionId": "representantes_brigadas", "cascadeDelete": false, "minSelect": null, "maxSelect": 1}},
+      {"name": "fecha_conformacion", "type": "date"},
+      {"name": "estado", "type": "select", "required": true, "options": {"values": ["en_formacion", "activa", "en_planificacion", "suspendida", "inactiva"]}},
+      {"name": "area_actuacion", "type": "text"},
+      {"name": "objetivos", "type": "text"},
+      {"name": "total_brigadistas", "type": "number"}
+    ],
+    "listRule": "@request.auth.id != ''",
+    "viewRule": "@request.auth.id != ''",
+    "createRule": "@request.auth.id != ''",
+    "updateRule": "@request.auth.collectionName = 'admins' || @request.auth.collectionName = 'comandantes_brigadas' || @request.auth.collectionName = 'representantes_brigadas'",
+    "deleteRule": "@request.auth.collectionName = 'admins'"
+  },
+  {
+    "name": "actividades_brigadas",
+    "type": "base",
+    "fields": [
+      {"name": "brigada_id", "type": "relation", "required": true, "options": {"collectionId": "brigadas", "cascadeDelete": false, "minSelect": null, "maxSelect": 1}},
+      {"name": "titulo", "type": "text", "required": true},
+      {"name": "tipo", "type": "select", "required": true, "options": {"values": ["jornada_limpieza", "siembra", "charla_ambiental", "censo", "formacion", "visita", "otro"]}},
+      {"name": "fecha", "type": "date", "required": true},
+      {"name": "hora_inicio", "type": "text"},
+      {"name": "hora_fin", "type": "text"},
+      {"name": "lugar", "type": "text"},
+      {"name": "parroquia", "type": "text"},
+      {"name": "descripcion", "type": "text"},
+      {"name": "estado", "type": "select", "required": true, "options": {"values": ["planificada", "en_ejecucion", "ejecutada", "cancelada", "postergada"]}},
+      {"name": "total_participantes", "type": "number"},
+      {"name": "resultado", "type": "text"},
+      {"name": "representante_id", "type": "relation", "options": {"collectionId": "representantes_brigadas", "cascadeDelete": false, "minSelect": null, "maxSelect": 1}}
+    ],
+    "listRule": "@request.auth.id != ''",
+    "viewRule": "@request.auth.id != ''",
+    "createRule": "@request.auth.id != ''",
+    "updateRule": "@request.auth.id != ''",
+    "deleteRule": "@request.auth.collectionName = 'admins' || @request.auth.collectionName = 'comandantes_brigadas'"
+  },
+  {
+    "name": "asistencia_brigadas",
+    "type": "base",
+    "fields": [
+      {"name": "actividad_id", "type": "relation", "required": true, "options": {"collectionId": "actividades_brigadas", "cascadeDelete": false, "minSelect": null, "maxSelect": 1}},
+      {"name": "brigadista_id", "type": "relation", "options": {"collectionId": "brigadistas", "cascadeDelete": false, "minSelect": null, "maxSelect": 1}},
+      {"name": "brigadista_menor_id", "type": "relation", "options": {"collectionId": "brigadistas_menores", "cascadeDelete": false, "minSelect": null, "maxSelect": 1}},
+      {"name": "presente", "type": "bool"},
+      {"name": "hora_llegada", "type": "text"},
+      {"name": "observaciones", "type": "text"}
+    ],
+    "listRule": "@request.auth.id != ''",
+    "viewRule": "@request.auth.id != ''",
+    "createRule": "@request.auth.id != ''",
+    "updateRule": "@request.auth.id != ''",
+    "deleteRule": "@request.auth.collectionName = 'admins'"
+  },
+  {
+    "name": "comunicados_brigadas",
+    "type": "base",
+    "fields": [
+      {"name": "asunto", "type": "text", "required": true},
+      {"name": "contenido", "type": "text", "required": true},
+      {"name": "destinatarios", "type": "select", "required": true, "options": {"values": ["todos", "parroquia", "comuna", "consejo_comunal"]}},
+      {"name": "parroquia_destino", "type": "text"},
+      {"name": "prioridad", "type": "select", "required": true, "options": {"values": ["normal", "urgente"]}},
+      {"name": "fecha_envio", "type": "date"},
+      {"name": "autor_id", "type": "text"},
+      {"name": "tipo_autor", "type": "text"}
+    ],
+    "listRule": "@request.auth.id != ''",
+    "viewRule": "@request.auth.id != ''",
+    "createRule": "@request.auth.id != ''",
+    "updateRule": "@request.auth.collectionName = 'admins'",
+    "deleteRule": "@request.auth.collectionName = 'admins'"
+  },
+  {
+    "name": "solicitudes_apoyo",
+    "type": "base",
+    "fields": [
+      {"name": "brigada_id", "type": "relation", "options": {"collectionId": "brigadas", "cascadeDelete": false, "minSelect": null, "maxSelect": 1}},
+      {"name": "representante_id", "type": "relation", "options": {"collectionId": "representantes_brigadas", "cascadeDelete": false, "minSelect": null, "maxSelect": 1}},
+      {"name": "tipo_apoyo", "type": "select", "required": true, "options": {"values": ["plantas", "arboles", "herramientas", "bolsas", "guantes", "agua", "transporte", "material_educativo", "apoyo_tecnico", "formacion", "otro"]}},
+      {"name": "descripcion", "type": "text", "required": true},
+      {"name": "cantidad", "type": "text"},
+      {"name": "urgencia", "type": "select", "options": {"values": ["baja", "media", "alta"]}},
+      {"name": "estado", "type": "select", "required": true, "options": {"values": ["pendiente", "en_proceso", "aprobada", "rechazada", "entregada"]}},
+      {"name": "respuesta_institucional", "type": "text"},
+      {"name": "fecha_respuesta", "type": "date"},
+      {"name": "evidencia", "type": "file", "options": {"maxSelect": 5, "maxSize": 10485760, "mimeTypes": ["image/jpeg", "image/png", "image/webp", "application/pdf"]}}
+    ],
+    "listRule": "@request.auth.id != ''",
+    "viewRule": "@request.auth.id != ''",
+    "createRule": "@request.auth.id != ''",
+    "updateRule": "@request.auth.collectionName = 'admins' || @request.auth.collectionName = 'comandantes_brigadas' || @request.auth.collectionName = 'representantes_brigadas'",
+    "deleteRule": "@request.auth.collectionName = 'admins'"
+  },
+  {
+    "name": "informes_actividad",
+    "type": "base",
+    "fields": [
+      {"name": "actividad_id", "type": "relation", "options": {"collectionId": "actividades_brigadas", "cascadeDelete": false, "minSelect": null, "maxSelect": 1}},
+      {"name": "brigada_id", "type": "relation", "options": {"collectionId": "brigadas", "cascadeDelete": false, "minSelect": null, "maxSelect": 1}},
+      {"name": "representante_id", "type": "relation", "options": {"collectionId": "representantes_brigadas", "cascadeDelete": false, "minSelect": null, "maxSelect": 1}},
+      {"name": "titulo", "type": "text", "required": true},
+      {"name": "resumen", "type": "text", "required": true},
+      {"name": "total_participantes", "type": "number"},
+      {"name": "logros", "type": "text"},
+      {"name": "dificultades", "type": "text"},
+      {"name": "recomendaciones", "type": "text"},
+      {"name": "estado", "type": "select", "options": {"values": ["borrador", "enviado", "revisado"]}},
+      {"name": "adjuntos", "type": "file", "options": {"maxSelect": 10, "maxSize": 10485760}}
+    ],
+    "listRule": "@request.auth.id != ''",
+    "viewRule": "@request.auth.id != ''",
+    "createRule": "@request.auth.id != ''",
+    "updateRule": "@request.auth.id != ''",
+    "deleteRule": "@request.auth.collectionName = 'admins'"
+  },
+  {
+    "name": "evidencias_brigadas",
+    "type": "base",
+    "fields": [
+      {"name": "actividad_id", "type": "relation", "options": {"collectionId": "actividades_brigadas", "cascadeDelete": false, "minSelect": null, "maxSelect": 1}},
+      {"name": "brigada_id", "type": "relation", "options": {"collectionId": "brigadas", "cascadeDelete": false, "minSelect": null, "maxSelect": 1}},
+      {"name": "representante_id", "type": "relation", "options": {"collectionId": "representantes_brigadas", "cascadeDelete": false, "minSelect": null, "maxSelect": 1}},
+      {"name": "tipo", "type": "select", "required": true, "options": {"values": ["foto", "video", "documento", "otro"]}},
+      {"name": "descripcion", "type": "text"},
+      {"name": "archivo", "type": "file", "required": true, "options": {"maxSelect": 5, "maxSize": 10485760, "mimeTypes": ["image/jpeg", "image/png", "image/webp", "video/mp4", "application/pdf"]}},
+      {"name": "fecha_captura", "type": "date"},
+      {"name": "coordenadas", "type": "text"},
+      {"name": "verificada", "type": "bool"}
+    ],
+    "listRule": "@request.auth.id != ''",
+    "viewRule": "@request.auth.id != ''",
+    "createRule": "@request.auth.id != ''",
+    "updateRule": "@request.auth.id != ''",
+    "deleteRule": "@request.auth.collectionName = 'admins'"
+  }
+]
