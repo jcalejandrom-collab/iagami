@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Portal Docente — IAGAMI Aula Ambiental</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --primary:#1d6b3e;--primary-dark:#1a3d2b;--primary-light:#e8f5ee;
+  --bg:#f5f7f5;--surface:#fff;--border:#e2e8f0;
+  --text:#1f2937;--muted:#6b7280;--danger:#dc2626;--warn:#d97706;--info:#2563eb;
+  --success:#059669;--radius:12px;--shadow:0 2px 12px rgba(0,0,0,.08);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+a{color:inherit;text-decoration:none}
+
+/* ── LOGIN ── */
+#screen-login{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+.login-card{background:var(--surface);border-radius:20px;padding:40px 36px;width:100%;max-width:400px;box-shadow:var(--shadow)}
+.login-logo{text-align:center;margin-bottom:28px}
+.login-logo .ico{font-size:48px;margin-bottom:8px}
+.login-logo h1{font-family:'Poppins',sans-serif;font-size:20px;color:var(--primary-dark);font-weight:700}
+.login-logo p{font-size:13px;color:var(--muted);margin-top:4px}
+.form-label{display:block;font-size:12px;font-weight:600;color:var(--text);margin-bottom:5px}
+.form-control{width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:'Inter',sans-serif;transition:border .2s;background:#fff;color:var(--text)}
+.form-control:focus{outline:none;border-color:var(--primary)}
+.btn{padding:11px 20px;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:.2s}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:hover{background:var(--primary-dark)}
+.btn-secondary{background:#f1f5f9;color:var(--text);border:1px solid var(--border)}
+.btn-secondary:hover{background:#e2e8f0}
+.btn-danger{background:#fef2f2;color:var(--danger);border:1px solid #fca5a5}
+.btn-sm{padding:6px 12px;font-size:12px}
+.form-group{margin-bottom:16px}
+.login-err{background:#fef2f2;color:var(--danger);border:1px solid #fca5a5;border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:14px;display:none}
+
+/* ── APP ── */
+#screen-app{display:none;min-height:100vh}
+.top-bar{background:var(--primary-dark);color:#fff;padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.top-bar-brand{display:flex;align-items:center;gap:10px;font-family:'Poppins',sans-serif;font-weight:700;font-size:15px}
+.top-bar-brand .ico{font-size:22px}
+.top-bar-right{display:flex;align-items:center;gap:12px}
+.user-chip{background:rgba(255,255,255,.12);border-radius:20px;padding:4px 12px;font-size:13px;font-weight:500}
+.app-layout{display:flex;min-height:calc(100vh - 56px)}
+.sidebar{width:220px;background:var(--surface);border-right:1px solid var(--border);padding:16px 0;flex-shrink:0;position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;font-size:14px;cursor:pointer;border-radius:0;transition:.15s;color:var(--text)}
+.nav-item:hover{background:var(--primary-light);color:var(--primary)}
+.nav-item.active{background:var(--primary-light);color:var(--primary);font-weight:600;border-right:3px solid var(--primary)}
+.nav-item .nav-ico{font-size:18px;width:22px;text-align:center}
+.main-content{flex:1;padding:24px;overflow-y:auto}
+.section{display:none}
+.section.active{display:block}
+.page-header{margin-bottom:24px}
+.page-title{font-family:'Poppins',sans-serif;font-size:20px;font-weight:700;color:var(--primary-dark)}
+.page-subtitle{font-size:13px;color:var(--muted);margin-top:3px}
+
+/* ── CARDS / STATS ── */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;margin-bottom:24px}
+.stat-card{background:var(--surface);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);text-align:center}
+.stat-num{font-family:'Poppins',sans-serif;font-size:28px;font-weight:700;color:var(--primary)}
+.stat-lbl{font-size:12px;color:var(--muted);margin-top:4px}
+.card{background:var(--surface);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);margin-bottom:16px}
+.card-title{font-family:'Poppins',sans-serif;font-size:15px;font-weight:600;color:var(--primary-dark);margin-bottom:14px}
+
+/* ── TABLE ── */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:#f8fafc;font-weight:600;padding:10px 12px;text-align:left;border-bottom:2px solid var(--border);color:var(--muted);font-size:12px;text-transform:uppercase}
+td{padding:10px 12px;border-bottom:1px solid var(--border)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#fafafa}
+
+/* ── BADGE ── */
+.badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600}
+.badge-green{background:#dcfce7;color:#166534}
+.badge-blue{background:#dbeafe;color:#1d4ed8}
+.badge-yellow{background:#fef9c3;color:#854d0e}
+.badge-red{background:#fee2e2;color:#991b1b}
+.badge-gray{background:#f1f5f9;color:#475569}
+
+/* ── FORM PANEL ── */
+.form-panel{background:#f8fafc;border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-top:14px}
+.form-panel h4{font-family:'Poppins',sans-serif;font-size:15px;font-weight:600;color:var(--primary-dark);margin-bottom:14px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-grid .span2{grid-column:span 2}
+@media(max-width:600px){.form-grid{grid-template-columns:1fr}.form-grid .span2{grid-column:span 1}}
+textarea.form-control{resize:vertical;min-height:80px}
+
+/* ── TOAST ── */
+#toast{position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:10px;font-size:14px;font-weight:600;z-index:9999;display:none;box-shadow:0 4px 20px rgba(0,0,0,.15)}
+#toast.ok{background:#dcfce7;color:#166534}
+#toast.err{background:#fee2e2;color:#991b1b}
+
+/* ── TABS ── */
+.tabs{display:flex;border-bottom:2px solid var(--border);margin-bottom:18px;gap:0;overflow-x:auto}
+.tab-btn{padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);white-space:nowrap;margin-bottom:-2px;font-family:'Inter',sans-serif;transition:.15s}
+.tab-btn.active{color:var(--primary);border-bottom-color:var(--primary)}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
+/* ── EMPTY ── */
+.empty{text-align:center;padding:40px 20px;color:var(--muted)}
+.empty .ico{font-size:36px;margin-bottom:10px}
+.empty p{font-size:13px}
+
+/* ── MOBILE ── */
+.mob-menu-btn{display:none;background:none;border:none;color:#fff;font-size:22px;cursor:pointer}
+@media(max-width:768px){
+  .sidebar{display:none;position:fixed;top:56px;left:0;height:calc(100vh - 56px);z-index:200;width:230px;box-shadow:4px 0 20px rgba(0,0,0,.15)}
+  .sidebar.open{display:block}
+  .mob-menu-btn{display:block}
+  .main-content{padding:16px}
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════ LOGIN ══════════════ -->
+<div id="screen-login">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="ico">🌿</div>
+      <h1>Aula Ambiental IAGAMI</h1>
+      <p>Portal Docente — Acceso exclusivo para profesores</p>
+    </div>
+    <div id="login-err" class="login-err"></div>
+    <div class="form-group">
+      <label class="form-label">Correo institucional</label>
+      <input class="form-control" id="login-email" type="email" placeholder="profesor@iagami.online" autocomplete="username"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Contraseña</label>
+      <input class="form-control" id="login-pass" type="password" placeholder="••••••••" autocomplete="current-password"/>
+    </div>
+    <button class="btn btn-primary" style="width:100%;margin-top:4px" onclick="doLogin()">Ingresar al Portal</button>
+    <p style="text-align:center;font-size:12px;color:var(--muted);margin-top:16px">¿Sin acceso? Contacta al administrador de IAGAMI.</p>
+    <p style="text-align:center;font-size:12px;margin-top:8px"><a href="../../" style="color:var(--primary)">← Volver al portal público</a></p>
+  </div>
+</div>
+
+<!-- ══════════════ APP ══════════════ -->
+<div id="screen-app">
+
+  <!-- Top bar -->
+  <div class="top-bar">
+    <div class="top-bar-brand">
+      <button class="mob-menu-btn" onclick="toggleSidebar()">☰</button>
+      <span class="ico">🌿</span>
+      <span>Aula Ambiental</span>
+    </div>
+    <div class="top-bar-right">
+      <span class="user-chip" id="top-user">Profesor</span>
+      <button class="btn btn-sm" style="background:rgba(255,255,255,.12);color:#fff;border:none" onclick="doLogout()">Salir →</button>
+    </div>
+  </div>
+
+  <div class="app-layout">
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+      <div onclick="showSec('dashboard')" class="nav-item active" id="nav-dashboard"><span class="nav-ico">🏠</span> Dashboard</div>
+      <div onclick="showSec('cursos')"    class="nav-item"        id="nav-cursos"   ><span class="nav-ico">🎓</span> Mis Cursos</div>
+      <div onclick="showSec('clases')"    class="nav-item"        id="nav-clases"   ><span class="nav-ico">🎥</span> Clases Virtuales</div>
+      <div onclick="showSec('avisos')"    class="nav-item"        id="nav-avisos"   ><span class="nav-ico">📢</span> Avisos a Alumnos</div>
+      <div onclick="showSec('biblioteca');" class="nav-item"      id="nav-biblioteca"><span class="nav-ico">📚</span> Biblioteca</div>
+      <div onclick="showSec('perfil')"    class="nav-item"        id="nav-perfil"   ><span class="nav-ico">👤</span> Mi Perfil</div>
+    </div>
+
+    <!-- Main -->
+    <div class="main-content">
+
+      <!-- ── DASHBOARD ── -->
+      <div class="section active" id="sec-dashboard">
+        <div class="page-header">
+          <div class="page-title">🏠 Dashboard</div>
+          <div class="page-subtitle" id="dash-saludo">Bienvenido al portal docente</div>
+        </div>
+        <div class="stats-grid" id="dash-stats">
+          <div class="stat-card"><div class="stat-num" id="stat-cursos">—</div><div class="stat-lbl">Cursos asignados</div></div>
+          <div class="stat-card"><div class="stat-num" id="stat-alumnos">—</div><div class="stat-lbl">Alumnos inscritos</div></div>
+          <div class="stat-card"><div class="stat-num" id="stat-proximas">—</div><div class="stat-lbl">Clases próximas</div></div>
+          <div class="stat-card"><div class="stat-num" id="stat-avisos">—</div><div class="stat-lbl">Avisos publicados</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px" id="dash-panels">
+          <div class="card">
+            <div class="card-title">📅 Próximas clases</div>
+            <div id="dash-prox-clases"><div class="empty"><div class="ico">🎥</div><p>Sin clases programadas</p></div></div>
+          </div>
+          <div class="card">
+            <div class="card-title">📢 Últimos avisos</div>
+            <div id="dash-last-avisos"><div class="empty"><div class="ico">📢</div><p>Sin avisos recientes</p></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── CURSOS ── -->
+      <div class="section" id="sec-cursos">
+        <div class="page-header">
+          <div class="page-title">🎓 Mis Cursos</div>
+          <div class="page-subtitle">Cursos asignados a tu perfil docente</div>
+        </div>
+        <div id="cursos-grid"><div class="empty"><div class="ico">⏳</div><p>Cargando...</p></div></div>
+
+        <!-- Detalle de curso -->
+        <div id="curso-detalle" style="display:none">
+          <button class="btn btn-secondary btn-sm" onclick="closeCursoDetalle()" style="margin-bottom:16px">← Volver a mis cursos</button>
+          <div class="page-header">
+            <div class="page-title" id="curso-det-titulo">Curso</div>
+            <div class="page-subtitle" id="curso-det-desc"></div>
+          </div>
+          <div class="tabs">
+            <button class="tab-btn active" onclick="switchCursoTab('alumnos')">👥 Alumnos inscritos</button>
+            <button class="tab-btn" onclick="switchCursoTab('materiales')">📖 Materiales</button>
+          </div>
+          <div class="tab-panel active" id="ctab-alumnos">
+            <div id="alumnos-list"><div class="empty"><p>Cargando alumnos...</p></div></div>
+          </div>
+          <div class="tab-panel" id="ctab-materiales">
+            <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+              <button class="btn btn-primary btn-sm" onclick="openMaterialForm()">+ Agregar material</button>
+            </div>
+            <div id="materiales-list"><div class="empty"><div class="ico">📖</div><p>Sin materiales aún</p></div></div>
+            <div class="form-panel" id="material-form" style="display:none">
+              <h4>📖 Agregar Material Educativo</h4>
+              <div class="form-grid">
+                <div><label class="form-label">Título *</label><input class="form-control" id="mat-titulo" placeholder="Nombre del recurso"/></div>
+                <div><label class="form-label">Tipo *</label>
+                  <select class="form-control" id="mat-tipo">
+                    <option value="video">Video YouTube</option>
+                    <option value="pdf">Documento PDF</option>
+                    <option value="guia">Guía didáctica</option>
+                    <option value="infografia">Infografía</option>
+                    <option value="presentacion">Presentación</option>
+                  </select>
+                </div>
+                <div class="span2"><label class="form-label">URL del recurso *</label><input class="form-control" id="mat-url" placeholder="https://youtube.com/watch?v=... o enlace al documento"/></div>
+                <div class="span2"><label class="form-label">Descripción</label><textarea class="form-control" id="mat-desc" placeholder="Descripción breve..."></textarea></div>
+              </div>
+              <div style="display:flex;gap:10px;margin-top:12px">
+                <button class="btn btn-primary btn-sm" onclick="saveMaterial()">💾 Guardar</button>
+                <button class="btn btn-secondary btn-sm" onclick="closeMaterialForm()">Cancelar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── CLASES VIRTUALES ── -->
+      <div class="section" id="sec-clases">
+        <div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between">
+          <div>
+            <div class="page-title">🎥 Clases Virtuales</div>
+            <div class="page-subtitle">Programa y administra tus reuniones Zoom / Meet</div>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="openClaseForm()">+ Nueva clase</button>
+        </div>
+
+        <div class="tabs">
+          <button class="tab-btn active" onclick="switchClasesTab('proximas')">📅 Próximas</button>
+          <button class="tab-btn" onclick="switchClasesTab('pasadas')">🕐 Realizadas</button>
+        </div>
+        <div class="tab-panel active" id="cltab-proximas"><div id="clases-proximas-list"><div class="empty"><div class="ico">⏳</div><p>Cargando...</p></div></div></div>
+        <div class="tab-panel" id="cltab-pasadas"><div id="clases-pasadas-list"><div class="empty"><div class="ico">🕐</div><p>Sin clases realizadas</p></div></div></div>
+
+        <!-- Formulario nueva clase -->
+        <div class="form-panel" id="clase-form" style="display:none">
+          <h4 id="clase-form-title">🎥 Programar Nueva Clase Virtual</h4>
+          <input type="hidden" id="clase-edit-id"/>
+          <div class="form-grid">
+            <div><label class="form-label">Nombre de la clase *</label><input class="form-control" id="cl-nombre" placeholder="Ej: Taller de Reciclaje"/></div>
+            <div><label class="form-label">Curso *</label><select class="form-control" id="cl-curso"><option value="">Selecciona un curso...</option></select></div>
+            <div><label class="form-label">Fecha *</label><input class="form-control" id="cl-fecha" type="date"/></div>
+            <div><label class="form-label">Hora *</label><input class="form-control" id="cl-hora" type="time"/></div>
+            <div><label class="form-label">Duración</label><input class="form-control" id="cl-duracion" placeholder="Ej: 1 hora 30 min"/></div>
+            <div><label class="form-label">Plataforma</label>
+              <select class="form-control" id="cl-plataforma">
+                <option>Zoom</option><option>Google Meet</option><option>Teams</option><option>YouTube Live</option><option>Otro</option>
+              </select>
+            </div>
+            <div class="span2"><label class="form-label">Enlace de la reunión</label><input class="form-control" id="cl-enlace" placeholder="https://zoom.us/j/... o meet.google.com/..."/></div>
+            <div><label class="form-label">Contraseña (opcional)</label><input class="form-control" id="cl-pass" placeholder="Contraseña Zoom"/></div>
+            <div><label class="form-label">URL Material complementario</label><input class="form-control" id="cl-material" placeholder="https://..."/></div>
+            <div class="span2"><label class="form-label">Descripción / Bienvenida</label><textarea class="form-control" id="cl-desc" placeholder="Mensaje de bienvenida o descripción de la clase..."></textarea></div>
+            <div class="span2" style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="cl-pub" checked/><label for="cl-pub" style="font-size:13px">Publicar (visible para alumnos)</label></div>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:14px">
+            <button class="btn btn-primary btn-sm" onclick="saveClase()">💾 Guardar clase</button>
+            <button class="btn btn-secondary btn-sm" onclick="closeClaseForm()">Cancelar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── AVISOS ── -->
+      <div class="section" id="sec-avisos">
+        <div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between">
+          <div>
+            <div class="page-title">📢 Avisos a Mis Alumnos</div>
+            <div class="page-subtitle">Comunica novedades, recordatorios y cancelaciones a tus cursos</div>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="openAvisoForm()">+ Nuevo aviso</button>
+        </div>
+        <div id="avisos-list"><div class="empty"><div class="ico">⏳</div><p>Cargando...</p></div></div>
+
+        <!-- Formulario aviso -->
+        <div class="form-panel" id="aviso-form" style="display:none">
+          <h4>📢 Publicar Aviso</h4>
+          <input type="hidden" id="aviso-edit-id"/>
+          <div class="form-grid">
+            <div><label class="form-label">Título *</label><input class="form-control" id="av-titulo" placeholder="Título del aviso"/></div>
+            <div><label class="form-label">Tipo *</label>
+              <select class="form-control" id="av-tipo">
+                <option value="aviso">Aviso general</option>
+                <option value="nueva_clase">Nueva clase</option>
+                <option value="recordatorio">Recordatorio de clase</option>
+                <option value="cancelacion">Clase cancelada</option>
+                <option value="tarea">Nueva actividad / tarea</option>
+                <option value="material">Nuevo material disponible</option>
+              </select>
+            </div>
+            <div class="span2"><label class="form-label">Curso destinatario *</label><select class="form-control" id="av-curso"><option value="">Selecciona un curso...</option></select></div>
+            <div class="span2"><label class="form-label">Mensaje *</label><textarea class="form-control" id="av-contenido" rows="4" placeholder="Escribe el mensaje completo para tus alumnos..."></textarea></div>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:14px">
+            <button class="btn btn-primary btn-sm" onclick="saveAviso()">📢 Publicar aviso</button>
+            <button class="btn btn-secondary btn-sm" onclick="closeAvisoForm()">Cancelar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── BIBLIOTECA ── -->
+      <div class="section" id="sec-biblioteca">
+        <div class="page-header">
+          <div class="page-title">📚 Biblioteca de Recursos</div>
+          <div class="page-subtitle">Recursos educativos publicados en el Aula Ambiental</div>
+        </div>
+        <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+          <select class="form-control" id="bib-f-tipo" style="width:auto;min-width:140px" onchange="renderBib()">
+            <option value="">Todos los tipos</option>
+            <option value="video">Video</option><option value="pdf">PDF</option>
+            <option value="guia">Guía</option><option value="infografia">Infografía</option>
+            <option value="presentacion">Presentación</option>
+          </select>
+        </div>
+        <div id="bib-grid"><div class="empty"><div class="ico">⏳</div><p>Cargando recursos...</p></div></div>
+      </div>
+
+      <!-- ── PERFIL ── -->
+      <div class="section" id="sec-perfil">
+        <div class="page-header">
+          <div class="page-title">👤 Mi Perfil</div>
+          <div class="page-subtitle">Información de tu cuenta docente</div>
+        </div>
+        <div class="card" style="max-width:500px">
+          <div id="perfil-info"><div class="empty"><div class="ico">⏳</div><p>Cargando...</p></div></div>
+          <hr style="margin:16px 0;border:none;border-top:1px solid var(--border)"/>
+          <div class="card-title">🔒 Cambiar contraseña</div>
+          <div class="form-grid" style="max-width:400px">
+            <div><label class="form-label">Contraseña actual</label><input class="form-control" id="pwd-old" type="password" placeholder="••••••••"/></div>
+            <div><label class="form-label">Nueva contraseña</label><input class="form-control" id="pwd-new" type="password" placeholder="••••••••"/></div>
+            <div class="span2"><label class="form-label">Confirmar nueva contraseña</label><input class="form-control" id="pwd-confirm" type="password" placeholder="••••••••"/></div>
+          </div>
+          <button class="btn btn-primary btn-sm" style="margin-top:12px" onclick="cambiarPass()">Actualizar contraseña</button>
+        </div>
+      </div>
+
+    </div><!-- /main-content -->
+  </div><!-- /app-layout -->
+</div><!-- /screen-app -->
+
+<div id="toast"></div>
+
+<script>
+const PB_URL = 'https://api.iagami.online';
+let _token = null;
+let _profesor = null;
+let _misCursos = [];
+let _cursoActivo = null;
+let _misClases = [];
+let _misAvisos = [];
+let _bibRecursos = [];
+
+/* ─── UTILS ─── */
+function toast(msg, tipo='ok') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = tipo === 'error' ? 'err' : 'ok';
+  el.style.display = 'block';
+  setTimeout(() => { el.style.display = 'none'; }, 3200);
+}
+
+function esc(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+async function pbFetch(path, opts={}) {
+  const url = PB_URL + path;
+  const headers = {'Content-Type': 'application/json', ...(opts.headers||{})};
+  if (_token) headers['Authorization'] = _token;
+  const res = await fetch(url, {...opts, headers});
+  if (!res.ok) {
+    const err = await res.json().catch(()=>({message:'Error de conexión'}));
+    throw new Error(err.message || `HTTP ${res.status}`);
+  }
+  return res.json();
+}
+
+/* ─── AUTH ─── */
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass  = document.getElementById('login-pass').value;
+  const errEl = document.getElementById('login-err');
+  errEl.style.display = 'none';
+
+  if (!email || !pass) { errEl.textContent = 'Ingresa tu correo y contraseña.'; errEl.style.display = 'block'; return; }
+
+  try {
+    const data = await pbFetch('/api/collections/profesores/auth-with-password', {
+      method: 'POST',
+      body: JSON.stringify({identity: email, password: pass})
+    });
+
+    if (data.record.estado !== 'activo') {
+      errEl.textContent = 'Tu cuenta está suspendida. Contacta al administrador de IAGAMI.';
+      errEl.style.display = 'block';
+      return;
+    }
+
+    _token = data.token;
+    _profesor = data.record;
+    localStorage.setItem('prof_token', _token);
+    localStorage.setItem('prof_data', JSON.stringify(_profesor));
+    iniciarApp();
+  } catch(e) {
+    errEl.textContent = 'Correo o contraseña incorrectos.';
+    errEl.style.display = 'block';
+  }
+}
+
+function doLogout() {
+  _token = null; _profesor = null;
+  localStorage.removeItem('prof_token');
+  localStorage.removeItem('prof_data');
+  document.getElementById('screen-app').style.display = 'none';
+  document.getElementById('screen-login').style.display = 'flex';
+  document.getElementById('login-pass').value = '';
+}
+
+document.getElementById('login-pass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+
+/* ─── INICIAR APP ─── */
+async function iniciarApp() {
+  document.getElementById('screen-login').style.display = 'none';
+  document.getElementById('screen-app').style.display   = 'block';
+
+  const nombre = (_profesor.nombres || '').split(' ')[0];
+  document.getElementById('top-user').textContent = nombre || 'Profesor';
+  document.getElementById('dash-saludo').textContent = `Bienvenido/a, ${_profesor.nombres} ${_profesor.apellidos || ''}`;
+
+  await cargarDatos();
+  renderDashboard();
+}
+
+async function cargarDatos() {
+  try {
+    // Cursos asignados a este profesor
+    const rC = await pbFetch(`/api/collections/cursos_aula/records?filter=profesor_id%3D%22${_profesor.id}%22%26%26estado%3D%22activo%22&sort=nombre&perPage=50`);
+    _misCursos = rC.items || [];
+  } catch(e) { _misCursos = []; }
+
+  try {
+    // Clases virtuales de este profesor
+    const rCl = await pbFetch(`/api/collections/clases_virtuales/records?filter=profesor_id%3D%22${_profesor.id}%22&sort=-fecha&perPage=100`);
+    _misClases = rCl.items || [];
+  } catch(e) {
+    // Si la colección no tiene profesor_id aún, carga por nombre
+    try {
+      const nombre = encodeURIComponent(`${_profesor.nombres} ${_profesor.apellidos||''}`.trim());
+      const rCl2 = await pbFetch(`/api/collections/clases_virtuales/records?filter=profesor%3D%22${nombre}%22&sort=-fecha&perPage=100`);
+      _misClases = rCl2.items || [];
+    } catch(e2) { _misClases = []; }
+  }
+
+  try {
+    // Avisos de este profesor
+    const rA = await pbFetch(`/api/collections/avisos_aula/records?filter=profesor_id%3D%22${_profesor.id}%22&sort=-created&perPage=100`);
+    _misAvisos = rA.items || [];
+  } catch(e) {
+    try {
+      const nombre = encodeURIComponent(`${_profesor.nombres} ${_profesor.apellidos||''}`.trim());
+      const rA2 = await pbFetch(`/api/collections/avisos_aula/records?filter=profesor%3D%22${nombre}%22&sort=-created&perPage=100`);
+      _misAvisos = rA2.items || [];
+    } catch(e2) { _misAvisos = []; }
+  }
+
+  try {
+    const rB = await pbFetch('/api/collections/biblioteca_multimedia/records?filter=publicado%3Dtrue&sort=-created&perPage=200');
+    _bibRecursos = rB.items || [];
+  } catch(e) { _bibRecursos = []; }
+}
+
+/* ─── NAV ─── */
+let _secActiva = 'dashboard';
+function showSec(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('sec-' + id).classList.add('active');
+  document.getElementById('nav-' + id).classList.add('active');
+  _secActiva = id;
+  closeSidebar();
+  if (id === 'cursos')     renderCursos();
+  if (id === 'clases')     renderClases();
+  if (id === 'avisos')     renderAvisos();
+  if (id === 'biblioteca') renderBib();
+  if (id === 'perfil')     renderPerfil();
+}
+
+function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+function closeSidebar()   { document.getElementById('sidebar').classList.remove('open'); }
+
+/* ─── DASHBOARD ─── */
+function renderDashboard() {
+  const ahora = new Date();
+  const proximas = _misClases.filter(c => c.fecha && new Date(c.fecha) >= ahora);
+  document.getElementById('stat-cursos').textContent  = _misCursos.length;
+  document.getElementById('stat-proximas').textContent = proximas.length;
+  document.getElementById('stat-avisos').textContent  = _misAvisos.length;
+
+  // alumnos: contar inscripciones (aproximado con cursos)
+  document.getElementById('stat-alumnos').textContent = '—';
+
+  // Próximas clases
+  const pcEl = document.getElementById('dash-prox-clases');
+  const pSlice = proximas.slice(0,3);
+  if (pSlice.length === 0) {
+    pcEl.innerHTML = '<div class="empty"><div class="ico">🎥</div><p>Sin clases próximas</p></div>';
+  } else {
+    pcEl.innerHTML = pSlice.map(c => `
+      <div style="padding:10px 0;border-bottom:1px solid var(--border)">
+        <div style="font-size:13px;font-weight:600">${esc(c.nombre)}</div>
+        <div style="font-size:12px;color:var(--muted)">📅 ${c.fecha||'—'} ${c.hora?'·'+c.hora:''} · ${esc(c.plataforma||'')}</div>
+        ${c.enlace_zoom?`<a href="${esc(c.enlace_zoom)}" target="_blank" style="font-size:12px;color:var(--primary);font-weight:600">🔗 Unirse</a>`:''}
+      </div>`).join('');
+  }
+
+  // Últimos avisos
+  const laEl = document.getElementById('dash-last-avisos');
+  const aSlice = _misAvisos.slice(0,3);
+  if (aSlice.length === 0) {
+    laEl.innerHTML = '<div class="empty"><div class="ico">📢</div><p>Sin avisos recientes</p></div>';
+  } else {
+    laEl.innerHTML = aSlice.map(a => `
+      <div style="padding:10px 0;border-bottom:1px solid var(--border)">
+        <div style="font-size:13px;font-weight:600">${esc(a.titulo)}</div>
+        <div style="font-size:12px;color:var(--muted)">${esc(a.tipo||'aviso')} · ${esc(a.curso||'General')} · ${new Date(a.created).toLocaleDateString('es-VE')}</div>
+      </div>`).join('');
+  }
+}
+
+/* ─── CURSOS ─── */
+function renderCursos() {
+  const el = document.getElementById('cursos-grid');
+  if (_misCursos.length === 0) {
+    el.innerHTML = '<div class="empty"><div class="ico">🎓</div><p>No tienes cursos asignados.<br>El administrador de IAGAMI asigna los cursos.</p></div>';
+    return;
+  }
+  const catIco = {ambiental:'🌿',ecosocialismo:'♻️',reciclaje:'♻️',agua:'💧',biodiversidad:'🦋',clima:'🌡️',otro:'📚'};
+  el.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px">${_misCursos.map(c => `
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;cursor:pointer" onclick="abrirCurso('${c.id}')">
+      <div style="background:var(--primary-light);padding:20px;text-align:center;font-size:36px">${catIco[c.categoria]||'📚'}</div>
+      <div style="padding:14px">
+        <div style="font-size:14px;font-weight:600;font-family:'Poppins',sans-serif;margin-bottom:4px">${esc(c.nombre)}</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:10px">${esc(c.descripcion||'Sin descripción')}</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <span class="badge badge-green">${esc(c.nivel||'General')}</span>
+          <span class="badge badge-blue">${esc(c.categoria||'')}</span>
+        </div>
+        <button class="btn btn-primary btn-sm" style="width:100%;margin-top:12px">Ver curso →</button>
+      </div>
+    </div>`).join('')}</div>`;
+  document.getElementById('curso-detalle').style.display = 'none';
+}
+
+async function abrirCurso(id) {
+  _cursoActivo = _misCursos.find(c => c.id === id);
+  if (!_cursoActivo) return;
+  document.getElementById('cursos-grid').style.display = 'none';
+  document.getElementById('curso-detalle').style.display = 'block';
+  document.getElementById('curso-det-titulo').textContent = _cursoActivo.nombre;
+  document.getElementById('curso-det-desc').textContent = _cursoActivo.descripcion || '';
+  switchCursoTab('alumnos');
+}
+
+function closeCursoDetalle() {
+  document.getElementById('curso-detalle').style.display = 'none';
+  document.getElementById('cursos-grid').style.display = 'block';
+}
+
+function switchCursoTab(tab) {
+  ['alumnos','materiales'].forEach(t => {
+    document.getElementById('ctab-'+t).classList.toggle('active', t===tab);
+    document.querySelectorAll(`[onclick="switchCursoTab('${t}')"]`).forEach(b => b.classList.toggle('active', t===tab));
+  });
+  if (tab === 'alumnos')    cargarAlumnos();
+  if (tab === 'materiales') cargarMateriales();
+}
+
+async function cargarAlumnos() {
+  const el = document.getElementById('alumnos-list');
+  if (!_cursoActivo) return;
+  el.innerHTML = '<div class="empty"><div class="ico">⏳</div><p>Cargando alumnos...</p></div>';
+  try {
+    const r = await pbFetch(`/api/collections/inscripciones_curso/records?filter=curso_id%3D%22${_cursoActivo.id}%22%26%26estado%3D%22activo%22&sort=alumno_nombre&perPage=200`);
+    const alumnos = r.items || [];
+    if (alumnos.length === 0) { el.innerHTML = '<div class="empty"><div class="ico">👥</div><p>Sin alumnos inscritos aún</p></div>'; return; }
+    el.innerHTML = `<div style="margin-bottom:8px;font-size:13px;color:var(--muted)">${alumnos.length} alumno(s) inscrito(s)</div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Nombre</th><th>Cédula / ID</th><th>Categoría</th><th>Estado</th></tr></thead>
+        <tbody>${alumnos.map(a => `<tr>
+          <td>${esc(a.alumno_nombre)}</td>
+          <td style="font-size:12px;color:var(--muted)">${esc(a.alumno_cedula||a.alumno_id||'—')}</td>
+          <td><span class="badge ${a.alumno_tipo==='adulto'?'badge-blue':a.alumno_tipo==='adolescente'?'badge-yellow':'badge-green'}">${esc(a.alumno_tipo)}</span></td>
+          <td><span class="badge badge-green">${esc(a.estado)}</span></td>
+        </tr>`).join('')}</tbody>
+      </table></div>`;
+  } catch(e) { el.innerHTML = '<div class="empty"><div class="ico">❌</div><p>No se pudo cargar la lista de alumnos.</p></div>'; }
+}
+
+async function cargarMateriales() {
+  const el = document.getElementById('materiales-list');
+  if (!_cursoActivo) return;
+  const mat = _bibRecursos.filter(r => r.curso_id === _cursoActivo.id || r.categoria === _cursoActivo.nombre);
+  if (mat.length === 0) { el.innerHTML = '<div class="empty"><div class="ico">📖</div><p>Sin materiales publicados en este curso</p></div>'; return; }
+  const ico = {video:'▶️',pdf:'📄',guia:'📗',infografia:'🖼️',presentacion:'📊'};
+  el.innerHTML = mat.map(r => `
+    <div style="display:flex;align-items:center;gap:12px;padding:10px;background:#f8fafc;border-radius:8px;margin-bottom:8px">
+      <div style="font-size:24px">${ico[r.tipo]||'📁'}</div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:600">${esc(r.titulo)}</div>
+        <div style="font-size:12px;color:var(--muted)">${esc(r.tipo)} · ${esc(r.nivel||'General')}</div>
+      </div>
+      <a href="${esc(r.url)}" target="_blank" class="btn btn-secondary btn-sm">🔗 Abrir</a>
+    </div>`).join('');
+}
+
+function openMaterialForm()  { document.getElementById('material-form').style.display = 'block'; }
+function closeMaterialForm() { document.getElementById('material-form').style.display = 'none'; }
+
+async function saveMaterial() {
+  if (!_cursoActivo) return;
+  const titulo = document.getElementById('mat-titulo').value.trim();
+  const url    = document.getElementById('mat-url').value.trim();
+  const tipo   = document.getElementById('mat-tipo').value;
+  if (!titulo || !url) { toast('Título y URL son requeridos', 'error'); return; }
+  try {
+    await pbFetch('/api/collections/biblioteca_multimedia/records', {
+      method: 'POST',
+      body: JSON.stringify({
+        titulo, tipo, url,
+        categoria: _cursoActivo.nombre,
+        descripcion: document.getElementById('mat-desc').value.trim(),
+        publicado: true,
+        profesor_id: _profesor.id
+      })
+    });
+    toast('Material guardado');
+    closeMaterialForm();
+    ['mat-titulo','mat-url','mat-desc'].forEach(id => { document.getElementById(id).value = ''; });
+    const rB = await pbFetch('/api/collections/biblioteca_multimedia/records?filter=publicado%3Dtrue&sort=-created&perPage=200');
+    _bibRecursos = rB.items || [];
+    cargarMateriales();
+  } catch(e) { toast('Error al guardar material', 'error'); }
+}
+
+/* ─── CLASES VIRTUALES ─── */
+let _claseTab = 'proximas';
+
+function switchClasesTab(tab) {
+  _claseTab = tab;
+  ['proximas','pasadas'].forEach(t => {
+    document.getElementById('cltab-'+t).classList.toggle('active', t===tab);
+    document.querySelectorAll(`[onclick="switchClasesTab('${t}')"]`).forEach(b => b.classList.toggle('active', t===tab));
+  });
+  renderClases();
+}
+
+function renderClases() {
+  const ahora = new Date();
+  const proximas = _misClases.filter(c => !c.fecha || new Date(c.fecha) >= ahora);
+  const pasadas  = _misClases.filter(c => c.fecha && new Date(c.fecha) < ahora);
+  renderClaseLista('clases-proximas-list', proximas, false);
+  renderClaseLista('clases-pasadas-list',  pasadas,  true);
+  poblarSelectCursos('cl-curso');
+}
+
+function renderClaseLista(elId, lista, pasada) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  if (lista.length === 0) {
+    el.innerHTML = `<div class="empty"><div class="ico">${pasada?'🕐':'📅'}</div><p>${pasada?'Sin clases realizadas':'Sin clases programadas'}</p></div>`;
+    return;
+  }
+  const platIco = {Zoom:'🔵',Meet:'🟢',Teams:'🟣','YouTube Live':'🔴',Otro:'🎥'};
+  el.innerHTML = lista.map(c => `
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+        <div style="font-size:14px;font-weight:600">${platIco[c.plataforma]||'🎥'} ${esc(c.nombre)}</div>
+        <span class="badge ${pasada?'badge-gray':'badge-green'}">${pasada?'Realizada':'Próxima'}</span>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:6px">📅 ${c.fecha||'—'} ${c.hora?'· '+c.hora:''} · ${esc(c.plataforma||'')} · ${esc(c.curso||'General')}</div>
+      ${c.enlace_zoom?`<a href="${esc(c.enlace_zoom)}" target="_blank" style="font-size:12px;color:var(--primary);font-weight:600">🔗 ${esc(c.enlace_zoom)}</a>`:''}
+      ${c.contrasena?`<div style="font-size:12px;color:var(--muted);margin-top:2px">🔑 Contraseña: ${esc(c.contrasena)}</div>`:''}
+      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+        <button onclick="editarClase('${c.id}')" class="btn btn-secondary btn-sm">✏️ Editar</button>
+        <button onclick="eliminarClase('${c.id}')" class="btn btn-danger btn-sm">🗑 Eliminar</button>
+      </div>
+    </div>`).join('');
+}
+
+function openClaseForm(clear=true) {
+  document.getElementById('clase-form').style.display = 'block';
+  document.getElementById('clase-form-title').textContent = '🎥 Programar Nueva Clase Virtual';
+  if (clear) {
+    document.getElementById('clase-edit-id').value = '';
+    ['cl-nombre','cl-enlace','cl-pass','cl-material','cl-desc','cl-duracion'].forEach(id => { document.getElementById(id).value = ''; });
+    document.getElementById('cl-pub').checked = true;
+  }
+  poblarSelectCursos('cl-curso');
+}
+
+function closeClaseForm() { document.getElementById('clase-form').style.display = 'none'; }
+
+function editarClase(id) {
+  const c = _misClases.find(x => x.id === id);
+  if (!c) return;
+  openClaseForm(false);
+  document.getElementById('clase-form-title').textContent = '✏️ Editar Clase Virtual';
+  document.getElementById('clase-edit-id').value = id;
+  document.getElementById('cl-nombre').value    = c.nombre||'';
+  document.getElementById('cl-curso').value     = c.curso||'';
+  document.getElementById('cl-fecha').value     = c.fecha||'';
+  document.getElementById('cl-hora').value      = c.hora||'';
+  document.getElementById('cl-duracion').value  = c.duracion||'';
+  document.getElementById('cl-plataforma').value= c.plataforma||'Zoom';
+  document.getElementById('cl-enlace').value    = c.enlace_zoom||'';
+  document.getElementById('cl-pass').value      = c.contrasena||'';
+  document.getElementById('cl-material').value  = c.material_url||'';
+  document.getElementById('cl-desc').value      = c.descripcion||'';
+  document.getElementById('cl-pub').checked     = !!c.publicado;
+  document.getElementById('clase-form').scrollIntoView({behavior:'smooth'});
+}
+
+async function saveClase() {
+  const nombre = document.getElementById('cl-nombre').value.trim();
+  const fecha  = document.getElementById('cl-fecha').value;
+  if (!nombre || !fecha) { toast('Nombre y fecha son requeridos', 'error'); return; }
+  const editId = document.getElementById('clase-edit-id').value;
+  const data = {
+    nombre, fecha,
+    descripcion:  document.getElementById('cl-desc').value.trim(),
+    curso:        document.getElementById('cl-curso').value,
+    hora:         document.getElementById('cl-hora').value,
+    duracion:     document.getElementById('cl-duracion').value.trim(),
+    plataforma:   document.getElementById('cl-plataforma').value,
+    enlace_zoom:  document.getElementById('cl-enlace').value.trim(),
+    contrasena:   document.getElementById('cl-pass').value.trim(),
+    material_url: document.getElementById('cl-material').value.trim(),
+    publicado:    document.getElementById('cl-pub').checked,
+    profesor: `${_profesor.nombres} ${_profesor.apellidos||''}`.trim(),
+    profesor_id: _profesor.id
+  };
+  try {
+    if (editId) {
+      await pbFetch(`/api/collections/clases_virtuales/records/${editId}`, {method:'PATCH', body: JSON.stringify(data)});
+      toast('Clase actualizada');
+    } else {
+      await pbFetch('/api/collections/clases_virtuales/records', {method:'POST', body: JSON.stringify(data)});
+      toast('Clase programada');
+    }
+    closeClaseForm();
+    // recargar
+    try {
+      const rCl = await pbFetch(`/api/collections/clases_virtuales/records?filter=profesor_id%3D%22${_profesor.id}%22&sort=-fecha&perPage=100`);
+      _misClases = rCl.items || [];
+    } catch(e2) { await cargarDatos(); }
+    renderClases();
+    renderDashboard();
+  } catch(e) { toast('Error al guardar: ' + e.message, 'error'); }
+}
+
+async function eliminarClase(id) {
+  if (!confirm('¿Eliminar esta clase virtual?')) return;
+  try {
+    await pbFetch(`/api/collections/clases_virtuales/records/${id}`, {method:'DELETE'});
+    toast('Clase eliminada');
+    _misClases = _misClases.filter(c => c.id !== id);
+    renderClases();
+    renderDashboard();
+  } catch(e) { toast('Error al eliminar: ' + e.message, 'error'); }
+}
+
+/* ─── AVISOS ─── */
+function renderAvisos() {
+  poblarSelectCursos('av-curso');
+  const el = document.getElementById('avisos-list');
+  if (_misAvisos.length === 0) {
+    el.innerHTML = '<div class="empty"><div class="ico">📢</div><p>Sin avisos publicados. Crea el primero.</p></div>'; return;
+  }
+  const colores = {aviso:'#2563eb',recordatorio:'#d97706',cancelacion:'#dc2626',nueva_clase:'#059669',tarea:'#7c3aed',material:'#0891b2'};
+  el.innerHTML = _misAvisos.map(a => `
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px">
+        <div style="font-size:14px;font-weight:600">📢 ${esc(a.titulo)}</div>
+        <span class="badge" style="background:#f8fafc;color:${colores[a.tipo]||'#374151'}">${esc(a.tipo||'aviso')}</span>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:8px">Curso: ${esc(a.curso||'General')} · ${new Date(a.created).toLocaleDateString('es-VE')}</div>
+      <div style="font-size:13px;color:var(--text);line-height:1.5">${esc(a.contenido)}</div>
+      <div style="margin-top:10px;display:flex;justify-content:flex-end">
+        <button onclick="eliminarAviso('${a.id}')" class="btn btn-danger btn-sm">🗑 Eliminar</button>
+      </div>
+    </div>`).join('');
+}
+
+function openAvisoForm()  { document.getElementById('aviso-form').style.display = 'block'; poblarSelectCursos('av-curso'); }
+function closeAvisoForm() { document.getElementById('aviso-form').style.display = 'none'; }
+
+async function saveAviso() {
+  const titulo    = document.getElementById('av-titulo').value.trim();
+  const contenido = document.getElementById('av-contenido').value.trim();
+  if (!titulo || !contenido) { toast('Título y mensaje son requeridos', 'error'); return; }
+  const data = {
+    titulo, contenido,
+    tipo:    document.getElementById('av-tipo').value,
+    curso:   document.getElementById('av-curso').value,
+    publicado: true,
+    profesor: `${_profesor.nombres} ${_profesor.apellidos||''}`.trim(),
+    profesor_id: _profesor.id
+  };
+  try {
+    await pbFetch('/api/collections/avisos_aula/records', {method:'POST', body: JSON.stringify(data)});
+    toast('Aviso publicado');
+    closeAvisoForm();
+    ['av-titulo','av-contenido'].forEach(id => { document.getElementById(id).value = ''; });
+    try {
+      const rA = await pbFetch(`/api/collections/avisos_aula/records?filter=profesor_id%3D%22${_profesor.id}%22&sort=-created&perPage=100`);
+      _misAvisos = rA.items || [];
+    } catch(e2) { await cargarDatos(); }
+    renderAvisos();
+    renderDashboard();
+  } catch(e) { toast('Error al publicar: ' + e.message, 'error'); }
+}
+
+async function eliminarAviso(id) {
+  if (!confirm('¿Eliminar este aviso?')) return;
+  try {
+    await pbFetch(`/api/collections/avisos_aula/records/${id}`, {method:'DELETE'});
+    toast('Aviso eliminado');
+    _misAvisos = _misAvisos.filter(a => a.id !== id);
+    renderAvisos();
+    renderDashboard();
+  } catch(e) { toast('Error al eliminar: ' + e.message, 'error'); }
+}
+
+/* ─── BIBLIOTECA ─── */
+function renderBib() {
+  const tipo = document.getElementById('bib-f-tipo').value;
+  const lista = tipo ? _bibRecursos.filter(r => r.tipo === tipo) : _bibRecursos;
+  const el = document.getElementById('bib-grid');
+  if (lista.length === 0) { el.innerHTML = '<div class="empty"><div class="ico">📚</div><p>No hay recursos en la biblioteca.</p></div>'; return; }
+  const ico = {video:'▶️',pdf:'📄',guia:'📗',infografia:'🖼️',presentacion:'📊'};
+  el.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px">${lista.map(r=>`
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden">
+      <div style="background:var(--primary-light);padding:14px;text-align:center;font-size:28px">${ico[r.tipo]||'📁'}</div>
+      <div style="padding:12px">
+        <div style="font-size:13px;font-weight:600;margin-bottom:4px">${esc(r.titulo)}</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:8px">${esc(r.categoria||'')} · ${esc(r.nivel||'General')}</div>
+        <a href="${esc(r.url)}" target="_blank" class="btn btn-secondary btn-sm" style="width:100%;display:block;text-align:center">🔗 Abrir recurso</a>
+      </div>
+    </div>`).join('')}</div>`;
+}
+
+/* ─── PERFIL ─── */
+function renderPerfil() {
+  const el = document.getElementById('perfil-info');
+  if (!_profesor) return;
+  el.innerHTML = `
+    <div style="display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center;margin-bottom:16px">
+      <div style="width:64px;height:64px;border-radius:50%;background:var(--primary-light);display:flex;align-items:center;justify-content:center;font-size:28px">👤</div>
+      <div>
+        <div style="font-family:'Poppins',sans-serif;font-size:18px;font-weight:700">${esc(_profesor.nombres)} ${esc(_profesor.apellidos||'')}</div>
+        <div style="font-size:13px;color:var(--muted)">${esc(_profesor.email||'')}</div>
+        <span class="badge ${_profesor.estado==='activo'?'badge-green':'badge-red'}" style="margin-top:4px">${esc(_profesor.estado)}</span>
+      </div>
+    </div>
+    <div style="font-size:13px;display:grid;gap:6px">
+      <div><strong>Especialidad:</strong> ${esc(_profesor.especialidad||'No indicada')}</div>
+      <div><strong>Cédula:</strong> ${esc(_profesor.cedula||'—')}</div>
+      <div><strong>Teléfono:</strong> ${esc(_profesor.telefono||'—')}</div>
+      <div><strong>Cursos asignados:</strong> ${_misCursos.length}</div>
+    </div>`;
+}
+
+async function cambiarPass() {
+  const vieja    = document.getElementById('pwd-old').value;
+  const nueva    = document.getElementById('pwd-new').value;
+  const confirm2 = document.getElementById('pwd-confirm').value;
+  if (!vieja || !nueva || !confirm2) { toast('Completa todos los campos', 'error'); return; }
+  if (nueva !== confirm2) { toast('Las contraseñas no coinciden', 'error'); return; }
+  if (nueva.length < 8)   { toast('La contraseña debe tener al menos 8 caracteres', 'error'); return; }
+  try {
+    await pbFetch(`/api/collections/profesores/records/${_profesor.id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({password: nueva, passwordConfirm: confirm2, oldPassword: vieja})
+    });
+    toast('Contraseña actualizada. Vuelve a iniciar sesión.');
+    setTimeout(doLogout, 2000);
+  } catch(e) { toast('Error: ' + (e.message||'Verifica la contraseña actual'), 'error'); }
+}
+
+/* ─── HELPERS ─── */
+function poblarSelectCursos(selectId) {
+  const sel = document.getElementById(selectId);
+  if (!sel) return;
+  const val = sel.value;
+  sel.innerHTML = '<option value="">Selecciona un curso...</option>';
+  _misCursos.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c.nombre;
+    opt.textContent = c.nombre;
+    sel.appendChild(opt);
+  });
+  if (val) sel.value = val;
+}
+
+/* ─── SESSION RESTORE ─── */
+(function restoreSession() {
+  try {
+    const t = localStorage.getItem('prof_token');
+    const d = localStorage.getItem('prof_data');
+    if (!t || !d) return;
+    _token    = t;
+    _profesor = JSON.parse(d);
+    if (_profesor.estado !== 'activo') { localStorage.clear(); return; }
+    // Verificar que el token sigue válido
+    fetch(PB_URL + '/api/collections/profesores/auth-refresh', {
+      method: 'POST',
+      headers: {Authorization: _token}
+    }).then(r => r.json()).then(data => {
+      if (data.token) {
+        _token = data.token;
+        _profesor = data.record;
+        localStorage.setItem('prof_token', _token);
+        localStorage.setItem('prof_data', JSON.stringify(_profesor));
+        iniciarApp();
+      } else {
+        doLogout();
+      }
+    }).catch(() => { doLogout(); });
+  } catch(e) { /* silent */ }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,63 @@
+[
+  {
+    "name": "profesores",
+    "type": "auth",
+    "system": false,
+    "listRule": "@request.auth.id != ''",
+    "viewRule": "@request.auth.id = id || @request.auth.collectionName = 'admins'",
+    "createRule": null,
+    "updateRule": "@request.auth.id = id",
+    "deleteRule": null,
+    "schema": [
+      {"name": "nombres",           "type": "text",   "required": true,  "options": {"min": 2, "max": 100}},
+      {"name": "apellidos",         "type": "text",   "required": true,  "options": {"min": 2, "max": 100}},
+      {"name": "cedula",            "type": "text",   "required": false, "options": {"max": 12}},
+      {"name": "telefono",          "type": "text",   "required": false, "options": {"max": 15}},
+      {"name": "especialidad",      "type": "text",   "required": false, "options": {"max": 200}},
+      {"name": "estado",            "type": "select", "required": true,  "options": {"values": ["activo","suspendido","inactivo"]}, "default": "activo"},
+      {"name": "avatar",            "type": "file",   "required": false, "options": {"maxSelect": 1, "maxSize": 2097152, "mimeTypes": ["image/jpeg","image/png","image/webp"]}},
+      {"name": "created",           "type": "autodate","onCreate": true, "onUpdate": false}
+    ]
+  },
+  {
+    "name": "cursos_aula",
+    "type": "base",
+    "system": false,
+    "listRule": "",
+    "viewRule": "",
+    "createRule": "@request.auth.collectionName = 'admins'",
+    "updateRule": "@request.auth.collectionName = 'admins' || @request.auth.id = profesor_id",
+    "deleteRule": "@request.auth.collectionName = 'admins'",
+    "schema": [
+      {"name": "nombre",        "type": "text",     "required": true,  "options": {"min": 2, "max": 200}},
+      {"name": "descripcion",   "type": "text",     "required": false, "options": {"max": 1000}},
+      {"name": "profesor_id",   "type": "relation", "required": false, "options": {"collectionId": "profesores", "cascadeDelete": false, "maxSelect": 1}},
+      {"name": "profesor_nombre","type": "text",    "required": false, "options": {"max": 150}},
+      {"name": "categoria",     "type": "select",   "required": true,  "options": {"values": ["ambiental","ecosocialismo","reciclaje","agua","biodiversidad","clima","otro"]}},
+      {"name": "nivel",         "type": "select",   "required": false, "options": {"values": ["inicial","primaria","secundaria","adultos","brigadistas","general"]}},
+      {"name": "imagen_url",    "type": "url",      "required": false},
+      {"name": "estado",        "type": "select",   "required": true,  "options": {"values": ["activo","inactivo","finalizado"]}, "default": "activo"},
+      {"name": "publicado",     "type": "bool",     "required": false},
+      {"name": "created",       "type": "autodate", "onCreate": true,  "onUpdate": false}
+    ]
+  },
+  {
+    "name": "inscripciones_curso",
+    "type": "base",
+    "system": false,
+    "listRule": "@request.auth.id != ''",
+    "viewRule": "@request.auth.id != ''",
+    "createRule": "",
+    "updateRule": "@request.auth.collectionName = 'admins' || @request.auth.id = id",
+    "deleteRule": "@request.auth.collectionName = 'admins'",
+    "schema": [
+      {"name": "curso_id",       "type": "relation", "required": true, "options": {"collectionId": "cursos_aula", "cascadeDelete": false, "maxSelect": 1}},
+      {"name": "alumno_tipo",    "type": "select",   "required": true, "options": {"values": ["adulto","adolescente","nino"]}},
+      {"name": "alumno_id",      "type": "text",     "required": true, "options": {"max": 50}},
+      {"name": "alumno_nombre",  "type": "text",     "required": true, "options": {"max": 200}},
+      {"name": "alumno_cedula",  "type": "text",     "required": false,"options": {"max": 12}},
+      {"name": "estado",         "type": "select",   "required": true, "options": {"values": ["activo","retirado","completado"]}, "default": "activo"},
+      {"name": "created",        "type": "autodate", "onCreate": true, "onUpdate": false}
+    ]
+  }
+]

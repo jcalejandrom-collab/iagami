@@ -1781,6 +1781,110 @@ input,select,textarea{font-family:inherit}
   </div>
 </div>
 
+    <!-- ══════ PROFESORES ══════ -->
+    <div id="sec-profesores" class="section">
+      <div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between">
+        <div>
+          <div class="page-title">👨‍🏫 Gestión de Profesores</div>
+          <div class="page-subtitle">Crear, activar/suspender cuentas docentes y asignar cursos</div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="openProfForm()">+ Nuevo profesor</button>
+      </div>
+
+      <!-- Estadísticas -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px" id="prof-stats">
+        <div style="background:#fff;border-radius:12px;padding:14px;text-align:center;box-shadow:var(--shadow)">
+          <div style="font-size:24px;font-weight:700;color:var(--primary)" id="ps-total">—</div>
+          <div style="font-size:11px;color:var(--muted)">Total profesores</div>
+        </div>
+        <div style="background:#fff;border-radius:12px;padding:14px;text-align:center;box-shadow:var(--shadow)">
+          <div style="font-size:24px;font-weight:700;color:#059669" id="ps-activos">—</div>
+          <div style="font-size:11px;color:var(--muted)">Activos</div>
+        </div>
+        <div style="background:#fff;border-radius:12px;padding:14px;text-align:center;box-shadow:var(--shadow)">
+          <div style="font-size:24px;font-weight:700;color:var(--primary)" id="ps-cursos">—</div>
+          <div style="font-size:11px;color:var(--muted)">Cursos activos</div>
+        </div>
+        <div style="background:#fff;border-radius:12px;padding:14px;text-align:center;box-shadow:var(--shadow)">
+          <div style="font-size:24px;font-weight:700;color:#2563eb" id="ps-clases">—</div>
+          <div style="font-size:11px;color:var(--muted)">Clases programadas</div>
+        </div>
+      </div>
+
+      <!-- Formulario nuevo profesor -->
+      <div id="prof-form-panel" style="display:none;background:#f8fafc;border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:20px">
+        <h4 style="font-family:'Poppins',sans-serif;font-size:15px;font-weight:600;color:var(--primary-dark);margin-bottom:14px">👨‍🏫 Crear Cuenta Docente</h4>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div><label class="form-label">Nombres *</label><input class="form-control" id="pf-nombres" placeholder="Nombres del profesor"/></div>
+          <div><label class="form-label">Apellidos *</label><input class="form-control" id="pf-apellidos" placeholder="Apellidos"/></div>
+          <div><label class="form-label">Correo institucional *</label><input class="form-control" id="pf-email" type="email" placeholder="profesor@iagami.online"/></div>
+          <div><label class="form-label">Cédula</label><input class="form-control" id="pf-cedula" placeholder="V-00000000"/></div>
+          <div><label class="form-label">Teléfono</label><input class="form-control" id="pf-tel" placeholder="04XX-XXXXXXX"/></div>
+          <div><label class="form-label">Especialidad</label><input class="form-control" id="pf-esp" placeholder="Ej: Educación Ambiental"/></div>
+          <div><label class="form-label">Contraseña inicial *</label><input class="form-control" id="pf-pass" type="password" placeholder="Mínimo 8 caracteres"/></div>
+          <div><label class="form-label">Confirmar contraseña *</label><input class="form-control" id="pf-pass2" type="password" placeholder="Repite la contraseña"/></div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:14px">
+          <button class="btn btn-primary btn-sm" onclick="saveProfesor()">💾 Crear cuenta docente</button>
+          <button class="btn btn-secondary btn-sm" onclick="closeProfForm()">Cancelar</button>
+        </div>
+      </div>
+
+      <!-- Tabs: Profesores / Cursos -->
+      <div style="display:flex;border-bottom:2px solid var(--border);margin-bottom:16px">
+        <button id="ptab-profesores" onclick="switchProfTab('profesores')" style="padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;background:none;border:none;border-bottom:2px solid var(--primary);color:var(--primary);margin-bottom:-2px;font-family:'Inter',sans-serif">👨‍🏫 Profesores</button>
+        <button id="ptab-cursos" onclick="switchProfTab('cursos')" style="padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);margin-bottom:-2px;font-family:'Inter',sans-serif">🎓 Cursos</button>
+      </div>
+
+      <div id="ptab-panel-profesores">
+        <div id="profesores-list"><div style="text-align:center;padding:32px;color:var(--muted)">Cargando...</div></div>
+      </div>
+
+      <div id="ptab-panel-cursos" style="display:none">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+          <button class="btn btn-primary btn-sm" onclick="openCursoForm()">+ Nuevo curso</button>
+        </div>
+        <div id="cursos-admin-list"><div style="text-align:center;padding:32px;color:var(--muted)">Cargando...</div></div>
+        <div id="curso-form-panel" style="display:none;background:#f8fafc;border:1px solid var(--border);border-radius:12px;padding:20px;margin-top:14px">
+          <h4 style="font-family:'Poppins',sans-serif;font-size:15px;font-weight:600;color:var(--primary-dark);margin-bottom:14px">🎓 Crear Curso del Aula Ambiental</h4>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div><label class="form-label">Nombre del curso *</label><input class="form-control" id="cu-nombre" placeholder="Ej: Educación Ambiental Básica"/></div>
+            <div><label class="form-label">Categoría *</label>
+              <select class="form-control" id="cu-cat">
+                <option value="ambiental">Educación Ambiental</option>
+                <option value="ecosocialismo">Ecosocialismo</option>
+                <option value="reciclaje">Reciclaje y Residuos</option>
+                <option value="agua">Protección del Agua</option>
+                <option value="biodiversidad">Biodiversidad</option>
+                <option value="clima">Cambio Climático</option>
+                <option value="otro">Otro</option>
+              </select>
+            </div>
+            <div><label class="form-label">Nivel</label>
+              <select class="form-control" id="cu-nivel">
+                <option value="general">General</option>
+                <option value="inicial">Inicial</option>
+                <option value="primaria">Primaria</option>
+                <option value="secundaria">Secundaria</option>
+                <option value="adultos">Adultos</option>
+                <option value="brigadistas">Brigadistas</option>
+              </select>
+            </div>
+            <div><label class="form-label">Asignar profesor</label>
+              <select class="form-control" id="cu-profesor"><option value="">Sin asignar</option></select>
+            </div>
+            <div style="grid-column:span 2"><label class="form-label">Descripción</label><textarea class="form-control" id="cu-desc" rows="2" placeholder="Descripción del curso..."></textarea></div>
+            <div style="grid-column:span 2;display:flex;align-items:center;gap:8px"><input type="checkbox" id="cu-pub" checked/><label for="cu-pub" style="font-size:13px">Publicado</label></div>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:14px">
+            <button class="btn btn-primary btn-sm" onclick="saveCursoAdmin()">💾 Guardar curso</button>
+            <button class="btn btn-secondary btn-sm" onclick="closeCursoForm()">Cancelar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- /sec-profesores -->
+
     <div id="sec-auditoria" class="section">
       <div class="page-header">
         <div>
@@ -1984,6 +2088,7 @@ const NAV = [
   {id:'ctrl_seguimiento', icon:'🔍', label:'Control y Seguimiento'},
   {id:'brigadas',          icon:'🌿', label:'Brigadas Ambientales'},
   {id:'aula',              icon:'📚', label:'Aula Ambiental'},
+  {id:'profesores',        icon:'👨‍🏫', label:'Profesores'},
   {id:'auditoria',        icon:'🛡️', label:'Auditoría'},
 ];
 
@@ -2046,6 +2151,7 @@ async function renderSection(name) {
     case 'ctrl_seguimiento': await renderCtrlSeguimiento(); break;
     case 'brigadas':         await renderBrigadas(); break;
     case 'aula':             await renderAula(); break;
+    case 'profesores':       await renderProfesores(); break;
     case 'auditoria':        await renderAuditoria(); break;
   }
 }
@@ -2387,6 +2493,224 @@ async function deleteAviso(id) {
   if (!confirm('¿Eliminar este aviso?')) return;
   try { await pb.collection('avisos_aula').delete(id); toast('Aviso eliminado'); await renderAvisosAdmin(); }
   catch(e) { toast('Error al eliminar', 'error'); }
+}
+
+/* ─── PROFESORES ─── */
+let _profesoresList = [];
+let _cursosAdminList = [];
+let _profTab = 'profesores';
+
+async function renderProfesores() {
+  try {
+    const [rP, rC, rCl] = await Promise.all([
+      pb.collection('profesores').getList(1, 200, {sort: 'nombres'}).catch(()=>({items:[]})),
+      pb.collection('cursos_aula').getList(1, 200, {sort: 'nombre'}).catch(()=>({items:[]})),
+      pb.collection('clases_virtuales').getList(1, 1, {}).catch(()=>({totalItems:0}))
+    ]);
+    _profesoresList = rP.items || [];
+    _cursosAdminList = rC.items || [];
+    const activos = _profesoresList.filter(p => p.estado === 'activo').length;
+    const cursosActivos = _cursosAdminList.filter(c => c.estado === 'activo').length;
+    document.getElementById('ps-total').textContent   = _profesoresList.length;
+    document.getElementById('ps-activos').textContent = activos;
+    document.getElementById('ps-cursos').textContent  = cursosActivos;
+    document.getElementById('ps-clases').textContent  = rCl.totalItems || 0;
+  } catch(e) { _profesoresList = []; _cursosAdminList = []; }
+  switchProfTab(_profTab);
+}
+
+function switchProfTab(tab) {
+  _profTab = tab;
+  ['profesores','cursos'].forEach(t => {
+    document.getElementById('ptab-panel-' + t).style.display = t === tab ? 'block' : 'none';
+    const btn = document.getElementById('ptab-' + t);
+    if (btn) {
+      btn.style.color = t === tab ? 'var(--primary)' : 'var(--muted)';
+      btn.style.borderBottomColor = t === tab ? 'var(--primary)' : 'transparent';
+    }
+  });
+  if (tab === 'profesores') renderProfList();
+  if (tab === 'cursos')     renderCursosAdmin();
+}
+
+function renderProfList() {
+  const el = document.getElementById('profesores-list');
+  if (!el) return;
+  if (_profesoresList.length === 0) {
+    el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted)"><div style="font-size:32px;margin-bottom:12px">👨‍🏫</div><div style="font-size:14px">No hay profesores registrados. Crea el primero.</div></div>';
+    return;
+  }
+  el.innerHTML = `<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">
+    <thead><tr style="background:#f8fafc">
+      <th style="padding:10px 12px;text-align:left;border-bottom:2px solid var(--border);color:var(--muted);font-size:11px;text-transform:uppercase">Profesor</th>
+      <th style="padding:10px 12px;text-align:left;border-bottom:2px solid var(--border);color:var(--muted);font-size:11px;text-transform:uppercase">Correo</th>
+      <th style="padding:10px 12px;text-align:left;border-bottom:2px solid var(--border);color:var(--muted);font-size:11px;text-transform:uppercase">Especialidad</th>
+      <th style="padding:10px 12px;text-align:left;border-bottom:2px solid var(--border);color:var(--muted);font-size:11px;text-transform:uppercase">Estado</th>
+      <th style="padding:10px 12px;text-align:left;border-bottom:2px solid var(--border);color:var(--muted);font-size:11px;text-transform:uppercase">Cursos</th>
+      <th style="padding:10px 12px;text-align:left;border-bottom:2px solid var(--border);color:var(--muted);font-size:11px;text-transform:uppercase">Acciones</th>
+    </tr></thead>
+    <tbody>${_profesoresList.map(p => {
+      const cursosProf = _cursosAdminList.filter(c => c.profesor_id === p.id).length;
+      const estadoBadge = p.estado === 'activo'
+        ? '<span style="font-size:11px;padding:2px 8px;border-radius:12px;background:#dcfce7;color:#166534;font-weight:600">activo</span>'
+        : '<span style="font-size:11px;padding:2px 8px;border-radius:12px;background:#fee2e2;color:#991b1b;font-weight:600">' + (p.estado||'suspendido') + '</span>';
+      return `<tr style="border-bottom:1px solid var(--border)">
+        <td style="padding:10px 12px;font-weight:600">${p.nombres||''} ${p.apellidos||''}</td>
+        <td style="padding:10px 12px;color:var(--muted)">${p.email||'—'}</td>
+        <td style="padding:10px 12px;color:var(--muted)">${p.especialidad||'—'}</td>
+        <td style="padding:10px 12px">${estadoBadge}</td>
+        <td style="padding:10px 12px;text-align:center">${cursosProf}</td>
+        <td style="padding:10px 12px">
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            ${p.estado==='activo'
+              ? `<button onclick="toggleProfesorEstado('${p.id}','suspendido')" style="font-size:11px;padding:3px 8px;border:1px solid #fca5a5;background:#fef2f2;color:#dc2626;border-radius:6px;cursor:pointer">⏸ Suspender</button>`
+              : `<button onclick="toggleProfesorEstado('${p.id}','activo')" style="font-size:11px;padding:3px 8px;border:1px solid #86efac;background:#dcfce7;color:#166534;border-radius:6px;cursor:pointer">▶ Activar</button>`}
+            <button onclick="resetProfPass('${p.id}','${(p.nombres||'').replace(/'/g,"\\'")}');" style="font-size:11px;padding:3px 8px;border:1px solid var(--border);background:#fff;border-radius:6px;cursor:pointer">🔑 Pass</button>
+          </div>
+        </td>
+      </tr>`;
+    }).join('')}</tbody>
+  </table></div>`;
+}
+
+function openProfForm()  { document.getElementById('prof-form-panel').style.display = 'block'; }
+function closeProfForm() { document.getElementById('prof-form-panel').style.display = 'none'; }
+
+async function saveProfesor() {
+  const nombres   = document.getElementById('pf-nombres').value.trim();
+  const apellidos = document.getElementById('pf-apellidos').value.trim();
+  const email     = document.getElementById('pf-email').value.trim();
+  const pass      = document.getElementById('pf-pass').value;
+  const pass2     = document.getElementById('pf-pass2').value;
+  if (!nombres || !apellidos || !email || !pass) { toast('Completa los campos requeridos', 'error'); return; }
+  if (pass !== pass2) { toast('Las contraseñas no coinciden', 'error'); return; }
+  if (pass.length < 8) { toast('La contraseña debe tener al menos 8 caracteres', 'error'); return; }
+  try {
+    await pb.collection('profesores').create({
+      nombres, apellidos, email,
+      username: email.split('@')[0].replace(/[^a-zA-Z0-9_]/g,'_') + '_' + Date.now().toString(36),
+      cedula:       document.getElementById('pf-cedula').value.trim(),
+      telefono:     document.getElementById('pf-tel').value.trim(),
+      especialidad: document.getElementById('pf-esp').value.trim(),
+      password: pass, passwordConfirm: pass2,
+      estado: 'activo'
+    });
+    toast('Cuenta docente creada. El profesor ya puede acceder al portal.');
+    closeProfForm();
+    ['pf-nombres','pf-apellidos','pf-email','pf-cedula','pf-tel','pf-esp','pf-pass','pf-pass2'].forEach(id => { document.getElementById(id).value = ''; });
+    await renderProfesores();
+  } catch(e) { toast('Error: ' + (e.message||'Verifica el correo (debe ser único)'), 'error'); }
+}
+
+async function toggleProfesorEstado(id, nuevoEstado) {
+  try {
+    await pb.collection('profesores').update(id, {estado: nuevoEstado});
+    toast(nuevoEstado === 'activo' ? 'Profesor activado' : 'Profesor suspendido');
+    const idx = _profesoresList.findIndex(p => p.id === id);
+    if (idx >= 0) _profesoresList[idx].estado = nuevoEstado;
+    renderProfList();
+  } catch(e) { toast('Error al actualizar estado', 'error'); }
+}
+
+async function resetProfPass(id, nombre) {
+  const nueva = prompt(`Nueva contraseña para ${nombre} (mínimo 8 caracteres):`);
+  if (!nueva || nueva.length < 8) { if (nueva !== null) toast('Contraseña demasiado corta', 'error'); return; }
+  try {
+    await pb.collection('profesores').update(id, {password: nueva, passwordConfirm: nueva});
+    toast('Contraseña actualizada');
+  } catch(e) { toast('Error al actualizar contraseña', 'error'); }
+}
+
+function renderCursosAdmin() {
+  const el = document.getElementById('cursos-admin-list');
+  if (!el) return;
+  poblarSelectProfesores();
+  if (_cursosAdminList.length === 0) {
+    el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted)">No hay cursos creados. Crea el primero.</div>';
+    return;
+  }
+  const catIco = {ambiental:'🌿',ecosocialismo:'♻️',reciclaje:'♻️',agua:'💧',biodiversidad:'🦋',clima:'🌡️',otro:'📚'};
+  el.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px">${_cursosAdminList.map(c => {
+    const prof = _profesoresList.find(p => p.id === c.profesor_id);
+    const profNombre = prof ? `${prof.nombres} ${prof.apellidos||''}` : (c.profesor_nombre || 'Sin asignar');
+    return `<div style="background:#fff;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden">
+      <div style="background:var(--primary-light);padding:14px;text-align:center;font-size:28px">${catIco[c.categoria]||'📚'}</div>
+      <div style="padding:14px">
+        <div style="font-size:13px;font-weight:600;margin-bottom:4px">${c.nombre}</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px">👨‍🏫 ${profNombre}</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:10px">${c.nivel||'General'} · ${c.categoria||''}</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <select onchange="asignarProfesorCurso('${c.id}',this.value)" style="font-size:11px;padding:3px 6px;border:1px solid var(--border);border-radius:6px;cursor:pointer">
+            <option value="">— Reasignar profesor —</option>
+            ${_profesoresList.map(p=>`<option value="${p.id}" ${p.id===c.profesor_id?'selected':''}>${p.nombres} ${p.apellidos||''}</option>`).join('')}
+          </select>
+          <button onclick="toggleCursoEstado('${c.id}','${c.estado==='activo'?'inactivo':'activo'}')" style="font-size:11px;padding:3px 8px;border:1px solid var(--border);background:#fff;border-radius:6px;cursor:pointer">${c.estado==='activo'?'⏸ Desactivar':'▶ Activar'}</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+function openCursoForm()  { document.getElementById('curso-form-panel').style.display = 'block'; poblarSelectProfesores(); }
+function closeCursoForm() { document.getElementById('curso-form-panel').style.display = 'none'; }
+
+function poblarSelectProfesores() {
+  const sel = document.getElementById('cu-profesor');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">Sin asignar</option>';
+  _profesoresList.filter(p => p.estado === 'activo').forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p.id;
+    opt.textContent = `${p.nombres} ${p.apellidos||''}`;
+    sel.appendChild(opt);
+  });
+}
+
+async function saveCursoAdmin() {
+  const nombre = document.getElementById('cu-nombre').value.trim();
+  if (!nombre) { toast('El nombre del curso es requerido', 'error'); return; }
+  const profId = document.getElementById('cu-profesor').value;
+  const prof   = _profesoresList.find(p => p.id === profId);
+  try {
+    await pb.collection('cursos_aula').create({
+      nombre,
+      descripcion:   document.getElementById('cu-desc').value.trim(),
+      categoria:     document.getElementById('cu-cat').value,
+      nivel:         document.getElementById('cu-nivel').value,
+      profesor_id:   profId || null,
+      profesor_nombre: prof ? `${prof.nombres} ${prof.apellidos||''}`.trim() : '',
+      publicado:     document.getElementById('cu-pub').checked,
+      estado:        'activo'
+    });
+    toast('Curso creado');
+    closeCursoForm();
+    ['cu-nombre','cu-desc'].forEach(id => { document.getElementById(id).value = ''; });
+    await renderProfesores();
+  } catch(e) { toast('Error al crear curso', 'error'); }
+}
+
+async function asignarProfesorCurso(cursoId, profId) {
+  const prof = _profesoresList.find(p => p.id === profId);
+  try {
+    await pb.collection('cursos_aula').update(cursoId, {
+      profesor_id: profId || null,
+      profesor_nombre: prof ? `${prof.nombres} ${prof.apellidos||''}`.trim() : ''
+    });
+    toast('Profesor asignado');
+    const idx = _cursosAdminList.findIndex(c => c.id === cursoId);
+    if (idx >= 0) { _cursosAdminList[idx].profesor_id = profId; _cursosAdminList[idx].profesor_nombre = prof ? `${prof.nombres} ${prof.apellidos||''}`.trim() : ''; }
+    renderCursosAdmin();
+  } catch(e) { toast('Error al asignar', 'error'); }
+}
+
+async function toggleCursoEstado(id, estado) {
+  try {
+    await pb.collection('cursos_aula').update(id, {estado});
+    toast('Estado actualizado');
+    const idx = _cursosAdminList.findIndex(c => c.id === id);
+    if (idx >= 0) _cursosAdminList[idx].estado = estado;
+    renderCursosAdmin();
+  } catch(e) { toast('Error', 'error'); }
 }
 
 /* ─── MOBILE ─── */
