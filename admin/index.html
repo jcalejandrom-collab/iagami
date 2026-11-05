@@ -1664,7 +1664,11 @@ input,select,textarea{font-family:inherit}
       <div class="page-title">📚 Aula Ambiental IAGAMI</div>
       <div class="page-subtitle">Biblioteca multimedia y recursos educativos</div>
     </div>
-    <button class="btn btn-primary" onclick="openAulaForm()">+ Nuevo Recurso</button>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <a href="reportes-academicos/index.html" target="_blank" class="btn btn-secondary" style="text-decoration:none">📊 Reportes</a>
+      <a href="../aula-ambiental/calendario/index.html" target="_blank" class="btn btn-secondary" style="text-decoration:none">📅 Calendario</a>
+      <button class="btn btn-primary" onclick="openAulaForm()">+ Nuevo Recurso</button>
+    </div>
   </div>
   <div style="display:flex;gap:8px;margin-bottom:16px;border-bottom:2px solid var(--border);padding-bottom:0">
     <button id="atab-biblioteca" onclick="switchAulaTab('biblioteca')" style="padding:8px 16px;border:none;background:none;font-size:13px;font-weight:600;color:var(--primary);border-bottom:2px solid var(--primary);margin-bottom:-2px;cursor:pointer;font-family:inherit">📖 Biblioteca</button>
