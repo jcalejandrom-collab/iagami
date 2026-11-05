@@ -2250,6 +2250,66 @@ input,select,textarea{font-family:inherit}
       </div>
     </div>
 
+    <!-- ══════════ RESPALDOS ══════════ -->
+    <div id="sec-respaldos" class="section">
+      <div class="page-header">
+        <div>
+          <div class="page-title">💾 Respaldos</div>
+          <div class="page-subtitle">Estado del sistema de copias de seguridad de PocketBase</div>
+        </div>
+        <button class="btn-s" onclick="renderRespaldos()" style="font-size:12px">↻ Actualizar</button>
+      </div>
+
+      <!-- Estado actual -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:16px" id="backup-stats-row">
+        <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px">
+          <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Último respaldo</div>
+          <div id="backup-stat-fecha" style="font-size:15px;font-weight:700;color:var(--text)">—</div>
+        </div>
+        <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px">
+          <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Tamaño</div>
+          <div id="backup-stat-size" style="font-size:15px;font-weight:700;color:var(--text)">—</div>
+        </div>
+        <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px">
+          <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Estado</div>
+          <div id="backup-stat-estado" style="font-size:15px;font-weight:700;color:var(--text)">—</div>
+        </div>
+        <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px">
+          <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Registros en log</div>
+          <div id="backup-stat-count" style="font-size:15px;font-weight:700;color:var(--text)">—</div>
+        </div>
+      </div>
+
+      <!-- Historial de respaldos -->
+      <div style="background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:16px">
+        <div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+          <div style="font-weight:600;font-size:14px">Historial de respaldos</div>
+          <span style="font-size:12px;color:var(--muted)">Últimas 10 entradas registradas</span>
+        </div>
+        <div id="backup-history-wrap" style="overflow-x:auto">
+          <div style="padding:32px;text-align:center;color:var(--muted);font-size:13px">Cargando…</div>
+        </div>
+      </div>
+
+      <!-- Almacenamiento y acciones -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px">
+          <div style="font-weight:600;font-size:14px;margin-bottom:12px">Almacenamiento</div>
+          <div id="backup-storage-info" style="font-size:13px;color:var(--muted)">Cargando información…</div>
+        </div>
+        <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px">
+          <div style="font-weight:600;font-size:14px;margin-bottom:12px">Información del sistema</div>
+          <div style="font-size:13px;color:var(--text);line-height:1.6">
+            <div>📂 <strong>Scripts:</strong> <code style="font-size:11px;background:#f1f5f9;padding:2px 5px;border-radius:4px">scripts/backup_pocketbase.sh</code></div>
+            <div style="margin-top:6px">🔒 <strong>Cifrado:</strong> AES-256-CBC (opcional)</div>
+            <div style="margin-top:6px">⏰ <strong>Horario:</strong> 02:00 AM diario</div>
+            <div style="margin-top:6px">📋 <strong>Retención:</strong> 7 días / 4 semanas</div>
+            <div style="margin-top:6px">📊 <strong>RPO:</strong> 24h &nbsp;|&nbsp; <strong>RTO:</strong> 4h</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -2374,6 +2434,7 @@ const NAV = [
   {id:'aula',              icon:'📚', label:'Aula Ambiental'},
   {id:'profesores',        icon:'👨‍🏫', label:'Profesores'},
   {id:'auditoria',        icon:'🛡️', label:'Auditoría'},
+  {id:'respaldos',        icon:'💾', label:'Respaldos'},
 ];
 
 let currentSection = 'dashboard';
@@ -2437,6 +2498,7 @@ async function renderSection(name) {
     case 'aula':             await renderAula(); break;
     case 'profesores':       await renderProfesores(); break;
     case 'auditoria':        await renderAuditoria(); break;
+    case 'respaldos':        await renderRespaldos(); break;
   }
 }
 
@@ -8445,6 +8507,94 @@ async function loadZoomRecordings() {
       ${e.message.includes('configurado') ? '⚙️ ' + esc(e.message) : '⚠️ No se pudieron cargar las grabaciones: ' + esc(e.message)}
     </div>`;
   }
+}
+
+/* ═══════════════════════════════════════
+   RESPALDOS — ADMIN
+═══════════════════════════════════════ */
+async function renderRespaldos() {
+  const wrap = document.getElementById('backup-history-wrap');
+  const storage = document.getElementById('backup-storage-info');
+  if (wrap) wrap.innerHTML = '<div style="padding:32px;text-align:center;color:var(--muted);font-size:13px">Cargando…</div>';
+
+  let records = [];
+  let error = null;
+
+  try {
+    const res = await pb.collection('iagami_sys_logs').getList(1, 10, {
+      filter: 'tipo = "backup"',
+      sort: '-created'
+    });
+    records = res.items || [];
+  } catch(e) {
+    error = e.message || 'Error desconocido';
+  }
+
+  if (error || records.length === 0) {
+    const msg = error
+      ? `⚠️ No se pudo conectar al registro: ${esc(error)}`
+      : 'No hay registros de respaldo disponibles. Los backups se ejecutan desde el VPS.';
+    if (wrap) wrap.innerHTML = `<div style="padding:32px;text-align:center;color:var(--muted);font-size:13px">${msg}<br><br><span style="font-size:12px">Configurar con: <code>crontab -e</code> en VPS · Ver <code>scripts/backup_pocketbase.sh</code></span></div>`;
+
+    document.getElementById('backup-stat-fecha').textContent = 'Sin datos';
+    document.getElementById('backup-stat-size').textContent = 'Sin datos';
+    document.getElementById('backup-stat-estado').innerHTML = '<span style="color:#6b7280">Sin datos</span>';
+    document.getElementById('backup-stat-count').textContent = '0';
+    if (storage) storage.innerHTML = '<div style="color:var(--muted)">Sin datos de almacenamiento. Configurar backups en VPS.</div>';
+    return;
+  }
+
+  renderBackupHistory(records);
+
+  const last = records[0];
+  const fecha = last.created ? new Date(last.created).toLocaleString('es-VE') : '—';
+  const estado = last.nivel === 'error' ? 'ALERTA' : 'OK';
+  const estadoColor = estado === 'OK' ? '#1d6b3e' : '#dc2626';
+
+  document.getElementById('backup-stat-fecha').textContent = fecha;
+  document.getElementById('backup-stat-size').textContent = last.detalle ? (esc(last.detalle).match(/\d+(\.\d+)?\s*(M|G|K)/i)?.[0] || '—') : '—';
+  document.getElementById('backup-stat-estado').innerHTML = `<span style="color:${estadoColor};font-weight:700">${esc(estado)}</span>`;
+  document.getElementById('backup-stat-count').textContent = records.length;
+
+  if (storage) {
+    storage.innerHTML = `
+      <div style="font-size:13px;line-height:1.8">
+        <div>📦 <strong>Registros en log:</strong> ${records.length}</div>
+        <div>✅ <strong>Último estado:</strong> ${esc(estado)}</div>
+        <div>📅 <strong>Fecha última entrada:</strong> ${fecha}</div>
+        <div style="margin-top:8px;font-size:11px;color:var(--muted)">Los datos de almacenamiento en disco solo están disponibles ejecutando <code>monitor_backups.sh --check</code> en el VPS.</div>
+      </div>`;
+  }
+}
+
+function renderBackupHistory(records) {
+  const wrap = document.getElementById('backup-history-wrap');
+  if (!wrap) return;
+  wrap.innerHTML = `
+    <table style="width:100%;border-collapse:collapse;font-size:13px">
+      <thead>
+        <tr style="background:var(--primary-light);text-align:left">
+          <th style="padding:10px 14px;font-weight:600;color:var(--text)">Fecha</th>
+          <th style="padding:10px 14px;font-weight:600;color:var(--text)">Módulo</th>
+          <th style="padding:10px 14px;font-weight:600;color:var(--text)">Estado</th>
+          <th style="padding:10px 14px;font-weight:600;color:var(--text)">Detalle</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${records.map(r => {
+          const esBad = r.nivel === 'error' || r.nivel === 'warning';
+          const badge = esBad
+            ? `<span style="display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600;background:#fee2e2;color:#991b1b">${esc(r.nivel||'error')}</span>`
+            : `<span style="display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600;background:var(--primary-light);color:var(--primary)">OK</span>`;
+          return `<tr style="border-bottom:1px solid var(--border)">
+            <td style="padding:10px 14px;white-space:nowrap">${r.created ? new Date(r.created).toLocaleString('es-VE') : '—'}</td>
+            <td style="padding:10px 14px">${esc(r.modulo||'backup')}</td>
+            <td style="padding:10px 14px">${badge}</td>
+            <td style="padding:10px 14px;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.detalle||r.accion||'—')}</td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>`;
 }
 </script>
 

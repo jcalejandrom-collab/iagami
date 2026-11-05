@@ -65,12 +65,39 @@ La Fase 16 entrega la estrategia completa de respaldo, continuidad y recuperaci�
 
 ---
 
+## Fase 16 — Ampliación (requisitos institucionales completos)
+
+**Fecha ampliación:** 5 de noviembre de 2026
+
+| Archivo | Descripción | Estado |
+|---|---|---|
+| `scripts/backup_pocketbase.sh` | **Actualizado**: cifrado AES-256-CBC opcional via OpenSSL (passphrase en archivo protegido, NUNCA en repo). Compatible si OpenSSL no está instalado. | ✅ Actualizado |
+| `scripts/setup_systemd_timer.sh` | Configurar systemd timer como alternativa al cron. Instala servicio + timer, verifica estado, permite eliminar. Disparo: 02:00 AM diario. | ✅ Creado |
+| `scripts/monitor_backups.sh` | Monitor de estado: último backup, antigüedad, tamaño, alertas de disco (>90%), log CSV detallado en `/opt/backups/iagami/backup_monitor.log`. Modos: `--check`, `--report`, `--log`. | ✅ Creado |
+| `admin/index.html` | Módulo **Respaldos** en panel admin: estado actual (4 stat cards), historial de las últimas 10 entradas de `iagami_sys_logs` tipo "backup", info de almacenamiento y sistema. Sigue patrón y diseño institucional exacto. | ✅ Creado |
+
+### Detalles del cifrado en backup_pocketbase.sh
+
+- Variable `ENCRYPT_BACKUPS=false` — desactivado por defecto, no rompe el script si OpenSSL no está.
+- Si se activa: cifra con `openssl enc -aes-256-cbc -pbkdf2`, passphrase desde `/opt/backups/iagami/.backup_key` (permisos 600).
+- Si falla el cifrado: guarda sin cifrar y registra advertencia en log.
+- Instrucciones de configuración documentadas como comentario al final del script.
+
+### Detalles del módulo admin de respaldos
+
+- Consulta `iagami_sys_logs` con `filter=tipo="backup"` para mostrar historial.
+- Si no hay registros o falla la conexión: muestra mensaje explicativo con instrucción de configurar VPS.
+- Nunca llama a rutas inexistentes ni expone credenciales.
+- Función `renderRespaldos()` + `renderBackupHistory()` usando `esc()` en todos los valores.
+
+---
+
 ## Próxima fase
 
 **Fase 17 — Despliegue Productivo**
 
 Prerrequisitos:
 - Nginx rate limiting aplicado en VPS ⏳
-- Scripts de backup copiados al VPS y cron configurado ⏳
+- Scripts de backup copiados al VPS y cron o systemd timer configurado ⏳
 - Primera prueba de restauración real aprobada ⏳
 - 9 colecciones de Brigadas creadas en PocketBase producción ⏳
