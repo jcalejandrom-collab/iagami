@@ -307,6 +307,10 @@ textarea.form-control{resize:vertical;min-height:70px}
       <div onclick="showSec('clases')"     class="nav-item"        id="nav-clases"    ><span class="nav-ico">🎥</span> Clases Virtuales</div>
       <div onclick="showSec('avisos')"     class="nav-item"        id="nav-avisos"    ><span class="nav-ico">📢</span> Avisos</div>
       <div onclick="showSec('biblioteca')" class="nav-item"        id="nav-biblioteca"><span class="nav-ico">📚</span> Biblioteca</div>
+      <div onclick="showSec('evaluaciones')" class="nav-item"        id="nav-evaluaciones"><span class="nav-ico">📝</span> Evaluaciones</div>
+      <div onclick="showSec('tareas')"      class="nav-item"        id="nav-tareas"     ><span class="nav-ico">📋</span> Tareas</div>
+      <div onclick="showSec('calificaciones')" class="nav-item"     id="nav-calificaciones"><span class="nav-ico">🏆</span> Calificaciones</div>
+      <div onclick="showSec('asistencia')"  class="nav-item"        id="nav-asistencia" ><span class="nav-ico">✅</span> Asistencia</div>
       <div onclick="showSec('perfil')"     class="nav-item"        id="nav-perfil"    ><span class="nav-ico">👤</span> Mi Perfil</div>
     </div>
 
@@ -400,6 +404,86 @@ textarea.form-control{resize:vertical;min-height:70px}
           <input class="form-control" id="bib-buscar" style="max-width:220px" placeholder="🔍 Buscar..." oninput="renderBib()"/>
         </div>
         <div id="bib-grid"></div>
+      </div>
+
+      <!-- ── EVALUACIONES ── -->
+      <div class="section" id="sec-evaluaciones">
+        <div class="page-header">
+          <div class="page-title">📝 Evaluaciones</div>
+          <div class="page-subtitle">Exámenes y cuestionarios de tus cursos</div>
+        </div>
+        <div id="eval-lista"></div>
+        <!-- Modal evaluación activa -->
+        <div id="eval-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;overflow-y:auto;padding:20px">
+          <div style="background:#fff;border-radius:16px;max-width:680px;margin:0 auto;padding:28px">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px">
+              <div>
+                <div class="page-title" id="em-titulo">Evaluación</div>
+                <div id="em-desc" style="font-size:13px;color:var(--muted)"></div>
+              </div>
+              <div style="text-align:right">
+                <div class="countdown" id="em-timer">—</div>
+                <div style="font-size:11px;color:var(--muted)">tiempo restante</div>
+              </div>
+            </div>
+            <div id="em-preguntas"></div>
+            <div style="margin-top:20px;display:flex;gap:10px;justify-content:flex-end">
+              <button class="btn btn-secondary btn-sm" onclick="cerrarEvalModal()">Cancelar</button>
+              <button class="btn btn-primary" id="em-submit-btn" onclick="enviarEvaluacion()">Enviar respuestas</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── TAREAS ── -->
+      <div class="section" id="sec-tareas">
+        <div class="page-header">
+          <div class="page-title">📋 Tareas</div>
+          <div class="page-subtitle">Asignaciones y entregas de tus cursos</div>
+        </div>
+        <div class="tabs">
+          <button class="tab-btn active" onclick="switchTareasTab('pendientes')">⏳ Pendientes</button>
+          <button class="tab-btn" onclick="switchTareasTab('entregadas')">✅ Entregadas</button>
+        </div>
+        <div class="tab-panel active" id="ttab-pendientes"><div id="tareas-pendientes"></div></div>
+        <div class="tab-panel" id="ttab-entregadas"><div id="tareas-entregadas"></div></div>
+        <!-- Modal entrega -->
+        <div id="tarea-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;overflow-y:auto;padding:20px">
+          <div style="background:#fff;border-radius:16px;max-width:560px;margin:0 auto;padding:28px">
+            <div class="page-title" id="tm-titulo" style="margin-bottom:4px">Entregar tarea</div>
+            <div id="tm-desc" style="font-size:13px;color:var(--muted);margin-bottom:16px"></div>
+            <div class="form-group">
+              <label class="form-label">Texto de tu entrega</label>
+              <textarea class="form-control" id="tm-texto" rows="5" placeholder="Escribe tu respuesta o descripción de la entrega..."></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">URL de archivo (Drive, Docs, etc.)</label>
+              <input class="form-control" id="tm-url" placeholder="https://docs.google.com/..."/>
+            </div>
+            <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px">
+              <button class="btn btn-secondary btn-sm" onclick="cerrarTareaModal()">Cancelar</button>
+              <button class="btn btn-primary btn-sm" onclick="confirmarEntrega()">📤 Entregar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── CALIFICACIONES ── -->
+      <div class="section" id="sec-calificaciones">
+        <div class="page-header">
+          <div class="page-title">🏆 Calificaciones</div>
+          <div class="page-subtitle">Tu rendimiento académico por curso</div>
+        </div>
+        <div id="calif-contenido"></div>
+      </div>
+
+      <!-- ── ASISTENCIA ── -->
+      <div class="section" id="sec-asistencia">
+        <div class="page-header">
+          <div class="page-title">✅ Asistencia</div>
+          <div class="page-subtitle">Tu registro de asistencia a clases</div>
+        </div>
+        <div id="asistencia-contenido"></div>
       </div>
 
       <!-- ── PERFIL ── -->
@@ -705,11 +789,15 @@ function showSec(id) {
   document.getElementById('sec-'+id).classList.add('active');
   document.getElementById('nav-'+id).classList.add('active');
   closeSidebar();
-  if (id==='cursos')     renderCursos();
-  if (id==='clases')     renderClases();
-  if (id==='avisos')     renderAvisos();
-  if (id==='biblioteca') renderBib();
-  if (id==='perfil')     renderPerfil();
+  if (id==='cursos')          renderCursos();
+  if (id==='clases')          renderClases();
+  if (id==='avisos')          renderAvisos();
+  if (id==='biblioteca')      renderBib();
+  if (id==='evaluaciones')    renderEvaluaciones();
+  if (id==='tareas')          renderTareasEst();
+  if (id==='calificaciones')  renderCalificaciones();
+  if (id==='asistencia')      renderAsistenciaEst();
+  if (id==='perfil')          renderPerfil();
 }
 function toggleSidebar(){ document.getElementById('sidebar').classList.toggle('open'); }
 function closeSidebar()  { document.getElementById('sidebar').classList.remove('open'); }
