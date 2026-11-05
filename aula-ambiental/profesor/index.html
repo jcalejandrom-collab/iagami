@@ -733,6 +733,8 @@ textarea.form-control{resize:vertical;min-height:80px}
 const PB_URL = 'https://api.iagami.online';
 let _token = null;
 let _profesor = null;
+// Brute-force protection — Server-side: configurar limit_req en Nginx para /api/collections/*/auth-with-password
+let _profLoginAttempts = 0, _profLoginBlocked = false;
 let _misCursos = [];
 let _cursoActivo = null;
 let _misClases = [];
@@ -774,6 +776,7 @@ async function doLogin() {
   const errEl = document.getElementById('login-err');
   errEl.style.display = 'none';
 
+  if (_profLoginBlocked) { errEl.textContent = 'Demasiados intentos fallidos. Espera 60 segundos.'; errEl.style.display = 'block'; return; }
   if (!email || !pass) { errEl.textContent = 'Ingresa tu correo y contraseña.'; errEl.style.display = 'block'; return; }
 
   try {
@@ -788,13 +791,21 @@ async function doLogin() {
       return;
     }
 
+    _profLoginAttempts = 0;
     _token = data.token;
     _profesor = data.record;
     localStorage.setItem('prof_token', _token);
     localStorage.setItem('prof_data', JSON.stringify(_profesor));
     iniciarApp();
   } catch(e) {
-    errEl.textContent = 'Correo o contraseña incorrectos.';
+    _profLoginAttempts++;
+    if (_profLoginAttempts >= 5) {
+      _profLoginBlocked = true;
+      setTimeout(() => { _profLoginBlocked = false; _profLoginAttempts = 0; }, 60000);
+      errEl.textContent = 'Cuenta bloqueada temporalmente. Espera 60 segundos.';
+    } else {
+      errEl.textContent = 'Correo o contraseña incorrectos.';
+    }
     errEl.style.display = 'block';
   }
 }
@@ -1972,7 +1983,7 @@ function renderZoomMeetings(el) {
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button onclick="profStartMeeting('${esc(m.start_url||'')}','${esc(m.join_url||'')}')"
-          class="btn btn-primary btn-sm" ${!m.start_url?'disabled':''}>▶ Iniciar clase</button>
+          class="btn btn-primary btn-sm" ${!m.join_url?'disabled':''}>▶ Iniciar clase</button>
         <button onclick="profCancelZoomMeeting('${esc(String(m.id||''))}')"
           class="btn btn-danger btn-sm">🗑 Cancelar</button>
       </div>

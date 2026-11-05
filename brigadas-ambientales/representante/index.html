@@ -531,6 +531,8 @@ label{display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:4
 <script>
 const API = 'https://api.iagami.online';
 let _rep = null, _misB = [], _misAct = [], _misBrigadistas = [], _allBrigadistas = [];
+// Brute-force protection — Server-side: configurar limit_req en Nginx para /api/collections/*/auth-with-password
+let _repLoginAttempts = 0, _repLoginBlocked = false;
 let _calYear, _calMonth, _calEventos = [];
 let _currentEvTab = 'proximos';
 
@@ -571,6 +573,7 @@ async function doLogin(){
   const pass  = document.getElementById('l-pass').value;
   const errEl = document.getElementById('login-err');
   errEl.style.display = 'none';
+  if(_repLoginBlocked){ errEl.textContent='Demasiados intentos fallidos. Espera 60 segundos.'; errEl.style.display='block'; return; }
   if(!email||!pass){ errEl.textContent='Completa todos los campos.'; errEl.style.display='block'; return; }
   try{
     const data = await pbFetch('/api/collections/representantes_brigadas/auth-with-password',{
@@ -585,11 +588,17 @@ async function doLogin(){
       errEl.textContent='Tu cuenta está suspendida. Contacta al Comandante Municipal.';
       errEl.style.display='block'; return;
     }
+    _repLoginAttempts = 0;
     localStorage.setItem('rep_token', data.token);
     localStorage.setItem('rep_data', JSON.stringify(rec));
     initApp(rec);
   } catch(e){
-    if(e.status===404||e.status===400){
+    _repLoginAttempts++;
+    if(_repLoginAttempts >= 5){
+      _repLoginBlocked = true;
+      setTimeout(()=>{ _repLoginBlocked=false; _repLoginAttempts=0; }, 60000);
+      errEl.textContent='Cuenta bloqueada temporalmente. Espera 60 segundos.';
+    } else if(e.status===404||e.status===400){
       errEl.textContent='Esta funcionalidad estará disponible cuando se complete la configuración del sistema.';
     } else {
       errEl.textContent='Correo o contraseña incorrectos.';
@@ -963,7 +972,7 @@ async function renderEventos(tab){
             <div style="font-size:1.3rem">${catIco(ev.categoria)}</div>
           </div>
           <div style="flex:1">
-            <div style="font-weight:700">${esc(ev.nombre)}</div>
+            <div style="font-weight:700">${esc(ev.titulo||ev.nombre)}</div>
             <div style="font-size:13px;color:#6b7280;margin-top:3px">📅 ${esc(ev.fecha_inicio||'')} ${ev.hora_inicio?'· '+esc(ev.hora_inicio):''}</div>
             <div style="font-size:13px;color:#6b7280">📍 ${esc(ev.lugar||'Sin lugar')}</div>
             <div style="margin-top:6px">${estadoActBadge(ev.estado)}</div>
@@ -1240,7 +1249,7 @@ async function loadActividadesEvidencias(){
     const r = await pbFetch(`/api/collections/actividades_brigadas/records?filter=${encodeURIComponent(tf)}&sort=-fecha_inicio&perPage=50`);
     const sel = document.getElementById('evid-actividad');
     sel.innerHTML='<option value="">— Seleccionar actividad —</option>';
-    (r.items||[]).forEach(a=>{ const o=document.createElement('option'); o.value=a.id; o.textContent=`${a.nombre} · ${a.fecha_inicio||''}`; sel.appendChild(o); });
+    (r.items||[]).forEach(a=>{ const o=document.createElement('option'); o.value=a.id; o.textContent=`${a.titulo||a.nombre} · ${a.fecha||a.fecha_inicio||''}`; sel.appendChild(o); });
   } catch{}
 }
 
@@ -1316,7 +1325,7 @@ async function renderSolicitudes(){
       <div class="card" style="margin-bottom:10px">
         <div style="display:flex;align-items:start;justify-content:space-between">
           <div>
-            <div style="font-weight:700">${esc(s.tipo_recurso||s.tipo||'—')}</div>
+            <div style="font-weight:700">${esc(s.tipo_apoyo||s.tipo_recurso||s.tipo||'—')}</div>
             <div style="font-size:13px;color:#6b7280;margin-top:3px">${esc(s.descripcion||'')}</div>
             ${s.respuesta_institucional?`<div style="margin-top:8px;padding:8px;background:#f0fdf4;border-radius:8px;font-size:13px;color:#166534">📢 ${esc(s.respuesta_institucional)}</div>`:''}
           </div>
@@ -1338,7 +1347,7 @@ async function saveSolicitud(){
     await pbFetch('/api/collections/solicitudes_apoyo/records',{
       method:'POST',
       body: JSON.stringify({
-        tipo_recurso: document.getElementById('sol-tipo').value,
+        tipo_apoyo: document.getElementById('sol-tipo').value,
         descripcion: document.getElementById('sol-desc').value.trim(),
         cantidad: document.getElementById('sol-cantidad').value.trim(),
         justificacion: document.getElementById('sol-justif').value.trim(),

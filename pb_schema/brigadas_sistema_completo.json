@@ -24,6 +24,7 @@
     "fields": [
       {"name": "nombres", "type": "text", "required": true},
       {"name": "apellidos", "type": "text", "required": true},
+      {"name": "cedula", "type": "text", "required": false, "options": {"max": 12}},
       {"name": "tipo", "type": "select", "required": true, "options": {"values": ["representante_comuna", "representante_consejo_comunal"]}},
       {"name": "parroquia", "type": "text"},
       {"name": "comuna_id", "type": "relation", "options": {"collectionId": "comunas", "cascadeDelete": false, "minSelect": null, "maxSelect": 1}},
@@ -92,7 +93,7 @@
       {"name": "actividad_id", "type": "relation", "required": true, "options": {"collectionId": "actividades_brigadas", "cascadeDelete": false, "minSelect": null, "maxSelect": 1}},
       {"name": "brigadista_id", "type": "relation", "options": {"collectionId": "brigadistas", "cascadeDelete": false, "minSelect": null, "maxSelect": 1}},
       {"name": "brigadista_menor_id", "type": "relation", "options": {"collectionId": "brigadistas_menores", "cascadeDelete": false, "minSelect": null, "maxSelect": 1}},
-      {"name": "presente", "type": "bool"},
+      {"name": "estado", "type": "select", "required": true, "options": {"values": ["presente", "ausente", "justificado"]}},
       {"name": "hora_llegada", "type": "text"},
       {"name": "observaciones", "type": "text"}
     ],

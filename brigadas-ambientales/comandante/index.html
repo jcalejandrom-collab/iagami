@@ -806,8 +806,22 @@ async function loadAsistencia() {
   try {
     const res = await pb.collection('asistencia_brigadas').getList(1,500,{filter:`actividad_id="${actId}"`,expand:'brigadista_id,brigadista_menor_id'});
     const items = res.items||[];
-    const presentes = items.filter(r=>r.presente).length;
-    el.innerHTML = `<div style="background:var(--primary-light);border-radius:var(--radius);padding:12px 16px;display:flex;gap:20px;font-size:14px;font-weight:600;margin-bottom:16px"><span style="color:var(--primary)">✅ Presentes: ${presentes}</span><span style="color:var(--danger)">❌ Ausentes: ${items.length-presentes}</span><span style="color:#374151">Total: ${items.length}</span></div>${items.length?`<div class="table-wrap"><table class="data-table"><thead><tr><th>Brigadista</th><th>Asistencia</th><th>Hora llegada</th></tr></thead><tbody>${items.map(r=>{const b=r.expand?.brigadista_id||r.expand?.brigadista_menor_id;return`<tr><td>${b?esc(b.nombres+' '+b.apellidos):r.id.slice(0,8)}</td><td>${r.presente?'<span class="badge badge-green">Presente</span>':'<span class="badge badge-red">Ausente</span>'}</td><td>${esc(r.hora_llegada||'—')}</td></tr>`;}).join('')}</tbody></table></div>`:'<div class="empty-state"><div class="ico">📋</div><p>No hay registros de asistencia para esta actividad</p></div>'}`;
+    // Compatibilidad: campo nuevo estado (select) + campo anterior presente (bool)
+    function getEstadoAsistencia(r) {
+      if (r.estado) return r.estado;
+      if (r.presente === true) return 'presente';
+      if (r.presente === false) return 'ausente';
+      return 'sin_registro';
+    }
+    function estadoBadgeCmnd(r) {
+      const e = getEstadoAsistencia(r);
+      if (e === 'presente') return '<span class="badge badge-green">Presente</span>';
+      if (e === 'justificado') return '<span class="badge" style="background:#fef3c7;color:#92400e">Justificado</span>';
+      return '<span class="badge badge-red">Ausente</span>';
+    }
+    const presentes = items.filter(r=>getEstadoAsistencia(r)==='presente').length;
+    const justificados = items.filter(r=>getEstadoAsistencia(r)==='justificado').length;
+    el.innerHTML = `<div style="background:var(--primary-light);border-radius:var(--radius);padding:12px 16px;display:flex;gap:20px;font-size:14px;font-weight:600;margin-bottom:16px"><span style="color:var(--primary)">✅ Presentes: ${presentes}</span><span style="color:var(--danger)">❌ Ausentes: ${items.length-presentes-justificados}</span><span style="color:#92400e">⚠️ Justificados: ${justificados}</span><span style="color:#374151">Total: ${items.length}</span></div>${items.length?`<div class="table-wrap"><table class="data-table"><thead><tr><th>Brigadista</th><th>Asistencia</th><th>Hora llegada</th></tr></thead><tbody>${items.map(r=>{const b=r.expand?.brigadista_id||r.expand?.brigadista_menor_id;return`<tr><td>${b?esc(b.nombres+' '+b.apellidos):r.id.slice(0,8)}</td><td>${estadoBadgeCmnd(r)}</td><td>${esc(r.hora_llegada||'—')}</td></tr>`;}).join('')}</tbody></table></div>`:'<div class="empty-state"><div class="ico">📋</div><p>No hay registros de asistencia para esta actividad</p></div>'}`;
   } catch(e) { el.innerHTML = '<span style="color:var(--danger)">Error al cargar asistencia</span>'; }
 }
 
