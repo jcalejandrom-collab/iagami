@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reportes Académicos — SIGAP Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --verde:#1d6b3e;--verde-dark:#1a3d2b;--bg:#f5f7f5;--text:#1f2937;
+  --white:#fff;--border:#e5e7eb;--radius:10px;--shadow:0 2px 8px rgba(0,0,0,.08);
+  --bar1:#1d6b3e;--bar2:#2563eb;--bar3:#d97706;--bar4:#9333ea;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+/* HEADER */
+.top-bar{background:var(--verde-dark);padding:12px 24px;display:flex;align-items:center;gap:12px}
+.top-bar h1{color:#fff;font-family:'Poppins',sans-serif;font-size:1rem;font-weight:700;flex:1}
+.top-bar a{color:rgba(255,255,255,.8);font-size:.82rem;text-decoration:none;padding:5px 12px;border:1px solid rgba(255,255,255,.25);border-radius:16px;transition:background .2s}
+.top-bar a:hover{background:rgba(255,255,255,.12);color:#fff}
+.btn-print{background:var(--verde);color:#fff;border:none;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:.82rem;font-weight:600;transition:background .2s}
+.btn-print:hover{background:#155a31}
+
+/* MAIN */
+main{max-width:1140px;margin:24px auto;padding:0 16px}
+.page-title{font-family:'Poppins',sans-serif;font-size:1.3rem;font-weight:700;color:var(--verde-dark);margin-bottom:6px}
+.page-sub{color:#6b7280;font-size:.88rem;margin-bottom:20px}
+
+/* FILTROS */
+.filtros-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:22px;background:#fff;padding:14px 16px;border-radius:var(--radius);box-shadow:var(--shadow)}
+.filtros-row label{font-size:.82rem;font-weight:600;color:#374151}
+.filtros-row select,.filtros-row input[type=month]{border:1.5px solid var(--border);border-radius:6px;padding:5px 10px;font-size:.83rem;font-family:'Inter',sans-serif;color:var(--text);cursor:pointer}
+.filtros-row select:focus,.filtros-row input:focus{outline:2px solid var(--verde);border-color:var(--verde)}
+.btn-filtrar{background:var(--verde);color:#fff;border:none;padding:6px 16px;border-radius:6px;cursor:pointer;font-size:.83rem;font-weight:600;transition:background .2s}
+.btn-filtrar:hover{background:var(--verde-dark)}
+.btn-csv{background:#fff;color:var(--verde);border:1.5px solid var(--verde);padding:6px 14px;border-radius:6px;cursor:pointer;font-size:.82rem;font-weight:600;transition:background .2s;margin-left:auto}
+.btn-csv:hover{background:var(--verde);color:#fff}
+
+/* KPI CARDS */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:24px}
+.kpi-card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:16px 18px;border-left:4px solid var(--verde)}
+.kpi-card.azul{border-color:#2563eb}
+.kpi-card.naranja{border-color:#d97706}
+.kpi-card.lila{border-color:#9333ea}
+.kpi-card.rojo{border-color:#dc2626}
+.kpi-num{font-family:'Poppins',sans-serif;font-size:2rem;font-weight:700;color:var(--verde-dark);line-height:1}
+.kpi-card.azul .kpi-num{color:#1d4ed8}
+.kpi-card.naranja .kpi-num{color:#b45309}
+.kpi-card.lila .kpi-num{color:#7e22ce}
+.kpi-card.rojo .kpi-num{color:#b91c1c}
+.kpi-label{font-size:.78rem;color:#6b7280;margin-top:4px;font-weight:500}
+.kpi-delta{font-size:.72rem;margin-top:6px;font-weight:600}
+.delta-up{color:#16a34a}
+.delta-dn{color:#dc2626}
+
+/* PANELS */
+.panels-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:22px}
+@media(max-width:768px){.panels-grid{grid-template-columns:1fr}}
+.panel{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+.panel-head{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.panel-head h3{font-family:'Poppins',sans-serif;font-size:.95rem;font-weight:700;color:var(--verde-dark)}
+.panel-body{padding:14px 16px}
+
+/* TABLA */
+.rep-table{width:100%;border-collapse:collapse;font-size:.82rem}
+.rep-table th{padding:7px 10px;background:#f9fafb;border-bottom:2px solid var(--border);text-align:left;font-weight:600;color:#374151;font-size:.75rem;text-transform:uppercase;letter-spacing:.04em}
+.rep-table td{padding:7px 10px;border-bottom:1px solid var(--border);color:var(--text)}
+.rep-table tr:last-child td{border-bottom:none}
+.rep-table tr:hover td{background:#f9fafb}
+.bar-cell{display:flex;align-items:center;gap:8px}
+.bar-track{flex:1;height:7px;background:#e5e7eb;border-radius:4px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px;transition:width .4s}
+.pct-label{font-size:.73rem;color:#6b7280;width:36px;text-align:right;flex-shrink:0}
+.badge{display:inline-block;padding:1px 8px;border-radius:10px;font-size:.7rem;font-weight:600}
+.badge-verde{background:#dcfce7;color:#166534}
+.badge-azul{background:#dbeafe;color:#1e40af}
+.badge-naranja{background:#fef3c7;color:#92400e}
+.badge-rojo{background:#fee2e2;color:#991b1b}
+.badge-gris{background:#f3f4f6;color:#6b7280}
+
+/* GRAFICO HORIZONTAL */
+.chart-row{display:flex;flex-direction:column;gap:9px;padding:4px 0}
+.chart-item{}
+.chart-item-label{display:flex;justify-content:space-between;font-size:.8rem;margin-bottom:3px}
+.chart-item-name{font-weight:500}
+.chart-item-val{color:#6b7280}
+.chart-bar-track{height:12px;background:#e5e7eb;border-radius:6px;overflow:hidden}
+.chart-bar-fill{height:100%;border-radius:6px;transition:width .5s}
+
+/* TABLA PARROQUIAS */
+.parr-table td:first-child{font-weight:500}
+
+/* CARGANDO */
+.loading-row td{text-align:center;padding:28px;color:#9ca3af}
+.spinner{width:20px;height:20px;border:2.5px solid var(--border);border-top-color:var(--verde);border-radius:50%;animation:spin .7s linear infinite;display:inline-block;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* PRINT */
+@media print{
+  .top-bar .btn-print,.top-bar a,.filtros-row .btn-filtrar,.filtros-row .btn-csv{display:none}
+  body{background:#fff}
+  .panel,.kpi-card{box-shadow:none;border:1px solid #e5e7eb}
+}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <h1>📊 SIGAP — Reportes Académicos</h1>
+  <a href="../../index.html">Portal público</a>
+  <a href="../index.html">Panel Admin</a>
+  <button class="btn-print" onclick="window.print()">🖨 Imprimir / PDF</button>
+</div>
+
+<main>
+  <div class="page-title">Reportes e Indicadores del Aula Ambiental</div>
+  <p class="page-sub" id="rango-label">Cargando datos…</p>
+
+  <!-- FILTROS -->
+  <div class="filtros-row">
+    <label>Curso:</label>
+    <select id="f-curso">
+      <option value="">Todos los cursos</option>
+    </select>
+    <label>Desde:</label>
+    <input type="month" id="f-desde">
+    <label>Hasta:</label>
+    <input type="month" id="f-hasta">
+    <button class="btn-filtrar" onclick="cargarTodo()">Actualizar</button>
+    <button class="btn-csv" onclick="exportarCSV()">⬇ Exportar CSV</button>
+  </div>
+
+  <!-- KPI -->
+  <div class="kpi-grid">
+    <div class="kpi-card"><div class="kpi-num" id="kpi-est">—</div><div class="kpi-label">Estudiantes activos</div></div>
+    <div class="kpi-card azul"><div class="kpi-num" id="kpi-cur">—</div><div class="kpi-label">Cursos activos</div></div>
+    <div class="kpi-card naranja"><div class="kpi-num" id="kpi-cls">—</div><div class="kpi-label">Clases programadas</div></div>
+    <div class="kpi-card lila"><div class="kpi-num" id="kpi-vis">—</div><div class="kpi-label">Visitas aprobadas</div></div>
+    <div class="kpi-card"><div class="kpi-num" id="kpi-sol">—</div><div class="kpi-label">Solicitudes pendientes</div></div>
+    <div class="kpi-card rojo"><div class="kpi-num" id="kpi-sus">—</div><div class="kpi-label">Estudiantes suspendidos</div></div>
+  </div>
+
+  <!-- PANELS -->
+  <div class="panels-grid">
+
+    <!-- INSCRIPCIONES POR CURSO -->
+    <div class="panel">
+      <div class="panel-head">
+        <h3>Inscripciones por curso</h3>
+        <span id="ins-total" style="font-size:.78rem;color:#6b7280"></span>
+      </div>
+      <div class="panel-body">
+        <div class="chart-row" id="chart-cursos"><div style="color:#9ca3af;font-size:.85rem;text-align:center;padding:20px">Cargando…</div></div>
+      </div>
+    </div>
+
+    <!-- ESTUDIANTES POR TIPO -->
+    <div class="panel">
+      <div class="panel-head"><h3>Distribución por tipo de participante</h3></div>
+      <div class="panel-body">
+        <div class="chart-row" id="chart-tipos"><div style="color:#9ca3af;font-size:.85rem;text-align:center;padding:20px">Cargando…</div></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- PARTICIPACION POR PARROQUIA -->
+  <div class="panel" style="margin-bottom:22px">
+    <div class="panel-head"><h3>Participación por parroquia</h3></div>
+    <div class="panel-body" style="overflow-x:auto">
+      <table class="rep-table parr-table" id="tabla-parr">
+        <thead><tr><th>Parroquia</th><th>Estudiantes</th><th>Participación</th><th>Distribución</th></tr></thead>
+        <tbody><tr class="loading-row"><td colspan="4"><span class="spinner"></span>Cargando…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ACTIVIDAD ACADÉMICA -->
+  <div class="panel" style="margin-bottom:22px">
+    <div class="panel-head"><h3>Actividad académica reciente</h3></div>
+    <div class="panel-body" style="overflow-x:auto">
+      <table class="rep-table" id="tabla-actividad">
+        <thead><tr><th>Clase / Actividad</th><th>Curso</th><th>Profesor</th><th>Fecha</th><th>Estado</th></tr></thead>
+        <tbody><tr class="loading-row"><td colspan="5"><span class="spinner"></span>Cargando…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SOLICITUDES PENDIENTES -->
+  <div class="panel" style="margin-bottom:22px">
+    <div class="panel-head"><h3>Solicitudes de inscripción pendientes</h3></div>
+    <div class="panel-body" style="overflow-x:auto">
+      <table class="rep-table" id="tabla-sol">
+        <thead><tr><th>Nombre</th><th>Tipo</th><th>Parroquia</th><th>Curso</th><th>Fecha solicitud</th></tr></thead>
+        <tbody><tr class="loading-row"><td colspan="5"><span class="spinner"></span>Cargando…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+
+<script>
+const API = 'https://api.iagami.online';
+
+// Redirigir si no hay sesión admin
+(function checkAuth(){
+  const tk = localStorage.getItem('pb_admin_token') || sessionStorage.getItem('pb_admin_token');
+  if(!tk){
+    // Intentar con la cookie de pb que el admin puede tener
+    const pbAuth = localStorage.getItem('pocketbase_auth');
+    if(!pbAuth) {
+      // No bloquear carga, solo mostrar aviso
+      console.warn('Sin sesión admin — datos públicos solamente');
+    }
+  }
+})();
+
+let _token = localStorage.getItem('pb_admin_token') || sessionStorage.getItem('pb_admin_token') || '';
+let _cursos = [];
+let _estudiantes = [];
+let _inscripciones = [];
+let _clases = [];
+let _visitas = [];
+let _solicitudes = [];
+
+const PARROQUIAS = ['Catedral','Concepción','El Cuji','Juan de Villegas','Tamaca','Unión','Agua Viva','Buena Vista','Cabudare','Montalbán','Olivos','Santa Rosa','Río Claro','Juárez','Aguedo Felipe Alvarado','Sarare'];
+const COLORES = ['#1d6b3e','#2563eb','#d97706','#9333ea','#dc2626','#0891b2','#65a30d','#f43f5e'];
+
+function esc(s){ return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }
+
+function hdrs(){
+  const h = {'Content-Type':'application/json'};
+  if(_token) h['Authorization'] = _token;
+  return h;
+}
+
+async function pbGet(col, params=''){
+  try{
+    const r = await fetch(`${API}/api/collections/${col}/records?${params}&perPage=500`, {headers:hdrs()});
+    if(!r.ok) return [];
+    const d = await r.json();
+    return d.items || [];
+  }catch(e){ return [] }
+}
+
+function getFilters(){
+  const desde = document.getElementById('f-desde').value;
+  const hasta = document.getElementById('f-hasta').value;
+  const curso = document.getElementById('f-curso').value;
+  return {desde, hasta, curso};
+}
+
+async function cargarTodo(){
+  document.getElementById('rango-label').textContent = 'Actualizando datos…';
+
+  const { desde, hasta, curso } = getFilters();
+
+  // Paralelo
+  [_cursos, _estudiantes, _inscripciones, _clases, _visitas, _solicitudes] = await Promise.all([
+    pbGet('cursos_aula', 'sort=nombre'),
+    pbGet('estudiantes', 'sort=apellidos'),
+    pbGet('inscripciones_curso', ''),
+    pbGet('clases_virtuales', 'filter=publicado%3Dtrue&sort=-fecha'),
+    pbGet('solicitudes_visitas', 'filter=estado%3D%27aprobada%27'),
+    pbGet('solicitudes_inscripcion', 'filter=estado%3D%27pendiente%27&sort=-created')
+  ]);
+
+  // Poblar select de cursos
+  const sel = document.getElementById('f-curso');
+  const curVal = sel.value;
+  sel.innerHTML = '<option value="">Todos los cursos</option>';
+  _cursos.forEach(c => {
+    const o = document.createElement('option');
+    o.value = c.id;
+    o.textContent = c.nombre;
+    if(curVal===c.id) o.selected = true;
+    sel.appendChild(o);
+  });
+
+  // KPIs
+  const activos = _estudiantes.filter(e => e.estado==='activo');
+  const suspendidos = _estudiantes.filter(e => e.estado==='suspendido');
+  const cursosActivos = _cursos.filter(c => c.estado==='activo' || !c.estado);
+  document.getElementById('kpi-est').textContent = activos.length;
+  document.getElementById('kpi-cur').textContent = cursosActivos.length;
+  document.getElementById('kpi-cls').textContent = _clases.length;
+  document.getElementById('kpi-vis').textContent = _visitas.length;
+  document.getElementById('kpi-sol').textContent = _solicitudes.length;
+  document.getElementById('kpi-sus').textContent = suspendidos.length;
+
+  const ahora = new Date();
+  document.getElementById('rango-label').textContent = `Actualizado el ${ahora.toLocaleDateString('es-VE',{day:'2-digit',month:'long',year:'numeric'})} a las ${ahora.toLocaleTimeString('es-VE',{hour:'2-digit',minute:'2-digit'})}`;
+
+  renderChartCursos();
+  renderChartTipos();
+  renderTablaParr();
+  renderTablaActividad();
+  renderTablaSol();
+}
+
+function renderChartCursos(){
+  const insxcurso = {};
+  _inscripciones.forEach(i => {
+    const cid = i.curso_id;
+    insxcurso[cid] = (insxcurso[cid]||0) + 1;
+  });
+  const max = Math.max(1, ...Object.values(insxcurso));
+  const total = Object.values(insxcurso).reduce((a,b)=>a+b,0);
+  document.getElementById('ins-total').textContent = `${total} inscripciones`;
+
+  if(_cursos.length === 0){
+    document.getElementById('chart-cursos').innerHTML = '<div style="color:#9ca3af;font-size:.85rem;text-align:center;padding:20px">Sin datos de cursos</div>';
+    return;
+  }
+
+  const sorted = [..._cursos].sort((a,b) => (insxcurso[b.id]||0) - (insxcurso[a.id]||0)).slice(0,8);
+  let html = '';
+  sorted.forEach((c,i) => {
+    const n = insxcurso[c.id]||0;
+    const pct = Math.round(n/max*100);
+    const color = COLORES[i % COLORES.length];
+    html += `<div class="chart-item">
+      <div class="chart-item-label"><span class="chart-item-name">${esc(c.nombre)}</span><span class="chart-item-val">${n}</span></div>
+      <div class="chart-bar-track"><div class="chart-bar-fill" style="width:${pct}%;background:${color}"></div></div>
+    </div>`;
+  });
+  document.getElementById('chart-cursos').innerHTML = html || '<div style="color:#9ca3af;font-size:.85rem;text-align:center;padding:20px">Sin inscripciones</div>';
+}
+
+function renderChartTipos(){
+  const conteo = {adulto:0, adolescente:0, nino:0};
+  _estudiantes.filter(e=>e.estado==='activo').forEach(e => {
+    if(conteo[e.tipo]!==undefined) conteo[e.tipo]++;
+  });
+  const total = Math.max(1, Object.values(conteo).reduce((a,b)=>a+b,0));
+  const labels = {adulto:'Adultos',adolescente:'Adolescentes',nino:'Niños'};
+  const cols = {adulto:'#1d6b3e',adolescente:'#2563eb',nino:'#d97706'};
+
+  let html = '';
+  Object.entries(conteo).forEach(([k,n]) => {
+    const pct = Math.round(n/total*100);
+    html += `<div class="chart-item">
+      <div class="chart-item-label"><span class="chart-item-name">${labels[k]}</span><span class="chart-item-val">${n} (${pct}%)</span></div>
+      <div class="chart-bar-track"><div class="chart-bar-fill" style="width:${Math.round(n/Math.max(1,Math.max(...Object.values(conteo)))*100)}%;background:${cols[k]}"></div></div>
+    </div>`;
+  });
+  document.getElementById('chart-tipos').innerHTML = html || '<div style="color:#9ca3af;font-size:.85rem;text-align:center;padding:20px">Sin datos</div>';
+}
+
+function renderTablaParr(){
+  const conteo = {};
+  PARROQUIAS.forEach(p => conteo[p]=0);
+  _estudiantes.filter(e=>e.estado==='activo').forEach(e => {
+    if(e.parroquia && conteo[e.parroquia]!==undefined) conteo[e.parroquia]++;
+  });
+  const total = Math.max(1, Object.values(conteo).reduce((a,b)=>a+b,0));
+  const max = Math.max(1, Math.max(...Object.values(conteo)));
+  const sorted = Object.entries(conteo).filter(([,n])=>n>0).sort(([,a],[,b])=>b-a);
+
+  if(sorted.length===0){
+    document.querySelector('#tabla-parr tbody').innerHTML = '<tr><td colspan="4" style="text-align:center;color:#9ca3af;padding:20px">Sin datos de parroquias</td></tr>';
+    return;
+  }
+
+  let html = '';
+  sorted.forEach(([parr,n]) => {
+    const pct = Math.round(n/total*100);
+    const pctMax = Math.round(n/max*100);
+    html += `<tr>
+      <td>${esc(parr)}</td>
+      <td>${n}</td>
+      <td>${pct}%</td>
+      <td><div class="bar-cell"><div class="bar-track"><div class="bar-fill" style="width:${pctMax}%;background:var(--verde)"></div></div><span class="pct-label">${n}</span></div></td>
+    </tr>`;
+  });
+  document.querySelector('#tabla-parr tbody').innerHTML = html;
+}
+
+function renderTablaActividad(){
+  const actividades = [..._clases].sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||'')).slice(0,15);
+  if(actividades.length===0){
+    document.querySelector('#tabla-actividad tbody').innerHTML = '<tr><td colspan="5" style="text-align:center;color:#9ca3af;padding:20px">Sin actividades registradas</td></tr>';
+    return;
+  }
+
+  let html = '';
+  actividades.forEach(c => {
+    const fecha = c.fecha ? new Date(c.fecha).toLocaleDateString('es-VE',{day:'2-digit',month:'short',year:'numeric'}) : '—';
+    const ahora = new Date();
+    const fechaCls = c.fecha ? new Date(c.fecha) : null;
+    let estado = 'badge-gris', estadoTxt = 'Sin fecha';
+    if(fechaCls){
+      if(fechaCls > ahora){ estado='badge-azul'; estadoTxt='Próxima' }
+      else if(fechaCls.toDateString()===ahora.toDateString()){ estado='badge-verde'; estadoTxt='Hoy' }
+      else{ estado='badge-gris'; estadoTxt='Realizada' }
+    }
+    const curso = _cursos.find(cu=>cu.id===c.curso_id);
+    html += `<tr>
+      <td>${esc(c.nombre||c.titulo||'Clase virtual')}</td>
+      <td>${esc(curso?.nombre||c.curso||'—')}</td>
+      <td>${esc(c.profesor||'—')}</td>
+      <td>${fecha}</td>
+      <td><span class="badge ${estado}">${estadoTxt}</span></td>
+    </tr>`;
+  });
+  document.querySelector('#tabla-actividad tbody').innerHTML = html;
+}
+
+function renderTablaSol(){
+  if(_solicitudes.length===0){
+    document.querySelector('#tabla-sol tbody').innerHTML = '<tr><td colspan="5" style="text-align:center;color:#9ca3af;padding:20px">Sin solicitudes pendientes</td></tr>';
+    return;
+  }
+
+  let html = '';
+  _solicitudes.slice(0,20).forEach(s => {
+    const fecha = s.created ? new Date(s.created).toLocaleDateString('es-VE',{day:'2-digit',month:'short',year:'numeric'}) : '—';
+    const tipos = {adulto:'Adulto',adolescente:'Adolescente',nino:'Niño'};
+    const curso = _cursos.find(c=>c.id===s.curso_id);
+    const tagCls = {adulto:'badge-verde',adolescente:'badge-azul',nino:'badge-naranja'}[s.tipo]||'badge-gris';
+    html += `<tr>
+      <td>${esc(s.nombres)} ${esc(s.apellidos)}</td>
+      <td><span class="badge ${tagCls}">${tipos[s.tipo]||s.tipo||'—'}</span></td>
+      <td>${esc(s.parroquia||'—')}</td>
+      <td>${esc(curso?.nombre||'—')}</td>
+      <td>${fecha}</td>
+    </tr>`;
+  });
+  document.querySelector('#tabla-sol tbody').innerHTML = html;
+}
+
+function exportarCSV(){
+  // Tabla parroquias
+  const rows = [['Parroquia','Estudiantes activos','Porcentaje']];
+  const conteo = {};
+  PARROQUIAS.forEach(p => conteo[p]=0);
+  _estudiantes.filter(e=>e.estado==='activo').forEach(e => {
+    if(e.parroquia && conteo[e.parroquia]!==undefined) conteo[e.parroquia]++;
+  });
+  const total = Math.max(1, Object.values(conteo).reduce((a,b)=>a+b,0));
+  Object.entries(conteo).filter(([,n])=>n>0).sort(([,a],[,b])=>b-a).forEach(([p,n]) => {
+    rows.push([p, n, Math.round(n/total*100)+'%']);
+  });
+
+  rows.push([]);
+  rows.push(['KPI','Valor']);
+  rows.push(['Estudiantes activos', document.getElementById('kpi-est').textContent]);
+  rows.push(['Cursos activos', document.getElementById('kpi-cur').textContent]);
+  rows.push(['Clases programadas', document.getElementById('kpi-cls').textContent]);
+  rows.push(['Visitas aprobadas', document.getElementById('kpi-vis').textContent]);
+  rows.push(['Solicitudes pendientes', document.getElementById('kpi-sol').textContent]);
+
+  const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob(['﻿'+csv], {type:'text/csv;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `reporte-academico-${new Date().toISOString().substring(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// Defaults de filtros de fecha
+(function initFiltros(){
+  const hoy = new Date();
+  const hace3 = new Date(hoy.getFullYear(), hoy.getMonth()-2, 1);
+  document.getElementById('f-desde').value = `${hace3.getFullYear()}-${String(hace3.getMonth()+1).padStart(2,'0')}`;
+  document.getElementById('f-hasta').value = `${hoy.getFullYear()}-${String(hoy.getMonth()+1).padStart(2,'0')}`;
+})();
+
+cargarTodo();
+</script>
+</body>
+</html>

@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Mapa Brigadas Ambientales — Municipio Iribarren</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet"/>
+<script src="../../cms/pb.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--verde:#1d6b3e;--verde-dark:#1a3d2b;--verde-light:#e8f5ee;--bg:#f5f7f5;--text:#1f2937}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.navbar{background:var(--verde);color:#fff;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.2)}
+.navbar-brand{display:flex;align-items:center;gap:10px;font-family:'Poppins',sans-serif;font-size:15px;font-weight:700}
+.navbar-back{background:rgba(255,255,255,.18);border:none;color:#fff;padding:7px 14px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer}
+.navbar-back:hover{background:rgba(255,255,255,.28)}
+.mock-banner{background:#fff3cd;border:1px solid #ffc107;padding:10px 16px;text-align:center;font-size:12px;font-weight:600;color:#856404}
+.container{max-width:1100px;margin:0 auto;padding:24px 16px}
+h1{font-family:'Poppins',sans-serif;font-size:22px;font-weight:700;color:var(--verde-dark);margin-bottom:6px}
+.subtitle{font-size:13px;color:#6b7280;margin-bottom:24px}
+.layout{display:grid;grid-template-columns:1fr 300px;gap:24px}
+@media(max-width:768px){.layout{grid-template-columns:1fr}}
+.map-wrap{background:#fff;border-radius:16px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.map-title{font-family:'Poppins',sans-serif;font-size:14px;font-weight:700;color:var(--verde-dark);margin-bottom:16px}
+/* SVG parroquia rectangles */
+.parroquia-rect{cursor:pointer;transition:opacity .15s}
+.parroquia-rect:hover{opacity:.8;stroke:#1a3d2b;stroke-width:2}
+.parroquia-label{font-size:9px;fill:#fff;font-weight:600;pointer-events:none;font-family:'Inter',sans-serif}
+.tooltip{position:fixed;background:#1a3d2b;color:#fff;padding:10px 14px;border-radius:10px;font-size:12px;pointer-events:none;display:none;z-index:200;max-width:200px;line-height:1.5}
+/* sidebar */
+.sidebar-panel{background:#fff;border-radius:16px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.sidebar-title{font-family:'Poppins',sans-serif;font-size:14px;font-weight:700;color:var(--verde-dark);margin-bottom:14px}
+.legend{display:flex;flex-direction:column;gap:8px;margin-bottom:20px}
+.legend-item{display:flex;align-items:center;gap:8px;font-size:12px}
+.legend-dot{width:14px;height:14px;border-radius:4px;flex-shrink:0}
+.stats-list{display:flex;flex-direction:column;gap:10px}
+.stat-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:8px 10px;background:var(--verde-light);border-radius:8px}
+.stat-num{font-weight:700;color:var(--verde-dark)}
+.detail-box{margin-top:20px;padding:14px;background:var(--verde-light);border-radius:10px;border:1px solid #d4edd8;display:none}
+.detail-box h3{font-family:'Poppins',sans-serif;font-size:13px;font-weight:700;color:var(--verde-dark);margin-bottom:8px}
+.detail-row{font-size:12px;margin-bottom:4px;color:#374151}
+.btn-inscribir{display:block;text-align:center;background:var(--verde);color:#fff;padding:10px;border-radius:10px;font-size:13px;font-weight:600;text-decoration:none;margin-top:12px}
+.footer{background:var(--verde-dark);color:rgba(255,255,255,.7);text-align:center;padding:16px;font-size:12px;margin-top:40px}
+</style>
+</head>
+<body>
+
+<div style="background:#1a3d2b;padding:8px 16px;text-align:right;font-size:13px">
+  <a href="/brigadas-ambientales/representante/" style="color:#a7f3d0;margin-right:16px;text-decoration:none">Acceso Representantes →</a>
+  <a href="/brigadas-ambientales/comandante/" style="color:#6ee7b7;font-size:11px;text-decoration:none">Personal IAGAMI</a>
+</div>
+
+<nav class="navbar">
+  <div class="navbar-brand">🗺️ Mapa Brigadas — Municipio Iribarren</div>
+  <button class="navbar-back" onclick="history.back()">← Volver</button>
+</nav>
+
+<div class="mock-banner">⚠️ DATOS DE PRUEBA — Los números mostrados no representan brigadas reales. Se actualizarán con datos reales al activar la base de datos.</div>
+
+<div class="container">
+  <h1>Mapa de Brigadas Ambientales</h1>
+  <p class="subtitle">Distribución de brigadas activas por parroquia · Municipio Iribarren, Estado Lara</p>
+
+  <div class="layout">
+    <div class="map-wrap">
+      <div class="map-title">16 Parroquias del Municipio Iribarren</div>
+      <!-- SVG 4×4 grid of parroquias -->
+      <svg id="mapa-svg" viewBox="0 0 480 480" width="100%" style="max-width:480px;display:block;margin:0 auto">
+        <!-- Row 1 -->
+        <rect class="parroquia-rect" data-id="0" x="4"   y="4"   width="112" height="112" rx="8" fill="#1d6b3e"/>
+        <text class="parroquia-label" x="60"  y="58"  text-anchor="middle">Catedral</text>
+        <text class="parroquia-label" x="60"  y="72"  text-anchor="middle" style="font-size:11px;fill:#a7f3d0" id="cnt-0">3 brigadas</text>
+
+        <rect class="parroquia-rect" data-id="1" x="124" y="4"   width="112" height="112" rx="8" fill="#1d6b3e"/>
+        <text class="parroquia-label" x="180" y="52"  text-anchor="middle">Concepción</text>
+        <text class="parroquia-label" x="180" y="66"  text-anchor="middle" style="font-size:11px;fill:#a7f3d0" id="cnt-1">2 brigadas</text>
+
+        <rect class="parroquia-rect" data-id="2" x="244" y="4"   width="112" height="112" rx="8" fill="#256b48"/>
+        <text class="parroquia-label" x="300" y="52"  text-anchor="middle">El Cuji</text>
+        <text class="parroquia-label" x="300" y="66"  text-anchor="middle" style="font-size:11px;fill:#a7f3d0" id="cnt-2">5 brigadas</text>
+
+        <rect class="parroquia-rect" data-id="3" x="364" y="4"   width="112" height="112" rx="8" fill="#1d6b3e"/>
+        <text class="parroquia-label" x="420" y="46"  text-anchor="middle">Juan de</text>
+        <text class="parroquia-label" x="420" y="60"  text-anchor="middle">Villegas</text>
+        <text class="parroquia-label" x="420" y="76"  text-anchor="middle" style="font-size:11px;fill:#a7f3d0" id="cnt-3">1 brigada</text>
+
+        <!-- Row 2 -->
+        <rect class="parroquia-rect" data-id="4" x="4"   y="124" width="112" height="112" rx="8" fill="#256b48"/>
+        <text class="parroquia-label" x="60"  y="178" text-anchor="middle">Tamaca</text>
+        <text class="parroquia-label" x="60"  y="192" text-anchor="middle" style="font-size:11px;fill:#a7f3d0" id="cnt-4">4 brigadas</text>
+
+        <rect class="parroquia-rect" data-id="5" x="124" y="124" width="112" height="112" rx="8" fill="#338855"/>
+        <text class="parroquia-label" x="180" y="178" text-anchor="middle">Unión</text>
+        <text class="parroquia-label" x="180" y="192" text-anchor="middle" style="font-size:11px;fill:#a7f3d0" id="cnt-5">7 brigadas</text>
+
+        <rect class="parroquia-rect" data-id="6" x="244" y="124" width="112" height="112" rx="8" fill="#1d6b3e"/>
+        <text class="parroquia-label" x="300" y="178" text-anchor="middle">Agua Viva</text>
+        <text class="parroquia-label" x="300" y="192" text-anchor="middle" style="font-size:11px;fill:#a7f3d0" id="cnt-6">2 brigadas</text>
+
+        <rect class="parroquia-rect" data-id="7" x="364" y="124" width="112" height="112" rx="8" fill="#256b48"/>
+        <text class="parroquia-label" x="420" y="178" text-anchor="middle">Buena Vista</text>
+        <text class="parroquia-label" x="420" y="192" text-anchor="middle" style="font-size:11px;fill:#a7f3d0" id="cnt-7">3 brigadas</text>
+
+        <!-- Row 3 -->
+        <rect class="parroquia-rect" data-id="8" x="4"   y="244" width="112" height="112" rx="8" fill="#338855"/>
+        <text class="parroquia-label" x="60"  y="298" text-anchor="middle">Cabudare</text>
+        <text class="parroquia-label" x="60"  y="312" text-anchor="middle" style="font-size:11px;fill:#a7f3d0" id="cnt-8">6 brigadas</text>
+
+        <rect class="parroquia-rect" data-id="9" x="124" y="244" width="112" height="112" rx="8" fill="#1d6b3e"/>
+        <text class="parroquia-label" x="180" y="298" text-anchor="middle">Montalbán</text>
+        <text class="parroquia-label" x="180" y="312" text-anchor="middle" style="font-size:11px;fill:#a7f3d0" id="cnt-9">2 brigadas</text>
+
+        <rect class="parroquia-rect" data-id="10" x="244" y="244" width="112" height="112" rx="8" fill="#256b48"/>
+        <text class="parroquia-label" x="300" y="298" text-anchor="middle">Olivos</text>
+        <text class="parroquia-label" x="300" y="312" text-anchor="middle" style="font-size:11px;fill:#a7f3d0" id="cnt-10">4 brigadas</text>
+
+        <rect class="parroquia-rect" data-id="11" x="364" y="244" width="112" height="112" rx="8" fill="#1d6b3e"/>
+        <text class="parroquia-label" x="420" y="298" text-anchor="middle">Santa Rosa</text>
+        <text class="parroquia-label" x="420" y="312" text-anchor="middle" style="font-size:11px;fill:#a7f3d0" id="cnt-11">1 brigada</text>
+
+        <!-- Row 4 -->
+        <rect class="parroquia-rect" data-id="12" x="4"   y="364" width="112" height="112" rx="8" fill="#256b48"/>
+        <text class="parroquia-label" x="60"  y="418" text-anchor="middle">Río Claro</text>
+        <text class="parroquia-label" x="60"  y="432" text-anchor="middle" style="font-size:11px;fill:#a7f3d0" id="cnt-12">3 brigadas</text>
+
+        <rect class="parroquia-rect" data-id="13" x="124" y="364" width="112" height="112" rx="8" fill="#1d6b3e"/>
+        <text class="parroquia-label" x="180" y="418" text-anchor="middle">Juárez</text>
+        <text class="parroquia-label" x="180" y="432" text-anchor="middle" style="font-size:11px;fill:#a7f3d0" id="cnt-13">2 brigadas</text>
+
+        <rect class="parroquia-rect" data-id="14" x="244" y="364" width="112" height="112" rx="8" fill="#338855"/>
+        <text class="parroquia-label" x="300" y="412" text-anchor="middle">Aguedo F.</text>
+        <text class="parroquia-label" x="300" y="426" text-anchor="middle">Alvarado</text>
+        <text class="parroquia-label" x="300" y="442" text-anchor="middle" style="font-size:11px;fill:#a7f3d0" id="cnt-14">5 brigadas</text>
+
+        <rect class="parroquia-rect" data-id="15" x="364" y="364" width="112" height="112" rx="8" fill="#1d6b3e"/>
+        <text class="parroquia-label" x="420" y="418" text-anchor="middle">Sarare</text>
+        <text class="parroquia-label" x="420" y="432" text-anchor="middle" style="font-size:11px;fill:#a7f3d0" id="cnt-15">1 brigada</text>
+      </svg>
+
+      <div style="display:flex;gap:16px;justify-content:center;margin-top:16px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:6px;font-size:12px"><div style="width:14px;height:14px;border-radius:3px;background:#338855"></div>Alta actividad (6+)</div>
+        <div style="display:flex;align-items:center;gap:6px;font-size:12px"><div style="width:14px;height:14px;border-radius:3px;background:#256b48"></div>Media (3–5)</div>
+        <div style="display:flex;align-items:center;gap:6px;font-size:12px"><div style="width:14px;height:14px;border-radius:3px;background:#1d6b3e"></div>Inicial (1–2)</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="sidebar-panel">
+        <div class="sidebar-title">📊 Resumen Municipal</div>
+        <div class="stats-list">
+          <div class="stat-row"><span>Total Brigadas</span><span class="stat-num" id="total-brigadas">51</span></div>
+          <div class="stat-row"><span>Brigadistas</span><span class="stat-num" id="total-brigadistas">247</span></div>
+          <div class="stat-row"><span>Parroquias Activas</span><span class="stat-num">16/16</span></div>
+          <div class="stat-row"><span>Actividades 2024</span><span class="stat-num" id="total-actividades">89</span></div>
+        </div>
+
+        <div class="detail-box" id="detail-box">
+          <h3 id="detail-nombre">Parroquia</h3>
+          <div class="detail-row" id="detail-brigadas">— brigadas</div>
+          <div class="detail-row" id="detail-brigadistas">— brigadistas</div>
+          <div class="detail-row" id="detail-estado">Estado: —</div>
+          <a href="/brigadas-ambientales/#cats-section" class="btn-inscribir">🌿 Inscribirse en esta parroquia</a>
+        </div>
+      </div>
+
+      <div class="sidebar-panel" style="margin-top:16px">
+        <div class="sidebar-title">🏆 Top Parroquias</div>
+        <div class="stats-list" id="top-list">
+          <div class="stat-row"><span>Unión</span><span class="stat-num">7</span></div>
+          <div class="stat-row"><span>Cabudare</span><span class="stat-num">6</span></div>
+          <div class="stat-row"><span>El Cuji</span><span class="stat-num">5</span></div>
+          <div class="stat-row"><span>Aguedo F.A.</span><span class="stat-num">5</span></div>
+          <div class="stat-row"><span>Tamaca</span><span class="stat-num">4</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="tooltip" id="tooltip"></div>
+
+<div class="footer">IAGAMI — Instituto Autónomo de Gestión Ambiental · Municipio Iribarren · Barquisimeto, Lara</div>
+
+<script>
+const PARROQUIAS = [
+  {nombre:'Catedral',brigadas:3,brigadistas:14,estado:'Activa'},
+  {nombre:'Concepción',brigadas:2,brigadistas:9,estado:'Activa'},
+  {nombre:'El Cuji',brigadas:5,brigadistas:24,estado:'Activa'},
+  {nombre:'Juan de Villegas',brigadas:1,brigadistas:5,estado:'En formación'},
+  {nombre:'Tamaca',brigadas:4,brigadistas:19,estado:'Activa'},
+  {nombre:'Unión',brigadas:7,brigadistas:34,estado:'Activa'},
+  {nombre:'Agua Viva',brigadas:2,brigadistas:8,estado:'Activa'},
+  {nombre:'Buena Vista',brigadas:3,brigadistas:15,estado:'Activa'},
+  {nombre:'Cabudare',brigadas:6,brigadistas:29,estado:'Activa'},
+  {nombre:'Montalbán',brigadas:2,brigadistas:9,estado:'Activa'},
+  {nombre:'Olivos',brigadas:4,brigadistas:18,estado:'Activa'},
+  {nombre:'Santa Rosa',brigadas:1,brigadistas:4,estado:'En formación'},
+  {nombre:'Río Claro',brigadas:3,brigadistas:14,estado:'Activa'},
+  {nombre:'Juárez',brigadas:2,brigadistas:9,estado:'Activa'},
+  {nombre:'Aguedo F. Alvarado',brigadas:5,brigadistas:23,estado:'Activa'},
+  {nombre:'Sarare',brigadas:1,brigadistas:5,estado:'En formación'},
+];
+
+const tooltip = document.getElementById('tooltip');
+const detailBox = document.getElementById('detail-box');
+
+document.querySelectorAll('.parroquia-rect').forEach(rect => {
+  const id = parseInt(rect.dataset.id);
+  const p = PARROQUIAS[id];
+
+  rect.addEventListener('mouseenter', e => {
+    tooltip.style.display = 'block';
+    tooltip.innerHTML = `<strong>${p.nombre}</strong><br>${p.brigadas} brigadas · ${p.brigadistas} brigadistas<br>Estado: ${p.estado}`;
+  });
+  rect.addEventListener('mousemove', e => {
+    tooltip.style.left = (e.clientX + 12) + 'px';
+    tooltip.style.top  = (e.clientY + 12) + 'px';
+  });
+  rect.addEventListener('mouseleave', () => { tooltip.style.display = 'none'; });
+
+  rect.addEventListener('click', () => {
+    document.getElementById('detail-nombre').textContent = p.nombre;
+    document.getElementById('detail-brigadas').textContent = p.brigadas + ' brigada' + (p.brigadas !== 1 ? 's' : '');
+    document.getElementById('detail-brigadistas').textContent = p.brigadistas + ' brigadistas';
+    document.getElementById('detail-estado').textContent = 'Estado: ' + p.estado;
+    detailBox.style.display = 'block';
+  });
+});
+</script>
+</body>
+</html>

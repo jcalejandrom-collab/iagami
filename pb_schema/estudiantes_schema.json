@@ -1,0 +1,98 @@
+[
+  {
+    "name": "estudiantes",
+    "type": "auth",
+    "system": false,
+    "listRule": "@request.auth.collectionName = 'admins' || @request.auth.collectionName = 'profesores'",
+    "viewRule": "@request.auth.id = id || @request.auth.collectionName = 'admins' || @request.auth.collectionName = 'profesores'",
+    "createRule": null,
+    "updateRule": "@request.auth.id = id || @request.auth.collectionName = 'admins'",
+    "deleteRule": null,
+    "schema": [
+      {"name": "nombres",           "type": "text",     "required": true,  "options": {"min": 2, "max": 100}},
+      {"name": "apellidos",         "type": "text",     "required": true,  "options": {"min": 2, "max": 100}},
+      {"name": "cedula",            "type": "text",     "required": false, "options": {"max": 12}},
+      {"name": "fecha_nacimiento",  "type": "text",     "required": false},
+      {"name": "tipo",              "type": "select",   "required": true,  "options": {"values": ["adulto","adolescente","nino"]}, "default": "adulto"},
+      {"name": "telefono",          "type": "text",     "required": false, "options": {"max": 15}},
+      {"name": "parroquia",         "type": "select",   "required": false, "options": {"values": ["Catedral","Concepción","El Cuji","Juan de Villegas","Tamaca","Unión","Agua Viva","Buena Vista","Cabudare","Montalbán","Olivos","Santa Rosa","Río Claro","Juárez","Aguedo Felipe Alvarado","Sarare"]}},
+      {"name": "comunidad",         "type": "text",     "required": false, "options": {"max": 150}},
+      {"name": "institucion",       "type": "text",     "required": false, "options": {"max": 200}},
+      {"name": "representante_id",  "type": "relation", "required": false, "options": {"collectionId": "representantes_legales", "cascadeDelete": false, "maxSelect": 1}},
+      {"name": "estado",            "type": "select",   "required": true,  "options": {"values": ["pendiente","activo","suspendido","inactivo"]}, "default": "pendiente"},
+      {"name": "avatar",            "type": "file",     "required": false, "options": {"maxSelect": 1, "maxSize": 2097152, "mimeTypes": ["image/jpeg","image/png","image/webp"]}},
+      {"name": "created",           "type": "autodate", "onCreate": true,  "onUpdate": false}
+    ]
+  },
+  {
+    "name": "inscripciones_curso",
+    "type": "base",
+    "system": false,
+    "listRule": "@request.auth.collectionName = 'admins' || @request.auth.collectionName = 'profesores' || @request.auth.id = estudiante_id",
+    "viewRule": "@request.auth.collectionName = 'admins' || @request.auth.collectionName = 'profesores' || @request.auth.id = estudiante_id",
+    "createRule": "@request.auth.collectionName = 'admins' || @request.auth.collectionName = 'profesores'",
+    "updateRule": "@request.auth.collectionName = 'admins'",
+    "deleteRule": "@request.auth.collectionName = 'admins'",
+    "schema": [
+      {"name": "curso_id",         "type": "relation", "required": true,  "options": {"collectionId": "cursos_aula", "cascadeDelete": false, "maxSelect": 1}},
+      {"name": "estudiante_id",    "type": "relation", "required": true,  "options": {"collectionId": "estudiantes", "cascadeDelete": false, "maxSelect": 1}},
+      {"name": "estado",           "type": "select",   "required": true,  "options": {"values": ["activo","retirado","completado","suspendido"]}, "default": "activo"},
+      {"name": "fecha_inscripcion","type": "text",     "required": false},
+      {"name": "created",          "type": "autodate", "onCreate": true,  "onUpdate": false}
+    ]
+  },
+  {
+    "name": "solicitudes_inscripcion",
+    "type": "base",
+    "system": false,
+    "listRule": "@request.auth.collectionName = 'admins' || @request.auth.collectionName = 'profesores'",
+    "viewRule": "@request.auth.collectionName = 'admins' || @request.auth.collectionName = 'profesores'",
+    "createRule": "",
+    "updateRule": "@request.auth.collectionName = 'admins'",
+    "deleteRule": null,
+    "schema": [
+      {"name": "nombres",          "type": "text",     "required": true,  "options": {"min": 2, "max": 100}},
+      {"name": "apellidos",        "type": "text",     "required": true,  "options": {"min": 2, "max": 100}},
+      {"name": "cedula",           "type": "text",     "required": false, "options": {"max": 12}},
+      {"name": "correo",           "type": "email",    "required": false},
+      {"name": "telefono",         "type": "text",     "required": false, "options": {"max": 15}},
+      {"name": "fecha_nacimiento", "type": "text",     "required": false},
+      {"name": "tipo",             "type": "select",   "required": true,  "options": {"values": ["adulto","adolescente","nino"]}},
+      {"name": "parroquia",        "type": "select",   "required": false, "options": {"values": ["Catedral","Concepción","El Cuji","Juan de Villegas","Tamaca","Unión","Agua Viva","Buena Vista","Cabudare","Montalbán","Olivos","Santa Rosa","Río Claro","Juárez","Aguedo Felipe Alvarado","Sarare"]}},
+      {"name": "comunidad",        "type": "text",     "required": false, "options": {"max": 150}},
+      {"name": "institucion",      "type": "text",     "required": false, "options": {"max": 200}},
+      {"name": "curso_id",         "type": "relation", "required": false, "options": {"collectionId": "cursos_aula", "maxSelect": 1}},
+      {"name": "rep_nombres",      "type": "text",     "required": false, "options": {"max": 100}},
+      {"name": "rep_apellidos",    "type": "text",     "required": false, "options": {"max": 100}},
+      {"name": "rep_cedula",       "type": "text",     "required": false, "options": {"max": 12}},
+      {"name": "rep_telefono",     "type": "text",     "required": false, "options": {"max": 15}},
+      {"name": "rep_correo",       "type": "email",    "required": false},
+      {"name": "estado",           "type": "select",   "required": true,  "options": {"values": ["pendiente","aprobada","rechazada"]}, "default": "pendiente"},
+      {"name": "observaciones",    "type": "text",     "required": false, "options": {"max": 500}},
+      {"name": "created",          "type": "autodate", "onCreate": true,  "onUpdate": false}
+    ]
+  },
+  {
+    "name": "certificados",
+    "type": "base",
+    "system": false,
+    "listRule": "@request.auth.collectionName = 'admins' || @request.auth.collectionName = 'profesores' || @request.auth.id = estudiante_id",
+    "viewRule": "",
+    "createRule": "@request.auth.collectionName = 'admins'",
+    "updateRule": "@request.auth.collectionName = 'admins'",
+    "deleteRule": null,
+    "schema": [
+      {"name": "nombre_estudiante",    "type": "text",     "required": true,  "options": {"min": 2, "max": 150}},
+      {"name": "estudiante_id",        "type": "relation", "required": false, "options": {"collectionId": "estudiantes", "cascadeDelete": false, "maxSelect": 1}},
+      {"name": "nombre_curso",         "type": "text",     "required": true,  "options": {"min": 2, "max": 200}},
+      {"name": "horas",                "type": "number",   "required": false, "options": {"min": 1}},
+      {"name": "fecha_inicio",         "type": "text",     "required": false},
+      {"name": "fecha_fin",            "type": "text",     "required": false},
+      {"name": "fecha_emision",        "type": "text",     "required": false},
+      {"name": "nombre_profesor",      "type": "text",     "required": false, "options": {"max": 150}},
+      {"name": "codigo_verificacion",  "type": "text",     "required": true,  "options": {"min": 8, "max": 60}},
+      {"name": "estado",               "type": "select",   "required": true,  "options": {"values": ["emitido","revocado"]}, "default": "emitido"},
+      {"name": "created",              "type": "autodate", "onCreate": true,  "onUpdate": false}
+    ]
+  }
+]

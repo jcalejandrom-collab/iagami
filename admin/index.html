@@ -1607,6 +1607,568 @@ input,select,textarea{font-family:inherit}
     <!-- ══════════════════════════════════════
          SECCIÓN: AUDITORÍA INSTITUCIONAL
     ══════════════════════════════════════ -->
+    <!-- BRIGADAS AMBIENTALES ADMIN -->
+<div id="sec-brigadas" class="section">
+  <div class="page-header">
+    <div>
+      <div class="page-title">🌿 Brigadas Ambientales</div>
+      <div class="page-subtitle">Gestión de inscripciones, expedientes y brigadas constituidas</div>
+    </div>
+    <button class="btn btn-primary" onclick="renderBrigadas()">↻ Actualizar</button>
+  </div>
+  <div style="display:flex;gap:8px;margin-bottom:16px;border-bottom:2px solid var(--border);padding-bottom:0">
+    <button id="btab-censo" onclick="switchBrigTab('censo')" style="padding:8px 16px;border:none;background:none;font-size:13px;font-weight:600;color:var(--primary);border-bottom:2px solid var(--primary);margin-bottom:-2px;cursor:pointer;font-family:inherit">📊 Censo</button>
+    <button id="btab-adultos" onclick="switchBrigTab('adultos')" style="padding:8px 16px;border:none;background:none;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;font-family:inherit">🧑 Adultos</button>
+    <button id="btab-menores" onclick="switchBrigTab('menores')" style="padding:8px 16px;border:none;background:none;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;font-family:inherit">🧒 Menores</button>
+    <button id="btab-consentimientos" onclick="switchBrigTab('consentimientos')" style="padding:8px 16px;border:none;background:none;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;font-family:inherit">📋 Consentimientos</button>
+    <button id="btab-comandantes" onclick="switchBrigTab('comandantes')" style="padding:8px 16px;border:none;background:none;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;font-family:inherit">⭐ Comandantes</button>
+    <button id="btab-representantes" onclick="switchBrigTab('representantes')" style="padding:8px 16px;border:none;background:none;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;font-family:inherit">👥 Representantes</button>
+    <button id="btab-brigadas-list" onclick="switchBrigTab('brigadas-list')" style="padding:8px 16px;border:none;background:none;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;font-family:inherit">🌿 Brigadas</button>
+    <button id="btab-convocatorias" onclick="switchBrigTab('convocatorias')" style="padding:8px 16px;border:none;background:none;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;font-family:inherit">📣 Convocatorias</button>
+    <button id="btab-solicitudes-brig" onclick="switchBrigTab('solicitudes-brig')" style="padding:8px 16px;border:none;background:none;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;font-family:inherit">🛠 Solicitudes</button>
+    <button id="btab-estadisticas-brig" onclick="switchBrigTab('estadisticas-brig')" style="padding:8px 16px;border:none;background:none;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;font-family:inherit">📊 Estadísticas</button>
+  </div>
+  <div id="btab-panel-censo">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px">
+      <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center"><div style="font-size:28px;font-weight:700;color:var(--primary)" id="bstat-adultos">—</div><div style="font-size:11px;color:var(--muted);margin-top:4px">Adultos inscritos</div></div>
+      <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center"><div style="font-size:28px;font-weight:700;color:#2563eb" id="bstat-adolescentes">—</div><div style="font-size:11px;color:var(--muted);margin-top:4px">Adolescentes</div></div>
+      <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center"><div style="font-size:28px;font-weight:700;color:#7c3aed" id="bstat-ninos">—</div><div style="font-size:11px;color:var(--muted);margin-top:4px">Niños</div></div>
+      <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center"><div style="font-size:28px;font-weight:700;color:#d97706" id="bstat-pendientes">—</div><div style="font-size:11px;color:var(--muted);margin-top:4px">Pendientes</div></div>
+      <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center"><div style="font-size:28px;font-weight:700;color:#059669" id="bstat-aprobados">—</div><div style="font-size:11px;color:var(--muted);margin-top:4px">Aprobados</div></div>
+    </div>
+    <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px">
+      <div style="font-size:13px;font-weight:600;margin-bottom:12px">Participación por Parroquia</div>
+      <div id="brig-parroquia-chart" style="font-size:13px;color:var(--muted)">Cargando...</div>
+    </div>
+  </div>
+  <div id="btab-panel-adultos" style="display:none">
+    <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+      <input id="brig-search-adulto" class="form-control" placeholder="Buscar por nombre o cédula..." style="flex:1;min-width:200px" oninput="filterBrigAdultos()"/>
+      <select id="brig-f-parroquia-a" class="form-control" style="min-width:160px" onchange="filterBrigAdultos()"><option value="">Todas las parroquias</option><option>Catedral</option><option>Concepción</option><option>El Cuji</option><option>Juan de Villegas</option><option>Tamaca</option><option>Unión</option><option>Agua Viva</option><option>Buena Vista</option><option>Cabudare</option><option>Montalbán</option><option>Olivos</option><option>Santa Rosa</option><option>Río Claro</option><option>Juárez</option><option>Aguedo Felipe Alvarado</option><option>Sarare</option></select>
+      <select id="brig-f-estado-a" class="form-control" style="min-width:140px" onchange="filterBrigAdultos()"><option value="">Todos los estados</option><option value="pendiente">Pendiente</option><option value="activo">Activo</option><option value="inactivo">Inactivo</option></select>
+    </div>
+    <div id="brig-adultos-list" style="font-size:13px;color:var(--muted)">Cargando...</div>
+  </div>
+  <div id="btab-panel-menores" style="display:none">
+    <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+      <input id="brig-search-menor" class="form-control" placeholder="Buscar por nombre..." style="flex:1;min-width:200px" oninput="filterBrigMenores()"/>
+      <select id="brig-f-cat" class="form-control" style="min-width:160px" onchange="filterBrigMenores()"><option value="">Todas las categorías</option><option value="adolescente">Adolescente</option><option value="nino">Niño</option></select>
+      <select id="brig-f-estado-m" class="form-control" style="min-width:160px" onchange="filterBrigMenores()"><option value="">Todos los estados</option><option value="pendiente_consentimiento">Pendiente consentimiento</option><option value="consentimiento_cargado">Consentimiento cargado</option><option value="en_revision">En revisión</option><option value="aprobado">Aprobado</option><option value="rechazado">Rechazado</option></select>
+    </div>
+    <div id="brig-menores-list" style="font-size:13px;color:var(--muted)">Cargando...</div>
+  </div>
+  <div id="btab-panel-consentimientos" style="display:none">
+    <div style="font-size:13px;color:var(--muted);margin-bottom:12px">Consentimientos pendientes de revisión</div>
+    <div id="brig-consent-list">Cargando...</div>
+  </div>
+
+  <!-- TAB: COMANDANTES -->
+  <div id="btab-panel-comandantes" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div style="font-size:14px;font-weight:600">Comandantes Municipales de Brigadas</div>
+      <button class="btn btn-primary" onclick="document.getElementById('brig-cmd-form').style.display='block'">+ Crear Comandante</button>
+    </div>
+    <div id="brig-cmd-form" style="display:none;background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px">
+      <h4 style="margin-bottom:14px;font-family:'Poppins',sans-serif">Nuevo Comandante Municipal</h4>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div><label class="form-label">Nombres *</label><input class="form-control" id="cmd-nombres" placeholder="Nombres"/></div>
+        <div><label class="form-label">Apellidos *</label><input class="form-control" id="cmd-apellidos" placeholder="Apellidos"/></div>
+        <div><label class="form-label">Email (usuario) *</label><input class="form-control" id="cmd-email" type="email" placeholder="correo@ejemplo.com"/></div>
+        <div><label class="form-label">Contraseña inicial *</label><input class="form-control" id="cmd-pass" type="password" placeholder="Mínimo 8 caracteres"/></div>
+        <div><label class="form-label">Cargo</label><input class="form-control" id="cmd-cargo" placeholder="Ej: Comandante Municipal"/></div>
+        <div><label class="form-label">Teléfono</label><input class="form-control" id="cmd-tel" placeholder="0414-0000000"/></div>
+        <div><label class="form-label">Parroquia asignada</label><select class="form-control" id="cmd-parroquia"><option value="Municipal">Municipal (todas)</option><option>Catedral</option><option>Concepción</option><option>El Cuji</option><option>Juan de Villegas</option><option>Tamaca</option><option>Unión</option><option>Agua Viva</option><option>Buena Vista</option><option>Cabudare</option><option>Montalbán</option><option>Olivos</option><option>Santa Rosa</option><option>Río Claro</option><option>Juárez</option><option>Aguedo Felipe Alvarado</option><option>Sarare</option></select></div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:14px">
+        <button class="btn btn-primary" onclick="brig_saveComandante()">💾 Crear Comandante</button>
+        <button class="btn btn-secondary" onclick="document.getElementById('brig-cmd-form').style.display='none'">Cancelar</button>
+      </div>
+    </div>
+    <div id="brig-cmd-list">Cargando...</div>
+  </div>
+
+  <!-- TAB: REPRESENTANTES -->
+  <div id="btab-panel-representantes" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px">
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <select id="brig-f-tipo-rep" class="form-control" style="min-width:200px" onchange="brig_loadRepresentantes()"><option value="">Todos los tipos</option><option value="representante_comuna">Rep. de Comuna</option><option value="representante_consejo_comunal">Rep. de Consejo Comunal</option></select>
+        <select id="brig-f-estado-rep" class="form-control" style="min-width:140px" onchange="brig_loadRepresentantes()"><option value="">Todos los estados</option><option value="pendiente">Pendiente</option><option value="activo">Activo</option><option value="suspendido">Suspendido</option></select>
+      </div>
+      <button class="btn btn-primary" onclick="document.getElementById('brig-rep-form').style.display='block'">+ Crear Representante</button>
+    </div>
+    <div id="brig-rep-form" style="display:none;background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px">
+      <h4 style="margin-bottom:14px;font-family:'Poppins',sans-serif">Nuevo Representante Territorial</h4>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div><label class="form-label">Nombres *</label><input class="form-control" id="rep-nombres" placeholder="Nombres"/></div>
+        <div><label class="form-label">Apellidos *</label><input class="form-control" id="rep-apellidos" placeholder="Apellidos"/></div>
+        <div><label class="form-label">Email (usuario) *</label><input class="form-control" id="rep-email" type="email" placeholder="correo@ejemplo.com"/></div>
+        <div><label class="form-label">Contraseña inicial *</label><input class="form-control" id="rep-pass" type="password" placeholder="Mínimo 8 caracteres"/></div>
+        <div><label class="form-label">Tipo *</label><select class="form-control" id="rep-tipo"><option value="representante_comuna">Representante de Comuna</option><option value="representante_consejo_comunal">Representante de Consejo Comunal</option></select></div>
+        <div><label class="form-label">Parroquia</label><select class="form-control" id="rep-parroquia"><option value="">Selecciona...</option><option>Catedral</option><option>Concepción</option><option>El Cuji</option><option>Juan de Villegas</option><option>Tamaca</option><option>Unión</option><option>Agua Viva</option><option>Buena Vista</option><option>Cabudare</option><option>Montalbán</option><option>Olivos</option><option>Santa Rosa</option><option>Río Claro</option><option>Juárez</option><option>Aguedo Felipe Alvarado</option><option>Sarare</option></select></div>
+        <div><label class="form-label">Cargo</label><input class="form-control" id="rep-cargo" placeholder="Ej: Coordinador de brigadas"/></div>
+        <div><label class="form-label">Teléfono</label><input class="form-control" id="rep-tel" placeholder="0414-0000000"/></div>
+        <div><label class="form-label">Fecha de designación</label><input class="form-control" id="rep-fecha" type="date"/></div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:14px">
+        <button class="btn btn-primary" onclick="brig_saveRepresentante()">💾 Crear Representante</button>
+        <button class="btn btn-secondary" onclick="document.getElementById('brig-rep-form').style.display='none'">Cancelar</button>
+      </div>
+    </div>
+    <div id="brig-rep-list">Cargando...</div>
+  </div>
+
+  <!-- TAB: BRIGADAS LIST -->
+  <div id="btab-panel-brigadas-list" style="display:none">
+    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
+      <input id="brig-search-nom" class="form-control" placeholder="Buscar por nombre, código..." style="flex:1;min-width:200px" oninput="brig_filterBrigadas()"/>
+      <select id="brig-f-parroquia-b" class="form-control" style="min-width:160px" onchange="brig_filterBrigadas()"><option value="">Todas las parroquias</option><option>Catedral</option><option>Concepción</option><option>El Cuji</option><option>Juan de Villegas</option><option>Tamaca</option><option>Unión</option><option>Agua Viva</option><option>Buena Vista</option><option>Cabudare</option><option>Montalbán</option><option>Olivos</option><option>Santa Rosa</option><option>Río Claro</option><option>Juárez</option><option>Aguedo Felipe Alvarado</option><option>Sarare</option></select>
+      <select id="brig-f-estado-b" class="form-control" style="min-width:160px" onchange="brig_filterBrigadas()"><option value="">Todos los estados</option><option value="en_formacion">En formación</option><option value="activa">Activa</option><option value="en_planificacion">En planificación</option><option value="suspendida">Suspendida</option><option value="inactiva">Inactiva</option></select>
+      <button class="btn btn-primary" onclick="document.getElementById('brig-new-form').style.display='block'">+ Nueva Brigada</button>
+    </div>
+    <div id="brig-new-form" style="display:none;background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px">
+      <h4 style="margin-bottom:14px;font-family:'Poppins',sans-serif">🌿 Registrar Brigada</h4>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div><label class="form-label">Nombre *</label><input class="form-control" id="brig-n-nombre" placeholder="Nombre de la brigada"/></div>
+        <div><label class="form-label">Parroquia *</label><select class="form-control" id="brig-n-parroquia"><option value="">Selecciona...</option><option>Catedral</option><option>Concepción</option><option>El Cuji</option><option>Juan de Villegas</option><option>Tamaca</option><option>Unión</option><option>Agua Viva</option><option>Buena Vista</option><option>Cabudare</option><option>Montalbán</option><option>Olivos</option><option>Santa Rosa</option><option>Río Claro</option><option>Juárez</option><option>Aguedo Felipe Alvarado</option><option>Sarare</option></select></div>
+        <div><label class="form-label">Fecha de conformación</label><input class="form-control" id="brig-n-fecha" type="date"/></div>
+        <div><label class="form-label">Estado</label><select class="form-control" id="brig-n-estado"><option value="en_formacion">En formación</option><option value="activa">Activa</option><option value="en_planificacion">En planificación</option></select></div>
+        <div style="grid-column:span 2"><label class="form-label">Área de actuación</label><input class="form-control" id="brig-n-area" placeholder="Ej: Quebrada de Barquisimeto sector norte"/></div>
+        <div style="grid-column:span 2"><label class="form-label">Objetivos</label><textarea class="form-control" id="brig-n-obj" rows="2" placeholder="Objetivos de la brigada..."></textarea></div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:14px">
+        <button class="btn btn-primary" onclick="brig_saveBrigada()">💾 Guardar Brigada</button>
+        <button class="btn btn-secondary" onclick="document.getElementById('brig-new-form').style.display='none'">Cancelar</button>
+      </div>
+    </div>
+    <div id="brig-brigadas-list">Cargando...</div>
+  </div>
+
+  <!-- TAB: CONVOCATORIAS -->
+  <div id="btab-panel-convocatorias" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div style="font-size:14px;font-weight:600">Comunicados y Convocatorias</div>
+      <button class="btn btn-primary" onclick="document.getElementById('brig-conv-form').style.display='block'">+ Nueva Convocatoria</button>
+    </div>
+    <div id="brig-conv-form" style="display:none;background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px">
+      <h4 style="margin-bottom:14px;font-family:'Poppins',sans-serif">📣 Enviar Convocatoria / Comunicado</h4>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div style="grid-column:span 2"><label class="form-label">Asunto *</label><input class="form-control" id="conv-asunto" placeholder="Asunto del comunicado"/></div>
+        <div><label class="form-label">Destinatarios</label><select class="form-control" id="conv-dest"><option value="todos">Todos los representantes</option><option value="parroquia">Una parroquia específica</option><option value="comuna">Una comuna</option><option value="consejo_comunal">Un Consejo Comunal</option></select></div>
+        <div><label class="form-label">Prioridad</label><select class="form-control" id="conv-prioridad"><option value="normal">Normal</option><option value="urgente">🔴 Urgente</option></select></div>
+        <div style="grid-column:span 2"><label class="form-label">Contenido *</label><textarea class="form-control" id="conv-contenido" rows="4" placeholder="Escriba el contenido del comunicado..."></textarea></div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:14px">
+        <button class="btn btn-primary" onclick="brig_sendConvocatoria()">📤 Enviar</button>
+        <button class="btn btn-secondary" onclick="document.getElementById('brig-conv-form').style.display='none'">Cancelar</button>
+      </div>
+    </div>
+    <div id="brig-conv-list">Cargando...</div>
+  </div>
+
+  <!-- TAB: SOLICITUDES -->
+  <div id="btab-panel-solicitudes-brig" style="display:none">
+    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+      <select id="brig-f-sol-estado" class="form-control" style="min-width:160px" onchange="brig_loadSolicitudes()"><option value="">Todos los estados</option><option value="pendiente">Pendiente</option><option value="en_proceso">En proceso</option><option value="aprobada">Aprobada</option><option value="rechazada">Rechazada</option><option value="entregada">Entregada</option></select>
+      <select id="brig-f-sol-tipo" class="form-control" style="min-width:180px" onchange="brig_loadSolicitudes()"><option value="">Todos los tipos</option><option value="plantas">Plantas</option><option value="arboles">Árboles</option><option value="herramientas">Herramientas</option><option value="bolsas">Bolsas</option><option value="guantes">Guantes</option><option value="agua">Agua</option><option value="transporte">Transporte</option><option value="material_educativo">Material educativo</option><option value="apoyo_tecnico">Apoyo técnico</option><option value="formacion">Formación</option></select>
+    </div>
+    <div id="brig-sol-list">Cargando...</div>
+    <div id="brig-sol-resp-form" style="display:none;background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px;margin-top:12px">
+      <input type="hidden" id="brig-sol-id"/>
+      <h4 style="margin-bottom:12px;font-family:'Poppins',sans-serif">Responder Solicitud</h4>
+      <div style="display:grid;gap:12px">
+        <div><label class="form-label">Estado *</label><select class="form-control" id="brig-sol-nuevo-estado"><option value="en_proceso">En proceso</option><option value="aprobada">Aprobada</option><option value="rechazada">Rechazada</option><option value="entregada">Entregada</option></select></div>
+        <div><label class="form-label">Respuesta institucional</label><textarea class="form-control" id="brig-sol-respuesta" rows="3" placeholder="Describa la acción tomada..."></textarea></div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:12px">
+        <button class="btn btn-primary" onclick="brig_responderSolicitud(document.getElementById('brig-sol-id').value)">💾 Guardar respuesta</button>
+        <button class="btn btn-secondary" onclick="document.getElementById('brig-sol-resp-form').style.display='none'">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: ESTADÍSTICAS -->
+  <div id="btab-panel-estadisticas-brig" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div style="font-size:14px;font-weight:600">Estadísticas Municipales de Brigadas</div>
+      <button class="btn btn-secondary" onclick="brig_exportCensoCSV()">⬇ Exportar censo CSV</button>
+    </div>
+    <div id="brig-stats-content">
+      <div style="text-align:center;padding:40px;color:var(--muted)">Cargando estadísticas...</div>
+    </div>
+  </div>
+</div>
+
+<!-- AULA AMBIENTAL ADMIN -->
+<div id="sec-aula" class="section">
+  <div class="page-header">
+    <div>
+      <div class="page-title">📚 Aula Ambiental IAGAMI</div>
+      <div class="page-subtitle">Biblioteca multimedia y recursos educativos</div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <a href="reportes-academicos/index.html" target="_blank" class="btn btn-secondary" style="text-decoration:none">📊 Reportes</a>
+      <a href="../aula-ambiental/calendario/index.html" target="_blank" class="btn btn-secondary" style="text-decoration:none">📅 Calendario</a>
+      <button class="btn btn-primary" onclick="openAulaForm()">+ Nuevo Recurso</button>
+    </div>
+  </div>
+  <div style="display:flex;gap:8px;margin-bottom:16px;border-bottom:2px solid var(--border);padding-bottom:0">
+    <button id="atab-biblioteca" onclick="switchAulaTab('biblioteca')" style="padding:8px 16px;border:none;background:none;font-size:13px;font-weight:600;color:var(--primary);border-bottom:2px solid var(--primary);margin-bottom:-2px;cursor:pointer;font-family:inherit">📖 Biblioteca</button>
+    <button id="atab-cursos" onclick="switchAulaTab('cursos')" style="padding:8px 16px;border:none;background:none;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;font-family:inherit">🎓 Cursos</button>
+    <button id="atab-visitas" onclick="switchAulaTab('visitas')" style="padding:8px 16px;border:none;background:none;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;font-family:inherit">🏫 Visitas Escolares</button>
+    <button id="atab-clases" onclick="switchAulaTab('clases')" style="padding:8px 16px;border:none;background:none;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;font-family:inherit">🎥 Clases Virtuales</button>
+    <button id="atab-avisos" onclick="switchAulaTab('avisos')" style="padding:8px 16px;border:none;background:none;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;font-family:inherit">📢 Avisos</button>
+    <button id="atab-certificados" onclick="switchAulaTab('certificados')" style="padding:8px 16px;border:none;background:none;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;font-family:inherit">🏅 Certificados</button>
+    <button id="atab-zoom" onclick="switchAulaTab('zoom')" style="padding:8px 16px;border:none;background:none;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;font-family:inherit">🎥 Zoom API</button>
+  </div>
+  <div id="atab-panel-biblioteca">
+    <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+      <select id="aula-f-cat" class="form-control" style="min-width:200px" onchange="renderAulaBiblioteca()"><option value="">Todas las categorías</option><option>Educación ambiental</option><option>Cambio climático</option><option>Protección del agua</option><option>Reciclaje</option><option>Reforestación</option><option>Árboles autóctonos de Lara</option><option>Biodiversidad</option><option>Protección de fauna</option><option>Contaminación ambiental</option><option>Gestión de residuos</option><option>Compostaje</option><option>Parques y áreas verdes</option><option>Ecosistemas de Iribarren</option></select>
+      <select id="aula-f-tipo" class="form-control" style="min-width:140px" onchange="renderAulaBiblioteca()"><option value="">Todos los tipos</option><option value="video">Video YouTube</option><option value="pdf">Documento PDF</option><option value="guia">Guía didáctica</option><option value="infografia">Infografía</option><option value="presentacion">Presentación</option></select>
+    </div>
+    <div id="aula-biblioteca-list">Cargando...</div>
+  </div>
+  <div id="atab-panel-cursos" style="display:none"><div id="aula-cursos-list">Cargando...</div></div>
+  <div id="atab-panel-visitas" style="display:none">
+    <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+      <select id="vis-f-estado" class="form-control" style="min-width:160px" onchange="renderVisitas()"><option value="">Todos los estados</option><option value="recibida">Recibida</option><option value="aprobada">Aprobada</option><option value="programada">Programada</option><option value="ejecutada">Ejecutada</option><option value="cancelada">Cancelada</option></select>
+      <button class="btn btn-primary" onclick="openVisitaForm()">+ Nueva Solicitud</button>
+    </div>
+    <div id="visitas-list">Cargando...</div>
+    <div id="visita-form-panel" style="display:none;background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px;margin-top:16px">
+      <h4 style="margin-bottom:14px;font-family:'Poppins',sans-serif">📋 Registrar Visita Escolar</h4>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div><label class="form-label">Institución Educativa *</label><input class="form-control" id="vis-institucion" placeholder="Nombre de la institución"/></div>
+        <div><label class="form-label">Solicitante *</label><input class="form-control" id="vis-solicitante" placeholder="Nombre del docente/director"/></div>
+        <div><label class="form-label">Teléfono</label><input class="form-control" id="vis-tel" placeholder="Teléfono de contacto"/></div>
+        <div><label class="form-label">Parroquia *</label><select class="form-control" id="vis-parroquia"><option value="">Selecciona...</option><option>Catedral</option><option>Concepción</option><option>El Cuji</option><option>Juan de Villegas</option><option>Tamaca</option><option>Unión</option><option>Agua Viva</option><option>Buena Vista</option><option>Cabudare</option><option>Montalbán</option><option>Olivos</option><option>Santa Rosa</option><option>Río Claro</option><option>Juárez</option><option>Aguedo Felipe Alvarado</option><option>Sarare</option></select></div>
+        <div><label class="form-label">Cantidad de Estudiantes</label><input class="form-control" id="vis-cantidad" type="number" min="1" placeholder="Ej: 30"/></div>
+        <div><label class="form-label">Nivel Educativo</label><select class="form-control" id="vis-nivel"><option value="">Selecciona...</option><option>Inicial</option><option>Primaria</option><option>Secundaria</option><option>Universitario</option></select></div>
+        <div><label class="form-label">Fecha Propuesta *</label><input class="form-control" id="vis-fecha" type="date"/></div>
+        <div><label class="form-label">Horario</label><input class="form-control" id="vis-horario" placeholder="Ej: 8:00am - 10:00am"/></div>
+        <div style="grid-column:span 2"><label class="form-label">Temática Ambiental *</label><input class="form-control" id="vis-tematica" placeholder="¿Qué tema desean tratar?"/></div>
+        <div style="grid-column:span 2"><label class="form-label">Observaciones</label><textarea class="form-control" id="vis-obs" rows="2" placeholder="Información adicional..."></textarea></div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:14px">
+        <button class="btn btn-primary" onclick="saveVisita()">💾 Guardar Solicitud</button>
+        <button class="btn btn-secondary" onclick="closeVisitaForm()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+  <!-- CLASES VIRTUALES -->
+  <div id="atab-panel-clases" style="display:none">
+    <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+      <button class="btn btn-primary" onclick="openClaseForm()">+ Nueva Clase Virtual</button>
+    </div>
+    <div id="clases-admin-list">Cargando...</div>
+    <div id="clase-form-panel" style="display:none;background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px;margin-top:16px">
+      <h4 style="margin-bottom:14px;font-family:'Poppins',sans-serif">🎥 Programar Clase Virtual</h4>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div><label class="form-label">Nombre de la clase *</label><input class="form-control" id="cls-nombre" placeholder="Ej: Taller de Reciclaje"/></div>
+        <div><label class="form-label">Profesor *</label><input class="form-control" id="cls-profesor" placeholder="Nombre del facilitador"/></div>
+        <div><label class="form-label">Curso / Grupo</label><input class="form-control" id="cls-curso" placeholder="Ej: Brigadistas Adultos"/></div>
+        <div><label class="form-label">Plataforma</label>
+          <select class="form-control" id="cls-plataforma"><option>Zoom</option><option>Google Meet</option><option>Teams</option><option>YouTube Live</option><option>Otro</option></select>
+        </div>
+        <div><label class="form-label">Fecha *</label><input class="form-control" id="cls-fecha" type="date"/></div>
+        <div><label class="form-label">Hora *</label><input class="form-control" id="cls-hora" type="time"/></div>
+        <div><label class="form-label">Duración</label><input class="form-control" id="cls-duracion" placeholder="Ej: 1 hora 30 min"/></div>
+        <div><label class="form-label">Enlace de la reunión</label><input class="form-control" id="cls-enlace" placeholder="https://zoom.us/j/..."/></div>
+        <div><label class="form-label">Contraseña (opcional)</label><input class="form-control" id="cls-pass" placeholder="Contraseña de la reunión"/></div>
+        <div><label class="form-label">URL Material Complementario</label><input class="form-control" id="cls-material" placeholder="https://..."/></div>
+        <div style="grid-column:span 2"><label class="form-label">Descripción / Bienvenida</label><textarea class="form-control" id="cls-desc" rows="2" placeholder="Mensaje de bienvenida o descripción de la clase..."></textarea></div>
+        <div style="grid-column:span 2;display:flex;align-items:center;gap:8px"><input type="checkbox" id="cls-pub" checked/><label for="cls-pub" style="font-size:13px">Publicar (visible para alumnos)</label></div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:14px">
+        <button class="btn btn-primary" onclick="saveClase()">💾 Guardar Clase</button>
+        <button class="btn btn-secondary" onclick="document.getElementById('clase-form-panel').style.display='none'">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- AVISOS -->
+  <div id="atab-panel-avisos" style="display:none">
+    <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+      <button class="btn btn-primary" onclick="openAvisoForm()">+ Nuevo Aviso</button>
+    </div>
+    <div id="avisos-admin-list">Cargando...</div>
+    <div id="aviso-form-panel" style="display:none;background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px;margin-top:16px">
+      <h4 style="margin-bottom:14px;font-family:'Poppins',sans-serif">📢 Publicar Aviso</h4>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div><label class="form-label">Título *</label><input class="form-control" id="av-titulo" placeholder="Título del aviso"/></div>
+        <div><label class="form-label">Tipo *</label>
+          <select class="form-control" id="av-tipo"><option value="aviso">Aviso general</option><option value="recordatorio">Recordatorio</option><option value="cancelacion">Cancelación</option><option value="nueva_clase">Nueva clase</option><option value="tarea">Tarea</option><option value="material">Nuevo material</option></select>
+        </div>
+        <div><label class="form-label">Profesor / Responsable</label><input class="form-control" id="av-profesor" placeholder="Nombre"/></div>
+        <div><label class="form-label">Curso / Grupo destinatario</label><input class="form-control" id="av-curso" placeholder="Ej: Todos, Brigadistas..."/></div>
+        <div style="grid-column:span 2"><label class="form-label">Contenido *</label><textarea class="form-control" id="av-contenido" rows="4" placeholder="Escribe el mensaje completo..."></textarea></div>
+        <div style="grid-column:span 2;display:flex;align-items:center;gap:8px"><input type="checkbox" id="av-pub" checked/><label for="av-pub" style="font-size:13px">Publicar inmediatamente</label></div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:14px">
+        <button class="btn btn-primary" onclick="saveAviso()">📢 Publicar Aviso</button>
+        <button class="btn btn-secondary" onclick="document.getElementById('aviso-form-panel').style.display='none'">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CERTIFICADOS -->
+  <div id="atab-panel-certificados" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+      <div style="font-size:13px;color:var(--muted)">Gestión de certificados digitales emitidos a estudiantes</div>
+      <button class="btn btn-primary" onclick="openCertForm()">🏅 Emitir Certificado</button>
+    </div>
+    <div id="certs-admin-list">Cargando...</div>
+    <div id="cert-form-panel" style="display:none;background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px;margin-top:16px">
+      <h4 style="margin-bottom:14px;font-family:'Poppins',sans-serif">🏅 Emitir Certificado Digital</h4>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div><label class="form-label">Nombre del Estudiante *</label><input class="form-control" id="cert-estudiante" placeholder="Nombre completo del estudiante"/></div>
+        <div><label class="form-label">ID del Estudiante (PocketBase)</label><input class="form-control" id="cert-estudiante-id" placeholder="ID del registro en estudiantes"/></div>
+        <div><label class="form-label">Nombre del Curso *</label><input class="form-control" id="cert-curso" placeholder="Nombre del curso"/></div>
+        <div><label class="form-label">Horas de formación *</label><input class="form-control" id="cert-horas" type="number" min="1" placeholder="Ej: 20"/></div>
+        <div><label class="form-label">Fecha de inicio *</label><input class="form-control" id="cert-fecha-inicio" type="date"/></div>
+        <div><label class="form-label">Fecha de fin *</label><input class="form-control" id="cert-fecha-fin" type="date"/></div>
+        <div><label class="form-label">Fecha de emisión *</label><input class="form-control" id="cert-fecha-emision" type="date"/></div>
+        <div><label class="form-label">Facilitador / Profesor</label><input class="form-control" id="cert-profesor" placeholder="Nombre del facilitador"/></div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:14px">
+        <button class="btn btn-primary" onclick="emitirCertificado()">🏅 Emitir Certificado</button>
+        <button class="btn btn-secondary" onclick="closeCertForm()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ZOOM API -->
+  <div id="atab-panel-zoom" style="display:none">
+    <!-- Estado de conexión -->
+    <div id="zoom-status-card" style="background:#f8fafc;border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span id="zoom-status-dot" style="width:12px;height:12px;border-radius:50%;background:#94a3b8;display:inline-block"></span>
+        <div>
+          <div id="zoom-status-text" style="font-size:13px;font-weight:600;color:var(--text)">Verificando conexión...</div>
+          <div id="zoom-status-account" style="font-size:12px;color:var(--muted)"></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px" onclick="checkZoomStatus()">🔄 Verificar</button>
+        <button class="btn btn-secondary" style="font-size:12px;padding:6px 12px" onclick="document.getElementById('zoom-config-info').style.display=document.getElementById('zoom-config-info').style.display==='none'?'block':'none'">⚙️ Configuración</button>
+      </div>
+    </div>
+    <div id="zoom-config-info" style="display:none;background:#fffbeb;border:1px solid #fcd34d;border-radius:10px;padding:14px;margin-bottom:16px;font-size:13px;color:#92400e">
+      <strong>Configuración de Zoom OAuth</strong><br>
+      El flujo OAuth se gestiona exclusivamente en el VPS mediante el hook de PocketBase.<br>
+      Para configurar: acceder al servidor VPS y ejecutar <code style="background:#fef3c7;padding:2px 6px;border-radius:4px">node /opt/pocketbase/pb_hooks/zoom_setup.js</code><br>
+      Las credenciales (Client ID / Client Secret) deben estar en las variables de entorno del servidor.
+    </div>
+
+    <!-- Gestión de Reuniones -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+      <h4 style="margin:0;font-family:'Poppins',sans-serif;font-size:15px">Reuniones Programadas</h4>
+      <button class="btn btn-primary" onclick="openZoomMeetingForm()">+ Nueva Reunión</button>
+    </div>
+
+    <!-- Formulario nueva reunión -->
+    <div id="zoom-meeting-form" style="display:none;background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px">
+      <h4 style="margin-bottom:14px;font-family:'Poppins',sans-serif;font-size:14px" id="zoom-form-title">🎥 Crear Reunión en Zoom</h4>
+      <input type="hidden" id="zoom-edit-id">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div style="grid-column:span 2"><label class="form-label">Tema de la reunión *</label><input class="form-control" id="zoom-tema" placeholder="Ej: Clase de Educación Ambiental — Curso Brigadistas"/></div>
+        <div><label class="form-label">Curso</label><input class="form-control" id="zoom-curso" placeholder="Nombre del curso"/></div>
+        <div><label class="form-label">Profesor / Facilitador</label><input class="form-control" id="zoom-profesor" placeholder="Nombre del facilitador"/></div>
+        <div><label class="form-label">Fecha *</label><input class="form-control" id="zoom-fecha" type="date"/></div>
+        <div><label class="form-label">Hora inicio *</label><input class="form-control" id="zoom-hora" type="time"/></div>
+        <div><label class="form-label">Duración (minutos)</label><input class="form-control" id="zoom-duracion" type="number" value="60" min="15" max="480"/></div>
+        <div style="grid-column:span 2"><label class="form-label">Agenda / Descripción</label><textarea class="form-control" id="zoom-agenda" rows="2" placeholder="Descripción de la clase o agenda de la reunión..."></textarea></div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:14px">
+        <button class="btn btn-primary" id="zoom-form-btn" onclick="submitZoomMeetingForm()">🎥 Crear en Zoom</button>
+        <button class="btn btn-secondary" onclick="closeZoomMeetingForm()">Cancelar</button>
+      </div>
+    </div>
+
+    <!-- Tabla de reuniones -->
+    <div id="zoom-meetings-list" style="margin-bottom:24px">
+      <div style="text-align:center;padding:30px;color:var(--muted);font-size:13px">Cargando reuniones...</div>
+    </div>
+
+    <!-- Grabaciones -->
+    <div>
+      <h4 style="font-family:'Poppins',sans-serif;font-size:15px;margin-bottom:12px">Grabaciones</h4>
+      <div id="zoom-recordings-list">
+        <div style="text-align:center;padding:30px;color:var(--muted);font-size:13px">Cargando grabaciones...</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="aula-form-panel" style="display:none;background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px;margin-top:16px">
+    <h4 style="margin-bottom:14px;font-family:'Poppins',sans-serif">📖 Agregar Recurso Educativo</h4>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div><label class="form-label">Título *</label><input class="form-control" id="aula-titulo" placeholder="Título del recurso"/></div>
+      <div><label class="form-label">Tipo *</label><select class="form-control" id="aula-tipo"><option value="">Selecciona...</option><option value="video">Video YouTube</option><option value="pdf">Documento PDF</option><option value="guia">Guía didáctica</option><option value="infografia">Infografía</option><option value="presentacion">Presentación</option></select></div>
+      <div><label class="form-label">Categoría *</label><select class="form-control" id="aula-cat"><option value="">Selecciona...</option><option>Educación ambiental</option><option>Cambio climático</option><option>Protección del agua</option><option>Reciclaje</option><option>Reforestación</option><option>Árboles autóctonos de Lara</option><option>Biodiversidad</option><option>Protección de fauna</option><option>Contaminación ambiental</option><option>Gestión de residuos</option><option>Compostaje</option><option>Parques y áreas verdes</option><option>Ecosistemas de Iribarren</option></select></div>
+      <div><label class="form-label">Nivel Educativo</label><select class="form-control" id="aula-nivel"><option value="">General</option><option>Inicial</option><option>Primaria</option><option>Secundaria</option><option>Adultos</option></select></div>
+      <div style="grid-column:span 2"><label class="form-label">Descripción</label><textarea class="form-control" id="aula-desc" rows="2" placeholder="Breve descripción del recurso..."></textarea></div>
+      <div style="grid-column:span 2"><label class="form-label">URL del recurso *</label><input class="form-control" id="aula-url" placeholder="https://youtube.com/watch?v=... o enlace al documento"/></div>
+      <div style="grid-column:span 2;display:flex;align-items:center;gap:8px"><input type="checkbox" id="aula-publicado" checked/><label for="aula-publicado" style="font-size:13px">Publicado</label></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:14px">
+      <button class="btn btn-primary" onclick="saveAulaRecurso()">💾 Guardar Recurso</button>
+      <button class="btn btn-secondary" onclick="closeAulaForm()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+    <!-- ══════ PROFESORES ══════ -->
+    <div id="sec-profesores" class="section">
+      <div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between">
+        <div>
+          <div class="page-title">👨‍🏫 Gestión de Profesores</div>
+          <div class="page-subtitle">Crear, activar/suspender cuentas docentes y asignar cursos</div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="openProfForm()">+ Nuevo profesor</button>
+      </div>
+
+      <!-- Estadísticas -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px" id="prof-stats">
+        <div style="background:#fff;border-radius:12px;padding:14px;text-align:center;box-shadow:var(--shadow)">
+          <div style="font-size:24px;font-weight:700;color:var(--primary)" id="ps-total">—</div>
+          <div style="font-size:11px;color:var(--muted)">Total profesores</div>
+        </div>
+        <div style="background:#fff;border-radius:12px;padding:14px;text-align:center;box-shadow:var(--shadow)">
+          <div style="font-size:24px;font-weight:700;color:#059669" id="ps-activos">—</div>
+          <div style="font-size:11px;color:var(--muted)">Activos</div>
+        </div>
+        <div style="background:#fff;border-radius:12px;padding:14px;text-align:center;box-shadow:var(--shadow)">
+          <div style="font-size:24px;font-weight:700;color:var(--primary)" id="ps-cursos">—</div>
+          <div style="font-size:11px;color:var(--muted)">Cursos activos</div>
+        </div>
+        <div style="background:#fff;border-radius:12px;padding:14px;text-align:center;box-shadow:var(--shadow)">
+          <div style="font-size:24px;font-weight:700;color:#2563eb" id="ps-clases">—</div>
+          <div style="font-size:11px;color:var(--muted)">Clases programadas</div>
+        </div>
+      </div>
+
+      <!-- Formulario nuevo profesor -->
+      <div id="prof-form-panel" style="display:none;background:#f8fafc;border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:20px">
+        <h4 style="font-family:'Poppins',sans-serif;font-size:15px;font-weight:600;color:var(--primary-dark);margin-bottom:14px">👨‍🏫 Crear Cuenta Docente</h4>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div><label class="form-label">Nombres *</label><input class="form-control" id="pf-nombres" placeholder="Nombres del profesor"/></div>
+          <div><label class="form-label">Apellidos *</label><input class="form-control" id="pf-apellidos" placeholder="Apellidos"/></div>
+          <div><label class="form-label">Correo institucional *</label><input class="form-control" id="pf-email" type="email" placeholder="profesor@iagami.online"/></div>
+          <div><label class="form-label">Cédula</label><input class="form-control" id="pf-cedula" placeholder="V-00000000"/></div>
+          <div><label class="form-label">Teléfono</label><input class="form-control" id="pf-tel" placeholder="04XX-XXXXXXX"/></div>
+          <div><label class="form-label">Especialidad</label><input class="form-control" id="pf-esp" placeholder="Ej: Educación Ambiental"/></div>
+          <div><label class="form-label">Contraseña inicial *</label><input class="form-control" id="pf-pass" type="password" placeholder="Mínimo 8 caracteres"/></div>
+          <div><label class="form-label">Confirmar contraseña *</label><input class="form-control" id="pf-pass2" type="password" placeholder="Repite la contraseña"/></div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:14px">
+          <button class="btn btn-primary btn-sm" onclick="saveProfesor()">💾 Crear cuenta docente</button>
+          <button class="btn btn-secondary btn-sm" onclick="closeProfForm()">Cancelar</button>
+        </div>
+      </div>
+
+      <!-- Tabs: Profesores / Cursos -->
+      <div style="display:flex;border-bottom:2px solid var(--border);margin-bottom:16px">
+        <button id="ptab-profesores" onclick="switchProfTab('profesores')" style="padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;background:none;border:none;border-bottom:2px solid var(--primary);color:var(--primary);margin-bottom:-2px;font-family:'Inter',sans-serif">👨‍🏫 Profesores</button>
+        <button id="ptab-cursos" onclick="switchProfTab('cursos')" style="padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);margin-bottom:-2px;font-family:'Inter',sans-serif">🎓 Cursos</button>
+        <button id="ptab-estudiantes" onclick="switchProfTab('estudiantes')" style="padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);margin-bottom:-2px;font-family:'Inter',sans-serif">👨‍🎓 Estudiantes</button>
+        <button id="ptab-solicitudes" onclick="switchProfTab('solicitudes')" style="padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);margin-bottom:-2px;font-family:'Inter',sans-serif">📋 Solicitudes</button>
+      </div>
+
+      <div id="ptab-panel-profesores">
+        <div id="profesores-list"><div style="text-align:center;padding:32px;color:var(--muted)">Cargando...</div></div>
+      </div>
+
+      <div id="ptab-panel-cursos" style="display:none">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+          <button class="btn btn-primary btn-sm" onclick="openCursoForm()">+ Nuevo curso</button>
+        </div>
+        <div id="cursos-admin-list"><div style="text-align:center;padding:32px;color:var(--muted)">Cargando...</div></div>
+        <div id="curso-form-panel" style="display:none;background:#f8fafc;border:1px solid var(--border);border-radius:12px;padding:20px;margin-top:14px">
+          <h4 style="font-family:'Poppins',sans-serif;font-size:15px;font-weight:600;color:var(--primary-dark);margin-bottom:14px">🎓 Crear Curso del Aula Ambiental</h4>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div><label class="form-label">Nombre del curso *</label><input class="form-control" id="cu-nombre" placeholder="Ej: Educación Ambiental Básica"/></div>
+            <div><label class="form-label">Categoría *</label>
+              <select class="form-control" id="cu-cat">
+                <option value="ambiental">Educación Ambiental</option>
+                <option value="ecosocialismo">Ecosocialismo</option>
+                <option value="reciclaje">Reciclaje y Residuos</option>
+                <option value="agua">Protección del Agua</option>
+                <option value="biodiversidad">Biodiversidad</option>
+                <option value="clima">Cambio Climático</option>
+                <option value="otro">Otro</option>
+              </select>
+            </div>
+            <div><label class="form-label">Nivel</label>
+              <select class="form-control" id="cu-nivel">
+                <option value="general">General</option>
+                <option value="inicial">Inicial</option>
+                <option value="primaria">Primaria</option>
+                <option value="secundaria">Secundaria</option>
+                <option value="adultos">Adultos</option>
+                <option value="brigadistas">Brigadistas</option>
+              </select>
+            </div>
+            <div><label class="form-label">Asignar profesor</label>
+              <select class="form-control" id="cu-profesor"><option value="">Sin asignar</option></select>
+            </div>
+            <div style="grid-column:span 2"><label class="form-label">Descripción</label><textarea class="form-control" id="cu-desc" rows="2" placeholder="Descripción del curso..."></textarea></div>
+            <div style="grid-column:span 2;display:flex;align-items:center;gap:8px"><input type="checkbox" id="cu-pub" checked/><label for="cu-pub" style="font-size:13px">Publicado</label></div>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:14px">
+            <button class="btn btn-primary btn-sm" onclick="saveCursoAdmin()">💾 Guardar curso</button>
+            <button class="btn btn-secondary btn-sm" onclick="closeCursoForm()">Cancelar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB ESTUDIANTES -->
+      <div id="ptab-panel-estudiantes" style="display:none">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+          <button class="btn btn-primary btn-sm" onclick="openEstForm()">+ Nuevo estudiante</button>
+        </div>
+        <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap">
+          <select class="form-control" id="est-f-estado" style="width:auto;min-width:140px" onchange="renderEstList()">
+            <option value="">Todos</option>
+            <option value="pendiente">Pendientes</option>
+            <option value="activo">Activos</option>
+            <option value="suspendido">Suspendidos</option>
+          </select>
+          <select class="form-control" id="est-f-tipo" style="width:auto;min-width:140px" onchange="renderEstList()">
+            <option value="">Todos los tipos</option>
+            <option value="adulto">Adultos</option>
+            <option value="adolescente">Adolescentes</option>
+            <option value="nino">Niños</option>
+          </select>
+        </div>
+        <div id="estudiantes-list"><div style="text-align:center;padding:32px;color:var(--muted)">Cargando...</div></div>
+        <!-- Formulario nuevo estudiante -->
+        <div id="est-form-panel" style="display:none;background:#f8fafc;border:1px solid var(--border);border-radius:12px;padding:20px;margin-top:16px">
+          <h4 style="font-family:'Poppins',sans-serif;font-size:15px;font-weight:600;color:var(--primary-dark);margin-bottom:14px">👨‍🎓 Crear Cuenta de Estudiante</h4>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div><label class="form-label">Nombres *</label><input class="form-control" id="ef-nombres" placeholder="Nombres"/></div>
+            <div><label class="form-label">Apellidos *</label><input class="form-control" id="ef-apellidos" placeholder="Apellidos"/></div>
+            <div><label class="form-label">Usuario *</label><input class="form-control" id="ef-user" placeholder="sin espacios"/></div>
+            <div><label class="form-label">Correo</label><input class="form-control" id="ef-email" type="email" placeholder="opcional"/></div>
+            <div><label class="form-label">Cédula</label><input class="form-control" id="ef-cedula" placeholder="V-00000000"/></div>
+            <div><label class="form-label">Tipo</label>
+              <select class="form-control" id="ef-tipo"><option value="adulto">Adulto</option><option value="adolescente">Adolescente</option><option value="nino">Niño/a</option></select>
+            </div>
+            <div><label class="form-label">Contraseña inicial *</label><input class="form-control" id="ef-pass" type="password" placeholder="Mínimo 8 caracteres"/></div>
+            <div><label class="form-label">Confirmar *</label><input class="form-control" id="ef-pass2" type="password" placeholder="Repite"/></div>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:14px">
+            <button class="btn btn-primary btn-sm" onclick="saveEstudiante()">💾 Crear cuenta</button>
+            <button class="btn btn-secondary btn-sm" onclick="closeEstForm()">Cancelar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB SOLICITUDES -->
+      <div id="ptab-panel-solicitudes" style="display:none">
+        <div id="solicitudes-list"><div style="text-align:center;padding:32px;color:var(--muted)">Cargando...</div></div>
+      </div>
+    </div>
+    <!-- /sec-profesores -->
+
     <div id="sec-auditoria" class="section">
       <div class="page-header">
         <div>
@@ -1685,6 +2247,66 @@ input,select,textarea{font-family:inherit}
         </div>
         <div id="audit-estado" style="padding:12px 14px;font-size:12px;color:var(--muted);border-top:1px solid var(--border)"></div>
         <div id="audit-pagination" style="display:flex;align-items:center;gap:6px;padding:10px 14px;border-top:1px solid var(--border)"></div>
+      </div>
+    </div>
+
+    <!-- ══════════ RESPALDOS ══════════ -->
+    <div id="sec-respaldos" class="section">
+      <div class="page-header">
+        <div>
+          <div class="page-title">💾 Respaldos</div>
+          <div class="page-subtitle">Estado del sistema de copias de seguridad de PocketBase</div>
+        </div>
+        <button class="btn-s" onclick="renderRespaldos()" style="font-size:12px">↻ Actualizar</button>
+      </div>
+
+      <!-- Estado actual -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:16px" id="backup-stats-row">
+        <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px">
+          <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Último respaldo</div>
+          <div id="backup-stat-fecha" style="font-size:15px;font-weight:700;color:var(--text)">—</div>
+        </div>
+        <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px">
+          <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Tamaño</div>
+          <div id="backup-stat-size" style="font-size:15px;font-weight:700;color:var(--text)">—</div>
+        </div>
+        <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px">
+          <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Estado</div>
+          <div id="backup-stat-estado" style="font-size:15px;font-weight:700;color:var(--text)">—</div>
+        </div>
+        <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px">
+          <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Registros en log</div>
+          <div id="backup-stat-count" style="font-size:15px;font-weight:700;color:var(--text)">—</div>
+        </div>
+      </div>
+
+      <!-- Historial de respaldos -->
+      <div style="background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:16px">
+        <div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+          <div style="font-weight:600;font-size:14px">Historial de respaldos</div>
+          <span style="font-size:12px;color:var(--muted)">Últimas 10 entradas registradas</span>
+        </div>
+        <div id="backup-history-wrap" style="overflow-x:auto">
+          <div style="padding:32px;text-align:center;color:var(--muted);font-size:13px">Cargando…</div>
+        </div>
+      </div>
+
+      <!-- Almacenamiento y acciones -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px">
+          <div style="font-weight:600;font-size:14px;margin-bottom:12px">Almacenamiento</div>
+          <div id="backup-storage-info" style="font-size:13px;color:var(--muted)">Cargando información…</div>
+        </div>
+        <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px">
+          <div style="font-weight:600;font-size:14px;margin-bottom:12px">Información del sistema</div>
+          <div style="font-size:13px;color:var(--text);line-height:1.6">
+            <div>📂 <strong>Scripts:</strong> <code style="font-size:11px;background:#f1f5f9;padding:2px 5px;border-radius:4px">scripts/backup_pocketbase.sh</code></div>
+            <div style="margin-top:6px">🔒 <strong>Cifrado:</strong> AES-256-CBC (opcional)</div>
+            <div style="margin-top:6px">⏰ <strong>Horario:</strong> 02:00 AM diario</div>
+            <div style="margin-top:6px">📋 <strong>Retención:</strong> 7 días / 4 semanas</div>
+            <div style="margin-top:6px">📊 <strong>RPO:</strong> 24h &nbsp;|&nbsp; <strong>RTO:</strong> 4h</div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -1808,7 +2430,11 @@ const NAV = [
   {id:'gestion_rrhh',  icon:'👥', label:'Gestión Humana'},
   {id:'presidencial',  icon:'🎯', label:'Centro de Control'},
   {id:'ctrl_seguimiento', icon:'🔍', label:'Control y Seguimiento'},
+  {id:'brigadas',          icon:'🌿', label:'Brigadas Ambientales'},
+  {id:'aula',              icon:'📚', label:'Aula Ambiental'},
+  {id:'profesores',        icon:'👨‍🏫', label:'Profesores'},
   {id:'auditoria',        icon:'🛡️', label:'Auditoría'},
+  {id:'respaldos',        icon:'💾', label:'Respaldos'},
 ];
 
 let currentSection = 'dashboard';
@@ -1868,8 +2494,1096 @@ async function renderSection(name) {
     case 'gestion_rrhh':     await renderGestionRRHH(); break;
     case 'presidencial':     await renderPresidencial(); break;
     case 'ctrl_seguimiento': await renderCtrlSeguimiento(); break;
+    case 'brigadas':         await renderBrigadas(); break;
+    case 'aula':             await renderAula(); break;
+    case 'profesores':       await renderProfesores(); break;
     case 'auditoria':        await renderAuditoria(); break;
+    case 'respaldos':        await renderRespaldos(); break;
   }
+}
+
+/* ═══════════════════════════════════════
+   BRIGADAS AMBIENTALES — ADMIN
+═══════════════════════════════════════ */
+let _brigAdultos = [], _brigMenores = [], _brigConsentimientos = [];
+let _brigComandantes = [], _brigRepresentantes = [], _brigBrigadasList = [], _brigConvocatorias = [], _brigSolicitudes = [];
+let _currentBrigTab = 'censo';
+
+function switchBrigTab(tab) {
+  _currentBrigTab = tab;
+  ['censo','adultos','menores','consentimientos','comandantes','representantes','brigadas-list','convocatorias','solicitudes-brig','estadisticas-brig'].forEach(t => {
+    const panel = document.getElementById('btab-panel-' + t);
+    if (panel) panel.style.display = t === tab ? 'block' : 'none';
+    const btn = document.getElementById('btab-' + t);
+    if (btn) {
+      btn.style.color = t === tab ? 'var(--primary)' : 'var(--muted)';
+      btn.style.borderBottomColor = t === tab ? 'var(--primary)' : 'transparent';
+    }
+  });
+  if (tab === 'adultos') renderBrigAdultos();
+  if (tab === 'menores') renderBrigMenores();
+  if (tab === 'consentimientos') renderBrigConsentimientos();
+  if (tab === 'comandantes') brig_loadComandantes();
+  if (tab === 'representantes') brig_loadRepresentantes();
+  if (tab === 'brigadas-list') brig_loadBrigadas();
+  if (tab === 'convocatorias') brig_loadConvocatorias();
+  if (tab === 'solicitudes-brig') brig_loadSolicitudes();
+  if (tab === 'estadisticas-brig') brig_loadEstadisticas();
+}
+
+async function renderBrigadas() {
+  try {
+    const [resA, resM, resC] = await Promise.all([
+      pb.collection('brigadistas').getList(1, 500, {sort: '-created'}),
+      pb.collection('brigadistas_menores').getList(1, 500, {sort: '-created'}),
+      pb.collection('consentimientos').getList(1, 500, {sort: '-created'})
+    ]);
+    _brigAdultos = resA.items || [];
+    _brigMenores = resM.items || [];
+    _brigConsentimientos = resC.items || [];
+    document.getElementById('bstat-adultos').textContent = _brigAdultos.length;
+    const adol = _brigMenores.filter(m => m.categoria === 'adolescente').length;
+    const ninos = _brigMenores.filter(m => m.categoria === 'nino').length;
+    document.getElementById('bstat-adolescentes').textContent = adol;
+    document.getElementById('bstat-ninos').textContent = ninos;
+    const pend = _brigMenores.filter(m => m.estado === 'pendiente_consentimiento').length;
+    document.getElementById('bstat-pendientes').textContent = pend;
+    const apro = _brigMenores.filter(m => m.estado === 'aprobado').length + _brigAdultos.filter(a => a.estado === 'activo').length;
+    document.getElementById('bstat-aprobados').textContent = apro;
+    const all = [..._brigAdultos, ..._brigMenores];
+    const byParr = {};
+    all.forEach(b => { byParr[b.parroquia] = (byParr[b.parroquia] || 0) + 1; });
+    const sorted = Object.entries(byParr).sort((a,b) => b[1]-a[1]);
+    const max = sorted[0] ? sorted[0][1] : 1;
+    document.getElementById('brig-parroquia-chart').innerHTML = sorted.length === 0
+      ? '<span style="color:var(--muted)">Sin datos aún</span>'
+      : sorted.map(([p,n]) => `<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><div style="width:140px;font-size:12px;color:var(--text)">${p}</div><div style="flex:1;background:#f0faf5;border-radius:4px;height:18px;overflow:hidden"><div style="background:var(--primary);height:100%;width:${Math.round(n/max*100)}%;border-radius:4px"></div></div><div style="width:30px;text-align:right;font-size:12px;font-weight:600">${n}</div></div>`).join('');
+    if (_currentBrigTab !== 'censo') switchBrigTab(_currentBrigTab);
+  } catch(e) {
+    const el = document.getElementById('bstat-adultos');
+    if (el) el.textContent = '—';
+  }
+}
+
+function estadoBrigBadge(estado) {
+  const map = {
+    pendiente:['#f59e0b','#fffbeb','Pendiente'],activo:['#059669','#ecfdf5','Activo'],inactivo:['#6b7280','#f9fafb','Inactivo'],
+    pendiente_consentimiento:['#d97706','#fffbeb','Pend. consentimiento'],consentimiento_cargado:['#2563eb','#eff6ff','Doc. cargado'],
+    en_revision:['#7c3aed','#f5f3ff','En revisión'],aprobado:['#059669','#ecfdf5','Aprobado'],
+    rechazado:['#dc2626','#fef2f2','Rechazado'],retirado:['#6b7280','#f9fafb','Retirado']
+  };
+  const [color,bg,label] = map[estado] || ['#6b7280','#f9fafb',estado];
+  return `<span style="background:${bg};color:${color};font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px">${label}</span>`;
+}
+
+function filterBrigAdultos() { renderBrigAdultos(); }
+function filterBrigMenores() { renderBrigMenores(); }
+
+function renderBrigAdultos() {
+  const q = (document.getElementById('brig-search-adulto')?.value || '').toLowerCase();
+  const parr = document.getElementById('brig-f-parroquia-a')?.value || '';
+  const est = document.getElementById('brig-f-estado-a')?.value || '';
+  let list = _brigAdultos.filter(b => (!q||(b.nombres+' '+b.apellidos+' '+b.cedula).toLowerCase().includes(q))&&(!parr||b.parroquia===parr)&&(!est||b.estado===est));
+  const el = document.getElementById('brig-adultos-list');
+  if (!el) return;
+  if (list.length === 0) { el.innerHTML = '<div style="text-align:center;padding:32px;color:var(--muted)">No se encontraron registros</div>'; return; }
+  el.innerHTML = `<div style="background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden"><table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr style="background:#f8fcfa;border-bottom:1px solid var(--border)"><th style="padding:10px 14px;text-align:left;font-weight:600">Nombre</th><th style="padding:10px 14px;text-align:left;font-weight:600">Cédula</th><th style="padding:10px 14px;text-align:left;font-weight:600">Parroquia</th><th style="padding:10px 14px;text-align:left;font-weight:600">Disponibilidad</th><th style="padding:10px 14px;text-align:left;font-weight:600">Estado</th><th style="padding:10px 14px;text-align:left;font-weight:600">Acción</th></tr></thead><tbody>${list.map(b=>`<tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 14px">${b.nombres} ${b.apellidos}</td><td style="padding:10px 14px">${b.cedula||'—'}</td><td style="padding:10px 14px">${b.parroquia||'—'}</td><td style="padding:10px 14px">${b.disponibilidad||'—'}</td><td style="padding:10px 14px">${estadoBrigBadge(b.estado)}</td><td style="padding:10px 14px"><select style="font-size:11px;padding:3px 6px;border:1px solid var(--border);border-radius:6px" onchange="updateBrigEstado('brigadistas','${b.id}',this.value)"><option value="pendiente" ${b.estado==='pendiente'?'selected':''}>Pendiente</option><option value="activo" ${b.estado==='activo'?'selected':''}>Activo</option><option value="inactivo" ${b.estado==='inactivo'?'selected':''}>Inactivo</option></select></td></tr>`).join('')}</tbody></table></div>`;
+}
+
+function renderBrigMenores() {
+  const q = (document.getElementById('brig-search-menor')?.value || '').toLowerCase();
+  const cat = document.getElementById('brig-f-cat')?.value || '';
+  const est = document.getElementById('brig-f-estado-m')?.value || '';
+  let list = _brigMenores.filter(b => (!q||(b.nombres+' '+b.apellidos).toLowerCase().includes(q))&&(!cat||b.categoria===cat)&&(!est||b.estado===est));
+  const el = document.getElementById('brig-menores-list');
+  if (!el) return;
+  if (list.length === 0) { el.innerHTML = '<div style="text-align:center;padding:32px;color:var(--muted)">No se encontraron registros</div>'; return; }
+  el.innerHTML = `<div style="background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden"><table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr style="background:#f8fcfa;border-bottom:1px solid var(--border)"><th style="padding:10px 14px;text-align:left;font-weight:600">Nombre</th><th style="padding:10px 14px;text-align:left;font-weight:600">Categoría</th><th style="padding:10px 14px;text-align:left;font-weight:600">Edad</th><th style="padding:10px 14px;text-align:left;font-weight:600">Escuela</th><th style="padding:10px 14px;text-align:left;font-weight:600">Estado</th><th style="padding:10px 14px;text-align:left;font-weight:600">Acción</th></tr></thead><tbody>${list.map(b=>`<tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 14px">${b.nombres} ${b.apellidos}</td><td style="padding:10px 14px">${b.categoria==='adolescente'?'🧑‍🎓 Adolescente':'🧒 Niño'}</td><td style="padding:10px 14px">${b.edad?b.edad+' años':'—'}</td><td style="padding:10px 14px">${b.institucion_educativa||'—'}</td><td style="padding:10px 14px">${estadoBrigBadge(b.estado)}</td><td style="padding:10px 14px"><select style="font-size:11px;padding:3px 6px;border:1px solid var(--border);border-radius:6px" onchange="updateBrigEstado('brigadistas_menores','${b.id}',this.value)"><option value="pendiente_consentimiento" ${b.estado==='pendiente_consentimiento'?'selected':''}>Pend. consentimiento</option><option value="consentimiento_cargado" ${b.estado==='consentimiento_cargado'?'selected':''}>Doc. cargado</option><option value="en_revision" ${b.estado==='en_revision'?'selected':''}>En revisión</option><option value="aprobado" ${b.estado==='aprobado'?'selected':''}>Aprobado</option><option value="rechazado" ${b.estado==='rechazado'?'selected':''}>Rechazado</option></select></td></tr>`).join('')}</tbody></table></div>`;
+}
+
+function renderBrigConsentimientos() {
+  const pend = _brigConsentimientos.filter(c => ['pendiente','consentimiento_cargado','en_revision'].includes(c.estado));
+  const el = document.getElementById('brig-consent-list');
+  if (!el) return;
+  if (pend.length === 0) { el.innerHTML = '<div style="text-align:center;padding:32px;color:var(--muted)">No hay consentimientos pendientes</div>'; return; }
+  el.innerHTML = pend.map(c=>`<div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:12px"><div><div style="font-size:13px;font-weight:600">Consentimiento #${c.id.slice(0,8)}</div><div style="font-size:11px;color:var(--muted);margin-top:2px">${new Date(c.created).toLocaleDateString('es-VE')} · ${estadoBrigBadge(c.estado)}</div></div><div style="display:flex;gap:8px"><button onclick="updateConsentimiento('${c.id}','aprobado')" style="background:#ecfdf5;color:#059669;border:1px solid #a7f3d0;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:600;cursor:pointer">✓ Aprobar</button><button onclick="updateConsentimiento('${c.id}','rechazado')" style="background:#fef2f2;color:#dc2626;border:1px solid #fca5a5;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:600;cursor:pointer">✕ Rechazar</button></div></div>`).join('');
+}
+
+async function updateBrigEstado(col, id, estado) {
+  try { await pb.collection(col).update(id, {estado}); toast('Estado actualizado'); await renderBrigadas(); }
+  catch(e) { toast('Error al actualizar', 'error'); }
+}
+
+async function updateConsentimiento(id, estado) {
+  try { await pb.collection('consentimientos').update(id, {estado, fecha_revision: new Date().toLocaleDateString('sv-SE')}); toast('Consentimiento ' + estado); await renderBrigadas(); }
+  catch(e) { toast('Error al actualizar', 'error'); }
+}
+
+/* ═══════════════════════════════════════
+   BRIGADAS — COMANDANTES / REPRESENTANTES / BRIGADAS / CONVOCATORIAS / SOLICITUDES / ESTADÍSTICAS
+═══════════════════════════════════════ */
+
+function esc(s){ const d=document.createElement('div');d.textContent=s??'';return d.innerHTML; }
+
+async function brig_loadComandantes() {
+  const el = document.getElementById('brig-cmd-list');
+  if (!el) return;
+  try {
+    const res = await pb.collection('comandantes_brigadas').getList(1, 200, {sort: '-created'});
+    _brigComandantes = res.items || [];
+    if (!_brigComandantes.length) { el.innerHTML = '<div style="text-align:center;padding:32px;color:var(--muted)">No hay comandantes registrados</div>'; return; }
+    el.innerHTML = `<div style="background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden"><table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr style="background:#f8fcfa;border-bottom:1px solid var(--border)"><th style="padding:10px 14px;text-align:left">Nombre</th><th style="padding:10px 14px;text-align:left">Email</th><th style="padding:10px 14px;text-align:left">Cargo</th><th style="padding:10px 14px;text-align:left">Parroquia</th><th style="padding:10px 14px;text-align:left">Estado</th><th style="padding:10px 14px;text-align:left">Acción</th></tr></thead><tbody>${_brigComandantes.map(c=>`<tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 14px;font-weight:600">${esc(c.nombres)} ${esc(c.apellidos)}</td><td style="padding:10px 14px">${esc(c.email)}</td><td style="padding:10px 14px">${esc(c.cargo)||'—'}</td><td style="padding:10px 14px">${esc(c.parroquia_asignada)||'Municipal'}</td><td style="padding:10px 14px">${estadoBrigBadge(c.estado||'activo')}</td><td style="padding:10px 14px"><button onclick="brig_toggleComandante('${c.id}','${c.estado==='activo'?'suspendido':'activo'}')" style="font-size:11px;padding:4px 10px;border-radius:6px;border:1px solid var(--border);cursor:pointer;background:#fff">${c.estado==='activo'?'Suspender':'Activar'}</button></td></tr>`).join('')}</tbody></table></div>`;
+  } catch(e) { el.innerHTML = '<div style="color:var(--danger);padding:16px">Error al cargar comandantes</div>'; }
+}
+
+async function brig_saveComandante() {
+  const nombres = document.getElementById('cmd-nombres')?.value.trim();
+  const apellidos = document.getElementById('cmd-apellidos')?.value.trim();
+  const email = document.getElementById('cmd-email')?.value.trim();
+  const pass = document.getElementById('cmd-pass')?.value;
+  if (!nombres || !apellidos || !email || !pass) { toast('Completa los campos obligatorios', 'error'); return; }
+  if (pass.length < 8) { toast('La contraseña debe tener mínimo 8 caracteres', 'error'); return; }
+  try {
+    await pb.collection('comandantes_brigadas').create({
+      nombres, apellidos, email, password: pass, passwordConfirm: pass,
+      cargo: document.getElementById('cmd-cargo')?.value.trim() || 'Comandante Municipal',
+      telefono: document.getElementById('cmd-tel')?.value.trim(),
+      parroquia_asignada: document.getElementById('cmd-parroquia')?.value || 'Municipal',
+      estado: 'activo'
+    });
+    toast('Comandante creado exitosamente');
+    document.getElementById('brig-cmd-form').style.display = 'none';
+    ['cmd-nombres','cmd-apellidos','cmd-email','cmd-pass','cmd-cargo','cmd-tel'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+    brig_loadComandantes();
+  } catch(e) { toast('Error al crear comandante: ' + (e.message||''), 'error'); }
+}
+
+async function brig_toggleComandante(id, nuevoEstado) {
+  try {
+    await pb.collection('comandantes_brigadas').update(id, {estado: nuevoEstado});
+    toast('Estado actualizado');
+    brig_loadComandantes();
+  } catch(e) { toast('Error al actualizar', 'error'); }
+}
+
+async function brig_loadRepresentantes() {
+  const el = document.getElementById('brig-rep-list');
+  if (!el) return;
+  const tipo = document.getElementById('brig-f-tipo-rep')?.value || '';
+  const estado = document.getElementById('brig-f-estado-rep')?.value || '';
+  let filter = [];
+  if (tipo) filter.push(`tipo="${tipo}"`);
+  if (estado) filter.push(`estado="${estado}"`);
+  try {
+    const res = await pb.collection('representantes_brigadas').getList(1, 300, {sort: '-created', filter: filter.join('&&') || ''});
+    _brigRepresentantes = res.items || [];
+    if (!_brigRepresentantes.length) { el.innerHTML = '<div style="text-align:center;padding:32px;color:var(--muted)">No se encontraron representantes</div>'; return; }
+    el.innerHTML = `<div style="background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden"><table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr style="background:#f8fcfa;border-bottom:1px solid var(--border)"><th style="padding:10px 14px;text-align:left">Nombre</th><th style="padding:10px 14px;text-align:left">Email</th><th style="padding:10px 14px;text-align:left">Tipo</th><th style="padding:10px 14px;text-align:left">Parroquia</th><th style="padding:10px 14px;text-align:left">Estado</th><th style="padding:10px 14px;text-align:left">Acciones</th></tr></thead><tbody>${_brigRepresentantes.map(r=>`<tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 14px;font-weight:600">${esc(r.nombres)} ${esc(r.apellidos)}</td><td style="padding:10px 14px">${esc(r.email)}</td><td style="padding:10px 14px;font-size:11px">${r.tipo==='representante_comuna'?'Rep. Comuna':'Rep. C. Comunal'}</td><td style="padding:10px 14px">${esc(r.parroquia)||'—'}</td><td style="padding:10px 14px">${estadoBrigBadge(r.estado||'pendiente')}</td><td style="padding:10px 14px;display:flex;gap:6px">${r.estado==='pendiente'?`<button onclick="brig_aprobarRep('${r.id}')" style="font-size:11px;padding:4px 10px;border-radius:6px;border:none;background:#ecfdf5;color:#059669;font-weight:600;cursor:pointer">Aprobar</button>`:''}${r.estado!=='suspendido'?`<button onclick="brig_toggleRep('${r.id}','suspendido')" style="font-size:11px;padding:4px 10px;border-radius:6px;border:1px solid var(--border);cursor:pointer;background:#fff">Suspender</button>`:`<button onclick="brig_toggleRep('${r.id}','activo')" style="font-size:11px;padding:4px 10px;border-radius:6px;border:1px solid var(--border);cursor:pointer;background:#fff">Activar</button>`}</td></tr>`).join('')}</tbody></table></div>`;
+  } catch(e) { el.innerHTML = '<div style="color:var(--danger);padding:16px">Error al cargar representantes</div>'; }
+}
+
+async function brig_saveRepresentante() {
+  const nombres = document.getElementById('rep-nombres')?.value.trim();
+  const apellidos = document.getElementById('rep-apellidos')?.value.trim();
+  const email = document.getElementById('rep-email')?.value.trim();
+  const pass = document.getElementById('rep-pass')?.value;
+  if (!nombres || !apellidos || !email || !pass) { toast('Completa los campos obligatorios', 'error'); return; }
+  if (pass.length < 8) { toast('La contraseña debe tener mínimo 8 caracteres', 'error'); return; }
+  try {
+    await pb.collection('representantes_brigadas').create({
+      nombres, apellidos, email, password: pass, passwordConfirm: pass,
+      tipo: document.getElementById('rep-tipo')?.value || 'representante_consejo_comunal',
+      parroquia: document.getElementById('rep-parroquia')?.value,
+      cargo: document.getElementById('rep-cargo')?.value.trim(),
+      telefono: document.getElementById('rep-tel')?.value.trim(),
+      fecha_designacion: document.getElementById('rep-fecha')?.value,
+      estado: 'activo'
+    });
+    toast('Representante creado exitosamente');
+    document.getElementById('brig-rep-form').style.display = 'none';
+    ['rep-nombres','rep-apellidos','rep-email','rep-pass','rep-cargo','rep-tel','rep-fecha'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+    brig_loadRepresentantes();
+  } catch(e) { toast('Error al crear representante: ' + (e.message||''), 'error'); }
+}
+
+async function brig_aprobarRep(id) {
+  try {
+    await pb.collection('representantes_brigadas').update(id, {estado: 'activo'});
+    toast('Representante aprobado');
+    brig_loadRepresentantes();
+  } catch(e) { toast('Error al aprobar', 'error'); }
+}
+
+async function brig_toggleRep(id, nuevoEstado) {
+  try {
+    await pb.collection('representantes_brigadas').update(id, {estado: nuevoEstado});
+    toast('Estado actualizado');
+    brig_loadRepresentantes();
+  } catch(e) { toast('Error al actualizar', 'error'); }
+}
+
+async function brig_loadBrigadas() {
+  const el = document.getElementById('brig-brigadas-list');
+  if (!el) return;
+  try {
+    const res = await pb.collection('brigadas').getList(1, 500, {sort: '-created'});
+    _brigBrigadasList = res.items || [];
+    brig_filterBrigadas();
+  } catch(e) { el.innerHTML = '<div style="color:var(--danger);padding:16px">Error al cargar brigadas</div>'; }
+}
+
+function brig_filterBrigadas() {
+  const el = document.getElementById('brig-brigadas-list');
+  if (!el) return;
+  const q = (document.getElementById('brig-search-nom')?.value || '').toLowerCase();
+  const parr = document.getElementById('brig-f-parroquia-b')?.value || '';
+  const est = document.getElementById('brig-f-estado-b')?.value || '';
+  const list = _brigBrigadasList.filter(b =>
+    (!q || (b.nombre + ' ' + (b.codigo||'')).toLowerCase().includes(q)) &&
+    (!parr || b.parroquia === parr) &&
+    (!est || b.estado === est)
+  );
+  if (!list.length) { el.innerHTML = '<div style="text-align:center;padding:32px;color:var(--muted)">No se encontraron brigadas</div>'; return; }
+  el.innerHTML = `<div style="background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden"><table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr style="background:#f8fcfa;border-bottom:1px solid var(--border)"><th style="padding:10px 14px;text-align:left">Nombre</th><th style="padding:10px 14px;text-align:left">Parroquia</th><th style="padding:10px 14px;text-align:left">Área</th><th style="padding:10px 14px;text-align:left">Conformación</th><th style="padding:10px 14px;text-align:left">Estado</th><th style="padding:10px 14px;text-align:left">Acción</th></tr></thead><tbody>${list.map(b=>`<tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 14px;font-weight:600">${esc(b.nombre)}</td><td style="padding:10px 14px">${esc(b.parroquia)||'—'}</td><td style="padding:10px 14px;font-size:11px;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(b.area_actuacion)||'—'}</td><td style="padding:10px 14px">${b.fecha_conformacion?new Date(b.fecha_conformacion).toLocaleDateString('es-VE'):'—'}</td><td style="padding:10px 14px">${estadoBrigBadge(b.estado||'en_formacion')}</td><td style="padding:10px 14px"><select style="font-size:11px;padding:3px 6px;border:1px solid var(--border);border-radius:6px" onchange="brig_cambiarEstadoBrigada('${b.id}',this.value)"><option value="en_formacion" ${b.estado==='en_formacion'?'selected':''}>En formación</option><option value="activa" ${b.estado==='activa'?'selected':''}>Activa</option><option value="en_planificacion" ${b.estado==='en_planificacion'?'selected':''}>En planificación</option><option value="suspendida" ${b.estado==='suspendida'?'selected':''}>Suspendida</option><option value="inactiva" ${b.estado==='inactiva'?'selected':''}>Inactiva</option></select></td></tr>`).join('')}</tbody></table></div>`;
+}
+
+async function brig_saveBrigada() {
+  const nombre = document.getElementById('brig-n-nombre')?.value.trim();
+  const parroquia = document.getElementById('brig-n-parroquia')?.value;
+  if (!nombre || !parroquia) { toast('Nombre y parroquia son obligatorios', 'error'); return; }
+  try {
+    await pb.collection('brigadas').create({
+      nombre, parroquia,
+      fecha_conformacion: document.getElementById('brig-n-fecha')?.value || null,
+      estado: document.getElementById('brig-n-estado')?.value || 'en_formacion',
+      area_actuacion: document.getElementById('brig-n-area')?.value.trim(),
+      objetivos: document.getElementById('brig-n-obj')?.value.trim()
+    });
+    toast('Brigada registrada exitosamente');
+    document.getElementById('brig-new-form').style.display = 'none';
+    ['brig-n-nombre','brig-n-fecha','brig-n-area','brig-n-obj'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+    brig_loadBrigadas();
+  } catch(e) { toast('Error al guardar brigada: ' + (e.message||''), 'error'); }
+}
+
+async function brig_cambiarEstadoBrigada(id, estado) {
+  try {
+    await pb.collection('brigadas').update(id, {estado});
+    toast('Estado actualizado');
+    brig_loadBrigadas();
+  } catch(e) { toast('Error al actualizar', 'error'); }
+}
+
+async function brig_loadConvocatorias() {
+  const el = document.getElementById('brig-conv-list');
+  if (!el) return;
+  try {
+    const res = await pb.collection('comunicados_brigadas').getList(1, 100, {sort: '-created'});
+    _brigConvocatorias = res.items || [];
+    if (!_brigConvocatorias.length) { el.innerHTML = '<div style="text-align:center;padding:32px;color:var(--muted)">No hay comunicados enviados</div>'; return; }
+    el.innerHTML = _brigConvocatorias.map(c=>`<div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px"><div style="flex:1"><div style="font-size:13px;font-weight:600">${esc(c.asunto)}</div><div style="font-size:11px;color:var(--muted);margin-top:4px">${new Date(c.created).toLocaleDateString('es-VE')} · ${c.prioridad==='urgente'?'<span style="color:#dc2626;font-weight:700">🔴 URGENTE</span>':'Normal'}</div><div style="font-size:12px;margin-top:8px;color:var(--text)">${esc(c.contenido)}</div></div></div></div>`).join('');
+  } catch(e) { el.innerHTML = '<div style="color:var(--danger);padding:16px">Error al cargar comunicados</div>'; }
+}
+
+async function brig_sendConvocatoria() {
+  const asunto = document.getElementById('conv-asunto')?.value.trim();
+  const contenido = document.getElementById('conv-contenido')?.value.trim();
+  if (!asunto || !contenido) { toast('Asunto y contenido son obligatorios', 'error'); return; }
+  try {
+    await pb.collection('comunicados_brigadas').create({
+      asunto, contenido,
+      destinatarios: document.getElementById('conv-dest')?.value || 'todos',
+      prioridad: document.getElementById('conv-prioridad')?.value || 'normal',
+      fecha_envio: new Date().toISOString()
+    });
+    toast('Comunicado enviado exitosamente');
+    document.getElementById('brig-conv-form').style.display = 'none';
+    ['conv-asunto','conv-contenido'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+    brig_loadConvocatorias();
+  } catch(e) { toast('Error al enviar comunicado: ' + (e.message||''), 'error'); }
+}
+
+async function brig_loadSolicitudes() {
+  const el = document.getElementById('brig-sol-list');
+  if (!el) return;
+  const estado = document.getElementById('brig-f-sol-estado')?.value || '';
+  const tipo = document.getElementById('brig-f-sol-tipo')?.value || '';
+  let filter = [];
+  if (estado) filter.push(`estado="${estado}"`);
+  if (tipo) filter.push(`tipo_apoyo="${tipo}"`);
+  try {
+    const res = await pb.collection('solicitudes_apoyo').getList(1, 200, {sort: '-created', filter: filter.join('&&') || '', expand: 'brigada_id'});
+    _brigSolicitudes = res.items || [];
+    if (!_brigSolicitudes.length) { el.innerHTML = '<div style="text-align:center;padding:32px;color:var(--muted)">No hay solicitudes</div>'; return; }
+    const estadoColors = {pendiente:['#f59e0b','#fffbeb'],en_proceso:['#2563eb','#eff6ff'],aprobada:['#059669','#ecfdf5'],rechazada:['#dc2626','#fef2f2'],entregada:['#6b7280','#f9fafb']};
+    el.innerHTML = _brigSolicitudes.map(s=>{
+      const [color,bg] = estadoColors[s.estado] || ['#6b7280','#f9fafb'];
+      return `<div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px"><div style="flex:1"><div style="font-size:13px;font-weight:600">${esc(s.tipo_apoyo||'Solicitud de apoyo')}</div><div style="font-size:11px;color:var(--muted);margin-top:2px">${new Date(s.created).toLocaleDateString('es-VE')} · <span style="background:${bg};color:${color};font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px">${s.estado}</span></div><div style="font-size:12px;margin-top:6px">${esc(s.descripcion)}</div>${s.respuesta_institucional?`<div style="font-size:11px;margin-top:6px;color:#059669;font-weight:600">↳ ${esc(s.respuesta_institucional)}</div>`:''}</div><button onclick="document.getElementById('brig-sol-id').value='${s.id}';document.getElementById('brig-sol-resp-form').style.display='block'" style="font-size:11px;padding:6px 12px;border:1px solid var(--border);border-radius:8px;cursor:pointer;background:#fff;white-space:nowrap">Responder</button></div>`;
+    }).join('');
+  } catch(e) { el.innerHTML = '<div style="color:var(--danger);padding:16px">Error al cargar solicitudes</div>'; }
+}
+
+async function brig_responderSolicitud(id) {
+  if (!id) { toast('ID no encontrado', 'error'); return; }
+  const estado = document.getElementById('brig-sol-nuevo-estado')?.value;
+  const respuesta = document.getElementById('brig-sol-respuesta')?.value.trim();
+  try {
+    await pb.collection('solicitudes_apoyo').update(id, {estado, respuesta_institucional: respuesta, fecha_respuesta: new Date().toISOString()});
+    toast('Respuesta guardada');
+    document.getElementById('brig-sol-resp-form').style.display = 'none';
+    document.getElementById('brig-sol-respuesta').value = '';
+    brig_loadSolicitudes();
+  } catch(e) { toast('Error al guardar respuesta', 'error'); }
+}
+
+async function brig_loadEstadisticas() {
+  const el = document.getElementById('brig-stats-content');
+  if (!el) return;
+  el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted)">Calculando estadísticas...</div>';
+  try {
+    const [resB, resA, resM, resBrig, resAct] = await Promise.all([
+      pb.collection('brigadistas').getList(1,1,{}).catch(()=>({totalItems:0})),
+      pb.collection('brigadistas').getList(1,1,{filter:'estado="activo"'}).catch(()=>({totalItems:0})),
+      pb.collection('brigadistas_menores').getList(1,1,{}).catch(()=>({totalItems:0})),
+      pb.collection('brigadas').getList(1,1,{filter:'estado="activa"'}).catch(()=>({totalItems:0})),
+      pb.collection('actividades_brigadas').getList(1,1,{}).catch(()=>({totalItems:0}))
+    ]);
+    const stats = [
+      {label:'Total brigadistas adultos',val:resB.totalItems,icon:'👥'},
+      {label:'Brigadistas activos',val:resA.totalItems,icon:'✅'},
+      {label:'Brigadistas menores',val:resM.totalItems,icon:'🧒'},
+      {label:'Brigadas activas',val:resBrig.totalItems,icon:'🌿'},
+      {label:'Actividades registradas',val:resAct.totalItems,icon:'📋'}
+    ];
+    el.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:24px">${stats.map(s=>`<div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center"><div style="font-size:28px;margin-bottom:8px">${s.icon}</div><div style="font-size:28px;font-weight:700;color:var(--primary)">${s.val}</div><div style="font-size:12px;color:var(--muted);margin-top:4px">${s.label}</div></div>`).join('')}</div><div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px"><div style="font-size:13px;font-weight:600;margin-bottom:12px">Distribución por parroquia</div><div id="brig-dist-parr">Calculando...</div></div>`;
+    const resAll = await pb.collection('brigadistas').getList(1, 500, {}).catch(()=>({items:[]}));
+    const resAllM = await pb.collection('brigadistas_menores').getList(1, 500, {}).catch(()=>({items:[]}));
+    const all = [...(resAll.items||[]), ...(resAllM.items||[])];
+    const byP = {};
+    all.forEach(b => { byP[b.parroquia||'Sin parroquia'] = (byP[b.parroquia||'Sin parroquia']||0)+1; });
+    const sorted = Object.entries(byP).sort((a,b)=>b[1]-a[1]);
+    const max = sorted[0]?sorted[0][1]:1;
+    const distEl = document.getElementById('brig-dist-parr');
+    if (distEl) distEl.innerHTML = sorted.length?sorted.map(([p,n])=>`<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><div style="width:160px;font-size:12px">${esc(p)}</div><div style="flex:1;background:#f0faf5;border-radius:4px;height:16px;overflow:hidden"><div style="background:var(--primary);height:100%;width:${Math.round(n/max*100)}%;border-radius:4px"></div></div><div style="width:28px;text-align:right;font-size:12px;font-weight:600">${n}</div></div>`).join(''):'<span style="color:var(--muted)">Sin datos</span>';
+  } catch(e) { el.innerHTML = '<div style="color:var(--danger);padding:16px">Error al cargar estadísticas</div>'; }
+}
+
+async function brig_exportCensoCSV() {
+  try {
+    const [resA, resM] = await Promise.all([
+      pb.collection('brigadistas').getList(1, 2000, {sort: 'apellidos'}),
+      pb.collection('brigadistas_menores').getList(1, 2000, {sort: 'apellidos'})
+    ]);
+    const adultos = (resA.items||[]).map(b=>['Adulto',b.nombres,b.apellidos,b.cedula||'',b.email||'',b.telefono||'',b.parroquia||'',b.disponibilidad||'',b.estado||''].join(','));
+    const menores = (resM.items||[]).map(b=>['Menor',b.nombres,b.apellidos,b.cedula||'',b.email||'','',b.parroquia||'',b.categoria||'',b.estado||''].join(','));
+    const header = 'Tipo,Nombres,Apellidos,Cédula,Email,Teléfono,Parroquia,Categoría/Disponibilidad,Estado';
+    const csv = [header, ...adultos, ...menores].join('\n');
+    const blob = new Blob(['﻿'+csv], {type:'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `censo_brigadistas_${new Date().toISOString().slice(0,10)}.csv`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+    toast('Censo exportado exitosamente');
+  } catch(e) { toast('Error al exportar censo', 'error'); }
+}
+
+/* ═══════════════════════════════════════
+   AULA AMBIENTAL — ADMIN
+═══════════════════════════════════════ */
+let _aulaRecursos = [], _aulaVisitas = [];
+let _currentAulaTab = 'biblioteca';
+let _certificadosAdmin = [];
+
+function switchAulaTab(tab) {
+  _currentAulaTab = tab;
+  ['biblioteca','cursos','visitas','clases','avisos','certificados','zoom'].forEach(t => {
+    const p = document.getElementById('atab-panel-' + t);
+    if (p) p.style.display = t === tab ? 'block' : 'none';
+    const btn = document.getElementById('atab-' + t);
+    if (btn) { btn.style.color = t === tab ? 'var(--primary)' : 'var(--muted)'; btn.style.borderBottomColor = t === tab ? 'var(--primary)' : 'transparent'; }
+  });
+  if (tab === 'cursos') renderAulaCursos();
+  if (tab === 'visitas') renderVisitas();
+  if (tab === 'biblioteca') renderAulaBiblioteca();
+  if (tab === 'clases') renderClasesAdmin();
+  if (tab === 'avisos') renderAvisosAdmin();
+  if (tab === 'certificados') renderCertificadosAdmin();
+  if (tab === 'zoom') zoomAdminInit();
+}
+
+async function renderAula() {
+  try {
+    const [resR, resV, resC, resA] = await Promise.all([
+      pb.collection('biblioteca_multimedia').getList(1, 200, {sort: '-created'}),
+      pb.collection('solicitudes_visitas').getList(1, 100, {sort: '-created'}),
+      pb.collection('clases_virtuales').getList(1, 100, {sort: '-fecha'}).catch(()=>({items:[]})),
+      pb.collection('avisos_aula').getList(1, 100, {sort: '-created'}).catch(()=>({items:[]}))
+    ]);
+    _aulaRecursos = resR.items || [];
+    _aulaVisitas  = resV.items || [];
+    _clases       = resC.items || [];
+    _avisos       = resA.items || [];
+  } catch(e) { _aulaRecursos = []; _aulaVisitas = []; _clases = []; _avisos = []; }
+  renderAulaBiblioteca();
+}
+
+function renderAulaBiblioteca() {
+  const cat = document.getElementById('aula-f-cat')?.value || '';
+  const tipo = document.getElementById('aula-f-tipo')?.value || '';
+  let list = _aulaRecursos.filter(r => (!cat||r.categoria===cat)&&(!tipo||r.tipo===tipo));
+  const el = document.getElementById('aula-biblioteca-list');
+  if (!el) return;
+  if (list.length === 0) { el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted)">No hay recursos aún. Agrega el primero con "+ Nuevo Recurso"</div>'; return; }
+  const iconos = {video:'▶️',pdf:'📄',guia:'📗',infografia:'🖼️',presentacion:'📊'};
+  el.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px">${list.map(r=>`<div style="background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden"><div style="background:var(--primary-light);padding:14px;text-align:center;font-size:28px">${iconos[r.tipo]||'📁'}</div><div style="padding:12px"><div style="font-size:13px;font-weight:600;margin-bottom:4px">${r.titulo}</div><div style="font-size:11px;color:var(--muted);margin-bottom:8px">${r.categoria||''} · ${r.nivel||'General'}</div>${r.url?`<a href="${r.url}" target="_blank" style="font-size:12px;color:var(--primary);font-weight:600">🔗 Abrir recurso</a>`:''}<div style="margin-top:8px;display:flex;justify-content:flex-end"><button onclick="deleteAulaRecurso('${r.id}')" style="background:#fef2f2;color:#dc2626;border:1px solid #fca5a5;border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer">🗑</button></div></div></div>`).join('')}</div>`;
+}
+
+function renderAulaCursos() {
+  const el = document.getElementById('aula-cursos-list');
+  if (el) el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted)"><div style="font-size:32px;margin-bottom:12px">🎓</div><div style="font-size:14px;font-weight:600">Módulo de Cursos</div><div style="font-size:12px;margin-top:6px">Próximamente: cursos, lecciones y certificados integrados con la colección <strong>cursos</strong> de PocketBase.</div></div>';
+}
+
+async function renderVisitas() {
+  const est = document.getElementById('vis-f-estado')?.value || '';
+  let list = _aulaVisitas.filter(v => !est||v.estado===est);
+  const el = document.getElementById('visitas-list');
+  if (!el) return;
+  if (list.length === 0) { el.innerHTML = '<div style="text-align:center;padding:32px;color:var(--muted)">No hay solicitudes de visitas</div>'; return; }
+  const estadoColor = {recibida:'#d97706',aprobada:'#059669',programada:'#2563eb',ejecutada:'#1d6b3e',cancelada:'#dc2626'};
+  el.innerHTML = list.map(v=>`<div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><div style="font-size:13px;font-weight:600">🏫 ${v.institucion}</div><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;background:#f8fcfa;color:${estadoColor[v.estado]||'#374151'}">${v.estado}</span></div><div style="font-size:12px;color:var(--muted)">Solicitante: ${v.solicitante} · ${v.fecha?new Date(v.fecha).toLocaleDateString('es-VE'):''}</div><div style="font-size:12px;color:var(--muted)">Temática: ${v.tematica||'—'} · Estudiantes: ${v.cantidad||'—'}</div><div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">${['aprobada','programada','ejecutada','cancelada'].map(s=>`<button onclick="updateVisitaEstado('${v.id}','${s}')" style="font-size:11px;padding:3px 10px;border:1px solid var(--border);border-radius:6px;cursor:pointer;background:#fff">→ ${s}</button>`).join('')}</div></div>`).join('');
+}
+
+function openAulaForm() { document.getElementById('aula-form-panel').style.display = 'block'; }
+function closeAulaForm() { document.getElementById('aula-form-panel').style.display = 'none'; }
+function openVisitaForm() { document.getElementById('visita-form-panel').style.display = 'block'; }
+function closeVisitaForm() { document.getElementById('visita-form-panel').style.display = 'none'; }
+
+async function saveAulaRecurso() {
+  const titulo = document.getElementById('aula-titulo').value.trim();
+  const tipo   = document.getElementById('aula-tipo').value;
+  const cat    = document.getElementById('aula-cat').value;
+  const url    = document.getElementById('aula-url').value.trim();
+  if (!titulo||!tipo||!cat||!url) { toast('Completa todos los campos requeridos', 'error'); return; }
+  try {
+    await pb.collection('biblioteca_multimedia').create({titulo, tipo, categoria: cat, nivel: document.getElementById('aula-nivel').value, descripcion: document.getElementById('aula-desc').value.trim(), url, publicado: document.getElementById('aula-publicado').checked});
+    toast('Recurso guardado'); closeAulaForm();
+    ['aula-titulo','aula-url','aula-desc'].forEach(id => document.getElementById(id).value = '');
+    await renderAula();
+  } catch(e) { toast('Error al guardar', 'error'); }
+}
+
+async function deleteAulaRecurso(id) {
+  if (!confirm('¿Eliminar este recurso?')) return;
+  try { await pb.collection('biblioteca_multimedia').delete(id); toast('Recurso eliminado'); await renderAula(); }
+  catch(e) { toast('Error al eliminar', 'error'); }
+}
+
+async function saveVisita() {
+  const institucion = document.getElementById('vis-institucion').value.trim();
+  const solicitante = document.getElementById('vis-solicitante').value.trim();
+  const fecha       = document.getElementById('vis-fecha').value;
+  const tematica    = document.getElementById('vis-tematica').value.trim();
+  const parroquia   = document.getElementById('vis-parroquia').value;
+  if (!institucion||!solicitante||!fecha||!tematica||!parroquia) { toast('Completa los campos requeridos', 'error'); return; }
+  try {
+    await pb.collection('solicitudes_visitas').create({institucion, solicitante, parroquia, telefono: document.getElementById('vis-tel').value.trim(), cantidad: parseInt(document.getElementById('vis-cantidad').value)||0, nivel: document.getElementById('vis-nivel').value, fecha, horario: document.getElementById('vis-horario').value.trim(), tematica, observaciones: document.getElementById('vis-obs').value.trim(), estado: 'recibida'});
+    toast('Solicitud guardada'); closeVisitaForm(); await renderAula(); switchAulaTab('visitas');
+  } catch(e) { toast('Error al guardar', 'error'); }
+}
+
+async function updateVisitaEstado(id, estado) {
+  try {
+    await pb.collection('solicitudes_visitas').update(id, {estado});
+    toast('Estado actualizado');
+    const idx = _aulaVisitas.findIndex(v => v.id === id);
+    if (idx >= 0) _aulaVisitas[idx].estado = estado;
+    renderVisitas();
+  } catch(e) { toast('Error', 'error'); }
+}
+
+/* ─── CLASES VIRTUALES ─── */
+let _clases = [];
+let _avisos = [];
+
+async function renderClasesAdmin() {
+  try {
+    const res = await pb.collection('clases_virtuales').getList(1, 100, {sort: '-fecha'});
+    _clases = res.items || [];
+  } catch(e) { _clases = []; }
+  const el = document.getElementById('clases-admin-list');
+  if (!el) return;
+  if (_clases.length === 0) {
+    el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted)">No hay clases virtuales registradas. Agrega la primera.</div>'; return;
+  }
+  const ahora = new Date();
+  el.innerHTML = _clases.map(c => {
+    const fecha = c.fecha ? new Date(c.fecha) : null;
+    const pasada = fecha && fecha < ahora;
+    const badge = pasada ? '<span style="font-size:11px;padding:2px 7px;border-radius:12px;background:#f1f5f9;color:#64748b">Finalizada</span>'
+                         : '<span style="font-size:11px;padding:2px 7px;border-radius:12px;background:#dcfce7;color:#166534">Próxima</span>';
+    return `<div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <div style="font-size:14px;font-weight:600">🎥 ${c.nombre}</div>${badge}
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:4px">📅 ${c.fecha||'—'} ${c.hora?'· '+c.hora:''} · ${c.plataforma||'Sin plataforma'} · Prof: ${c.profesor||'—'}</div>
+      ${c.enlace_zoom ? `<a href="${c.enlace_zoom}" target="_blank" style="font-size:12px;color:var(--primary);font-weight:600">🔗 ${c.enlace_zoom}</a>` : ''}
+      ${c.contrasena ? `<div style="font-size:12px;color:var(--muted);margin-top:2px">🔑 Contraseña: ${c.contrasena}</div>` : ''}
+      <div style="margin-top:10px;display:flex;justify-content:flex-end">
+        <button onclick="deleteClase('${c.id}')" style="font-size:11px;padding:3px 10px;border:1px solid #fca5a5;background:#fef2f2;color:#dc2626;border-radius:6px;cursor:pointer">🗑 Eliminar</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openClaseForm() { document.getElementById('clase-form-panel').style.display = 'block'; }
+function closeClaseForm() { document.getElementById('clase-form-panel').style.display = 'none'; }
+
+async function saveClase() {
+  const nombre = document.getElementById('cls-nombre').value.trim();
+  const fecha  = document.getElementById('cls-fecha').value;
+  if (!nombre || !fecha) { toast('Nombre y fecha son requeridos', 'error'); return; }
+  try {
+    await pb.collection('clases_virtuales').create({
+      nombre, fecha,
+      descripcion: document.getElementById('cls-desc').value.trim(),
+      profesor:    document.getElementById('cls-profesor').value.trim(),
+      curso:       document.getElementById('cls-curso').value.trim(),
+      hora:        document.getElementById('cls-hora').value,
+      plataforma:  document.getElementById('cls-plataforma').value,
+      enlace_zoom: document.getElementById('cls-enlace').value.trim(),
+      contrasena:  document.getElementById('cls-pass').value.trim(),
+      publicado:   document.getElementById('cls-pub').checked
+    });
+    toast('Clase virtual guardada');
+    closeClaseForm();
+    ['cls-nombre','cls-desc','cls-profesor','cls-curso','cls-enlace','cls-pass'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+    await renderClasesAdmin();
+  } catch(e) { toast('Error al guardar clase', 'error'); }
+}
+
+async function deleteClase(id) {
+  if (!confirm('¿Eliminar esta clase virtual?')) return;
+  try { await pb.collection('clases_virtuales').delete(id); toast('Clase eliminada'); await renderClasesAdmin(); }
+  catch(e) { toast('Error al eliminar', 'error'); }
+}
+
+/* ─── AVISOS AULA ─── */
+async function renderAvisosAdmin() {
+  try {
+    const res = await pb.collection('avisos_aula').getList(1, 100, {sort: '-created'});
+    _avisos = res.items || [];
+  } catch(e) { _avisos = []; }
+  const el = document.getElementById('avisos-admin-list');
+  if (!el) return;
+  if (_avisos.length === 0) {
+    el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted)">No hay avisos publicados.</div>'; return;
+  }
+  const colores = {aviso:'#2563eb',recordatorio:'#d97706',cancelacion:'#dc2626',nueva_clase:'#059669',tarea:'#7c3aed',material:'#0891b2'};
+  el.innerHTML = _avisos.map(a => `<div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+      <div style="font-size:14px;font-weight:600">📢 ${a.titulo}</div>
+      <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:#f8fafc;color:${colores[a.tipo]||'#374151'};border:1px solid currentColor">${a.tipo||'aviso'}</span>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Prof: ${a.profesor||'—'} · Curso: ${a.curso||'General'} · ${new Date(a.created).toLocaleDateString('es-VE')}</div>
+    <div style="font-size:13px;color:#374151;line-height:1.5">${a.contenido}</div>
+    <div style="margin-top:10px;display:flex;justify-content:flex-end">
+      <button onclick="deleteAviso('${a.id}')" style="font-size:11px;padding:3px 10px;border:1px solid #fca5a5;background:#fef2f2;color:#dc2626;border-radius:6px;cursor:pointer">🗑 Eliminar</button>
+    </div>
+  </div>`).join('');
+}
+
+function openAvisoForm() { document.getElementById('aviso-form-panel').style.display = 'block'; }
+function closeAvisoForm() { document.getElementById('aviso-form-panel').style.display = 'none'; }
+
+async function saveAviso() {
+  const titulo    = document.getElementById('av-titulo').value.trim();
+  const contenido = document.getElementById('av-contenido').value.trim();
+  if (!titulo || !contenido) { toast('Título y contenido son requeridos', 'error'); return; }
+  try {
+    await pb.collection('avisos_aula').create({
+      titulo, contenido,
+      tipo:     document.getElementById('av-tipo').value,
+      profesor: document.getElementById('av-profesor').value.trim(),
+      curso:    document.getElementById('av-curso').value.trim(),
+      publicado: true
+    });
+    toast('Aviso publicado');
+    closeAvisoForm();
+    ['av-titulo','av-contenido','av-profesor','av-curso'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+    await renderAvisosAdmin();
+  } catch(e) { toast('Error al publicar aviso', 'error'); }
+}
+
+async function deleteAviso(id) {
+  if (!confirm('¿Eliminar este aviso?')) return;
+  try { await pb.collection('avisos_aula').delete(id); toast('Aviso eliminado'); await renderAvisosAdmin(); }
+  catch(e) { toast('Error al eliminar', 'error'); }
+}
+
+/* ─── CERTIFICADOS ADMIN ─── */
+async function renderCertificadosAdmin() {
+  const el = document.getElementById('certs-admin-list');
+  if (!el) return;
+  el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--muted)">Cargando...</div>';
+  try {
+    const r = await pb.collection('certificados').getList(1, 200, {sort: '-fecha_emision'}).catch(()=>({items:[]}));
+    _certificadosAdmin = r.items || [];
+  } catch(e) { _certificadosAdmin = []; }
+  if (!_certificadosAdmin.length) {
+    el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted)"><div style="font-size:32px;margin-bottom:10px">🏅</div><div style="font-size:14px;font-weight:600">Sin certificados emitidos</div><div style="font-size:12px;margin-top:4px">Haz clic en "Emitir Certificado" para comenzar.</div></div>';
+    return;
+  }
+  const estadoColor = {emitido:'#059669',revocado:'#dc2626'};
+  el.innerHTML = _certificadosAdmin.map(c => {
+    const fechaE = c.fecha_emision ? new Date(c.fecha_emision).toLocaleDateString('es-VE') : '—';
+    return `<div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+      <div style="flex:1;min-width:200px">
+        <div style="font-size:13px;font-weight:600;margin-bottom:2px">${esc(c.nombre_estudiante)}</div>
+        <div style="font-size:12px;color:var(--muted)">📚 ${esc(c.nombre_curso)} · ${esc(String(c.horas||'—'))} h</div>
+        <div style="font-size:11px;color:var(--muted)">📆 ${fechaE} · <code style="font-size:10px;background:#f0f4f8;padding:1px 4px;border-radius:3px">${esc(c.codigo_verificacion)}</code></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;background:#f0fdf4;color:${estadoColor[c.estado]||'#374151'}">${esc(c.estado)}</span>
+        ${c.estado==='emitido'?`<button onclick="revocarCertificado('${c.id}')" style="font-size:11px;padding:3px 10px;border:1px solid #fca5a5;background:#fef2f2;color:#dc2626;border-radius:6px;cursor:pointer">🚫 Revocar</button>`:''}
+        <a href="/aula-ambiental/certificado/?codigo=${encodeURIComponent(c.codigo_verificacion)}" target="_blank" style="font-size:11px;padding:3px 10px;border:1px solid var(--border);background:#fff;color:var(--primary);border-radius:6px;cursor:pointer;text-decoration:none">🔗 Ver</a>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openCertForm() {
+  const hoy = new Date().toISOString().split('T')[0];
+  document.getElementById('cert-fecha-emision').value = hoy;
+  document.getElementById('cert-form-panel').style.display = 'block';
+  document.getElementById('cert-form-panel').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function closeCertForm() {
+  document.getElementById('cert-form-panel').style.display = 'none';
+  ['cert-estudiante','cert-estudiante-id','cert-curso','cert-horas','cert-fecha-inicio','cert-fecha-fin','cert-fecha-emision','cert-profesor'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+}
+
+async function emitirCertificado() {
+  const nombre   = document.getElementById('cert-estudiante').value.trim();
+  const estId    = document.getElementById('cert-estudiante-id').value.trim();
+  const curso    = document.getElementById('cert-curso').value.trim();
+  const horas    = parseInt(document.getElementById('cert-horas').value)||0;
+  const fIni     = document.getElementById('cert-fecha-inicio').value;
+  const fFin     = document.getElementById('cert-fecha-fin').value;
+  const fEmision = document.getElementById('cert-fecha-emision').value;
+  const prof     = document.getElementById('cert-profesor').value.trim();
+  if (!nombre||!curso||!horas||!fIni||!fFin||!fEmision) { toast('Completa los campos obligatorios','error'); return; }
+  const codigo = 'IAGAMI-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).substr(2,4).toUpperCase();
+  try {
+    await pb.collection('certificados').create({
+      nombre_estudiante: nombre,
+      estudiante_id: estId || null,
+      nombre_curso: curso,
+      horas,
+      fecha_inicio: fIni,
+      fecha_fin: fFin,
+      fecha_emision: fEmision,
+      nombre_profesor: prof,
+      codigo_verificacion: codigo,
+      estado: 'emitido'
+    });
+    toast('Certificado emitido ✓');
+    closeCertForm();
+    await renderCertificadosAdmin();
+  } catch(e) { toast('Error al emitir: ' + e.message, 'error'); }
+}
+
+async function revocarCertificado(id) {
+  if (!confirm('¿Revocar este certificado? Esta acción lo invalidará permanentemente.')) return;
+  try {
+    await pb.collection('certificados').update(id, {estado:'revocado'});
+    toast('Certificado revocado');
+    await renderCertificadosAdmin();
+  } catch(e) { toast('Error al revocar', 'error'); }
+}
+
+/* ─── PROFESORES ─── */
+let _profesoresList = [];
+let _cursosAdminList = [];
+let _profTab = 'profesores';
+
+async function renderProfesores() {
+  try {
+    const [rP, rC, rCl] = await Promise.all([
+      pb.collection('profesores').getList(1, 200, {sort: 'nombres'}).catch(()=>({items:[]})),
+      pb.collection('cursos_aula').getList(1, 200, {sort: 'nombre'}).catch(()=>({items:[]})),
+      pb.collection('clases_virtuales').getList(1, 1, {}).catch(()=>({totalItems:0}))
+    ]);
+    _profesoresList = rP.items || [];
+    _cursosAdminList = rC.items || [];
+    const activos = _profesoresList.filter(p => p.estado === 'activo').length;
+    const cursosActivos = _cursosAdminList.filter(c => c.estado === 'activo').length;
+    document.getElementById('ps-total').textContent   = _profesoresList.length;
+    document.getElementById('ps-activos').textContent = activos;
+    document.getElementById('ps-cursos').textContent  = cursosActivos;
+    document.getElementById('ps-clases').textContent  = rCl.totalItems || 0;
+  } catch(e) { _profesoresList = []; _cursosAdminList = []; }
+  switchProfTab(_profTab);
+}
+
+function switchProfTab(tab) {
+  _profTab = tab;
+  ['profesores','cursos'].forEach(t => {
+    document.getElementById('ptab-panel-' + t).style.display = t === tab ? 'block' : 'none';
+    const btn = document.getElementById('ptab-' + t);
+    if (btn) {
+      btn.style.color = t === tab ? 'var(--primary)' : 'var(--muted)';
+      btn.style.borderBottomColor = t === tab ? 'var(--primary)' : 'transparent';
+    }
+  });
+  if (tab === 'profesores') renderProfList();
+  if (tab === 'cursos')     renderCursosAdmin();
+}
+
+function renderProfList() {
+  const el = document.getElementById('profesores-list');
+  if (!el) return;
+  if (_profesoresList.length === 0) {
+    el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted)"><div style="font-size:32px;margin-bottom:12px">👨‍🏫</div><div style="font-size:14px">No hay profesores registrados. Crea el primero.</div></div>';
+    return;
+  }
+  el.innerHTML = `<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">
+    <thead><tr style="background:#f8fafc">
+      <th style="padding:10px 12px;text-align:left;border-bottom:2px solid var(--border);color:var(--muted);font-size:11px;text-transform:uppercase">Profesor</th>
+      <th style="padding:10px 12px;text-align:left;border-bottom:2px solid var(--border);color:var(--muted);font-size:11px;text-transform:uppercase">Correo</th>
+      <th style="padding:10px 12px;text-align:left;border-bottom:2px solid var(--border);color:var(--muted);font-size:11px;text-transform:uppercase">Especialidad</th>
+      <th style="padding:10px 12px;text-align:left;border-bottom:2px solid var(--border);color:var(--muted);font-size:11px;text-transform:uppercase">Estado</th>
+      <th style="padding:10px 12px;text-align:left;border-bottom:2px solid var(--border);color:var(--muted);font-size:11px;text-transform:uppercase">Cursos</th>
+      <th style="padding:10px 12px;text-align:left;border-bottom:2px solid var(--border);color:var(--muted);font-size:11px;text-transform:uppercase">Acciones</th>
+    </tr></thead>
+    <tbody>${_profesoresList.map(p => {
+      const cursosProf = _cursosAdminList.filter(c => c.profesor_id === p.id).length;
+      const estadoBadge = p.estado === 'activo'
+        ? '<span style="font-size:11px;padding:2px 8px;border-radius:12px;background:#dcfce7;color:#166534;font-weight:600">activo</span>'
+        : '<span style="font-size:11px;padding:2px 8px;border-radius:12px;background:#fee2e2;color:#991b1b;font-weight:600">' + (p.estado||'suspendido') + '</span>';
+      return `<tr style="border-bottom:1px solid var(--border)">
+        <td style="padding:10px 12px;font-weight:600">${p.nombres||''} ${p.apellidos||''}</td>
+        <td style="padding:10px 12px;color:var(--muted)">${p.email||'—'}</td>
+        <td style="padding:10px 12px;color:var(--muted)">${p.especialidad||'—'}</td>
+        <td style="padding:10px 12px">${estadoBadge}</td>
+        <td style="padding:10px 12px;text-align:center">${cursosProf}</td>
+        <td style="padding:10px 12px">
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            ${p.estado==='activo'
+              ? `<button onclick="toggleProfesorEstado('${p.id}','suspendido')" style="font-size:11px;padding:3px 8px;border:1px solid #fca5a5;background:#fef2f2;color:#dc2626;border-radius:6px;cursor:pointer">⏸ Suspender</button>`
+              : `<button onclick="toggleProfesorEstado('${p.id}','activo')" style="font-size:11px;padding:3px 8px;border:1px solid #86efac;background:#dcfce7;color:#166534;border-radius:6px;cursor:pointer">▶ Activar</button>`}
+            <button onclick="resetProfPass('${p.id}','${(p.nombres||'').replace(/'/g,"\\'")}');" style="font-size:11px;padding:3px 8px;border:1px solid var(--border);background:#fff;border-radius:6px;cursor:pointer">🔑 Pass</button>
+          </div>
+        </td>
+      </tr>`;
+    }).join('')}</tbody>
+  </table></div>`;
+}
+
+function openProfForm()  { document.getElementById('prof-form-panel').style.display = 'block'; }
+function closeProfForm() { document.getElementById('prof-form-panel').style.display = 'none'; }
+
+async function saveProfesor() {
+  const nombres   = document.getElementById('pf-nombres').value.trim();
+  const apellidos = document.getElementById('pf-apellidos').value.trim();
+  const email     = document.getElementById('pf-email').value.trim();
+  const pass      = document.getElementById('pf-pass').value;
+  const pass2     = document.getElementById('pf-pass2').value;
+  if (!nombres || !apellidos || !email || !pass) { toast('Completa los campos requeridos', 'error'); return; }
+  if (pass !== pass2) { toast('Las contraseñas no coinciden', 'error'); return; }
+  if (pass.length < 8) { toast('La contraseña debe tener al menos 8 caracteres', 'error'); return; }
+  try {
+    await pb.collection('profesores').create({
+      nombres, apellidos, email,
+      username: email.split('@')[0].replace(/[^a-zA-Z0-9_]/g,'_') + '_' + Date.now().toString(36),
+      cedula:       document.getElementById('pf-cedula').value.trim(),
+      telefono:     document.getElementById('pf-tel').value.trim(),
+      especialidad: document.getElementById('pf-esp').value.trim(),
+      password: pass, passwordConfirm: pass2,
+      estado: 'activo'
+    });
+    toast('Cuenta docente creada. El profesor ya puede acceder al portal.');
+    closeProfForm();
+    ['pf-nombres','pf-apellidos','pf-email','pf-cedula','pf-tel','pf-esp','pf-pass','pf-pass2'].forEach(id => { document.getElementById(id).value = ''; });
+    await renderProfesores();
+  } catch(e) { toast('Error: ' + (e.message||'Verifica el correo (debe ser único)'), 'error'); }
+}
+
+async function toggleProfesorEstado(id, nuevoEstado) {
+  try {
+    await pb.collection('profesores').update(id, {estado: nuevoEstado});
+    toast(nuevoEstado === 'activo' ? 'Profesor activado' : 'Profesor suspendido');
+    const idx = _profesoresList.findIndex(p => p.id === id);
+    if (idx >= 0) _profesoresList[idx].estado = nuevoEstado;
+    renderProfList();
+  } catch(e) { toast('Error al actualizar estado', 'error'); }
+}
+
+async function resetProfPass(id, nombre) {
+  const nueva = prompt(`Nueva contraseña para ${nombre} (mínimo 8 caracteres):`);
+  if (!nueva || nueva.length < 8) { if (nueva !== null) toast('Contraseña demasiado corta', 'error'); return; }
+  try {
+    await pb.collection('profesores').update(id, {password: nueva, passwordConfirm: nueva});
+    toast('Contraseña actualizada');
+  } catch(e) { toast('Error al actualizar contraseña', 'error'); }
+}
+
+function renderCursosAdmin() {
+  const el = document.getElementById('cursos-admin-list');
+  if (!el) return;
+  poblarSelectProfesores();
+  if (_cursosAdminList.length === 0) {
+    el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted)">No hay cursos creados. Crea el primero.</div>';
+    return;
+  }
+  const catIco = {ambiental:'🌿',ecosocialismo:'♻️',reciclaje:'♻️',agua:'💧',biodiversidad:'🦋',clima:'🌡️',otro:'📚'};
+  el.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px">${_cursosAdminList.map(c => {
+    const prof = _profesoresList.find(p => p.id === c.profesor_id);
+    const profNombre = prof ? `${prof.nombres} ${prof.apellidos||''}` : (c.profesor_nombre || 'Sin asignar');
+    return `<div style="background:#fff;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden">
+      <div style="background:var(--primary-light);padding:14px;text-align:center;font-size:28px">${catIco[c.categoria]||'📚'}</div>
+      <div style="padding:14px">
+        <div style="font-size:13px;font-weight:600;margin-bottom:4px">${c.nombre}</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px">👨‍🏫 ${profNombre}</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:10px">${c.nivel||'General'} · ${c.categoria||''}</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <select onchange="asignarProfesorCurso('${c.id}',this.value)" style="font-size:11px;padding:3px 6px;border:1px solid var(--border);border-radius:6px;cursor:pointer">
+            <option value="">— Reasignar profesor —</option>
+            ${_profesoresList.map(p=>`<option value="${p.id}" ${p.id===c.profesor_id?'selected':''}>${p.nombres} ${p.apellidos||''}</option>`).join('')}
+          </select>
+          <button onclick="toggleCursoEstado('${c.id}','${c.estado==='activo'?'inactivo':'activo'}')" style="font-size:11px;padding:3px 8px;border:1px solid var(--border);background:#fff;border-radius:6px;cursor:pointer">${c.estado==='activo'?'⏸ Desactivar':'▶ Activar'}</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+function openCursoForm()  { document.getElementById('curso-form-panel').style.display = 'block'; poblarSelectProfesores(); }
+function closeCursoForm() { document.getElementById('curso-form-panel').style.display = 'none'; }
+
+function poblarSelectProfesores() {
+  const sel = document.getElementById('cu-profesor');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">Sin asignar</option>';
+  _profesoresList.filter(p => p.estado === 'activo').forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p.id;
+    opt.textContent = `${p.nombres} ${p.apellidos||''}`;
+    sel.appendChild(opt);
+  });
+}
+
+async function saveCursoAdmin() {
+  const nombre = document.getElementById('cu-nombre').value.trim();
+  if (!nombre) { toast('El nombre del curso es requerido', 'error'); return; }
+  const profId = document.getElementById('cu-profesor').value;
+  const prof   = _profesoresList.find(p => p.id === profId);
+  try {
+    await pb.collection('cursos_aula').create({
+      nombre,
+      descripcion:   document.getElementById('cu-desc').value.trim(),
+      categoria:     document.getElementById('cu-cat').value,
+      nivel:         document.getElementById('cu-nivel').value,
+      profesor_id:   profId || null,
+      profesor_nombre: prof ? `${prof.nombres} ${prof.apellidos||''}`.trim() : '',
+      publicado:     document.getElementById('cu-pub').checked,
+      estado:        'activo'
+    });
+    toast('Curso creado');
+    closeCursoForm();
+    ['cu-nombre','cu-desc'].forEach(id => { document.getElementById(id).value = ''; });
+    await renderProfesores();
+  } catch(e) { toast('Error al crear curso', 'error'); }
+}
+
+async function asignarProfesorCurso(cursoId, profId) {
+  const prof = _profesoresList.find(p => p.id === profId);
+  try {
+    await pb.collection('cursos_aula').update(cursoId, {
+      profesor_id: profId || null,
+      profesor_nombre: prof ? `${prof.nombres} ${prof.apellidos||''}`.trim() : ''
+    });
+    toast('Profesor asignado');
+    const idx = _cursosAdminList.findIndex(c => c.id === cursoId);
+    if (idx >= 0) { _cursosAdminList[idx].profesor_id = profId; _cursosAdminList[idx].profesor_nombre = prof ? `${prof.nombres} ${prof.apellidos||''}`.trim() : ''; }
+    renderCursosAdmin();
+  } catch(e) { toast('Error al asignar', 'error'); }
+}
+
+async function toggleCursoEstado(id, estado) {
+  try {
+    await pb.collection('cursos_aula').update(id, {estado});
+    toast('Estado actualizado');
+    const idx = _cursosAdminList.findIndex(c => c.id === id);
+    if (idx >= 0) _cursosAdminList[idx].estado = estado;
+    renderCursosAdmin();
+  } catch(e) { toast('Error', 'error'); }
+}
+
+/* ─── ESTUDIANTES ─── */
+let _estudiantesList = [];
+let _solicitudesList = [];
+
+function switchProfTab_orig(tab) { switchProfTab(tab); }
+
+const _switchProfTabOriginal = switchProfTab;
+function switchProfTab(tab) {
+  _profTab = tab;
+  ['profesores','cursos','estudiantes','solicitudes'].forEach(t => {
+    const p = document.getElementById('ptab-panel-'+t);
+    if (p) p.style.display = t===tab ? 'block' : 'none';
+    const btn = document.getElementById('ptab-'+t);
+    if (btn) {
+      btn.style.color = t===tab ? 'var(--primary)' : 'var(--muted)';
+      btn.style.borderBottomColor = t===tab ? 'var(--primary)' : 'transparent';
+    }
+  });
+  if (tab==='profesores')  renderProfList();
+  if (tab==='cursos')      renderCursosAdmin();
+  if (tab==='estudiantes') { cargarEstudiantes().then(renderEstList); }
+  if (tab==='solicitudes') cargarSolicitudes();
+}
+
+async function cargarEstudiantes() {
+  try {
+    const r = await pb.collection('estudiantes').getList(1, 500, {sort: 'nombres'}).catch(()=>({items:[]}));
+    _estudiantesList = r.items || [];
+  } catch(e) { _estudiantesList = []; }
+}
+
+function renderEstList() {
+  const el = document.getElementById('estudiantes-list');
+  if (!el) return;
+  const fEst  = document.getElementById('est-f-estado')?.value || '';
+  const fTipo = document.getElementById('est-f-tipo')?.value   || '';
+  const lista = _estudiantesList.filter(e =>
+    (!fEst  || e.estado === fEst) &&
+    (!fTipo || e.tipo   === fTipo)
+  );
+  if (!lista.length) { el.innerHTML = '<div style="text-align:center;padding:32px;color:var(--muted)">Sin estudiantes registrados</div>'; return; }
+  const estadoColor = {pendiente:'#d97706',activo:'#059669',suspendido:'#dc2626',inactivo:'#6b7280'};
+  const tipoColor   = {adulto:'#2563eb',adolescente:'#7c3aed',nino:'#059669'};
+  el.innerHTML = `<div style="margin-bottom:8px;font-size:12px;color:var(--muted)">${lista.length} estudiante(s)</div>
+    <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">
+    <thead><tr style="background:#f8fafc">
+      <th style="padding:9px 12px;text-align:left;border-bottom:2px solid var(--border);color:var(--muted);font-size:11px;text-transform:uppercase">Nombre</th>
+      <th style="padding:9px 12px;text-align:left;border-bottom:2px solid var(--border);color:var(--muted);font-size:11px;text-transform:uppercase">Usuario</th>
+      <th style="padding:9px 12px;text-align:left;border-bottom:2px solid var(--border);color:var(--muted);font-size:11px;text-transform:uppercase">Tipo</th>
+      <th style="padding:9px 12px;text-align:left;border-bottom:2px solid var(--border);color:var(--muted);font-size:11px;text-transform:uppercase">Estado</th>
+      <th style="padding:9px 12px;text-align:left;border-bottom:2px solid var(--border);color:var(--muted);font-size:11px;text-transform:uppercase">Acciones</th>
+    </tr></thead>
+    <tbody>${lista.map(e=>`<tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:9px 12px;font-weight:600">${e.nombres||''} ${e.apellidos||''}</td>
+      <td style="padding:9px 12px;color:var(--muted)">@${e.username||'—'}</td>
+      <td style="padding:9px 12px"><span style="font-size:11px;padding:2px 7px;border-radius:12px;background:#f8fafc;color:${tipoColor[e.tipo]||'#374151'}">${e.tipo||'adulto'}</span></td>
+      <td style="padding:9px 12px"><span style="font-size:11px;padding:2px 7px;border-radius:12px;background:#f8fafc;color:${estadoColor[e.estado]||'#374151'};font-weight:600">${e.estado||'—'}</span></td>
+      <td style="padding:9px 12px"><div style="display:flex;gap:5px;flex-wrap:wrap">
+        ${e.estado==='pendiente'?`<button onclick="updateEstEstado('${e.id}','activo')" style="font-size:11px;padding:2px 7px;border:1px solid #86efac;background:#dcfce7;color:#166534;border-radius:5px;cursor:pointer">✓ Activar</button>`:''}
+        ${e.estado==='activo'?`<button onclick="updateEstEstado('${e.id}','suspendido')" style="font-size:11px;padding:2px 7px;border:1px solid #fca5a5;background:#fef2f2;color:#dc2626;border-radius:5px;cursor:pointer">⏸ Suspender</button>`:''}
+        ${e.estado==='suspendido'?`<button onclick="updateEstEstado('${e.id}','activo')" style="font-size:11px;padding:2px 7px;border:1px solid #86efac;background:#dcfce7;color:#166534;border-radius:5px;cursor:pointer">▶ Reactivar</button>`:''}
+        <button onclick="resetEstPass('${e.id}','${(e.nombres||'').replace(/'/g,"\\'")}');" style="font-size:11px;padding:2px 7px;border:1px solid var(--border);background:#fff;border-radius:5px;cursor:pointer">🔑 Pass</button>
+      </div></td>
+    </tr>`).join('')}</tbody>
+  </table></div>`;
+  // Actualizar stat
+  const activos = lista.filter(e => e.estado==='activo').length;
+  const psTot = document.getElementById('ps-total');
+  if (psTot) { /* ya se actualiza en renderProfesores */ }
+}
+
+function openEstForm()  { document.getElementById('est-form-panel').style.display = 'block'; }
+function closeEstForm() { document.getElementById('est-form-panel').style.display = 'none'; }
+
+async function saveEstudiante() {
+  const nombres   = document.getElementById('ef-nombres').value.trim();
+  const apellidos = document.getElementById('ef-apellidos').value.trim();
+  const user      = document.getElementById('ef-user').value.trim().replace(/\s+/g,'');
+  const pass      = document.getElementById('ef-pass').value;
+  const pass2     = document.getElementById('ef-pass2').value;
+  if (!nombres||!apellidos||!user) { toast('Nombres, apellidos y usuario son requeridos','error'); return; }
+  if (!pass||pass.length<8) { toast('Contraseña mínimo 8 caracteres','error'); return; }
+  if (pass!==pass2) { toast('Las contraseñas no coinciden','error'); return; }
+  try {
+    await pb.collection('estudiantes').create({
+      nombres, apellidos,
+      username: user,
+      email: document.getElementById('ef-email').value.trim() || null,
+      cedula: document.getElementById('ef-cedula').value.trim(),
+      tipo:   document.getElementById('ef-tipo').value,
+      password: pass, passwordConfirm: pass,
+      estado: 'activo'
+    });
+    toast('Cuenta de estudiante creada');
+    closeEstForm();
+    ['ef-nombres','ef-apellidos','ef-user','ef-email','ef-cedula','ef-pass','ef-pass2'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+    await cargarEstudiantes(); renderEstList();
+  } catch(e) { toast('Error: '+e.message,'error'); }
+}
+
+async function updateEstEstado(id, estado) {
+  try {
+    await pb.collection('estudiantes').update(id, {estado});
+    toast(estado==='activo'?'Estudiante activado':'Estudiante suspendido');
+    const idx = _estudiantesList.findIndex(e=>e.id===id);
+    if(idx>=0) _estudiantesList[idx].estado = estado;
+    renderEstList();
+  } catch(e) { toast('Error al actualizar','error'); }
+}
+
+async function resetEstPass(id, nombre) {
+  const nueva = prompt(`Nueva contraseña para ${nombre} (mínimo 8 caracteres):`);
+  if (!nueva||nueva.length<8) { if(nueva!==null) toast('Contraseña demasiado corta','error'); return; }
+  try {
+    await pb.collection('estudiantes').update(id, {password:nueva, passwordConfirm:nueva});
+    toast('Contraseña actualizada');
+  } catch(e) { toast('Error al actualizar contraseña','error'); }
+}
+
+async function cargarSolicitudes() {
+  const el = document.getElementById('solicitudes-list');
+  if (!el) return;
+  try {
+    const r = await pb.collection('solicitudes_inscripcion').getList(1, 200, {filter:'estado="pendiente"', sort:'-created'}).catch(()=>({items:[]}));
+    _solicitudesList = r.items || [];
+  } catch(e) { _solicitudesList = []; }
+  if (!_solicitudesList.length) {
+    el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted)"><div style="font-size:32px;margin-bottom:12px">📋</div><div style="font-size:14px">Sin solicitudes pendientes</div></div>'; return;
+  }
+  el.innerHTML = _solicitudesList.map(s=>`
+    <div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <div style="font-size:14px;font-weight:600">${s.nombres||''} ${s.apellidos||''}</div>
+        <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:#fef9c3;color:#854d0e;font-weight:600">${s.tipo||'adulto'}</span>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:8px">
+        📧 ${s.correo||'—'} · 📱 ${s.telefono||'—'} · 📅 ${new Date(s.created).toLocaleDateString('es-VE')}
+      </div>
+      ${s.tipo!=='adulto'?`<div style="font-size:12px;color:var(--muted);margin-bottom:6px">👤 Rep: ${s.rep_nombres||''} ${s.rep_apellidos||''} · ${s.rep_cedula||''}</div>`:''}
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button onclick="aprobarSolicitud('${s.id}')" style="font-size:11px;padding:4px 10px;border:1px solid #86efac;background:#dcfce7;color:#166534;border-radius:6px;cursor:pointer">✓ Aprobar</button>
+        <button onclick="rechazarSolicitud('${s.id}')" style="font-size:11px;padding:4px 10px;border:1px solid #fca5a5;background:#fef2f2;color:#dc2626;border-radius:6px;cursor:pointer">✗ Rechazar</button>
+      </div>
+    </div>`).join('');
+}
+
+async function aprobarSolicitud(id) {
+  try {
+    await pb.collection('solicitudes_inscripcion').update(id, {estado:'aprobada'});
+    toast('Solicitud aprobada');
+    _solicitudesList = _solicitudesList.filter(s=>s.id!==id);
+    cargarSolicitudes();
+  } catch(e) { toast('Error','error'); }
+}
+
+async function rechazarSolicitud(id) {
+  if (!confirm('¿Rechazar esta solicitud de inscripción?')) return;
+  try {
+    await pb.collection('solicitudes_inscripcion').update(id, {estado:'rechazada'});
+    toast('Solicitud rechazada');
+    _solicitudesList = _solicitudesList.filter(s=>s.id!==id);
+    cargarSolicitudes();
+  } catch(e) { toast('Error','error'); }
 }
 
 /* ─── MOBILE ─── */
@@ -6568,6 +8282,319 @@ async function auditExportarCSV() {
   } finally {
     if (btn) { btn.textContent = '⬇ CSV'; btn.disabled = false; }
   }
+}
+
+// ════════════════════════════════════════
+// FASE 7 — ZOOM API (via VPS hook)
+// Las credenciales OAuth NUNCA se exponen en el navegador.
+// Todas las llamadas pasan por endpoints del VPS: /api/zoom/...
+// El VPS hook gestiona Client ID, Client Secret y tokens de acceso.
+// ════════════════════════════════════════
+
+const ZOOM_API_BASE = 'https://api.iagami.online/api/zoom';
+
+function _zoomHeaders() {
+  return {
+    'Authorization': 'Admin ' + (sessionStorage.getItem('pb_token') || ''),
+    'Content-Type': 'application/json'
+  };
+}
+
+async function _zoomFetch(path, opts = {}) {
+  const url = ZOOM_API_BASE + path;
+  const res = await fetch(url, { ...opts, headers: { ..._zoomHeaders(), ...(opts.headers||{}) } });
+  if (res.status === 503) throw new Error('Zoom no está configurado en el servidor. Verificar VPS hook.');
+  if (res.status === 401) throw new Error('Sin autorización. Verificar sesión de administrador.');
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.message || `Error ${res.status}`);
+  }
+  return res.json();
+}
+
+async function zoomAdminInit() {
+  await checkZoomStatus();
+  await loadZoomMeetings();
+  await loadZoomRecordings();
+}
+
+async function checkZoomStatus() {
+  const dot  = document.getElementById('zoom-status-dot');
+  const txt  = document.getElementById('zoom-status-text');
+  const acc  = document.getElementById('zoom-status-account');
+  if (!dot) return;
+  try {
+    const data = await _zoomFetch('/status');
+    if (data.connected) {
+      dot.style.background = '#16a34a';
+      txt.textContent = '● Conectado';
+      acc.textContent = data.account ? `Cuenta: ${esc(data.account)}` : '';
+    } else {
+      dot.style.background = '#dc2626';
+      txt.textContent = '○ Desconectado';
+      acc.textContent = 'Zoom no está autorizado. Configurar en el VPS.';
+    }
+  } catch(e) {
+    dot.style.background = '#94a3b8';
+    txt.textContent = '⚠ No se puede verificar la conexión';
+    acc.textContent = e.message;
+  }
+}
+
+async function loadZoomMeetings() {
+  const el = document.getElementById('zoom-meetings-list');
+  if (!el) return;
+  try {
+    const data = await _zoomFetch('/meetings');
+    renderZoomMeetings(data.meetings || data || []);
+  } catch(e) {
+    el.innerHTML = `<div style="text-align:center;padding:30px;color:var(--muted);font-size:13px">
+      ${e.message.includes('configurado') ? '⚙️ ' + esc(e.message) : '⚠️ No se pudieron cargar las reuniones: ' + esc(e.message)}
+    </div>`;
+  }
+}
+
+function renderZoomMeetings(meetings) {
+  const el = document.getElementById('zoom-meetings-list');
+  if (!el) return;
+  if (!meetings.length) {
+    el.innerHTML = '<div style="text-align:center;padding:30px;color:var(--muted);font-size:13px">No hay reuniones programadas.</div>';
+    return;
+  }
+  const estadoBadge = s => {
+    const m = {waiting:'⏳ Pendiente', started:'🟢 En vivo', finished:'✅ Finalizada'};
+    return `<span style="font-size:11px;padding:2px 8px;border-radius:20px;background:${s==='started'?'#dcfce7':s==='finished'?'#f1f5f9':'#fef9c3'};color:${s==='started'?'#166534':s==='finished'?'#475569':'#854d0e'};font-weight:600">${m[s]||s}</span>`;
+  };
+  el.innerHTML = `<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">
+    <thead><tr style="border-bottom:2px solid var(--border)">
+      <th style="text-align:left;padding:8px 12px;color:var(--muted);font-weight:600">Tema</th>
+      <th style="text-align:left;padding:8px 12px;color:var(--muted);font-weight:600">Curso / Profesor</th>
+      <th style="text-align:left;padding:8px 12px;color:var(--muted);font-weight:600">Fecha y Hora</th>
+      <th style="text-align:left;padding:8px 12px;color:var(--muted);font-weight:600">Estado</th>
+      <th style="text-align:right;padding:8px 12px;color:var(--muted);font-weight:600">Acciones</th>
+    </tr></thead>
+    <tbody>
+    ${meetings.map(m => `<tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:10px 12px"><div style="font-weight:600">${esc(m.topic||'')}</div><div style="font-size:11px;color:var(--muted)">ID: ${esc(String(m.id||''))}</div></td>
+      <td style="padding:10px 12px"><div>${esc(m.agenda_curso||'—')}</div><div style="font-size:12px;color:var(--muted)">${esc(m.agenda_profesor||'')}</div></td>
+      <td style="padding:10px 12px;white-space:nowrap">${m.start_time ? new Date(m.start_time).toLocaleString('es-VE',{dateStyle:'short',timeStyle:'short'}) : '—'}<br><span style="font-size:12px;color:var(--muted)">${m.duration||60} min</span></td>
+      <td style="padding:10px 12px">${estadoBadge(m.status||'waiting')}</td>
+      <td style="padding:10px 12px;text-align:right">
+        <button class="btn btn-secondary" style="font-size:11px;padding:4px 10px;margin-right:4px" onclick="editZoomMeeting('${esc(String(m.id||''))}')">✏️ Editar</button>
+        <button style="font-size:11px;padding:4px 10px;border:1px solid #fca5a5;border-radius:6px;background:#fff;color:#dc2626;cursor:pointer;font-family:inherit;font-weight:600" onclick="cancelZoomMeeting('${esc(String(m.id||''))}','${esc(m.topic||'')}')">🗑 Cancelar</button>
+      </td>
+    </tr>`).join('')}
+    </tbody></table></div>`;
+}
+
+function openZoomMeetingForm() {
+  document.getElementById('zoom-edit-id').value = '';
+  document.getElementById('zoom-tema').value = '';
+  document.getElementById('zoom-curso').value = '';
+  document.getElementById('zoom-profesor').value = '';
+  document.getElementById('zoom-fecha').value = '';
+  document.getElementById('zoom-hora').value = '';
+  document.getElementById('zoom-duracion').value = '60';
+  document.getElementById('zoom-agenda').value = '';
+  document.getElementById('zoom-form-title').textContent = '🎥 Crear Reunión en Zoom';
+  document.getElementById('zoom-form-btn').textContent = '🎥 Crear en Zoom';
+  document.getElementById('zoom-meeting-form').style.display = 'block';
+}
+
+function closeZoomMeetingForm() {
+  document.getElementById('zoom-meeting-form').style.display = 'none';
+}
+
+async function editZoomMeeting(zoomId) {
+  try {
+    const data = await _zoomFetch('/meetings/' + zoomId);
+    const m = data.meeting || data;
+    document.getElementById('zoom-edit-id').value = zoomId;
+    document.getElementById('zoom-tema').value = m.topic || '';
+    document.getElementById('zoom-curso').value = m.agenda_curso || '';
+    document.getElementById('zoom-profesor').value = m.agenda_profesor || '';
+    if (m.start_time) {
+      const d = new Date(m.start_time);
+      document.getElementById('zoom-fecha').value = d.toISOString().slice(0,10);
+      document.getElementById('zoom-hora').value = d.toTimeString().slice(0,5);
+    }
+    document.getElementById('zoom-duracion').value = m.duration || 60;
+    document.getElementById('zoom-agenda').value = m.agenda || '';
+    document.getElementById('zoom-form-title').textContent = '✏️ Editar Reunión';
+    document.getElementById('zoom-form-btn').textContent = '💾 Guardar Cambios';
+    document.getElementById('zoom-meeting-form').style.display = 'block';
+    document.getElementById('zoom-meeting-form').scrollIntoView({behavior:'smooth'});
+  } catch(e) {
+    toast('Error al cargar reunión: ' + e.message);
+  }
+}
+
+async function submitZoomMeetingForm() {
+  const btn = document.getElementById('zoom-form-btn');
+  const tema = document.getElementById('zoom-tema').value.trim();
+  const fecha = document.getElementById('zoom-fecha').value;
+  const hora = document.getElementById('zoom-hora').value;
+  if (!tema) { toast('El tema es obligatorio'); return; }
+  if (!fecha || !hora) { toast('Fecha y hora son obligatorias'); return; }
+  const zoomId = document.getElementById('zoom-edit-id').value;
+  const payload = {
+    topic: tema,
+    start_time: fecha + 'T' + hora + ':00',
+    duration: parseInt(document.getElementById('zoom-duracion').value) || 60,
+    agenda: document.getElementById('zoom-agenda').value.trim(),
+    agenda_curso: document.getElementById('zoom-curso').value.trim(),
+    agenda_profesor: document.getElementById('zoom-profesor').value.trim()
+  };
+  btn.disabled = true; btn.textContent = '⏳ Procesando...';
+  try {
+    if (zoomId) {
+      await _zoomFetch('/meetings/' + zoomId, {method:'PATCH', body: JSON.stringify(payload)});
+      toast('Reunión actualizada en Zoom');
+    } else {
+      await _zoomFetch('/meetings', {method:'POST', body: JSON.stringify(payload)});
+      toast('Reunión creada en Zoom ✅');
+    }
+    closeZoomMeetingForm();
+    await loadZoomMeetings();
+  } catch(e) {
+    toast('Error: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = zoomId ? '💾 Guardar Cambios' : '🎥 Crear en Zoom';
+  }
+}
+
+async function cancelZoomMeeting(zoomId, topic) {
+  if (!confirm(`¿Cancelar la reunión "${topic}"?\n\nEsta acción eliminará la reunión de Zoom.`)) return;
+  try {
+    await _zoomFetch('/meetings/' + zoomId, {method:'DELETE'});
+    toast('Reunión cancelada');
+    await loadZoomMeetings();
+  } catch(e) {
+    toast('Error al cancelar: ' + e.message);
+  }
+}
+
+async function loadZoomRecordings() {
+  const el = document.getElementById('zoom-recordings-list');
+  if (!el) return;
+  try {
+    const data = await _zoomFetch('/recordings');
+    const recs = data.recordings || data || [];
+    if (!recs.length) {
+      el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px">No hay grabaciones disponibles.</div>';
+      return;
+    }
+    el.innerHTML = `<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">
+      <thead><tr style="border-bottom:2px solid var(--border)">
+        <th style="text-align:left;padding:8px 12px;color:var(--muted);font-weight:600">Tema</th>
+        <th style="text-align:left;padding:8px 12px;color:var(--muted);font-weight:600">Fecha</th>
+        <th style="text-align:left;padding:8px 12px;color:var(--muted);font-weight:600">Duración</th>
+        <th style="text-align:right;padding:8px 12px;color:var(--muted);font-weight:600">Acceso</th>
+      </tr></thead>
+      <tbody>
+      ${recs.map(r => `<tr style="border-bottom:1px solid var(--border)">
+        <td style="padding:10px 12px;font-weight:600">${esc(r.topic||'')}</td>
+        <td style="padding:10px 12px">${r.start_time ? new Date(r.start_time).toLocaleDateString('es-VE') : '—'}</td>
+        <td style="padding:10px 12px">${r.duration ? Math.floor(r.duration/60)+'h '+((r.duration%60)||'')+'m' : '—'}</td>
+        <td style="padding:10px 12px;text-align:right">
+          ${r.play_url ? `<a href="${esc(r.play_url)}" target="_blank" class="btn btn-secondary" style="font-size:11px;padding:4px 10px;text-decoration:none">▶ Ver grabación</a>` : '<span style="font-size:12px;color:var(--muted)">No disponible</span>'}
+        </td>
+      </tr>`).join('')}
+      </tbody></table></div>`;
+  } catch(e) {
+    el.innerHTML = `<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px">
+      ${e.message.includes('configurado') ? '⚙️ ' + esc(e.message) : '⚠️ No se pudieron cargar las grabaciones: ' + esc(e.message)}
+    </div>`;
+  }
+}
+
+/* ═══════════════════════════════════════
+   RESPALDOS — ADMIN
+═══════════════════════════════════════ */
+async function renderRespaldos() {
+  const wrap = document.getElementById('backup-history-wrap');
+  const storage = document.getElementById('backup-storage-info');
+  if (wrap) wrap.innerHTML = '<div style="padding:32px;text-align:center;color:var(--muted);font-size:13px">Cargando…</div>';
+
+  let records = [];
+  let error = null;
+
+  try {
+    const res = await pb.collection('iagami_sys_logs').getList(1, 10, {
+      filter: 'tipo = "backup"',
+      sort: '-created'
+    });
+    records = res.items || [];
+  } catch(e) {
+    error = e.message || 'Error desconocido';
+  }
+
+  if (error || records.length === 0) {
+    const msg = error
+      ? `⚠️ No se pudo conectar al registro: ${esc(error)}`
+      : 'No hay registros de respaldo disponibles. Los backups se ejecutan desde el VPS.';
+    if (wrap) wrap.innerHTML = `<div style="padding:32px;text-align:center;color:var(--muted);font-size:13px">${msg}<br><br><span style="font-size:12px">Configurar con: <code>crontab -e</code> en VPS · Ver <code>scripts/backup_pocketbase.sh</code></span></div>`;
+
+    document.getElementById('backup-stat-fecha').textContent = 'Sin datos';
+    document.getElementById('backup-stat-size').textContent = 'Sin datos';
+    document.getElementById('backup-stat-estado').innerHTML = '<span style="color:#6b7280">Sin datos</span>';
+    document.getElementById('backup-stat-count').textContent = '0';
+    if (storage) storage.innerHTML = '<div style="color:var(--muted)">Sin datos de almacenamiento. Configurar backups en VPS.</div>';
+    return;
+  }
+
+  renderBackupHistory(records);
+
+  const last = records[0];
+  const fecha = last.created ? new Date(last.created).toLocaleString('es-VE') : '—';
+  const estado = last.nivel === 'error' ? 'ALERTA' : 'OK';
+  const estadoColor = estado === 'OK' ? '#1d6b3e' : '#dc2626';
+
+  document.getElementById('backup-stat-fecha').textContent = fecha;
+  document.getElementById('backup-stat-size').textContent = last.detalle ? (esc(last.detalle).match(/\d+(\.\d+)?\s*(M|G|K)/i)?.[0] || '—') : '—';
+  document.getElementById('backup-stat-estado').innerHTML = `<span style="color:${estadoColor};font-weight:700">${esc(estado)}</span>`;
+  document.getElementById('backup-stat-count').textContent = records.length;
+
+  if (storage) {
+    storage.innerHTML = `
+      <div style="font-size:13px;line-height:1.8">
+        <div>📦 <strong>Registros en log:</strong> ${records.length}</div>
+        <div>✅ <strong>Último estado:</strong> ${esc(estado)}</div>
+        <div>📅 <strong>Fecha última entrada:</strong> ${fecha}</div>
+        <div style="margin-top:8px;font-size:11px;color:var(--muted)">Los datos de almacenamiento en disco solo están disponibles ejecutando <code>monitor_backups.sh --check</code> en el VPS.</div>
+      </div>`;
+  }
+}
+
+function renderBackupHistory(records) {
+  const wrap = document.getElementById('backup-history-wrap');
+  if (!wrap) return;
+  wrap.innerHTML = `
+    <table style="width:100%;border-collapse:collapse;font-size:13px">
+      <thead>
+        <tr style="background:var(--primary-light);text-align:left">
+          <th style="padding:10px 14px;font-weight:600;color:var(--text)">Fecha</th>
+          <th style="padding:10px 14px;font-weight:600;color:var(--text)">Módulo</th>
+          <th style="padding:10px 14px;font-weight:600;color:var(--text)">Estado</th>
+          <th style="padding:10px 14px;font-weight:600;color:var(--text)">Detalle</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${records.map(r => {
+          const esBad = r.nivel === 'error' || r.nivel === 'warning';
+          const badge = esBad
+            ? `<span style="display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600;background:#fee2e2;color:#991b1b">${esc(r.nivel||'error')}</span>`
+            : `<span style="display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600;background:var(--primary-light);color:var(--primary)">OK</span>`;
+          return `<tr style="border-bottom:1px solid var(--border)">
+            <td style="padding:10px 14px;white-space:nowrap">${r.created ? new Date(r.created).toLocaleString('es-VE') : '—'}</td>
+            <td style="padding:10px 14px">${esc(r.modulo||'backup')}</td>
+            <td style="padding:10px 14px">${badge}</td>
+            <td style="padding:10px 14px;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.detalle||r.accion||'—')}</td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>`;
 }
 </script>
 

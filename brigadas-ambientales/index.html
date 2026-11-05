@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Brigadas Ambientales IAGAMI — Municipio Iribarren</title>
+<meta name="description" content="Únete a las Brigadas Ambientales de Iribarren. Protege nuestros árboles, agua, biodiversidad y comunidades."/>
+<meta name="theme-color" content="#1d6b3e"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet"/>
+<script src="../cms/pb.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--verde:#1d6b3e;--verde-dark:#1a3d2b;--verde-light:#e8f5ee;--verde-border:#d4edd8;--bg:#f5f7f5;--text:#1f2937}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+a{color:inherit;text-decoration:none}
+button{cursor:pointer;font-family:inherit}
+
+/* NAVBAR */
+.navbar{background:var(--verde);color:#fff;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.2)}
+.navbar-brand{display:flex;align-items:center;gap:10px}
+.navbar-logo{width:36px;height:36px;border-radius:8px;background:#fff;padding:3px;object-fit:contain}
+.navbar-title{font-family:'Poppins',sans-serif;font-size:15px;font-weight:700}
+.navbar-back{background:rgba(255,255,255,.18);border:none;color:#fff;padding:7px 14px;border-radius:8px;font-size:13px;font-weight:600}
+.navbar-back:hover{background:rgba(255,255,255,.28)}
+
+/* HERO */
+.hero{background:linear-gradient(135deg,rgba(26,61,43,.88) 0%,rgba(29,107,62,.75) 100%),url('https://iagami.online/hero-iagami.webp') center/cover no-repeat;color:#fff;padding:52px 24px 44px;text-align:center}
+.hero-tag{font-size:11px;font-weight:700;letter-spacing:.08em;background:rgba(255,255,255,.18);border-radius:20px;display:inline-block;padding:4px 14px;margin-bottom:16px}
+.hero h1{font-family:'Poppins',sans-serif;font-size:28px;font-weight:700;line-height:1.3;margin-bottom:12px}
+.hero p{font-size:14px;opacity:.9;line-height:1.7;max-width:600px;margin:0 auto 24px}
+.hero-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.btn-primary{background:#fff;color:var(--verde);border:none;padding:12px 24px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer}
+.btn-primary:hover{background:#e8f5ee}
+.btn-outline{background:transparent;color:#fff;border:2px solid rgba(255,255,255,.6);padding:12px 24px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer}
+.btn-outline:hover{background:rgba(255,255,255,.12)}
+
+/* CONTAINER */
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+
+/* CATEGORÍAS */
+.cats{padding:48px 0 24px}
+.cats h2{font-family:'Poppins',sans-serif;font-size:22px;font-weight:700;color:var(--verde-dark);text-align:center;margin-bottom:8px}
+.cats-sub{text-align:center;color:#6b7280;font-size:14px;margin-bottom:32px}
+.cats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.cat-card{background:#fff;border:2px solid var(--verde-border);border-radius:16px;padding:24px 20px;cursor:pointer;transition:.2s;text-align:center}
+.cat-card:hover{border-color:var(--verde);transform:translateY(-3px);box-shadow:0 8px 28px rgba(29,107,62,.12)}
+.cat-ico{font-size:44px;margin-bottom:14px}
+.cat-title{font-family:'Poppins',sans-serif;font-size:16px;font-weight:700;color:var(--verde-dark);margin-bottom:6px}
+.cat-desc{font-size:12px;color:#6b7280;line-height:1.6}
+.cat-badge{display:inline-block;margin-top:10px;background:var(--verde-light);color:var(--verde);font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px}
+
+/* FORMULARIOS */
+.form-section{padding:0 0 48px}
+.form-panel{background:#fff;border:1px solid var(--verde-border);border-radius:16px;padding:28px 24px;margin-top:0}
+.form-title{font-family:'Poppins',sans-serif;font-size:18px;font-weight:700;color:var(--verde-dark);margin-bottom:6px}
+.form-desc{font-size:13px;color:#6b7280;margin-bottom:24px;line-height:1.6}
+.step-ind{display:flex;gap:8px;margin-bottom:20px;align-items:center}
+.step{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.step.active{background:var(--verde);color:#fff}
+.step.done{background:#d1fae5;color:var(--verde)}
+.step.pending{background:#f3f4f6;color:#9ca3af}
+.step-line{flex:1;height:2px;background:#e5e7eb}
+.step-line.done{background:var(--verde)}
+.fg{margin-bottom:16px}
+.flabel{display:block;font-size:12px;font-weight:600;color:var(--verde-dark);margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em}
+.finput,.fselect,.ftextarea{width:100%;padding:11px 14px;border:1.5px solid var(--verde-border);border-radius:10px;font-size:14px;font-family:inherit;color:var(--text);background:#fff;transition:border-color .15s}
+.finput:focus,.fselect:focus,.ftextarea:focus{outline:none;border-color:var(--verde)}
+.ftextarea{resize:vertical;min-height:80px}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.areas-wrap{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.area-chip{display:flex;align-items:center;gap:5px;font-size:12px;background:var(--verde-light);border-radius:20px;padding:4px 10px;cursor:pointer;border:1.5px solid transparent}
+.area-chip input{width:0;height:0;opacity:0;position:absolute}
+.area-chip.checked{border-color:var(--verde);font-weight:600}
+.btn-submit{width:100%;background:var(--verde);color:#fff;border:none;padding:14px;border-radius:12px;font-size:15px;font-weight:700;font-family:'Poppins',sans-serif;margin-top:8px;transition:.15s}
+.btn-submit:hover{background:var(--verde-dark)}
+.btn-submit:disabled{opacity:.6;cursor:default}
+.btn-sec{background:none;border:1.5px solid var(--verde-border);color:var(--text);padding:11px 20px;border-radius:10px;font-size:13px;font-weight:600}
+.btn-sec:hover{border-color:var(--verde)}
+.note-box{background:#fffbea;border:1px solid #fde68a;border-radius:10px;padding:12px 14px;font-size:12px;color:#78350f;line-height:1.6;margin-bottom:16px}
+.success-box{text-align:center;padding:40px 24px}
+.success-box .ico{font-size:56px;margin-bottom:16px}
+.success-box h3{font-family:'Poppins',sans-serif;font-size:20px;font-weight:700;color:var(--verde-dark);margin-bottom:10px}
+.success-box p{font-size:14px;color:#6b7280;line-height:1.7;margin-bottom:24px}
+
+/* CONSULTA ESTADO */
+.consulta-sec{background:#fff;border:1px solid var(--verde-border);border-radius:16px;padding:24px;margin:0 0 48px}
+
+/* ESTADÍSTICAS */
+.stats-sec{background:var(--verde-dark);color:#fff;padding:40px 24px;text-align:center}
+.stats-grid{display:flex;gap:32px;justify-content:center;flex-wrap:wrap;margin-top:24px}
+.stat-item{text-align:center}
+.stat-num{font-family:'Poppins',sans-serif;font-size:36px;font-weight:700}
+.stat-label{font-size:12px;opacity:.8;margin-top:4px}
+
+/* FOOTER */
+.footer{background:var(--verde);color:#fff;text-align:center;padding:20px;font-size:12px;opacity:.9}
+
+/* RESPONSIVE */
+@media(max-width:600px){
+  .hero h1{font-size:22px}
+  .fgrid{grid-template-columns:1fr}
+  .hero-btns{flex-direction:column;align-items:center}
+}
+</style>
+</head>
+<body>
+
+<!-- BARRA ACCESO PORTALES -->
+<div style="background:#1a3d2b;padding:8px 16px;text-align:right;font-size:13px">
+  <a href="/brigadas-ambientales/representante/" style="color:#a7f3d0;margin-right:16px;text-decoration:none">Acceso Representantes →</a>
+  <a href="/brigadas-ambientales/comandante/" style="color:#6ee7b7;font-size:11px;text-decoration:none">Personal IAGAMI</a>
+</div>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="navbar-brand">
+    <img src="/assets/images/logo-iagami.png" alt="IAGAMI" class="navbar-logo"/>
+    <span class="navbar-title">Brigadas Ambientales</span>
+  </div>
+  <a href="/" class="navbar-back">← Portal</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-tag">IAGAMI · Municipio Iribarren</div>
+  <h1>Brigadas Ambientales<br>de Iribarren</h1>
+  <p>Únete a las Brigadas Ambientales de Iribarren. Participa en la protección de nuestros árboles, agua, biodiversidad, comunidades y espacios naturales. Construyamos juntos un municipio ambientalmente sostenible.</p>
+  <div class="hero-btns">
+    <button class="btn-primary" onclick="scrollToForm()">🌿 Inscríbete ahora</button>
+    <button class="btn-outline" onclick="scrollToConsulta()">🔍 Consultar mi inscripción</button>
+  </div>
+</div>
+
+<!-- ESTADÍSTICAS PÚBLICAS -->
+<div class="stats-sec">
+  <h2 style="font-family:'Poppins',sans-serif;font-size:18px;font-weight:700;margin-bottom:4px">Nuestra comunidad ambiental</h2>
+  <p style="font-size:13px;opacity:.8">Municipio Iribarren — datos actualizados</p>
+  <div class="stats-grid">
+    <div class="stat-item"><div class="stat-num" id="stat-adultos">—</div><div class="stat-label">Adultos inscritos</div></div>
+    <div class="stat-item"><div class="stat-num" id="stat-adolescentes">—</div><div class="stat-label">Adolescentes</div></div>
+    <div class="stat-item"><div class="stat-num" id="stat-ninos">—</div><div class="stat-label">Pequeños Guardianes</div></div>
+    <div class="stat-item"><div class="stat-num" id="stat-total">—</div><div class="stat-label">Total brigadistas</div></div>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- CATEGORÍAS -->
+<div class="cats" id="cats-section">
+  <h2>¿Cómo deseas participar?</h2>
+  <p class="cats-sub">Selecciona tu categoría para comenzar el proceso de inscripción</p>
+  <div class="cats-grid">
+    <div class="cat-card" onclick="showForm('adulto')">
+      <div class="cat-ico">🧑</div>
+      <div class="cat-title">Brigadista Adulto</div>
+      <div class="cat-desc">Para personas mayores de 18 años. Registro individual con datos personales, áreas de interés y disponibilidad.</div>
+      <div class="cat-badge">+18 años</div>
+    </div>
+    <div class="cat-card" onclick="showForm('adolescente')">
+      <div class="cat-ico">🧑‍🎓</div>
+      <div class="cat-title">Brigadista Adolescente</div>
+      <div class="cat-desc">Para jóvenes de 12 a 17 años. La inscripción es realizada por el padre, madre o representante legal.</div>
+      <div class="cat-badge">12 – 17 años</div>
+    </div>
+    <div class="cat-card" onclick="showForm('nino')">
+      <div class="cat-ico">🧒</div>
+      <div class="cat-title">Pequeño Guardián Ambiental</div>
+      <div class="cat-desc">Para niños menores de 12 años. Registro exclusivo por padre, madre o representante legal.</div>
+      <div class="cat-badge">Menores de 12</div>
+    </div>
+  </div>
+</div>
+
+<!-- FORMULARIOS -->
+<div class="form-section" id="form-section" style="display:none">
+
+  <!-- ADULTO -->
+  <div id="form-adulto" style="display:none">
+    <div class="form-panel">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+        <button onclick="backToCats()" class="btn-sec">← Volver</button>
+        <div>
+          <div class="form-title">🧑 Brigadista Adulto</div>
+          <div style="font-size:12px;color:#6b7280">Mayores de 18 años · Registro individual</div>
+        </div>
+      </div>
+      <div id="adulto-form-fields">
+        <div class="fgrid">
+          <div class="fg"><label class="flabel">Nombres *</label><input class="finput" id="ba-nombres" placeholder="Tu nombre completo"/></div>
+          <div class="fg"><label class="flabel">Apellidos *</label><input class="finput" id="ba-apellidos" placeholder="Tus apellidos"/></div>
+        </div>
+        <div class="fgrid">
+          <div class="fg"><label class="flabel">Cédula de Identidad *</label><input class="finput" id="ba-cedula" placeholder="Ej: V-12345678"/></div>
+          <div class="fg"><label class="flabel">Fecha de Nacimiento *</label><input class="finput" id="ba-fnac" type="date"/></div>
+        </div>
+        <div class="fgrid">
+          <div class="fg"><label class="flabel">Género *</label>
+            <select class="fselect" id="ba-genero"><option value="">Selecciona...</option><option>Masculino</option><option>Femenino</option><option>Prefiero no indicar</option></select>
+          </div>
+          <div class="fg"><label class="flabel">Teléfono *</label><input class="finput" id="ba-tel" placeholder="Ej: 0414-1234567"/></div>
+        </div>
+        <div class="fgrid">
+          <div class="fg"><label class="flabel">Correo Electrónico</label><input class="finput" id="ba-correo" type="email" placeholder="Opcional"/></div>
+          <div class="fg"><label class="flabel">Parroquia *</label>
+            <select class="fselect" id="ba-parroquia"><option value="">Selecciona...</option><option>Catedral</option><option>Concepción</option><option>El Cuji</option><option>Juan de Villegas</option><option>Tamaca</option><option>Unión</option><option>Agua Viva</option><option>Buena Vista</option><option>Cabudare</option><option>Montalbán</option><option>Olivos</option><option>Santa Rosa</option><option>Río Claro</option><option>Juárez</option><option>Aguedo Felipe Alvarado</option><option>Sarare</option></select>
+          </div>
+        </div>
+        <div class="fgrid">
+          <div class="fg"><label class="flabel">Comunidad / Sector *</label><input class="finput" id="ba-comunidad" placeholder="Nombre de tu comunidad"/></div>
+          <div class="fg"><label class="flabel">Disponibilidad *</label>
+            <select class="fselect" id="ba-disp"><option value="">Selecciona...</option><option>Fines de semana</option><option>Entre semana</option><option>Ambos</option><option>Tiempo completo</option></select>
+          </div>
+        </div>
+        <div class="fg">
+          <label class="flabel">Áreas de Interés Ambiental</label>
+          <div class="areas-wrap" id="ba-areas">
+            <label class="area-chip" onclick="toggleChip(this)"><input type="checkbox" value="Agua"> 💧 Agua</label>
+            <label class="area-chip" onclick="toggleChip(this)"><input type="checkbox" value="Árboles"> 🌳 Árboles</label>
+            <label class="area-chip" onclick="toggleChip(this)"><input type="checkbox" value="Reciclaje"> ♻️ Reciclaje</label>
+            <label class="area-chip" onclick="toggleChip(this)"><input type="checkbox" value="Fauna"> 🦋 Fauna</label>
+            <label class="area-chip" onclick="toggleChip(this)"><input type="checkbox" value="Educación"> 📚 Educación</label>
+            <label class="area-chip" onclick="toggleChip(this)"><input type="checkbox" value="Reforestación"> 🌱 Reforestación</label>
+            <label class="area-chip" onclick="toggleChip(this)"><input type="checkbox" value="Limpieza"> 🧹 Limpieza</label>
+          </div>
+        </div>
+        <div class="fgrid">
+          <div class="fg"><label class="flabel">Nombre de la Brigada (si ya perteneces)</label><input class="finput" id="ba-brigada" placeholder="Ej: Brigada Agua Viva (opcional)"/></div>
+          <div class="fg"><label class="flabel">Comuna</label><input class="finput" id="ba-comuna" placeholder="Nombre de tu comuna (opcional)"/></div>
+        </div>
+        <div class="fg"><label class="flabel">Experiencia Voluntaria Previa</label><textarea class="ftextarea" id="ba-exp" placeholder="Describe brevemente tu experiencia (opcional)"></textarea></div>
+        <button class="btn-submit" id="btn-adulto" onclick="enviarAdulto()">🌿 Inscribirme como Brigadista</button>
+      </div>
+      <div id="adulto-ok" style="display:none" class="success-box">
+        <div class="ico">🌿</div>
+        <h3>¡Inscripción Enviada!</h3>
+        <p>Tu solicitud de inscripción como Brigadista Adulto fue recibida. IAGAMI se pondrá en contacto contigo para confirmar tu participación.<br><br>Guarda tu número de registro para futuras consultas.</p>
+        <div id="adulto-num" style="background:var(--verde-light);border-radius:10px;padding:12px;font-weight:700;color:var(--verde-dark);margin-bottom:20px;font-size:16px"></div>
+        <button class="btn-submit" onclick="backToCats()">Inscribir otro brigadista</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MENOR (adolescente / niño) -->
+  <div id="form-menor" style="display:none">
+    <div class="form-panel">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+        <button onclick="backToCats()" class="btn-sec">← Volver</button>
+        <div>
+          <div class="form-title" id="menor-titulo">🧑‍🎓 Brigadista Adolescente</div>
+          <div style="font-size:12px;color:#6b7280">Inscripción realizada por representante legal</div>
+        </div>
+      </div>
+
+      <!-- Paso 1 -->
+      <div id="paso1">
+        <div class="step-ind">
+          <div class="step active">1</div>
+          <div class="step-line"></div>
+          <div class="step pending">2</div>
+        </div>
+        <div style="font-size:12px;font-weight:600;color:var(--verde-dark);margin-bottom:16px">PASO 1 — Datos del menor</div>
+        <div class="fgrid">
+          <div class="fg"><label class="flabel">Nombres del menor *</label><input class="finput" id="bm-nombres" placeholder="Nombre completo"/></div>
+          <div class="fg"><label class="flabel">Apellidos *</label><input class="finput" id="bm-apellidos" placeholder="Apellidos"/></div>
+        </div>
+        <div class="fgrid">
+          <div class="fg"><label class="flabel">Fecha de Nacimiento *</label><input class="finput" id="bm-fnac" type="date" oninput="calcEdadPublic()"/></div>
+          <div class="fg"><label class="flabel">Edad calculada</label><input class="finput" id="bm-edad" readonly style="background:#f9fafb" placeholder="Automática"/></div>
+        </div>
+        <div class="fgrid">
+          <div class="fg"><label class="flabel">Género *</label>
+            <select class="fselect" id="bm-genero"><option value="">Selecciona...</option><option>Masculino</option><option>Femenino</option><option>Prefiero no indicar</option></select>
+          </div>
+          <div class="fg"><label class="flabel">Institución Educativa *</label><input class="finput" id="bm-escuela" placeholder="Nombre de la escuela o liceo"/></div>
+        </div>
+        <div class="fgrid">
+          <div class="fg"><label class="flabel">Grado / Año Escolar</label><input class="finput" id="bm-grado" placeholder="Ej: 4to año, 5to grado"/></div>
+          <div class="fg"><label class="flabel">Parroquia *</label>
+            <select class="fselect" id="bm-parroquia"><option value="">Selecciona...</option><option>Catedral</option><option>Concepción</option><option>El Cuji</option><option>Juan de Villegas</option><option>Tamaca</option><option>Unión</option><option>Agua Viva</option><option>Buena Vista</option><option>Cabudare</option><option>Montalbán</option><option>Olivos</option><option>Santa Rosa</option><option>Río Claro</option><option>Juárez</option><option>Aguedo Felipe Alvarado</option><option>Sarare</option></select>
+          </div>
+        </div>
+        <div class="fg"><label class="flabel">Comunidad / Sector *</label><input class="finput" id="bm-comunidad" placeholder="Nombre de la comunidad"/></div>
+        <div class="fg">
+          <label class="flabel">Áreas de Interés</label>
+          <div class="areas-wrap">
+            <label class="area-chip" onclick="toggleChip(this)"><input type="checkbox" class="bm-area" value="Agua"> 💧 Agua</label>
+            <label class="area-chip" onclick="toggleChip(this)"><input type="checkbox" class="bm-area" value="Árboles"> 🌳 Árboles</label>
+            <label class="area-chip" onclick="toggleChip(this)"><input type="checkbox" class="bm-area" value="Reciclaje"> ♻️ Reciclaje</label>
+            <label class="area-chip" onclick="toggleChip(this)"><input type="checkbox" class="bm-area" value="Fauna"> 🦋 Fauna</label>
+            <label class="area-chip" onclick="toggleChip(this)"><input type="checkbox" class="bm-area" value="Educación"> 📚 Educación</label>
+          </div>
+        </div>
+        <button class="btn-submit" onclick="irPaso2()">Siguiente → Datos del Representante</button>
+      </div>
+
+      <!-- Paso 2 -->
+      <div id="paso2" style="display:none">
+        <div class="step-ind">
+          <div class="step done">✓</div>
+          <div class="step-line done"></div>
+          <div class="step active">2</div>
+        </div>
+        <div style="font-size:12px;font-weight:600;color:var(--verde-dark);margin-bottom:16px">PASO 2 — Datos del Representante Legal</div>
+        <div class="fgrid">
+          <div class="fg"><label class="flabel">Nombres del Representante *</label><input class="finput" id="rep-nombres" placeholder="Nombre completo"/></div>
+          <div class="fg"><label class="flabel">Apellidos *</label><input class="finput" id="rep-apellidos" placeholder="Apellidos"/></div>
+        </div>
+        <div class="fgrid">
+          <div class="fg"><label class="flabel">Cédula *</label><input class="finput" id="rep-cedula" placeholder="Ej: V-12345678"/></div>
+          <div class="fg"><label class="flabel">Parentesco *</label>
+            <select class="fselect" id="rep-parentesco"><option value="">Selecciona...</option><option>Padre</option><option>Madre</option><option>Tutor Legal</option><option>Abuelo/a</option><option>Otro</option></select>
+          </div>
+        </div>
+        <div class="fgrid">
+          <div class="fg"><label class="flabel">Teléfono Principal *</label><input class="finput" id="rep-tel" placeholder="Ej: 0414-1234567"/></div>
+          <div class="fg"><label class="flabel">Teléfono Alternativo</label><input class="finput" id="rep-tel2" placeholder="Opcional"/></div>
+        </div>
+        <div class="fgrid">
+          <div class="fg"><label class="flabel">Correo Electrónico</label><input class="finput" id="rep-correo" type="email" placeholder="Opcional"/></div>
+          <div class="fg"><label class="flabel">Parroquia *</label>
+            <select class="fselect" id="rep-parroquia"><option value="">Selecciona...</option><option>Catedral</option><option>Concepción</option><option>El Cuji</option><option>Juan de Villegas</option><option>Tamaca</option><option>Unión</option><option>Agua Viva</option><option>Buena Vista</option><option>Cabudare</option><option>Montalbán</option><option>Olivos</option><option>Santa Rosa</option><option>Río Claro</option><option>Juárez</option><option>Aguedo Felipe Alvarado</option><option>Sarare</option></select>
+          </div>
+        </div>
+        <div class="fgrid">
+          <div class="fg"><label class="flabel">Dirección *</label><input class="finput" id="rep-dir" placeholder="Dirección de residencia"/></div>
+          <div class="fg"><label class="flabel">Comunidad *</label><input class="finput" id="rep-comunidad" placeholder="Comunidad del representante"/></div>
+        </div>
+        <div class="fgrid">
+          <div class="fg"><label class="flabel">Nombre de la Brigada (si ya pertenece)</label><input class="finput" id="bm-brigada" placeholder="Ej: Brigada Agua Viva (opcional)"/></div>
+          <div class="fg"><label class="flabel">Comuna</label><input class="finput" id="bm-comuna" placeholder="Nombre de la comuna (opcional)"/></div>
+        </div>
+        <div class="note-box">
+          ⚠️ Al registrar a este menor, el representante legal declara ser responsable de su participación y se compromete a firmar el <strong>consentimiento informado</strong> requerido por IAGAMI. Ningún menor será brigadista activo sin autorización parental verificada.
+        </div>
+        <div style="display:flex;gap:12px">
+          <button onclick="document.getElementById('paso2').style.display='none';document.getElementById('paso1').style.display='block'" class="btn-sec">← Anterior</button>
+          <button class="btn-submit" id="btn-menor" onclick="enviarMenor()" style="flex:1">🌿 Registrar Inscripción</button>
+        </div>
+      </div>
+
+      <div id="menor-ok" style="display:none" class="success-box">
+        <div class="ico">🌿</div>
+        <h3>¡Inscripción Enviada!</h3>
+        <p id="menor-ok-txt">La inscripción fue recibida. IAGAMI le enviará el consentimiento informado que deberá firmar y entregar para completar el proceso.</p>
+        <div id="menor-num" style="background:var(--verde-light);border-radius:10px;padding:12px;font-weight:700;color:var(--verde-dark);margin-bottom:20px;font-size:16px"></div>
+        <button class="btn-submit" onclick="backToCats()">Inscribir otro brigadista</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- CONSULTAR ESTADO -->
+<div class="consulta-sec" id="consulta-section">
+  <h3 style="font-family:'Poppins',sans-serif;font-size:16px;font-weight:700;color:var(--verde-dark);margin-bottom:6px">🔍 Consultar estado de inscripción</h3>
+  <p style="font-size:13px;color:#6b7280;margin-bottom:16px">Ingresa tu cédula para verificar el estado de tu registro</p>
+  <div style="display:flex;gap:10px;flex-wrap:wrap">
+    <input class="finput" id="consulta-cedula" placeholder="Número de cédula (Ej: V-12345678)" style="flex:1;min-width:200px"/>
+    <button onclick="consultarEstado()" style="background:var(--verde);color:#fff;border:none;padding:11px 20px;border-radius:10px;font-size:13px;font-weight:600;white-space:nowrap">Consultar</button>
+  </div>
+  <div id="consulta-resultado" style="margin-top:14px"></div>
+</div>
+
+</div><!-- /container -->
+
+<!-- COMO FUNCIONA -->
+<div style="background:#fff;padding:48px 24px;border-top:1px solid var(--verde-border)">
+  <div style="max-width:900px;margin:0 auto">
+    <h2 style="font-family:'Poppins',sans-serif;font-size:22px;font-weight:700;color:var(--verde-dark);text-align:center;margin-bottom:8px">¿Cómo funciona?</h2>
+    <p style="text-align:center;color:#6b7280;font-size:14px;margin-bottom:36px">Tu camino para convertirte en Brigadista Ambiental de Iribarren</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:24px">
+      <div style="text-align:center;padding:24px 16px;border-radius:16px;background:var(--verde-light);border:1px solid var(--verde-border)">
+        <div style="font-size:36px;margin-bottom:12px">📋</div>
+        <div style="font-family:'Poppins',sans-serif;font-weight:700;color:var(--verde-dark);margin-bottom:8px">1. Inscríbete</div>
+        <div style="font-size:13px;color:#374151">Completa el formulario con tus datos personales y áreas de interés ambiental.</div>
+      </div>
+      <div style="text-align:center;padding:24px 16px;border-radius:16px;background:var(--verde-light);border:1px solid var(--verde-border)">
+        <div style="font-size:36px;margin-bottom:12px">✅</div>
+        <div style="font-family:'Poppins',sans-serif;font-weight:700;color:var(--verde-dark);margin-bottom:8px">2. Verificación</div>
+        <div style="font-size:13px;color:#374151">IAGAMI revisará tu solicitud y te contactará para confirmar tu participación.</div>
+      </div>
+      <div style="text-align:center;padding:24px 16px;border-radius:16px;background:var(--verde-light);border:1px solid var(--verde-border)">
+        <div style="font-size:36px;margin-bottom:12px">🎒</div>
+        <div style="font-family:'Poppins',sans-serif;font-weight:700;color:var(--verde-dark);margin-bottom:8px">3. Capacitación</div>
+        <div style="font-size:13px;color:#374151">Recibirás formación ambiental básica para actuar correctamente en tu comunidad.</div>
+      </div>
+      <div style="text-align:center;padding:24px 16px;border-radius:16px;background:var(--verde-light);border:1px solid var(--verde-border)">
+        <div style="font-size:36px;margin-bottom:12px">🌿</div>
+        <div style="font-family:'Poppins',sans-serif;font-weight:700;color:var(--verde-dark);margin-bottom:8px">4. ¡Actívate!</div>
+        <div style="font-size:13px;color:#374151">Participa en actividades, reporta situaciones y protege el ambiente de Iribarren.</div>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:28px">
+      <a href="/brigadas-ambientales/mapa/" style="display:inline-block;background:var(--verde);color:#fff;padding:12px 28px;border-radius:12px;font-weight:600;font-size:14px">🗺️ Ver mapa de Brigadas por Parroquia →</a>
+    </div>
+  </div>
+</div>
+
+<div class="footer">IAGAMI — Instituto Autónomo de Gestión Ambiental · Municipio Iribarren · Barquisimeto, Lara</div>
+
+<script>
+const PB_URL = 'https://api.iagami.online';
+let _cat = 'adulto';
+let _env = false;
+
+function scrollToForm() { document.getElementById('cats-section').scrollIntoView({behavior:'smooth'}); }
+function scrollToConsulta() { document.getElementById('consulta-section').scrollIntoView({behavior:'smooth'}); }
+
+function toggleChip(el) {
+  const cb = el.querySelector('input');
+  setTimeout(() => { el.classList.toggle('checked', cb.checked); }, 0);
+}
+
+function showForm(cat) {
+  _cat = cat;
+  document.getElementById('cats-section').style.display = 'none';
+  document.getElementById('form-section').style.display = 'block';
+  if (cat === 'adulto') {
+    document.getElementById('form-adulto').style.display = 'block';
+    document.getElementById('form-menor').style.display = 'none';
+  } else {
+    document.getElementById('form-adulto').style.display = 'none';
+    document.getElementById('form-menor').style.display = 'block';
+    document.getElementById('menor-titulo').textContent = cat === 'adolescente' ? '🧑‍🎓 Brigadista Adolescente' : '🧒 Pequeño Guardián Ambiental';
+    document.getElementById('paso1').style.display = 'block';
+    document.getElementById('paso2').style.display = 'none';
+    document.getElementById('menor-ok').style.display = 'none';
+    document.getElementById('adulto-ok').style.display = 'none';
+  }
+  document.getElementById('form-section').scrollIntoView({behavior:'smooth'});
+}
+
+function backToCats() {
+  document.getElementById('form-section').style.display = 'none';
+  document.getElementById('cats-section').style.display = 'block';
+  document.getElementById('adulto-ok').style.display = 'none';
+  document.getElementById('adulto-form-fields').style.display = 'block';
+  document.getElementById('menor-ok').style.display = 'none';
+  document.getElementById('paso1').style.display = 'block';
+  document.getElementById('paso2').style.display = 'none';
+  document.getElementById('cats-section').scrollIntoView({behavior:'smooth'});
+}
+
+function calcEdadPublic() {
+  const val = document.getElementById('bm-fnac').value;
+  if (!val) return;
+  const hoy = new Date(), nac = new Date(val);
+  let edad = hoy.getFullYear() - nac.getFullYear();
+  if (hoy.getMonth() < nac.getMonth() || (hoy.getMonth() === nac.getMonth() && hoy.getDate() < nac.getDate())) edad--;
+  document.getElementById('bm-edad').value = edad + ' años';
+}
+
+function irPaso2() {
+  const nombres = document.getElementById('bm-nombres').value.trim();
+  const apellidos = document.getElementById('bm-apellidos').value.trim();
+  const fnac = document.getElementById('bm-fnac').value;
+  const genero = document.getElementById('bm-genero').value;
+  const escuela = document.getElementById('bm-escuela').value.trim();
+  const parroquia = document.getElementById('bm-parroquia').value;
+  const comunidad = document.getElementById('bm-comunidad').value.trim();
+  if (!nombres) { alerta('Ingresa el nombre del menor'); return; }
+  if (!apellidos) { alerta('Ingresa los apellidos del menor'); return; }
+  if (!fnac) { alerta('Selecciona la fecha de nacimiento'); return; }
+  if (!genero) { alerta('Selecciona el género'); return; }
+  if (!escuela) { alerta('Ingresa la institución educativa'); return; }
+  if (!parroquia) { alerta('Selecciona la parroquia'); return; }
+  if (!comunidad) { alerta('Ingresa la comunidad'); return; }
+  document.getElementById('paso1').style.display = 'none';
+  document.getElementById('paso2').style.display = 'block';
+}
+
+function alerta(msg) {
+  const el = document.createElement('div');
+  el.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1f2937;color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;z-index:999;max-width:320px;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.3)';
+  el.textContent = '⚠ ' + msg;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 3000);
+}
+
+function genNum(prefix) {
+  return prefix + '-' + new Date().getFullYear() + String(new Date().getMonth()+1).padStart(2,'0') + '-' + Math.floor(1000+Math.random()*9000);
+}
+
+async function enviarAdulto() {
+  if (_env) return;
+  const nombres = document.getElementById('ba-nombres').value.trim();
+  const apellidos = document.getElementById('ba-apellidos').value.trim();
+  const cedula = document.getElementById('ba-cedula').value.trim();
+  const fnac = document.getElementById('ba-fnac').value;
+  const genero = document.getElementById('ba-genero').value;
+  const tel = document.getElementById('ba-tel').value.trim();
+  const parroquia = document.getElementById('ba-parroquia').value;
+  const comunidad = document.getElementById('ba-comunidad').value.trim();
+  const disp = document.getElementById('ba-disp').value;
+  if (!nombres) { alerta('Ingresa tu nombre'); return; }
+  if (!apellidos) { alerta('Ingresa tus apellidos'); return; }
+  if (!cedula) { alerta('Ingresa tu cédula'); return; }
+  if (!fnac) { alerta('Selecciona tu fecha de nacimiento'); return; }
+  if (!genero) { alerta('Selecciona tu género'); return; }
+  if (!tel) { alerta('Ingresa tu teléfono'); return; }
+  if (!parroquia) { alerta('Selecciona la parroquia'); return; }
+  if (!comunidad) { alerta('Ingresa tu comunidad'); return; }
+  if (!disp) { alerta('Selecciona tu disponibilidad'); return; }
+  const areas = [...document.querySelectorAll('#ba-areas input:checked')].map(c => c.value);
+  _env = true;
+  const btn = document.getElementById('btn-adulto');
+  btn.disabled = true; btn.textContent = '⏳ Enviando...';
+  try {
+    const num = genNum('BRA');
+    await fetch(PB_URL + '/api/collections/brigadistas/records', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({nombres, apellidos, cedula, fecha_nacimiento: fnac, genero,
+        telefono: tel, correo: document.getElementById('ba-correo').value.trim(),
+        parroquia, comunidad, areas_interes: areas,
+        disponibilidad: disp, experiencia: document.getElementById('ba-exp').value.trim(),
+        estado: 'pendiente', numero_registro: num})
+    });
+    document.getElementById('adulto-num').textContent = 'N° Registro: ' + num;
+    document.getElementById('adulto-form-fields').style.display = 'none';
+    document.getElementById('adulto-ok').style.display = 'block';
+  } catch(e) { alerta('Error al enviar. Verifica tu conexión e intenta nuevamente.'); }
+  finally { _env = false; btn.disabled = false; btn.textContent = '🌿 Inscribirme como Brigadista'; }
+}
+
+async function enviarMenor() {
+  if (_env) return;
+  const repNombres = document.getElementById('rep-nombres').value.trim();
+  const repApellidos = document.getElementById('rep-apellidos').value.trim();
+  const repCedula = document.getElementById('rep-cedula').value.trim();
+  const repPar = document.getElementById('rep-parentesco').value;
+  const repTel = document.getElementById('rep-tel').value.trim();
+  const repDir = document.getElementById('rep-dir').value.trim();
+  const repParroquia = document.getElementById('rep-parroquia').value;
+  const repComunidad = document.getElementById('rep-comunidad').value.trim();
+  if (!repNombres) { alerta('Ingresa el nombre del representante'); return; }
+  if (!repApellidos) { alerta('Ingresa los apellidos del representante'); return; }
+  if (!repCedula) { alerta('Ingresa la cédula del representante'); return; }
+  if (!repPar) { alerta('Selecciona el parentesco'); return; }
+  if (!repTel) { alerta('Ingresa el teléfono del representante'); return; }
+  if (!repDir) { alerta('Ingresa la dirección del representante'); return; }
+  if (!repParroquia) { alerta('Selecciona la parroquia'); return; }
+  if (!repComunidad) { alerta('Ingresa la comunidad'); return; }
+  _env = true;
+  const btn = document.getElementById('btn-menor');
+  btn.disabled = true; btn.textContent = '⏳ Enviando...';
+  try {
+    const resRep = await fetch(PB_URL + '/api/collections/representantes_legales/records', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({nombres: repNombres, apellidos: repApellidos, cedula: repCedula,
+        parentesco: repPar, telefono: repTel, telefono_alt: document.getElementById('rep-tel2').value.trim(),
+        correo: document.getElementById('rep-correo').value.trim(),
+        direccion: repDir, parroquia: repParroquia, comunidad: repComunidad})
+    });
+    if (!resRep.ok) throw new Error('rep');
+    const repData = await resRep.json();
+    const fnac = document.getElementById('bm-fnac').value;
+    const hoy = new Date(), nac = new Date(fnac);
+    let edad = hoy.getFullYear() - nac.getFullYear();
+    if (hoy.getMonth() < nac.getMonth() || (hoy.getMonth() === nac.getMonth() && hoy.getDate() < nac.getDate())) edad--;
+    const areas = [...document.querySelectorAll('.bm-area:checked')].map(c => c.value);
+    const num = genNum(_cat === 'adolescente' ? 'BRA' : 'GUA');
+    await fetch(PB_URL + '/api/collections/brigadistas_menores/records', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({nombres: document.getElementById('bm-nombres').value.trim(),
+        apellidos: document.getElementById('bm-apellidos').value.trim(),
+        fecha_nacimiento: fnac, edad, categoria: _cat,
+        genero: document.getElementById('bm-genero').value,
+        institucion_educativa: document.getElementById('bm-escuela').value.trim(),
+        grado: document.getElementById('bm-grado').value.trim(),
+        parroquia: document.getElementById('bm-parroquia').value,
+        comunidad: document.getElementById('bm-comunidad').value.trim(),
+        areas_interes: areas, representante: repData.id,
+        estado: 'pendiente_consentimiento', numero_registro: num})
+    });
+    const catLabel = _cat === 'adolescente' ? 'Brigadista Adolescente' : 'Pequeño Guardián Ambiental';
+    document.getElementById('menor-num').textContent = 'N° Registro: ' + num;
+    document.getElementById('menor-ok-txt').textContent = 'La inscripción como ' + catLabel + ' fue recibida. IAGAMI le enviará el consentimiento informado que deberá firmar y entregar para completar el proceso.';
+    document.getElementById('paso2').style.display = 'none';
+    document.getElementById('menor-ok').style.display = 'block';
+  } catch(e) { alerta('Error al enviar. Verifica tu conexión e intenta nuevamente.'); }
+  finally { _env = false; btn.disabled = false; btn.textContent = '🌿 Registrar Inscripción'; }
+}
+
+async function consultarEstado() {
+  const cedula = document.getElementById('consulta-cedula').value.trim();
+  if (!cedula) { alerta('Ingresa tu número de cédula'); return; }
+  const el = document.getElementById('consulta-resultado');
+  el.innerHTML = '<div style="font-size:13px;color:#6b7280">Buscando...</div>';
+  const estadoMap = {
+    pendiente: ['#f59e0b','Pendiente de aprobación'],
+    activo: ['#059669','✅ Activo como brigadista'],
+    inactivo: ['#6b7280','Inactivo'],
+    pendiente_consentimiento: ['#d97706','⏳ Pendiente de consentimiento informado'],
+    consentimiento_cargado: ['#2563eb','📄 Documento cargado — en revisión'],
+    en_revision: ['#7c3aed','🔍 En revisión por IAGAMI'],
+    aprobado: ['#059669','✅ Aprobado — brigadista activo'],
+    rechazado: ['#dc2626','❌ Rechazado — contacta a IAGAMI'],
+    retirado: ['#6b7280','Retirado']
+  };
+  try {
+    const [resA, resM] = await Promise.all([
+      fetch(PB_URL + '/api/collections/brigadistas/records?filter=cedula="'+encodeURIComponent(cedula)+'"').then(r=>r.json()),
+      fetch(PB_URL + '/api/collections/representantes_legales/records?filter=cedula="'+encodeURIComponent(cedula)+'"').then(r=>r.json())
+    ]);
+    const adultos = resA.items || [];
+    const reps = resM.items || [];
+    if (adultos.length === 0 && reps.length === 0) {
+      el.innerHTML = '<div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:10px;padding:14px;font-size:13px;color:#991b1b">No se encontró ninguna inscripción con esa cédula.</div>';
+      return;
+    }
+    let html = '';
+    adultos.forEach(a => {
+      const [color, label] = estadoMap[a.estado] || ['#374151', a.estado];
+      html += `<div style="background:#fff;border:1px solid var(--verde-border);border-radius:10px;padding:14px;margin-bottom:10px">
+        <div style="font-size:14px;font-weight:600">${a.nombres} ${a.apellidos} — Brigadista Adulto</div>
+        <div style="font-size:12px;color:#6b7280;margin-top:4px">N° ${a.numero_registro || a.id.slice(0,8)} · Parroquia: ${a.parroquia}</div>
+        <div style="margin-top:8px;font-size:13px;font-weight:600;color:${color}">${label}</div>
+      </div>`;
+    });
+    if (reps.length > 0) {
+      html += `<div style="background:var(--verde-light);border-radius:10px;padding:12px;font-size:12px;color:var(--verde-dark)">
+        🧑‍👧 Encontramos tu registro como representante legal. Los menores a tu cargo están siendo procesados por IAGAMI.
+      </div>`;
+    }
+    el.innerHTML = html;
+  } catch(e) {
+    el.innerHTML = '<div style="font-size:13px;color:#d97706">Error de conexión. Intenta más tarde.</div>';
+  }
+}
+
+// Cargar estadísticas públicas
+async function cargarStats() {
+  try {
+    const [resA, resM] = await Promise.all([
+      fetch(PB_URL + '/api/collections/brigadistas/records?perPage=1').then(r=>r.json()),
+      fetch(PB_URL + '/api/collections/brigadistas_menores/records?perPage=1').then(r=>r.json())
+    ]);
+    const adultos = resA.totalItems || 0;
+    const menores = resM.totalItems || 0;
+    document.getElementById('stat-adultos').textContent = adultos;
+    document.getElementById('stat-adolescentes').textContent = '—';
+    document.getElementById('stat-ninos').textContent = '—';
+    document.getElementById('stat-total').textContent = adultos + menores;
+  } catch(e) {}
+}
+cargarStats();
+</script>
+</body>
+</html>

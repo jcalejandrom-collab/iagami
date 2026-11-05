@@ -1,0 +1,1789 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Portal del Estudiante — IAGAMI Aula Ambiental</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --primary:#1d6b3e;--primary-dark:#1a3d2b;--primary-light:#e8f5ee;
+  --bg:#f5f7f5;--surface:#fff;--border:#e2e8f0;
+  --text:#1f2937;--muted:#6b7280;--danger:#dc2626;--warn:#d97706;--info:#2563eb;
+  --success:#059669;--radius:12px;--shadow:0 2px 12px rgba(0,0,0,.08);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+a{color:inherit;text-decoration:none}
+
+/* ── LOGIN / REGISTRO ── */
+.auth-wrap{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;background:linear-gradient(135deg,#1a3d2b 0%,#1d6b3e 60%,#2d8a52 100%)}
+.auth-card{background:#fff;border-radius:20px;padding:36px 32px;width:100%;max-width:420px;box-shadow:0 8px 40px rgba(0,0,0,.18)}
+.auth-logo{text-align:center;margin-bottom:24px}
+.auth-logo .ico{font-size:46px;margin-bottom:8px}
+.auth-logo h1{font-family:'Poppins',sans-serif;font-size:19px;color:var(--primary-dark);font-weight:700}
+.auth-logo p{font-size:12px;color:var(--muted);margin-top:3px}
+.auth-tabs{display:flex;border-bottom:2px solid var(--border);margin-bottom:20px}
+.auth-tab{flex:1;padding:9px;text-align:center;font-size:13px;font-weight:600;cursor:pointer;background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);margin-bottom:-2px;font-family:'Inter',sans-serif;transition:.15s}
+.auth-tab.active{color:var(--primary);border-bottom-color:var(--primary)}
+.form-label{display:block;font-size:12px;font-weight:600;color:var(--text);margin-bottom:5px}
+.form-control{width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:'Inter',sans-serif;transition:border .2s;background:#fff;color:var(--text)}
+.form-control:focus{outline:none;border-color:var(--primary)}
+.pw-wrap{position:relative}
+.pw-wrap .form-control{padding-right:42px}
+.pw-eye{position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:16px;user-select:none;color:var(--muted)}
+.btn{padding:11px 20px;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:.2s}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:hover{background:var(--primary-dark)}
+.btn-secondary{background:#f1f5f9;color:var(--text);border:1px solid var(--border)}
+.btn-sm{padding:6px 12px;font-size:12px}
+.btn-danger{background:#fef2f2;color:var(--danger);border:1px solid #fca5a5}
+.form-group{margin-bottom:14px}
+.auth-err{background:#fef2f2;color:var(--danger);border:1px solid #fca5a5;border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:14px;display:none}
+.auth-ok{background:#dcfce7;color:#166534;border:1px solid #86efac;border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:14px;display:none}
+
+/* ── APP ── */
+#screen-app{display:none;min-height:100vh}
+.top-bar{background:var(--primary-dark);color:#fff;padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.top-bar-brand{display:flex;align-items:center;gap:10px;font-family:'Poppins',sans-serif;font-weight:700;font-size:15px}
+.top-bar-brand .ico{font-size:22px}
+.top-bar-right{display:flex;align-items:center;gap:10px}
+.user-chip{background:rgba(255,255,255,.12);border-radius:20px;padding:4px 12px;font-size:13px;font-weight:500;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.app-layout{display:flex;min-height:calc(100vh - 56px)}
+.sidebar{width:215px;background:var(--surface);border-right:1px solid var(--border);padding:16px 0;flex-shrink:0;position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;font-size:14px;cursor:pointer;color:var(--text);transition:.15s}
+.nav-item:hover{background:var(--primary-light);color:var(--primary)}
+.nav-item.active{background:var(--primary-light);color:var(--primary);font-weight:600;border-right:3px solid var(--primary)}
+.nav-item .nav-ico{font-size:17px;width:22px;text-align:center}
+.main-content{flex:1;padding:24px;overflow-y:auto}
+.section{display:none}
+.section.active{display:block}
+.page-header{margin-bottom:22px}
+.page-title{font-family:'Poppins',sans-serif;font-size:20px;font-weight:700;color:var(--primary-dark)}
+.page-subtitle{font-size:13px;color:var(--muted);margin-top:3px}
+
+/* ── STATS ── */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:22px}
+.stat-card{background:var(--surface);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);text-align:center}
+.stat-num{font-family:'Poppins',sans-serif;font-size:26px;font-weight:700;color:var(--primary)}
+.stat-lbl{font-size:11px;color:var(--muted);margin-top:3px}
+
+/* ── PROGRESS ── */
+.progress-bar{background:#e2e8f0;border-radius:20px;height:8px;overflow:hidden;margin-top:6px}
+.progress-fill{background:var(--primary);height:100%;border-radius:20px;transition:width .4s}
+
+/* ── CARDS ── */
+.card{background:var(--surface);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);margin-bottom:14px}
+.card-title{font-family:'Poppins',sans-serif;font-size:14px;font-weight:600;color:var(--primary-dark);margin-bottom:12px}
+
+/* ── CURSO CARD ── */
+.curso-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;cursor:pointer;transition:box-shadow .2s}
+.curso-card:hover{box-shadow:0 4px 20px rgba(0,0,0,.12)}
+.curso-card-cover{background:var(--primary-light);padding:20px;text-align:center;font-size:36px}
+.curso-card-body{padding:14px}
+
+/* ── CLASE CARD ── */
+.clase-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px}
+
+/* ── BADGE ── */
+.badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600}
+.badge-green{background:#dcfce7;color:#166534}
+.badge-blue{background:#dbeafe;color:#1d4ed8}
+.badge-yellow{background:#fef9c3;color:#854d0e}
+.badge-red{background:#fee2e2;color:#991b1b}
+.badge-gray{background:#f1f5f9;color:#475569}
+.badge-purple{background:#ede9fe;color:#5b21b6}
+
+/* ── AVISO ── */
+.aviso-card{background:var(--surface);border-left:4px solid var(--primary);border-radius:0 10px 10px 0;padding:14px;margin-bottom:10px;box-shadow:var(--shadow)}
+
+/* ── COUNTDOWN ── */
+.countdown{font-family:'Poppins',sans-serif;font-size:18px;font-weight:700;color:var(--primary);letter-spacing:2px}
+
+/* ── EMPTY ── */
+.empty{text-align:center;padding:36px 20px;color:var(--muted)}
+.empty .ico{font-size:34px;margin-bottom:10px}
+.empty p{font-size:13px}
+
+/* ── TOAST ── */
+#toast{position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:10px;font-size:14px;font-weight:600;z-index:9999;display:none;box-shadow:0 4px 20px rgba(0,0,0,.15)}
+#toast.ok{background:#dcfce7;color:#166534}
+#toast.err{background:#fee2e2;color:#991b1b}
+
+/* ── TABS ── */
+.tabs{display:flex;border-bottom:2px solid var(--border);margin-bottom:16px;overflow-x:auto}
+.tab-btn{padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);white-space:nowrap;margin-bottom:-2px;font-family:'Inter',sans-serif;transition:.15s}
+.tab-btn.active{color:var(--primary);border-bottom-color:var(--primary)}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
+/* ── INSCRIPCION PUBLICA ── */
+.reg-section{display:none}
+.reg-section.active{display:block}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-grid .span2{grid-column:span 2}
+@media(max-width:600px){.form-grid{grid-template-columns:1fr}.form-grid .span2{grid-column:span 1}}
+textarea.form-control{resize:vertical;min-height:70px}
+.menor-notice{background:#fef9c3;border:1px solid #fde68a;border-radius:8px;padding:12px;font-size:12px;color:#78350f;margin-bottom:14px}
+
+/* ── AI CHAT ── */
+.ai-chat-box{background:#f8fafc;border:1px solid var(--border);border-radius:var(--radius);padding:14px;min-height:180px;max-height:360px;overflow-y:auto;margin-bottom:10px;display:flex;flex-direction:column;gap:10px}
+.ai-msg{padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.5;max-width:85%}
+.ai-msg.user{background:var(--primary);color:#fff;align-self:flex-end}
+.ai-msg.bot{background:#fff;border:1px solid var(--border);align-self:flex-start}
+.ai-chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px}
+.ai-chip{padding:5px 12px;border-radius:20px;border:1.5px solid var(--primary);color:var(--primary);font-size:12px;cursor:pointer;background:#fff;font-family:'Inter',sans-serif;transition:.15s}
+.ai-chip:hover{background:var(--primary-light)}
+.loading-ai{text-align:center;padding:2rem;color:var(--muted)}
+.spinner{width:32px;height:32px;border:3px solid #e8f5ee;border-top-color:#1d6b3e;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 1rem}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* ── MOBILE ── */
+.mob-btn{display:none;background:none;border:none;color:#fff;font-size:22px;cursor:pointer}
+@media(max-width:768px){
+  .sidebar{display:none;position:fixed;top:56px;left:0;height:calc(100vh - 56px);z-index:200;width:220px;box-shadow:4px 0 20px rgba(0,0,0,.15)}
+  .sidebar.open{display:block}
+  .mob-btn{display:block}
+  .main-content{padding:14px}
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .auth-card{padding:28px 20px}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════
+     PANTALLA DE AUTENTICACIÓN
+════════════════════════════════════ -->
+<div id="screen-auth" class="auth-wrap">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="ico">📗</div>
+      <h1>Aula Ambiental IAGAMI</h1>
+      <p>Portal del Estudiante</p>
+    </div>
+
+    <!-- Tabs: Iniciar sesión / Registrarse -->
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchAuthTab('login')">Iniciar sesión</button>
+      <button class="auth-tab" onclick="switchAuthTab('registro')">Registrarse</button>
+    </div>
+
+    <!-- ── LOGIN ── -->
+    <div id="auth-panel-login">
+      <div id="login-err" class="auth-err"></div>
+      <div class="form-group">
+        <label class="form-label">Usuario o correo</label>
+        <input class="form-control" id="login-user" type="text" placeholder="usuario o correo@email.com" autocomplete="username"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Contraseña</label>
+        <div class="pw-wrap">
+          <input class="form-control" id="login-pass" type="password" placeholder="••••••••" autocomplete="current-password"/>
+          <span class="pw-eye" onclick="togglePw('login-pass',this)">👁</span>
+        </div>
+      </div>
+      <button class="btn btn-primary" style="width:100%;margin-top:4px" id="login-btn" onclick="doLogin()">Entrar al Aula</button>
+      <p style="text-align:center;font-size:12px;color:var(--muted);margin-top:14px">¿No tienes cuenta? <span style="color:var(--primary);cursor:pointer;font-weight:600" onclick="switchAuthTab('registro')">Regístrate</span></p>
+      <p style="text-align:center;font-size:12px;margin-top:6px"><a href="../../" style="color:var(--primary)">← Portal institucional</a></p>
+    </div>
+
+    <!-- ── REGISTRO ── -->
+    <div id="auth-panel-registro" style="display:none">
+      <div id="reg-err"  class="auth-err"></div>
+      <div id="reg-ok"   class="auth-ok">Tu solicitud fue enviada. Un administrador revisará y activará tu cuenta.</div>
+
+      <!-- Paso 1: tipo de estudiante -->
+      <div class="reg-section active" id="reg-paso1">
+        <p style="font-size:13px;color:var(--muted);margin-bottom:16px">¿Cuál es tu edad aproximada?</p>
+        <div style="display:grid;gap:10px">
+          <div onclick="setTipoReg('adulto')" id="tipo-adulto" style="border:2px solid var(--border);border-radius:10px;padding:14px;cursor:pointer;display:flex;align-items:center;gap:12px;transition:.2s">
+            <span style="font-size:28px">👨</span>
+            <div><div style="font-size:14px;font-weight:600">Adulto (+18 años)</div><div style="font-size:12px;color:var(--muted)">Mayor de 18 años</div></div>
+          </div>
+          <div onclick="setTipoReg('adolescente')" id="tipo-adolescente" style="border:2px solid var(--border);border-radius:10px;padding:14px;cursor:pointer;display:flex;align-items:center;gap:12px;transition:.2s">
+            <span style="font-size:28px">🧑</span>
+            <div><div style="font-size:14px;font-weight:600">Adolescente (12–17 años)</div><div style="font-size:12px;color:var(--muted)">Requiere autorización del representante</div></div>
+          </div>
+          <div onclick="setTipoReg('nino')" id="tipo-nino" style="border:2px solid var(--border);border-radius:10px;padding:14px;cursor:pointer;display:flex;align-items:center;gap:12px;transition:.2s">
+            <span style="font-size:28px">👦</span>
+            <div><div style="font-size:14px;font-weight:600">Niño/a (hasta 11 años)</div><div style="font-size:12px;color:var(--muted)">El representante gestiona el registro</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Paso 2: datos del estudiante -->
+      <div class="reg-section" id="reg-paso2">
+        <div id="menor-aviso" class="menor-notice" style="display:none">
+          ⚠️ Para menores de edad se requerirá la información del representante legal y su autorización antes de activar la cuenta.
+        </div>
+        <div class="form-grid">
+          <div><label class="form-label">Nombres *</label><input class="form-control" id="rg-nombres" placeholder="Nombres"/></div>
+          <div><label class="form-label">Apellidos *</label><input class="form-control" id="rg-apellidos" placeholder="Apellidos"/></div>
+          <div><label class="form-label">Cédula / ID</label><input class="form-control" id="rg-cedula" placeholder="V-00000000 (opcional)"/></div>
+          <div><label class="form-label">Fecha de nacimiento</label><input class="form-control" id="rg-fnac" type="date"/></div>
+          <div class="span2"><label class="form-label">Correo electrónico <span id="rg-correo-lbl" style="color:var(--muted)">(opcional para menores)</span></label><input class="form-control" id="rg-correo" type="email" placeholder="correo@email.com"/></div>
+          <div><label class="form-label">Teléfono</label><input class="form-control" id="rg-tel" placeholder="04XX-XXXXXXX"/></div>
+          <div><label class="form-label">Parroquia</label>
+            <select class="form-control" id="rg-parroquia">
+              <option value="">Selecciona...</option>
+              <option>Catedral</option><option>Concepción</option><option>El Cuji</option>
+              <option>Juan de Villegas</option><option>Tamaca</option><option>Unión</option>
+              <option>Agua Viva</option><option>Buena Vista</option><option>Cabudare</option>
+              <option>Montalbán</option><option>Olivos</option><option>Santa Rosa</option>
+              <option>Río Claro</option><option>Juárez</option><option>Aguedo Felipe Alvarado</option><option>Sarare</option>
+            </select>
+          </div>
+          <div class="span2"><label class="form-label">Institución educativa (si aplica)</label><input class="form-control" id="rg-inst" placeholder="Nombre de la escuela o liceo"/></div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:14px">
+          <button class="btn btn-secondary btn-sm" onclick="regPaso(1)">← Atrás</button>
+          <button class="btn btn-primary btn-sm" onclick="regPaso(3)">Siguiente →</button>
+        </div>
+      </div>
+
+      <!-- Paso 3: representante (solo menores) -->
+      <div class="reg-section" id="reg-paso3">
+        <p style="font-size:13px;font-weight:600;color:var(--primary-dark);margin-bottom:12px">📋 Datos del representante legal</p>
+        <div class="form-grid">
+          <div><label class="form-label">Nombres del representante *</label><input class="form-control" id="rr-nombres" placeholder="Nombres"/></div>
+          <div><label class="form-label">Apellidos *</label><input class="form-control" id="rr-apellidos" placeholder="Apellidos"/></div>
+          <div><label class="form-label">Cédula *</label><input class="form-control" id="rr-cedula" placeholder="V-00000000"/></div>
+          <div><label class="form-label">Parentesco *</label>
+            <select class="form-control" id="rr-parent">
+              <option value="">Selecciona...</option>
+              <option>Padre</option><option>Madre</option><option>Tutor Legal</option><option>Abuelo/a</option><option>Otro</option>
+            </select>
+          </div>
+          <div><label class="form-label">Teléfono *</label><input class="form-control" id="rr-tel" placeholder="04XX-XXXXXXX"/></div>
+          <div><label class="form-label">Correo</label><input class="form-control" id="rr-correo" type="email" placeholder="correo@email.com"/></div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:14px">
+          <button class="btn btn-secondary btn-sm" onclick="regPaso(2)">← Atrás</button>
+          <button class="btn btn-primary btn-sm" onclick="regPaso(4)">Siguiente →</button>
+        </div>
+      </div>
+
+      <!-- Paso 4: credenciales de acceso -->
+      <div class="reg-section" id="reg-paso4">
+        <p style="font-size:13px;color:var(--muted);margin-bottom:14px">Crea tus credenciales de acceso al portal.</p>
+        <div class="form-group">
+          <label class="form-label">Usuario (sin espacios) *</label>
+          <input class="form-control" id="rg-user" placeholder="Ej: juan.perez" autocomplete="username"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Contraseña (mínimo 8 caracteres) *</label>
+          <div class="pw-wrap">
+            <input class="form-control" id="rg-pass" type="password" placeholder="••••••••" autocomplete="new-password"/>
+            <span class="pw-eye" onclick="togglePw('rg-pass',this)">👁</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Confirmar contraseña *</label>
+          <div class="pw-wrap">
+            <input class="form-control" id="rg-pass2" type="password" placeholder="••••••••" autocomplete="new-password"/>
+            <span class="pw-eye" onclick="togglePw('rg-pass2',this)">👁</span>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:4px">
+          <button class="btn btn-secondary btn-sm" onclick="regPaso(_tipoReg==='adulto'?2:3)">← Atrás</button>
+          <button class="btn btn-primary btn-sm" onclick="enviarSolicitud()">📤 Enviar solicitud</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     PORTAL DEL ESTUDIANTE
+════════════════════════════════════ -->
+<div id="screen-app">
+
+  <div class="top-bar">
+    <div class="top-bar-brand">
+      <button class="mob-btn" onclick="toggleSidebar()">☰</button>
+      <span class="ico">📗</span>
+      <span>Aula Ambiental</span>
+    </div>
+    <div class="top-bar-right">
+      <span class="user-chip" id="top-user">Estudiante</span>
+      <button class="btn btn-sm" style="background:rgba(255,255,255,.12);color:#fff;border:none" onclick="doLogout()">Salir →</button>
+    </div>
+  </div>
+
+  <div class="app-layout">
+    <div class="sidebar" id="sidebar">
+      <div onclick="showSec('dashboard')"  class="nav-item active" id="nav-dashboard" ><span class="nav-ico">🏠</span> Inicio</div>
+      <div onclick="showSec('cursos')"     class="nav-item"        id="nav-cursos"    ><span class="nav-ico">🎓</span> Mis Cursos</div>
+      <div onclick="showSec('clases')"     class="nav-item"        id="nav-clases"    ><span class="nav-ico">🎥</span> Clases Virtuales</div>
+      <div onclick="showSec('avisos')"     class="nav-item"        id="nav-avisos"    ><span class="nav-ico">📢</span> Avisos</div>
+      <div onclick="showSec('biblioteca')" class="nav-item"        id="nav-biblioteca"><span class="nav-ico">📚</span> Biblioteca</div>
+      <div onclick="showSec('evaluaciones')" class="nav-item"        id="nav-evaluaciones"><span class="nav-ico">📝</span> Evaluaciones</div>
+      <div onclick="showSec('tareas')"      class="nav-item"        id="nav-tareas"     ><span class="nav-ico">📋</span> Tareas</div>
+      <div onclick="showSec('calificaciones')" class="nav-item"     id="nav-calificaciones"><span class="nav-ico">🏆</span> Calificaciones</div>
+      <div onclick="showSec('asistencia')"  class="nav-item"        id="nav-asistencia" ><span class="nav-ico">✅</span> Asistencia</div>
+      <div onclick="showSec('certificados')" class="nav-item"        id="nav-certificados"><span class="nav-ico">🏅</span> Certificados</div>
+      <div onclick="showSec('ia-estudiante')" class="nav-item"      id="nav-ia-estudiante"><span class="nav-ico">✨</span> Asistente IA</div>
+      <div onclick="showSec('perfil')"     class="nav-item"        id="nav-perfil"    ><span class="nav-ico">👤</span> Mi Perfil</div>
+    </div>
+
+    <div class="main-content">
+
+      <!-- ── DASHBOARD ── -->
+      <div class="section active" id="sec-dashboard">
+        <div class="page-header">
+          <div class="page-title" id="dash-titulo">¡Bienvenido al Aula Ambiental!</div>
+          <div class="page-subtitle" id="dash-sub">Plataforma educativa del IAGAMI — Municipio Iribarren</div>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-num" id="st-cursos">—</div><div class="stat-lbl">Cursos inscritos</div></div>
+          <div class="stat-card"><div class="stat-num" id="st-proximas">—</div><div class="stat-lbl">Clases próximas</div></div>
+          <div class="stat-card"><div class="stat-num" id="st-avisos">—</div><div class="stat-lbl">Avisos nuevos</div></div>
+          <div class="stat-card"><div class="stat-num" id="st-materiales">—</div><div class="stat-lbl">Materiales</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div class="card">
+            <div class="card-title">🎥 Próximas clases</div>
+            <div id="dash-clases"><div class="empty"><div class="ico">📅</div><p>Sin clases próximas</p></div></div>
+          </div>
+          <div class="card">
+            <div class="card-title">📢 Últimos avisos</div>
+            <div id="dash-avisos"><div class="empty"><div class="ico">📢</div><p>Sin avisos recientes</p></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── MIS CURSOS ── -->
+      <div class="section" id="sec-cursos">
+        <div class="page-header">
+          <div class="page-title">🎓 Mis Cursos</div>
+          <div class="page-subtitle">Cursos en los que estás inscrito</div>
+        </div>
+        <div id="cursos-grid"><div class="empty"><div class="ico">⏳</div><p>Cargando...</p></div></div>
+        <!-- Detalle de curso -->
+        <div id="curso-detalle" style="display:none">
+          <button class="btn btn-secondary btn-sm" onclick="closeCursoDetalle()" style="margin-bottom:14px">← Volver</button>
+          <div class="page-header">
+            <div class="page-title" id="cdet-titulo">Curso</div>
+            <div class="page-subtitle" id="cdet-info"></div>
+          </div>
+          <div class="tabs">
+            <button class="tab-btn active" onclick="switchCursoTab('info')">📖 Información</button>
+            <button class="tab-btn" onclick="switchCursoTab('materiales')">📁 Materiales</button>
+            <button class="tab-btn" onclick="switchCursoTab('clases')">🎥 Clases</button>
+          </div>
+          <div class="tab-panel active" id="ctab-info"><div id="cdet-info-panel"></div></div>
+          <div class="tab-panel" id="ctab-materiales"><div id="cdet-materiales"></div></div>
+          <div class="tab-panel" id="ctab-clases"><div id="cdet-clases"></div></div>
+        </div>
+      </div>
+
+      <!-- ── CLASES VIRTUALES ── -->
+      <div class="section" id="sec-clases">
+        <div class="page-header">
+          <div class="page-title">🎥 Clases Virtuales</div>
+          <div class="page-subtitle">Sesiones programadas para tus cursos</div>
+        </div>
+        <div class="tabs">
+          <button class="tab-btn active" onclick="switchClasesTab('proximas')">📅 Próximas</button>
+          <button class="tab-btn" onclick="switchClasesTab('pasadas')">🕐 Realizadas</button>
+          <button class="tab-btn" onclick="switchClasesTab('grabaciones')">🎬 Grabaciones</button>
+        </div>
+        <div class="tab-panel active" id="cltab-proximas"><div id="clases-prox"></div></div>
+        <div class="tab-panel" id="cltab-pasadas"><div id="clases-past"></div></div>
+        <div class="tab-panel" id="cltab-grabaciones"><div id="clases-grab"></div></div>
+      </div>
+
+      <!-- ── AVISOS ── -->
+      <div class="section" id="sec-avisos">
+        <div class="page-header">
+          <div class="page-title">📢 Avisos del Aula</div>
+          <div class="page-subtitle">Comunicados de tus profesores</div>
+        </div>
+        <div id="avisos-lista"><div class="empty"><div class="ico">⏳</div><p>Cargando...</p></div></div>
+      </div>
+
+      <!-- ── BIBLIOTECA ── -->
+      <div class="section" id="sec-biblioteca">
+        <div class="page-header">
+          <div class="page-title">📚 Biblioteca Ambiental</div>
+          <div class="page-subtitle">Videos, documentos y guías educativas</div>
+        </div>
+        <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+          <select class="form-control" id="bib-tipo" style="width:auto;min-width:140px" onchange="renderBib()">
+            <option value="">Todos los tipos</option>
+            <option value="video">Video</option><option value="pdf">PDF</option>
+            <option value="guia">Guía</option><option value="infografia">Infografía</option>
+            <option value="presentacion">Presentación</option>
+          </select>
+          <input class="form-control" id="bib-buscar" style="max-width:220px" placeholder="🔍 Buscar..." oninput="renderBib()"/>
+        </div>
+        <div id="bib-grid"></div>
+      </div>
+
+      <!-- ── EVALUACIONES ── -->
+      <div class="section" id="sec-evaluaciones">
+        <div class="page-header">
+          <div class="page-title">📝 Evaluaciones</div>
+          <div class="page-subtitle">Exámenes y cuestionarios de tus cursos</div>
+        </div>
+        <div id="eval-lista"></div>
+        <!-- Modal evaluación activa -->
+        <div id="eval-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;overflow-y:auto;padding:20px">
+          <div style="background:#fff;border-radius:16px;max-width:680px;margin:0 auto;padding:28px">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px">
+              <div>
+                <div class="page-title" id="em-titulo">Evaluación</div>
+                <div id="em-desc" style="font-size:13px;color:var(--muted)"></div>
+              </div>
+              <div style="text-align:right">
+                <div class="countdown" id="em-timer">—</div>
+                <div style="font-size:11px;color:var(--muted)">tiempo restante</div>
+              </div>
+            </div>
+            <div id="em-preguntas"></div>
+            <div style="margin-top:20px;display:flex;gap:10px;justify-content:flex-end">
+              <button class="btn btn-secondary btn-sm" onclick="cerrarEvalModal()">Cancelar</button>
+              <button class="btn btn-primary" id="em-submit-btn" onclick="enviarEvaluacion()">Enviar respuestas</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── TAREAS ── -->
+      <div class="section" id="sec-tareas">
+        <div class="page-header">
+          <div class="page-title">📋 Tareas</div>
+          <div class="page-subtitle">Asignaciones y entregas de tus cursos</div>
+        </div>
+        <div class="tabs">
+          <button class="tab-btn active" onclick="switchTareasTab('pendientes')">⏳ Pendientes</button>
+          <button class="tab-btn" onclick="switchTareasTab('entregadas')">✅ Entregadas</button>
+        </div>
+        <div class="tab-panel active" id="ttab-pendientes"><div id="tareas-pendientes"></div></div>
+        <div class="tab-panel" id="ttab-entregadas"><div id="tareas-entregadas"></div></div>
+        <!-- Modal entrega -->
+        <div id="tarea-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;overflow-y:auto;padding:20px">
+          <div style="background:#fff;border-radius:16px;max-width:560px;margin:0 auto;padding:28px">
+            <div class="page-title" id="tm-titulo" style="margin-bottom:4px">Entregar tarea</div>
+            <div id="tm-desc" style="font-size:13px;color:var(--muted);margin-bottom:16px"></div>
+            <div class="form-group">
+              <label class="form-label">Texto de tu entrega</label>
+              <textarea class="form-control" id="tm-texto" rows="5" placeholder="Escribe tu respuesta o descripción de la entrega..."></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">URL de archivo (Drive, Docs, etc.)</label>
+              <input class="form-control" id="tm-url" placeholder="https://docs.google.com/..."/>
+            </div>
+            <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px">
+              <button class="btn btn-secondary btn-sm" onclick="cerrarTareaModal()">Cancelar</button>
+              <button class="btn btn-primary btn-sm" onclick="confirmarEntrega()">📤 Entregar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── CALIFICACIONES ── -->
+      <div class="section" id="sec-calificaciones">
+        <div class="page-header">
+          <div class="page-title">🏆 Calificaciones</div>
+          <div class="page-subtitle">Tu rendimiento académico por curso</div>
+        </div>
+        <div id="calif-contenido"></div>
+      </div>
+
+      <!-- ── ASISTENCIA ── -->
+      <div class="section" id="sec-asistencia">
+        <div class="page-header">
+          <div class="page-title">✅ Asistencia</div>
+          <div class="page-subtitle">Tu registro de asistencia a clases</div>
+        </div>
+        <div id="asistencia-contenido"></div>
+      </div>
+
+      <!-- ── CERTIFICADOS ── -->
+      <div class="section" id="sec-certificados">
+        <div class="page-header">
+          <div class="page-title">🏅 Mis Certificados</div>
+          <div class="page-subtitle">Certificados digitales emitidos por el IAGAMI</div>
+        </div>
+        <div id="certs-lista"><div class="empty"><div class="ico">⏳</div><p>Cargando...</p></div></div>
+        <!-- iframe oculto para impresión -->
+        <iframe id="cert-print-frame" style="display:none;position:fixed;left:-9999px;top:0;width:800px;height:600px;border:none"></iframe>
+      </div>
+
+      <!-- ── IA ASISTENTE ── -->
+      <div class="section" id="sec-ia-estudiante">
+        <div class="page-header">
+          <div class="page-title">✨ Asistente IA Ambiental</div>
+          <div class="page-subtitle">Tu asistente educativo inteligente — impulsado por IA</div>
+        </div>
+        <div class="tabs">
+          <button class="tab-btn active" onclick="switchIATab('chat')">💬 Consultar</button>
+          <button class="tab-btn" onclick="switchIATab('recomendar')">🎯 Recomendaciones</button>
+        </div>
+        <!-- Tab chat -->
+        <div class="tab-panel active" id="iatab-chat">
+          <div class="card">
+            <div class="card-title">💬 Pregunta sobre medio ambiente</div>
+            <div style="font-size:12px;color:var(--muted);margin-bottom:10px" id="ia-counter-msg">Puedes hacer hasta 10 preguntas por sesión · <span id="ia-counter">0</span>/10 usadas</div>
+            <div class="ai-chips">
+              <button class="ai-chip" onclick="hacerPreguntaIA('¿Cómo funciona el ciclo del agua?')">💧 Ciclo del agua</button>
+              <button class="ai-chip" onclick="hacerPreguntaIA('¿Qué es el cambio climático?')">🌡️ Cambio climático</button>
+              <button class="ai-chip" onclick="hacerPreguntaIA('¿Cómo puedo ayudar al medio ambiente desde casa?')">🌿 Ayudar al ambiente</button>
+              <button class="ai-chip" onclick="hacerPreguntaIA('¿Qué son los residuos sólidos y cómo se clasifican?')">♻️ Residuos sólidos</button>
+            </div>
+            <div class="ai-chat-box" id="ia-chat-box">
+              <div class="ai-msg bot">👋 Hola, soy tu asistente ambiental de IAGAMI. Puedo ayudarte a aprender sobre medio ambiente, ecosistemas, cambio climático y más. ¿Qué quieres saber hoy?</div>
+            </div>
+            <div style="display:flex;gap:8px">
+              <input class="form-control" id="ia-pregunta" placeholder="Escribe tu pregunta ambiental..." style="flex:1" onkeydown="if(event.key==='Enter')hacerPreguntaIA()"/>
+              <button class="btn btn-primary" id="ia-btn" onclick="hacerPreguntaIA()">Preguntar</button>
+            </div>
+          </div>
+        </div>
+        <!-- Tab recomendaciones -->
+        <div class="tab-panel" id="iatab-recomendar">
+          <div class="card">
+            <div class="card-title">🎯 Recomendaciones personalizadas</div>
+            <p style="font-size:13px;color:var(--muted);margin-bottom:14px">Basado en tus cursos y progreso, la IA sugiere qué estudiar a continuación.</p>
+            <button class="btn btn-primary btn-sm" id="rec-btn" onclick="cargarRecomendaciones()">🔍 Ver mis recomendaciones</button>
+            <div id="rec-resultado" style="margin-top:16px"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── PERFIL ── -->
+      <div class="section" id="sec-perfil">
+        <div class="page-header">
+          <div class="page-title">👤 Mi Perfil</div>
+          <div class="page-subtitle">Información de tu cuenta de estudiante</div>
+        </div>
+        <div class="card" style="max-width:520px">
+          <div id="perfil-datos"></div>
+          <hr style="margin:16px 0;border:none;border-top:1px solid var(--border)"/>
+          <div class="card-title">🔒 Cambiar contraseña</div>
+          <div class="form-group"><label class="form-label">Contraseña actual</label>
+            <div class="pw-wrap"><input class="form-control" id="pwd-old" type="password" placeholder="••••••••"/><span class="pw-eye" onclick="togglePw('pwd-old',this)">👁</span></div>
+          </div>
+          <div class="form-group"><label class="form-label">Nueva contraseña</label>
+            <div class="pw-wrap"><input class="form-control" id="pwd-new" type="password" placeholder="••••••••"/><span class="pw-eye" onclick="togglePw('pwd-new',this)">👁</span></div>
+          </div>
+          <div class="form-group"><label class="form-label">Confirmar nueva</label>
+            <div class="pw-wrap"><input class="form-control" id="pwd-c" type="password" placeholder="••••••••"/><span class="pw-eye" onclick="togglePw('pwd-c',this)">👁</span></div>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="cambiarPass()">Actualizar contraseña</button>
+        </div>
+      </div>
+
+    </div><!-- /main-content -->
+  </div><!-- /app-layout -->
+</div><!-- /screen-app -->
+
+<div id="toast"></div>
+
+<script>
+const PB_URL = 'https://api.iagami.online';
+let _token     = null;
+let _estudiante = null;
+let _misInscripciones = [];
+let _misCursos = [];
+let _misClases = [];
+let _misAvisos = [];
+let _bibRecursos = [];
+let _cursoActivo = null;
+let _tipoReg     = 'adulto';
+let _regPasoActual = 1;
+let _claseTab    = 'proximas';
+let _loginAttempts = 0;
+let _loginBlocked  = false;
+let _misCertificados = [];
+let _countdownTimer = null;
+
+/* ─── UTILS ─── */
+function toast(msg, tipo='ok') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = tipo==='error'?'err':'ok';
+  el.style.display = 'block';
+  setTimeout(()=>{ el.style.display='none'; }, 3400);
+}
+function esc(s){ return s?String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'):''; }
+
+function togglePw(id, btn) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const show = el.type === 'password';
+  el.type = show ? 'text' : 'password';
+  btn.textContent = show ? '🙈' : '👁';
+}
+
+async function pbFetch(path, opts={}) {
+  const headers = {'Content-Type':'application/json', ...(opts.headers||{})};
+  if (_token) headers['Authorization'] = _token;
+  const res = await fetch(PB_URL + path, {...opts, headers});
+  if (!res.ok) {
+    const err = await res.json().catch(()=>({message:'Error'}));
+    throw new Error(err.message || `HTTP ${res.status}`);
+  }
+  return res.json();
+}
+
+/* ─── AUTH ─── */
+function switchAuthTab(tab) {
+  ['login','registro'].forEach(t => {
+    document.getElementById('auth-panel-'+t).style.display = t===tab?'block':'none';
+    document.querySelectorAll('.auth-tab').forEach((b,i) => b.classList.toggle('active', (i===0&&tab==='login')||(i===1&&tab==='registro')));
+  });
+  if (tab==='registro') regPaso(1);
+}
+
+async function doLogin() {
+  if (_loginBlocked) { showLoginErr('Demasiados intentos. Espera un momento.'); return; }
+  const user  = document.getElementById('login-user').value.trim();
+  const pass  = document.getElementById('login-pass').value;
+  const errEl = document.getElementById('login-err');
+  errEl.style.display = 'none';
+
+  if (!user || !pass) { showLoginErr('Ingresa tu usuario y contraseña.'); return; }
+
+  document.getElementById('login-btn').disabled = true;
+  document.getElementById('login-btn').textContent = 'Verificando...';
+
+  try {
+    const data = await pbFetch('/api/collections/estudiantes/auth-with-password', {
+      method: 'POST',
+      body: JSON.stringify({identity: user, password: pass})
+    });
+
+    if (data.record.estado === 'pendiente') {
+      showLoginErr('Tu cuenta aún está pendiente de aprobación. Un administrador la activará pronto.');
+      resetLoginBtn(); return;
+    }
+    if (data.record.estado === 'suspendido' || data.record.estado === 'inactivo') {
+      showLoginErr('Tu cuenta está suspendida. Contacta al IAGAMI.');
+      resetLoginBtn(); return;
+    }
+
+    _token = data.token;
+    _estudiante = data.record;
+    _loginAttempts = 0;
+    localStorage.setItem('est_token', _token);
+    localStorage.setItem('est_data', JSON.stringify(_estudiante));
+    iniciarApp();
+  } catch(e) {
+    _loginAttempts++;
+    if (_loginAttempts >= 5) {
+      _loginBlocked = true;
+      setTimeout(()=>{ _loginBlocked=false; _loginAttempts=0; }, 60000);
+      showLoginErr('Demasiados intentos fallidos. Espera 1 minuto.');
+    } else {
+      showLoginErr('Usuario o contraseña incorrectos.');
+    }
+    resetLoginBtn();
+  }
+}
+
+function showLoginErr(msg) {
+  const el = document.getElementById('login-err');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+function resetLoginBtn() {
+  const b = document.getElementById('login-btn');
+  b.disabled = false;
+  b.textContent = 'Entrar al Aula';
+}
+
+function doLogout() {
+  _token = null; _estudiante = null;
+  localStorage.removeItem('est_token'); localStorage.removeItem('est_data');
+  document.getElementById('screen-app').style.display  = 'none';
+  document.getElementById('screen-auth').style.display = 'flex';
+  document.getElementById('login-pass').value = '';
+  document.getElementById('login-user').value = '';
+}
+
+document.getElementById('login-pass').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
+
+/* ─── REGISTRO ─── */
+function setTipoReg(tipo) {
+  _tipoReg = tipo;
+  ['adulto','adolescente','nino'].forEach(t => {
+    const el = document.getElementById('tipo-'+t);
+    if (el) el.style.borderColor = t===tipo ? 'var(--primary)' : 'var(--border)';
+  });
+  regPaso(2);
+}
+
+function regPaso(paso) {
+  _regPasoActual = paso;
+  document.querySelectorAll('.reg-section').forEach(s => s.classList.remove('active'));
+  document.getElementById('reg-paso'+paso).classList.add('active');
+  if (paso===2) {
+    const menor = _tipoReg !== 'adulto';
+    document.getElementById('menor-aviso').style.display = menor ? 'block' : 'none';
+    document.getElementById('rg-correo-lbl').textContent = menor ? '(opcional para menores)' : '*';
+  }
+  if (paso===3 && _tipoReg==='adulto') { regPaso(4); }
+}
+
+async function enviarSolicitud() {
+  const nombres = document.getElementById('rg-nombres').value.trim();
+  const apellidos = document.getElementById('rg-apellidos').value.trim();
+  const user   = document.getElementById('rg-user').value.trim().replace(/\s+/g,'');
+  const pass   = document.getElementById('rg-pass').value;
+  const pass2  = document.getElementById('rg-pass2').value;
+  const errEl  = document.getElementById('reg-err');
+  errEl.style.display = 'none';
+
+  if (!nombres || !apellidos) { errEl.textContent='Nombres y apellidos son requeridos'; errEl.style.display='block'; regPaso(2); return; }
+  if (!user) { errEl.textContent='Debes elegir un nombre de usuario'; errEl.style.display='block'; return; }
+  if (!/^[a-zA-Z0-9._]{3,30}$/.test(user)) { errEl.textContent='Usuario inválido (solo letras, números, puntos y guiones bajos, 3-30 caracteres)'; errEl.style.display='block'; return; }
+  if (!pass || pass.length < 8) { errEl.textContent='La contraseña debe tener al menos 8 caracteres'; errEl.style.display='block'; return; }
+  if (pass !== pass2) { errEl.textContent='Las contraseñas no coinciden'; errEl.style.display='block'; return; }
+
+  if (_tipoReg !== 'adulto') {
+    const rNombres = document.getElementById('rr-nombres').value.trim();
+    const rApells  = document.getElementById('rr-apellidos').value.trim();
+    const rCedula  = document.getElementById('rr-cedula').value.trim();
+    const rParent  = document.getElementById('rr-parent').value;
+    const rTel     = document.getElementById('rr-tel').value.trim();
+    if (!rNombres||!rApells||!rCedula||!rParent||!rTel) {
+      errEl.textContent='Datos del representante incompletos'; errEl.style.display='block'; regPaso(3); return;
+    }
+  }
+
+  try {
+    const payload = {
+      nombres, apellidos,
+      cedula:          document.getElementById('rg-cedula').value.trim(),
+      correo:          document.getElementById('rg-correo').value.trim(),
+      telefono:        document.getElementById('rg-tel').value.trim(),
+      fecha_nacimiento:document.getElementById('rg-fnac').value,
+      tipo:            _tipoReg,
+      parroquia:       document.getElementById('rg-parroquia').value,
+      institucion:     document.getElementById('rg-inst').value.trim(),
+      estado:          'pendiente'
+    };
+    if (_tipoReg !== 'adulto') {
+      payload.rep_nombres  = document.getElementById('rr-nombres').value.trim();
+      payload.rep_apellidos= document.getElementById('rr-apellidos').value.trim();
+      payload.rep_cedula   = document.getElementById('rr-cedula').value.trim();
+      payload.rep_telefono = document.getElementById('rr-tel').value.trim();
+      payload.rep_correo   = document.getElementById('rr-correo').value.trim();
+    }
+    // Crear solicitud de inscripción (pública)
+    await pbFetch('/api/collections/solicitudes_inscripcion/records', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+    // También crear la cuenta (en estado pendiente, el admin la activa)
+    await pbFetch('/api/collections/estudiantes/records', {
+      method: 'POST',
+      body: JSON.stringify({
+        nombres, apellidos,
+        username: user,
+        email: document.getElementById('rg-correo').value.trim() || null,
+        password: pass,
+        passwordConfirm: pass,
+        cedula:   document.getElementById('rg-cedula').value.trim(),
+        tipo:     _tipoReg,
+        parroquia:document.getElementById('rg-parroquia').value,
+        telefono: document.getElementById('rg-tel').value.trim(),
+        institucion:document.getElementById('rg-inst').value.trim(),
+        estado:   'pendiente'
+      })
+    });
+    document.getElementById('reg-ok').style.display = 'block';
+    document.querySelectorAll('.reg-section').forEach(s => s.classList.remove('active'));
+  } catch(e) {
+    errEl.textContent = e.message.includes('username') ? 'Ese nombre de usuario ya está en uso. Elige otro.' : 'Error al registrar: ' + e.message;
+    errEl.style.display = 'block';
+  }
+}
+
+/* ─── INICIAR APP ─── */
+async function iniciarApp() {
+  document.getElementById('screen-auth').style.display = 'none';
+  document.getElementById('screen-app').style.display  = 'block';
+  const nombre = (_estudiante.nombres||'').split(' ')[0];
+  document.getElementById('top-user').textContent = nombre || 'Estudiante';
+  document.getElementById('dash-titulo').textContent = `¡Hola, ${_estudiante.nombres}!`;
+  document.getElementById('dash-sub').textContent = 'Bienvenido/a al Aula Ambiental de IAGAMI';
+  await cargarDatos();
+  renderDashboard();
+}
+
+async function cargarDatos() {
+  try {
+    const rI = await pbFetch(`/api/collections/inscripciones_curso/records?filter=estudiante_id%3D%22${_estudiante.id}%22%26%26estado%3D%22activo%22&sort=-created&perPage=50&expand=curso_id`);
+    _misInscripciones = rI.items || [];
+    _misCursos = _misInscripciones.map(i => i.expand?.curso_id || {id: i.curso_id, nombre: '(Curso)'}).filter(Boolean);
+  } catch(e) { _misInscripciones = []; _misCursos = []; }
+
+  // Clases de mis cursos
+  _misClases = [];
+  for (const c of _misCursos) {
+    try {
+      const nombre = encodeURIComponent(c.nombre||'');
+      const r = await pbFetch(`/api/collections/clases_virtuales/records?filter=(curso%3D%22${nombre}%22%7C%7Ccurso_id%3D%22${c.id}%22)%26%26publicado%3Dtrue&sort=-fecha&perPage=50`);
+      _misClases.push(...(r.items||[]));
+    } catch(e) {}
+  }
+  _misClases.sort((a,b) => (a.fecha||'') < (b.fecha||'') ? -1 : 1);
+
+  // Avisos de mis cursos
+  _misAvisos = [];
+  for (const c of _misCursos) {
+    try {
+      const nombre = encodeURIComponent(c.nombre||'');
+      const r = await pbFetch(`/api/collections/avisos_aula/records?filter=(curso%3D%22${nombre}%22%7C%7Ccurso_id%3D%22${c.id}%22)%26%26publicado%3Dtrue&sort=-created&perPage=20`);
+      _misAvisos.push(...(r.items||[]));
+    } catch(e) {}
+  }
+  _misAvisos.sort((a,b)=> a.created<b.created ? 1 : -1);
+
+  // Biblioteca
+  try {
+    const rB = await pbFetch('/api/collections/biblioteca_multimedia/records?filter=publicado%3Dtrue&sort=-created&perPage=200');
+    _bibRecursos = rB.items || [];
+  } catch(e) { _bibRecursos = []; }
+
+  // Certificados
+  try {
+    const rC = await pbFetch(`/api/collections/certificados/records?filter=estudiante_id%3D%22${_estudiante.id}%22%26%26estado%3D%22emitido%22&sort=-fecha_emision&perPage=50`);
+    _misCertificados = rC.items || [];
+  } catch(e) { _misCertificados = []; }
+}
+
+/* ─── NAV ─── */
+function showSec(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('sec-'+id).classList.add('active');
+  document.getElementById('nav-'+id).classList.add('active');
+  closeSidebar();
+  if (id==='cursos')          renderCursos();
+  if (id==='clases')          renderClases();
+  if (id==='avisos')          renderAvisos();
+  if (id==='biblioteca')      renderBib();
+  if (id==='evaluaciones')    renderEvaluaciones();
+  if (id==='tareas')          renderTareasEst();
+  if (id==='calificaciones')  renderCalificaciones();
+  if (id==='asistencia')      renderAsistenciaEst();
+  if (id==='certificados')    renderCertificados();
+  if (id==='ia-estudiante')   { switchIATab('chat'); }
+  if (id==='perfil')          renderPerfil();
+}
+function toggleSidebar(){ document.getElementById('sidebar').classList.toggle('open'); }
+function closeSidebar()  { document.getElementById('sidebar').classList.remove('open'); }
+
+/* ─── DASHBOARD ─── */
+function renderDashboard() {
+  const ahora = new Date();
+  const proximas = _misClases.filter(c => c.fecha && new Date(c.fecha) >= ahora);
+  document.getElementById('st-cursos').textContent    = _misCursos.length;
+  document.getElementById('st-proximas').textContent  = proximas.length;
+  document.getElementById('st-avisos').textContent    = _misAvisos.length;
+  document.getElementById('st-materiales').textContent= _bibRecursos.length;
+
+  // Próximas clases widget
+  const dcEl = document.getElementById('dash-clases');
+  const pSlice = proximas.slice(0,3);
+  if (!pSlice.length) {
+    dcEl.innerHTML = '<div class="empty"><div class="ico">📅</div><p>Sin clases próximas</p></div>';
+  } else {
+    dcEl.innerHTML = pSlice.map(c => `
+      <div style="padding:9px 0;border-bottom:1px solid var(--border)">
+        <div style="font-size:13px;font-weight:600">${esc(c.nombre)}</div>
+        <div style="font-size:12px;color:var(--muted)">📅 ${c.fecha||'—'} ${c.hora?'·'+c.hora:''} · ${esc(c.plataforma||'')}</div>
+        ${puedeAccederClase(c) ? `<a href="${esc(c.enlace_zoom)}" target="_blank" class="btn btn-primary btn-sm" style="margin-top:5px;display:inline-block">🔗 Ingresar</a>` : ''}
+      </div>`).join('');
+  }
+
+  // Avisos widget
+  const daEl = document.getElementById('dash-avisos');
+  const aSlice = _misAvisos.slice(0,3);
+  if (!aSlice.length) {
+    daEl.innerHTML = '<div class="empty"><div class="ico">📢</div><p>Sin avisos</p></div>';
+  } else {
+    daEl.innerHTML = aSlice.map(a => `
+      <div style="padding:9px 0;border-bottom:1px solid var(--border)">
+        <div style="font-size:13px;font-weight:600">${esc(a.titulo)}</div>
+        <div style="font-size:12px;color:var(--muted)">${esc(a.tipo||'aviso')} · ${esc(a.curso||'General')}</div>
+      </div>`).join('');
+  }
+}
+
+/* ─── CURSOS ─── */
+function renderCursos() {
+  const grid = document.getElementById('cursos-grid');
+  document.getElementById('curso-detalle').style.display = 'none';
+  grid.style.display = 'block';
+  if (!_misCursos.length) {
+    grid.innerHTML = '<div class="empty"><div class="ico">🎓</div><p>No estás inscrito en ningún curso aún.<br>Contacta al IAGAMI o a tu profesor para inscribirte.</p></div>'; return;
+  }
+  const catIco = {ambiental:'🌿',ecosocialismo:'♻️',reciclaje:'♻️',agua:'💧',biodiversidad:'🦋',clima:'🌡️',otro:'📚'};
+  grid.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px">${_misCursos.map(c=>`
+    <div class="curso-card" onclick="abrirCurso('${c.id}')">
+      <div class="curso-card-cover">${catIco[c.categoria]||'📚'}</div>
+      <div class="curso-card-body">
+        <div style="font-size:14px;font-weight:600;font-family:'Poppins',sans-serif;margin-bottom:4px">${esc(c.nombre)}</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:8px">${esc(c.descripcion||'')}</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
+          <span class="badge badge-green">${esc(c.nivel||'General')}</span>
+          <span class="badge badge-blue">${esc(c.categoria||'')}</span>
+        </div>
+        <button class="btn btn-primary btn-sm" style="width:100%">Entrar al curso →</button>
+      </div>
+    </div>`).join('')}</div>`;
+}
+
+function abrirCurso(id) {
+  _cursoActivo = _misCursos.find(c => c.id === id);
+  if (!_cursoActivo) return;
+  document.getElementById('cursos-grid').style.display = 'none';
+  document.getElementById('curso-detalle').style.display = 'block';
+  document.getElementById('cdet-titulo').textContent = _cursoActivo.nombre;
+  document.getElementById('cdet-info').textContent   = `${_cursoActivo.nivel||'General'} · ${_cursoActivo.categoria||''} · Prof: ${_cursoActivo.profesor_nombre||'—'}`;
+  switchCursoTab('info');
+}
+
+function closeCursoDetalle() {
+  document.getElementById('curso-detalle').style.display = 'none';
+  document.getElementById('cursos-grid').style.display = 'block';
+}
+
+function switchCursoTab(tab) {
+  ['info','materiales','clases'].forEach(t => {
+    document.getElementById('ctab-'+t).classList.toggle('active', t===tab);
+    document.querySelectorAll(`[onclick="switchCursoTab('${t}')"]`).forEach(b=>b.classList.toggle('active',t===tab));
+  });
+  if (tab==='info')       renderCursoInfo();
+  if (tab==='materiales') renderCursoMateriales();
+  if (tab==='clases')     renderCursoClases();
+}
+
+function renderCursoInfo() {
+  const c = _cursoActivo;
+  document.getElementById('cdet-info-panel').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+      <div class="card"><div class="card-title">📋 Detalles del curso</div>
+        <div style="font-size:13px;display:grid;gap:8px">
+          <div><strong>Categoría:</strong> ${esc(c.categoria||'—')}</div>
+          <div><strong>Nivel:</strong> ${esc(c.nivel||'—')}</div>
+          <div><strong>Profesor:</strong> ${esc(c.profesor_nombre||'—')}</div>
+          <div><strong>Estado:</strong> <span class="badge badge-green">${esc(c.estado||'activo')}</span></div>
+        </div>
+      </div>
+      <div class="card"><div class="card-title">📝 Descripción</div>
+        <div style="font-size:13px;line-height:1.6;color:var(--text)">${esc(c.descripcion||'Sin descripción disponible.')}</div>
+      </div>
+    </div>`;
+}
+
+function renderCursoMateriales() {
+  const el = document.getElementById('cdet-materiales');
+  const mat = _bibRecursos.filter(r => r.categoria===_cursoActivo.nombre || r.curso_id===_cursoActivo.id);
+  if (!mat.length) { el.innerHTML = '<div class="empty"><div class="ico">📁</div><p>Sin materiales publicados en este curso</p></div>'; return; }
+  const ico = {video:'▶️',pdf:'📄',guia:'📗',infografia:'🖼️',presentacion:'📊'};
+  el.innerHTML = mat.map(r=>`
+    <div style="display:flex;align-items:center;gap:12px;padding:10px;background:#f8fafc;border-radius:8px;margin-bottom:8px">
+      <span style="font-size:22px">${ico[r.tipo]||'📁'}</span>
+      <div style="flex:1"><div style="font-size:13px;font-weight:600">${esc(r.titulo)}</div><div style="font-size:11px;color:var(--muted)">${esc(r.tipo)} · ${esc(r.nivel||'General')}</div></div>
+      <a href="${esc(r.url)}" target="_blank" class="btn btn-secondary btn-sm">🔗 Abrir</a>
+    </div>`).join('');
+}
+
+function renderCursoClases() {
+  const el = document.getElementById('cdet-clases');
+  const ahora = new Date();
+  const clases = _misClases.filter(c => c.curso === _cursoActivo.nombre || c.curso_id === _cursoActivo.id);
+  if (!clases.length) { el.innerHTML = '<div class="empty"><div class="ico">🎥</div><p>Sin clases programadas en este curso</p></div>'; return; }
+  el.innerHTML = clases.map(c => renderClaseCard(c)).join('');
+}
+
+/* ─── CLASES VIRTUALES ─── */
+function switchClasesTab(tab) {
+  _claseTab = tab;
+  ['proximas','pasadas','grabaciones'].forEach(t => {
+    const p = document.getElementById('cltab-'+t);
+    if (p) p.classList.toggle('active', t===tab);
+    document.querySelectorAll(`[onclick="switchClasesTab('${t}')"]`).forEach(b=>b.classList.toggle('active',t===tab));
+  });
+  if (tab === 'grabaciones') renderGrabaciones();
+  else renderClases();
+}
+
+function renderClases() {
+  const ahora = new Date();
+  const prox = _misClases.filter(c => !c.fecha || new Date(c.fecha) >= ahora);
+  const past = _misClases.filter(c =>  c.fecha && new Date(c.fecha) <  ahora);
+  const pEl = document.getElementById('clases-prox');
+  const dEl = document.getElementById('clases-past');
+  if (!prox.length) pEl.innerHTML = '<div class="empty"><div class="ico">📅</div><p>Sin clases próximas</p></div>';
+  else pEl.innerHTML = prox.map(c => renderClaseCard(c)).join('');
+  if (!past.length) dEl.innerHTML = '<div class="empty"><div class="ico">🕐</div><p>Sin clases realizadas</p></div>';
+  else dEl.innerHTML = past.map(c => renderClaseCard(c, true)).join('');
+  setTimeout(activarCountdowns, 50);
+}
+
+function puedeAccederClase(c) {
+  if (!c.enlace_zoom) return false;
+  if (!c.publicado)   return false;
+  if (_estudiante.estado !== 'activo') return false;
+  // Ventana de acceso: desde 15 min antes hasta 2 horas después
+  if (!c.fecha) return false;
+  const fechaClase = new Date(c.fecha + (c.hora ? 'T'+c.hora : 'T00:00'));
+  const ahora      = new Date();
+  const diff       = (fechaClase - ahora) / 60000; // minutos
+  return diff <= 15 && diff >= -120;
+}
+
+function renderClaseCard(c, pasada=false) {
+  const acceder = puedeAccederClase(c);
+  const platIco = {Zoom:'🔵','Google Meet':'🟢',Teams:'🟣','YouTube Live':'🔴',Otro:'🎥'};
+  return `<div class="clase-card">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+      <div style="font-size:14px;font-weight:600">${platIco[c.plataforma]||'🎥'} ${esc(c.nombre)}</div>
+      <span class="badge ${pasada?'badge-gray':'badge-green'}">${pasada?'Realizada':'Próxima'}</span>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:6px">
+      📅 ${c.fecha||'—'} ${c.hora?'· '+c.hora:''} · ${esc(c.plataforma||'')} · ${esc(c.curso||'General')}
+    </div>
+    ${c.descripcion?`<div style="font-size:13px;color:var(--text);margin-bottom:8px">${esc(c.descripcion)}</div>`:''}
+    ${acceder
+      ? `<a href="${esc(c.enlace_zoom)}" target="_blank" rel="noopener" class="btn btn-primary btn-sm">🔗 Ingresar a la clase ${c.contrasena?'(Contraseña: '+esc(c.contrasena)+')':''}</a>`
+      : (c.enlace_zoom && !pasada
+        ? `<div style="font-size:12px;color:var(--muted);background:#f8fafc;padding:8px 12px;border-radius:8px">🔒 Acceso disponible 15 min antes del inicio</div>`
+        : (pasada && c.enlace_zoom ? `<div style="font-size:12px;color:var(--muted)">🕐 Clase finalizada</div>` : ''))
+    }
+  </div>`;
+}
+
+/* ─── AVISOS ─── */
+function renderAvisos() {
+  const el = document.getElementById('avisos-lista');
+  if (!_misAvisos.length) { el.innerHTML = '<div class="empty"><div class="ico">📢</div><p>Sin avisos de tus cursos</p></div>'; return; }
+  const colores = {aviso:'var(--primary)',recordatorio:'var(--warn)',cancelacion:'var(--danger)',nueva_clase:'var(--success)',tarea:'#7c3aed',material:'var(--info)'};
+  el.innerHTML = _misAvisos.map(a=>`
+    <div class="aviso-card" style="border-left-color:${colores[a.tipo]||'var(--primary)'}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
+        <div style="font-size:14px;font-weight:600">📢 ${esc(a.titulo)}</div>
+        <span class="badge badge-blue" style="flex-shrink:0">${esc(a.tipo||'aviso')}</span>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:6px">
+        Prof: ${esc(a.profesor||'IAGAMI')} · ${esc(a.curso||'General')} · ${new Date(a.created).toLocaleDateString('es-VE')}
+      </div>
+      <div style="font-size:13px;line-height:1.5">${esc(a.contenido)}</div>
+    </div>`).join('');
+}
+
+/* ─── BIBLIOTECA ─── */
+function renderBib() {
+  const tipo   = document.getElementById('bib-tipo').value;
+  const buscar = document.getElementById('bib-buscar').value.toLowerCase();
+  let lista = _bibRecursos.filter(r =>
+    (!tipo || r.tipo===tipo) &&
+    (!buscar || (r.titulo||'').toLowerCase().includes(buscar) || (r.descripcion||'').toLowerCase().includes(buscar))
+  );
+  const el = document.getElementById('bib-grid');
+  if (!lista.length) { el.innerHTML = '<div class="empty"><div class="ico">📚</div><p>Sin recursos encontrados</p></div>'; return; }
+  const ico = {video:'▶️',pdf:'📄',guia:'📗',infografia:'🖼️',presentacion:'📊'};
+  el.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px">${lista.map(r=>`
+    <div style="background:#fff;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden">
+      <div style="background:var(--primary-light);padding:14px;text-align:center;font-size:28px">${ico[r.tipo]||'📁'}</div>
+      <div style="padding:12px">
+        <div style="font-size:13px;font-weight:600;margin-bottom:4px">${esc(r.titulo)}</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:8px">${esc(r.categoria||'')} · ${esc(r.nivel||'General')}</div>
+        <a href="${esc(r.url)}" target="_blank" rel="noopener" class="btn btn-secondary btn-sm" style="width:100%;display:block;text-align:center">🔗 Abrir</a>
+      </div>
+    </div>`).join('')}</div>`;
+}
+
+/* ─── PERFIL ─── */
+function renderPerfil() {
+  const el = document.getElementById('perfil-datos');
+  if (!_estudiante) return;
+  el.innerHTML = `
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
+      <div style="width:60px;height:60px;border-radius:50%;background:var(--primary-light);display:flex;align-items:center;justify-content:center;font-size:26px">📗</div>
+      <div>
+        <div style="font-family:'Poppins',sans-serif;font-size:17px;font-weight:700">${esc(_estudiante.nombres)} ${esc(_estudiante.apellidos||'')}</div>
+        <div style="font-size:12px;color:var(--muted)">@${esc(_estudiante.username||'')} · ${esc(_estudiante.email||'Sin correo')}</div>
+        <span class="badge ${_estudiante.estado==='activo'?'badge-green':'badge-yellow'}">${esc(_estudiante.estado)}</span>
+      </div>
+    </div>
+    <div style="font-size:13px;display:grid;gap:6px">
+      <div><strong>Tipo:</strong> ${esc(_estudiante.tipo||'adulto')}</div>
+      <div><strong>Cédula:</strong> ${esc(_estudiante.cedula||'—')}</div>
+      <div><strong>Teléfono:</strong> ${esc(_estudiante.telefono||'—')}</div>
+      <div><strong>Parroquia:</strong> ${esc(_estudiante.parroquia||'—')}</div>
+      <div><strong>Institución:</strong> ${esc(_estudiante.institucion||'—')}</div>
+      <div><strong>Cursos inscritos:</strong> ${_misCursos.length}</div>
+    </div>`;
+}
+
+/* ─── CERTIFICADOS ─── */
+function renderCertificados() {
+  const el = document.getElementById('certs-lista');
+  if (!el) return;
+  if (!_misCertificados.length) {
+    el.innerHTML = '<div class="empty"><div class="ico">🏅</div><p>Aún no tienes certificados emitidos.<br>Completa tus cursos para obtenerlos.</p></div>';
+    return;
+  }
+  el.innerHTML = _misCertificados.map(c => {
+    const fechaE = c.fecha_emision ? new Date(c.fecha_emision).toLocaleDateString('es-VE',{year:'numeric',month:'long',day:'numeric'}) : '—';
+    const fechaI = c.fecha_inicio  ? new Date(c.fecha_inicio ).toLocaleDateString('es-VE',{year:'numeric',month:'short',day:'numeric'}) : '—';
+    const fechaF = c.fecha_fin     ? new Date(c.fecha_fin    ).toLocaleDateString('es-VE',{year:'numeric',month:'short',day:'numeric'}) : '—';
+    return `
+    <div style="background:#fff;border:1px solid #d1e7d9;border-radius:14px;padding:22px;margin-bottom:14px">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap">
+        <div style="flex:1;min-width:200px">
+          <div style="display:inline-flex;align-items:center;gap:5px;background:#1d6b3e;color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;margin-bottom:10px">✅ CERTIFICADO VÁLIDO</div>
+          <div style="font-family:'Poppins',sans-serif;font-size:17px;font-weight:700;margin-bottom:2px">${esc(c.nombre_curso)}</div>
+          <div style="font-size:13px;color:var(--muted);margin-bottom:10px">${esc(c.horas||'—')} horas · Prof: ${esc(c.nombre_profesor||'—')}</div>
+          <div style="font-size:12px;display:grid;gap:3px">
+            <div>📅 Período: ${esc(fechaI)} — ${esc(fechaF)}</div>
+            <div>🏷️ Código: <code style="font-size:11px;background:#e8f5ee;padding:1px 5px;border-radius:3px">${esc(c.codigo_verificacion)}</code></div>
+            <div>📆 Emitido: ${esc(fechaE)}</div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
+          <button class="btn btn-primary btn-sm" onclick="descargarCertificado('${c.id}')">🖨️ Descargar PDF</button>
+          <a href="../certificado/?codigo=${encodeURIComponent(c.codigo_verificacion)}" target="_blank" class="btn btn-secondary btn-sm" style="text-align:center">🔗 Verificar</a>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function descargarCertificado(id) {
+  const c = _misCertificados.find(x => x.id === id);
+  if (!c) return;
+  const fechaE = c.fecha_emision ? new Date(c.fecha_emision).toLocaleDateString('es-VE',{year:'numeric',month:'long',day:'numeric'}) : '—';
+  const fechaI = c.fecha_inicio  ? new Date(c.fecha_inicio ).toLocaleDateString('es-VE',{year:'numeric',month:'long',day:'numeric'}) : '—';
+  const fechaF = c.fecha_fin     ? new Date(c.fecha_fin    ).toLocaleDateString('es-VE',{year:'numeric',month:'long',day:'numeric'}) : '—';
+  const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"/>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&display=swap');
+  @page{size:landscape;margin:0}
+  body{margin:0;padding:0;font-family:'Inter',sans-serif;background:#fff}
+  .cert{width:100%;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;border:12px solid #1a3d2b;padding:40px;box-sizing:border-box;position:relative;text-align:center}
+  .header-logo{font-family:'Poppins',sans-serif;font-size:14px;font-weight:700;color:#1a3d2b;letter-spacing:2px;margin-bottom:4px}
+  .header-sub{font-size:11px;color:#6b7280;margin-bottom:28px}
+  .title{font-family:'Poppins',sans-serif;font-size:13px;text-transform:uppercase;letter-spacing:3px;color:#1d6b3e;font-weight:600;margin-bottom:4px}
+  .nombre{font-family:'Poppins',sans-serif;font-size:34px;font-weight:700;color:#1f2937;margin:8px 0}
+  .curso{font-family:'Poppins',sans-serif;font-size:18px;font-weight:600;color:#1d6b3e;margin-bottom:20px}
+  .detalle{font-size:12px;color:#6b7280;margin-bottom:24px;line-height:1.8}
+  .firma{border-top:1px solid #d1e7d9;padding-top:12px;font-size:11px;color:#1a3d2b;font-weight:600}
+  .codigo{position:absolute;bottom:20px;right:28px;font-size:10px;color:#9ca3af}
+  @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+</style></head><body>
+<div class="cert">
+  <div class="header-logo">IAGAMI</div>
+  <div class="header-sub">Instituto Autónomo de Gestión Ambiental del Municipio Iribarren — Barquisimeto, Estado Lara</div>
+  <div class="title">Certifica que</div>
+  <div class="nombre">${c.nombre_estudiante}</div>
+  <div style="font-size:13px;color:#6b7280;margin-bottom:6px">ha completado satisfactoriamente el curso</div>
+  <div class="curso">${c.nombre_curso}</div>
+  <div class="detalle">
+    Duración: <strong>${c.horas||'—'} horas académicas</strong> · Período: ${fechaI} — ${fechaF}<br/>
+    Facilitador: <strong>${c.nombre_profesor||'IAGAMI'}</strong> · Fecha de emisión: <strong>${fechaE}</strong>
+  </div>
+  <div class="firma">IAGAMI — Municipio Iribarren, Estado Lara, Venezuela</div>
+  <div class="codigo">Código: ${c.codigo_verificacion} · Verifica en: iagami.online/aula-ambiental/certificado/</div>
+</div>
+<script>window.onload=function(){window.print();}<\/script>
+</body></html>`;
+  const frame = document.getElementById('cert-print-frame');
+  frame.style.display = 'block';
+  frame.srcdoc = html;
+}
+
+async function cambiarPass() {
+  const vieja    = document.getElementById('pwd-old').value;
+  const nueva    = document.getElementById('pwd-new').value;
+  const confirma = document.getElementById('pwd-c').value;
+  if (!vieja||!nueva||!confirma) { toast('Completa todos los campos','error'); return; }
+  if (nueva !== confirma)  { toast('Las contraseñas no coinciden','error'); return; }
+  if (nueva.length < 8)    { toast('Mínimo 8 caracteres','error'); return; }
+  try {
+    await pbFetch(`/api/collections/estudiantes/records/${_estudiante.id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({password:nueva, passwordConfirm:confirma, oldPassword:vieja})
+    });
+    toast('Contraseña actualizada. Inicia sesión de nuevo.');
+    setTimeout(doLogout, 2000);
+  } catch(e) { toast('Error: contraseña actual incorrecta','error'); }
+}
+
+/* ═══════════════════════════════════════════════════
+   FASE 3 — EVALUACIONES, TAREAS, CALIFICACIONES, ASISTENCIA
+   ═══════════════════════════════════════════════════ */
+
+let _evalActiva = null;
+let _evalPreguntas = [];
+let _evalTimer = null;
+let _tareaActiva = null;
+let _tareaTab = 'pendientes';
+
+const _PROX = '📚 Esta funcionalidad estará disponible próximamente. 📚';
+
+/* ── EVALUACIONES ── */
+async function renderEvaluaciones() {
+  const el = document.getElementById('eval-lista');
+  el.innerHTML = '<div class="empty"><div class="ico">⏳</div><p>Cargando...</p></div>';
+  try {
+    // Obtener IDs de cursos del estudiante
+    const cursoIds = _misCursos.map(c => c.id);
+    if (!cursoIds.length) {
+      el.innerHTML = '<div class="empty"><div class="ico">📝</div><p>No tienes cursos inscritos.</p></div>'; return;
+    }
+    const filter = cursoIds.map(id => `curso_id="${id}"`).join('||');
+    const r = await pbFetch(`/api/collections/evaluaciones/records?filter=(${encodeURIComponent(filter)})%26%26publicado%3Dtrue&sort=-created&perPage=50`);
+    const evals = r.items || [];
+    if (!evals.length) { el.innerHTML = '<div class="empty"><div class="ico">📝</div><p>No hay evaluaciones publicadas en tus cursos.</p></div>'; return; }
+
+    // Cargar resultados previos del estudiante
+    let resultados = [];
+    try {
+      const rRes = await pbFetch(`/api/collections/resultados_evaluacion/records?filter=estudiante_id%3D%22${_estudiante.id}%22&perPage=200`);
+      resultados = rRes.items || [];
+    } catch(e) {}
+
+    el.innerHTML = evals.map(ev => {
+      const res = resultados.find(r => r.evaluacion_id === ev.id);
+      const entregada = !!res;
+      const nota = res ? res.nota : null;
+      const curso = _misCursos.find(c => c.id === ev.curso_id);
+      return `<div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+          <div>
+            <div style="font-size:15px;font-weight:600;font-family:'Poppins',sans-serif">${esc(ev.nombre)}</div>
+            <div style="font-size:12px;color:var(--muted)">📚 ${esc(curso?.nombre||ev.curso_id)} · ⏱ ${ev.tiempo_minutos||'—'} min · ${ev.tipo||'evaluacion'}</div>
+          </div>
+          ${entregada
+            ? `<span class="badge badge-green">✅ Nota: ${nota!==null?nota:' —'}/20</span>`
+            : `<span class="badge badge-yellow">Pendiente</span>`}
+        </div>
+        ${ev.descripcion ? `<div style="font-size:13px;color:var(--text);margin-bottom:10px">${esc(ev.descripcion)}</div>` : ''}
+        ${!entregada
+          ? `<button class="btn btn-primary btn-sm" onclick="abrirEvaluacion('${ev.id}')">📝 Iniciar evaluación</button>`
+          : `<div style="font-size:12px;color:var(--success)">Enviada el ${new Date(res.created).toLocaleDateString('es-VE')}. ${res.retroalimentacion?'Retroalimentación: '+esc(res.retroalimentacion):''}</div>`}
+      </div>`;
+    }).join('');
+  } catch(e) {
+    if (e.message && (e.message.includes('404') || e.message.includes('not found') || e.message.includes('missing'))) {
+      el.innerHTML = `<div class="empty"><div class="ico">📝</div><p>${_PROX}</p></div>`;
+    } else {
+      el.innerHTML = `<div class="empty"><div class="ico">⚠️</div><p>Error al cargar evaluaciones: ${esc(e.message)}</p></div>`;
+    }
+  }
+}
+
+async function abrirEvaluacion(evalId) {
+  try {
+    _evalActiva = await pbFetch(`/api/collections/evaluaciones/records/${evalId}`);
+    const rP = await pbFetch(`/api/collections/preguntas_evaluacion/records?filter=evaluacion_id%3D%22${evalId}%22&sort=orden&perPage=100`);
+    _evalPreguntas = rP.items || [];
+  } catch(e) {
+    if (e.message && (e.message.includes('404') || e.message.includes('not found'))) {
+      toast(_PROX, 'error'); return;
+    }
+    toast('Error al cargar la evaluación', 'error'); return;
+  }
+
+  document.getElementById('em-titulo').textContent = _evalActiva.nombre;
+  document.getElementById('em-desc').textContent   = _evalActiva.descripcion || '';
+
+  const pEl = document.getElementById('em-preguntas');
+  pEl.innerHTML = _evalPreguntas.map((p, i) => {
+    const opciones = Array.isArray(p.opciones) ? p.opciones : (p.opciones ? JSON.parse(p.opciones) : []);
+    if (p.tipo === 'opcion_multiple' || p.tipo === 'verdadero_falso') {
+      const opts = p.tipo === 'verdadero_falso' ? ['Verdadero','Falso'] : opciones;
+      return `<div style="margin-bottom:18px;padding:14px;background:#f8fafc;border-radius:10px">
+        <div style="font-size:14px;font-weight:600;margin-bottom:10px">${i+1}. ${esc(p.enunciado)}</div>
+        ${opts.map((op,oi)=>`<label style="display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:7px;cursor:pointer;margin-bottom:4px;background:#fff;border:1.5px solid var(--border)">
+          <input type="radio" name="preg_${p.id}" value="${esc(String(oi))}" style="accent-color:var(--primary)"/>
+          <span style="font-size:13px">${esc(String(op))}</span>
+        </label>`).join('')}
+      </div>`;
+    }
+    // Pregunta abierta
+    return `<div style="margin-bottom:18px;padding:14px;background:#f8fafc;border-radius:10px">
+      <div style="font-size:14px;font-weight:600;margin-bottom:10px">${i+1}. ${esc(p.enunciado)}</div>
+      <textarea class="form-control" id="resp_${p.id}" rows="3" placeholder="Escribe tu respuesta..."></textarea>
+    </div>`;
+  }).join('');
+
+  if (_evalActiva.tiempo_minutos) startTimer(_evalActiva.tiempo_minutos);
+  else document.getElementById('em-timer').textContent = '∞';
+  document.getElementById('eval-modal').style.display = 'block';
+}
+
+function startTimer(minutos) {
+  if (_evalTimer) clearInterval(_evalTimer);
+  let segs = minutos * 60;
+  const timerEl = document.getElementById('em-timer');
+  _evalTimer = setInterval(() => {
+    segs--;
+    if (segs <= 0) { clearInterval(_evalTimer); enviarEvaluacion(); return; }
+    const m = Math.floor(segs/60), s = segs%60;
+    timerEl.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    if (segs <= 60) timerEl.style.color = 'var(--danger)';
+  }, 1000);
+}
+
+async function enviarEvaluacion() {
+  if (!_evalActiva) return;
+  if (_evalTimer) clearInterval(_evalTimer);
+  const respuestas = _evalPreguntas.map(p => {
+    if (p.tipo === 'opcion_multiple' || p.tipo === 'verdadero_falso') {
+      const sel = document.querySelector(`input[name="preg_${p.id}"]:checked`);
+      return {pregunta_id: p.id, respuesta: sel ? sel.value : '', tipo: p.tipo};
+    }
+    const ta = document.getElementById('resp_'+p.id);
+    return {pregunta_id: p.id, respuesta: ta ? ta.value : '', tipo: p.tipo};
+  });
+  try {
+    await pbFetch('/api/collections/resultados_evaluacion/records', {
+      method: 'POST',
+      body: JSON.stringify({
+        evaluacion_id: _evalActiva.id,
+        estudiante_id: _estudiante.id,
+        curso_id: _evalActiva.curso_id,
+        respuestas: JSON.stringify(respuestas),
+        nota: null,
+        estado: 'entregado'
+      })
+    });
+    cerrarEvalModal();
+    toast('✅ Evaluación enviada correctamente');
+    renderEvaluaciones();
+  } catch(e) {
+    toast('Error al enviar: ' + e.message, 'error');
+  }
+}
+
+function cerrarEvalModal() {
+  if (_evalTimer) clearInterval(_evalTimer);
+  document.getElementById('eval-modal').style.display = 'none';
+  _evalActiva = null; _evalPreguntas = [];
+}
+
+/* ── TAREAS ── */
+function switchTareasTab(tab) {
+  _tareaTab = tab;
+  ['pendientes','entregadas'].forEach(t => {
+    document.getElementById('ttab-'+t).classList.toggle('active', t===tab);
+    document.querySelectorAll(`[onclick="switchTareasTab('${t}')"]`).forEach(b=>b.classList.toggle('active',t===tab));
+  });
+  renderTareasEst();
+}
+
+async function renderTareasEst() {
+  const pelEl = document.getElementById('tareas-pendientes');
+  const entEl = document.getElementById('tareas-entregadas');
+  pelEl.innerHTML = '<div class="empty"><div class="ico">⏳</div><p>Cargando...</p></div>';
+  entEl.innerHTML = '';
+  try {
+    const cursoIds = _misCursos.map(c => c.id);
+    if (!cursoIds.length) {
+      pelEl.innerHTML = '<div class="empty"><div class="ico">📋</div><p>No tienes cursos inscritos.</p></div>'; return;
+    }
+    const filter = cursoIds.map(id => `curso_id="${id}"`).join('||');
+    const r = await pbFetch(`/api/collections/tareas/records?filter=(${encodeURIComponent(filter)})%26%26publicado%3Dtrue&sort=-created&perPage=100`);
+    const tareas = r.items || [];
+
+    let entregas = [];
+    try {
+      const rE = await pbFetch(`/api/collections/entregas_tareas/records?filter=estudiante_id%3D%22${_estudiante.id}%22&perPage=200`);
+      entregas = rE.items || [];
+    } catch(e) {}
+
+    const pendientes = tareas.filter(t => !entregas.find(e => e.tarea_id === t.id));
+    const entregadas = tareas.filter(t =>  entregas.find(e => e.tarea_id === t.id));
+
+    const renderTarea = (t, entregada) => {
+      const ent = entregas.find(e => e.tarea_id === t.id);
+      const curso = _misCursos.find(c => c.id === t.curso_id);
+      return `<div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+          <div>
+            <div style="font-size:14px;font-weight:600">${esc(t.nombre)}</div>
+            <div style="font-size:12px;color:var(--muted)">📚 ${esc(curso?.nombre||t.curso_id)} ${t.fecha_entrega?'· 📅 Entrega: '+t.fecha_entrega:''}</div>
+          </div>
+          ${entregada ? `<span class="badge badge-green">✅ Entregada</span>` : `<span class="badge badge-yellow">Pendiente</span>`}
+        </div>
+        ${t.descripcion?`<div style="font-size:13px;margin-bottom:8px">${esc(t.descripcion)}</div>`:''}
+        ${t.url_referencia?`<a href="${esc(t.url_referencia)}" target="_blank" class="btn btn-secondary btn-sm" style="margin-bottom:8px">📎 Ver material</a>`:''}
+        ${!entregada
+          ? `<button class="btn btn-primary btn-sm" onclick="abrirEntregaTarea('${t.id}')">📤 Entregar</button>`
+          : `<div style="font-size:12px;color:var(--success)">Enviada el ${new Date(ent.created).toLocaleDateString('es-VE')}. ${(ent.calificacion??ent.nota)!==null&&(ent.calificacion??ent.nota)!==undefined?'Nota: '+(ent.calificacion??ent.nota)+'/100':'Pendiente de calificación.'}</div>`}
+      </div>`;
+    };
+
+    pelEl.innerHTML = pendientes.length ? pendientes.map(t=>renderTarea(t,false)).join('') : '<div class="empty"><div class="ico">✅</div><p>No tienes tareas pendientes.</p></div>';
+    entEl.innerHTML = entregadas.length ? entregadas.map(t=>renderTarea(t,true)).join('') : '<div class="empty"><div class="ico">📋</div><p>Aún no has entregado ninguna tarea.</p></div>';
+  } catch(e) {
+    const msg = (e.message && (e.message.includes('404') || e.message.includes('not found')))
+      ? _PROX : 'Error: ' + esc(e.message);
+    pelEl.innerHTML = `<div class="empty"><div class="ico">📋</div><p>${msg}</p></div>`;
+  }
+}
+
+function abrirEntregaTarea(tareaId) {
+  _tareaActiva = tareaId;
+  document.getElementById('tm-titulo').textContent = 'Entregar tarea';
+  document.getElementById('tm-desc').textContent = '';
+  document.getElementById('tm-texto').value = '';
+  document.getElementById('tm-url').value = '';
+  document.getElementById('tarea-modal').style.display = 'block';
+}
+
+async function confirmarEntrega() {
+  const texto = document.getElementById('tm-texto').value.trim();
+  const url   = document.getElementById('tm-url').value.trim();
+  if (!texto && !url) { toast('Escribe tu respuesta o incluye un enlace', 'error'); return; }
+  try {
+    await pbFetch('/api/collections/entregas_tareas/records', {
+      method: 'POST',
+      body: JSON.stringify({
+        tarea_id: _tareaActiva,
+        estudiante_id: _estudiante.id,
+        texto_entrega: texto,
+        url_entrega: url,
+        estado: 'entregado'
+      })
+    });
+    cerrarTareaModal();
+    toast('✅ Tarea entregada correctamente');
+    renderTareasEst();
+  } catch(e) { toast('Error al entregar: ' + e.message, 'error'); }
+}
+
+function cerrarTareaModal() {
+  document.getElementById('tarea-modal').style.display = 'none';
+  _tareaActiva = null;
+}
+
+/* ── CALIFICACIONES ── */
+async function renderCalificaciones() {
+  const el = document.getElementById('calif-contenido');
+  el.innerHTML = '<div class="empty"><div class="ico">⏳</div><p>Cargando...</p></div>';
+  try {
+    const cursoIds = _misCursos.map(c => c.id);
+    if (!cursoIds.length) { el.innerHTML = '<div class="empty"><div class="ico">🏆</div><p>No tienes cursos inscritos.</p></div>'; return; }
+
+    // Cargar resultados de evaluaciones
+    let resultados = [];
+    try {
+      const rR = await pbFetch(`/api/collections/resultados_evaluacion/records?filter=estudiante_id%3D%22${_estudiante.id}%22&perPage=200`);
+      resultados = rR.items || [];
+    } catch(e) {}
+
+    // Cargar entregas de tareas con notas
+    let entregas = [];
+    try {
+      const rE = await pbFetch(`/api/collections/entregas_tareas/records?filter=estudiante_id%3D%22${_estudiante.id}%22%26%26calificacion!%3Dnull&perPage=200`);
+      entregas = rE.items || [];
+    } catch(e) {}
+
+    if (!resultados.length && !entregas.length) {
+      el.innerHTML = '<div class="empty"><div class="ico">🏆</div><p>Aún no tienes calificaciones registradas.</p></div>'; return;
+    }
+
+    el.innerHTML = _misCursos.map(curso => {
+      const resC = resultados.filter(r => r.curso_id === curso.id && r.nota !== null && r.nota !== undefined && r.nota !== '');
+      const entC = entregas.filter(e => e.curso_id === curso.id);
+      if (!resC.length && !entC.length) return '';
+
+      const notas = [...resC.map(r=>r.nota), ...entC.map(e=>e.calificacion??e.nota)].filter(n=>n!==null&&n!==undefined);
+      const prom = notas.length ? (notas.reduce((a,b)=>a+Number(b),0) / notas.length).toFixed(1) : '—';
+      const promNum = notas.length ? parseFloat(prom) : 0;
+      const color = promNum >= 10 ? 'var(--success)' : promNum > 0 ? 'var(--warn)' : 'var(--muted)';
+
+      return `<div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <div class="card-title">📚 ${esc(curso.nombre)}</div>
+          <div style="font-family:'Poppins',sans-serif;font-size:22px;font-weight:700;color:${color}">${prom}</div>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${Math.min(promNum/20*100,100)}%;background:${color}"></div></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px;margin-bottom:12px">Promedio sobre 20 puntos · ${notas.length} nota(s)</div>
+        ${resC.length ? `<div style="font-size:12px;font-weight:600;margin-bottom:6px">Evaluaciones:</div>${resC.map(r=>`
+          <div style="display:flex;justify-content:space-between;padding:6px 10px;background:#f8fafc;border-radius:6px;margin-bottom:4px;font-size:12px">
+            <span>${esc(r.evaluacion_id)}</span>
+            <strong>${r.nota}/100</strong>
+          </div>`).join('')}` : ''}
+        ${entC.length ? `<div style="font-size:12px;font-weight:600;margin:8px 0 6px">Tareas:</div>${entC.map(e=>`
+          <div style="display:flex;justify-content:space-between;padding:6px 10px;background:#f8fafc;border-radius:6px;margin-bottom:4px;font-size:12px">
+            <span>${esc(e.tarea_id)}</span>
+            <strong>${(e.calificacion??e.nota)}/100</strong>
+          </div>`).join('')}` : ''}
+      </div>`;
+    }).filter(Boolean).join('') || '<div class="empty"><div class="ico">🏆</div><p>Aún no tienes calificaciones en tus cursos.</p></div>';
+  } catch(e) {
+    const msg = (e.message && (e.message.includes('404') || e.message.includes('not found')))
+      ? _PROX : 'Error: ' + esc(e.message);
+    el.innerHTML = `<div class="empty"><div class="ico">🏆</div><p>${msg}</p></div>`;
+  }
+}
+
+/* ── ASISTENCIA ── */
+async function renderAsistenciaEst() {
+  const el = document.getElementById('asistencia-contenido');
+  el.innerHTML = '<div class="empty"><div class="ico">⏳</div><p>Cargando...</p></div>';
+  try {
+    const r = await pbFetch(`/api/collections/asistencia_clases/records?filter=estudiante_id%3D%22${_estudiante.id}%22&sort=-fecha&perPage=200`);
+    const registros = r.items || [];
+    if (!registros.length) {
+      el.innerHTML = '<div class="empty"><div class="ico">✅</div><p>No hay registros de asistencia aún.</p></div>'; return;
+    }
+
+    // Agrupar por curso
+    const porcurso = {};
+    registros.forEach(reg => {
+      const cid = reg.curso_id || 'general';
+      if (!porcurso[cid]) porcurso[cid] = [];
+      porcurso[cid].push(reg);
+    });
+
+    el.innerHTML = Object.entries(porcurso).map(([cid, regs]) => {
+      const curso = _misCursos.find(c => c.id === cid);
+      const total = regs.length;
+      const presentes = regs.filter(r => r.estado === 'presente').length;
+      const pct = total ? Math.round(presentes/total*100) : 0;
+      const color = pct >= 75 ? 'var(--success)' : pct >= 50 ? 'var(--warn)' : 'var(--danger)';
+      return `<div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div class="card-title">📚 ${esc(curso?.nombre||cid)}</div>
+          <div style="font-family:'Poppins',sans-serif;font-size:20px;font-weight:700;color:${color}">${pct}%</div>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${color}"></div></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px;margin-bottom:12px">${presentes} presentes de ${total} clases</div>
+        <div style="display:grid;gap:4px">${regs.slice(0,10).map(reg=>`
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 10px;background:#f8fafc;border-radius:6px;font-size:12px">
+            <span>📅 ${esc(reg.fecha||'—')} · ${esc(reg.clase_nombre||'Clase')}</span>
+            <span class="badge ${reg.estado==='presente'?'badge-green':reg.estado==='tardanza'?'badge-yellow':'badge-red'}">${esc(reg.estado||'—')}</span>
+          </div>`).join('')}
+        </div>
+        ${regs.length > 10 ? `<div style="font-size:11px;color:var(--muted);margin-top:6px">Mostrando los 10 más recientes de ${regs.length} registros.</div>` : ''}
+      </div>`;
+    }).join('');
+  } catch(e) {
+    const msg = (e.message && (e.message.includes('404') || e.message.includes('not found')))
+      ? _PROX : 'Error: ' + esc(e.message);
+    el.innerHTML = `<div class="empty"><div class="ico">✅</div><p>${msg}</p></div>`;
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   FASE 7 — ZOOM: COUNTDOWN + GRABACIONES
+   ═══════════════════════════════════════════════════ */
+
+function getClaseEstado(c) {
+  if (!c.fecha) return 'proxima';
+  const fechaClase = new Date(c.fecha + (c.hora ? 'T'+c.hora : 'T00:00'));
+  const ahora = new Date();
+  const diff = (fechaClase - ahora) / 60000;
+  if (diff > 15)   return 'proxima';
+  if (diff >= -120) return 'en_curso';
+  return 'finalizada';
+}
+
+function renderClaseCard(c, pasada=false) {
+  const acceder = puedeAccederClase(c);
+  const estado = getClaseEstado(c);
+  const badgeMap = {proxima:['badge-blue','Próxima'], en_curso:['badge-green','🔴 En curso'], finalizada:['badge-gray','Finalizada'], cancelada:['badge-red','Cancelada']};
+  const [badgeCls, badgeTxt] = badgeMap[c.estado_zoom||estado] || ['badge-gray','—'];
+  const platIco = {Zoom:'🔵','Google Meet':'🟢',Teams:'🟣','YouTube Live':'🔴',Otro:'🎥'};
+  const countdownId = 'cd-'+c.id;
+  const html = `<div class="clase-card" id="card-${c.id}">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+      <div style="font-size:14px;font-weight:600">${platIco[c.plataforma]||'🎥'} ${esc(c.nombre)}</div>
+      <span class="badge ${badgeCls}">${badgeTxt}</span>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:6px">
+      📅 ${c.fecha||'—'} ${c.hora?'· '+c.hora:''} · ${esc(c.plataforma||'')} · ${esc(c.curso||'General')}
+      ${c.duracion ? ' · ⏱ '+esc(String(c.duracion))+' min' : ''}
+    </div>
+    ${c.descripcion?`<div style="font-size:13px;color:var(--text);margin-bottom:8px">${esc(c.descripcion)}</div>`:''}
+    ${estado==='proxima' && c.fecha ? `<div style="font-size:12px;color:var(--primary);font-weight:600;margin-bottom:8px" id="${countdownId}">⏳ Calculando...</div>` : ''}
+    ${acceder
+      ? `<a href="${esc(c.enlace_zoom)}" target="_blank" rel="noopener" class="btn btn-primary btn-sm">🔗 Unirse a la clase ${c.contrasena?'· Contraseña: '+esc(c.contrasena):''}</a>`
+      : (c.enlace_zoom && estado==='proxima'
+        ? `<div style="font-size:12px;color:var(--muted);background:#f8fafc;padding:8px 12px;border-radius:8px">🔒 El botón de acceso aparecerá 15 minutos antes del inicio</div>`
+        : (estado==='finalizada' ? `<div style="font-size:12px;color:var(--muted)">🕐 Clase finalizada</div>` : ''))
+    }
+  </div>`;
+  return html;
+}
+
+function activarCountdowns() {
+  _misClases.forEach(c => {
+    const el = document.getElementById('cd-'+c.id);
+    if (!el || !c.fecha) return;
+    const fechaClase = new Date(c.fecha + (c.hora ? 'T'+c.hora : 'T00:00'));
+    function actualizar() {
+      const diff = fechaClase - new Date();
+      if (diff <= 0) { el.textContent = ''; return; }
+      const h = Math.floor(diff/3600000);
+      const m = Math.floor((diff%3600000)/60000);
+      el.textContent = h > 0 ? `⏳ Comienza en ${h}h ${m}m` : `⏳ Comienza en ${m} minutos`;
+    }
+    actualizar();
+    if (_countdownTimer) clearInterval(_countdownTimer);
+    _countdownTimer = setInterval(actualizar, 60000);
+  });
+}
+
+
+async function renderGrabaciones() {
+  const el = document.getElementById('clases-grab');
+  el.innerHTML = '<div class="loading-ai"><div class="spinner"></div><p>Buscando grabaciones...</p></div>';
+  try {
+    // Llama al VPS hook que filtra por cursos del estudiante y devuelve solo play_url
+    const cursoIds = _misCursos.map(c=>c.id).join(',');
+    const res = await fetch('/api/zoom/recordings?cursos='+encodeURIComponent(cursoIds), {
+      headers: { 'Authorization': 'Bearer ' + (_token||''), 'Content-Type': 'application/json' }
+    });
+    if (!res.ok) throw new Error('HTTP '+res.status);
+    const data = await res.json();
+    const grabaciones = data.recordings || [];
+    if (!grabaciones.length) {
+      el.innerHTML = '<div class="empty"><div class="ico">🎬</div><p>No hay grabaciones disponibles para tus cursos.</p></div>'; return;
+    }
+    el.innerHTML = grabaciones.map(g => `
+      <div class="clase-card">
+        <div style="font-size:14px;font-weight:600;margin-bottom:4px">🎬 ${esc(g.topic||g.tema||'Grabación')}</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:8px">📅 ${esc(g.fecha||g.start_time||'—')} · ⏱ ${esc(String(g.duracion||g.duration||'—'))} min</div>
+        <a href="${esc(g.play_url)}" target="_blank" rel="noopener" class="btn btn-secondary btn-sm">▶️ Ver grabación</a>
+      </div>`).join('');
+  } catch(e) {
+    el.innerHTML = `<div class="empty"><div class="ico">🎬</div><p>Las grabaciones estarán disponibles cuando se configure la integración con Zoom.<br><small style="color:var(--muted)">Las credenciales se configuran en el servidor VPS.</small></p></div>`;
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   FASE 12 — IA GEMINI (PROXY VPS)
+   ═══════════════════════════════════════════════════ */
+
+let _iaContador = 0;
+const _IA_MAX = 10;
+const API_VPS = ''; // El VPS está en la misma origen o se configura en el hook
+
+function switchIATab(tab) {
+  ['chat','recomendar'].forEach(t => {
+    document.getElementById('iatab-'+t).classList.toggle('active', t===tab);
+    document.querySelectorAll(`[onclick="switchIATab('${t}')"]`).forEach(b=>b.classList.toggle('active',t===tab));
+  });
+}
+
+async function hacerPreguntaIA(preguntaFija) {
+  if (_iaContador >= _IA_MAX) {
+    toast('Alcanzaste el límite de preguntas por sesión ('+_IA_MAX+')', 'error'); return;
+  }
+  const inputEl = document.getElementById('ia-pregunta');
+  const pregunta = preguntaFija || inputEl.value.trim();
+  if (!pregunta) { toast('Escribe una pregunta primero', 'error'); return; }
+
+  const chatEl = document.getElementById('ia-chat-box');
+  const btn    = document.getElementById('ia-btn');
+
+  // Agregar burbuja del usuario
+  chatEl.insertAdjacentHTML('beforeend', `<div class="ai-msg user">${esc(pregunta)}</div>`);
+  chatEl.insertAdjacentHTML('beforeend', `<div class="ai-msg bot" id="ia-resp-${_iaContador}"><div class="spinner" style="width:20px;height:20px;border-width:2px;margin:0"></div></div>`);
+  chatEl.scrollTop = chatEl.scrollHeight;
+  inputEl.value = '';
+  btn.disabled = true;
+
+  try {
+    // Llama al VPS hook que usa Gemini API server-side — credenciales NUNCA en el navegador
+    const res = await fetch('/api/gemini/content-generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer '+(_token||'') },
+      body: JSON.stringify({
+        tema: pregunta,
+        tipo: 'respuesta',
+        nivel: _estudiante?.tipo || 'adulto',
+        idioma: 'es'
+      })
+    });
+
+    const data = await res.json();
+    const respuesta = data.respuesta || data.text || data.content || data.candidates?.[0]?.content?.parts?.[0]?.text || 'No se pudo obtener respuesta.';
+    const respEl = document.getElementById('ia-resp-'+_iaContador);
+    if (respEl) respEl.innerHTML = esc(respuesta).replace(/\n/g,'<br>');
+    _iaContador++;
+    document.getElementById('ia-counter').textContent = _iaContador;
+    if (_iaContador >= _IA_MAX) document.getElementById('ia-counter-msg').style.color = 'var(--danger)';
+  } catch(e) {
+    const respEl = document.getElementById('ia-resp-'+_iaContador);
+    if (respEl) respEl.innerHTML = '⚠️ El asistente IA estará disponible cuando se configure la conexión con el servidor. <small>Las credenciales Gemini se configuran en el VPS.</small>';
+    _iaContador++;
+    document.getElementById('ia-counter').textContent = _iaContador;
+  } finally {
+    btn.disabled = false;
+    chatEl.scrollTop = chatEl.scrollHeight;
+  }
+}
+
+async function cargarRecomendaciones() {
+  const el  = document.getElementById('rec-resultado');
+  const btn = document.getElementById('rec-btn');
+  el.innerHTML = '<div class="loading-ai"><div class="spinner"></div><p>Analizando tu progreso...</p></div>';
+  btn.disabled = true;
+  try {
+    const res = await fetch('/api/gemini/course-recommend', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer '+(_token||'') },
+      body: JSON.stringify({
+        estudiante_id: _estudiante?.id,
+        tipo: _estudiante?.tipo || 'adulto',
+        cursos_inscritos: _misCursos.map(c => c.nombre),
+        parroquia: _estudiante?.parroquia || ''
+      })
+    });
+    const data = await res.json();
+    const recomendaciones = data.recomendaciones || data.recommendations || [];
+    if (!recomendaciones.length) {
+      el.innerHTML = '<div class="empty"><div class="ico">🎯</div><p>Completa más cursos para recibir recomendaciones personalizadas.</p></div>';
+    } else {
+      el.innerHTML = recomendaciones.map((r, i) => `
+        <div class="card" style="margin-bottom:10px">
+          <div style="font-size:14px;font-weight:600;margin-bottom:4px">🎓 ${esc(r.nombre_curso||r.curso||r.title||'Curso '+( i+1))}</div>
+          <div style="font-size:13px;color:var(--text);margin-bottom:6px">${esc(r.razon||r.reason||r.description||'')}</div>
+          <div>${'⭐'.repeat(Math.min(Math.round(r.compatibilidad||r.score||3),5))}${'☆'.repeat(5-Math.min(Math.round(r.compatibilidad||r.score||3),5))}</div>
+        </div>`).join('');
+    }
+  } catch(e) {
+    el.innerHTML = '<div class="empty"><div class="ico">🎯</div><p>Las recomendaciones estarán disponibles cuando se configure la IA.<br><small>La API Gemini se ejecuta desde el servidor VPS, nunca desde el navegador.</small></p></div>';
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+/* ─── SESSION RESTORE ─── */
+(function restoreSession(){
+  try {
+    const t = localStorage.getItem('est_token');
+    const d = localStorage.getItem('est_data');
+    if (!t||!d) return;
+    _token = t; _estudiante = JSON.parse(d);
+    if (_estudiante.estado === 'pendiente' || _estudiante.estado === 'suspendido') { doLogout(); return; }
+    fetch(PB_URL+'/api/collections/estudiantes/auth-refresh', {method:'POST',headers:{Authorization:_token}})
+      .then(r=>r.json()).then(data=>{
+        if (data.token) {
+          _token=data.token; _estudiante=data.record;
+          localStorage.setItem('est_token',_token);
+          localStorage.setItem('est_data',JSON.stringify(_estudiante));
+          iniciarApp();
+        } else { doLogout(); }
+      }).catch(()=>{ doLogout(); });
+  } catch(e){}
+})();
+</script>
+</body>
+</html>

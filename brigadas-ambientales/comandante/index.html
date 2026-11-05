@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Comandante Municipal — Brigadas Ambientales IAGAMI</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="../../cms/pb.js"></script>
+<style>
+:root{--primary:#1d6b3e;--primary-dark:#1a3d2b;--primary-light:#e8f5ee;--bg:#f5f7f5;--text:#1f2937;--border:#d1e7d9;--danger:#dc2626;--warning:#d97706;--success:#16a34a;--radius:12px;--shadow:0 2px 8px rgba(0,0,0,.08)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);font-size:16px;min-height:100vh}
+h1,h2,h3,h4{font-family:'Poppins',sans-serif}
+button{font-family:'Inter',sans-serif;cursor:pointer;border:none;border-radius:8px;font-size:14px;font-weight:500;transition:.2s}
+input,select,textarea{font-family:'Inter',sans-serif;font-size:15px;padding:10px 14px;border:1.5px solid var(--border);border-radius:8px;width:100%;outline:none;transition:.2s;background:#fff}
+input:focus,select:focus,textarea:focus{border-color:var(--primary)}
+label{display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:4px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:11px 20px;min-height:44px;font-weight:600;border-radius:8px;cursor:pointer;border:none;transition:.2s;font-size:14px}
+.btn-primary{background:var(--primary);color:#fff}.btn-primary:hover{background:var(--primary-dark)}
+.btn-secondary{background:#fff;color:var(--primary);border:1.5px solid var(--primary)}.btn-secondary:hover{background:var(--primary-light)}
+.btn-danger{background:#fee2e2;color:var(--danger)}.btn-sm{padding:7px 14px;min-height:36px;font-size:13px}
+.btn-block{width:100%}
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600}
+.badge-green{background:#dcfce7;color:#166534}.badge-yellow{background:#fef9c3;color:#854d0e}
+.badge-red{background:#fee2e2;color:#991b1b}.badge-blue{background:#dbeafe;color:#1e40af}
+.badge-gray{background:#f3f4f6;color:#374151}.badge-orange{background:#ffedd5;color:#9a3412}
+.card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow)}
+.form-group{margin-bottom:16px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.toast{position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:10px;font-weight:600;font-size:14px;z-index:9999;animation:fadeIn .3s;box-shadow:0 4px 12px rgba(0,0,0,.15)}
+.toast-ok{background:#dcfce7;color:#166534}.toast-err{background:#fee2e2;color:#991b1b}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.spinner{width:28px;height:28px;border:3px solid var(--primary-light);border-top-color:var(--primary);border-radius:50%;animation:spin .7s linear infinite;margin:40px auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty-state{text-align:center;padding:48px 20px;color:#9ca3af}
+.empty-state .ico{font-size:3rem;margin-bottom:12px}
+.section-title{font-size:1.3rem;font-weight:700;color:var(--primary-dark);margin-bottom:20px;display:flex;align-items:center;gap:8px}
+/* LOGIN */
+#login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+.login-card{background:#fff;border-radius:16px;padding:40px 32px;width:100%;max-width:400px;box-shadow:0 8px 32px rgba(0,0,0,.1)}
+.login-logo{text-align:center;margin-bottom:28px}
+.login-logo .ico{font-size:3rem}
+.login-logo h2{font-size:1.3rem;color:var(--primary-dark);margin-top:8px}
+.login-logo p{font-size:13px;color:#6b7280;margin-top:4px}
+#login-err{background:#fee2e2;color:var(--danger);padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:12px;display:none}
+/* APP */
+#app{display:none;min-height:100vh}
+.top-bar{background:var(--primary-dark);color:#fff;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.top-bar h1{font-size:1rem;font-weight:600}
+#menu-toggle{background:none;border:none;color:#fff;font-size:1.5rem;cursor:pointer;line-height:1;padding:4px}
+.layout{display:flex;min-height:calc(100vh - 56px)}
+/* SIDEBAR */
+.sidebar{width:260px;background:#fff;border-right:1px solid var(--border);flex-shrink:0;overflow-y:auto}
+.sidebar-user{padding:20px;border-bottom:1px solid var(--border);text-align:center}
+.sidebar-avatar{width:56px;height:56px;border-radius:50%;background:var(--primary-light);display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin:0 auto 8px}
+.sidebar-name{font-size:14px;font-weight:700;color:var(--primary-dark)}
+.sidebar-role{font-size:12px;color:#6b7280;margin-top:2px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:13px 20px;cursor:pointer;font-size:14px;font-weight:500;color:#374151;transition:.15s;border-left:3px solid transparent}
+.nav-item:hover{background:var(--primary-light);color:var(--primary)}
+.nav-item.active{background:var(--primary-light);color:var(--primary);border-left-color:var(--primary);font-weight:600}
+.nav-badge{margin-left:auto;background:var(--danger);color:#fff;border-radius:10px;padding:1px 7px;font-size:11px;font-weight:700}
+.sidebar-footer{padding:16px 20px;border-top:1px solid var(--border)}
+/* CONTENT */
+.content{flex:1;padding:24px;overflow-y:auto}
+.section{display:none}.section.active{display:block}
+/* STAT CARDS */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:24px}
+.stat-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:16px;text-align:center}
+.stat-card .num{font-size:1.8rem;font-weight:700;color:var(--primary);font-family:'Poppins',sans-serif}
+.stat-card .lbl{font-size:12px;color:#6b7280;margin-top:4px}
+/* BAR CHART */
+.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.bar-label{width:150px;font-size:12px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar-track{flex:1;background:#f0faf5;border-radius:4px;height:16px;overflow:hidden}
+.bar-fill{background:var(--primary);height:100%;border-radius:4px;transition:.4s}
+.bar-val{width:28px;text-align:right;font-size:12px;font-weight:600}
+/* TABLE */
+.table-wrap{background:#fff;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.data-table{width:100%;border-collapse:collapse;font-size:13px}
+.data-table thead tr{background:#f8fcfa;border-bottom:1px solid var(--border)}
+.data-table th{padding:10px 14px;text-align:left;font-weight:600;font-size:12px;color:#374151}
+.data-table td{padding:10px 14px;border-bottom:1px solid var(--border);vertical-align:middle}
+.data-table tr:last-child td{border-bottom:none}
+/* CALENDAR */
+.cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.cal-nav{background:none;border:1.5px solid var(--border);border-radius:8px;padding:6px 12px;cursor:pointer}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cal-day-name{text-align:center;font-size:12px;font-weight:700;color:#6b7280;padding:6px 0}
+.cal-day{min-height:60px;background:#fff;border:1px solid var(--border);border-radius:6px;padding:4px;cursor:pointer;transition:.15s}
+.cal-day:hover{background:var(--primary-light)}
+.cal-day.today{border-color:var(--primary);background:var(--primary-light)}
+.cal-day.other-month{background:#f9fafb;color:#9ca3af}
+.cal-day-num{font-size:12px;font-weight:600;margin-bottom:2px}
+.cal-event-dot{font-size:9px;background:var(--primary);color:#fff;border-radius:3px;padding:1px 4px;margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* GALLERY */
+.gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.gallery-item{aspect-ratio:1;background:var(--primary-light);border-radius:8px;overflow:hidden;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:2rem}
+.gallery-item img{width:100%;height:100%;object-fit:cover}
+#lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9998;align-items:center;justify-content:center}
+#lightbox.open{display:flex}
+#lightbox img{max-width:90vw;max-height:90vh;border-radius:8px}
+#lb-close{position:absolute;top:16px;right:16px;background:rgba(255,255,255,.2);border:none;color:#fff;font-size:1.5rem;width:40px;height:40px;border-radius:50%;cursor:pointer}
+/* MSG */
+.msg-item{padding:14px 16px;border:1px solid var(--border);border-radius:var(--radius);margin-bottom:8px;background:#fff}
+.msg-subject{font-weight:600;font-size:14px}
+.msg-meta{font-size:12px;color:#9ca3af;margin-top:4px}
+/* FORM PANEL */
+.form-panel{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px;display:none}
+.form-panel.open{display:block}
+/* FILTERS */
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.filters select,.filters input{flex:1;min-width:140px}
+/* MOBILE */
+@media(max-width:768px){
+  .sidebar{position:fixed;left:-260px;top:0;height:100vh;z-index:200;transition:.3s;box-shadow:4px 0 20px rgba(0,0,0,.15)}
+  .sidebar.open{left:0}
+  .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:199}
+  .sidebar-overlay.open{display:block}
+  .content{padding:16px}
+  .grid-2{grid-template-columns:1fr}
+  .gallery-grid{grid-template-columns:repeat(2,1fr)}
+  .stat-grid{grid-template-columns:repeat(2,1fr)}
+  .data-table{font-size:12px}
+}
+@media(min-width:769px){#menu-toggle{display:none}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="ico">🏛️</div>
+      <h2>Brigadas Ambientales IAGAMI</h2>
+      <p>Portal del Comandante Municipal</p>
+    </div>
+    <div id="login-err" style="display:none"></div>
+    <div class="form-group"><label>Correo electrónico</label><input type="email" id="l-email" placeholder="correo@ejemplo.com"></div>
+    <div class="form-group"><label>Contraseña</label><input type="password" id="l-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <button class="btn btn-primary btn-block" id="btn-login" onclick="doLogin()">Iniciar sesión</button>
+    <p style="text-align:center;margin-top:16px;font-size:13px;color:#6b7280">Portal de uso exclusivo para Comandantes Municipales</p>
+  </div>
+</div>
+
+<!-- LIGHTBOX -->
+<div id="lightbox" onclick="if(event.target===this)closeLb()">
+  <button id="lb-close" onclick="closeLb()">✕</button>
+  <img id="lb-img" src="" alt="">
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="top-bar">
+    <div style="display:flex;align-items:center;gap:12px">
+      <button id="menu-toggle" onclick="toggleSidebar()">☰</button>
+      <h1>Brigadas Ambientales — Comandante Municipal</h1>
+    </div>
+    <button class="btn btn-sm" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3)" onclick="doLogout()">Salir</button>
+  </div>
+  <div class="layout">
+    <div class="sidebar-overlay" id="sb-overlay" onclick="toggleSidebar()"></div>
+    <div class="sidebar" id="sidebar">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar">🏛️</div>
+        <div class="sidebar-name" id="sb-name">Cargando...</div>
+        <div class="sidebar-role">Comandante Municipal</div>
+      </div>
+      <nav>
+        <div class="nav-item active" onclick="showSec('inicio')" data-sec="inicio">🏠 <span>Inicio</span></div>
+        <div class="nav-item" onclick="showSec('mapa')" data-sec="mapa">🗺️ <span>Mapa Territorial</span></div>
+        <div class="nav-item" onclick="showSec('brigadas')" data-sec="brigadas">🌿 <span>Brigadas</span></div>
+        <div class="nav-item" onclick="showSec('representantes')" data-sec="representantes">👥 <span>Representantes</span> <span class="nav-badge" id="nb-reps" style="display:none">0</span></div>
+        <div class="nav-item" onclick="showSec('brigadistas')" data-sec="brigadistas">🧑‍🤝‍🧑 <span>Brigadistas</span></div>
+        <div class="nav-item" onclick="showSec('actividades')" data-sec="actividades">📅 <span>Actividades</span></div>
+        <div class="nav-item" onclick="showSec('asistencia')" data-sec="asistencia">✅ <span>Asistencia</span></div>
+        <div class="nav-item" onclick="showSec('comunicados')" data-sec="comunicados">📣 <span>Comunicados</span></div>
+        <div class="nav-item" onclick="showSec('solicitudes')" data-sec="solicitudes">📦 <span>Solicitudes</span> <span class="nav-badge" id="nb-sols" style="display:none">0</span></div>
+        <div class="nav-item" onclick="showSec('evidencias')" data-sec="evidencias">📸 <span>Evidencias</span></div>
+        <div class="nav-item" onclick="showSec('informes')" data-sec="informes">📝 <span>Informes</span></div>
+        <div class="nav-item" onclick="showSec('estadisticas')" data-sec="estadisticas">📈 <span>Estadísticas</span></div>
+        <div class="nav-item" onclick="showSec('calendario')" data-sec="calendario">🗓️ <span>Calendario</span></div>
+        <div class="nav-item" onclick="showSec('convocatorias')" data-sec="convocatorias">🏅 <span>Convocatorias</span></div>
+        <div class="nav-item" onclick="showSec('notificaciones')" data-sec="notificaciones">🔔 <span>Notificaciones</span> <span class="nav-badge" id="nb-notif" style="display:none">0</span></div>
+        <div class="nav-item" onclick="showSec('documentos')" data-sec="documentos">📂 <span>Documentos</span></div>
+        <div class="nav-item" onclick="showSec('perfil')" data-sec="perfil">👤 <span>Mi Perfil</span></div>
+        <div class="nav-item" onclick="showSec('config')" data-sec="config">⚙️ <span>Configuración</span></div>
+      </nav>
+      <div class="sidebar-footer">
+        <div style="font-size:11px;color:#9ca3af;text-align:center">SIGAP · IAGAMI · Municipio Iribarren</div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- INICIO -->
+      <div class="section active" id="sec-inicio">
+        <div class="section-title">🏠 Panel de Control Municipal</div>
+        <div class="stat-grid" id="inicio-stats">
+          <div class="stat-card"><div class="num" id="st-brigadistas">—</div><div class="lbl">Total brigadistas</div></div>
+          <div class="stat-card"><div class="num" id="st-brigadas">—</div><div class="lbl">Brigadas activas</div></div>
+          <div class="stat-card"><div class="num" id="st-actividades">—</div><div class="lbl">Actividades este mes</div></div>
+          <div class="stat-card"><div class="num" id="st-solicitudes">—</div><div class="lbl">Solicitudes pendientes</div></div>
+          <div class="stat-card"><div class="num" id="st-reps">—</div><div class="lbl">Representantes</div></div>
+          <div class="stat-card"><div class="num" id="st-parroquias">16</div><div class="lbl">Parroquias cubiertas</div></div>
+        </div>
+        <div class="card" style="margin-bottom:16px">
+          <div style="font-size:14px;font-weight:700;color:var(--primary-dark);margin-bottom:12px">Brigadistas por parroquia</div>
+          <div id="inicio-chart"><div class="spinner"></div></div>
+        </div>
+        <div class="card">
+          <div style="font-size:14px;font-weight:700;color:var(--primary-dark);margin-bottom:12px">Últimas actividades</div>
+          <div id="inicio-actividades"><div class="spinner"></div></div>
+        </div>
+      </div>
+
+      <!-- MAPA -->
+      <div class="section" id="sec-mapa">
+        <div class="section-title">🗺️ Mapa Territorial</div>
+        <div style="margin-bottom:16px">
+          <a href="../mapa/index.html" target="_blank" class="btn btn-secondary" style="text-decoration:none">🗺️ Abrir mapa interactivo</a>
+        </div>
+        <div class="card" style="margin-bottom:16px">
+          <div style="font-size:13px;font-weight:600;margin-bottom:12px">Brigadas por parroquia</div>
+          <div id="mapa-tabla"><div class="spinner"></div></div>
+        </div>
+      </div>
+
+      <!-- BRIGADAS -->
+      <div class="section" id="sec-brigadas">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+          <div class="section-title" style="margin-bottom:0">🌿 Brigadas Ambientales</div>
+          <button class="btn btn-primary btn-sm" onclick="toggleForm('brig-form')">+ Nueva Brigada</button>
+        </div>
+        <div class="form-panel" id="brig-form">
+          <h4 style="margin-bottom:14px">Registrar Brigada</h4>
+          <div class="grid-2">
+            <div class="form-group"><label>Nombre *</label><input id="bf-nombre" placeholder="Nombre de la brigada"></div>
+            <div class="form-group"><label>Parroquia *</label><select id="bf-parroquia"><option value="">Selecciona...</option><option>Catedral</option><option>Concepción</option><option>El Cuji</option><option>Juan de Villegas</option><option>Tamaca</option><option>Unión</option><option>Agua Viva</option><option>Buena Vista</option><option>Cabudare</option><option>Montalbán</option><option>Olivos</option><option>Santa Rosa</option><option>Río Claro</option><option>Juárez</option><option>Aguedo Felipe Alvarado</option><option>Sarare</option></select></div>
+            <div class="form-group"><label>Fecha conformación</label><input id="bf-fecha" type="date"></div>
+            <div class="form-group"><label>Estado</label><select id="bf-estado"><option value="en_formacion">En formación</option><option value="activa">Activa</option><option value="en_planificacion">En planificación</option></select></div>
+            <div class="form-group" style="grid-column:span 2"><label>Área de actuación</label><input id="bf-area" placeholder="Ej: Quebrada norte de Barquisimeto"></div>
+            <div class="form-group" style="grid-column:span 2"><label>Objetivos</label><textarea id="bf-obj" rows="2" placeholder="Objetivos de la brigada..."></textarea></div>
+          </div>
+          <div style="display:flex;gap:8px"><button class="btn btn-primary btn-sm" onclick="saveBrigada()">💾 Guardar</button><button class="btn btn-secondary btn-sm" onclick="toggleForm('brig-form')">Cancelar</button></div>
+        </div>
+        <div class="filters">
+          <select id="bf-fp" onchange="loadBrigadas()"><option value="">Todas las parroquias</option><option>Catedral</option><option>Concepción</option><option>El Cuji</option><option>Juan de Villegas</option><option>Tamaca</option><option>Unión</option><option>Agua Viva</option><option>Buena Vista</option><option>Cabudare</option><option>Montalbán</option><option>Olivos</option><option>Santa Rosa</option><option>Río Claro</option><option>Juárez</option><option>Aguedo Felipe Alvarado</option><option>Sarare</option></select>
+          <select id="bf-fe" onchange="loadBrigadas()"><option value="">Todos los estados</option><option value="en_formacion">En formación</option><option value="activa">Activa</option><option value="en_planificacion">En planificación</option><option value="suspendida">Suspendida</option><option value="inactiva">Inactiva</option></select>
+        </div>
+        <div id="brigadas-list"><div class="spinner"></div></div>
+      </div>
+
+      <!-- REPRESENTANTES -->
+      <div class="section" id="sec-representantes">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+          <div class="section-title" style="margin-bottom:0">👥 Representantes Territoriales</div>
+          <button class="btn btn-primary btn-sm" onclick="toggleForm('rep-form')">+ Nuevo Representante</button>
+        </div>
+        <div class="form-panel" id="rep-form">
+          <h4 style="margin-bottom:14px">Registrar Representante</h4>
+          <div class="grid-2">
+            <div class="form-group"><label>Nombres *</label><input id="rf-nombres" placeholder="Nombres"></div>
+            <div class="form-group"><label>Apellidos *</label><input id="rf-apellidos" placeholder="Apellidos"></div>
+            <div class="form-group"><label>Email (usuario) *</label><input id="rf-email" type="email" placeholder="correo@ejemplo.com"></div>
+            <div class="form-group"><label>Contraseña inicial *</label><input id="rf-pass" type="password" placeholder="Mínimo 8 caracteres"></div>
+            <div class="form-group"><label>Tipo *</label><select id="rf-tipo"><option value="representante_consejo_comunal">Rep. Consejo Comunal</option><option value="representante_comuna">Rep. de Comuna</option></select></div>
+            <div class="form-group"><label>Parroquia</label><select id="rf-parroquia"><option value="">Selecciona...</option><option>Catedral</option><option>Concepción</option><option>El Cuji</option><option>Juan de Villegas</option><option>Tamaca</option><option>Unión</option><option>Agua Viva</option><option>Buena Vista</option><option>Cabudare</option><option>Montalbán</option><option>Olivos</option><option>Santa Rosa</option><option>Río Claro</option><option>Juárez</option><option>Aguedo Felipe Alvarado</option><option>Sarare</option></select></div>
+            <div class="form-group"><label>Cargo</label><input id="rf-cargo" placeholder="Ej: Coordinador de brigadas"></div>
+            <div class="form-group"><label>Teléfono</label><input id="rf-tel" placeholder="0414-0000000"></div>
+          </div>
+          <div style="display:flex;gap:8px"><button class="btn btn-primary btn-sm" onclick="saveRep()">💾 Crear</button><button class="btn btn-secondary btn-sm" onclick="toggleForm('rep-form')">Cancelar</button></div>
+        </div>
+        <div class="filters">
+          <select id="rf-ft" onchange="loadReps()"><option value="">Todos los tipos</option><option value="representante_comunal">Rep. de Comunal</option><option value="representante_consejo_comunal">Rep. de C. Comunal</option></select>
+          <select id="rf-fe" onchange="loadReps()"><option value="">Todos los estados</option><option value="pendiente">Pendiente</option><option value="activo">Activo</option><option value="suspendido">Suspendido</option></select>
+        </div>
+        <div id="reps-list"><div class="spinner"></div></div>
+      </div>
+
+      <!-- BRIGADISTAS -->
+      <div class="section" id="sec-brigadistas">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+          <div class="section-title" style="margin-bottom:0">🧑‍🤝‍🧑 Brigadistas</div>
+          <button class="btn btn-secondary btn-sm" onclick="exportBrigadistasCSV()">⬇ Exportar CSV</button>
+        </div>
+        <div class="filters">
+          <input id="brig-q" placeholder="Buscar nombre..." oninput="filterBrigadistas()">
+          <select id="brig-fp" onchange="filterBrigadistas()"><option value="">Todas las parroquias</option><option>Catedral</option><option>Concepción</option><option>El Cuji</option><option>Juan de Villegas</option><option>Tamaca</option><option>Unión</option><option>Agua Viva</option><option>Buena Vista</option><option>Cabudare</option><option>Montalbán</option><option>Olivos</option><option>Santa Rosa</option><option>Río Claro</option><option>Juárez</option><option>Aguedo Felipe Alvarado</option><option>Sarare</option></select>
+          <select id="brig-ft" onchange="filterBrigadistas()"><option value="">Adultos y menores</option><option value="adulto">Solo adultos</option><option value="menor">Solo menores</option></select>
+        </div>
+        <div id="brigadistas-counts" style="display:flex;gap:12px;margin-bottom:12px;font-size:13px"></div>
+        <div id="brigadistas-list"><div class="spinner"></div></div>
+      </div>
+
+      <!-- ACTIVIDADES -->
+      <div class="section" id="sec-actividades">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+          <div class="section-title" style="margin-bottom:0">📅 Actividades</div>
+          <button class="btn btn-primary btn-sm" onclick="toggleForm('act-form')">+ Nueva Actividad</button>
+        </div>
+        <div class="form-panel" id="act-form">
+          <h4 style="margin-bottom:14px">Registrar Actividad</h4>
+          <div class="grid-2">
+            <div class="form-group" style="grid-column:span 2"><label>Título *</label><input id="af-titulo" placeholder="Título de la actividad"></div>
+            <div class="form-group"><label>Tipo *</label><select id="af-tipo"><option value="jornada_limpieza">Jornada de limpieza</option><option value="siembra">Siembra</option><option value="charla_ambiental">Charla ambiental</option><option value="censo">Censo</option><option value="formacion">Formación</option><option value="visita">Visita</option><option value="otro">Otro</option></select></div>
+            <div class="form-group"><label>Fecha *</label><input id="af-fecha" type="date"></div>
+            <div class="form-group"><label>Hora inicio</label><input id="af-hora" type="time"></div>
+            <div class="form-group"><label>Parroquia</label><select id="af-parroquia"><option value="">Selecciona...</option><option>Catedral</option><option>Concepción</option><option>El Cuji</option><option>Juan de Villegas</option><option>Tamaca</option><option>Unión</option><option>Agua Viva</option><option>Buena Vista</option><option>Cabudare</option><option>Montalbán</option><option>Olivos</option><option>Santa Rosa</option><option>Río Claro</option><option>Juárez</option><option>Aguedo Felipe Alvarado</option><option>Sarare</option></select></div>
+            <div class="form-group"><label>Lugar</label><input id="af-lugar" placeholder="Dirección o referencia"></div>
+            <div class="form-group" style="grid-column:span 2"><label>Descripción</label><textarea id="af-desc" rows="2"></textarea></div>
+          </div>
+          <div style="display:flex;gap:8px"><button class="btn btn-primary btn-sm" onclick="saveActividad()">💾 Guardar</button><button class="btn btn-secondary btn-sm" onclick="toggleForm('act-form')">Cancelar</button></div>
+        </div>
+        <div class="filters">
+          <select id="act-fp" onchange="loadActividades()"><option value="">Todas las parroquias</option><option>Catedral</option><option>Concepción</option><option>El Cuji</option><option>Juan de Villegas</option><option>Tamaca</option><option>Unión</option><option>Agua Viva</option><option>Buena Vista</option><option>Cabudare</option><option>Montalbán</option><option>Olivos</option><option>Santa Rosa</option><option>Río Claro</option><option>Juárez</option><option>Aguedo Felipe Alvarado</option><option>Sarare</option></select>
+          <select id="act-fe" onchange="loadActividades()"><option value="">Todos los estados</option><option value="planificada">Planificada</option><option value="en_ejecucion">En ejecución</option><option value="ejecutada">Ejecutada</option><option value="cancelada">Cancelada</option></select>
+        </div>
+        <div id="actividades-list"><div class="spinner"></div></div>
+      </div>
+
+      <!-- ASISTENCIA -->
+      <div class="section" id="sec-asistencia">
+        <div class="section-title">✅ Asistencia por Actividad</div>
+        <div class="form-group" style="max-width:400px;margin-bottom:20px">
+          <label>Seleccionar actividad</label>
+          <select id="asist-act-sel" onchange="loadAsistencia()"><option value="">— Selecciona una actividad —</option></select>
+        </div>
+        <div id="asistencia-content"><div class="empty-state"><div class="ico">✅</div><p>Selecciona una actividad para ver la asistencia</p></div></div>
+      </div>
+
+      <!-- COMUNICADOS -->
+      <div class="section" id="sec-comunicados">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+          <div class="section-title" style="margin-bottom:0">📣 Comunicados y Convocatorias</div>
+          <button class="btn btn-primary btn-sm" onclick="toggleForm('conv-form')">+ Nuevo Comunicado</button>
+        </div>
+        <div class="form-panel" id="conv-form">
+          <h4 style="margin-bottom:14px">Enviar Comunicado</h4>
+          <div class="grid-2">
+            <div class="form-group" style="grid-column:span 2"><label>Asunto *</label><input id="cv-asunto" placeholder="Asunto del comunicado"></div>
+            <div class="form-group"><label>Destinatarios</label><select id="cv-dest"><option value="todos">Todos los representantes</option><option value="parroquia">Una parroquia</option></select></div>
+            <div class="form-group"><label>Prioridad</label><select id="cv-prior"><option value="normal">Normal</option><option value="urgente">🔴 Urgente</option></select></div>
+            <div class="form-group" style="grid-column:span 2"><label>Contenido *</label><textarea id="cv-cont" rows="4" placeholder="Escriba el contenido..."></textarea></div>
+          </div>
+          <div style="display:flex;gap:8px"><button class="btn btn-primary btn-sm" onclick="sendComunicado()">📤 Enviar</button><button class="btn btn-secondary btn-sm" onclick="toggleForm('conv-form')">Cancelar</button></div>
+        </div>
+        <div id="comunicados-list"><div class="spinner"></div></div>
+      </div>
+
+      <!-- SOLICITUDES -->
+      <div class="section" id="sec-solicitudes">
+        <div class="section-title">📦 Solicitudes de Apoyo</div>
+        <div class="filters">
+          <select id="sol-fe" onchange="loadSolicitudes()"><option value="">Todos los estados</option><option value="pendiente">Pendiente</option><option value="en_proceso">En proceso</option><option value="aprobada">Aprobada</option><option value="rechazada">Rechazada</option><option value="entregada">Entregada</option></select>
+          <select id="sol-ft" onchange="loadSolicitudes()"><option value="">Todos los tipos</option><option value="plantas">Plantas</option><option value="arboles">Árboles</option><option value="herramientas">Herramientas</option><option value="bolsas">Bolsas</option><option value="guantes">Guantes</option><option value="agua">Agua</option><option value="transporte">Transporte</option><option value="material_educativo">Material educativo</option><option value="apoyo_tecnico">Apoyo técnico</option><option value="formacion">Formación</option></select>
+        </div>
+        <div id="solicitudes-list"><div class="spinner"></div></div>
+        <div class="form-panel" id="sol-resp-form">
+          <input type="hidden" id="sol-resp-id">
+          <h4 style="margin-bottom:12px">Responder Solicitud</h4>
+          <div class="form-group"><label>Nuevo estado</label><select id="sol-resp-estado"><option value="en_proceso">En proceso</option><option value="aprobada">Aprobada</option><option value="rechazada">Rechazada</option><option value="entregada">Entregada</option></select></div>
+          <div class="form-group"><label>Respuesta institucional</label><textarea id="sol-resp-txt" rows="3" placeholder="Describa la acción tomada..."></textarea></div>
+          <div style="display:flex;gap:8px"><button class="btn btn-primary btn-sm" onclick="responderSolicitud()">💾 Guardar</button><button class="btn btn-secondary btn-sm" onclick="toggleForm('sol-resp-form')">Cancelar</button></div>
+        </div>
+      </div>
+
+      <!-- EVIDENCIAS -->
+      <div class="section" id="sec-evidencias">
+        <div class="section-title">📸 Evidencias</div>
+        <div class="filters">
+          <select id="ev-fp" onchange="loadEvidencias()"><option value="">Todas las parroquias</option><option>Catedral</option><option>Concepción</option><option>El Cuji</option><option>Juan de Villegas</option><option>Tamaca</option><option>Unión</option><option>Agua Viva</option><option>Buena Vista</option><option>Cabudare</option><option>Montalbán</option><option>Olivos</option><option>Santa Rosa</option><option>Río Claro</option><option>Juárez</option><option>Aguedo Felipe Alvarado</option><option>Sarare</option></select>
+          <select id="ev-ft" onchange="loadEvidencias()"><option value="">Todos los tipos</option><option value="foto">Foto</option><option value="video">Video</option><option value="documento">Documento</option></select>
+        </div>
+        <div id="evidencias-gallery"><div class="spinner"></div></div>
+      </div>
+
+      <!-- INFORMES -->
+      <div class="section" id="sec-informes">
+        <div class="section-title">📝 Informes de Actividad</div>
+        <div class="filters">
+          <select id="inf-fe" onchange="loadInformes()"><option value="">Todos los estados</option><option value="borrador">Borrador</option><option value="enviado">Enviado</option><option value="revisado">Revisado</option></select>
+        </div>
+        <div id="informes-list"><div class="spinner"></div></div>
+      </div>
+
+      <!-- ESTADÍSTICAS -->
+      <div class="section" id="sec-estadisticas">
+        <div class="section-title">📈 Estadísticas Municipales</div>
+        <div class="stat-grid" id="stats-cards"><div class="spinner"></div></div>
+        <div class="card" style="margin-bottom:16px">
+          <div style="font-size:13px;font-weight:700;color:var(--primary-dark);margin-bottom:12px">Brigadistas por parroquia</div>
+          <div id="stats-chart"><div class="spinner"></div></div>
+        </div>
+        <div class="card">
+          <div style="font-size:13px;font-weight:700;color:var(--primary-dark);margin-bottom:12px">Brigadas por estado</div>
+          <div id="stats-brigadas-estado"><div class="spinner"></div></div>
+        </div>
+      </div>
+
+      <!-- CALENDARIO -->
+      <div class="section" id="sec-calendario">
+        <div class="section-title">🗓️ Calendario de Actividades</div>
+        <div class="cal-header">
+          <button class="cal-nav" onclick="calNav(-1)">◀</button>
+          <h3 id="cal-title">—</h3>
+          <button class="cal-nav" onclick="calNav(1)">▶</button>
+        </div>
+        <div class="cal-grid">
+          <div class="cal-day-name">Dom</div><div class="cal-day-name">Lun</div><div class="cal-day-name">Mar</div>
+          <div class="cal-day-name">Mié</div><div class="cal-day-name">Jue</div><div class="cal-day-name">Vie</div><div class="cal-day-name">Sáb</div>
+        </div>
+        <div class="cal-grid" id="cal-days" style="margin-top:4px"></div>
+      </div>
+
+      <!-- CONVOCATORIAS -->
+      <div class="section" id="sec-convocatorias">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+          <div class="section-title" style="margin-bottom:0">🏅 Convocatorias Próximas</div>
+          <button class="btn btn-primary btn-sm" onclick="toggleForm('conv-act-form')">+ Nueva Convocatoria</button>
+        </div>
+        <div class="form-panel" id="conv-act-form">
+          <h4 style="margin-bottom:14px">Crear Convocatoria</h4>
+          <div class="grid-2">
+            <div class="form-group" style="grid-column:span 2"><label>Título *</label><input id="ca-titulo" placeholder="Título de la convocatoria"></div>
+            <div class="form-group"><label>Tipo</label><select id="ca-tipo"><option value="jornada_limpieza">Jornada de limpieza</option><option value="siembra">Siembra</option><option value="charla_ambiental">Charla ambiental</option><option value="formacion">Formación</option><option value="otro">Otro</option></select></div>
+            <div class="form-group"><label>Fecha *</label><input id="ca-fecha" type="date"></div>
+            <div class="form-group"><label>Hora</label><input id="ca-hora" type="time"></div>
+            <div class="form-group"><label>Parroquia</label><select id="ca-parroquia"><option value="">Municipal (todas)</option><option>Catedral</option><option>Concepción</option><option>El Cuji</option><option>Juan de Villegas</option><option>Tamaca</option><option>Unión</option><option>Agua Viva</option><option>Buena Vista</option><option>Cabudare</option><option>Montalbán</option><option>Olivos</option><option>Santa Rosa</option><option>Río Claro</option><option>Juárez</option><option>Aguedo Felipe Alvarado</option><option>Sarare</option></select></div>
+            <div class="form-group"><label>Lugar</label><input id="ca-lugar" placeholder="Lugar de encuentro"></div>
+            <div class="form-group" style="grid-column:span 2"><label>Descripción</label><textarea id="ca-desc" rows="2"></textarea></div>
+          </div>
+          <div style="display:flex;gap:8px"><button class="btn btn-primary btn-sm" onclick="saveConvocatoria()">📤 Publicar</button><button class="btn btn-secondary btn-sm" onclick="toggleForm('conv-act-form')">Cancelar</button></div>
+        </div>
+        <div id="convocatorias-list"><div class="spinner"></div></div>
+      </div>
+
+      <!-- NOTIFICACIONES -->
+      <div class="section" id="sec-notificaciones">
+        <div class="section-title">🔔 Notificaciones Pendientes</div>
+        <div id="notif-list"><div class="spinner"></div></div>
+      </div>
+
+      <!-- DOCUMENTOS -->
+      <div class="section" id="sec-documentos">
+        <div class="section-title">📂 Documentos e Informes</div>
+        <div id="docs-list"><div class="spinner"></div></div>
+      </div>
+
+      <!-- PERFIL -->
+      <div class="section" id="sec-perfil">
+        <div class="section-title">👤 Mi Perfil</div>
+        <div class="card" style="max-width:500px">
+          <div id="perfil-info"></div>
+          <hr style="border:none;border-top:1px solid var(--border);margin:20px 0">
+          <h4 style="margin-bottom:12px">Cambiar contraseña</h4>
+          <div class="form-group"><label>Nueva contraseña</label><input id="pf-pass1" type="password" placeholder="Mínimo 8 caracteres"></div>
+          <div class="form-group"><label>Confirmar contraseña</label><input id="pf-pass2" type="password" placeholder="Repite la contraseña"></div>
+          <button class="btn btn-primary btn-sm" onclick="changePass()">🔒 Cambiar contraseña</button>
+        </div>
+      </div>
+
+      <!-- CONFIGURACIÓN -->
+      <div class="section" id="sec-config">
+        <div class="section-title">⚙️ Configuración</div>
+        <div class="card" style="max-width:500px">
+          <div style="font-size:14px;color:#6b7280;margin-bottom:16px">Las opciones avanzadas de gestión del sistema están disponibles en el Panel Administrativo de IAGAMI.</div>
+          <a href="/admin/" class="btn btn-secondary" style="text-decoration:none">🔧 Ir al Panel Administrativo</a>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /layout -->
+</div><!-- /app -->
+
+<script>
+const PB_URL = 'https://api.iagami.online';
+const pb = new PocketBase(PB_URL);
+
+function esc(s){ const d=document.createElement('div');d.textContent=s??'';return d.innerHTML; }
+
+function toast(msg, type='ok') {
+  const t = document.createElement('div');
+  t.className = 'toast toast-' + type;
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sb-overlay').classList.toggle('open');
+}
+
+function toggleForm(id) {
+  const f = document.getElementById(id);
+  if (f) f.classList.toggle('open');
+}
+
+let _cmd = null;
+let _adultos = [], _menores = [];
+// Brute-force protection — Server-side: configurar limit_req en Nginx — ver docs/nginx_rate_limiting.md
+// PENDIENTE: Nginx rate limiting — ver docs/nginx_rate_limiting.md
+let _cmdLoginAttempts = 0, _cmdLoginBlocked = false;
+let _calYear = new Date().getFullYear(), _calMonth = new Date().getMonth();
+let _actividades = [];
+
+async function doLogin() {
+  const email = document.getElementById('l-email').value.trim();
+  const pass = document.getElementById('l-pass').value;
+  const errEl = document.getElementById('login-err');
+  errEl.style.display = 'none';
+  // PENDIENTE: Nginx rate limiting — ver docs/nginx_rate_limiting.md
+  if (_cmdLoginBlocked) { errEl.textContent = 'Demasiados intentos fallidos. Espera 60 segundos.'; errEl.style.display = 'block'; return; }
+  if (!email || !pass) { errEl.textContent = 'Ingresa tu correo y contraseña.'; errEl.style.display = 'block'; return; }
+  const btn = document.getElementById('btn-login');
+  btn.disabled = true; btn.textContent = 'Verificando...';
+  try {
+    const auth = await pb.collection('comandantes_brigadas').authWithPassword(email, pass);
+    if (auth.record.estado !== 'activo') {
+      pb.authStore.clear();
+      errEl.textContent = 'Tu cuenta no está activa. Contacta a la administración.';
+      errEl.style.display = 'block';
+      btn.disabled = false; btn.textContent = 'Iniciar sesión';
+      return;
+    }
+    _cmdLoginAttempts = 0;
+    _cmd = auth.record;
+    initApp();
+  } catch(e) {
+    _cmdLoginAttempts++;
+    if (_cmdLoginAttempts >= 5) {
+      _cmdLoginBlocked = true;
+      setTimeout(() => { _cmdLoginBlocked = false; _cmdLoginAttempts = 0; }, 60000);
+      errEl.textContent = 'Cuenta bloqueada temporalmente. Espera 60 segundos.';
+    } else {
+      errEl.textContent = 'Correo o contraseña incorrectos.';
+    }
+    errEl.style.display = 'block';
+    btn.disabled = false; btn.textContent = 'Iniciar sesión';
+  }
+}
+
+function doLogout() {
+  pb.authStore.clear();
+  _cmd = null;
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+}
+
+function initApp() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('sb-name').textContent = (_cmd.nombres + ' ' + _cmd.apellidos) || _cmd.email;
+  loadDashboard();
+  loadActividadesSelector();
+}
+
+function showSec(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const sec = document.getElementById('sec-' + id);
+  if (sec) sec.classList.add('active');
+  const nav = document.querySelector('[data-sec="' + id + '"]');
+  if (nav) nav.classList.add('active');
+  if (window.innerWidth < 769) toggleSidebar();
+  const loaders = {
+    mapa: loadMapa, brigadas: loadBrigadas, representantes: loadReps,
+    brigadistas: loadBrigadistas, actividades: loadActividades,
+    comunicados: loadComunicados, solicitudes: loadSolicitudes,
+    evidencias: loadEvidencias, informes: loadInformes,
+    estadisticas: loadEstadisticas, calendario: renderCal,
+    convocatorias: loadConvocatorias, notificaciones: loadNotificaciones,
+    documentos: loadDocumentos, perfil: loadPerfil
+  };
+  if (loaders[id]) loaders[id]();
+}
+
+/* ─── DASHBOARD ─── */
+async function loadDashboard() {
+  try {
+    const [resA, resM, resBrig, resAct, resRep, resSol] = await Promise.all([
+      pb.collection('brigadistas').getList(1,1,{}).catch(()=>({totalItems:0})),
+      pb.collection('brigadistas_menores').getList(1,1,{}).catch(()=>({totalItems:0})),
+      pb.collection('brigadas').getList(1,1,{filter:'estado="activa"'}).catch(()=>({totalItems:0})),
+      pb.collection('actividades_brigadas').getList(1,1,{filter:`fecha>="${new Date().toISOString().slice(0,7)}-01"`}).catch(()=>({totalItems:0})),
+      pb.collection('representantes_brigadas').getList(1,1,{}).catch(()=>({totalItems:0})),
+      pb.collection('solicitudes_apoyo').getList(1,1,{filter:'estado="pendiente"'}).catch(()=>({totalItems:0}))
+    ]);
+    document.getElementById('st-brigadistas').textContent = resA.totalItems + resM.totalItems;
+    document.getElementById('st-brigadas').textContent = resBrig.totalItems;
+    document.getElementById('st-actividades').textContent = resAct.totalItems;
+    document.getElementById('st-solicitudes').textContent = resSol.totalItems;
+    document.getElementById('st-reps').textContent = resRep.totalItems;
+    if (resSol.totalItems > 0) { document.getElementById('nb-sols').style.display = ''; document.getElementById('nb-sols').textContent = resSol.totalItems; }
+    const repPend = await pb.collection('representantes_brigadas').getList(1,1,{filter:'estado="pendiente"'}).catch(()=>({totalItems:0}));
+    if (repPend.totalItems > 0) { document.getElementById('nb-reps').style.display = ''; document.getElementById('nb-reps').textContent = repPend.totalItems; }
+    const totalNotif = resSol.totalItems + repPend.totalItems;
+    if (totalNotif > 0) { document.getElementById('nb-notif').style.display = ''; document.getElementById('nb-notif').textContent = totalNotif; }
+    loadInicioChart();
+    loadUltimasActividades();
+  } catch(e) {}
+}
+
+async function loadInicioChart() {
+  const el = document.getElementById('inicio-chart');
+  if (!el) return;
+  try {
+    const [rA, rM] = await Promise.all([
+      pb.collection('brigadistas').getList(1,2000,{fields:'parroquia'}).catch(()=>({items:[]})),
+      pb.collection('brigadistas_menores').getList(1,2000,{fields:'parroquia'}).catch(()=>({items:[]}))
+    ]);
+    const all = [...(rA.items||[]),...(rM.items||[])];
+    const byP = {};
+    all.forEach(b => { byP[b.parroquia||'Sin parroquia'] = (byP[b.parroquia||'Sin parroquia']||0)+1; });
+    const sorted = Object.entries(byP).sort((a,b)=>b[1]-a[1]).slice(0,10);
+    const max = sorted[0]?sorted[0][1]:1;
+    el.innerHTML = sorted.length ? sorted.map(([p,n])=>`<div class="bar-row"><div class="bar-label">${esc(p)}</div><div class="bar-track"><div class="bar-fill" style="width:${Math.round(n/max*100)}%"></div></div><div class="bar-val">${n}</div></div>`).join('') : '<span style="color:var(--muted)">Sin datos aún</span>';
+  } catch(e) { el.innerHTML = '<span style="color:#9ca3af">No disponible</span>'; }
+}
+
+async function loadUltimasActividades() {
+  const el = document.getElementById('inicio-actividades');
+  if (!el) return;
+  try {
+    const res = await pb.collection('actividades_brigadas').getList(1,5,{sort:'-created'});
+    const items = res.items||[];
+    if (!items.length) { el.innerHTML = '<div class="empty-state"><div class="ico">📅</div><p>No hay actividades registradas</p></div>'; return; }
+    el.innerHTML = items.map(a=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)"><div><div style="font-size:13px;font-weight:600">${esc(a.titulo)}</div><div style="font-size:11px;color:#9ca3af">${a.fecha?new Date(a.fecha).toLocaleDateString('es-VE'):''} · ${esc(a.parroquia||'')}</div></div>${estBadge(a.estado)}</div>`).join('');
+  } catch(e) { el.innerHTML = '<span style="color:#9ca3af">No disponible</span>'; }
+}
+
+/* ─── MAPA ─── */
+async function loadMapa() {
+  const el = document.getElementById('mapa-tabla');
+  if (!el) return;
+  try {
+    const res = await pb.collection('brigadas').getList(1,500,{fields:'parroquia,estado'}).catch(()=>({items:[]}));
+    const byP = {};
+    (res.items||[]).forEach(b => { byP[b.parroquia||'—'] = (byP[b.parroquia||'—']||0)+1; });
+    const parroquias = ['Catedral','Concepción','El Cuji','Juan de Villegas','Tamaca','Unión','Agua Viva','Buena Vista','Cabudare','Montalbán','Olivos','Santa Rosa','Río Claro','Juárez','Aguedo Felipe Alvarado','Sarare'];
+    el.innerHTML = `<div class="table-wrap"><table class="data-table"><thead><tr><th>Parroquia</th><th>Brigadas</th></tr></thead><tbody>${parroquias.map(p=>`<tr><td>${esc(p)}</td><td style="font-weight:600;color:var(--primary)">${byP[p]||0}</td></tr>`).join('')}</tbody></table></div>`;
+  } catch(e) { el.innerHTML = '<span style="color:var(--danger)">Error al cargar</span>'; }
+}
+
+/* ─── BRIGADAS ─── */
+async function loadBrigadas() {
+  const el = document.getElementById('brigadas-list');
+  if (!el) return;
+  el.innerHTML = '<div class="spinner"></div>';
+  const fp = document.getElementById('bf-fp')?.value || '';
+  const fe = document.getElementById('bf-fe')?.value || '';
+  let filter = [];
+  if (fp) filter.push(`parroquia="${fp}"`);
+  if (fe) filter.push(`estado="${fe}"`);
+  try {
+    const res = await pb.collection('brigadas').getList(1,500,{sort:'-created',filter:filter.join('&&')||''});
+    const items = res.items||[];
+    if (!items.length) { el.innerHTML = '<div class="empty-state"><div class="ico">🌿</div><p>No se encontraron brigadas</p></div>'; return; }
+    el.innerHTML = `<div class="table-wrap"><table class="data-table"><thead><tr><th>Nombre</th><th>Parroquia</th><th>Estado</th><th>Conformación</th><th>Acción</th></tr></thead><tbody>${items.map(b=>`<tr><td style="font-weight:600">${esc(b.nombre)}</td><td>${esc(b.parroquia||'—')}</td><td>${estBadge(b.estado||'en_formacion')}</td><td>${b.fecha_conformacion?new Date(b.fecha_conformacion).toLocaleDateString('es-VE'):'—'}</td><td><select style="font-size:11px;padding:3px 6px;border:1px solid var(--border);border-radius:6px" onchange="updateBrigadaEstado('${b.id}',this.value)"><option value="en_formacion" ${b.estado==='en_formacion'?'selected':''}>En formación</option><option value="activa" ${b.estado==='activa'?'selected':''}>Activa</option><option value="en_planificacion" ${b.estado==='en_planificacion'?'selected':''}>En planificación</option><option value="suspendida" ${b.estado==='suspendida'?'selected':''}>Suspendida</option><option value="inactiva" ${b.estado==='inactiva'?'selected':''}>Inactiva</option></select></td></tr>`).join('')}</tbody></table></div>`;
+  } catch(e) { el.innerHTML = '<span style="color:var(--danger)">Error al cargar brigadas</span>'; }
+}
+
+async function saveBrigada() {
+  const nombre = document.getElementById('bf-nombre')?.value.trim();
+  const parroquia = document.getElementById('bf-parroquia')?.value;
+  if (!nombre || !parroquia) { toast('Nombre y parroquia son obligatorios', 'err'); return; }
+  try {
+    await pb.collection('brigadas').create({nombre,parroquia,fecha_conformacion:document.getElementById('bf-fecha')?.value||null,estado:document.getElementById('bf-estado')?.value||'en_formacion',area_actuacion:document.getElementById('bf-area')?.value.trim(),objetivos:document.getElementById('bf-obj')?.value.trim()});
+    toast('Brigada registrada');
+    toggleForm('brig-form');
+    ['bf-nombre','bf-fecha','bf-area','bf-obj'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+    loadBrigadas();
+  } catch(e) { toast('Error: '+(e.message||''), 'err'); }
+}
+
+async function updateBrigadaEstado(id, estado) {
+  try { await pb.collection('brigadas').update(id,{estado}); toast('Estado actualizado'); }
+  catch(e) { toast('Error al actualizar','err'); loadBrigadas(); }
+}
+
+/* ─── REPRESENTANTES ─── */
+async function loadReps() {
+  const el = document.getElementById('reps-list');
+  if (!el) return;
+  el.innerHTML = '<div class="spinner"></div>';
+  const ft = document.getElementById('rf-ft')?.value || '';
+  const fe = document.getElementById('rf-fe')?.value || '';
+  let filter = [];
+  if (ft) filter.push(`tipo="${ft}"`);
+  if (fe) filter.push(`estado="${fe}"`);
+  try {
+    const res = await pb.collection('representantes_brigadas').getList(1,300,{sort:'-created',filter:filter.join('&&')||''});
+    const items = res.items||[];
+    if (!items.length) { el.innerHTML = '<div class="empty-state"><div class="ico">👥</div><p>No se encontraron representantes</p></div>'; return; }
+    el.innerHTML = `<div class="table-wrap"><table class="data-table"><thead><tr><th>Nombre</th><th>Parroquia</th><th>Tipo</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>${items.map(r=>`<tr><td style="font-weight:600">${esc(r.nombres)} ${esc(r.apellidos)}</td><td>${esc(r.parroquia||'—')}</td><td style="font-size:11px">${r.tipo==='representante_comunal'?'Comunal':'C. Comunal'}</td><td>${estBadge(r.estado||'pendiente')}</td><td style="display:flex;gap:6px;flex-wrap:wrap">${r.estado==='pendiente'?`<button onclick="aprobarRep('${r.id}')" style="font-size:11px;padding:4px 10px;border-radius:6px;border:none;background:#dcfce7;color:#166534;font-weight:600;cursor:pointer">✓ Aprobar</button>`:''}${r.estado!=='suspendido'?`<button onclick="toggleRep('${r.id}','suspendido')" style="font-size:11px;padding:4px 10px;border-radius:6px;border:1px solid var(--border);cursor:pointer;background:#fff">Suspender</button>`:`<button onclick="toggleRep('${r.id}','activo')" style="font-size:11px;padding:4px 10px;border-radius:6px;border:1px solid var(--border);cursor:pointer;background:#fff">Activar</button>`}</td></tr>`).join('')}</tbody></table></div>`;
+  } catch(e) { el.innerHTML = '<span style="color:var(--danger)">Error al cargar</span>'; }
+}
+
+async function saveRep() {
+  const nombres = document.getElementById('rf-nombres')?.value.trim();
+  const apellidos = document.getElementById('rf-apellidos')?.value.trim();
+  const email = document.getElementById('rf-email')?.value.trim();
+  const pass = document.getElementById('rf-pass')?.value;
+  if (!nombres||!apellidos||!email||!pass) { toast('Completa los campos obligatorios','err'); return; }
+  if (pass.length < 8) { toast('Contraseña mínimo 8 caracteres','err'); return; }
+  try {
+    await pb.collection('representantes_brigadas').create({nombres,apellidos,email,password:pass,passwordConfirm:pass,tipo:document.getElementById('rf-tipo')?.value||'representante_consejo_comunal',parroquia:document.getElementById('rf-parroquia')?.value,cargo:document.getElementById('rf-cargo')?.value.trim(),telefono:document.getElementById('rf-tel')?.value.trim(),estado:'activo'});
+    toast('Representante creado');
+    toggleForm('rep-form');
+    ['rf-nombres','rf-apellidos','rf-email','rf-pass','rf-cargo','rf-tel'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+    loadReps();
+  } catch(e) { toast('Error: '+(e.message||''),'err'); }
+}
+
+async function aprobarRep(id) {
+  try { await pb.collection('representantes_brigadas').update(id,{estado:'activo'}); toast('Aprobado'); loadReps(); }
+  catch(e) { toast('Error','err'); }
+}
+
+async function toggleRep(id, estado) {
+  try { await pb.collection('representantes_brigadas').update(id,{estado}); toast('Estado actualizado'); loadReps(); }
+  catch(e) { toast('Error','err'); }
+}
+
+/* ─── BRIGADISTAS ─── */
+async function loadBrigadistas() {
+  try {
+    const [rA, rM] = await Promise.all([
+      pb.collection('brigadistas').getList(1,2000,{sort:'apellidos'}).catch(()=>({items:[]})),
+      pb.collection('brigadistas_menores').getList(1,2000,{sort:'apellidos'}).catch(()=>({items:[]}))
+    ]);
+    _adultos = rA.items||[];
+    _menores = rM.items||[];
+    document.getElementById('brigadistas-counts').innerHTML = `<span style="background:var(--primary-light);color:var(--primary);padding:4px 12px;border-radius:20px;font-weight:600">Adultos: ${_adultos.length}</span><span style="background:#eff6ff;color:#1e40af;padding:4px 12px;border-radius:20px;font-weight:600">Menores: ${_menores.length}</span><span style="background:#fef9c3;color:#854d0e;padding:4px 12px;border-radius:20px;font-weight:600">Total: ${_adultos.length+_menores.length}</span>`;
+    filterBrigadistas();
+  } catch(e) {}
+}
+
+function filterBrigadistas() {
+  const el = document.getElementById('brigadistas-list');
+  if (!el) return;
+  const q = (document.getElementById('brig-q')?.value||'').toLowerCase();
+  const fp = document.getElementById('brig-fp')?.value||'';
+  const ft = document.getElementById('brig-ft')?.value||'';
+  let list = [];
+  if (ft !== 'menor') list = _adultos.filter(b=>(!q||(b.nombres+' '+b.apellidos).toLowerCase().includes(q))&&(!fp||b.parroquia===fp)).map(b=>({...b,_tipo:'Adulto'}));
+  if (ft !== 'adulto') list = [...list,..._menores.filter(b=>(!q||(b.nombres+' '+b.apellidos).toLowerCase().includes(q))&&(!fp||b.parroquia===fp)).map(b=>({...b,_tipo:'Menor'}))];
+  if (!list.length) { el.innerHTML = '<div class="empty-state"><div class="ico">🧑‍🤝‍🧑</div><p>No se encontraron brigadistas</p></div>'; return; }
+  el.innerHTML = `<div class="table-wrap"><table class="data-table"><thead><tr><th>Nombre</th><th>Tipo</th><th>Parroquia</th><th>Estado</th></tr></thead><tbody>${list.map(b=>`<tr><td style="font-weight:600">${esc(b.nombres)} ${esc(b.apellidos)}</td><td style="font-size:11px">${b._tipo}</td><td>${esc(b.parroquia||'—')}</td><td>${estBadge(b.estado||'pendiente')}</td></tr>`).join('')}</tbody></table></div>`;
+}
+
+async function exportBrigadistasCSV() {
+  const adultos = _adultos.map(b=>['Adulto',b.nombres,b.apellidos,b.cedula||'',b.email||'',b.parroquia||'',b.estado||''].join(','));
+  const menores = _menores.map(b=>['Menor',b.nombres,b.apellidos,'',b.email||'',b.parroquia||'',b.estado||''].join(','));
+  const csv = ['Tipo,Nombres,Apellidos,Cédula,Email,Parroquia,Estado',...adultos,...menores].join('\n');
+  const blob = new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `brigadistas_${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+  toast('CSV exportado');
+}
+
+/* ─── ACTIVIDADES ─── */
+async function loadActividades() {
+  const el = document.getElementById('actividades-list');
+  if (!el) return;
+  el.innerHTML = '<div class="spinner"></div>';
+  const fp = document.getElementById('act-fp')?.value||'';
+  const fe = document.getElementById('act-fe')?.value||'';
+  let filter = [];
+  if (fp) filter.push(`parroquia="${fp}"`);
+  if (fe) filter.push(`estado="${fe}"`);
+  try {
+    const res = await pb.collection('actividades_brigadas').getList(1,200,{sort:'-fecha',filter:filter.join('&&')||''});
+    _actividades = res.items||[];
+    if (!_actividades.length) { el.innerHTML = '<div class="empty-state"><div class="ico">📅</div><p>No hay actividades</p></div>'; return; }
+    el.innerHTML = `<div class="table-wrap"><table class="data-table"><thead><tr><th>Título</th><th>Tipo</th><th>Fecha</th><th>Parroquia</th><th>Estado</th><th>Acción</th></tr></thead><tbody>${_actividades.map(a=>`<tr><td style="font-weight:600">${esc(a.titulo)}</td><td style="font-size:11px">${esc(a.tipo||'')}</td><td>${a.fecha?new Date(a.fecha).toLocaleDateString('es-VE'):'—'}</td><td>${esc(a.parroquia||'—')}</td><td>${estBadge(a.estado||'planificada')}</td><td><select style="font-size:11px;padding:3px 6px;border:1px solid var(--border);border-radius:6px" onchange="updateActEstado('${a.id}',this.value)"><option value="planificada" ${a.estado==='planificada'?'selected':''}>Planificada</option><option value="en_ejecucion" ${a.estado==='en_ejecucion'?'selected':''}>En ejecución</option><option value="ejecutada" ${a.estado==='ejecutada'?'selected':''}>Ejecutada</option><option value="cancelada" ${a.estado==='cancelada'?'selected':''}>Cancelada</option></select></td></tr>`).join('')}</tbody></table></div>`;
+  } catch(e) { el.innerHTML = '<span style="color:var(--danger)">Error al cargar</span>'; }
+}
+
+async function saveActividad() {
+  const titulo = document.getElementById('af-titulo')?.value.trim();
+  const fecha = document.getElementById('af-fecha')?.value;
+  if (!titulo||!fecha) { toast('Título y fecha son obligatorios','err'); return; }
+  try {
+    await pb.collection('actividades_brigadas').create({titulo,fecha,tipo:document.getElementById('af-tipo')?.value||'otro',hora_inicio:document.getElementById('af-hora')?.value,parroquia:document.getElementById('af-parroquia')?.value,lugar:document.getElementById('af-lugar')?.value.trim(),descripcion:document.getElementById('af-desc')?.value.trim(),estado:'planificada'});
+    toast('Actividad registrada');
+    toggleForm('act-form');
+    ['af-titulo','af-fecha','af-hora','af-lugar','af-desc'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+    loadActividades();
+    loadActividadesSelector();
+  } catch(e) { toast('Error: '+(e.message||''),'err'); }
+}
+
+async function updateActEstado(id, estado) {
+  try { await pb.collection('actividades_brigadas').update(id,{estado}); toast('Estado actualizado'); }
+  catch(e) { toast('Error','err'); loadActividades(); }
+}
+
+async function loadActividadesSelector() {
+  const sel = document.getElementById('asist-act-sel');
+  if (!sel) return;
+  try {
+    const res = await pb.collection('actividades_brigadas').getList(1,100,{sort:'-fecha'});
+    const opts = (res.items||[]).map(a=>`<option value="${a.id}">${esc(a.titulo)} · ${a.fecha?new Date(a.fecha).toLocaleDateString('es-VE'):''}</option>`).join('');
+    sel.innerHTML = '<option value="">— Selecciona una actividad —</option>' + opts;
+  } catch(e) {}
+}
+
+/* ─── ASISTENCIA ─── */
+async function loadAsistencia() {
+  const actId = document.getElementById('asist-act-sel')?.value;
+  const el = document.getElementById('asistencia-content');
+  if (!el) return;
+  if (!actId) { el.innerHTML = '<div class="empty-state"><div class="ico">✅</div><p>Selecciona una actividad</p></div>'; return; }
+  el.innerHTML = '<div class="spinner"></div>';
+  try {
+    const res = await pb.collection('asistencia_brigadas').getList(1,500,{filter:`actividad_id="${actId}"`,expand:'brigadista_id,brigadista_menor_id'});
+    const items = res.items||[];
+    // Compatibilidad: campo nuevo estado (select) + campo anterior presente (bool)
+    function getEstadoAsistencia(r) {
+      if (r.estado) return r.estado;
+      if (r.presente === true) return 'presente';
+      if (r.presente === false) return 'ausente';
+      return 'sin_registro';
+    }
+    function estadoBadgeCmnd(r) {
+      const e = getEstadoAsistencia(r);
+      if (e === 'presente') return '<span class="badge badge-green">Presente</span>';
+      if (e === 'justificado') return '<span class="badge" style="background:#fef3c7;color:#92400e">Justificado</span>';
+      return '<span class="badge badge-red">Ausente</span>';
+    }
+    const presentes = items.filter(r=>getEstadoAsistencia(r)==='presente').length;
+    const justificados = items.filter(r=>getEstadoAsistencia(r)==='justificado').length;
+    el.innerHTML = `<div style="background:var(--primary-light);border-radius:var(--radius);padding:12px 16px;display:flex;gap:20px;font-size:14px;font-weight:600;margin-bottom:16px"><span style="color:var(--primary)">✅ Presentes: ${presentes}</span><span style="color:var(--danger)">❌ Ausentes: ${items.length-presentes-justificados}</span><span style="color:#92400e">⚠️ Justificados: ${justificados}</span><span style="color:#374151">Total: ${items.length}</span></div>${items.length?`<div class="table-wrap"><table class="data-table"><thead><tr><th>Brigadista</th><th>Asistencia</th><th>Hora llegada</th></tr></thead><tbody>${items.map(r=>{const b=r.expand?.brigadista_id||r.expand?.brigadista_menor_id;return`<tr><td>${b?esc(b.nombres+' '+b.apellidos):r.id.slice(0,8)}</td><td>${estadoBadgeCmnd(r)}</td><td>${esc(r.hora_llegada||'—')}</td></tr>`;}).join('')}</tbody></table></div>`:'<div class="empty-state"><div class="ico">📋</div><p>No hay registros de asistencia para esta actividad</p></div>'}`;
+  } catch(e) { el.innerHTML = '<span style="color:var(--danger)">Error al cargar asistencia</span>'; }
+}
+
+/* ─── COMUNICADOS ─── */
+async function loadComunicados() {
+  const el = document.getElementById('comunicados-list');
+  if (!el) return;
+  el.innerHTML = '<div class="spinner"></div>';
+  try {
+    const res = await pb.collection('comunicados_brigadas').getList(1,100,{sort:'-created'});
+    const items = res.items||[];
+    if (!items.length) { el.innerHTML = '<div class="empty-state"><div class="ico">📣</div><p>No hay comunicados</p></div>'; return; }
+    el.innerHTML = items.map(c=>`<div class="msg-item"><div class="msg-subject">${c.prioridad==='urgente'?'🔴 ':''} ${esc(c.asunto)}</div><div class="msg-meta">${new Date(c.created).toLocaleDateString('es-VE')} · Destinatarios: ${esc(c.destinatarios||'todos')}</div><div style="font-size:13px;margin-top:8px;color:#374151">${esc(c.contenido)}</div></div>`).join('');
+  } catch(e) { el.innerHTML = '<span style="color:var(--danger)">Error al cargar</span>'; }
+}
+
+async function sendComunicado() {
+  const asunto = document.getElementById('cv-asunto')?.value.trim();
+  const contenido = document.getElementById('cv-cont')?.value.trim();
+  if (!asunto||!contenido) { toast('Asunto y contenido son obligatorios','err'); return; }
+  try {
+    await pb.collection('comunicados_brigadas').create({asunto,contenido,destinatarios:document.getElementById('cv-dest')?.value||'todos',prioridad:document.getElementById('cv-prior')?.value||'normal',fecha_envio:new Date().toISOString()});
+    toast('Comunicado enviado');
+    toggleForm('conv-form');
+    ['cv-asunto','cv-cont'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+    loadComunicados();
+  } catch(e) { toast('Error: '+(e.message||''),'err'); }
+}
+
+/* ─── SOLICITUDES ─── */
+async function loadSolicitudes() {
+  const el = document.getElementById('solicitudes-list');
+  if (!el) return;
+  el.innerHTML = '<div class="spinner"></div>';
+  const fe = document.getElementById('sol-fe')?.value||'';
+  const ft = document.getElementById('sol-ft')?.value||'';
+  let filter = [];
+  if (fe) filter.push(`estado="${fe}"`);
+  if (ft) filter.push(`tipo_apoyo="${ft}"`);
+  try {
+    const res = await pb.collection('solicitudes_apoyo').getList(1,200,{sort:'-created',filter:filter.join('&&')||''});
+    const items = res.items||[];
+    if (!items.length) { el.innerHTML = '<div class="empty-state"><div class="ico">📦</div><p>No hay solicitudes</p></div>'; return; }
+    const estadoColors = {pendiente:['#f59e0b','#fffbeb'],en_proceso:['#2563eb','#eff6ff'],aprobada:['#059669','#ecfdf5'],rechazada:['#dc2626','#fef2f2'],entregada:['#6b7280','#f9fafb']};
+    el.innerHTML = items.map(s=>{
+      const [color,bg] = estadoColors[s.estado]||['#6b7280','#f9fafb'];
+      return `<div class="card" style="margin-bottom:10px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px"><div style="flex:1"><div style="font-size:13px;font-weight:600">${esc(s.tipo_apoyo||'Apoyo')}</div><div style="font-size:11px;color:#9ca3af;margin-top:2px">${new Date(s.created).toLocaleDateString('es-VE')} · <span style="background:${bg};color:${color};font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px">${s.estado}</span></div><div style="font-size:12px;margin-top:6px">${esc(s.descripcion)}</div>${s.respuesta_institucional?`<div style="font-size:11px;margin-top:6px;color:#059669;font-weight:600">↳ ${esc(s.respuesta_institucional)}</div>`:''}</div><button onclick="document.getElementById('sol-resp-id').value='${s.id}';document.getElementById('sol-resp-form').classList.add('open')" style="font-size:11px;padding:6px 12px;border:1px solid var(--border);border-radius:8px;cursor:pointer;background:#fff;white-space:nowrap">Responder</button></div>`;
+    }).join('');
+  } catch(e) { el.innerHTML = '<span style="color:var(--danger)">Error al cargar</span>'; }
+}
+
+async function responderSolicitud() {
+  const id = document.getElementById('sol-resp-id')?.value;
+  if (!id) { toast('ID no encontrado','err'); return; }
+  try {
+    await pb.collection('solicitudes_apoyo').update(id,{estado:document.getElementById('sol-resp-estado')?.value,respuesta_institucional:document.getElementById('sol-resp-txt')?.value.trim(),fecha_respuesta:new Date().toISOString()});
+    toast('Respuesta guardada');
+    document.getElementById('sol-resp-form').classList.remove('open');
+    document.getElementById('sol-resp-txt').value = '';
+    loadSolicitudes();
+    loadDashboard();
+  } catch(e) { toast('Error','err'); }
+}
+
+/* ─── EVIDENCIAS ─── */
+async function loadEvidencias() {
+  const el = document.getElementById('evidencias-gallery');
+  if (!el) return;
+  el.innerHTML = '<div class="spinner"></div>';
+  const ft = document.getElementById('ev-ft')?.value||'';
+  let filter = ft ? `tipo="${ft}"` : '';
+  try {
+    const res = await pb.collection('evidencias_brigadas').getList(1,100,{sort:'-created',filter});
+    const items = res.items||[];
+    if (!items.length) { el.innerHTML = '<div class="empty-state"><div class="ico">📸</div><p>No hay evidencias</p></div>'; return; }
+    el.innerHTML = `<div class="gallery-grid">${items.map(e=>{
+      const files = Array.isArray(e.archivo) ? e.archivo : [e.archivo];
+      const isImg = files[0] && /\.(jpg|jpeg|png|webp)$/i.test(files[0]);
+      const url = files[0] ? `${PB_URL}/api/files/${e.collectionId}/${e.id}/${files[0]}` : '';
+      return `<div class="gallery-item" onclick="${isImg&&url?`openLb('${url}')`:''}">${isImg&&url?`<img src="${url}" alt="${esc(e.descripcion||'')}" loading="lazy">`:'<div style="text-align:center;font-size:11px;padding:8px">' + (e.tipo==='video'?'🎥':'📄') + '<br>' + esc(e.descripcion||'Archivo') + '</div>'}</div>`;
+    }).join('')}</div>`;
+  } catch(e) { el.innerHTML = '<span style="color:var(--danger)">Error al cargar evidencias</span>'; }
+}
+
+function openLb(url) { document.getElementById('lb-img').src = url; document.getElementById('lightbox').classList.add('open'); }
+function closeLb() { document.getElementById('lightbox').classList.remove('open'); document.getElementById('lb-img').src = ''; }
+
+/* ─── INFORMES ─── */
+async function loadInformes() {
+  const el = document.getElementById('informes-list');
+  if (!el) return;
+  el.innerHTML = '<div class="spinner"></div>';
+  const fe = document.getElementById('inf-fe')?.value||'';
+  try {
+    const res = await pb.collection('informes_actividad').getList(1,100,{sort:'-created',filter:fe?`estado="${fe}"`:''});
+    const items = res.items||[];
+    if (!items.length) { el.innerHTML = '<div class="empty-state"><div class="ico">📝</div><p>No hay informes</p></div>'; return; }
+    el.innerHTML = items.map(i=>`<div class="card" style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div><div style="font-size:13px;font-weight:600">${esc(i.titulo)}</div><div style="font-size:11px;color:#9ca3af;margin-top:2px">${new Date(i.created).toLocaleDateString('es-VE')} · ${estBadge(i.estado||'borrador')}</div><div style="font-size:12px;margin-top:8px">${esc(i.resumen)}</div></div>${i.estado==='enviado'?`<button onclick="marcarInformeRevisado('${i.id}')" style="font-size:11px;padding:6px 12px;border:none;border-radius:8px;background:var(--primary-light);color:var(--primary);font-weight:600;cursor:pointer;white-space:nowrap">✓ Marcar revisado</button>`:''}</div></div>`).join('');
+  } catch(e) { el.innerHTML = '<span style="color:var(--danger)">Error al cargar</span>'; }
+}
+
+async function marcarInformeRevisado(id) {
+  try { await pb.collection('informes_actividad').update(id,{estado:'revisado'}); toast('Informe marcado como revisado'); loadInformes(); }
+  catch(e) { toast('Error','err'); }
+}
+
+/* ─── ESTADÍSTICAS ─── */
+async function loadEstadisticas() {
+  try {
+    const [rA, rM, rBrig, rAct, rInf] = await Promise.all([
+      pb.collection('brigadistas').getList(1,1,{}).catch(()=>({totalItems:0,items:[]})),
+      pb.collection('brigadistas_menores').getList(1,1,{}).catch(()=>({totalItems:0})),
+      pb.collection('brigadas').getList(1,500,{fields:'estado'}).catch(()=>({items:[]})),
+      pb.collection('actividades_brigadas').getList(1,1,{}).catch(()=>({totalItems:0})),
+      pb.collection('informes_actividad').getList(1,1,{}).catch(()=>({totalItems:0}))
+    ]);
+    const brigItems = rBrig.items||[];
+    const activas = brigItems.filter(b=>b.estado==='activa').length;
+    const stats = [{label:'Brigadistas adultos',val:rA.totalItems,ico:'👥'},{label:'Brigadistas menores',val:rM.totalItems,ico:'🧒'},{label:'Brigadas activas',val:activas,ico:'🌿'},{label:'Total actividades',val:rAct.totalItems,ico:'📅'},{label:'Informes enviados',val:rInf.totalItems,ico:'📝'},{label:'Parroquias',val:16,ico:'🗺️'}];
+    document.getElementById('stats-cards').innerHTML = stats.map(s=>`<div class="stat-card"><div style="font-size:1.6rem;margin-bottom:6px">${s.ico}</div><div class="num">${s.val}</div><div class="lbl">${s.label}</div></div>`).join('');
+    const rA2 = await pb.collection('brigadistas').getList(1,2000,{fields:'parroquia'}).catch(()=>({items:[]}));
+    const rM2 = await pb.collection('brigadistas_menores').getList(1,2000,{fields:'parroquia'}).catch(()=>({items:[]}));
+    const all = [...(rA2.items||[]),...(rM2.items||[])];
+    const byP = {};
+    all.forEach(b => { byP[b.parroquia||'Sin parroquia'] = (byP[b.parroquia||'Sin parroquia']||0)+1; });
+    const sorted = Object.entries(byP).sort((a,b)=>b[1]-a[1]);
+    const max = sorted[0]?sorted[0][1]:1;
+    document.getElementById('stats-chart').innerHTML = sorted.length ? sorted.map(([p,n])=>`<div class="bar-row"><div class="bar-label">${esc(p)}</div><div class="bar-track"><div class="bar-fill" style="width:${Math.round(n/max*100)}%"></div></div><div class="bar-val">${n}</div></div>`).join('') : '<span style="color:#9ca3af">Sin datos</span>';
+    const estadoCount = {};
+    brigItems.forEach(b => { estadoCount[b.estado||'desconocido'] = (estadoCount[b.estado||'desconocido']||0)+1; });
+    const estadoLabels = {en_formacion:'En formación',activa:'Activa',en_planificacion:'En planificación',suspendida:'Suspendida',inactiva:'Inactiva'};
+    document.getElementById('stats-brigadas-estado').innerHTML = Object.entries(estadoCount).map(([e,n])=>`<div class="bar-row"><div class="bar-label">${estadoLabels[e]||e}</div><div class="bar-track"><div class="bar-fill" style="width:${Math.round(n/(brigItems.length||1)*100)}%;background:${e==='activa'?'var(--primary)':'#9ca3af'}"></div></div><div class="bar-val">${n}</div></div>`).join('') || '<span style="color:#9ca3af">Sin datos</span>';
+  } catch(e) {}
+}
+
+/* ─── CALENDARIO ─── */
+async function renderCal() {
+  const el = document.getElementById('cal-days');
+  if (!el) return;
+  const months = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  document.getElementById('cal-title').textContent = months[_calMonth] + ' ' + _calYear;
+  const y = _calYear, m = _calMonth;
+  const first = new Date(y, m, 1).getDay();
+  const days = new Date(y, m+1, 0).getDate();
+  const today = new Date();
+  let acts = {};
+  try {
+    const ym = `${y}-${String(m+1).padStart(2,'0')}`;
+    const res = await pb.collection('actividades_brigadas').getList(1,100,{filter:`fecha>="${ym}-01"&&fecha<="${ym}-31"`,fields:'titulo,fecha'});
+    (res.items||[]).forEach(a => {
+      if (!a.fecha) return;
+      const d = a.fecha.slice(8,10);
+      acts[d] = acts[d]||[];
+      acts[d].push(a.titulo);
+    });
+  } catch(e) {}
+  el.innerHTML = '';
+  for (let i=0;i<first;i++) el.innerHTML += `<div class="cal-day other-month"></div>`;
+  for (let d=1;d<=days;d++) {
+    const isToday = d===today.getDate()&&m===today.getMonth()&&y===today.getFullYear();
+    const key = String(d).padStart(2,'0');
+    const dots = (acts[key]||[]).map(t=>`<div class="cal-event-dot">${esc(t)}</div>`).join('');
+    el.innerHTML += `<div class="cal-day${isToday?' today':''}"><div class="cal-day-num">${d}</div>${dots}</div>`;
+  }
+}
+
+function calNav(dir) {
+  _calMonth += dir;
+  if (_calMonth > 11) { _calMonth = 0; _calYear++; }
+  if (_calMonth < 0) { _calMonth = 11; _calYear--; }
+  renderCal();
+}
+
+/* ─── CONVOCATORIAS ─── */
+async function loadConvocatorias() {
+  const el = document.getElementById('convocatorias-list');
+  if (!el) return;
+  el.innerHTML = '<div class="spinner"></div>';
+  const hoy = new Date().toISOString().slice(0,10);
+  try {
+    const res = await pb.collection('actividades_brigadas').getList(1,100,{filter:`fecha>="${hoy}"&&estado="planificada"`,sort:'fecha'});
+    const items = res.items||[];
+    if (!items.length) { el.innerHTML = '<div class="empty-state"><div class="ico">🏅</div><p>No hay convocatorias próximas</p></div>'; return; }
+    el.innerHTML = items.map(a=>`<div class="card" style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px"><div><div style="font-size:14px;font-weight:700">${esc(a.titulo)}</div><div style="font-size:12px;color:#9ca3af;margin-top:4px">${new Date(a.fecha).toLocaleDateString('es-VE')}${a.hora_inicio?' · '+a.hora_inicio:''} · ${esc(a.parroquia||'Municipal')}</div>${a.lugar?`<div style="font-size:12px;margin-top:4px">📍 ${esc(a.lugar)}</div>`:''}</div><span class="badge badge-blue">${esc(a.tipo||'actividad')}</span></div></div>`).join('');
+  } catch(e) { el.innerHTML = '<span style="color:var(--danger)">Error al cargar</span>'; }
+}
+
+async function saveConvocatoria() {
+  const titulo = document.getElementById('ca-titulo')?.value.trim();
+  const fecha = document.getElementById('ca-fecha')?.value;
+  if (!titulo||!fecha) { toast('Título y fecha son obligatorios','err'); return; }
+  try {
+    await pb.collection('actividades_brigadas').create({titulo,fecha,tipo:document.getElementById('ca-tipo')?.value||'otro',hora_inicio:document.getElementById('ca-hora')?.value,parroquia:document.getElementById('ca-parroquia')?.value||'',lugar:document.getElementById('ca-lugar')?.value.trim(),descripcion:document.getElementById('ca-desc')?.value.trim(),estado:'planificada'});
+    toast('Convocatoria publicada');
+    toggleForm('conv-act-form');
+    ['ca-titulo','ca-fecha','ca-hora','ca-lugar','ca-desc'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+    loadConvocatorias();
+  } catch(e) { toast('Error: '+(e.message||''),'err'); }
+}
+
+/* ─── NOTIFICACIONES ─── */
+async function loadNotificaciones() {
+  const el = document.getElementById('notif-list');
+  if (!el) return;
+  el.innerHTML = '<div class="spinner"></div>';
+  try {
+    const [rSol, rRep, rBrig] = await Promise.all([
+      pb.collection('solicitudes_apoyo').getList(1,20,{filter:'estado="pendiente"',sort:'-created'}).catch(()=>({items:[]})),
+      pb.collection('representantes_brigadas').getList(1,20,{filter:'estado="pendiente"',sort:'-created'}).catch(()=>({items:[]})),
+      pb.collection('brigadistas').getList(1,20,{filter:'estado="pendiente"',sort:'-created'}).catch(()=>({items:[]}))
+    ]);
+    const notifs = [
+      ...(rSol.items||[]).map(s=>({ico:'📦',txt:`Solicitud de apoyo pendiente: ${s.tipo_apoyo||''}`,sec:'solicitudes',fecha:s.created})),
+      ...(rRep.items||[]).map(r=>({ico:'👥',txt:`Representante pendiente de aprobación: ${r.nombres||''} ${r.apellidos||''}`,sec:'representantes',fecha:r.created})),
+      ...(rBrig.items||[]).map(b=>({ico:'🌿',txt:`Brigadista pendiente: ${b.nombres||''} ${b.apellidos||''}`,sec:'brigadistas',fecha:b.created}))
+    ];
+    if (!notifs.length) { el.innerHTML = '<div class="empty-state"><div class="ico">🔔</div><p>No hay notificaciones pendientes</p></div>'; return; }
+    el.innerHTML = notifs.map(n=>`<div class="card" style="margin-bottom:8px;cursor:pointer;display:flex;align-items:center;gap:14px" onclick="showSec('${n.sec}')"><div style="font-size:1.5rem">${n.ico}</div><div style="flex:1"><div style="font-size:13px;font-weight:600">${esc(n.txt)}</div><div style="font-size:11px;color:#9ca3af">${new Date(n.fecha).toLocaleDateString('es-VE')}</div></div><span style="font-size:11px;color:var(--primary)">Ver →</span></div>`).join('');
+  } catch(e) { el.innerHTML = '<span style="color:var(--danger)">Error al cargar</span>'; }
+}
+
+/* ─── DOCUMENTOS ─── */
+async function loadDocumentos() {
+  const el = document.getElementById('docs-list');
+  if (!el) return;
+  el.innerHTML = '<div class="spinner"></div>';
+  try {
+    const res = await pb.collection('informes_actividad').getList(1,100,{filter:'estado="enviado"',sort:'-created'});
+    const items = res.items||[];
+    if (!items.length) { el.innerHTML = '<div class="empty-state"><div class="ico">📂</div><p>No hay documentos para revisar</p></div>'; return; }
+    el.innerHTML = `<div class="table-wrap"><table class="data-table"><thead><tr><th>Título</th><th>Fecha</th><th>Participantes</th><th>Acción</th></tr></thead><tbody>${items.map(i=>`<tr><td style="font-weight:600">${esc(i.titulo)}</td><td>${new Date(i.created).toLocaleDateString('es-VE')}</td><td>${i.total_participantes||'—'}</td><td><button onclick="marcarInformeRevisado('${i.id}')" style="font-size:11px;padding:4px 10px;border-radius:6px;border:none;background:var(--primary-light);color:var(--primary);font-weight:600;cursor:pointer">✓ Revisar</button></td></tr>`).join('')}</tbody></table></div>`;
+  } catch(e) { el.innerHTML = '<span style="color:var(--danger)">Error al cargar</span>'; }
+}
+
+/* ─── PERFIL ─── */
+function loadPerfil() {
+  if (!_cmd) return;
+  document.getElementById('perfil-info').innerHTML = `<div style="margin-bottom:16px"><div style="font-size:1.3rem;font-weight:700;font-family:'Poppins',sans-serif;color:var(--primary-dark)">${esc(_cmd.nombres)} ${esc(_cmd.apellidos)}</div><div style="font-size:13px;color:#6b7280;margin-top:4px">Comandante Municipal · ${esc(_cmd.parroquia_asignada||'Municipal')}</div></div><div class="grid-2" style="font-size:13px"><div><span style="font-weight:600">Email:</span> ${esc(_cmd.email)}</div><div><span style="font-weight:600">Cargo:</span> ${esc(_cmd.cargo||'Comandante Municipal')}</div><div><span style="font-weight:600">Teléfono:</span> ${esc(_cmd.telefono||'—')}</div></div>`;
+}
+
+async function changePass() {
+  const p1 = document.getElementById('pf-pass1')?.value;
+  const p2 = document.getElementById('pf-pass2')?.value;
+  if (!p1||!p2) { toast('Completa ambos campos','err'); return; }
+  if (p1 !== p2) { toast('Las contraseñas no coinciden','err'); return; }
+  if (p1.length < 8) { toast('Mínimo 8 caracteres','err'); return; }
+  try {
+    await pb.collection('comandantes_brigadas').update(_cmd.id,{password:p1,passwordConfirm:p2,oldPassword:p1});
+    toast('Contraseña actualizada');
+    document.getElementById('pf-pass1').value = '';
+    document.getElementById('pf-pass2').value = '';
+  } catch(e) { toast('Error al cambiar contraseña. Puede requerir la contraseña actual.','err'); }
+}
+
+/* ─── HELPERS ─── */
+function estBadge(estado) {
+  const map = {activo:'badge-green',activa:'badge-green',ejecutada:'badge-green',aprobado:'badge-green',aprobada:'badge-green',revisado:'badge-green',pendiente:'badge-yellow',en_formacion:'badge-yellow',planificada:'badge-blue',en_ejecucion:'badge-blue',enviado:'badge-blue',en_planificacion:'badge-blue',suspendido:'badge-red',suspendida:'badge-red',rechazado:'badge-red',rechazada:'badge-red',inactivo:'badge-gray',inactiva:'badge-gray',cancelada:'badge-gray'};
+  return `<span class="badge ${map[estado]||'badge-gray'}">${estado}</span>`;
+}
+
+/* ─── INIT ─── */
+pb.authStore.onChange(() => {
+  if (!pb.authStore.isValid && document.getElementById('app').style.display !== 'none') doLogout();
+});
+
+if (pb.authStore.isValid && pb.authStore.model?.collectionName === 'comandantes_brigadas') {
+  _cmd = pb.authStore.model;
+  if (_cmd.estado === 'activo') initApp();
+  else { pb.authStore.clear(); }
+}
+</script>
+</body>
+</html>

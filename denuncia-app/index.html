@@ -242,6 +242,11 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
         <div class="svc-name">Brigadas Ambientales</div>
         <div class="svc-desc">Únete y protege el ambiente</div>
       </div>
+      <div class="svc-card" onclick="goScreen('aula')">
+        <div class="svc-ico">📚</div>
+        <div class="svc-name">Aula Ambiental</div>
+        <div class="svc-desc">Recursos educativos</div>
+      </div>
     </div>
 
     <!-- NOTICIAS PREVIEW EN INICIO -->
@@ -414,6 +419,42 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
         </div>
       </div>
 
+    </div>
+  </div>
+</div>
+
+<!-- PANTALLA AULA AMBIENTAL -->
+<div class="screen" id="screen-aula">
+  <div style="overflow-y:auto;flex:1">
+    <div class="den-screen">
+      <div style="background:linear-gradient(135deg,var(--verde-dark),#2d8a5e);border-radius:16px;color:#fff;padding:28px 20px;margin-bottom:20px;text-align:center">
+        <div style="font-size:48px;margin-bottom:12px">📚</div>
+        <h2 style="font-family:'Poppins',sans-serif;font-size:18px;font-weight:700;margin-bottom:8px">Aula Ambiental IAGAMI</h2>
+        <p style="font-size:12px;opacity:.9;line-height:1.6">Biblioteca de recursos educativos ambientales para toda la comunidad del Municipio Iribarren</p>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">
+        <div style="background:#fff;border:1px solid var(--verde-border);border-radius:12px;padding:16px;text-align:center">
+          <div style="font-size:28px;margin-bottom:6px">▶️</div>
+          <div style="font-size:12px;font-weight:600;color:var(--verde-dark)">Videos</div>
+          <div style="font-size:11px;color:#6b7280;margin-top:2px">Clases y documentales</div>
+        </div>
+        <div style="background:#fff;border:1px solid var(--verde-border);border-radius:12px;padding:16px;text-align:center">
+          <div style="font-size:28px;margin-bottom:6px">📄</div>
+          <div style="font-size:12px;font-weight:600;color:var(--verde-dark)">Documentos</div>
+          <div style="font-size:11px;color:#6b7280;margin-top:2px">Guías y materiales PDF</div>
+        </div>
+        <div style="background:#fff;border:1px solid var(--verde-border);border-radius:12px;padding:16px;text-align:center">
+          <div style="font-size:28px;margin-bottom:6px">🎓</div>
+          <div style="font-size:12px;font-weight:600;color:var(--verde-dark)">Cursos</div>
+          <div style="font-size:11px;color:#6b7280;margin-top:2px">Formación ambiental</div>
+        </div>
+        <div style="background:#fff;border:1px solid var(--verde-border);border-radius:12px;padding:16px;text-align:center">
+          <div style="font-size:28px;margin-bottom:6px">🏫</div>
+          <div style="font-size:12px;font-weight:600;color:var(--verde-dark)">IAGAMI en Escuelas</div>
+          <div style="font-size:11px;color:#6b7280;margin-top:2px">Visitas educativas</div>
+        </div>
+      </div>
+      <div id="aula-pub-list"><div style="text-align:center;padding:20px;color:#6b7280;font-size:13px">⏳ Cargando recursos...</div></div>
     </div>
   </div>
 </div>
@@ -592,6 +633,23 @@ function goScreen(name) {
   const backBtn = document.getElementById('header-back');
   if (name === 'inicio') backBtn.classList.remove('show');
   else backBtn.classList.add('show');
+  if (name === 'aula') loadAulaPublica();
+}
+
+async function loadAulaPublica() {
+  const el = document.getElementById('aula-pub-list');
+  if (!el) return;
+  try {
+    const res = await fetch(PB_URL + '/api/collections/biblioteca_multimedia/records?filter=(publicado=true)&sort=-created&perPage=20');
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+    const items = data.items || [];
+    if (items.length === 0) { el.innerHTML = '<div style="text-align:center;padding:20px;color:#6b7280;font-size:13px">Los recursos educativos estarán disponibles próximamente.</div>'; return; }
+    const iconos = {video:'▶️',pdf:'📄',guia:'📗',infografia:'🖼️',presentacion:'📊'};
+    el.innerHTML = `<div style="margin-top:4px"><h3 style="font-family:\'Poppins\',sans-serif;font-size:14px;font-weight:700;color:var(--verde-dark);margin-bottom:12px">Recursos disponibles</h3>${items.map(r=>`<a href="${r.url}" target="_blank" style="display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--verde-border);border-radius:12px;padding:12px 14px;margin-bottom:10px;text-decoration:none;color:inherit"><span style="font-size:24px">${iconos[r.tipo]||'📁'}</span><div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--verde-dark)">${r.titulo}</div><div style="font-size:11px;color:#6b7280;margin-top:2px">${r.categoria||''}</div></div><span style="color:var(--verde);font-size:16px">→</span></a>`).join('')}</div>`;
+  } catch(e) {
+    el.innerHTML = '<div style="text-align:center;padding:20px;color:#6b7280;font-size:13px">📚 El Aula Ambiental IAGAMI — Próximamente: biblioteca de videos, cursos y recursos educativos ambientales.</div>';
+  }
 }
 
 function openWeb(url) {
