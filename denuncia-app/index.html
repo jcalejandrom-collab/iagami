@@ -26,6 +26,10 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .app-header-text h1{font-family:'Poppins',sans-serif;font-size:15px;font-weight:700;line-height:1.2}
 .app-header-text p{font-size:11px;opacity:.8;margin-top:1px}
 
+/* BACK BTN */
+.header-back{background:none;border:none;color:#fff;font-size:22px;cursor:pointer;padding:0 8px 0 0;line-height:1;display:none;-webkit-tap-highlight-color:transparent}
+.header-back.show{display:block}
+
 /* BOTTOM NAV */
 .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--verde-border);display:flex;z-index:200;padding-bottom:env(safe-area-inset-bottom,0px)}
 .nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 4px;border:none;background:none;cursor:pointer;color:#6b7280;font-family:'Inter',sans-serif;font-size:10px;gap:3px;-webkit-tap-highlight-color:transparent;transition:.15s}
@@ -150,6 +154,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 
 <header class="app-header">
   <div class="app-header-inner">
+    <button class="header-back" id="header-back" onclick="goScreen('inicio')">←</button>
     <img class="app-logo" src="/assets/images/logo-iagami.png" alt="IAGAMI"
       onerror="this.style.display='none'"/>
     <div class="app-header-text">
@@ -394,6 +399,9 @@ function goScreen(name) {
   document.getElementById('screen-' + name).classList.add('active');
   const nb = document.getElementById('nav-' + name);
   if (nb) nb.classList.add('active');
+  const backBtn = document.getElementById('header-back');
+  if (name === 'inicio') backBtn.classList.remove('show');
+  else backBtn.classList.add('show');
   if (name === 'noticias' && !_noticiasCargadas) cargarNoticias();
   if (name === 'revista'  && !_revistaCargada)  cargarRevista();
 }
@@ -444,7 +452,7 @@ function fmtFecha(str) {
 async function cargarNoticias() {
   _noticiasCargadas = true;
   try {
-    const r = await fetch(PB_URL + '/api/collections/noticias/records?sort=-fecha&perPage=20&filter=(publicado=true)');
+    const r = await fetch(PB_URL + '/api/collections/noticias/records?sort=-fecha&perPage=20&filter=' + encodeURIComponent('publicado=true'));
     const data = await r.json();
     renderNoticias(data.items || [], 'noticias-list', false);
     renderNoticias((data.items || []).slice(0,3), 'home-noticias-list', true);
@@ -477,14 +485,14 @@ function renderNoticias(items, containerId, compact) {
 async function cargarRevista() {
   _revistaCargada = true;
   try {
-    const r = await fetch(PB_URL + '/api/collections/revistas/records?sort=-fecha&perPage=20&filter=(publicado=true)');
+    const r = await fetch(PB_URL + '/api/collections/revistas/records?sort=-fecha&perPage=20');
     const data = await r.json();
     const wrap = document.getElementById('revista-list');
     const items = data.items || [];
     if (!items.length) { wrap.innerHTML = '<div class="loading">No hay ediciones disponibles</div>'; return; }
     wrap.innerHTML = items.map(rv => {
       const cover = rv.portada ? `${PB_URL}/api/files/revistas/${rv.id}/${rv.portada}` : '';
-      const pdf   = rv.archivo ? `${PB_URL}/api/files/revistas/${rv.id}/${rv.archivo}` : '';
+      const pdf   = rv.pdf ? `${PB_URL}/api/files/revistas/${rv.id}/${rv.pdf}` : '';
       return `<div class="rev-card" onclick="openDetail('${esc(rv.titulo)}','${fmtFecha(rv.fecha)}','${esc(rv.descripcion||'')}','${cover}','${pdf}')">
         <div class="rev-cover">${cover ? `<img src="${cover}" alt="${esc(rv.titulo)}" loading="lazy"/>` : '📗'}</div>
         <div class="rev-body">
