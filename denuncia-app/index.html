@@ -184,10 +184,10 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
         <div class="svc-name">Trámites en Línea</div>
         <div class="svc-desc">Permisos y certificaciones</div>
       </div>
-      <div class="svc-card" onclick="openWeb('https://iagami.online/#atencion')">
-        <div class="svc-ico">🏛️</div>
-        <div class="svc-name">Atención Ciudadana</div>
-        <div class="svc-desc">Consultas y seguimiento</div>
+      <div class="svc-card" onclick="openWeb('https://iagami.online/indicadores/')">
+        <div class="svc-ico">📊</div>
+        <div class="svc-name">Indicadores</div>
+        <div class="svc-desc">Monitoreo ambiental</div>
       </div>
       <div class="svc-card" onclick="openWeb('https://iagami.online/empresas/')">
         <div class="svc-ico">🏭</div>
@@ -221,41 +221,17 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
       </div>
     </div>
 
-    <!-- Noticias recientes -->
-    <div class="home-section">
-      <div class="home-sec-hdr">
-        <span class="home-sec-title">Últimas Noticias</span>
-        <button class="home-sec-more" onclick="goScreen('noticias')">Ver todas →</button>
-      </div>
-      <div id="home-noticias-list"><div class="loading"><span class="loading-spin">🔄</span>Cargando...</div></div>
-    </div>
   </div>
 </div>
 
 <!-- PANTALLA NOTICIAS -->
 <div class="screen" id="screen-noticias">
-  <div style="overflow-y:auto;flex:1">
-    <div style="padding:16px 16px 4px">
-      <div class="sec-tag">COMUNICACIÓN INSTITUCIONAL</div>
-      <div class="sec-title">Noticias</div>
-    </div>
-    <div class="news-list" id="noticias-list">
-      <div class="loading"><span class="loading-spin">🔄</span>Cargando noticias...</div>
-    </div>
-  </div>
+  <iframe src="https://iagami.online/noticias/" style="flex:1;border:none;width:100%;height:100%" loading="lazy" title="Noticias IAGAMI"></iframe>
 </div>
 
 <!-- PANTALLA REVISTA -->
 <div class="screen" id="screen-revista">
-  <div style="overflow-y:auto;flex:1">
-    <div style="padding:16px 16px 4px">
-      <div class="sec-tag">PUBLICACIÓN DIGITAL</div>
-      <div class="sec-title">Revista IAGAMI</div>
-    </div>
-    <div class="revista-list" id="revista-list">
-      <div class="loading"><span class="loading-spin">🔄</span>Cargando revista...</div>
-    </div>
-  </div>
+  <iframe src="https://iagami.online/revista/" style="flex:1;border:none;width:100%;height:100%" loading="lazy" title="Revista IAGAMI"></iframe>
 </div>
 
 <!-- PANTALLA DENUNCIA -->
@@ -389,8 +365,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 const PB_URL = 'https://api.iagami.online';
 let adjuntosData = [];
 let _enviando = false;
-let _noticiasCargadas = false;
-let _revistaCargada = false;
 
 /* ── Navegación ── */
 function goScreen(name) {
@@ -402,8 +376,6 @@ function goScreen(name) {
   const backBtn = document.getElementById('header-back');
   if (name === 'inicio') backBtn.classList.remove('show');
   else backBtn.classList.add('show');
-  if (name === 'noticias' && !_noticiasCargadas) cargarNoticias();
-  if (name === 'revista'  && !_revistaCargada)  cargarRevista();
 }
 
 function openWeb(url) {
