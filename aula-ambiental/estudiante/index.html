@@ -311,6 +311,7 @@ textarea.form-control{resize:vertical;min-height:70px}
       <div onclick="showSec('tareas')"      class="nav-item"        id="nav-tareas"     ><span class="nav-ico">📋</span> Tareas</div>
       <div onclick="showSec('calificaciones')" class="nav-item"     id="nav-calificaciones"><span class="nav-ico">🏆</span> Calificaciones</div>
       <div onclick="showSec('asistencia')"  class="nav-item"        id="nav-asistencia" ><span class="nav-ico">✅</span> Asistencia</div>
+      <div onclick="showSec('certificados')" class="nav-item"        id="nav-certificados"><span class="nav-ico">🏅</span> Certificados</div>
       <div onclick="showSec('perfil')"     class="nav-item"        id="nav-perfil"    ><span class="nav-ico">👤</span> Mi Perfil</div>
     </div>
 
@@ -484,6 +485,17 @@ textarea.form-control{resize:vertical;min-height:70px}
           <div class="page-subtitle">Tu registro de asistencia a clases</div>
         </div>
         <div id="asistencia-contenido"></div>
+      </div>
+
+      <!-- ── CERTIFICADOS ── -->
+      <div class="section" id="sec-certificados">
+        <div class="page-header">
+          <div class="page-title">🏅 Mis Certificados</div>
+          <div class="page-subtitle">Certificados digitales emitidos por el IAGAMI</div>
+        </div>
+        <div id="certs-lista"><div class="empty"><div class="ico">⏳</div><p>Cargando...</p></div></div>
+        <!-- iframe oculto para impresión -->
+        <iframe id="cert-print-frame" style="display:none;position:fixed;left:-9999px;top:0;width:800px;height:600px;border:none"></iframe>
       </div>
 
       <!-- ── PERFIL ── -->
@@ -1060,6 +1072,366 @@ async function cambiarPass() {
     toast('Contraseña actualizada. Inicia sesión de nuevo.');
     setTimeout(doLogout, 2000);
   } catch(e) { toast('Error: contraseña actual incorrecta','error'); }
+}
+
+/* ═══════════════════════════════════════════════════
+   FASE 3 — EVALUACIONES, TAREAS, CALIFICACIONES, ASISTENCIA
+   ═══════════════════════════════════════════════════ */
+
+let _evalActiva = null;
+let _evalPreguntas = [];
+let _evalTimer = null;
+let _tareaActiva = null;
+let _tareaTab = 'pendientes';
+
+const _PROX = '📚 Esta funcionalidad estará disponible próximamente. 📚';
+
+/* ── EVALUACIONES ── */
+async function renderEvaluaciones() {
+  const el = document.getElementById('eval-lista');
+  el.innerHTML = '<div class="empty"><div class="ico">⏳</div><p>Cargando...</p></div>';
+  try {
+    // Obtener IDs de cursos del estudiante
+    const cursoIds = _misCursos.map(c => c.id);
+    if (!cursoIds.length) {
+      el.innerHTML = '<div class="empty"><div class="ico">📝</div><p>No tienes cursos inscritos.</p></div>'; return;
+    }
+    const filter = cursoIds.map(id => `curso_id="${id}"`).join('||');
+    const r = await pbFetch(`/api/collections/evaluaciones/records?filter=(${encodeURIComponent(filter)})%26%26publicado%3Dtrue&sort=-created&perPage=50`);
+    const evals = r.items || [];
+    if (!evals.length) { el.innerHTML = '<div class="empty"><div class="ico">📝</div><p>No hay evaluaciones publicadas en tus cursos.</p></div>'; return; }
+
+    // Cargar resultados previos del estudiante
+    let resultados = [];
+    try {
+      const rRes = await pbFetch(`/api/collections/resultados_evaluacion/records?filter=estudiante_id%3D%22${_estudiante.id}%22&perPage=200`);
+      resultados = rRes.items || [];
+    } catch(e) {}
+
+    el.innerHTML = evals.map(ev => {
+      const res = resultados.find(r => r.evaluacion_id === ev.id);
+      const entregada = !!res;
+      const nota = res ? res.nota : null;
+      const curso = _misCursos.find(c => c.id === ev.curso_id);
+      return `<div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+          <div>
+            <div style="font-size:15px;font-weight:600;font-family:'Poppins',sans-serif">${esc(ev.nombre)}</div>
+            <div style="font-size:12px;color:var(--muted)">📚 ${esc(curso?.nombre||ev.curso_id)} · ⏱ ${ev.tiempo_minutos||'—'} min · ${ev.tipo||'evaluacion'}</div>
+          </div>
+          ${entregada
+            ? `<span class="badge badge-green">✅ Nota: ${nota!==null?nota:' —'}/20</span>`
+            : `<span class="badge badge-yellow">Pendiente</span>`}
+        </div>
+        ${ev.descripcion ? `<div style="font-size:13px;color:var(--text);margin-bottom:10px">${esc(ev.descripcion)}</div>` : ''}
+        ${!entregada
+          ? `<button class="btn btn-primary btn-sm" onclick="abrirEvaluacion('${ev.id}')">📝 Iniciar evaluación</button>`
+          : `<div style="font-size:12px;color:var(--success)">Enviada el ${new Date(res.created).toLocaleDateString('es-VE')}. ${res.retroalimentacion?'Retroalimentación: '+esc(res.retroalimentacion):''}</div>`}
+      </div>`;
+    }).join('');
+  } catch(e) {
+    if (e.message && (e.message.includes('404') || e.message.includes('not found') || e.message.includes('missing'))) {
+      el.innerHTML = `<div class="empty"><div class="ico">📝</div><p>${_PROX}</p></div>`;
+    } else {
+      el.innerHTML = `<div class="empty"><div class="ico">⚠️</div><p>Error al cargar evaluaciones: ${esc(e.message)}</p></div>`;
+    }
+  }
+}
+
+async function abrirEvaluacion(evalId) {
+  try {
+    _evalActiva = await pbFetch(`/api/collections/evaluaciones/records/${evalId}`);
+    const rP = await pbFetch(`/api/collections/preguntas_evaluacion/records?filter=evaluacion_id%3D%22${evalId}%22&sort=orden&perPage=100`);
+    _evalPreguntas = rP.items || [];
+  } catch(e) {
+    if (e.message && (e.message.includes('404') || e.message.includes('not found'))) {
+      toast(_PROX, 'error'); return;
+    }
+    toast('Error al cargar la evaluación', 'error'); return;
+  }
+
+  document.getElementById('em-titulo').textContent = _evalActiva.nombre;
+  document.getElementById('em-desc').textContent   = _evalActiva.descripcion || '';
+
+  const pEl = document.getElementById('em-preguntas');
+  pEl.innerHTML = _evalPreguntas.map((p, i) => {
+    const opciones = Array.isArray(p.opciones) ? p.opciones : (p.opciones ? JSON.parse(p.opciones) : []);
+    if (p.tipo === 'opcion_multiple' || p.tipo === 'verdadero_falso') {
+      const opts = p.tipo === 'verdadero_falso' ? ['Verdadero','Falso'] : opciones;
+      return `<div style="margin-bottom:18px;padding:14px;background:#f8fafc;border-radius:10px">
+        <div style="font-size:14px;font-weight:600;margin-bottom:10px">${i+1}. ${esc(p.enunciado)}</div>
+        ${opts.map((op,oi)=>`<label style="display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:7px;cursor:pointer;margin-bottom:4px;background:#fff;border:1.5px solid var(--border)">
+          <input type="radio" name="preg_${p.id}" value="${esc(String(oi))}" style="accent-color:var(--primary)"/>
+          <span style="font-size:13px">${esc(String(op))}</span>
+        </label>`).join('')}
+      </div>`;
+    }
+    // Pregunta abierta
+    return `<div style="margin-bottom:18px;padding:14px;background:#f8fafc;border-radius:10px">
+      <div style="font-size:14px;font-weight:600;margin-bottom:10px">${i+1}. ${esc(p.enunciado)}</div>
+      <textarea class="form-control" id="resp_${p.id}" rows="3" placeholder="Escribe tu respuesta..."></textarea>
+    </div>`;
+  }).join('');
+
+  if (_evalActiva.tiempo_minutos) startTimer(_evalActiva.tiempo_minutos);
+  else document.getElementById('em-timer').textContent = '∞';
+  document.getElementById('eval-modal').style.display = 'block';
+}
+
+function startTimer(minutos) {
+  if (_evalTimer) clearInterval(_evalTimer);
+  let segs = minutos * 60;
+  const timerEl = document.getElementById('em-timer');
+  _evalTimer = setInterval(() => {
+    segs--;
+    if (segs <= 0) { clearInterval(_evalTimer); enviarEvaluacion(); return; }
+    const m = Math.floor(segs/60), s = segs%60;
+    timerEl.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    if (segs <= 60) timerEl.style.color = 'var(--danger)';
+  }, 1000);
+}
+
+async function enviarEvaluacion() {
+  if (!_evalActiva) return;
+  if (_evalTimer) clearInterval(_evalTimer);
+  const respuestas = _evalPreguntas.map(p => {
+    if (p.tipo === 'opcion_multiple' || p.tipo === 'verdadero_falso') {
+      const sel = document.querySelector(`input[name="preg_${p.id}"]:checked`);
+      return {pregunta_id: p.id, respuesta: sel ? sel.value : '', tipo: p.tipo};
+    }
+    const ta = document.getElementById('resp_'+p.id);
+    return {pregunta_id: p.id, respuesta: ta ? ta.value : '', tipo: p.tipo};
+  });
+  try {
+    await pbFetch('/api/collections/resultados_evaluacion/records', {
+      method: 'POST',
+      body: JSON.stringify({
+        evaluacion_id: _evalActiva.id,
+        estudiante_id: _estudiante.id,
+        curso_id: _evalActiva.curso_id,
+        respuestas: JSON.stringify(respuestas),
+        nota: null,
+        estado: 'entregado'
+      })
+    });
+    cerrarEvalModal();
+    toast('✅ Evaluación enviada correctamente');
+    renderEvaluaciones();
+  } catch(e) {
+    toast('Error al enviar: ' + e.message, 'error');
+  }
+}
+
+function cerrarEvalModal() {
+  if (_evalTimer) clearInterval(_evalTimer);
+  document.getElementById('eval-modal').style.display = 'none';
+  _evalActiva = null; _evalPreguntas = [];
+}
+
+/* ── TAREAS ── */
+function switchTareasTab(tab) {
+  _tareaTab = tab;
+  ['pendientes','entregadas'].forEach(t => {
+    document.getElementById('ttab-'+t).classList.toggle('active', t===tab);
+    document.querySelectorAll(`[onclick="switchTareasTab('${t}')"]`).forEach(b=>b.classList.toggle('active',t===tab));
+  });
+  renderTareasEst();
+}
+
+async function renderTareasEst() {
+  const pelEl = document.getElementById('tareas-pendientes');
+  const entEl = document.getElementById('tareas-entregadas');
+  pelEl.innerHTML = '<div class="empty"><div class="ico">⏳</div><p>Cargando...</p></div>';
+  entEl.innerHTML = '';
+  try {
+    const cursoIds = _misCursos.map(c => c.id);
+    if (!cursoIds.length) {
+      pelEl.innerHTML = '<div class="empty"><div class="ico">📋</div><p>No tienes cursos inscritos.</p></div>'; return;
+    }
+    const filter = cursoIds.map(id => `curso_id="${id}"`).join('||');
+    const r = await pbFetch(`/api/collections/tareas/records?filter=(${encodeURIComponent(filter)})%26%26publicado%3Dtrue&sort=-created&perPage=100`);
+    const tareas = r.items || [];
+
+    let entregas = [];
+    try {
+      const rE = await pbFetch(`/api/collections/entregas_tareas/records?filter=estudiante_id%3D%22${_estudiante.id}%22&perPage=200`);
+      entregas = rE.items || [];
+    } catch(e) {}
+
+    const pendientes = tareas.filter(t => !entregas.find(e => e.tarea_id === t.id));
+    const entregadas = tareas.filter(t =>  entregas.find(e => e.tarea_id === t.id));
+
+    const renderTarea = (t, entregada) => {
+      const ent = entregas.find(e => e.tarea_id === t.id);
+      const curso = _misCursos.find(c => c.id === t.curso_id);
+      return `<div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+          <div>
+            <div style="font-size:14px;font-weight:600">${esc(t.nombre)}</div>
+            <div style="font-size:12px;color:var(--muted)">📚 ${esc(curso?.nombre||t.curso_id)} ${t.fecha_entrega?'· 📅 Entrega: '+t.fecha_entrega:''}</div>
+          </div>
+          ${entregada ? `<span class="badge badge-green">✅ Entregada</span>` : `<span class="badge badge-yellow">Pendiente</span>`}
+        </div>
+        ${t.descripcion?`<div style="font-size:13px;margin-bottom:8px">${esc(t.descripcion)}</div>`:''}
+        ${t.url_referencia?`<a href="${esc(t.url_referencia)}" target="_blank" class="btn btn-secondary btn-sm" style="margin-bottom:8px">📎 Ver material</a>`:''}
+        ${!entregada
+          ? `<button class="btn btn-primary btn-sm" onclick="abrirEntregaTarea('${t.id}')">📤 Entregar</button>`
+          : `<div style="font-size:12px;color:var(--success)">Enviada el ${new Date(ent.created).toLocaleDateString('es-VE')}. ${ent.nota!==null&&ent.nota!==undefined?'Nota: '+ent.nota+'/20':'Pendiente de calificación.'}</div>`}
+      </div>`;
+    };
+
+    pelEl.innerHTML = pendientes.length ? pendientes.map(t=>renderTarea(t,false)).join('') : '<div class="empty"><div class="ico">✅</div><p>No tienes tareas pendientes.</p></div>';
+    entEl.innerHTML = entregadas.length ? entregadas.map(t=>renderTarea(t,true)).join('') : '<div class="empty"><div class="ico">📋</div><p>Aún no has entregado ninguna tarea.</p></div>';
+  } catch(e) {
+    const msg = (e.message && (e.message.includes('404') || e.message.includes('not found')))
+      ? _PROX : 'Error: ' + esc(e.message);
+    pelEl.innerHTML = `<div class="empty"><div class="ico">📋</div><p>${msg}</p></div>`;
+  }
+}
+
+function abrirEntregaTarea(tareaId) {
+  _tareaActiva = tareaId;
+  document.getElementById('tm-titulo').textContent = 'Entregar tarea';
+  document.getElementById('tm-desc').textContent = '';
+  document.getElementById('tm-texto').value = '';
+  document.getElementById('tm-url').value = '';
+  document.getElementById('tarea-modal').style.display = 'block';
+}
+
+async function confirmarEntrega() {
+  const texto = document.getElementById('tm-texto').value.trim();
+  const url   = document.getElementById('tm-url').value.trim();
+  if (!texto && !url) { toast('Escribe tu respuesta o incluye un enlace', 'error'); return; }
+  try {
+    await pbFetch('/api/collections/entregas_tareas/records', {
+      method: 'POST',
+      body: JSON.stringify({
+        tarea_id: _tareaActiva,
+        estudiante_id: _estudiante.id,
+        texto_entrega: texto,
+        url_entrega: url,
+        estado: 'entregado'
+      })
+    });
+    cerrarTareaModal();
+    toast('✅ Tarea entregada correctamente');
+    renderTareasEst();
+  } catch(e) { toast('Error al entregar: ' + e.message, 'error'); }
+}
+
+function cerrarTareaModal() {
+  document.getElementById('tarea-modal').style.display = 'none';
+  _tareaActiva = null;
+}
+
+/* ── CALIFICACIONES ── */
+async function renderCalificaciones() {
+  const el = document.getElementById('calif-contenido');
+  el.innerHTML = '<div class="empty"><div class="ico">⏳</div><p>Cargando...</p></div>';
+  try {
+    const cursoIds = _misCursos.map(c => c.id);
+    if (!cursoIds.length) { el.innerHTML = '<div class="empty"><div class="ico">🏆</div><p>No tienes cursos inscritos.</p></div>'; return; }
+
+    // Cargar resultados de evaluaciones
+    let resultados = [];
+    try {
+      const rR = await pbFetch(`/api/collections/resultados_evaluacion/records?filter=estudiante_id%3D%22${_estudiante.id}%22&perPage=200`);
+      resultados = rR.items || [];
+    } catch(e) {}
+
+    // Cargar entregas de tareas con notas
+    let entregas = [];
+    try {
+      const rE = await pbFetch(`/api/collections/entregas_tareas/records?filter=estudiante_id%3D%22${_estudiante.id}%22%26%26nota!%3Dnull&perPage=200`);
+      entregas = rE.items || [];
+    } catch(e) {}
+
+    if (!resultados.length && !entregas.length) {
+      el.innerHTML = '<div class="empty"><div class="ico">🏆</div><p>Aún no tienes calificaciones registradas.</p></div>'; return;
+    }
+
+    el.innerHTML = _misCursos.map(curso => {
+      const resC = resultados.filter(r => r.curso_id === curso.id && r.nota !== null && r.nota !== undefined);
+      const entC = entregas.filter(e => e.curso_id === curso.id);
+      if (!resC.length && !entC.length) return '';
+
+      const notas = [...resC.map(r=>r.nota), ...entC.map(e=>e.nota)].filter(n=>n!==null&&n!==undefined);
+      const prom = notas.length ? (notas.reduce((a,b)=>a+Number(b),0) / notas.length).toFixed(1) : '—';
+      const promNum = notas.length ? parseFloat(prom) : 0;
+      const color = promNum >= 10 ? 'var(--success)' : promNum > 0 ? 'var(--warn)' : 'var(--muted)';
+
+      return `<div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <div class="card-title">📚 ${esc(curso.nombre)}</div>
+          <div style="font-family:'Poppins',sans-serif;font-size:22px;font-weight:700;color:${color}">${prom}</div>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${Math.min(promNum/20*100,100)}%;background:${color}"></div></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px;margin-bottom:12px">Promedio sobre 20 puntos · ${notas.length} nota(s)</div>
+        ${resC.length ? `<div style="font-size:12px;font-weight:600;margin-bottom:6px">Evaluaciones:</div>${resC.map(r=>`
+          <div style="display:flex;justify-content:space-between;padding:6px 10px;background:#f8fafc;border-radius:6px;margin-bottom:4px;font-size:12px">
+            <span>${esc(r.evaluacion_id)}</span>
+            <strong>${r.nota}/20</strong>
+          </div>`).join('')}` : ''}
+        ${entC.length ? `<div style="font-size:12px;font-weight:600;margin:8px 0 6px">Tareas:</div>${entC.map(e=>`
+          <div style="display:flex;justify-content:space-between;padding:6px 10px;background:#f8fafc;border-radius:6px;margin-bottom:4px;font-size:12px">
+            <span>${esc(e.tarea_id)}</span>
+            <strong>${e.nota}/20</strong>
+          </div>`).join('')}` : ''}
+      </div>`;
+    }).filter(Boolean).join('') || '<div class="empty"><div class="ico">🏆</div><p>Aún no tienes calificaciones en tus cursos.</p></div>';
+  } catch(e) {
+    const msg = (e.message && (e.message.includes('404') || e.message.includes('not found')))
+      ? _PROX : 'Error: ' + esc(e.message);
+    el.innerHTML = `<div class="empty"><div class="ico">🏆</div><p>${msg}</p></div>`;
+  }
+}
+
+/* ── ASISTENCIA ── */
+async function renderAsistenciaEst() {
+  const el = document.getElementById('asistencia-contenido');
+  el.innerHTML = '<div class="empty"><div class="ico">⏳</div><p>Cargando...</p></div>';
+  try {
+    const r = await pbFetch(`/api/collections/asistencia_clases/records?filter=estudiante_id%3D%22${_estudiante.id}%22&sort=-fecha&perPage=200`);
+    const registros = r.items || [];
+    if (!registros.length) {
+      el.innerHTML = '<div class="empty"><div class="ico">✅</div><p>No hay registros de asistencia aún.</p></div>'; return;
+    }
+
+    // Agrupar por curso
+    const porcurso = {};
+    registros.forEach(reg => {
+      const cid = reg.curso_id || 'general';
+      if (!porcurso[cid]) porcurso[cid] = [];
+      porcurso[cid].push(reg);
+    });
+
+    el.innerHTML = Object.entries(porcurso).map(([cid, regs]) => {
+      const curso = _misCursos.find(c => c.id === cid);
+      const total = regs.length;
+      const presentes = regs.filter(r => r.estado === 'presente').length;
+      const pct = total ? Math.round(presentes/total*100) : 0;
+      const color = pct >= 75 ? 'var(--success)' : pct >= 50 ? 'var(--warn)' : 'var(--danger)';
+      return `<div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div class="card-title">📚 ${esc(curso?.nombre||cid)}</div>
+          <div style="font-family:'Poppins',sans-serif;font-size:20px;font-weight:700;color:${color}">${pct}%</div>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${color}"></div></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px;margin-bottom:12px">${presentes} presentes de ${total} clases</div>
+        <div style="display:grid;gap:4px">${regs.slice(0,10).map(reg=>`
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 10px;background:#f8fafc;border-radius:6px;font-size:12px">
+            <span>📅 ${esc(reg.fecha||'—')} · ${esc(reg.clase_nombre||'Clase')}</span>
+            <span class="badge ${reg.estado==='presente'?'badge-green':reg.estado==='tardanza'?'badge-yellow':'badge-red'}">${esc(reg.estado||'—')}</span>
+          </div>`).join('')}
+        </div>
+        ${regs.length > 10 ? `<div style="font-size:11px;color:var(--muted);margin-top:6px">Mostrando los 10 más recientes de ${regs.length} registros.</div>` : ''}
+      </div>`;
+    }).join('');
+  } catch(e) {
+    const msg = (e.message && (e.message.includes('404') || e.message.includes('not found')))
+      ? _PROX : 'Error: ' + esc(e.message);
+    el.innerHTML = `<div class="empty"><div class="ico">✅</div><p>${msg}</p></div>`;
+  }
 }
 
 /* ─── SESSION RESTORE ─── */
