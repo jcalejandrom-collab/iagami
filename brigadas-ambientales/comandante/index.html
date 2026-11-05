@@ -499,6 +499,9 @@ function toggleForm(id) {
 
 let _cmd = null;
 let _adultos = [], _menores = [];
+// Brute-force protection — Server-side: configurar limit_req en Nginx — ver docs/nginx_rate_limiting.md
+// PENDIENTE: Nginx rate limiting — ver docs/nginx_rate_limiting.md
+let _cmdLoginAttempts = 0, _cmdLoginBlocked = false;
 let _calYear = new Date().getFullYear(), _calMonth = new Date().getMonth();
 let _actividades = [];
 
@@ -507,6 +510,8 @@ async function doLogin() {
   const pass = document.getElementById('l-pass').value;
   const errEl = document.getElementById('login-err');
   errEl.style.display = 'none';
+  // PENDIENTE: Nginx rate limiting — ver docs/nginx_rate_limiting.md
+  if (_cmdLoginBlocked) { errEl.textContent = 'Demasiados intentos fallidos. Espera 60 segundos.'; errEl.style.display = 'block'; return; }
   if (!email || !pass) { errEl.textContent = 'Ingresa tu correo y contraseña.'; errEl.style.display = 'block'; return; }
   const btn = document.getElementById('btn-login');
   btn.disabled = true; btn.textContent = 'Verificando...';
@@ -519,10 +524,18 @@ async function doLogin() {
       btn.disabled = false; btn.textContent = 'Iniciar sesión';
       return;
     }
+    _cmdLoginAttempts = 0;
     _cmd = auth.record;
     initApp();
   } catch(e) {
-    errEl.textContent = 'Correo o contraseña incorrectos.';
+    _cmdLoginAttempts++;
+    if (_cmdLoginAttempts >= 5) {
+      _cmdLoginBlocked = true;
+      setTimeout(() => { _cmdLoginBlocked = false; _cmdLoginAttempts = 0; }, 60000);
+      errEl.textContent = 'Cuenta bloqueada temporalmente. Espera 60 segundos.';
+    } else {
+      errEl.textContent = 'Correo o contraseña incorrectos.';
+    }
     errEl.style.display = 'block';
     btn.disabled = false; btn.textContent = 'Iniciar sesión';
   }

@@ -734,6 +734,7 @@ const PB_URL = 'https://api.iagami.online';
 let _token = null;
 let _profesor = null;
 // Brute-force protection — Server-side: configurar limit_req en Nginx para /api/collections/*/auth-with-password
+// PENDIENTE: Nginx rate limiting — ver docs/nginx_rate_limiting.md
 let _profLoginAttempts = 0, _profLoginBlocked = false;
 let _misCursos = [];
 let _cursoActivo = null;
@@ -1992,6 +1993,7 @@ function renderZoomMeetings(el) {
 
 function profStartMeeting(startUrl, joinUrl) {
   if (!startUrl && !joinUrl) { toast('Enlace no disponible', 'error'); return; }
+  // start_url no es retornado por el VPS por seguridad; el profesor entra por join_url (mismo link que el alumno) hasta configurar start_url por webhook
   window.open(startUrl || joinUrl, '_blank');
 }
 

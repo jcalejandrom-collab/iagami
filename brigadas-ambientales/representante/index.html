@@ -532,6 +532,7 @@ label{display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:4
 const API = 'https://api.iagami.online';
 let _rep = null, _misB = [], _misAct = [], _misBrigadistas = [], _allBrigadistas = [];
 // Brute-force protection — Server-side: configurar limit_req en Nginx para /api/collections/*/auth-with-password
+// PENDIENTE: Nginx rate limiting — ver docs/nginx_rate_limiting.md
 let _repLoginAttempts = 0, _repLoginBlocked = false;
 let _calYear, _calMonth, _calEventos = [];
 let _currentEvTab = 'proximos';

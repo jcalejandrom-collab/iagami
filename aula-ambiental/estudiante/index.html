@@ -598,6 +598,7 @@ let _claseTab    = 'proximas';
 let _loginAttempts = 0;
 let _loginBlocked  = false;
 let _misCertificados = [];
+let _countdownTimer = null;
 
 /* ─── UTILS ─── */
 function toast(msg, tipo='ok') {
@@ -1633,7 +1634,8 @@ function activarCountdowns() {
       el.textContent = h > 0 ? `⏳ Comienza en ${h}h ${m}m` : `⏳ Comienza en ${m} minutos`;
     }
     actualizar();
-    setInterval(actualizar, 60000);
+    if (_countdownTimer) clearInterval(_countdownTimer);
+    _countdownTimer = setInterval(actualizar, 60000);
   });
 }
 
