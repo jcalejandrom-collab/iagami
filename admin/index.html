@@ -1992,6 +1992,219 @@ async function renderSection(name) {
   }
 }
 
+/* ═══════════════════════════════════════
+   BRIGADAS AMBIENTALES — ADMIN
+═══════════════════════════════════════ */
+let _brigAdultos = [], _brigMenores = [], _brigConsentimientos = [];
+let _currentBrigTab = 'censo';
+
+function switchBrigTab(tab) {
+  _currentBrigTab = tab;
+  ['censo','adultos','menores','consentimientos'].forEach(t => {
+    document.getElementById('btab-panel-' + t).style.display = t === tab ? 'block' : 'none';
+    const btn = document.getElementById('btab-' + t);
+    if (btn) {
+      btn.style.color = t === tab ? 'var(--primary)' : 'var(--muted)';
+      btn.style.borderBottomColor = t === tab ? 'var(--primary)' : 'transparent';
+    }
+  });
+  if (tab === 'adultos') renderBrigAdultos();
+  if (tab === 'menores') renderBrigMenores();
+  if (tab === 'consentimientos') renderBrigConsentimientos();
+}
+
+async function renderBrigadas() {
+  try {
+    const [resA, resM, resC] = await Promise.all([
+      pb.collection('brigadistas').getList(1, 500, {sort: '-created'}),
+      pb.collection('brigadistas_menores').getList(1, 500, {sort: '-created'}),
+      pb.collection('consentimientos').getList(1, 500, {sort: '-created'})
+    ]);
+    _brigAdultos = resA.items || [];
+    _brigMenores = resM.items || [];
+    _brigConsentimientos = resC.items || [];
+    document.getElementById('bstat-adultos').textContent = _brigAdultos.length;
+    const adol = _brigMenores.filter(m => m.categoria === 'adolescente').length;
+    const ninos = _brigMenores.filter(m => m.categoria === 'nino').length;
+    document.getElementById('bstat-adolescentes').textContent = adol;
+    document.getElementById('bstat-ninos').textContent = ninos;
+    const pend = _brigMenores.filter(m => m.estado === 'pendiente_consentimiento').length;
+    document.getElementById('bstat-pendientes').textContent = pend;
+    const apro = _brigMenores.filter(m => m.estado === 'aprobado').length + _brigAdultos.filter(a => a.estado === 'activo').length;
+    document.getElementById('bstat-aprobados').textContent = apro;
+    const all = [..._brigAdultos, ..._brigMenores];
+    const byParr = {};
+    all.forEach(b => { byParr[b.parroquia] = (byParr[b.parroquia] || 0) + 1; });
+    const sorted = Object.entries(byParr).sort((a,b) => b[1]-a[1]);
+    const max = sorted[0] ? sorted[0][1] : 1;
+    document.getElementById('brig-parroquia-chart').innerHTML = sorted.length === 0
+      ? '<span style="color:var(--muted)">Sin datos aún</span>'
+      : sorted.map(([p,n]) => `<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><div style="width:140px;font-size:12px;color:var(--text)">${p}</div><div style="flex:1;background:#f0faf5;border-radius:4px;height:18px;overflow:hidden"><div style="background:var(--primary);height:100%;width:${Math.round(n/max*100)}%;border-radius:4px"></div></div><div style="width:30px;text-align:right;font-size:12px;font-weight:600">${n}</div></div>`).join('');
+    if (_currentBrigTab !== 'censo') switchBrigTab(_currentBrigTab);
+  } catch(e) {
+    const el = document.getElementById('bstat-adultos');
+    if (el) el.textContent = '—';
+  }
+}
+
+function estadoBrigBadge(estado) {
+  const map = {
+    pendiente:['#f59e0b','#fffbeb','Pendiente'],activo:['#059669','#ecfdf5','Activo'],inactivo:['#6b7280','#f9fafb','Inactivo'],
+    pendiente_consentimiento:['#d97706','#fffbeb','Pend. consentimiento'],consentimiento_cargado:['#2563eb','#eff6ff','Doc. cargado'],
+    en_revision:['#7c3aed','#f5f3ff','En revisión'],aprobado:['#059669','#ecfdf5','Aprobado'],
+    rechazado:['#dc2626','#fef2f2','Rechazado'],retirado:['#6b7280','#f9fafb','Retirado']
+  };
+  const [color,bg,label] = map[estado] || ['#6b7280','#f9fafb',estado];
+  return `<span style="background:${bg};color:${color};font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px">${label}</span>`;
+}
+
+function filterBrigAdultos() { renderBrigAdultos(); }
+function filterBrigMenores() { renderBrigMenores(); }
+
+function renderBrigAdultos() {
+  const q = (document.getElementById('brig-search-adulto')?.value || '').toLowerCase();
+  const parr = document.getElementById('brig-f-parroquia-a')?.value || '';
+  const est = document.getElementById('brig-f-estado-a')?.value || '';
+  let list = _brigAdultos.filter(b => (!q||(b.nombres+' '+b.apellidos+' '+b.cedula).toLowerCase().includes(q))&&(!parr||b.parroquia===parr)&&(!est||b.estado===est));
+  const el = document.getElementById('brig-adultos-list');
+  if (!el) return;
+  if (list.length === 0) { el.innerHTML = '<div style="text-align:center;padding:32px;color:var(--muted)">No se encontraron registros</div>'; return; }
+  el.innerHTML = `<div style="background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden"><table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr style="background:#f8fcfa;border-bottom:1px solid var(--border)"><th style="padding:10px 14px;text-align:left;font-weight:600">Nombre</th><th style="padding:10px 14px;text-align:left;font-weight:600">Cédula</th><th style="padding:10px 14px;text-align:left;font-weight:600">Parroquia</th><th style="padding:10px 14px;text-align:left;font-weight:600">Disponibilidad</th><th style="padding:10px 14px;text-align:left;font-weight:600">Estado</th><th style="padding:10px 14px;text-align:left;font-weight:600">Acción</th></tr></thead><tbody>${list.map(b=>`<tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 14px">${b.nombres} ${b.apellidos}</td><td style="padding:10px 14px">${b.cedula||'—'}</td><td style="padding:10px 14px">${b.parroquia||'—'}</td><td style="padding:10px 14px">${b.disponibilidad||'—'}</td><td style="padding:10px 14px">${estadoBrigBadge(b.estado)}</td><td style="padding:10px 14px"><select style="font-size:11px;padding:3px 6px;border:1px solid var(--border);border-radius:6px" onchange="updateBrigEstado('brigadistas','${b.id}',this.value)"><option value="pendiente" ${b.estado==='pendiente'?'selected':''}>Pendiente</option><option value="activo" ${b.estado==='activo'?'selected':''}>Activo</option><option value="inactivo" ${b.estado==='inactivo'?'selected':''}>Inactivo</option></select></td></tr>`).join('')}</tbody></table></div>`;
+}
+
+function renderBrigMenores() {
+  const q = (document.getElementById('brig-search-menor')?.value || '').toLowerCase();
+  const cat = document.getElementById('brig-f-cat')?.value || '';
+  const est = document.getElementById('brig-f-estado-m')?.value || '';
+  let list = _brigMenores.filter(b => (!q||(b.nombres+' '+b.apellidos).toLowerCase().includes(q))&&(!cat||b.categoria===cat)&&(!est||b.estado===est));
+  const el = document.getElementById('brig-menores-list');
+  if (!el) return;
+  if (list.length === 0) { el.innerHTML = '<div style="text-align:center;padding:32px;color:var(--muted)">No se encontraron registros</div>'; return; }
+  el.innerHTML = `<div style="background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden"><table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr style="background:#f8fcfa;border-bottom:1px solid var(--border)"><th style="padding:10px 14px;text-align:left;font-weight:600">Nombre</th><th style="padding:10px 14px;text-align:left;font-weight:600">Categoría</th><th style="padding:10px 14px;text-align:left;font-weight:600">Edad</th><th style="padding:10px 14px;text-align:left;font-weight:600">Escuela</th><th style="padding:10px 14px;text-align:left;font-weight:600">Estado</th><th style="padding:10px 14px;text-align:left;font-weight:600">Acción</th></tr></thead><tbody>${list.map(b=>`<tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 14px">${b.nombres} ${b.apellidos}</td><td style="padding:10px 14px">${b.categoria==='adolescente'?'🧑‍🎓 Adolescente':'🧒 Niño'}</td><td style="padding:10px 14px">${b.edad?b.edad+' años':'—'}</td><td style="padding:10px 14px">${b.institucion_educativa||'—'}</td><td style="padding:10px 14px">${estadoBrigBadge(b.estado)}</td><td style="padding:10px 14px"><select style="font-size:11px;padding:3px 6px;border:1px solid var(--border);border-radius:6px" onchange="updateBrigEstado('brigadistas_menores','${b.id}',this.value)"><option value="pendiente_consentimiento" ${b.estado==='pendiente_consentimiento'?'selected':''}>Pend. consentimiento</option><option value="consentimiento_cargado" ${b.estado==='consentimiento_cargado'?'selected':''}>Doc. cargado</option><option value="en_revision" ${b.estado==='en_revision'?'selected':''}>En revisión</option><option value="aprobado" ${b.estado==='aprobado'?'selected':''}>Aprobado</option><option value="rechazado" ${b.estado==='rechazado'?'selected':''}>Rechazado</option></select></td></tr>`).join('')}</tbody></table></div>`;
+}
+
+function renderBrigConsentimientos() {
+  const pend = _brigConsentimientos.filter(c => ['pendiente','consentimiento_cargado','en_revision'].includes(c.estado));
+  const el = document.getElementById('brig-consent-list');
+  if (!el) return;
+  if (pend.length === 0) { el.innerHTML = '<div style="text-align:center;padding:32px;color:var(--muted)">No hay consentimientos pendientes</div>'; return; }
+  el.innerHTML = pend.map(c=>`<div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:12px"><div><div style="font-size:13px;font-weight:600">Consentimiento #${c.id.slice(0,8)}</div><div style="font-size:11px;color:var(--muted);margin-top:2px">${new Date(c.created).toLocaleDateString('es-VE')} · ${estadoBrigBadge(c.estado)}</div></div><div style="display:flex;gap:8px"><button onclick="updateConsentimiento('${c.id}','aprobado')" style="background:#ecfdf5;color:#059669;border:1px solid #a7f3d0;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:600;cursor:pointer">✓ Aprobar</button><button onclick="updateConsentimiento('${c.id}','rechazado')" style="background:#fef2f2;color:#dc2626;border:1px solid #fca5a5;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:600;cursor:pointer">✕ Rechazar</button></div></div>`).join('');
+}
+
+async function updateBrigEstado(col, id, estado) {
+  try { await pb.collection(col).update(id, {estado}); toast('Estado actualizado'); await renderBrigadas(); }
+  catch(e) { toast('Error al actualizar', 'error'); }
+}
+
+async function updateConsentimiento(id, estado) {
+  try { await pb.collection('consentimientos').update(id, {estado, fecha_revision: new Date().toLocaleDateString('sv-SE')}); toast('Consentimiento ' + estado); await renderBrigadas(); }
+  catch(e) { toast('Error al actualizar', 'error'); }
+}
+
+/* ═══════════════════════════════════════
+   AULA AMBIENTAL — ADMIN
+═══════════════════════════════════════ */
+let _aulaRecursos = [], _aulaVisitas = [];
+let _currentAulaTab = 'biblioteca';
+
+function switchAulaTab(tab) {
+  _currentAulaTab = tab;
+  ['biblioteca','cursos','visitas'].forEach(t => {
+    document.getElementById('atab-panel-' + t).style.display = t === tab ? 'block' : 'none';
+    const btn = document.getElementById('atab-' + t);
+    if (btn) { btn.style.color = t === tab ? 'var(--primary)' : 'var(--muted)'; btn.style.borderBottomColor = t === tab ? 'var(--primary)' : 'transparent'; }
+  });
+  if (tab === 'cursos') renderAulaCursos();
+  if (tab === 'visitas') renderVisitas();
+  if (tab === 'biblioteca') renderAulaBiblioteca();
+}
+
+async function renderAula() {
+  try {
+    const [resR, resV] = await Promise.all([
+      pb.collection('biblioteca_multimedia').getList(1, 200, {sort: '-created'}),
+      pb.collection('solicitudes_visitas').getList(1, 100, {sort: '-created'})
+    ]);
+    _aulaRecursos = resR.items || [];
+    _aulaVisitas = resV.items || [];
+  } catch(e) { _aulaRecursos = []; _aulaVisitas = []; }
+  renderAulaBiblioteca();
+}
+
+function renderAulaBiblioteca() {
+  const cat = document.getElementById('aula-f-cat')?.value || '';
+  const tipo = document.getElementById('aula-f-tipo')?.value || '';
+  let list = _aulaRecursos.filter(r => (!cat||r.categoria===cat)&&(!tipo||r.tipo===tipo));
+  const el = document.getElementById('aula-biblioteca-list');
+  if (!el) return;
+  if (list.length === 0) { el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted)">No hay recursos aún. Agrega el primero con "+ Nuevo Recurso"</div>'; return; }
+  const iconos = {video:'▶️',pdf:'📄',guia:'📗',infografia:'🖼️',presentacion:'📊'};
+  el.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px">${list.map(r=>`<div style="background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden"><div style="background:var(--primary-light);padding:14px;text-align:center;font-size:28px">${iconos[r.tipo]||'📁'}</div><div style="padding:12px"><div style="font-size:13px;font-weight:600;margin-bottom:4px">${r.titulo}</div><div style="font-size:11px;color:var(--muted);margin-bottom:8px">${r.categoria||''} · ${r.nivel||'General'}</div>${r.url?`<a href="${r.url}" target="_blank" style="font-size:12px;color:var(--primary);font-weight:600">🔗 Abrir recurso</a>`:''}<div style="margin-top:8px;display:flex;justify-content:flex-end"><button onclick="deleteAulaRecurso('${r.id}')" style="background:#fef2f2;color:#dc2626;border:1px solid #fca5a5;border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer">🗑</button></div></div></div>`).join('')}</div>`;
+}
+
+function renderAulaCursos() {
+  const el = document.getElementById('aula-cursos-list');
+  if (el) el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted)"><div style="font-size:32px;margin-bottom:12px">🎓</div><div style="font-size:14px;font-weight:600">Módulo de Cursos</div><div style="font-size:12px;margin-top:6px">Próximamente: cursos, lecciones y certificados integrados con la colección <strong>cursos</strong> de PocketBase.</div></div>';
+}
+
+async function renderVisitas() {
+  const est = document.getElementById('vis-f-estado')?.value || '';
+  let list = _aulaVisitas.filter(v => !est||v.estado===est);
+  const el = document.getElementById('visitas-list');
+  if (!el) return;
+  if (list.length === 0) { el.innerHTML = '<div style="text-align:center;padding:32px;color:var(--muted)">No hay solicitudes de visitas</div>'; return; }
+  const estadoColor = {recibida:'#d97706',aprobada:'#059669',programada:'#2563eb',ejecutada:'#1d6b3e',cancelada:'#dc2626'};
+  el.innerHTML = list.map(v=>`<div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><div style="font-size:13px;font-weight:600">🏫 ${v.institucion}</div><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;background:#f8fcfa;color:${estadoColor[v.estado]||'#374151'}">${v.estado}</span></div><div style="font-size:12px;color:var(--muted)">Solicitante: ${v.solicitante} · ${v.fecha?new Date(v.fecha).toLocaleDateString('es-VE'):''}</div><div style="font-size:12px;color:var(--muted)">Temática: ${v.tematica||'—'} · Estudiantes: ${v.cantidad||'—'}</div><div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">${['aprobada','programada','ejecutada','cancelada'].map(s=>`<button onclick="updateVisitaEstado('${v.id}','${s}')" style="font-size:11px;padding:3px 10px;border:1px solid var(--border);border-radius:6px;cursor:pointer;background:#fff">→ ${s}</button>`).join('')}</div></div>`).join('');
+}
+
+function openAulaForm() { document.getElementById('aula-form-panel').style.display = 'block'; }
+function closeAulaForm() { document.getElementById('aula-form-panel').style.display = 'none'; }
+function openVisitaForm() { document.getElementById('visita-form-panel').style.display = 'block'; }
+function closeVisitaForm() { document.getElementById('visita-form-panel').style.display = 'none'; }
+
+async function saveAulaRecurso() {
+  const titulo = document.getElementById('aula-titulo').value.trim();
+  const tipo   = document.getElementById('aula-tipo').value;
+  const cat    = document.getElementById('aula-cat').value;
+  const url    = document.getElementById('aula-url').value.trim();
+  if (!titulo||!tipo||!cat||!url) { toast('Completa todos los campos requeridos', 'error'); return; }
+  try {
+    await pb.collection('biblioteca_multimedia').create({titulo, tipo, categoria: cat, nivel: document.getElementById('aula-nivel').value, descripcion: document.getElementById('aula-desc').value.trim(), url, publicado: document.getElementById('aula-publicado').checked});
+    toast('Recurso guardado'); closeAulaForm();
+    ['aula-titulo','aula-url','aula-desc'].forEach(id => document.getElementById(id).value = '');
+    await renderAula();
+  } catch(e) { toast('Error al guardar', 'error'); }
+}
+
+async function deleteAulaRecurso(id) {
+  if (!confirm('¿Eliminar este recurso?')) return;
+  try { await pb.collection('biblioteca_multimedia').delete(id); toast('Recurso eliminado'); await renderAula(); }
+  catch(e) { toast('Error al eliminar', 'error'); }
+}
+
+async function saveVisita() {
+  const institucion = document.getElementById('vis-institucion').value.trim();
+  const solicitante = document.getElementById('vis-solicitante').value.trim();
+  const fecha       = document.getElementById('vis-fecha').value;
+  const tematica    = document.getElementById('vis-tematica').value.trim();
+  const parroquia   = document.getElementById('vis-parroquia').value;
+  if (!institucion||!solicitante||!fecha||!tematica||!parroquia) { toast('Completa los campos requeridos', 'error'); return; }
+  try {
+    await pb.collection('solicitudes_visitas').create({institucion, solicitante, parroquia, telefono: document.getElementById('vis-tel').value.trim(), cantidad: parseInt(document.getElementById('vis-cantidad').value)||0, nivel: document.getElementById('vis-nivel').value, fecha, horario: document.getElementById('vis-horario').value.trim(), tematica, observaciones: document.getElementById('vis-obs').value.trim(), estado: 'recibida'});
+    toast('Solicitud guardada'); closeVisitaForm(); await renderAula(); switchAulaTab('visitas');
+  } catch(e) { toast('Error al guardar', 'error'); }
+}
+
+async function updateVisitaEstado(id, estado) {
+  try {
+    await pb.collection('solicitudes_visitas').update(id, {estado});
+    toast('Estado actualizado');
+    const idx = _aulaVisitas.findIndex(v => v.id === id);
+    if (idx >= 0) _aulaVisitas[idx].estado = estado;
+    renderVisitas();
+  } catch(e) { toast('Error', 'error'); }
+}
+
 /* ─── MOBILE ─── */
 function toggleSidebar() {
   document.getElementById('sidebar').classList.toggle('open');
