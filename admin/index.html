@@ -1607,6 +1607,122 @@ input,select,textarea{font-family:inherit}
     <!-- ══════════════════════════════════════
          SECCIÓN: AUDITORÍA INSTITUCIONAL
     ══════════════════════════════════════ -->
+    <!-- BRIGADAS AMBIENTALES ADMIN -->
+<div id="sec-brigadas" class="section">
+  <div class="page-header">
+    <div>
+      <div class="page-title">🌿 Brigadas Ambientales</div>
+      <div class="page-subtitle">Gestión de inscripciones, expedientes y brigadas constituidas</div>
+    </div>
+    <button class="btn btn-primary" onclick="renderBrigadas()">↻ Actualizar</button>
+  </div>
+  <div style="display:flex;gap:8px;margin-bottom:16px;border-bottom:2px solid var(--border);padding-bottom:0">
+    <button id="btab-censo" onclick="switchBrigTab('censo')" style="padding:8px 16px;border:none;background:none;font-size:13px;font-weight:600;color:var(--primary);border-bottom:2px solid var(--primary);margin-bottom:-2px;cursor:pointer;font-family:inherit">📊 Censo</button>
+    <button id="btab-adultos" onclick="switchBrigTab('adultos')" style="padding:8px 16px;border:none;background:none;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;font-family:inherit">🧑 Adultos</button>
+    <button id="btab-menores" onclick="switchBrigTab('menores')" style="padding:8px 16px;border:none;background:none;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;font-family:inherit">🧒 Menores</button>
+    <button id="btab-consentimientos" onclick="switchBrigTab('consentimientos')" style="padding:8px 16px;border:none;background:none;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;font-family:inherit">📋 Consentimientos</button>
+  </div>
+  <div id="btab-panel-censo">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px">
+      <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center"><div style="font-size:28px;font-weight:700;color:var(--primary)" id="bstat-adultos">—</div><div style="font-size:11px;color:var(--muted);margin-top:4px">Adultos inscritos</div></div>
+      <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center"><div style="font-size:28px;font-weight:700;color:#2563eb" id="bstat-adolescentes">—</div><div style="font-size:11px;color:var(--muted);margin-top:4px">Adolescentes</div></div>
+      <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center"><div style="font-size:28px;font-weight:700;color:#7c3aed" id="bstat-ninos">—</div><div style="font-size:11px;color:var(--muted);margin-top:4px">Niños</div></div>
+      <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center"><div style="font-size:28px;font-weight:700;color:#d97706" id="bstat-pendientes">—</div><div style="font-size:11px;color:var(--muted);margin-top:4px">Pendientes</div></div>
+      <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center"><div style="font-size:28px;font-weight:700;color:#059669" id="bstat-aprobados">—</div><div style="font-size:11px;color:var(--muted);margin-top:4px">Aprobados</div></div>
+    </div>
+    <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px">
+      <div style="font-size:13px;font-weight:600;margin-bottom:12px">Participación por Parroquia</div>
+      <div id="brig-parroquia-chart" style="font-size:13px;color:var(--muted)">Cargando...</div>
+    </div>
+  </div>
+  <div id="btab-panel-adultos" style="display:none">
+    <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+      <input id="brig-search-adulto" class="form-control" placeholder="Buscar por nombre o cédula..." style="flex:1;min-width:200px" oninput="filterBrigAdultos()"/>
+      <select id="brig-f-parroquia-a" class="form-control" style="min-width:160px" onchange="filterBrigAdultos()"><option value="">Todas las parroquias</option><option>Catedral</option><option>Concepción</option><option>El Cuji</option><option>Juan de Villegas</option><option>Tamaca</option><option>Unión</option><option>Agua Viva</option><option>Buena Vista</option><option>Cabudare</option><option>Montalbán</option><option>Olivos</option><option>Santa Rosa</option><option>Río Claro</option><option>Juárez</option><option>Aguedo Felipe Alvarado</option><option>Sarare</option></select>
+      <select id="brig-f-estado-a" class="form-control" style="min-width:140px" onchange="filterBrigAdultos()"><option value="">Todos los estados</option><option value="pendiente">Pendiente</option><option value="activo">Activo</option><option value="inactivo">Inactivo</option></select>
+    </div>
+    <div id="brig-adultos-list" style="font-size:13px;color:var(--muted)">Cargando...</div>
+  </div>
+  <div id="btab-panel-menores" style="display:none">
+    <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+      <input id="brig-search-menor" class="form-control" placeholder="Buscar por nombre..." style="flex:1;min-width:200px" oninput="filterBrigMenores()"/>
+      <select id="brig-f-cat" class="form-control" style="min-width:160px" onchange="filterBrigMenores()"><option value="">Todas las categorías</option><option value="adolescente">Adolescente</option><option value="nino">Niño</option></select>
+      <select id="brig-f-estado-m" class="form-control" style="min-width:160px" onchange="filterBrigMenores()"><option value="">Todos los estados</option><option value="pendiente_consentimiento">Pendiente consentimiento</option><option value="consentimiento_cargado">Consentimiento cargado</option><option value="en_revision">En revisión</option><option value="aprobado">Aprobado</option><option value="rechazado">Rechazado</option></select>
+    </div>
+    <div id="brig-menores-list" style="font-size:13px;color:var(--muted)">Cargando...</div>
+  </div>
+  <div id="btab-panel-consentimientos" style="display:none">
+    <div style="font-size:13px;color:var(--muted);margin-bottom:12px">Consentimientos pendientes de revisión</div>
+    <div id="brig-consent-list">Cargando...</div>
+  </div>
+</div>
+
+<!-- AULA AMBIENTAL ADMIN -->
+<div id="sec-aula" class="section">
+  <div class="page-header">
+    <div>
+      <div class="page-title">📚 Aula Ambiental IAGAMI</div>
+      <div class="page-subtitle">Biblioteca multimedia y recursos educativos</div>
+    </div>
+    <button class="btn btn-primary" onclick="openAulaForm()">+ Nuevo Recurso</button>
+  </div>
+  <div style="display:flex;gap:8px;margin-bottom:16px;border-bottom:2px solid var(--border);padding-bottom:0">
+    <button id="atab-biblioteca" onclick="switchAulaTab('biblioteca')" style="padding:8px 16px;border:none;background:none;font-size:13px;font-weight:600;color:var(--primary);border-bottom:2px solid var(--primary);margin-bottom:-2px;cursor:pointer;font-family:inherit">📖 Biblioteca</button>
+    <button id="atab-cursos" onclick="switchAulaTab('cursos')" style="padding:8px 16px;border:none;background:none;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;font-family:inherit">🎓 Cursos</button>
+    <button id="atab-visitas" onclick="switchAulaTab('visitas')" style="padding:8px 16px;border:none;background:none;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;font-family:inherit">🏫 Visitas Escolares</button>
+  </div>
+  <div id="atab-panel-biblioteca">
+    <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+      <select id="aula-f-cat" class="form-control" style="min-width:200px" onchange="renderAulaBiblioteca()"><option value="">Todas las categorías</option><option>Educación ambiental</option><option>Cambio climático</option><option>Protección del agua</option><option>Reciclaje</option><option>Reforestación</option><option>Árboles autóctonos de Lara</option><option>Biodiversidad</option><option>Protección de fauna</option><option>Contaminación ambiental</option><option>Gestión de residuos</option><option>Compostaje</option><option>Parques y áreas verdes</option><option>Ecosistemas de Iribarren</option></select>
+      <select id="aula-f-tipo" class="form-control" style="min-width:140px" onchange="renderAulaBiblioteca()"><option value="">Todos los tipos</option><option value="video">Video YouTube</option><option value="pdf">Documento PDF</option><option value="guia">Guía didáctica</option><option value="infografia">Infografía</option><option value="presentacion">Presentación</option></select>
+    </div>
+    <div id="aula-biblioteca-list">Cargando...</div>
+  </div>
+  <div id="atab-panel-cursos" style="display:none"><div id="aula-cursos-list">Cargando...</div></div>
+  <div id="atab-panel-visitas" style="display:none">
+    <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+      <select id="vis-f-estado" class="form-control" style="min-width:160px" onchange="renderVisitas()"><option value="">Todos los estados</option><option value="recibida">Recibida</option><option value="aprobada">Aprobada</option><option value="programada">Programada</option><option value="ejecutada">Ejecutada</option><option value="cancelada">Cancelada</option></select>
+      <button class="btn btn-primary" onclick="openVisitaForm()">+ Nueva Solicitud</button>
+    </div>
+    <div id="visitas-list">Cargando...</div>
+    <div id="visita-form-panel" style="display:none;background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px;margin-top:16px">
+      <h4 style="margin-bottom:14px;font-family:'Poppins',sans-serif">📋 Registrar Visita Escolar</h4>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div><label class="form-label">Institución Educativa *</label><input class="form-control" id="vis-institucion" placeholder="Nombre de la institución"/></div>
+        <div><label class="form-label">Solicitante *</label><input class="form-control" id="vis-solicitante" placeholder="Nombre del docente/director"/></div>
+        <div><label class="form-label">Teléfono</label><input class="form-control" id="vis-tel" placeholder="Teléfono de contacto"/></div>
+        <div><label class="form-label">Parroquia *</label><select class="form-control" id="vis-parroquia"><option value="">Selecciona...</option><option>Catedral</option><option>Concepción</option><option>El Cuji</option><option>Juan de Villegas</option><option>Tamaca</option><option>Unión</option><option>Agua Viva</option><option>Buena Vista</option><option>Cabudare</option><option>Montalbán</option><option>Olivos</option><option>Santa Rosa</option><option>Río Claro</option><option>Juárez</option><option>Aguedo Felipe Alvarado</option><option>Sarare</option></select></div>
+        <div><label class="form-label">Cantidad de Estudiantes</label><input class="form-control" id="vis-cantidad" type="number" min="1" placeholder="Ej: 30"/></div>
+        <div><label class="form-label">Nivel Educativo</label><select class="form-control" id="vis-nivel"><option value="">Selecciona...</option><option>Inicial</option><option>Primaria</option><option>Secundaria</option><option>Universitario</option></select></div>
+        <div><label class="form-label">Fecha Propuesta *</label><input class="form-control" id="vis-fecha" type="date"/></div>
+        <div><label class="form-label">Horario</label><input class="form-control" id="vis-horario" placeholder="Ej: 8:00am - 10:00am"/></div>
+        <div style="grid-column:span 2"><label class="form-label">Temática Ambiental *</label><input class="form-control" id="vis-tematica" placeholder="¿Qué tema desean tratar?"/></div>
+        <div style="grid-column:span 2"><label class="form-label">Observaciones</label><textarea class="form-control" id="vis-obs" rows="2" placeholder="Información adicional..."></textarea></div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:14px">
+        <button class="btn btn-primary" onclick="saveVisita()">💾 Guardar Solicitud</button>
+        <button class="btn btn-secondary" onclick="closeVisitaForm()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+  <div id="aula-form-panel" style="display:none;background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px;margin-top:16px">
+    <h4 style="margin-bottom:14px;font-family:'Poppins',sans-serif">📖 Agregar Recurso Educativo</h4>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div><label class="form-label">Título *</label><input class="form-control" id="aula-titulo" placeholder="Título del recurso"/></div>
+      <div><label class="form-label">Tipo *</label><select class="form-control" id="aula-tipo"><option value="">Selecciona...</option><option value="video">Video YouTube</option><option value="pdf">Documento PDF</option><option value="guia">Guía didáctica</option><option value="infografia">Infografía</option><option value="presentacion">Presentación</option></select></div>
+      <div><label class="form-label">Categoría *</label><select class="form-control" id="aula-cat"><option value="">Selecciona...</option><option>Educación ambiental</option><option>Cambio climático</option><option>Protección del agua</option><option>Reciclaje</option><option>Reforestación</option><option>Árboles autóctonos de Lara</option><option>Biodiversidad</option><option>Protección de fauna</option><option>Contaminación ambiental</option><option>Gestión de residuos</option><option>Compostaje</option><option>Parques y áreas verdes</option><option>Ecosistemas de Iribarren</option></select></div>
+      <div><label class="form-label">Nivel Educativo</label><select class="form-control" id="aula-nivel"><option value="">General</option><option>Inicial</option><option>Primaria</option><option>Secundaria</option><option>Adultos</option></select></div>
+      <div style="grid-column:span 2"><label class="form-label">Descripción</label><textarea class="form-control" id="aula-desc" rows="2" placeholder="Breve descripción del recurso..."></textarea></div>
+      <div style="grid-column:span 2"><label class="form-label">URL del recurso *</label><input class="form-control" id="aula-url" placeholder="https://youtube.com/watch?v=... o enlace al documento"/></div>
+      <div style="grid-column:span 2;display:flex;align-items:center;gap:8px"><input type="checkbox" id="aula-publicado" checked/><label for="aula-publicado" style="font-size:13px">Publicado</label></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:14px">
+      <button class="btn btn-primary" onclick="saveAulaRecurso()">💾 Guardar Recurso</button>
+      <button class="btn btn-secondary" onclick="closeAulaForm()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
     <div id="sec-auditoria" class="section">
       <div class="page-header">
         <div>
@@ -1808,6 +1924,8 @@ const NAV = [
   {id:'gestion_rrhh',  icon:'👥', label:'Gestión Humana'},
   {id:'presidencial',  icon:'🎯', label:'Centro de Control'},
   {id:'ctrl_seguimiento', icon:'🔍', label:'Control y Seguimiento'},
+  {id:'brigadas',          icon:'🌿', label:'Brigadas Ambientales'},
+  {id:'aula',              icon:'📚', label:'Aula Ambiental'},
   {id:'auditoria',        icon:'🛡️', label:'Auditoría'},
 ];
 
@@ -1868,6 +1986,8 @@ async function renderSection(name) {
     case 'gestion_rrhh':     await renderGestionRRHH(); break;
     case 'presidencial':     await renderPresidencial(); break;
     case 'ctrl_seguimiento': await renderCtrlSeguimiento(); break;
+    case 'brigadas':         await renderBrigadas(); break;
+    case 'aula':             await renderAula(); break;
     case 'auditoria':        await renderAuditoria(); break;
   }
 }
