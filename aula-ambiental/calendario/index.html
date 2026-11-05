@@ -271,7 +271,7 @@ async function cargarEventos(){
         raw: c
       }));
     }
-  } catch(e){ console.warn('clases_virtuales:', e.message) }
+  } catch(e){ /* colección no disponible aún */ }
 
   // Cargar solicitudes de visitas aprobadas
   try {
@@ -291,7 +291,7 @@ async function cargarEventos(){
         raw: v
       }));
     }
-  } catch(e){ console.warn('solicitudes_visitas:', e.message) }
+  } catch(e){ /* colección no disponible aún */ }
 
   // Cargar eventos del aula (colección eventos si existe)
   try {
@@ -311,7 +311,7 @@ async function cargarEventos(){
         raw: ev
       }));
     }
-  } catch(e){ console.warn('eventos:', e.message) }
+  } catch(e){ /* colección no disponible aún */ }
 
   renderCalendario();
 }
