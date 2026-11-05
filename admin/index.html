@@ -1834,6 +1834,8 @@ input,select,textarea{font-family:inherit}
       <div style="display:flex;border-bottom:2px solid var(--border);margin-bottom:16px">
         <button id="ptab-profesores" onclick="switchProfTab('profesores')" style="padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;background:none;border:none;border-bottom:2px solid var(--primary);color:var(--primary);margin-bottom:-2px;font-family:'Inter',sans-serif">👨‍🏫 Profesores</button>
         <button id="ptab-cursos" onclick="switchProfTab('cursos')" style="padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);margin-bottom:-2px;font-family:'Inter',sans-serif">🎓 Cursos</button>
+        <button id="ptab-estudiantes" onclick="switchProfTab('estudiantes')" style="padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);margin-bottom:-2px;font-family:'Inter',sans-serif">👨‍🎓 Estudiantes</button>
+        <button id="ptab-solicitudes" onclick="switchProfTab('solicitudes')" style="padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);margin-bottom:-2px;font-family:'Inter',sans-serif">📋 Solicitudes</button>
       </div>
 
       <div id="ptab-panel-profesores">
@@ -1881,6 +1883,53 @@ input,select,textarea{font-family:inherit}
             <button class="btn btn-secondary btn-sm" onclick="closeCursoForm()">Cancelar</button>
           </div>
         </div>
+      </div>
+
+      <!-- TAB ESTUDIANTES -->
+      <div id="ptab-panel-estudiantes" style="display:none">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+          <button class="btn btn-primary btn-sm" onclick="openEstForm()">+ Nuevo estudiante</button>
+        </div>
+        <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap">
+          <select class="form-control" id="est-f-estado" style="width:auto;min-width:140px" onchange="renderEstList()">
+            <option value="">Todos</option>
+            <option value="pendiente">Pendientes</option>
+            <option value="activo">Activos</option>
+            <option value="suspendido">Suspendidos</option>
+          </select>
+          <select class="form-control" id="est-f-tipo" style="width:auto;min-width:140px" onchange="renderEstList()">
+            <option value="">Todos los tipos</option>
+            <option value="adulto">Adultos</option>
+            <option value="adolescente">Adolescentes</option>
+            <option value="nino">Niños</option>
+          </select>
+        </div>
+        <div id="estudiantes-list"><div style="text-align:center;padding:32px;color:var(--muted)">Cargando...</div></div>
+        <!-- Formulario nuevo estudiante -->
+        <div id="est-form-panel" style="display:none;background:#f8fafc;border:1px solid var(--border);border-radius:12px;padding:20px;margin-top:16px">
+          <h4 style="font-family:'Poppins',sans-serif;font-size:15px;font-weight:600;color:var(--primary-dark);margin-bottom:14px">👨‍🎓 Crear Cuenta de Estudiante</h4>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div><label class="form-label">Nombres *</label><input class="form-control" id="ef-nombres" placeholder="Nombres"/></div>
+            <div><label class="form-label">Apellidos *</label><input class="form-control" id="ef-apellidos" placeholder="Apellidos"/></div>
+            <div><label class="form-label">Usuario *</label><input class="form-control" id="ef-user" placeholder="sin espacios"/></div>
+            <div><label class="form-label">Correo</label><input class="form-control" id="ef-email" type="email" placeholder="opcional"/></div>
+            <div><label class="form-label">Cédula</label><input class="form-control" id="ef-cedula" placeholder="V-00000000"/></div>
+            <div><label class="form-label">Tipo</label>
+              <select class="form-control" id="ef-tipo"><option value="adulto">Adulto</option><option value="adolescente">Adolescente</option><option value="nino">Niño/a</option></select>
+            </div>
+            <div><label class="form-label">Contraseña inicial *</label><input class="form-control" id="ef-pass" type="password" placeholder="Mínimo 8 caracteres"/></div>
+            <div><label class="form-label">Confirmar *</label><input class="form-control" id="ef-pass2" type="password" placeholder="Repite"/></div>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:14px">
+            <button class="btn btn-primary btn-sm" onclick="saveEstudiante()">💾 Crear cuenta</button>
+            <button class="btn btn-secondary btn-sm" onclick="closeEstForm()">Cancelar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB SOLICITUDES -->
+      <div id="ptab-panel-solicitudes" style="display:none">
+        <div id="solicitudes-list"><div style="text-align:center;padding:32px;color:var(--muted)">Cargando...</div></div>
       </div>
     </div>
     <!-- /sec-profesores -->
@@ -2711,6 +2760,171 @@ async function toggleCursoEstado(id, estado) {
     if (idx >= 0) _cursosAdminList[idx].estado = estado;
     renderCursosAdmin();
   } catch(e) { toast('Error', 'error'); }
+}
+
+/* ─── ESTUDIANTES ─── */
+let _estudiantesList = [];
+let _solicitudesList = [];
+
+function switchProfTab_orig(tab) { switchProfTab(tab); }
+
+const _switchProfTabOriginal = switchProfTab;
+function switchProfTab(tab) {
+  _profTab = tab;
+  ['profesores','cursos','estudiantes','solicitudes'].forEach(t => {
+    const p = document.getElementById('ptab-panel-'+t);
+    if (p) p.style.display = t===tab ? 'block' : 'none';
+    const btn = document.getElementById('ptab-'+t);
+    if (btn) {
+      btn.style.color = t===tab ? 'var(--primary)' : 'var(--muted)';
+      btn.style.borderBottomColor = t===tab ? 'var(--primary)' : 'transparent';
+    }
+  });
+  if (tab==='profesores')  renderProfList();
+  if (tab==='cursos')      renderCursosAdmin();
+  if (tab==='estudiantes') { cargarEstudiantes().then(renderEstList); }
+  if (tab==='solicitudes') cargarSolicitudes();
+}
+
+async function cargarEstudiantes() {
+  try {
+    const r = await pb.collection('estudiantes').getList(1, 500, {sort: 'nombres'}).catch(()=>({items:[]}));
+    _estudiantesList = r.items || [];
+  } catch(e) { _estudiantesList = []; }
+}
+
+function renderEstList() {
+  const el = document.getElementById('estudiantes-list');
+  if (!el) return;
+  const fEst  = document.getElementById('est-f-estado')?.value || '';
+  const fTipo = document.getElementById('est-f-tipo')?.value   || '';
+  const lista = _estudiantesList.filter(e =>
+    (!fEst  || e.estado === fEst) &&
+    (!fTipo || e.tipo   === fTipo)
+  );
+  if (!lista.length) { el.innerHTML = '<div style="text-align:center;padding:32px;color:var(--muted)">Sin estudiantes registrados</div>'; return; }
+  const estadoColor = {pendiente:'#d97706',activo:'#059669',suspendido:'#dc2626',inactivo:'#6b7280'};
+  const tipoColor   = {adulto:'#2563eb',adolescente:'#7c3aed',nino:'#059669'};
+  el.innerHTML = `<div style="margin-bottom:8px;font-size:12px;color:var(--muted)">${lista.length} estudiante(s)</div>
+    <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">
+    <thead><tr style="background:#f8fafc">
+      <th style="padding:9px 12px;text-align:left;border-bottom:2px solid var(--border);color:var(--muted);font-size:11px;text-transform:uppercase">Nombre</th>
+      <th style="padding:9px 12px;text-align:left;border-bottom:2px solid var(--border);color:var(--muted);font-size:11px;text-transform:uppercase">Usuario</th>
+      <th style="padding:9px 12px;text-align:left;border-bottom:2px solid var(--border);color:var(--muted);font-size:11px;text-transform:uppercase">Tipo</th>
+      <th style="padding:9px 12px;text-align:left;border-bottom:2px solid var(--border);color:var(--muted);font-size:11px;text-transform:uppercase">Estado</th>
+      <th style="padding:9px 12px;text-align:left;border-bottom:2px solid var(--border);color:var(--muted);font-size:11px;text-transform:uppercase">Acciones</th>
+    </tr></thead>
+    <tbody>${lista.map(e=>`<tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:9px 12px;font-weight:600">${e.nombres||''} ${e.apellidos||''}</td>
+      <td style="padding:9px 12px;color:var(--muted)">@${e.username||'—'}</td>
+      <td style="padding:9px 12px"><span style="font-size:11px;padding:2px 7px;border-radius:12px;background:#f8fafc;color:${tipoColor[e.tipo]||'#374151'}">${e.tipo||'adulto'}</span></td>
+      <td style="padding:9px 12px"><span style="font-size:11px;padding:2px 7px;border-radius:12px;background:#f8fafc;color:${estadoColor[e.estado]||'#374151'};font-weight:600">${e.estado||'—'}</span></td>
+      <td style="padding:9px 12px"><div style="display:flex;gap:5px;flex-wrap:wrap">
+        ${e.estado==='pendiente'?`<button onclick="updateEstEstado('${e.id}','activo')" style="font-size:11px;padding:2px 7px;border:1px solid #86efac;background:#dcfce7;color:#166534;border-radius:5px;cursor:pointer">✓ Activar</button>`:''}
+        ${e.estado==='activo'?`<button onclick="updateEstEstado('${e.id}','suspendido')" style="font-size:11px;padding:2px 7px;border:1px solid #fca5a5;background:#fef2f2;color:#dc2626;border-radius:5px;cursor:pointer">⏸ Suspender</button>`:''}
+        ${e.estado==='suspendido'?`<button onclick="updateEstEstado('${e.id}','activo')" style="font-size:11px;padding:2px 7px;border:1px solid #86efac;background:#dcfce7;color:#166534;border-radius:5px;cursor:pointer">▶ Reactivar</button>`:''}
+        <button onclick="resetEstPass('${e.id}','${(e.nombres||'').replace(/'/g,"\\'")}');" style="font-size:11px;padding:2px 7px;border:1px solid var(--border);background:#fff;border-radius:5px;cursor:pointer">🔑 Pass</button>
+      </div></td>
+    </tr>`).join('')}</tbody>
+  </table></div>`;
+  // Actualizar stat
+  const activos = lista.filter(e => e.estado==='activo').length;
+  const psTot = document.getElementById('ps-total');
+  if (psTot) { /* ya se actualiza en renderProfesores */ }
+}
+
+function openEstForm()  { document.getElementById('est-form-panel').style.display = 'block'; }
+function closeEstForm() { document.getElementById('est-form-panel').style.display = 'none'; }
+
+async function saveEstudiante() {
+  const nombres   = document.getElementById('ef-nombres').value.trim();
+  const apellidos = document.getElementById('ef-apellidos').value.trim();
+  const user      = document.getElementById('ef-user').value.trim().replace(/\s+/g,'');
+  const pass      = document.getElementById('ef-pass').value;
+  const pass2     = document.getElementById('ef-pass2').value;
+  if (!nombres||!apellidos||!user) { toast('Nombres, apellidos y usuario son requeridos','error'); return; }
+  if (!pass||pass.length<8) { toast('Contraseña mínimo 8 caracteres','error'); return; }
+  if (pass!==pass2) { toast('Las contraseñas no coinciden','error'); return; }
+  try {
+    await pb.collection('estudiantes').create({
+      nombres, apellidos,
+      username: user,
+      email: document.getElementById('ef-email').value.trim() || null,
+      cedula: document.getElementById('ef-cedula').value.trim(),
+      tipo:   document.getElementById('ef-tipo').value,
+      password: pass, passwordConfirm: pass,
+      estado: 'activo'
+    });
+    toast('Cuenta de estudiante creada');
+    closeEstForm();
+    ['ef-nombres','ef-apellidos','ef-user','ef-email','ef-cedula','ef-pass','ef-pass2'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+    await cargarEstudiantes(); renderEstList();
+  } catch(e) { toast('Error: '+e.message,'error'); }
+}
+
+async function updateEstEstado(id, estado) {
+  try {
+    await pb.collection('estudiantes').update(id, {estado});
+    toast(estado==='activo'?'Estudiante activado':'Estudiante suspendido');
+    const idx = _estudiantesList.findIndex(e=>e.id===id);
+    if(idx>=0) _estudiantesList[idx].estado = estado;
+    renderEstList();
+  } catch(e) { toast('Error al actualizar','error'); }
+}
+
+async function resetEstPass(id, nombre) {
+  const nueva = prompt(`Nueva contraseña para ${nombre} (mínimo 8 caracteres):`);
+  if (!nueva||nueva.length<8) { if(nueva!==null) toast('Contraseña demasiado corta','error'); return; }
+  try {
+    await pb.collection('estudiantes').update(id, {password:nueva, passwordConfirm:nueva});
+    toast('Contraseña actualizada');
+  } catch(e) { toast('Error al actualizar contraseña','error'); }
+}
+
+async function cargarSolicitudes() {
+  const el = document.getElementById('solicitudes-list');
+  if (!el) return;
+  try {
+    const r = await pb.collection('solicitudes_inscripcion').getList(1, 200, {filter:'estado="pendiente"', sort:'-created'}).catch(()=>({items:[]}));
+    _solicitudesList = r.items || [];
+  } catch(e) { _solicitudesList = []; }
+  if (!_solicitudesList.length) {
+    el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted)"><div style="font-size:32px;margin-bottom:12px">📋</div><div style="font-size:14px">Sin solicitudes pendientes</div></div>'; return;
+  }
+  el.innerHTML = _solicitudesList.map(s=>`
+    <div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <div style="font-size:14px;font-weight:600">${s.nombres||''} ${s.apellidos||''}</div>
+        <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:#fef9c3;color:#854d0e;font-weight:600">${s.tipo||'adulto'}</span>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:8px">
+        📧 ${s.correo||'—'} · 📱 ${s.telefono||'—'} · 📅 ${new Date(s.created).toLocaleDateString('es-VE')}
+      </div>
+      ${s.tipo!=='adulto'?`<div style="font-size:12px;color:var(--muted);margin-bottom:6px">👤 Rep: ${s.rep_nombres||''} ${s.rep_apellidos||''} · ${s.rep_cedula||''}</div>`:''}
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button onclick="aprobarSolicitud('${s.id}')" style="font-size:11px;padding:4px 10px;border:1px solid #86efac;background:#dcfce7;color:#166534;border-radius:6px;cursor:pointer">✓ Aprobar</button>
+        <button onclick="rechazarSolicitud('${s.id}')" style="font-size:11px;padding:4px 10px;border:1px solid #fca5a5;background:#fef2f2;color:#dc2626;border-radius:6px;cursor:pointer">✗ Rechazar</button>
+      </div>
+    </div>`).join('');
+}
+
+async function aprobarSolicitud(id) {
+  try {
+    await pb.collection('solicitudes_inscripcion').update(id, {estado:'aprobada'});
+    toast('Solicitud aprobada');
+    _solicitudesList = _solicitudesList.filter(s=>s.id!==id);
+    cargarSolicitudes();
+  } catch(e) { toast('Error','error'); }
+}
+
+async function rechazarSolicitud(id) {
+  if (!confirm('¿Rechazar esta solicitud de inscripción?')) return;
+  try {
+    await pb.collection('solicitudes_inscripcion').update(id, {estado:'rechazada'});
+    toast('Solicitud rechazada');
+    _solicitudesList = _solicitudesList.filter(s=>s.id!==id);
+    cargarSolicitudes();
+  } catch(e) { toast('Error','error'); }
 }
 
 /* ─── MOBILE ─── */

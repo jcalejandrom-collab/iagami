@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Portal del Estudiante — IAGAMI Aula Ambiental</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --primary:#1d6b3e;--primary-dark:#1a3d2b;--primary-light:#e8f5ee;
+  --bg:#f5f7f5;--surface:#fff;--border:#e2e8f0;
+  --text:#1f2937;--muted:#6b7280;--danger:#dc2626;--warn:#d97706;--info:#2563eb;
+  --success:#059669;--radius:12px;--shadow:0 2px 12px rgba(0,0,0,.08);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+a{color:inherit;text-decoration:none}
+
+/* ── LOGIN / REGISTRO ── */
+.auth-wrap{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;background:linear-gradient(135deg,#1a3d2b 0%,#1d6b3e 60%,#2d8a52 100%)}
+.auth-card{background:#fff;border-radius:20px;padding:36px 32px;width:100%;max-width:420px;box-shadow:0 8px 40px rgba(0,0,0,.18)}
+.auth-logo{text-align:center;margin-bottom:24px}
+.auth-logo .ico{font-size:46px;margin-bottom:8px}
+.auth-logo h1{font-family:'Poppins',sans-serif;font-size:19px;color:var(--primary-dark);font-weight:700}
+.auth-logo p{font-size:12px;color:var(--muted);margin-top:3px}
+.auth-tabs{display:flex;border-bottom:2px solid var(--border);margin-bottom:20px}
+.auth-tab{flex:1;padding:9px;text-align:center;font-size:13px;font-weight:600;cursor:pointer;background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);margin-bottom:-2px;font-family:'Inter',sans-serif;transition:.15s}
+.auth-tab.active{color:var(--primary);border-bottom-color:var(--primary)}
+.form-label{display:block;font-size:12px;font-weight:600;color:var(--text);margin-bottom:5px}
+.form-control{width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:'Inter',sans-serif;transition:border .2s;background:#fff;color:var(--text)}
+.form-control:focus{outline:none;border-color:var(--primary)}
+.pw-wrap{position:relative}
+.pw-wrap .form-control{padding-right:42px}
+.pw-eye{position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:16px;user-select:none;color:var(--muted)}
+.btn{padding:11px 20px;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:.2s}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:hover{background:var(--primary-dark)}
+.btn-secondary{background:#f1f5f9;color:var(--text);border:1px solid var(--border)}
+.btn-sm{padding:6px 12px;font-size:12px}
+.btn-danger{background:#fef2f2;color:var(--danger);border:1px solid #fca5a5}
+.form-group{margin-bottom:14px}
+.auth-err{background:#fef2f2;color:var(--danger);border:1px solid #fca5a5;border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:14px;display:none}
+.auth-ok{background:#dcfce7;color:#166534;border:1px solid #86efac;border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:14px;display:none}
+
+/* ── APP ── */
+#screen-app{display:none;min-height:100vh}
+.top-bar{background:var(--primary-dark);color:#fff;padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.top-bar-brand{display:flex;align-items:center;gap:10px;font-family:'Poppins',sans-serif;font-weight:700;font-size:15px}
+.top-bar-brand .ico{font-size:22px}
+.top-bar-right{display:flex;align-items:center;gap:10px}
+.user-chip{background:rgba(255,255,255,.12);border-radius:20px;padding:4px 12px;font-size:13px;font-weight:500;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.app-layout{display:flex;min-height:calc(100vh - 56px)}
+.sidebar{width:215px;background:var(--surface);border-right:1px solid var(--border);padding:16px 0;flex-shrink:0;position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;font-size:14px;cursor:pointer;color:var(--text);transition:.15s}
+.nav-item:hover{background:var(--primary-light);color:var(--primary)}
+.nav-item.active{background:var(--primary-light);color:var(--primary);font-weight:600;border-right:3px solid var(--primary)}
+.nav-item .nav-ico{font-size:17px;width:22px;text-align:center}
+.main-content{flex:1;padding:24px;overflow-y:auto}
+.section{display:none}
+.section.active{display:block}
+.page-header{margin-bottom:22px}
+.page-title{font-family:'Poppins',sans-serif;font-size:20px;font-weight:700;color:var(--primary-dark)}
+.page-subtitle{font-size:13px;color:var(--muted);margin-top:3px}
+
+/* ── STATS ── */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:22px}
+.stat-card{background:var(--surface);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);text-align:center}
+.stat-num{font-family:'Poppins',sans-serif;font-size:26px;font-weight:700;color:var(--primary)}
+.stat-lbl{font-size:11px;color:var(--muted);margin-top:3px}
+
+/* ── PROGRESS ── */
+.progress-bar{background:#e2e8f0;border-radius:20px;height:8px;overflow:hidden;margin-top:6px}
+.progress-fill{background:var(--primary);height:100%;border-radius:20px;transition:width .4s}
+
+/* ── CARDS ── */
+.card{background:var(--surface);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);margin-bottom:14px}
+.card-title{font-family:'Poppins',sans-serif;font-size:14px;font-weight:600;color:var(--primary-dark);margin-bottom:12px}
+
+/* ── CURSO CARD ── */
+.curso-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;cursor:pointer;transition:box-shadow .2s}
+.curso-card:hover{box-shadow:0 4px 20px rgba(0,0,0,.12)}
+.curso-card-cover{background:var(--primary-light);padding:20px;text-align:center;font-size:36px}
+.curso-card-body{padding:14px}
+
+/* ── CLASE CARD ── */
+.clase-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px}
+
+/* ── BADGE ── */
+.badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600}
+.badge-green{background:#dcfce7;color:#166534}
+.badge-blue{background:#dbeafe;color:#1d4ed8}
+.badge-yellow{background:#fef9c3;color:#854d0e}
+.badge-red{background:#fee2e2;color:#991b1b}
+.badge-gray{background:#f1f5f9;color:#475569}
+.badge-purple{background:#ede9fe;color:#5b21b6}
+
+/* ── AVISO ── */
+.aviso-card{background:var(--surface);border-left:4px solid var(--primary);border-radius:0 10px 10px 0;padding:14px;margin-bottom:10px;box-shadow:var(--shadow)}
+
+/* ── COUNTDOWN ── */
+.countdown{font-family:'Poppins',sans-serif;font-size:18px;font-weight:700;color:var(--primary);letter-spacing:2px}
+
+/* ── EMPTY ── */
+.empty{text-align:center;padding:36px 20px;color:var(--muted)}
+.empty .ico{font-size:34px;margin-bottom:10px}
+.empty p{font-size:13px}
+
+/* ── TOAST ── */
+#toast{position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:10px;font-size:14px;font-weight:600;z-index:9999;display:none;box-shadow:0 4px 20px rgba(0,0,0,.15)}
+#toast.ok{background:#dcfce7;color:#166534}
+#toast.err{background:#fee2e2;color:#991b1b}
+
+/* ── TABS ── */
+.tabs{display:flex;border-bottom:2px solid var(--border);margin-bottom:16px;overflow-x:auto}
+.tab-btn{padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);white-space:nowrap;margin-bottom:-2px;font-family:'Inter',sans-serif;transition:.15s}
+.tab-btn.active{color:var(--primary);border-bottom-color:var(--primary)}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
+/* ── INSCRIPCION PUBLICA ── */
+.reg-section{display:none}
+.reg-section.active{display:block}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-grid .span2{grid-column:span 2}
+@media(max-width:600px){.form-grid{grid-template-columns:1fr}.form-grid .span2{grid-column:span 1}}
+textarea.form-control{resize:vertical;min-height:70px}
+.menor-notice{background:#fef9c3;border:1px solid #fde68a;border-radius:8px;padding:12px;font-size:12px;color:#78350f;margin-bottom:14px}
+
+/* ── MOBILE ── */
+.mob-btn{display:none;background:none;border:none;color:#fff;font-size:22px;cursor:pointer}
+@media(max-width:768px){
+  .sidebar{display:none;position:fixed;top:56px;left:0;height:calc(100vh - 56px);z-index:200;width:220px;box-shadow:4px 0 20px rgba(0,0,0,.15)}
+  .sidebar.open{display:block}
+  .mob-btn{display:block}
+  .main-content{padding:14px}
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .auth-card{padding:28px 20px}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════
+     PANTALLA DE AUTENTICACIÓN
+════════════════════════════════════ -->
+<div id="screen-auth" class="auth-wrap">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="ico">📗</div>
+      <h1>Aula Ambiental IAGAMI</h1>
+      <p>Portal del Estudiante</p>
+    </div>
+
+    <!-- Tabs: Iniciar sesión / Registrarse -->
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchAuthTab('login')">Iniciar sesión</button>
+      <button class="auth-tab" onclick="switchAuthTab('registro')">Registrarse</button>
+    </div>
+
+    <!-- ── LOGIN ── -->
+    <div id="auth-panel-login">
+      <div id="login-err" class="auth-err"></div>
+      <div class="form-group">
+        <label class="form-label">Usuario o correo</label>
+        <input class="form-control" id="login-user" type="text" placeholder="usuario o correo@email.com" autocomplete="username"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Contraseña</label>
+        <div class="pw-wrap">
+          <input class="form-control" id="login-pass" type="password" placeholder="••••••••" autocomplete="current-password"/>
+          <span class="pw-eye" onclick="togglePw('login-pass',this)">👁</span>
+        </div>
+      </div>
+      <button class="btn btn-primary" style="width:100%;margin-top:4px" id="login-btn" onclick="doLogin()">Entrar al Aula</button>
+      <p style="text-align:center;font-size:12px;color:var(--muted);margin-top:14px">¿No tienes cuenta? <span style="color:var(--primary);cursor:pointer;font-weight:600" onclick="switchAuthTab('registro')">Regístrate</span></p>
+      <p style="text-align:center;font-size:12px;margin-top:6px"><a href="../../" style="color:var(--primary)">← Portal institucional</a></p>
+    </div>
+
+    <!-- ── REGISTRO ── -->
+    <div id="auth-panel-registro" style="display:none">
+      <div id="reg-err"  class="auth-err"></div>
+      <div id="reg-ok"   class="auth-ok">Tu solicitud fue enviada. Un administrador revisará y activará tu cuenta.</div>
+
+      <!-- Paso 1: tipo de estudiante -->
+      <div class="reg-section active" id="reg-paso1">
+        <p style="font-size:13px;color:var(--muted);margin-bottom:16px">¿Cuál es tu edad aproximada?</p>
+        <div style="display:grid;gap:10px">
+          <div onclick="setTipoReg('adulto')" id="tipo-adulto" style="border:2px solid var(--border);border-radius:10px;padding:14px;cursor:pointer;display:flex;align-items:center;gap:12px;transition:.2s">
+            <span style="font-size:28px">👨</span>
+            <div><div style="font-size:14px;font-weight:600">Adulto (+18 años)</div><div style="font-size:12px;color:var(--muted)">Mayor de 18 años</div></div>
+          </div>
+          <div onclick="setTipoReg('adolescente')" id="tipo-adolescente" style="border:2px solid var(--border);border-radius:10px;padding:14px;cursor:pointer;display:flex;align-items:center;gap:12px;transition:.2s">
+            <span style="font-size:28px">🧑</span>
+            <div><div style="font-size:14px;font-weight:600">Adolescente (12–17 años)</div><div style="font-size:12px;color:var(--muted)">Requiere autorización del representante</div></div>
+          </div>
+          <div onclick="setTipoReg('nino')" id="tipo-nino" style="border:2px solid var(--border);border-radius:10px;padding:14px;cursor:pointer;display:flex;align-items:center;gap:12px;transition:.2s">
+            <span style="font-size:28px">👦</span>
+            <div><div style="font-size:14px;font-weight:600">Niño/a (hasta 11 años)</div><div style="font-size:12px;color:var(--muted)">El representante gestiona el registro</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Paso 2: datos del estudiante -->
+      <div class="reg-section" id="reg-paso2">
+        <div id="menor-aviso" class="menor-notice" style="display:none">
+          ⚠️ Para menores de edad se requerirá la información del representante legal y su autorización antes de activar la cuenta.
+        </div>
+        <div class="form-grid">
+          <div><label class="form-label">Nombres *</label><input class="form-control" id="rg-nombres" placeholder="Nombres"/></div>
+          <div><label class="form-label">Apellidos *</label><input class="form-control" id="rg-apellidos" placeholder="Apellidos"/></div>
+          <div><label class="form-label">Cédula / ID</label><input class="form-control" id="rg-cedula" placeholder="V-00000000 (opcional)"/></div>
+          <div><label class="form-label">Fecha de nacimiento</label><input class="form-control" id="rg-fnac" type="date"/></div>
+          <div class="span2"><label class="form-label">Correo electrónico <span id="rg-correo-lbl" style="color:var(--muted)">(opcional para menores)</span></label><input class="form-control" id="rg-correo" type="email" placeholder="correo@email.com"/></div>
+          <div><label class="form-label">Teléfono</label><input class="form-control" id="rg-tel" placeholder="04XX-XXXXXXX"/></div>
+          <div><label class="form-label">Parroquia</label>
+            <select class="form-control" id="rg-parroquia">
+              <option value="">Selecciona...</option>
+              <option>Catedral</option><option>Concepción</option><option>El Cuji</option>
+              <option>Juan de Villegas</option><option>Tamaca</option><option>Unión</option>
+              <option>Agua Viva</option><option>Buena Vista</option><option>Cabudare</option>
+              <option>Montalbán</option><option>Olivos</option><option>Santa Rosa</option>
+              <option>Río Claro</option><option>Juárez</option><option>Aguedo Felipe Alvarado</option><option>Sarare</option>
+            </select>
+          </div>
+          <div class="span2"><label class="form-label">Institución educativa (si aplica)</label><input class="form-control" id="rg-inst" placeholder="Nombre de la escuela o liceo"/></div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:14px">
+          <button class="btn btn-secondary btn-sm" onclick="regPaso(1)">← Atrás</button>
+          <button class="btn btn-primary btn-sm" onclick="regPaso(3)">Siguiente →</button>
+        </div>
+      </div>
+
+      <!-- Paso 3: representante (solo menores) -->
+      <div class="reg-section" id="reg-paso3">
+        <p style="font-size:13px;font-weight:600;color:var(--primary-dark);margin-bottom:12px">📋 Datos del representante legal</p>
+        <div class="form-grid">
+          <div><label class="form-label">Nombres del representante *</label><input class="form-control" id="rr-nombres" placeholder="Nombres"/></div>
+          <div><label class="form-label">Apellidos *</label><input class="form-control" id="rr-apellidos" placeholder="Apellidos"/></div>
+          <div><label class="form-label">Cédula *</label><input class="form-control" id="rr-cedula" placeholder="V-00000000"/></div>
+          <div><label class="form-label">Parentesco *</label>
+            <select class="form-control" id="rr-parent">
+              <option value="">Selecciona...</option>
+              <option>Padre</option><option>Madre</option><option>Tutor Legal</option><option>Abuelo/a</option><option>Otro</option>
+            </select>
+          </div>
+          <div><label class="form-label">Teléfono *</label><input class="form-control" id="rr-tel" placeholder="04XX-XXXXXXX"/></div>
+          <div><label class="form-label">Correo</label><input class="form-control" id="rr-correo" type="email" placeholder="correo@email.com"/></div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:14px">
+          <button class="btn btn-secondary btn-sm" onclick="regPaso(2)">← Atrás</button>
+          <button class="btn btn-primary btn-sm" onclick="regPaso(4)">Siguiente →</button>
+        </div>
+      </div>
+
+      <!-- Paso 4: credenciales de acceso -->
+      <div class="reg-section" id="reg-paso4">
+        <p style="font-size:13px;color:var(--muted);margin-bottom:14px">Crea tus credenciales de acceso al portal.</p>
+        <div class="form-group">
+          <label class="form-label">Usuario (sin espacios) *</label>
+          <input class="form-control" id="rg-user" placeholder="Ej: juan.perez" autocomplete="username"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Contraseña (mínimo 8 caracteres) *</label>
+          <div class="pw-wrap">
+            <input class="form-control" id="rg-pass" type="password" placeholder="••••••••" autocomplete="new-password"/>
+            <span class="pw-eye" onclick="togglePw('rg-pass',this)">👁</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Confirmar contraseña *</label>
+          <div class="pw-wrap">
+            <input class="form-control" id="rg-pass2" type="password" placeholder="••••••••" autocomplete="new-password"/>
+            <span class="pw-eye" onclick="togglePw('rg-pass2',this)">👁</span>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:4px">
+          <button class="btn btn-secondary btn-sm" onclick="regPaso(_tipoReg==='adulto'?2:3)">← Atrás</button>
+          <button class="btn btn-primary btn-sm" onclick="enviarSolicitud()">📤 Enviar solicitud</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     PORTAL DEL ESTUDIANTE
+════════════════════════════════════ -->
+<div id="screen-app">
+
+  <div class="top-bar">
+    <div class="top-bar-brand">
+      <button class="mob-btn" onclick="toggleSidebar()">☰</button>
+      <span class="ico">📗</span>
+      <span>Aula Ambiental</span>
+    </div>
+    <div class="top-bar-right">
+      <span class="user-chip" id="top-user">Estudiante</span>
+      <button class="btn btn-sm" style="background:rgba(255,255,255,.12);color:#fff;border:none" onclick="doLogout()">Salir →</button>
+    </div>
+  </div>
+
+  <div class="app-layout">
+    <div class="sidebar" id="sidebar">
+      <div onclick="showSec('dashboard')"  class="nav-item active" id="nav-dashboard" ><span class="nav-ico">🏠</span> Inicio</div>
+      <div onclick="showSec('cursos')"     class="nav-item"        id="nav-cursos"    ><span class="nav-ico">🎓</span> Mis Cursos</div>
+      <div onclick="showSec('clases')"     class="nav-item"        id="nav-clases"    ><span class="nav-ico">🎥</span> Clases Virtuales</div>
+      <div onclick="showSec('avisos')"     class="nav-item"        id="nav-avisos"    ><span class="nav-ico">📢</span> Avisos</div>
+      <div onclick="showSec('biblioteca')" class="nav-item"        id="nav-biblioteca"><span class="nav-ico">📚</span> Biblioteca</div>
+      <div onclick="showSec('perfil')"     class="nav-item"        id="nav-perfil"    ><span class="nav-ico">👤</span> Mi Perfil</div>
+    </div>
+
+    <div class="main-content">
+
+      <!-- ── DASHBOARD ── -->
+      <div class="section active" id="sec-dashboard">
+        <div class="page-header">
+          <div class="page-title" id="dash-titulo">¡Bienvenido al Aula Ambiental!</div>
+          <div class="page-subtitle" id="dash-sub">Plataforma educativa del IAGAMI — Municipio Iribarren</div>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-num" id="st-cursos">—</div><div class="stat-lbl">Cursos inscritos</div></div>
+          <div class="stat-card"><div class="stat-num" id="st-proximas">—</div><div class="stat-lbl">Clases próximas</div></div>
+          <div class="stat-card"><div class="stat-num" id="st-avisos">—</div><div class="stat-lbl">Avisos nuevos</div></div>
+          <div class="stat-card"><div class="stat-num" id="st-materiales">—</div><div class="stat-lbl">Materiales</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div class="card">
+            <div class="card-title">🎥 Próximas clases</div>
+            <div id="dash-clases"><div class="empty"><div class="ico">📅</div><p>Sin clases próximas</p></div></div>
+          </div>
+          <div class="card">
+            <div class="card-title">📢 Últimos avisos</div>
+            <div id="dash-avisos"><div class="empty"><div class="ico">📢</div><p>Sin avisos recientes</p></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── MIS CURSOS ── -->
+      <div class="section" id="sec-cursos">
+        <div class="page-header">
+          <div class="page-title">🎓 Mis Cursos</div>
+          <div class="page-subtitle">Cursos en los que estás inscrito</div>
+        </div>
+        <div id="cursos-grid"><div class="empty"><div class="ico">⏳</div><p>Cargando...</p></div></div>
+        <!-- Detalle de curso -->
+        <div id="curso-detalle" style="display:none">
+          <button class="btn btn-secondary btn-sm" onclick="closeCursoDetalle()" style="margin-bottom:14px">← Volver</button>
+          <div class="page-header">
+            <div class="page-title" id="cdet-titulo">Curso</div>
+            <div class="page-subtitle" id="cdet-info"></div>
+          </div>
+          <div class="tabs">
+            <button class="tab-btn active" onclick="switchCursoTab('info')">📖 Información</button>
+            <button class="tab-btn" onclick="switchCursoTab('materiales')">📁 Materiales</button>
+            <button class="tab-btn" onclick="switchCursoTab('clases')">🎥 Clases</button>
+          </div>
+          <div class="tab-panel active" id="ctab-info"><div id="cdet-info-panel"></div></div>
+          <div class="tab-panel" id="ctab-materiales"><div id="cdet-materiales"></div></div>
+          <div class="tab-panel" id="ctab-clases"><div id="cdet-clases"></div></div>
+        </div>
+      </div>
+
+      <!-- ── CLASES VIRTUALES ── -->
+      <div class="section" id="sec-clases">
+        <div class="page-header">
+          <div class="page-title">🎥 Clases Virtuales</div>
+          <div class="page-subtitle">Sesiones programadas para tus cursos</div>
+        </div>
+        <div class="tabs">
+          <button class="tab-btn active" onclick="switchClasesTab('proximas')">📅 Próximas</button>
+          <button class="tab-btn" onclick="switchClasesTab('pasadas')">🕐 Realizadas</button>
+        </div>
+        <div class="tab-panel active" id="cltab-proximas"><div id="clases-prox"></div></div>
+        <div class="tab-panel" id="cltab-pasadas"><div id="clases-past"></div></div>
+      </div>
+
+      <!-- ── AVISOS ── -->
+      <div class="section" id="sec-avisos">
+        <div class="page-header">
+          <div class="page-title">📢 Avisos del Aula</div>
+          <div class="page-subtitle">Comunicados de tus profesores</div>
+        </div>
+        <div id="avisos-lista"><div class="empty"><div class="ico">⏳</div><p>Cargando...</p></div></div>
+      </div>
+
+      <!-- ── BIBLIOTECA ── -->
+      <div class="section" id="sec-biblioteca">
+        <div class="page-header">
+          <div class="page-title">📚 Biblioteca Ambiental</div>
+          <div class="page-subtitle">Videos, documentos y guías educativas</div>
+        </div>
+        <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+          <select class="form-control" id="bib-tipo" style="width:auto;min-width:140px" onchange="renderBib()">
+            <option value="">Todos los tipos</option>
+            <option value="video">Video</option><option value="pdf">PDF</option>
+            <option value="guia">Guía</option><option value="infografia">Infografía</option>
+            <option value="presentacion">Presentación</option>
+          </select>
+          <input class="form-control" id="bib-buscar" style="max-width:220px" placeholder="🔍 Buscar..." oninput="renderBib()"/>
+        </div>
+        <div id="bib-grid"></div>
+      </div>
+
+      <!-- ── PERFIL ── -->
+      <div class="section" id="sec-perfil">
+        <div class="page-header">
+          <div class="page-title">👤 Mi Perfil</div>
+          <div class="page-subtitle">Información de tu cuenta de estudiante</div>
+        </div>
+        <div class="card" style="max-width:520px">
+          <div id="perfil-datos"></div>
+          <hr style="margin:16px 0;border:none;border-top:1px solid var(--border)"/>
+          <div class="card-title">🔒 Cambiar contraseña</div>
+          <div class="form-group"><label class="form-label">Contraseña actual</label>
+            <div class="pw-wrap"><input class="form-control" id="pwd-old" type="password" placeholder="••••••••"/><span class="pw-eye" onclick="togglePw('pwd-old',this)">👁</span></div>
+          </div>
+          <div class="form-group"><label class="form-label">Nueva contraseña</label>
+            <div class="pw-wrap"><input class="form-control" id="pwd-new" type="password" placeholder="••••••••"/><span class="pw-eye" onclick="togglePw('pwd-new',this)">👁</span></div>
+          </div>
+          <div class="form-group"><label class="form-label">Confirmar nueva</label>
+            <div class="pw-wrap"><input class="form-control" id="pwd-c" type="password" placeholder="••••••••"/><span class="pw-eye" onclick="togglePw('pwd-c',this)">👁</span></div>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="cambiarPass()">Actualizar contraseña</button>
+        </div>
+      </div>
+
+    </div><!-- /main-content -->
+  </div><!-- /app-layout -->
+</div><!-- /screen-app -->
+
+<div id="toast"></div>
+
+<script>
+const PB_URL = 'https://api.iagami.online';
+let _token     = null;
+let _estudiante = null;
+let _misInscripciones = [];
+let _misCursos = [];
+let _misClases = [];
+let _misAvisos = [];
+let _bibRecursos = [];
+let _cursoActivo = null;
+let _tipoReg     = 'adulto';
+let _regPasoActual = 1;
+let _claseTab    = 'proximas';
+let _loginAttempts = 0;
+let _loginBlocked  = false;
+
+/* ─── UTILS ─── */
+function toast(msg, tipo='ok') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = tipo==='error'?'err':'ok';
+  el.style.display = 'block';
+  setTimeout(()=>{ el.style.display='none'; }, 3400);
+}
+function esc(s){ return s?String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'):''; }
+
+function togglePw(id, btn) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const show = el.type === 'password';
+  el.type = show ? 'text' : 'password';
+  btn.textContent = show ? '🙈' : '👁';
+}
+
+async function pbFetch(path, opts={}) {
+  const headers = {'Content-Type':'application/json', ...(opts.headers||{})};
+  if (_token) headers['Authorization'] = _token;
+  const res = await fetch(PB_URL + path, {...opts, headers});
+  if (!res.ok) {
+    const err = await res.json().catch(()=>({message:'Error'}));
+    throw new Error(err.message || `HTTP ${res.status}`);
+  }
+  return res.json();
+}
+
+/* ─── AUTH ─── */
+function switchAuthTab(tab) {
+  ['login','registro'].forEach(t => {
+    document.getElementById('auth-panel-'+t).style.display = t===tab?'block':'none';
+    document.querySelectorAll('.auth-tab').forEach((b,i) => b.classList.toggle('active', (i===0&&tab==='login')||(i===1&&tab==='registro')));
+  });
+  if (tab==='registro') regPaso(1);
+}
+
+async function doLogin() {
+  if (_loginBlocked) { showLoginErr('Demasiados intentos. Espera un momento.'); return; }
+  const user  = document.getElementById('login-user').value.trim();
+  const pass  = document.getElementById('login-pass').value;
+  const errEl = document.getElementById('login-err');
+  errEl.style.display = 'none';
+
+  if (!user || !pass) { showLoginErr('Ingresa tu usuario y contraseña.'); return; }
+
+  document.getElementById('login-btn').disabled = true;
+  document.getElementById('login-btn').textContent = 'Verificando...';
+
+  try {
+    const data = await pbFetch('/api/collections/estudiantes/auth-with-password', {
+      method: 'POST',
+      body: JSON.stringify({identity: user, password: pass})
+    });
+
+    if (data.record.estado === 'pendiente') {
+      showLoginErr('Tu cuenta aún está pendiente de aprobación. Un administrador la activará pronto.');
+      resetLoginBtn(); return;
+    }
+    if (data.record.estado === 'suspendido' || data.record.estado === 'inactivo') {
+      showLoginErr('Tu cuenta está suspendida. Contacta al IAGAMI.');
+      resetLoginBtn(); return;
+    }
+
+    _token = data.token;
+    _estudiante = data.record;
+    _loginAttempts = 0;
+    localStorage.setItem('est_token', _token);
+    localStorage.setItem('est_data', JSON.stringify(_estudiante));
+    iniciarApp();
+  } catch(e) {
+    _loginAttempts++;
+    if (_loginAttempts >= 5) {
+      _loginBlocked = true;
+      setTimeout(()=>{ _loginBlocked=false; _loginAttempts=0; }, 60000);
+      showLoginErr('Demasiados intentos fallidos. Espera 1 minuto.');
+    } else {
+      showLoginErr('Usuario o contraseña incorrectos.');
+    }
+    resetLoginBtn();
+  }
+}
+
+function showLoginErr(msg) {
+  const el = document.getElementById('login-err');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+function resetLoginBtn() {
+  const b = document.getElementById('login-btn');
+  b.disabled = false;
+  b.textContent = 'Entrar al Aula';
+}
+
+function doLogout() {
+  _token = null; _estudiante = null;
+  localStorage.removeItem('est_token'); localStorage.removeItem('est_data');
+  document.getElementById('screen-app').style.display  = 'none';
+  document.getElementById('screen-auth').style.display = 'flex';
+  document.getElementById('login-pass').value = '';
+  document.getElementById('login-user').value = '';
+}
+
+document.getElementById('login-pass').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
+
+/* ─── REGISTRO ─── */
+function setTipoReg(tipo) {
+  _tipoReg = tipo;
+  ['adulto','adolescente','nino'].forEach(t => {
+    const el = document.getElementById('tipo-'+t);
+    if (el) el.style.borderColor = t===tipo ? 'var(--primary)' : 'var(--border)';
+  });
+  regPaso(2);
+}
+
+function regPaso(paso) {
+  _regPasoActual = paso;
+  document.querySelectorAll('.reg-section').forEach(s => s.classList.remove('active'));
+  document.getElementById('reg-paso'+paso).classList.add('active');
+  if (paso===2) {
+    const menor = _tipoReg !== 'adulto';
+    document.getElementById('menor-aviso').style.display = menor ? 'block' : 'none';
+    document.getElementById('rg-correo-lbl').textContent = menor ? '(opcional para menores)' : '*';
+  }
+  if (paso===3 && _tipoReg==='adulto') { regPaso(4); }
+}
+
+async function enviarSolicitud() {
+  const nombres = document.getElementById('rg-nombres').value.trim();
+  const apellidos = document.getElementById('rg-apellidos').value.trim();
+  const user   = document.getElementById('rg-user').value.trim().replace(/\s+/g,'');
+  const pass   = document.getElementById('rg-pass').value;
+  const pass2  = document.getElementById('rg-pass2').value;
+  const errEl  = document.getElementById('reg-err');
+  errEl.style.display = 'none';
+
+  if (!nombres || !apellidos) { errEl.textContent='Nombres y apellidos son requeridos'; errEl.style.display='block'; regPaso(2); return; }
+  if (!user) { errEl.textContent='Debes elegir un nombre de usuario'; errEl.style.display='block'; return; }
+  if (!/^[a-zA-Z0-9._]{3,30}$/.test(user)) { errEl.textContent='Usuario inválido (solo letras, números, puntos y guiones bajos, 3-30 caracteres)'; errEl.style.display='block'; return; }
+  if (!pass || pass.length < 8) { errEl.textContent='La contraseña debe tener al menos 8 caracteres'; errEl.style.display='block'; return; }
+  if (pass !== pass2) { errEl.textContent='Las contraseñas no coinciden'; errEl.style.display='block'; return; }
+
+  if (_tipoReg !== 'adulto') {
+    const rNombres = document.getElementById('rr-nombres').value.trim();
+    const rApells  = document.getElementById('rr-apellidos').value.trim();
+    const rCedula  = document.getElementById('rr-cedula').value.trim();
+    const rParent  = document.getElementById('rr-parent').value;
+    const rTel     = document.getElementById('rr-tel').value.trim();
+    if (!rNombres||!rApells||!rCedula||!rParent||!rTel) {
+      errEl.textContent='Datos del representante incompletos'; errEl.style.display='block'; regPaso(3); return;
+    }
+  }
+
+  try {
+    const payload = {
+      nombres, apellidos,
+      cedula:          document.getElementById('rg-cedula').value.trim(),
+      correo:          document.getElementById('rg-correo').value.trim(),
+      telefono:        document.getElementById('rg-tel').value.trim(),
+      fecha_nacimiento:document.getElementById('rg-fnac').value,
+      tipo:            _tipoReg,
+      parroquia:       document.getElementById('rg-parroquia').value,
+      institucion:     document.getElementById('rg-inst').value.trim(),
+      estado:          'pendiente'
+    };
+    if (_tipoReg !== 'adulto') {
+      payload.rep_nombres  = document.getElementById('rr-nombres').value.trim();
+      payload.rep_apellidos= document.getElementById('rr-apellidos').value.trim();
+      payload.rep_cedula   = document.getElementById('rr-cedula').value.trim();
+      payload.rep_telefono = document.getElementById('rr-tel').value.trim();
+      payload.rep_correo   = document.getElementById('rr-correo').value.trim();
+    }
+    // Crear solicitud de inscripción (pública)
+    await pbFetch('/api/collections/solicitudes_inscripcion/records', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+    // También crear la cuenta (en estado pendiente, el admin la activa)
+    await pbFetch('/api/collections/estudiantes/records', {
+      method: 'POST',
+      body: JSON.stringify({
+        nombres, apellidos,
+        username: user,
+        email: document.getElementById('rg-correo').value.trim() || null,
+        password: pass,
+        passwordConfirm: pass,
+        cedula:   document.getElementById('rg-cedula').value.trim(),
+        tipo:     _tipoReg,
+        parroquia:document.getElementById('rg-parroquia').value,
+        telefono: document.getElementById('rg-tel').value.trim(),
+        institucion:document.getElementById('rg-inst').value.trim(),
+        estado:   'pendiente'
+      })
+    });
+    document.getElementById('reg-ok').style.display = 'block';
+    document.querySelectorAll('.reg-section').forEach(s => s.classList.remove('active'));
+  } catch(e) {
+    errEl.textContent = e.message.includes('username') ? 'Ese nombre de usuario ya está en uso. Elige otro.' : 'Error al registrar: ' + e.message;
+    errEl.style.display = 'block';
+  }
+}
+
+/* ─── INICIAR APP ─── */
+async function iniciarApp() {
+  document.getElementById('screen-auth').style.display = 'none';
+  document.getElementById('screen-app').style.display  = 'block';
+  const nombre = (_estudiante.nombres||'').split(' ')[0];
+  document.getElementById('top-user').textContent = nombre || 'Estudiante';
+  document.getElementById('dash-titulo').textContent = `¡Hola, ${_estudiante.nombres}!`;
+  document.getElementById('dash-sub').textContent = 'Bienvenido/a al Aula Ambiental de IAGAMI';
+  await cargarDatos();
+  renderDashboard();
+}
+
+async function cargarDatos() {
+  try {
+    const rI = await pbFetch(`/api/collections/inscripciones_curso/records?filter=estudiante_id%3D%22${_estudiante.id}%22%26%26estado%3D%22activo%22&sort=-created&perPage=50&expand=curso_id`);
+    _misInscripciones = rI.items || [];
+    _misCursos = _misInscripciones.map(i => i.expand?.curso_id || {id: i.curso_id, nombre: '(Curso)'}).filter(Boolean);
+  } catch(e) { _misInscripciones = []; _misCursos = []; }
+
+  // Clases de mis cursos
+  _misClases = [];
+  for (const c of _misCursos) {
+    try {
+      const nombre = encodeURIComponent(c.nombre||'');
+      const r = await pbFetch(`/api/collections/clases_virtuales/records?filter=(curso%3D%22${nombre}%22%7C%7Ccurso_id%3D%22${c.id}%22)%26%26publicado%3Dtrue&sort=-fecha&perPage=50`);
+      _misClases.push(...(r.items||[]));
+    } catch(e) {}
+  }
+  _misClases.sort((a,b) => (a.fecha||'') < (b.fecha||'') ? -1 : 1);
+
+  // Avisos de mis cursos
+  _misAvisos = [];
+  for (const c of _misCursos) {
+    try {
+      const nombre = encodeURIComponent(c.nombre||'');
+      const r = await pbFetch(`/api/collections/avisos_aula/records?filter=(curso%3D%22${nombre}%22%7C%7Ccurso_id%3D%22${c.id}%22)%26%26publicado%3Dtrue&sort=-created&perPage=20`);
+      _misAvisos.push(...(r.items||[]));
+    } catch(e) {}
+  }
+  _misAvisos.sort((a,b)=> a.created<b.created ? 1 : -1);
+
+  // Biblioteca
+  try {
+    const rB = await pbFetch('/api/collections/biblioteca_multimedia/records?filter=publicado%3Dtrue&sort=-created&perPage=200');
+    _bibRecursos = rB.items || [];
+  } catch(e) { _bibRecursos = []; }
+}
+
+/* ─── NAV ─── */
+function showSec(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('sec-'+id).classList.add('active');
+  document.getElementById('nav-'+id).classList.add('active');
+  closeSidebar();
+  if (id==='cursos')     renderCursos();
+  if (id==='clases')     renderClases();
+  if (id==='avisos')     renderAvisos();
+  if (id==='biblioteca') renderBib();
+  if (id==='perfil')     renderPerfil();
+}
+function toggleSidebar(){ document.getElementById('sidebar').classList.toggle('open'); }
+function closeSidebar()  { document.getElementById('sidebar').classList.remove('open'); }
+
+/* ─── DASHBOARD ─── */
+function renderDashboard() {
+  const ahora = new Date();
+  const proximas = _misClases.filter(c => c.fecha && new Date(c.fecha) >= ahora);
+  document.getElementById('st-cursos').textContent    = _misCursos.length;
+  document.getElementById('st-proximas').textContent  = proximas.length;
+  document.getElementById('st-avisos').textContent    = _misAvisos.length;
+  document.getElementById('st-materiales').textContent= _bibRecursos.length;
+
+  // Próximas clases widget
+  const dcEl = document.getElementById('dash-clases');
+  const pSlice = proximas.slice(0,3);
+  if (!pSlice.length) {
+    dcEl.innerHTML = '<div class="empty"><div class="ico">📅</div><p>Sin clases próximas</p></div>';
+  } else {
+    dcEl.innerHTML = pSlice.map(c => `
+      <div style="padding:9px 0;border-bottom:1px solid var(--border)">
+        <div style="font-size:13px;font-weight:600">${esc(c.nombre)}</div>
+        <div style="font-size:12px;color:var(--muted)">📅 ${c.fecha||'—'} ${c.hora?'·'+c.hora:''} · ${esc(c.plataforma||'')}</div>
+        ${puedeAccederClase(c) ? `<a href="${esc(c.enlace_zoom)}" target="_blank" class="btn btn-primary btn-sm" style="margin-top:5px;display:inline-block">🔗 Ingresar</a>` : ''}
+      </div>`).join('');
+  }
+
+  // Avisos widget
+  const daEl = document.getElementById('dash-avisos');
+  const aSlice = _misAvisos.slice(0,3);
+  if (!aSlice.length) {
+    daEl.innerHTML = '<div class="empty"><div class="ico">📢</div><p>Sin avisos</p></div>';
+  } else {
+    daEl.innerHTML = aSlice.map(a => `
+      <div style="padding:9px 0;border-bottom:1px solid var(--border)">
+        <div style="font-size:13px;font-weight:600">${esc(a.titulo)}</div>
+        <div style="font-size:12px;color:var(--muted)">${esc(a.tipo||'aviso')} · ${esc(a.curso||'General')}</div>
+      </div>`).join('');
+  }
+}
+
+/* ─── CURSOS ─── */
+function renderCursos() {
+  const grid = document.getElementById('cursos-grid');
+  document.getElementById('curso-detalle').style.display = 'none';
+  grid.style.display = 'block';
+  if (!_misCursos.length) {
+    grid.innerHTML = '<div class="empty"><div class="ico">🎓</div><p>No estás inscrito en ningún curso aún.<br>Contacta al IAGAMI o a tu profesor para inscribirte.</p></div>'; return;
+  }
+  const catIco = {ambiental:'🌿',ecosocialismo:'♻️',reciclaje:'♻️',agua:'💧',biodiversidad:'🦋',clima:'🌡️',otro:'📚'};
+  grid.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px">${_misCursos.map(c=>`
+    <div class="curso-card" onclick="abrirCurso('${c.id}')">
+      <div class="curso-card-cover">${catIco[c.categoria]||'📚'}</div>
+      <div class="curso-card-body">
+        <div style="font-size:14px;font-weight:600;font-family:'Poppins',sans-serif;margin-bottom:4px">${esc(c.nombre)}</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:8px">${esc(c.descripcion||'')}</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
+          <span class="badge badge-green">${esc(c.nivel||'General')}</span>
+          <span class="badge badge-blue">${esc(c.categoria||'')}</span>
+        </div>
+        <button class="btn btn-primary btn-sm" style="width:100%">Entrar al curso →</button>
+      </div>
+    </div>`).join('')}</div>`;
+}
+
+function abrirCurso(id) {
+  _cursoActivo = _misCursos.find(c => c.id === id);
+  if (!_cursoActivo) return;
+  document.getElementById('cursos-grid').style.display = 'none';
+  document.getElementById('curso-detalle').style.display = 'block';
+  document.getElementById('cdet-titulo').textContent = _cursoActivo.nombre;
+  document.getElementById('cdet-info').textContent   = `${_cursoActivo.nivel||'General'} · ${_cursoActivo.categoria||''} · Prof: ${_cursoActivo.profesor_nombre||'—'}`;
+  switchCursoTab('info');
+}
+
+function closeCursoDetalle() {
+  document.getElementById('curso-detalle').style.display = 'none';
+  document.getElementById('cursos-grid').style.display = 'block';
+}
+
+function switchCursoTab(tab) {
+  ['info','materiales','clases'].forEach(t => {
+    document.getElementById('ctab-'+t).classList.toggle('active', t===tab);
+    document.querySelectorAll(`[onclick="switchCursoTab('${t}')"]`).forEach(b=>b.classList.toggle('active',t===tab));
+  });
+  if (tab==='info')       renderCursoInfo();
+  if (tab==='materiales') renderCursoMateriales();
+  if (tab==='clases')     renderCursoClases();
+}
+
+function renderCursoInfo() {
+  const c = _cursoActivo;
+  document.getElementById('cdet-info-panel').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+      <div class="card"><div class="card-title">📋 Detalles del curso</div>
+        <div style="font-size:13px;display:grid;gap:8px">
+          <div><strong>Categoría:</strong> ${esc(c.categoria||'—')}</div>
+          <div><strong>Nivel:</strong> ${esc(c.nivel||'—')}</div>
+          <div><strong>Profesor:</strong> ${esc(c.profesor_nombre||'—')}</div>
+          <div><strong>Estado:</strong> <span class="badge badge-green">${esc(c.estado||'activo')}</span></div>
+        </div>
+      </div>
+      <div class="card"><div class="card-title">📝 Descripción</div>
+        <div style="font-size:13px;line-height:1.6;color:var(--text)">${esc(c.descripcion||'Sin descripción disponible.')}</div>
+      </div>
+    </div>`;
+}
+
+function renderCursoMateriales() {
+  const el = document.getElementById('cdet-materiales');
+  const mat = _bibRecursos.filter(r => r.categoria===_cursoActivo.nombre || r.curso_id===_cursoActivo.id);
+  if (!mat.length) { el.innerHTML = '<div class="empty"><div class="ico">📁</div><p>Sin materiales publicados en este curso</p></div>'; return; }
+  const ico = {video:'▶️',pdf:'📄',guia:'📗',infografia:'🖼️',presentacion:'📊'};
+  el.innerHTML = mat.map(r=>`
+    <div style="display:flex;align-items:center;gap:12px;padding:10px;background:#f8fafc;border-radius:8px;margin-bottom:8px">
+      <span style="font-size:22px">${ico[r.tipo]||'📁'}</span>
+      <div style="flex:1"><div style="font-size:13px;font-weight:600">${esc(r.titulo)}</div><div style="font-size:11px;color:var(--muted)">${esc(r.tipo)} · ${esc(r.nivel||'General')}</div></div>
+      <a href="${esc(r.url)}" target="_blank" class="btn btn-secondary btn-sm">🔗 Abrir</a>
+    </div>`).join('');
+}
+
+function renderCursoClases() {
+  const el = document.getElementById('cdet-clases');
+  const ahora = new Date();
+  const clases = _misClases.filter(c => c.curso === _cursoActivo.nombre || c.curso_id === _cursoActivo.id);
+  if (!clases.length) { el.innerHTML = '<div class="empty"><div class="ico">🎥</div><p>Sin clases programadas en este curso</p></div>'; return; }
+  el.innerHTML = clases.map(c => renderClaseCard(c)).join('');
+}
+
+/* ─── CLASES VIRTUALES ─── */
+function switchClasesTab(tab) {
+  _claseTab = tab;
+  ['proximas','pasadas'].forEach(t => {
+    document.getElementById('cltab-'+t).classList.toggle('active', t===tab);
+    document.querySelectorAll(`[onclick="switchClasesTab('${t}')"]`).forEach(b=>b.classList.toggle('active',t===tab));
+  });
+  renderClases();
+}
+
+function renderClases() {
+  const ahora = new Date();
+  const prox = _misClases.filter(c => !c.fecha || new Date(c.fecha) >= ahora);
+  const past = _misClases.filter(c =>  c.fecha && new Date(c.fecha) <  ahora);
+  const pEl = document.getElementById('clases-prox');
+  const dEl = document.getElementById('clases-past');
+  if (!prox.length) pEl.innerHTML = '<div class="empty"><div class="ico">📅</div><p>Sin clases próximas</p></div>';
+  else pEl.innerHTML = prox.map(c => renderClaseCard(c)).join('');
+  if (!past.length) dEl.innerHTML = '<div class="empty"><div class="ico">🕐</div><p>Sin clases realizadas</p></div>';
+  else dEl.innerHTML = past.map(c => renderClaseCard(c, true)).join('');
+}
+
+function puedeAccederClase(c) {
+  if (!c.enlace_zoom) return false;
+  if (!c.publicado)   return false;
+  if (_estudiante.estado !== 'activo') return false;
+  // Ventana de acceso: desde 15 min antes hasta 2 horas después
+  if (!c.fecha) return false;
+  const fechaClase = new Date(c.fecha + (c.hora ? 'T'+c.hora : 'T00:00'));
+  const ahora      = new Date();
+  const diff       = (fechaClase - ahora) / 60000; // minutos
+  return diff <= 15 && diff >= -120;
+}
+
+function renderClaseCard(c, pasada=false) {
+  const acceder = puedeAccederClase(c);
+  const platIco = {Zoom:'🔵','Google Meet':'🟢',Teams:'🟣','YouTube Live':'🔴',Otro:'🎥'};
+  return `<div class="clase-card">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+      <div style="font-size:14px;font-weight:600">${platIco[c.plataforma]||'🎥'} ${esc(c.nombre)}</div>
+      <span class="badge ${pasada?'badge-gray':'badge-green'}">${pasada?'Realizada':'Próxima'}</span>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:6px">
+      📅 ${c.fecha||'—'} ${c.hora?'· '+c.hora:''} · ${esc(c.plataforma||'')} · ${esc(c.curso||'General')}
+    </div>
+    ${c.descripcion?`<div style="font-size:13px;color:var(--text);margin-bottom:8px">${esc(c.descripcion)}</div>`:''}
+    ${acceder
+      ? `<a href="${esc(c.enlace_zoom)}" target="_blank" rel="noopener" class="btn btn-primary btn-sm">🔗 Ingresar a la clase ${c.contrasena?'(Contraseña: '+esc(c.contrasena)+')':''}</a>`
+      : (c.enlace_zoom && !pasada
+        ? `<div style="font-size:12px;color:var(--muted);background:#f8fafc;padding:8px 12px;border-radius:8px">🔒 Acceso disponible 15 min antes del inicio</div>`
+        : (pasada && c.enlace_zoom ? `<div style="font-size:12px;color:var(--muted)">🕐 Clase finalizada</div>` : ''))
+    }
+  </div>`;
+}
+
+/* ─── AVISOS ─── */
+function renderAvisos() {
+  const el = document.getElementById('avisos-lista');
+  if (!_misAvisos.length) { el.innerHTML = '<div class="empty"><div class="ico">📢</div><p>Sin avisos de tus cursos</p></div>'; return; }
+  const colores = {aviso:'var(--primary)',recordatorio:'var(--warn)',cancelacion:'var(--danger)',nueva_clase:'var(--success)',tarea:'#7c3aed',material:'var(--info)'};
+  el.innerHTML = _misAvisos.map(a=>`
+    <div class="aviso-card" style="border-left-color:${colores[a.tipo]||'var(--primary)'}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
+        <div style="font-size:14px;font-weight:600">📢 ${esc(a.titulo)}</div>
+        <span class="badge badge-blue" style="flex-shrink:0">${esc(a.tipo||'aviso')}</span>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:6px">
+        Prof: ${esc(a.profesor||'IAGAMI')} · ${esc(a.curso||'General')} · ${new Date(a.created).toLocaleDateString('es-VE')}
+      </div>
+      <div style="font-size:13px;line-height:1.5">${esc(a.contenido)}</div>
+    </div>`).join('');
+}
+
+/* ─── BIBLIOTECA ─── */
+function renderBib() {
+  const tipo   = document.getElementById('bib-tipo').value;
+  const buscar = document.getElementById('bib-buscar').value.toLowerCase();
+  let lista = _bibRecursos.filter(r =>
+    (!tipo || r.tipo===tipo) &&
+    (!buscar || (r.titulo||'').toLowerCase().includes(buscar) || (r.descripcion||'').toLowerCase().includes(buscar))
+  );
+  const el = document.getElementById('bib-grid');
+  if (!lista.length) { el.innerHTML = '<div class="empty"><div class="ico">📚</div><p>Sin recursos encontrados</p></div>'; return; }
+  const ico = {video:'▶️',pdf:'📄',guia:'📗',infografia:'🖼️',presentacion:'📊'};
+  el.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px">${lista.map(r=>`
+    <div style="background:#fff;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden">
+      <div style="background:var(--primary-light);padding:14px;text-align:center;font-size:28px">${ico[r.tipo]||'📁'}</div>
+      <div style="padding:12px">
+        <div style="font-size:13px;font-weight:600;margin-bottom:4px">${esc(r.titulo)}</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:8px">${esc(r.categoria||'')} · ${esc(r.nivel||'General')}</div>
+        <a href="${esc(r.url)}" target="_blank" rel="noopener" class="btn btn-secondary btn-sm" style="width:100%;display:block;text-align:center">🔗 Abrir</a>
+      </div>
+    </div>`).join('')}</div>`;
+}
+
+/* ─── PERFIL ─── */
+function renderPerfil() {
+  const el = document.getElementById('perfil-datos');
+  if (!_estudiante) return;
+  el.innerHTML = `
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
+      <div style="width:60px;height:60px;border-radius:50%;background:var(--primary-light);display:flex;align-items:center;justify-content:center;font-size:26px">📗</div>
+      <div>
+        <div style="font-family:'Poppins',sans-serif;font-size:17px;font-weight:700">${esc(_estudiante.nombres)} ${esc(_estudiante.apellidos||'')}</div>
+        <div style="font-size:12px;color:var(--muted)">@${esc(_estudiante.username||'')} · ${esc(_estudiante.email||'Sin correo')}</div>
+        <span class="badge ${_estudiante.estado==='activo'?'badge-green':'badge-yellow'}">${esc(_estudiante.estado)}</span>
+      </div>
+    </div>
+    <div style="font-size:13px;display:grid;gap:6px">
+      <div><strong>Tipo:</strong> ${esc(_estudiante.tipo||'adulto')}</div>
+      <div><strong>Cédula:</strong> ${esc(_estudiante.cedula||'—')}</div>
+      <div><strong>Teléfono:</strong> ${esc(_estudiante.telefono||'—')}</div>
+      <div><strong>Parroquia:</strong> ${esc(_estudiante.parroquia||'—')}</div>
+      <div><strong>Institución:</strong> ${esc(_estudiante.institucion||'—')}</div>
+      <div><strong>Cursos inscritos:</strong> ${_misCursos.length}</div>
+    </div>`;
+}
+
+async function cambiarPass() {
+  const vieja    = document.getElementById('pwd-old').value;
+  const nueva    = document.getElementById('pwd-new').value;
+  const confirma = document.getElementById('pwd-c').value;
+  if (!vieja||!nueva||!confirma) { toast('Completa todos los campos','error'); return; }
+  if (nueva !== confirma)  { toast('Las contraseñas no coinciden','error'); return; }
+  if (nueva.length < 8)    { toast('Mínimo 8 caracteres','error'); return; }
+  try {
+    await pbFetch(`/api/collections/estudiantes/records/${_estudiante.id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({password:nueva, passwordConfirm:confirma, oldPassword:vieja})
+    });
+    toast('Contraseña actualizada. Inicia sesión de nuevo.');
+    setTimeout(doLogout, 2000);
+  } catch(e) { toast('Error: contraseña actual incorrecta','error'); }
+}
+
+/* ─── SESSION RESTORE ─── */
+(function restoreSession(){
+  try {
+    const t = localStorage.getItem('est_token');
+    const d = localStorage.getItem('est_data');
+    if (!t||!d) return;
+    _token = t; _estudiante = JSON.parse(d);
+    if (_estudiante.estado === 'pendiente' || _estudiante.estado === 'suspendido') { doLogout(); return; }
+    fetch(PB_URL+'/api/collections/estudiantes/auth-refresh', {method:'POST',headers:{Authorization:_token}})
+      .then(r=>r.json()).then(data=>{
+        if (data.token) {
+          _token=data.token; _estudiante=data.record;
+          localStorage.setItem('est_token',_token);
+          localStorage.setItem('est_data',JSON.stringify(_estudiante));
+          iniciarApp();
+        } else { doLogout(); }
+      }).catch(()=>{ doLogout(); });
+  } catch(e){}
+})();
+</script>
+</body>
+</html>
