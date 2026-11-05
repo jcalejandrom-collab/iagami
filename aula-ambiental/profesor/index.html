@@ -115,6 +115,17 @@ textarea.form-control{resize:vertical;min-height:80px}
   .main-content{padding:16px}
   .stats-grid{grid-template-columns:repeat(2,1fr)}
 }
+
+/* ── ZOOM / IA ── */
+.zoom-status-card{display:flex;align-items:center;gap:10px;background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:12px 16px;margin-bottom:16px}
+.zoom-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.zoom-dot.on{background:#22c55e}
+.zoom-dot.off{background:#94a3b8}
+.ia-tool-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px}
+.ia-result{background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:16px;margin-top:12px;font-size:13px;line-height:1.6;min-height:80px}
+.loading-ai{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:30px 20px;color:var(--muted);font-size:13px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite}
 </style>
 </head>
 <body>
@@ -170,6 +181,7 @@ textarea.form-control{resize:vertical;min-height:80px}
       <div onclick="showSec('evaluaciones')" class="nav-item" id="nav-evaluaciones"><span class="nav-ico">📝</span> Evaluaciones</div>
       <div onclick="showSec('tareas')"       class="nav-item" id="nav-tareas"      ><span class="nav-ico">📋</span> Tareas</div>
       <div onclick="showSec('asistencia')"   class="nav-item" id="nav-asistencia"  ><span class="nav-ico">✅</span> Asistencia</div>
+      <div onclick="showSec('ia-asistente')" class="nav-item"      id="nav-ia-asistente"><span class="nav-ico">🤖</span> IA Asistente</div>
       <div onclick="showSec('perfil')"    class="nav-item"        id="nav-perfil"   ><span class="nav-ico">👤</span> Mi Perfil</div>
     </div>
 
@@ -294,6 +306,47 @@ textarea.form-control{resize:vertical;min-height:80px}
             <button class="btn btn-primary btn-sm" onclick="saveClase()">💾 Guardar clase</button>
             <button class="btn btn-secondary btn-sm" onclick="closeClaseForm()">Cancelar</button>
           </div>
+        </div>
+
+        <!-- Zoom Directo -->
+        <div style="margin-top:24px">
+          <div style="font-family:'Poppins',sans-serif;font-size:16px;font-weight:600;color:var(--primary-dark);margin-bottom:12px">🔵 Zoom Directo</div>
+          <div class="zoom-status-card" id="zoom-status-card">
+            <div class="zoom-dot off" id="zoom-dot"></div>
+            <div>
+              <div style="font-size:13px;font-weight:600" id="zoom-status-txt">Verificando conexión con Zoom...</div>
+              <div style="font-size:12px;color:var(--muted)" id="zoom-status-sub">Las credenciales están almacenadas en el servidor VPS de IAGAMI</div>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+            <button class="btn btn-primary btn-sm" onclick="openZoomForm()">🔵 Crear clase con Zoom</button>
+            <button class="btn btn-secondary btn-sm" onclick="profLoadZoomMeetings()">↻ Actualizar lista</button>
+          </div>
+
+          <div class="form-panel" id="zoom-form" style="display:none">
+            <h4>🔵 Programar Reunión en Zoom</h4>
+            <div class="form-grid">
+              <div><label class="form-label">Nombre de la clase *</label><input class="form-control" id="zm-nombre" placeholder="Ej: Taller Reciclaje"/></div>
+              <div><label class="form-label">Curso</label><select class="form-control" id="zm-curso"><option value="">Selecciona...</option></select></div>
+              <div><label class="form-label">Fecha y hora *</label><input class="form-control" id="zm-datetime" type="datetime-local"/></div>
+              <div><label class="form-label">Duración</label>
+                <select class="form-control" id="zm-duracion">
+                  <option value="30">30 minutos</option>
+                  <option value="60" selected>1 hora</option>
+                  <option value="90">1 hora 30 min</option>
+                  <option value="120">2 horas</option>
+                </select>
+              </div>
+              <div class="span2"><label class="form-label">Descripción</label><textarea class="form-control" id="zm-desc" placeholder="Descripción de la clase..."></textarea></div>
+            </div>
+            <div style="display:flex;gap:10px;margin-top:12px">
+              <button class="btn btn-primary btn-sm" onclick="profCreateZoomMeeting()">🔵 Programar en Zoom</button>
+              <button class="btn btn-secondary btn-sm" onclick="closeZoomForm()">Cancelar</button>
+            </div>
+          </div>
+
+          <div id="zoom-meetings-list"><div class="empty"><div class="ico">🔵</div><p>Cargando reuniones Zoom...</p></div></div>
         </div>
       </div>
 
