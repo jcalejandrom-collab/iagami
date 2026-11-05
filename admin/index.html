@@ -2444,12 +2444,14 @@ async function renderSection(name) {
    BRIGADAS AMBIENTALES — ADMIN
 ═══════════════════════════════════════ */
 let _brigAdultos = [], _brigMenores = [], _brigConsentimientos = [];
+let _brigComandantes = [], _brigRepresentantes = [], _brigBrigadasList = [], _brigConvocatorias = [], _brigSolicitudes = [];
 let _currentBrigTab = 'censo';
 
 function switchBrigTab(tab) {
   _currentBrigTab = tab;
-  ['censo','adultos','menores','consentimientos'].forEach(t => {
-    document.getElementById('btab-panel-' + t).style.display = t === tab ? 'block' : 'none';
+  ['censo','adultos','menores','consentimientos','comandantes','representantes','brigadas-list','convocatorias','solicitudes-brig','estadisticas-brig'].forEach(t => {
+    const panel = document.getElementById('btab-panel-' + t);
+    if (panel) panel.style.display = t === tab ? 'block' : 'none';
     const btn = document.getElementById('btab-' + t);
     if (btn) {
       btn.style.color = t === tab ? 'var(--primary)' : 'var(--muted)';
@@ -2459,6 +2461,12 @@ function switchBrigTab(tab) {
   if (tab === 'adultos') renderBrigAdultos();
   if (tab === 'menores') renderBrigMenores();
   if (tab === 'consentimientos') renderBrigConsentimientos();
+  if (tab === 'comandantes') brig_loadComandantes();
+  if (tab === 'representantes') brig_loadRepresentantes();
+  if (tab === 'brigadas-list') brig_loadBrigadas();
+  if (tab === 'convocatorias') brig_loadConvocatorias();
+  if (tab === 'solicitudes-brig') brig_loadSolicitudes();
+  if (tab === 'estadisticas-brig') brig_loadEstadisticas();
 }
 
 async function renderBrigadas() {

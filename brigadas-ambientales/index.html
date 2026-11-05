@@ -225,6 +225,10 @@ button{cursor:pointer;font-family:inherit}
             <label class="area-chip" onclick="toggleChip(this)"><input type="checkbox" value="Limpieza"> 🧹 Limpieza</label>
           </div>
         </div>
+        <div class="fgrid">
+          <div class="fg"><label class="flabel">Nombre de la Brigada (si ya perteneces)</label><input class="finput" id="ba-brigada" placeholder="Ej: Brigada Agua Viva (opcional)"/></div>
+          <div class="fg"><label class="flabel">Comuna</label><input class="finput" id="ba-comuna" placeholder="Nombre de tu comuna (opcional)"/></div>
+        </div>
         <div class="fg"><label class="flabel">Experiencia Voluntaria Previa</label><textarea class="ftextarea" id="ba-exp" placeholder="Describe brevemente tu experiencia (opcional)"></textarea></div>
         <button class="btn-submit" id="btn-adulto" onclick="enviarAdulto()">🌿 Inscribirme como Brigadista</button>
       </div>
@@ -322,6 +326,10 @@ button{cursor:pointer;font-family:inherit}
         <div class="fgrid">
           <div class="fg"><label class="flabel">Dirección *</label><input class="finput" id="rep-dir" placeholder="Dirección de residencia"/></div>
           <div class="fg"><label class="flabel">Comunidad *</label><input class="finput" id="rep-comunidad" placeholder="Comunidad del representante"/></div>
+        </div>
+        <div class="fgrid">
+          <div class="fg"><label class="flabel">Nombre de la Brigada (si ya pertenece)</label><input class="finput" id="bm-brigada" placeholder="Ej: Brigada Agua Viva (opcional)"/></div>
+          <div class="fg"><label class="flabel">Comuna</label><input class="finput" id="bm-comuna" placeholder="Nombre de la comuna (opcional)"/></div>
         </div>
         <div class="note-box">
           ⚠️ Al registrar a este menor, el representante legal declara ser responsable de su participación y se compromete a firmar el <strong>consentimiento informado</strong> requerido por IAGAMI. Ningún menor será brigadista activo sin autorización parental verificada.
