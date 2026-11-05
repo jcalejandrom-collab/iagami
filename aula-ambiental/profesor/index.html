@@ -1082,6 +1082,542 @@ function poblarSelectCursos(selectId) {
   if (val) sel.value = val;
 }
 
+/* ─── EVALUACIONES ─── */
+let _evalTab = 'lista';
+let _pregEvalId = null;
+
+function switchEvalTab(tab) {
+  _evalTab = tab;
+  ['lista','resultados'].forEach(t => {
+    document.getElementById('evtab-'+t).classList.toggle('active', t===tab);
+    document.querySelectorAll(`[onclick="switchEvalTab('${t}')"]`).forEach(b => b.classList.toggle('active', t===tab));
+  });
+  if (tab === 'resultados') poblarSelectEvals();
+}
+
+async function renderEvaluaciones() {
+  const el = document.getElementById('eval-lista');
+  el.innerHTML = '<div class="empty"><div class="ico">⏳</div><p>Cargando...</p></div>';
+  try {
+    const r = await pbFetch(`/api/collections/evaluaciones/records?filter=profesor_id%3D%22${_profesor.id}%22&sort=-created&perPage=100`);
+    _evaluaciones = r.items || [];
+  } catch(e) { _evaluaciones = []; }
+  if (_evaluaciones.length === 0) {
+    el.innerHTML = '<div class="empty"><div class="ico">📝</div><p>Sin evaluaciones creadas. Crea la primera.</p></div>';
+    return;
+  }
+  el.innerHTML = _evaluaciones.map(e => `
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div style="font-size:14px;font-weight:600">📝 ${esc(e.nombre)}</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:3px">
+            ${e.tiempo_limite?e.tiempo_limite+' min':'Sin límite de tiempo'} · Intentos: ${e.intentos_max||1}
+            ${e.fecha_apertura?'· '+e.fecha_apertura.slice(0,10)+' → '+(e.fecha_cierre?e.fecha_cierre.slice(0,10):'—'):''}
+          </div>
+        </div>
+        <span class="badge ${e.publicado?'badge-green':'badge-gray'}">${e.publicado?'Publicada':'Borrador'}</span>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+        <button onclick="editarEval('${e.id}')" class="btn btn-secondary btn-sm">✏️ Editar</button>
+        <button onclick="abrirPreguntas('${e.id}')" class="btn btn-secondary btn-sm">❓ Preguntas</button>
+        <button onclick="verResultadosEval('${e.id}')" class="btn btn-secondary btn-sm">📊 Resultados</button>
+        <button onclick="eliminarEval('${e.id}')" class="btn btn-danger btn-sm">🗑 Eliminar</button>
+      </div>
+    </div>`).join('');
+  poblarSelectEvals();
+}
+
+function openEvalForm(clear=true) {
+  document.getElementById('eval-form').style.display = 'block';
+  document.getElementById('eval-form-title').textContent = '📝 Nueva Evaluación';
+  if (clear) {
+    document.getElementById('eval-edit-id').value = '';
+    ['ev-nombre','ev-desc','ev-tiempo','ev-apertura','ev-cierre'].forEach(id => { document.getElementById(id).value = ''; });
+    document.getElementById('ev-intentos').value = '1';
+    document.getElementById('ev-pub').checked = false;
+  }
+  poblarSelectCursos('ev-curso');
+  document.getElementById('eval-form').scrollIntoView({behavior:'smooth'});
+}
+
+function closeEvalForm() { document.getElementById('eval-form').style.display = 'none'; }
+
+function editarEval(id) {
+  const e = _evaluaciones.find(x => x.id === id);
+  if (!e) return;
+  openEvalForm(false);
+  document.getElementById('eval-form-title').textContent = '✏️ Editar Evaluación';
+  document.getElementById('eval-edit-id').value = id;
+  document.getElementById('ev-nombre').value   = e.nombre||'';
+  document.getElementById('ev-desc').value     = e.descripcion||'';
+  document.getElementById('ev-tiempo').value   = e.tiempo_limite||'';
+  document.getElementById('ev-intentos').value = e.intentos_max||1;
+  document.getElementById('ev-apertura').value = e.fecha_apertura ? e.fecha_apertura.slice(0,16) : '';
+  document.getElementById('ev-cierre').value   = e.fecha_cierre   ? e.fecha_cierre.slice(0,16)   : '';
+  document.getElementById('ev-pub').checked    = !!e.publicado;
+  poblarSelectCursos('ev-curso');
+  document.getElementById('ev-curso').value = e.curso_id||'';
+}
+
+async function saveEval() {
+  const nombre = document.getElementById('ev-nombre').value.trim();
+  if (!nombre) { toast('El nombre es requerido', 'error'); return; }
+  const editId = document.getElementById('eval-edit-id').value;
+  const data = {
+    nombre,
+    descripcion:    document.getElementById('ev-desc').value.trim(),
+    curso_id:       document.getElementById('ev-curso').value || null,
+    tiempo_limite:  parseInt(document.getElementById('ev-tiempo').value)||null,
+    intentos_max:   parseInt(document.getElementById('ev-intentos').value)||1,
+    fecha_apertura: document.getElementById('ev-apertura').value||null,
+    fecha_cierre:   document.getElementById('ev-cierre').value||null,
+    publicado:      document.getElementById('ev-pub').checked,
+    profesor_id:    _profesor.id
+  };
+  try {
+    if (editId) {
+      await pbFetch(`/api/collections/evaluaciones/records/${editId}`, {method:'PATCH', body: JSON.stringify(data)});
+      toast('Evaluación actualizada');
+    } else {
+      await pbFetch('/api/collections/evaluaciones/records', {method:'POST', body: JSON.stringify(data)});
+      toast('Evaluación creada');
+    }
+    closeEvalForm();
+    renderEvaluaciones();
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+async function eliminarEval(id) {
+  if (!confirm('¿Eliminar esta evaluación y todas sus preguntas?')) return;
+  try {
+    await pbFetch(`/api/collections/evaluaciones/records/${id}`, {method:'DELETE'});
+    toast('Evaluación eliminada');
+    renderEvaluaciones();
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+function poblarSelectEvals() {
+  const sel = document.getElementById('res-eval-sel');
+  if (!sel) return;
+  const val = sel.value;
+  sel.innerHTML = '<option value="">— Selecciona —</option>';
+  _evaluaciones.forEach(e => {
+    const opt = document.createElement('option');
+    opt.value = e.id;
+    opt.textContent = e.nombre;
+    sel.appendChild(opt);
+  });
+  if (val) sel.value = val;
+}
+
+function verResultadosEval(id) {
+  switchEvalTab('resultados');
+  document.getElementById('res-eval-sel').value = id;
+  cargarResultados();
+}
+
+async function cargarResultados() {
+  const id = document.getElementById('res-eval-sel').value;
+  const el = document.getElementById('resultados-lista');
+  if (!id) { el.innerHTML = '<div class="empty"><div class="ico">📊</div><p>Selecciona una evaluación</p></div>'; return; }
+  el.innerHTML = '<div class="empty"><div class="ico">⏳</div><p>Cargando resultados...</p></div>';
+  try {
+    const r = await pbFetch(`/api/collections/resultados_evaluacion/records?filter=evaluacion_id%3D%22${id}%22&sort=-created&perPage=200`);
+    const items = r.items || [];
+    if (items.length === 0) { el.innerHTML = '<div class="empty"><div class="ico">📊</div><p>Sin resultados aún</p></div>'; return; }
+    el.innerHTML = `<div class="table-wrap"><table>
+      <thead><tr><th>Estudiante</th><th>Puntaje</th><th>Estado</th><th>Fecha</th></tr></thead>
+      <tbody>${items.map(res => `<tr>
+        <td>${esc(res.estudiante_id||'—')}</td>
+        <td style="font-weight:600">${res.puntaje_total??'—'}</td>
+        <td><span class="badge ${res.estado==='completado'?'badge-green':res.estado==='en_progreso'?'badge-yellow':'badge-gray'}">${esc(res.estado||'—')}</span></td>
+        <td style="font-size:12px;color:var(--muted)">${res.fecha_fin?new Date(res.fecha_fin).toLocaleDateString('es-VE'):'—'}</td>
+      </tr>`).join('')}</tbody>
+    </table></div>`;
+  } catch(e) { el.innerHTML = '<div class="empty"><div class="ico">❌</div><p>No se pudieron cargar los resultados</p></div>'; }
+}
+
+/* Banco de preguntas */
+async function abrirPreguntas(evalId) {
+  _pregEvalId = evalId;
+  const ev = _evaluaciones.find(e => e.id === evalId);
+  document.getElementById('preguntas-panel-titulo').textContent = `❓ Preguntas: ${ev ? ev.nombre : ''}`;
+  document.getElementById('preguntas-panel').style.display = 'block';
+  onTipoPreg();
+  await cargarPreguntas(evalId);
+  document.getElementById('preguntas-panel').scrollIntoView({behavior:'smooth'});
+}
+
+function closePreguntasPanel() {
+  document.getElementById('preguntas-panel').style.display = 'none';
+  _pregEvalId = null;
+}
+
+function onTipoPreg() {
+  const tipo = document.getElementById('preg-tipo').value;
+  document.getElementById('preg-opciones-wrap').style.display = tipo === 'multiple' ? 'block' : 'none';
+  document.getElementById('preg-respuesta-wrap').style.display = tipo !== 'abierta' ? 'block' : 'none';
+  document.getElementById('preg-respuesta').placeholder = tipo === 'verdadero_falso' ? 'Verdadero o Falso' : 'Ej: Opción A';
+}
+
+async function cargarPreguntas(evalId) {
+  const el = document.getElementById('preguntas-lista');
+  el.innerHTML = '<div class="empty"><div class="ico">⏳</div><p>Cargando preguntas...</p></div>';
+  try {
+    const r = await pbFetch(`/api/collections/preguntas_evaluacion/records?filter=evaluacion_id%3D%22${evalId}%22&sort=orden&perPage=200`);
+    const items = r.items || [];
+    if (items.length === 0) { el.innerHTML = '<div style="font-size:13px;color:var(--muted);padding:8px 0">Sin preguntas aún. Agrega la primera.</div>'; return; }
+    const tipoLabel = {multiple:'Múltiple',verdadero_falso:'V/F',abierta:'Abierta'};
+    el.innerHTML = items.map((p,i) => `
+      <div style="background:#fff;border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:600">${i+1}. ${esc(p.enunciado)}</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:3px">
+              <span class="badge badge-blue">${tipoLabel[p.tipo]||p.tipo}</span>
+              · ${p.puntaje||0} pts
+              ${p.respuesta_correcta ? '· ✅ '+esc(p.respuesta_correcta) : ''}
+            </div>
+          </div>
+          <button onclick="eliminarPreg('${p.id}')" class="btn btn-danger btn-sm">🗑</button>
+        </div>
+      </div>`).join('');
+  } catch(e) { el.innerHTML = '<div style="font-size:13px;color:var(--muted)">No se pudieron cargar las preguntas.</div>'; }
+}
+
+async function savePreg() {
+  if (!_pregEvalId) return;
+  const enunciado = document.getElementById('preg-enunciado').value.trim();
+  const tipo      = document.getElementById('preg-tipo').value;
+  if (!enunciado) { toast('El enunciado es requerido', 'error'); return; }
+  const opcionesRaw = document.getElementById('preg-opciones').value.trim();
+  const opciones = tipo === 'multiple' ? opcionesRaw.split('\n').map(o=>o.trim()).filter(Boolean) : [];
+  const data = {
+    evaluacion_id: _pregEvalId,
+    enunciado, tipo,
+    opciones: JSON.stringify(opciones),
+    respuesta_correcta: document.getElementById('preg-respuesta').value.trim(),
+    puntaje: parseInt(document.getElementById('preg-puntaje').value)||10,
+    orden: Date.now()
+  };
+  try {
+    await pbFetch('/api/collections/preguntas_evaluacion/records', {method:'POST', body: JSON.stringify(data)});
+    toast('Pregunta agregada');
+    ['preg-enunciado','preg-opciones','preg-respuesta'].forEach(id => { document.getElementById(id).value = ''; });
+    document.getElementById('preg-puntaje').value = '10';
+    await cargarPreguntas(_pregEvalId);
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+async function eliminarPreg(id) {
+  if (!confirm('¿Eliminar esta pregunta?')) return;
+  try {
+    await pbFetch(`/api/collections/preguntas_evaluacion/records/${id}`, {method:'DELETE'});
+    toast('Pregunta eliminada');
+    if (_pregEvalId) cargarPreguntas(_pregEvalId);
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+/* ─── TAREAS ─── */
+let _tareaTab = 'lista';
+
+function switchTareaTab(tab) {
+  _tareaTab = tab;
+  ['lista','entregas'].forEach(t => {
+    document.getElementById('tatab-'+t).classList.toggle('active', t===tab);
+    document.querySelectorAll(`[onclick="switchTareaTab('${t}')"]`).forEach(b => b.classList.toggle('active', t===tab));
+  });
+  if (tab === 'entregas') poblarSelectTareas();
+}
+
+async function renderTareas() {
+  const el = document.getElementById('tareas-lista');
+  el.innerHTML = '<div class="empty"><div class="ico">⏳</div><p>Cargando...</p></div>';
+  try {
+    const r = await pbFetch(`/api/collections/tareas/records?filter=profesor_id%3D%22${_profesor.id}%22&sort=-created&perPage=100`);
+    _tareas = r.items || [];
+  } catch(e) { _tareas = []; }
+  if (_tareas.length === 0) {
+    el.innerHTML = '<div class="empty"><div class="ico">📋</div><p>Sin tareas creadas. Crea la primera.</p></div>';
+    return;
+  }
+  el.innerHTML = _tareas.map(t => `
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div style="font-size:14px;font-weight:600">📋 ${esc(t.nombre)}</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:3px">
+            ${t.puntos_max||100} pts
+            ${t.fecha_entrega?'· Entrega: '+t.fecha_entrega.slice(0,10):'· Sin fecha límite'}
+          </div>
+          ${t.descripcion?`<div style="font-size:12px;color:var(--text);margin-top:4px">${esc(t.descripcion)}</div>`:''}
+        </div>
+        <span class="badge ${t.publicado?'badge-green':'badge-gray'}">${t.publicado?'Publicada':'Borrador'}</span>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+        <button onclick="editarTarea('${t.id}')" class="btn btn-secondary btn-sm">✏️ Editar</button>
+        <button onclick="verEntregas('${t.id}')" class="btn btn-secondary btn-sm">📥 Entregas</button>
+        <button onclick="eliminarTarea('${t.id}')" class="btn btn-danger btn-sm">🗑 Eliminar</button>
+      </div>
+    </div>`).join('');
+  poblarSelectTareas();
+}
+
+function openTareaForm(clear=true) {
+  document.getElementById('tarea-form').style.display = 'block';
+  document.getElementById('tarea-form-title').textContent = '📋 Nueva Tarea';
+  if (clear) {
+    document.getElementById('tarea-edit-id').value = '';
+    ['ta-nombre','ta-desc','ta-instrucciones','ta-fecha'].forEach(id => { document.getElementById(id).value = ''; });
+    document.getElementById('ta-puntos').value = '100';
+    document.getElementById('ta-pub').checked = true;
+  }
+  poblarSelectCursos('ta-curso');
+  document.getElementById('tarea-form').scrollIntoView({behavior:'smooth'});
+}
+
+function closeTareaForm() { document.getElementById('tarea-form').style.display = 'none'; }
+
+function editarTarea(id) {
+  const t = _tareas.find(x => x.id === id);
+  if (!t) return;
+  openTareaForm(false);
+  document.getElementById('tarea-form-title').textContent = '✏️ Editar Tarea';
+  document.getElementById('tarea-edit-id').value  = id;
+  document.getElementById('ta-nombre').value      = t.nombre||'';
+  document.getElementById('ta-desc').value        = t.descripcion||'';
+  document.getElementById('ta-instrucciones').value = t.instrucciones||'';
+  document.getElementById('ta-fecha').value       = t.fecha_entrega ? t.fecha_entrega.slice(0,16) : '';
+  document.getElementById('ta-puntos').value      = t.puntos_max||100;
+  document.getElementById('ta-pub').checked       = !!t.publicado;
+  poblarSelectCursos('ta-curso');
+  document.getElementById('ta-curso').value = t.curso_id||'';
+}
+
+async function saveTarea() {
+  const nombre = document.getElementById('ta-nombre').value.trim();
+  if (!nombre) { toast('El nombre es requerido', 'error'); return; }
+  const editId = document.getElementById('tarea-edit-id').value;
+  const data = {
+    nombre,
+    descripcion:    document.getElementById('ta-desc').value.trim(),
+    instrucciones:  document.getElementById('ta-instrucciones').value.trim(),
+    curso_id:       document.getElementById('ta-curso').value || null,
+    fecha_entrega:  document.getElementById('ta-fecha').value||null,
+    puntos_max:     parseInt(document.getElementById('ta-puntos').value)||100,
+    publicado:      document.getElementById('ta-pub').checked,
+    profesor_id:    _profesor.id
+  };
+  try {
+    if (editId) {
+      await pbFetch(`/api/collections/tareas/records/${editId}`, {method:'PATCH', body: JSON.stringify(data)});
+      toast('Tarea actualizada');
+    } else {
+      await pbFetch('/api/collections/tareas/records', {method:'POST', body: JSON.stringify(data)});
+      toast('Tarea creada');
+    }
+    closeTareaForm();
+    renderTareas();
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+async function eliminarTarea(id) {
+  if (!confirm('¿Eliminar esta tarea?')) return;
+  try {
+    await pbFetch(`/api/collections/tareas/records/${id}`, {method:'DELETE'});
+    toast('Tarea eliminada');
+    renderTareas();
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+function poblarSelectTareas() {
+  const sel = document.getElementById('ent-tarea-sel');
+  if (!sel) return;
+  const val = sel.value;
+  sel.innerHTML = '<option value="">— Selecciona —</option>';
+  _tareas.forEach(t => {
+    const opt = document.createElement('option');
+    opt.value = t.id;
+    opt.textContent = t.nombre;
+    sel.appendChild(opt);
+  });
+  if (val) sel.value = val;
+}
+
+function verEntregas(tareaId) {
+  switchTareaTab('entregas');
+  document.getElementById('ent-tarea-sel').value = tareaId;
+  cargarEntregas();
+}
+
+async function cargarEntregas() {
+  const id = document.getElementById('ent-tarea-sel').value;
+  const el = document.getElementById('entregas-lista');
+  if (!id) { el.innerHTML = '<div class="empty"><div class="ico">📥</div><p>Selecciona una tarea</p></div>'; return; }
+  el.innerHTML = '<div class="empty"><div class="ico">⏳</div><p>Cargando entregas...</p></div>';
+  try {
+    const r = await pbFetch(`/api/collections/entregas_tareas/records?filter=tarea_id%3D%22${id}%22&sort=-created&perPage=200`);
+    const items = r.items || [];
+    if (items.length === 0) { el.innerHTML = '<div class="empty"><div class="ico">📥</div><p>Sin entregas aún</p></div>'; return; }
+    el.innerHTML = `<div class="table-wrap"><table>
+      <thead><tr><th>Estudiante</th><th>Estado</th><th>Calificación</th><th>Entregado</th><th>Calificar</th></tr></thead>
+      <tbody>${items.map(e => `<tr>
+        <td>${esc(e.estudiante_id||'—')}</td>
+        <td><span class="badge ${e.estado==='entregado'?'badge-blue':e.estado==='calificado'?'badge-green':'badge-gray'}">${esc(e.estado||'pendiente')}</span></td>
+        <td id="cal-val-${e.id}" style="font-weight:600">${e.calificacion??'—'}</td>
+        <td style="font-size:12px;color:var(--muted)">${e.fecha_entrega?new Date(e.fecha_entrega).toLocaleDateString('es-VE'):'—'}</td>
+        <td>
+          <div style="display:flex;gap:6px;align-items:center">
+            <input type="number" id="cal-inp-${e.id}" value="${e.calificacion??''}" placeholder="0-100" min="0" max="100"
+              style="width:70px;padding:4px 6px;border:1px solid var(--border);border-radius:6px;font-size:12px"/>
+            <button onclick="calificarEntrega('${e.id}')" class="btn btn-primary btn-sm">✓</button>
+          </div>
+        </td>
+      </tr>`).join('')}</tbody>
+    </table></div>`;
+  } catch(e) { el.innerHTML = '<div class="empty"><div class="ico">❌</div><p>No se pudieron cargar las entregas</p></div>'; }
+}
+
+async function calificarEntrega(id) {
+  const inp = document.getElementById('cal-inp-'+id);
+  const cal = parseFloat(inp.value);
+  if (isNaN(cal) || cal < 0) { toast('Ingresa una calificación válida', 'error'); return; }
+  try {
+    await pbFetch(`/api/collections/entregas_tareas/records/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({calificacion: cal, estado: 'calificado'})
+    });
+    toast('Calificación guardada');
+    document.getElementById('cal-val-'+id).textContent = cal;
+    inp.style.borderColor = 'var(--success)';
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+/* ─── ASISTENCIA ─── */
+function renderAsistencia() {
+  poblarSelectCursosAsist();
+  document.getElementById('asist-clase').innerHTML = '<option value="">— Selecciona clase —</option>';
+  document.getElementById('asistencia-tabla').innerHTML = '<div class="empty"><div class="ico">✅</div><p>Selecciona un curso y clase</p></div>';
+}
+
+function poblarSelectCursosAsist() {
+  const sel = document.getElementById('asist-curso');
+  if (!sel) return;
+  const val = sel.value;
+  sel.innerHTML = '<option value="">— Selecciona curso —</option>';
+  _misCursos.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c.id;
+    opt.textContent = c.nombre;
+    sel.appendChild(opt);
+  });
+  if (val) sel.value = val;
+}
+
+function onAsistCursoChange() {
+  const cursoId = document.getElementById('asist-curso').value;
+  const selClase = document.getElementById('asist-clase');
+  selClase.innerHTML = '<option value="">— Selecciona clase —</option>';
+  document.getElementById('asistencia-tabla').innerHTML = '<div class="empty"><div class="ico">✅</div><p>Selecciona una clase</p></div>';
+  if (!cursoId) return;
+  const curso = _misCursos.find(c => c.id === cursoId);
+  if (!curso) return;
+  const clasesFiltradas = _misClases.filter(c => c.curso === curso.nombre || c.curso_id === cursoId);
+  if (clasesFiltradas.length === 0) {
+    selClase.innerHTML = '<option value="">Sin clases para este curso</option>';
+    return;
+  }
+  clasesFiltradas.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c.id;
+    opt.textContent = `${c.nombre} (${c.fecha||'—'})`;
+    selClase.appendChild(opt);
+  });
+}
+
+async function cargarAsistencia() {
+  const claseId = document.getElementById('asist-clase').value;
+  const cursoId = document.getElementById('asist-curso').value;
+  const el = document.getElementById('asistencia-tabla');
+  if (!claseId) { el.innerHTML = '<div class="empty"><div class="ico">✅</div><p>Selecciona una clase</p></div>'; return; }
+  el.innerHTML = '<div class="empty"><div class="ico">⏳</div><p>Cargando alumnos...</p></div>';
+
+  let alumnos = [];
+  let asistencias = [];
+  try {
+    const r = await pbFetch(`/api/collections/inscripciones_curso/records?filter=curso_id%3D%22${cursoId}%22%26%26estado%3D%22activo%22&sort=alumno_nombre&perPage=200`);
+    alumnos = r.items || [];
+  } catch(e) { alumnos = []; }
+  try {
+    const r = await pbFetch(`/api/collections/asistencia_clases/records?filter=clase_id%3D%22${claseId}%22&perPage=500`);
+    asistencias = r.items || [];
+  } catch(e) { asistencias = []; }
+
+  if (alumnos.length === 0) {
+    el.innerHTML = '<div class="empty"><div class="ico">👥</div><p>Sin alumnos inscritos en este curso</p></div>';
+    return;
+  }
+
+  const estadoMap = {};
+  asistencias.forEach(a => { estadoMap[a.estudiante_id] = a; });
+  const opts = ['presente','ausente','tardanza','justificado'];
+  const optLabel = {presente:'✅ Presente',ausente:'❌ Ausente',tardanza:'⏱ Tardanza',justificado:'📄 Justificado'};
+
+  el.innerHTML = `
+    <div class="table-wrap" style="margin-bottom:14px">
+      <table>
+        <thead><tr><th>Alumno</th>${opts.map(o=>`<th style="text-align:center">${optLabel[o]}</th>`).join('')}<th>Observación</th></tr></thead>
+        <tbody>${alumnos.map(a => {
+          const alumnoKey = a.alumno_id || a.id;
+          const ya = estadoMap[alumnoKey];
+          return `<tr>
+            <td style="font-size:13px">${esc(a.alumno_nombre)}</td>
+            ${opts.map(o => `<td style="text-align:center"><input type="radio" name="asist-${a.id}" value="${o}" data-alumno="${esc(alumnoKey)}" ${ya&&ya.estado===o?'checked':''}></td>`).join('')}
+            <td><input type="text" id="obs-${a.id}" value="${esc((ya&&ya.observaciones)||'')}" placeholder="Obs." style="width:110px;padding:3px 6px;border:1px solid var(--border);border-radius:5px;font-size:11px"/></td>
+          </tr>`;
+        }).join('')}</tbody>
+      </table>
+    </div>
+    <button class="btn btn-primary" onclick="guardarAsistencia('${claseId}')">💾 Guardar asistencia</button>`;
+}
+
+async function guardarAsistencia(claseId) {
+  const radios = document.querySelectorAll(`input[type=radio][name^="asist-"]:checked`);
+  const rows = [];
+  const vistas = new Set();
+  radios.forEach(r => {
+    const alumnoId = r.dataset.alumno;
+    if (!alumnoId || vistas.has(alumnoId)) return;
+    vistas.add(alumnoId);
+    const rowId = r.name.replace('asist-','');
+    rows.push({
+      clase_id: claseId,
+      estudiante_id: alumnoId,
+      estado: r.value,
+      observaciones: (document.getElementById('obs-'+rowId)?.value||'').trim()
+    });
+  });
+  if (rows.length === 0) { toast('Marca al menos una asistencia', 'error'); return; }
+  let ok = 0, err = 0;
+  for (const row of rows) {
+    try {
+      const existing = await pbFetch(
+        `/api/collections/asistencia_clases/records?filter=clase_id%3D%22${claseId}%22%26%26estudiante_id%3D%22${row.estudiante_id}%22&perPage=1`
+      ).catch(()=>({items:[]}));
+      const rec = (existing.items||[])[0];
+      if (rec) {
+        await pbFetch(`/api/collections/asistencia_clases/records/${rec.id}`, {method:'PATCH', body:JSON.stringify(row)});
+      } else {
+        await pbFetch('/api/collections/asistencia_clases/records', {method:'POST', body:JSON.stringify(row)});
+      }
+      ok++;
+    } catch(e) { err++; }
+  }
+  if (err > 0) toast(`${ok} guardados, ${err} con error`, 'error');
+  else toast(`Asistencia guardada: ${ok} registros ✅`);
+}
+
 /* ─── SESSION RESTORE ─── */
 (function restoreSession() {
   try {
