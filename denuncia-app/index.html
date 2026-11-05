@@ -237,6 +237,11 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
         <div class="svc-name">Revista</div>
         <div class="svc-desc">Publicación digital</div>
       </div>
+      <div class="svc-card" onclick="goScreen('brigadas')">
+        <div class="svc-ico">🌿</div>
+        <div class="svc-name">Brigadas Ambientales</div>
+        <div class="svc-desc">Únete y protege el ambiente</div>
+      </div>
     </div>
 
     <!-- NOTICIAS PREVIEW EN INICIO -->
@@ -248,6 +253,168 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
       <iframe src="https://iagami.online/noticias/" style="width:100%;height:420px;border:none;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.08)" loading="lazy" title="Noticias IAGAMI"></iframe>
     </div>
 
+  </div>
+</div>
+
+<!-- PANTALLA BRIGADAS AMBIENTALES -->
+<div class="screen" id="screen-brigadas">
+  <div style="overflow-y:auto;flex:1">
+    <div class="den-screen">
+
+      <!-- HERO BRIGADAS -->
+      <div style="background:linear-gradient(135deg,var(--verde-dark),var(--verde));border-radius:16px;color:#fff;padding:24px 20px;margin-bottom:20px;text-align:center">
+        <div style="font-size:40px;margin-bottom:10px">🌿</div>
+        <h2 style="font-family:'Poppins',sans-serif;font-size:18px;font-weight:700;margin-bottom:8px">Brigadas Ambientales IAGAMI</h2>
+        <p style="font-size:12px;opacity:.9;line-height:1.6">Únete a las Brigadas Ambientales de Iribarren. Participa en la protección de nuestros árboles, agua, biodiversidad y comunidades.</p>
+      </div>
+
+      <!-- SELECTOR CATEGORÍA -->
+      <div id="brig-selector">
+        <h3 style="font-family:'Poppins',sans-serif;font-size:14px;font-weight:700;color:var(--verde-dark);margin-bottom:14px;text-align:center">¿Cómo deseas participar?</h3>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <button onclick="showBrigForm('adulto')" style="display:flex;align-items:center;gap:14px;background:#fff;border:2px solid var(--verde-border);border-radius:14px;padding:16px;cursor:pointer;text-align:left;-webkit-tap-highlight-color:transparent">
+            <span style="font-size:32px">🧑</span>
+            <div>
+              <div style="font-family:'Poppins',sans-serif;font-size:14px;font-weight:700;color:var(--verde-dark)">Brigadista Adulto</div>
+              <div style="font-size:11px;color:#6b7280;margin-top:2px">Mayores de 18 años · Registro individual</div>
+            </div>
+          </button>
+          <button onclick="showBrigForm('adolescente')" style="display:flex;align-items:center;gap:14px;background:#fff;border:2px solid var(--verde-border);border-radius:14px;padding:16px;cursor:pointer;text-align:left;-webkit-tap-highlight-color:transparent">
+            <span style="font-size:32px">🧑‍🎓</span>
+            <div>
+              <div style="font-family:'Poppins',sans-serif;font-size:14px;font-weight:700;color:var(--verde-dark)">Brigadista Adolescente</div>
+              <div style="font-size:11px;color:#6b7280;margin-top:2px">12 a 17 años · Requiere representante legal</div>
+            </div>
+          </button>
+          <button onclick="showBrigForm('nino')" style="display:flex;align-items:center;gap:14px;background:#fff;border:2px solid var(--verde-border);border-radius:14px;padding:16px;cursor:pointer;text-align:left;-webkit-tap-highlight-color:transparent">
+            <span style="font-size:32px">🧒</span>
+            <div>
+              <div style="font-family:'Poppins',sans-serif;font-size:14px;font-weight:700;color:var(--verde-dark)">Pequeño Guardián Ambiental</div>
+              <div style="font-size:11px;color:#6b7280;margin-top:2px">Menores de 12 años · Registro por representante</div>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <!-- FORMULARIO ADULTO -->
+      <div id="brig-form-adulto" style="display:none">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+          <button onclick="backBrigSelector()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--verde)">←</button>
+          <h3 style="font-family:'Poppins',sans-serif;font-size:14px;font-weight:700;color:var(--verde-dark)">🧑 Brigadista Adulto</h3>
+        </div>
+        <div class="dform">
+          <div class="fg"><label class="flabel">Nombres *</label><input class="finput" id="ba-nombres" placeholder="Tu nombre completo"/></div>
+          <div class="fg"><label class="flabel">Apellidos *</label><input class="finput" id="ba-apellidos" placeholder="Tus apellidos"/></div>
+          <div class="fg"><label class="flabel">Cédula de Identidad *</label><input class="finput" id="ba-cedula" placeholder="Ej: V-12345678" inputmode="numeric"/></div>
+          <div class="fg"><label class="flabel">Fecha de Nacimiento *</label><input class="finput" id="ba-fnac" type="date"/></div>
+          <div class="fg"><label class="flabel">Género *</label>
+            <select class="fselect" id="ba-genero"><option value="">Selecciona...</option><option>Masculino</option><option>Femenino</option><option>Prefiero no indicar</option></select>
+          </div>
+          <div class="fg"><label class="flabel">Teléfono *</label><input class="finput" id="ba-tel" placeholder="Ej: 0414-1234567" inputmode="tel"/></div>
+          <div class="fg"><label class="flabel">Correo Electrónico</label><input class="finput" id="ba-correo" type="email" placeholder="tucorreo@gmail.com"/></div>
+          <div class="fg"><label class="flabel">Parroquia *</label>
+            <select class="fselect" id="ba-parroquia"><option value="">Selecciona...</option><option>Catedral</option><option>Concepción</option><option>El Cuji</option><option>Juan de Villegas</option><option>Tamaca</option><option>Unión</option><option>Agua Viva</option><option>Buena Vista</option><option>Cabudare</option><option>Montalbán</option><option>Olivos</option><option>Santa Rosa</option><option>Río Claro</option><option>Juárez</option><option>Aguedo Felipe Alvarado</option><option>Sarare</option></select>
+          </div>
+          <div class="fg"><label class="flabel">Comunidad / Sector *</label><input class="finput" id="ba-comunidad" placeholder="Nombre de tu comunidad"/></div>
+          <div class="fg"><label class="flabel">Áreas de Interés</label>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px" id="ba-areas-container">
+              <label style="display:flex;align-items:center;gap:5px;font-size:12px"><input type="checkbox" value="Agua"> Agua</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:12px"><input type="checkbox" value="Árboles"> Árboles</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:12px"><input type="checkbox" value="Reciclaje"> Reciclaje</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:12px"><input type="checkbox" value="Fauna"> Fauna</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:12px"><input type="checkbox" value="Educación"> Educación</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:12px"><input type="checkbox" value="Reforestación"> Reforestación</label>
+            </div>
+          </div>
+          <div class="fg"><label class="flabel">Disponibilidad *</label>
+            <select class="fselect" id="ba-disp"><option value="">Selecciona...</option><option>Fines de semana</option><option>Entre semana</option><option>Ambos</option><option>Tiempo completo</option></select>
+          </div>
+          <div class="fg"><label class="flabel">Experiencia Voluntaria</label><textarea class="ftextarea" id="ba-exp" placeholder="Describe brevemente tu experiencia (opcional)" rows="3"></textarea></div>
+          <button class="btn-enviar" id="btn-brig-adulto" onclick="enviarBrigadaAdulto()">🌿 Inscribirme como Brigadista</button>
+        </div>
+      </div>
+
+      <!-- FORMULARIO MENOR (adolescente / niño) -->
+      <div id="brig-form-menor" style="display:none">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+          <button onclick="backBrigSelector()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--verde)">←</button>
+          <h3 style="font-family:'Poppins',sans-serif;font-size:14px;font-weight:700;color:var(--verde-dark)" id="brig-menor-titulo">🧑‍🎓 Brigadista Adolescente</h3>
+        </div>
+
+        <!-- Paso 1: Datos del menor -->
+        <div id="brig-paso1">
+          <div style="background:var(--verde-light);border-radius:10px;padding:12px;margin-bottom:14px;font-size:12px;color:var(--verde-dark)">
+            📋 <strong>Paso 1 de 2:</strong> Datos del menor
+          </div>
+          <div class="dform">
+            <div class="fg"><label class="flabel">Nombres del menor *</label><input class="finput" id="bm-nombres" placeholder="Nombre completo"/></div>
+            <div class="fg"><label class="flabel">Apellidos *</label><input class="finput" id="bm-apellidos" placeholder="Apellidos"/></div>
+            <div class="fg"><label class="flabel">Fecha de Nacimiento *</label><input class="finput" id="bm-fnac" type="date" onchange="calcEdad()"/></div>
+            <div class="fg"><label class="flabel">Edad calculada</label><input class="finput" id="bm-edad" readonly style="background:#f0f0f0" placeholder="Se calcula automáticamente"/></div>
+            <div class="fg"><label class="flabel">Género *</label>
+              <select class="fselect" id="bm-genero"><option value="">Selecciona...</option><option>Masculino</option><option>Femenino</option><option>Prefiero no indicar</option></select>
+            </div>
+            <div class="fg"><label class="flabel">Institución Educativa *</label><input class="finput" id="bm-escuela" placeholder="Nombre de la escuela o liceo"/></div>
+            <div class="fg"><label class="flabel">Grado / Año Escolar</label><input class="finput" id="bm-grado" placeholder="Ej: 3er año, 5to grado"/></div>
+            <div class="fg"><label class="flabel">Parroquia *</label>
+              <select class="fselect" id="bm-parroquia"><option value="">Selecciona...</option><option>Catedral</option><option>Concepción</option><option>El Cuji</option><option>Juan de Villegas</option><option>Tamaca</option><option>Unión</option><option>Agua Viva</option><option>Buena Vista</option><option>Cabudare</option><option>Montalbán</option><option>Olivos</option><option>Santa Rosa</option><option>Río Claro</option><option>Juárez</option><option>Aguedo Felipe Alvarado</option><option>Sarare</option></select>
+            </div>
+            <div class="fg"><label class="flabel">Comunidad / Sector *</label><input class="finput" id="bm-comunidad" placeholder="Nombre de la comunidad"/></div>
+            <div class="fg"><label class="flabel">Áreas de Interés</label>
+              <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px">
+                <label style="display:flex;align-items:center;gap:5px;font-size:12px"><input type="checkbox" class="bm-area" value="Agua"> Agua</label>
+                <label style="display:flex;align-items:center;gap:5px;font-size:12px"><input type="checkbox" class="bm-area" value="Árboles"> Árboles</label>
+                <label style="display:flex;align-items:center;gap:5px;font-size:12px"><input type="checkbox" class="bm-area" value="Reciclaje"> Reciclaje</label>
+                <label style="display:flex;align-items:center;gap:5px;font-size:12px"><input type="checkbox" class="bm-area" value="Fauna"> Fauna</label>
+                <label style="display:flex;align-items:center;gap:5px;font-size:12px"><input type="checkbox" class="bm-area" value="Educación"> Educación</label>
+              </div>
+            </div>
+            <button class="btn-enviar" onclick="irPaso2()">Siguiente → Datos del Representante</button>
+          </div>
+        </div>
+
+        <!-- Paso 2: Datos del representante -->
+        <div id="brig-paso2" style="display:none">
+          <div style="background:var(--verde-light);border-radius:10px;padding:12px;margin-bottom:14px;font-size:12px;color:var(--verde-dark)">
+            👤 <strong>Paso 2 de 2:</strong> Datos del Representante Legal
+          </div>
+          <div class="dform">
+            <div class="fg"><label class="flabel">Nombres del Representante *</label><input class="finput" id="rep-nombres" placeholder="Nombre completo"/></div>
+            <div class="fg"><label class="flabel">Apellidos *</label><input class="finput" id="rep-apellidos" placeholder="Apellidos"/></div>
+            <div class="fg"><label class="flabel">Cédula *</label><input class="finput" id="rep-cedula" placeholder="Ej: V-12345678" inputmode="numeric"/></div>
+            <div class="fg"><label class="flabel">Parentesco *</label>
+              <select class="fselect" id="rep-parentesco"><option value="">Selecciona...</option><option>Padre</option><option>Madre</option><option>Tutor Legal</option><option>Abuelo/a</option><option>Otro</option></select>
+            </div>
+            <div class="fg"><label class="flabel">Teléfono Principal *</label><input class="finput" id="rep-tel" placeholder="Ej: 0414-1234567" inputmode="tel"/></div>
+            <div class="fg"><label class="flabel">Teléfono Alternativo</label><input class="finput" id="rep-tel2" placeholder="Opcional" inputmode="tel"/></div>
+            <div class="fg"><label class="flabel">Correo Electrónico</label><input class="finput" id="rep-correo" type="email" placeholder="Opcional"/></div>
+            <div class="fg"><label class="flabel">Dirección *</label><input class="finput" id="rep-dir" placeholder="Dirección de residencia"/></div>
+            <div class="fg"><label class="flabel">Parroquia *</label>
+              <select class="fselect" id="rep-parroquia"><option value="">Selecciona...</option><option>Catedral</option><option>Concepción</option><option>El Cuji</option><option>Juan de Villegas</option><option>Tamaca</option><option>Unión</option><option>Agua Viva</option><option>Buena Vista</option><option>Cabudare</option><option>Montalbán</option><option>Olivos</option><option>Santa Rosa</option><option>Río Claro</option><option>Juárez</option><option>Aguedo Felipe Alvarado</option><option>Sarare</option></select>
+            </div>
+            <div class="fg"><label class="flabel">Comunidad *</label><input class="finput" id="rep-comunidad" placeholder="Comunidad del representante"/></div>
+            <div style="background:#fffbea;border:1px solid #f5d76e;border-radius:10px;padding:12px;margin-bottom:14px;font-size:12px;color:#7a6000">
+              ⚠️ Al registrar este menor, el representante legal declara ser responsable de su participación y se compromete a firmar el consentimiento informado requerido por IAGAMI.
+            </div>
+            <div style="display:flex;gap:10px">
+              <button onclick="document.getElementById('brig-paso2').style.display='none';document.getElementById('brig-paso1').style.display='block'" style="flex:1;padding:12px;border:2px solid var(--verde);background:#fff;color:var(--verde);border-radius:10px;font-weight:600;cursor:pointer">← Anterior</button>
+              <button class="btn-enviar" id="btn-brig-menor" onclick="enviarBrigadaMenor()" style="flex:2">🌿 Registrar Inscripción</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODAL ÉXITO BRIGADA -->
+      <div id="modal-brig-ok" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;align-items:center;justify-content:center">
+        <div style="background:#fff;border-radius:20px;padding:28px 24px;max-width:340px;width:90%;text-align:center;margin:16px">
+          <div style="font-size:48px;margin-bottom:12px">🌿</div>
+          <h3 style="font-family:'Poppins',sans-serif;font-size:18px;font-weight:700;color:var(--verde-dark);margin-bottom:8px">¡Inscripción Enviada!</h3>
+          <p id="modal-brig-txt" style="font-size:13px;color:#374151;line-height:1.6;margin-bottom:20px"></p>
+          <button onclick="document.getElementById('modal-brig-ok').style.display='none';backBrigSelector()" style="background:var(--verde);color:#fff;border:none;border-radius:10px;padding:12px 24px;font-size:14px;font-weight:600;cursor:pointer;width:100%">Aceptar</button>
+        </div>
+      </div>
+
+    </div>
   </div>
 </div>
 
@@ -688,6 +855,172 @@ async function sendChat() {
       input.disabled = false;
       input.focus();
     }, 4000);
+  }
+}
+
+/* ── Brigadas Ambientales ── */
+let _brigCategoria = 'adulto';
+let _enviandoBrig = false;
+
+function showBrigForm(cat) {
+  _brigCategoria = cat;
+  document.getElementById('brig-selector').style.display = 'none';
+  if (cat === 'adulto') {
+    document.getElementById('brig-form-adulto').style.display = 'block';
+    document.getElementById('brig-form-menor').style.display = 'none';
+  } else {
+    document.getElementById('brig-form-menor').style.display = 'block';
+    document.getElementById('brig-form-adulto').style.display = 'none';
+    document.getElementById('brig-menor-titulo').textContent = cat === 'adolescente' ? '🧑‍🎓 Brigadista Adolescente' : '🧒 Pequeño Guardián Ambiental';
+    document.getElementById('brig-paso1').style.display = 'block';
+    document.getElementById('brig-paso2').style.display = 'none';
+  }
+}
+
+function backBrigSelector() {
+  document.getElementById('brig-selector').style.display = 'block';
+  document.getElementById('brig-form-adulto').style.display = 'none';
+  document.getElementById('brig-form-menor').style.display = 'none';
+}
+
+function calcEdad() {
+  const val = document.getElementById('bm-fnac').value;
+  if (!val) return;
+  const hoy = new Date();
+  const nac = new Date(val);
+  let edad = hoy.getFullYear() - nac.getFullYear();
+  if (hoy.getMonth() < nac.getMonth() || (hoy.getMonth() === nac.getMonth() && hoy.getDate() < nac.getDate())) edad--;
+  document.getElementById('bm-edad').value = edad + ' años';
+}
+
+function irPaso2() {
+  const nombres = document.getElementById('bm-nombres').value.trim();
+  const apellidos = document.getElementById('bm-apellidos').value.trim();
+  const fnac = document.getElementById('bm-fnac').value;
+  const genero = document.getElementById('bm-genero').value;
+  const escuela = document.getElementById('bm-escuela').value.trim();
+  const parroquia = document.getElementById('bm-parroquia').value;
+  const comunidad = document.getElementById('bm-comunidad').value.trim();
+  if (!nombres) { toast('⚠ Ingresa el nombre del menor'); return; }
+  if (!apellidos) { toast('⚠ Ingresa los apellidos del menor'); return; }
+  if (!fnac) { toast('⚠ Selecciona la fecha de nacimiento'); return; }
+  if (!genero) { toast('⚠ Selecciona el género'); return; }
+  if (!escuela) { toast('⚠ Ingresa la institución educativa'); return; }
+  if (!parroquia) { toast('⚠ Selecciona la parroquia'); return; }
+  if (!comunidad) { toast('⚠ Ingresa la comunidad'); return; }
+  document.getElementById('brig-paso1').style.display = 'none';
+  document.getElementById('brig-paso2').style.display = 'block';
+}
+
+async function enviarBrigadaAdulto() {
+  if (_enviandoBrig) return;
+  const nombres   = document.getElementById('ba-nombres').value.trim();
+  const apellidos = document.getElementById('ba-apellidos').value.trim();
+  const cedula    = document.getElementById('ba-cedula').value.trim();
+  const fnac      = document.getElementById('ba-fnac').value;
+  const genero    = document.getElementById('ba-genero').value;
+  const tel       = document.getElementById('ba-tel').value.trim();
+  const parroquia = document.getElementById('ba-parroquia').value;
+  const comunidad = document.getElementById('ba-comunidad').value.trim();
+  const disp      = document.getElementById('ba-disp').value;
+  if (!nombres)   { toast('⚠ Ingresa tu nombre'); return; }
+  if (!apellidos) { toast('⚠ Ingresa tus apellidos'); return; }
+  if (!cedula)    { toast('⚠ Ingresa tu cédula'); return; }
+  if (!fnac)      { toast('⚠ Selecciona tu fecha de nacimiento'); return; }
+  if (!genero)    { toast('⚠ Selecciona tu género'); return; }
+  if (!tel)       { toast('⚠ Ingresa tu teléfono'); return; }
+  if (!parroquia) { toast('⚠ Selecciona la parroquia'); return; }
+  if (!comunidad) { toast('⚠ Ingresa tu comunidad'); return; }
+  if (!disp)      { toast('⚠ Selecciona tu disponibilidad'); return; }
+  const areas = [...document.querySelectorAll('#ba-areas-container input:checked')].map(c => c.value);
+  _enviandoBrig = true;
+  const btn = document.getElementById('btn-brig-adulto');
+  btn.disabled = true; btn.textContent = '⏳ Enviando...';
+  try {
+    const res = await fetch(PB_URL + '/api/collections/brigadistas/records', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({nombres, apellidos, cedula, fecha_nacimiento: fnac, genero, telefono: tel,
+        correo: document.getElementById('ba-correo').value.trim(),
+        parroquia, comunidad, areas_interes: areas, disponibilidad: disp,
+        experiencia: document.getElementById('ba-exp').value.trim(), estado: 'pendiente'})
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    document.getElementById('modal-brig-txt').textContent = 'Tu inscripción como Brigadista Adulto fue recibida. IAGAMI se pondrá en contacto contigo para confirmar tu participación.';
+    document.getElementById('modal-brig-ok').style.display = 'flex';
+    ['ba-nombres','ba-apellidos','ba-cedula','ba-fnac','ba-tel','ba-correo','ba-comunidad','ba-exp'].forEach(id => {const el=document.getElementById(id);if(el)el.value='';});
+    document.getElementById('ba-genero').value = '';
+    document.getElementById('ba-parroquia').value = '';
+    document.getElementById('ba-disp').value = '';
+    document.querySelectorAll('#ba-areas-container input').forEach(c => c.checked = false);
+  } catch(e) {
+    toast('⚠ Error al enviar. Verifica tu conexión e intenta nuevamente.');
+  } finally {
+    _enviandoBrig = false; btn.disabled = false; btn.textContent = '🌿 Inscribirme como Brigadista';
+  }
+}
+
+async function enviarBrigadaMenor() {
+  if (_enviandoBrig) return;
+  const repNombres   = document.getElementById('rep-nombres').value.trim();
+  const repApellidos = document.getElementById('rep-apellidos').value.trim();
+  const repCedula    = document.getElementById('rep-cedula').value.trim();
+  const repPar       = document.getElementById('rep-parentesco').value;
+  const repTel       = document.getElementById('rep-tel').value.trim();
+  const repDir       = document.getElementById('rep-dir').value.trim();
+  const repParroquia = document.getElementById('rep-parroquia').value;
+  const repComunidad = document.getElementById('rep-comunidad').value.trim();
+  if (!repNombres)   { toast('⚠ Ingresa el nombre del representante'); return; }
+  if (!repApellidos) { toast('⚠ Ingresa los apellidos del representante'); return; }
+  if (!repCedula)    { toast('⚠ Ingresa la cédula del representante'); return; }
+  if (!repPar)       { toast('⚠ Selecciona el parentesco'); return; }
+  if (!repTel)       { toast('⚠ Ingresa el teléfono del representante'); return; }
+  if (!repDir)       { toast('⚠ Ingresa la dirección del representante'); return; }
+  if (!repParroquia) { toast('⚠ Selecciona la parroquia del representante'); return; }
+  if (!repComunidad) { toast('⚠ Ingresa la comunidad del representante'); return; }
+  _enviandoBrig = true;
+  const btn = document.getElementById('btn-brig-menor');
+  btn.disabled = true; btn.textContent = '⏳ Enviando...';
+  try {
+    // 1. Crear representante
+    const resRep = await fetch(PB_URL + '/api/collections/representantes_legales/records', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({nombres: repNombres, apellidos: repApellidos, cedula: repCedula,
+        parentesco: repPar, telefono: repTel, telefono_alt: document.getElementById('rep-tel2').value.trim(),
+        correo: document.getElementById('rep-correo').value.trim(),
+        direccion: repDir, parroquia: repParroquia, comunidad: repComunidad})
+    });
+    if (!resRep.ok) throw new Error('HTTP rep ' + resRep.status);
+    const repData = await resRep.json();
+    // 2. Crear menor
+    const fnac = document.getElementById('bm-fnac').value;
+    const hoy = new Date(); const nac = new Date(fnac);
+    let edad = hoy.getFullYear() - nac.getFullYear();
+    if (hoy.getMonth() < nac.getMonth() || (hoy.getMonth() === nac.getMonth() && hoy.getDate() < nac.getDate())) edad--;
+    const areas = [...document.querySelectorAll('.bm-area:checked')].map(c => c.value);
+    const resMenor = await fetch(PB_URL + '/api/collections/brigadistas_menores/records', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({nombres: document.getElementById('bm-nombres').value.trim(),
+        apellidos: document.getElementById('bm-apellidos').value.trim(),
+        fecha_nacimiento: fnac, edad, categoria: _brigCategoria,
+        genero: document.getElementById('bm-genero').value,
+        institucion_educativa: document.getElementById('bm-escuela').value.trim(),
+        grado: document.getElementById('bm-grado').value.trim(),
+        parroquia: document.getElementById('bm-parroquia').value,
+        comunidad: document.getElementById('bm-comunidad').value.trim(),
+        areas_interes: areas, representante: repData.id,
+        estado: 'pendiente_consentimiento'})
+    });
+    if (!resMenor.ok) throw new Error('HTTP menor ' + resMenor.status);
+    const catLabel = _brigCategoria === 'adolescente' ? 'Brigadista Adolescente' : 'Pequeño Guardián Ambiental';
+    document.getElementById('modal-brig-txt').textContent = 'La inscripción como ' + catLabel + ' fue recibida. IAGAMI le enviará el consentimiento informado que deberá firmar y cargar para completar el proceso.';
+    document.getElementById('modal-brig-ok').style.display = 'flex';
+  } catch(e) {
+    toast('⚠ Error al enviar. Verifica tu conexión e intenta nuevamente.');
+  } finally {
+    _enviandoBrig = false; btn.disabled = false; btn.textContent = '🌿 Registrar Inscripción';
   }
 }
 
