@@ -167,6 +167,9 @@ textarea.form-control{resize:vertical;min-height:80px}
       <div onclick="showSec('clases')"    class="nav-item"        id="nav-clases"   ><span class="nav-ico">🎥</span> Clases Virtuales</div>
       <div onclick="showSec('avisos')"    class="nav-item"        id="nav-avisos"   ><span class="nav-ico">📢</span> Avisos a Alumnos</div>
       <div onclick="showSec('biblioteca');" class="nav-item"      id="nav-biblioteca"><span class="nav-ico">📚</span> Biblioteca</div>
+      <div onclick="showSec('evaluaciones')" class="nav-item" id="nav-evaluaciones"><span class="nav-ico">📝</span> Evaluaciones</div>
+      <div onclick="showSec('tareas')"       class="nav-item" id="nav-tareas"      ><span class="nav-ico">📋</span> Tareas</div>
+      <div onclick="showSec('asistencia')"   class="nav-item" id="nav-asistencia"  ><span class="nav-ico">✅</span> Asistencia</div>
       <div onclick="showSec('perfil')"    class="nav-item"        id="nav-perfil"   ><span class="nav-ico">👤</span> Mi Perfil</div>
     </div>
 
@@ -367,6 +370,144 @@ textarea.form-control{resize:vertical;min-height:80px}
         </div>
       </div>
 
+      <!-- ── EVALUACIONES ── -->
+      <div class="section" id="sec-evaluaciones">
+        <div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between">
+          <div>
+            <div class="page-title">📝 Evaluaciones</div>
+            <div class="page-subtitle">Crea y gestiona evaluaciones para tus cursos</div>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="openEvalForm()">+ Nueva evaluación</button>
+        </div>
+        <div class="tabs">
+          <button class="tab-btn active" onclick="switchEvalTab('lista')">📝 Mis Evaluaciones</button>
+          <button class="tab-btn" onclick="switchEvalTab('resultados')">📊 Resultados</button>
+        </div>
+        <div class="tab-panel active" id="evtab-lista">
+          <div id="eval-lista"><div class="empty"><div class="ico">⏳</div><p>Cargando...</p></div></div>
+        </div>
+        <div class="tab-panel" id="evtab-resultados">
+          <div style="margin-bottom:14px">
+            <label class="form-label">Selecciona una evaluación</label>
+            <select class="form-control" id="res-eval-sel" onchange="cargarResultados()" style="max-width:400px">
+              <option value="">— Selecciona —</option>
+            </select>
+          </div>
+          <div id="resultados-lista"><div class="empty"><div class="ico">📊</div><p>Selecciona una evaluación para ver resultados</p></div></div>
+        </div>
+        <div class="form-panel" id="eval-form" style="display:none">
+          <h4 id="eval-form-title">📝 Nueva Evaluación</h4>
+          <input type="hidden" id="eval-edit-id"/>
+          <div class="form-grid">
+            <div><label class="form-label">Nombre *</label><input class="form-control" id="ev-nombre" placeholder="Ej: Evaluación parcial 1"/></div>
+            <div><label class="form-label">Curso</label><select class="form-control" id="ev-curso"><option value="">Selecciona...</option></select></div>
+            <div class="span2"><label class="form-label">Descripción</label><textarea class="form-control" id="ev-desc" placeholder="Descripción de la evaluación..."></textarea></div>
+            <div><label class="form-label">Tiempo límite (min)</label><input class="form-control" id="ev-tiempo" type="number" placeholder="Ej: 60" min="1"/></div>
+            <div><label class="form-label">Intentos máx.</label><input class="form-control" id="ev-intentos" type="number" placeholder="1" min="1" value="1"/></div>
+            <div><label class="form-label">Fecha apertura</label><input class="form-control" id="ev-apertura" type="datetime-local"/></div>
+            <div><label class="form-label">Fecha cierre</label><input class="form-control" id="ev-cierre" type="datetime-local"/></div>
+            <div class="span2" style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="ev-pub"/><label for="ev-pub" style="font-size:13px">Publicar (visible para alumnos)</label></div>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:14px">
+            <button class="btn btn-primary btn-sm" onclick="saveEval()">💾 Guardar</button>
+            <button class="btn btn-secondary btn-sm" onclick="closeEvalForm()">Cancelar</button>
+          </div>
+        </div>
+        <div class="form-panel" id="preguntas-panel" style="display:none;margin-top:14px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+            <h4 style="margin:0" id="preguntas-panel-titulo">Banco de Preguntas</h4>
+            <button class="btn btn-secondary btn-sm" onclick="closePreguntasPanel()">✕ Cerrar</button>
+          </div>
+          <div id="preguntas-lista" style="margin-bottom:14px"></div>
+          <div style="border-top:1px solid var(--border);padding-top:14px">
+            <div style="font-size:13px;font-weight:600;margin-bottom:10px;color:var(--primary-dark)">➕ Agregar pregunta</div>
+            <div class="form-grid">
+              <div class="span2"><label class="form-label">Enunciado *</label><textarea class="form-control" id="preg-enunciado" placeholder="Escribe la pregunta..."></textarea></div>
+              <div><label class="form-label">Tipo *</label>
+                <select class="form-control" id="preg-tipo" onchange="onTipoPreg()">
+                  <option value="multiple">Selección múltiple</option>
+                  <option value="verdadero_falso">Verdadero / Falso</option>
+                  <option value="abierta">Pregunta abierta</option>
+                </select>
+              </div>
+              <div><label class="form-label">Puntaje *</label><input class="form-control" id="preg-puntaje" type="number" placeholder="10" min="1" value="10"/></div>
+              <div class="span2" id="preg-opciones-wrap"><label class="form-label">Opciones (una por línea)</label><textarea class="form-control" id="preg-opciones" rows="3" placeholder="Opción A&#10;Opción B&#10;Opción C&#10;Opción D"></textarea></div>
+              <div class="span2" id="preg-respuesta-wrap"><label class="form-label">Respuesta correcta</label><input class="form-control" id="preg-respuesta" placeholder="Ej: Opción A, o Verdadero"/></div>
+            </div>
+            <button class="btn btn-primary btn-sm" style="margin-top:10px" onclick="savePreg()">➕ Agregar pregunta</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── TAREAS ── -->
+      <div class="section" id="sec-tareas">
+        <div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between">
+          <div>
+            <div class="page-title">📋 Tareas</div>
+            <div class="page-subtitle">Asigna y revisa tareas de tus alumnos</div>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="openTareaForm()">+ Nueva tarea</button>
+        </div>
+        <div class="tabs">
+          <button class="tab-btn active" onclick="switchTareaTab('lista')">📋 Mis Tareas</button>
+          <button class="tab-btn" onclick="switchTareaTab('entregas')">📥 Entregas</button>
+        </div>
+        <div class="tab-panel active" id="tatab-lista">
+          <div id="tareas-lista"><div class="empty"><div class="ico">⏳</div><p>Cargando...</p></div></div>
+        </div>
+        <div class="tab-panel" id="tatab-entregas">
+          <div style="margin-bottom:14px">
+            <label class="form-label">Selecciona una tarea</label>
+            <select class="form-control" id="ent-tarea-sel" onchange="cargarEntregas()" style="max-width:400px">
+              <option value="">— Selecciona —</option>
+            </select>
+          </div>
+          <div id="entregas-lista"><div class="empty"><div class="ico">📥</div><p>Selecciona una tarea para ver las entregas</p></div></div>
+        </div>
+        <div class="form-panel" id="tarea-form" style="display:none">
+          <h4 id="tarea-form-title">📋 Nueva Tarea</h4>
+          <input type="hidden" id="tarea-edit-id"/>
+          <div class="form-grid">
+            <div><label class="form-label">Nombre *</label><input class="form-control" id="ta-nombre" placeholder="Ej: Tarea 1 — Mapa conceptual"/></div>
+            <div><label class="form-label">Curso</label><select class="form-control" id="ta-curso"><option value="">Selecciona...</option></select></div>
+            <div><label class="form-label">Fecha de entrega</label><input class="form-control" id="ta-fecha" type="datetime-local"/></div>
+            <div><label class="form-label">Puntos máximos</label><input class="form-control" id="ta-puntos" type="number" placeholder="100" min="1" value="100"/></div>
+            <div class="span2"><label class="form-label">Descripción</label><textarea class="form-control" id="ta-desc" placeholder="Descripción breve..."></textarea></div>
+            <div class="span2"><label class="form-label">Instrucciones</label><textarea class="form-control" id="ta-instrucciones" rows="4" placeholder="Instrucciones detalladas para los alumnos..."></textarea></div>
+            <div class="span2" style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="ta-pub" checked/><label for="ta-pub" style="font-size:13px">Publicar (visible para alumnos)</label></div>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:14px">
+            <button class="btn btn-primary btn-sm" onclick="saveTarea()">💾 Guardar tarea</button>
+            <button class="btn btn-secondary btn-sm" onclick="closeTareaForm()">Cancelar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ASISTENCIA ── -->
+      <div class="section" id="sec-asistencia">
+        <div class="page-header">
+          <div class="page-title">✅ Asistencia</div>
+          <div class="page-subtitle">Registra la asistencia de tus alumnos por clase</div>
+        </div>
+        <div class="card">
+          <div class="form-grid" style="margin-bottom:16px">
+            <div>
+              <label class="form-label">Curso</label>
+              <select class="form-control" id="asist-curso" onchange="onAsistCursoChange()">
+                <option value="">— Selecciona curso —</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label">Clase</label>
+              <select class="form-control" id="asist-clase" onchange="cargarAsistencia()">
+                <option value="">— Selecciona clase —</option>
+              </select>
+            </div>
+          </div>
+          <div id="asistencia-tabla"><div class="empty"><div class="ico">✅</div><p>Selecciona un curso y clase para registrar asistencia</p></div></div>
+        </div>
+      </div>
+
     </div><!-- /main-content -->
   </div><!-- /app-layout -->
 </div><!-- /screen-app -->
@@ -382,6 +523,8 @@ let _cursoActivo = null;
 let _misClases = [];
 let _misAvisos = [];
 let _bibRecursos = [];
+let _evaluaciones = [];
+let _tareas = [];
 
 /* ─── UTILS ─── */
 function toast(msg, tipo='ok') {
@@ -517,6 +660,9 @@ function showSec(id) {
   if (id === 'avisos')     renderAvisos();
   if (id === 'biblioteca') renderBib();
   if (id === 'perfil')     renderPerfil();
+  if (id === 'evaluaciones') renderEvaluaciones();
+  if (id === 'tareas')       renderTareas();
+  if (id === 'asistencia')   renderAsistencia();
 }
 
 function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }

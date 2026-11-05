@@ -1672,6 +1672,7 @@ input,select,textarea{font-family:inherit}
     <button id="atab-visitas" onclick="switchAulaTab('visitas')" style="padding:8px 16px;border:none;background:none;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;font-family:inherit">🏫 Visitas Escolares</button>
     <button id="atab-clases" onclick="switchAulaTab('clases')" style="padding:8px 16px;border:none;background:none;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;font-family:inherit">🎥 Clases Virtuales</button>
     <button id="atab-avisos" onclick="switchAulaTab('avisos')" style="padding:8px 16px;border:none;background:none;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;font-family:inherit">📢 Avisos</button>
+    <button id="atab-certificados" onclick="switchAulaTab('certificados')" style="padding:8px 16px;border:none;background:none;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;font-family:inherit">🏅 Certificados</button>
   </div>
   <div id="atab-panel-biblioteca">
     <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
@@ -1759,6 +1760,32 @@ input,select,textarea{font-family:inherit}
       <div style="display:flex;gap:10px;margin-top:14px">
         <button class="btn btn-primary" onclick="saveAviso()">📢 Publicar Aviso</button>
         <button class="btn btn-secondary" onclick="document.getElementById('aviso-form-panel').style.display='none'">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CERTIFICADOS -->
+  <div id="atab-panel-certificados" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+      <div style="font-size:13px;color:var(--muted)">Gestión de certificados digitales emitidos a estudiantes</div>
+      <button class="btn btn-primary" onclick="openCertForm()">🏅 Emitir Certificado</button>
+    </div>
+    <div id="certs-admin-list">Cargando...</div>
+    <div id="cert-form-panel" style="display:none;background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px;margin-top:16px">
+      <h4 style="margin-bottom:14px;font-family:'Poppins',sans-serif">🏅 Emitir Certificado Digital</h4>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div><label class="form-label">Nombre del Estudiante *</label><input class="form-control" id="cert-estudiante" placeholder="Nombre completo del estudiante"/></div>
+        <div><label class="form-label">ID del Estudiante (PocketBase)</label><input class="form-control" id="cert-estudiante-id" placeholder="ID del registro en estudiantes"/></div>
+        <div><label class="form-label">Nombre del Curso *</label><input class="form-control" id="cert-curso" placeholder="Nombre del curso"/></div>
+        <div><label class="form-label">Horas de formación *</label><input class="form-control" id="cert-horas" type="number" min="1" placeholder="Ej: 20"/></div>
+        <div><label class="form-label">Fecha de inicio *</label><input class="form-control" id="cert-fecha-inicio" type="date"/></div>
+        <div><label class="form-label">Fecha de fin *</label><input class="form-control" id="cert-fecha-fin" type="date"/></div>
+        <div><label class="form-label">Fecha de emisión *</label><input class="form-control" id="cert-fecha-emision" type="date"/></div>
+        <div><label class="form-label">Facilitador / Profesor</label><input class="form-control" id="cert-profesor" placeholder="Nombre del facilitador"/></div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:14px">
+        <button class="btn btn-primary" onclick="emitirCertificado()">🏅 Emitir Certificado</button>
+        <button class="btn btn-secondary" onclick="closeCertForm()">Cancelar</button>
       </div>
     </div>
   </div>
@@ -2319,10 +2346,11 @@ async function updateConsentimiento(id, estado) {
 ═══════════════════════════════════════ */
 let _aulaRecursos = [], _aulaVisitas = [];
 let _currentAulaTab = 'biblioteca';
+let _certificadosAdmin = [];
 
 function switchAulaTab(tab) {
   _currentAulaTab = tab;
-  ['biblioteca','cursos','visitas','clases','avisos'].forEach(t => {
+  ['biblioteca','cursos','visitas','clases','avisos','certificados'].forEach(t => {
     const p = document.getElementById('atab-panel-' + t);
     if (p) p.style.display = t === tab ? 'block' : 'none';
     const btn = document.getElementById('atab-' + t);
@@ -2333,6 +2361,7 @@ function switchAulaTab(tab) {
   if (tab === 'biblioteca') renderAulaBiblioteca();
   if (tab === 'clases') renderClasesAdmin();
   if (tab === 'avisos') renderAvisosAdmin();
+  if (tab === 'certificados') renderCertificadosAdmin();
 }
 
 async function renderAula() {
@@ -2542,6 +2571,89 @@ async function deleteAviso(id) {
   if (!confirm('¿Eliminar este aviso?')) return;
   try { await pb.collection('avisos_aula').delete(id); toast('Aviso eliminado'); await renderAvisosAdmin(); }
   catch(e) { toast('Error al eliminar', 'error'); }
+}
+
+/* ─── CERTIFICADOS ADMIN ─── */
+async function renderCertificadosAdmin() {
+  const el = document.getElementById('certs-admin-list');
+  if (!el) return;
+  el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--muted)">Cargando...</div>';
+  try {
+    const r = await pb.collection('certificados').getList(1, 200, {sort: '-fecha_emision'}).catch(()=>({items:[]}));
+    _certificadosAdmin = r.items || [];
+  } catch(e) { _certificadosAdmin = []; }
+  if (!_certificadosAdmin.length) {
+    el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted)"><div style="font-size:32px;margin-bottom:10px">🏅</div><div style="font-size:14px;font-weight:600">Sin certificados emitidos</div><div style="font-size:12px;margin-top:4px">Haz clic en "Emitir Certificado" para comenzar.</div></div>';
+    return;
+  }
+  const estadoColor = {emitido:'#059669',revocado:'#dc2626'};
+  el.innerHTML = _certificadosAdmin.map(c => {
+    const fechaE = c.fecha_emision ? new Date(c.fecha_emision).toLocaleDateString('es-VE') : '—';
+    return `<div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+      <div style="flex:1;min-width:200px">
+        <div style="font-size:13px;font-weight:600;margin-bottom:2px">${esc(c.nombre_estudiante)}</div>
+        <div style="font-size:12px;color:var(--muted)">📚 ${esc(c.nombre_curso)} · ${esc(String(c.horas||'—'))} h</div>
+        <div style="font-size:11px;color:var(--muted)">📆 ${fechaE} · <code style="font-size:10px;background:#f0f4f8;padding:1px 4px;border-radius:3px">${esc(c.codigo_verificacion)}</code></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;background:#f0fdf4;color:${estadoColor[c.estado]||'#374151'}">${esc(c.estado)}</span>
+        ${c.estado==='emitido'?`<button onclick="revocarCertificado('${c.id}')" style="font-size:11px;padding:3px 10px;border:1px solid #fca5a5;background:#fef2f2;color:#dc2626;border-radius:6px;cursor:pointer">🚫 Revocar</button>`:''}
+        <a href="/aula-ambiental/certificado/?codigo=${encodeURIComponent(c.codigo_verificacion)}" target="_blank" style="font-size:11px;padding:3px 10px;border:1px solid var(--border);background:#fff;color:var(--primary);border-radius:6px;cursor:pointer;text-decoration:none">🔗 Ver</a>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openCertForm() {
+  const hoy = new Date().toISOString().split('T')[0];
+  document.getElementById('cert-fecha-emision').value = hoy;
+  document.getElementById('cert-form-panel').style.display = 'block';
+  document.getElementById('cert-form-panel').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function closeCertForm() {
+  document.getElementById('cert-form-panel').style.display = 'none';
+  ['cert-estudiante','cert-estudiante-id','cert-curso','cert-horas','cert-fecha-inicio','cert-fecha-fin','cert-fecha-emision','cert-profesor'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+}
+
+async function emitirCertificado() {
+  const nombre   = document.getElementById('cert-estudiante').value.trim();
+  const estId    = document.getElementById('cert-estudiante-id').value.trim();
+  const curso    = document.getElementById('cert-curso').value.trim();
+  const horas    = parseInt(document.getElementById('cert-horas').value)||0;
+  const fIni     = document.getElementById('cert-fecha-inicio').value;
+  const fFin     = document.getElementById('cert-fecha-fin').value;
+  const fEmision = document.getElementById('cert-fecha-emision').value;
+  const prof     = document.getElementById('cert-profesor').value.trim();
+  if (!nombre||!curso||!horas||!fIni||!fFin||!fEmision) { toast('Completa los campos obligatorios','error'); return; }
+  const codigo = 'IAGAMI-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).substr(2,4).toUpperCase();
+  try {
+    await pb.collection('certificados').create({
+      nombre_estudiante: nombre,
+      estudiante_id: estId || null,
+      nombre_curso: curso,
+      horas,
+      fecha_inicio: fIni,
+      fecha_fin: fFin,
+      fecha_emision: fEmision,
+      nombre_profesor: prof,
+      codigo_verificacion: codigo,
+      estado: 'emitido'
+    });
+    toast('Certificado emitido ✓');
+    closeCertForm();
+    await renderCertificadosAdmin();
+  } catch(e) { toast('Error al emitir: ' + e.message, 'error'); }
+}
+
+async function revocarCertificado(id) {
+  if (!confirm('¿Revocar este certificado? Esta acción lo invalidará permanentemente.')) return;
+  try {
+    await pb.collection('certificados').update(id, {estado:'revocado'});
+    toast('Certificado revocado');
+    await renderCertificadosAdmin();
+  } catch(e) { toast('Error al revocar', 'error'); }
 }
 
 /* ─── PROFESORES ─── */

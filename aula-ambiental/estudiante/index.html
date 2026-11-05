@@ -1065,6 +1065,83 @@ function renderPerfil() {
     </div>`;
 }
 
+/* ─── CERTIFICADOS ─── */
+function renderCertificados() {
+  const el = document.getElementById('certs-lista');
+  if (!el) return;
+  if (!_misCertificados.length) {
+    el.innerHTML = '<div class="empty"><div class="ico">🏅</div><p>Aún no tienes certificados emitidos.<br>Completa tus cursos para obtenerlos.</p></div>';
+    return;
+  }
+  el.innerHTML = _misCertificados.map(c => {
+    const fechaE = c.fecha_emision ? new Date(c.fecha_emision).toLocaleDateString('es-VE',{year:'numeric',month:'long',day:'numeric'}) : '—';
+    const fechaI = c.fecha_inicio  ? new Date(c.fecha_inicio ).toLocaleDateString('es-VE',{year:'numeric',month:'short',day:'numeric'}) : '—';
+    const fechaF = c.fecha_fin     ? new Date(c.fecha_fin    ).toLocaleDateString('es-VE',{year:'numeric',month:'short',day:'numeric'}) : '—';
+    return `
+    <div style="background:#fff;border:1px solid #d1e7d9;border-radius:14px;padding:22px;margin-bottom:14px">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap">
+        <div style="flex:1;min-width:200px">
+          <div style="display:inline-flex;align-items:center;gap:5px;background:#1d6b3e;color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;margin-bottom:10px">✅ CERTIFICADO VÁLIDO</div>
+          <div style="font-family:'Poppins',sans-serif;font-size:17px;font-weight:700;margin-bottom:2px">${esc(c.nombre_curso)}</div>
+          <div style="font-size:13px;color:var(--muted);margin-bottom:10px">${esc(c.horas||'—')} horas · Prof: ${esc(c.nombre_profesor||'—')}</div>
+          <div style="font-size:12px;display:grid;gap:3px">
+            <div>📅 Período: ${esc(fechaI)} — ${esc(fechaF)}</div>
+            <div>🏷️ Código: <code style="font-size:11px;background:#e8f5ee;padding:1px 5px;border-radius:3px">${esc(c.codigo_verificacion)}</code></div>
+            <div>📆 Emitido: ${esc(fechaE)}</div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
+          <button class="btn btn-primary btn-sm" onclick="descargarCertificado('${c.id}')">🖨️ Descargar PDF</button>
+          <a href="../certificado/?codigo=${encodeURIComponent(c.codigo_verificacion)}" target="_blank" class="btn btn-secondary btn-sm" style="text-align:center">🔗 Verificar</a>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function descargarCertificado(id) {
+  const c = _misCertificados.find(x => x.id === id);
+  if (!c) return;
+  const fechaE = c.fecha_emision ? new Date(c.fecha_emision).toLocaleDateString('es-VE',{year:'numeric',month:'long',day:'numeric'}) : '—';
+  const fechaI = c.fecha_inicio  ? new Date(c.fecha_inicio ).toLocaleDateString('es-VE',{year:'numeric',month:'long',day:'numeric'}) : '—';
+  const fechaF = c.fecha_fin     ? new Date(c.fecha_fin    ).toLocaleDateString('es-VE',{year:'numeric',month:'long',day:'numeric'}) : '—';
+  const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"/>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&display=swap');
+  @page{size:landscape;margin:0}
+  body{margin:0;padding:0;font-family:'Inter',sans-serif;background:#fff}
+  .cert{width:100%;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;border:12px solid #1a3d2b;padding:40px;box-sizing:border-box;position:relative;text-align:center}
+  .header-logo{font-family:'Poppins',sans-serif;font-size:14px;font-weight:700;color:#1a3d2b;letter-spacing:2px;margin-bottom:4px}
+  .header-sub{font-size:11px;color:#6b7280;margin-bottom:28px}
+  .title{font-family:'Poppins',sans-serif;font-size:13px;text-transform:uppercase;letter-spacing:3px;color:#1d6b3e;font-weight:600;margin-bottom:4px}
+  .nombre{font-family:'Poppins',sans-serif;font-size:34px;font-weight:700;color:#1f2937;margin:8px 0}
+  .curso{font-family:'Poppins',sans-serif;font-size:18px;font-weight:600;color:#1d6b3e;margin-bottom:20px}
+  .detalle{font-size:12px;color:#6b7280;margin-bottom:24px;line-height:1.8}
+  .firma{border-top:1px solid #d1e7d9;padding-top:12px;font-size:11px;color:#1a3d2b;font-weight:600}
+  .codigo{position:absolute;bottom:20px;right:28px;font-size:10px;color:#9ca3af}
+  @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+</style></head><body>
+<div class="cert">
+  <div class="header-logo">IAGAMI</div>
+  <div class="header-sub">Instituto Autónomo de Gestión Ambiental del Municipio Iribarren — Barquisimeto, Estado Lara</div>
+  <div class="title">Certifica que</div>
+  <div class="nombre">${c.nombre_estudiante}</div>
+  <div style="font-size:13px;color:#6b7280;margin-bottom:6px">ha completado satisfactoriamente el curso</div>
+  <div class="curso">${c.nombre_curso}</div>
+  <div class="detalle">
+    Duración: <strong>${c.horas||'—'} horas académicas</strong> · Período: ${fechaI} — ${fechaF}<br/>
+    Facilitador: <strong>${c.nombre_profesor||'IAGAMI'}</strong> · Fecha de emisión: <strong>${fechaE}</strong>
+  </div>
+  <div class="firma">IAGAMI — Municipio Iribarren, Estado Lara, Venezuela</div>
+  <div class="codigo">Código: ${c.codigo_verificacion} · Verifica en: iagami.online/aula-ambiental/certificado/</div>
+</div>
+<script>window.onload=function(){window.print();}<\/script>
+</body></html>`;
+  const frame = document.getElementById('cert-print-frame');
+  frame.style.display = 'block';
+  frame.srcdoc = html;
+}
+
 async function cambiarPass() {
   const vieja    = document.getElementById('pwd-old').value;
   const nueva    = document.getElementById('pwd-new').value;

@@ -71,5 +71,28 @@
       {"name": "observaciones",    "type": "text",     "required": false, "options": {"max": 500}},
       {"name": "created",          "type": "autodate", "onCreate": true,  "onUpdate": false}
     ]
+  },
+  {
+    "name": "certificados",
+    "type": "base",
+    "system": false,
+    "listRule": "@request.auth.collectionName = 'admins' || @request.auth.collectionName = 'profesores' || @request.auth.id = estudiante_id",
+    "viewRule": "",
+    "createRule": "@request.auth.collectionName = 'admins'",
+    "updateRule": "@request.auth.collectionName = 'admins'",
+    "deleteRule": null,
+    "schema": [
+      {"name": "nombre_estudiante",    "type": "text",     "required": true,  "options": {"min": 2, "max": 150}},
+      {"name": "estudiante_id",        "type": "relation", "required": false, "options": {"collectionId": "estudiantes", "cascadeDelete": false, "maxSelect": 1}},
+      {"name": "nombre_curso",         "type": "text",     "required": true,  "options": {"min": 2, "max": 200}},
+      {"name": "horas",                "type": "number",   "required": false, "options": {"min": 1}},
+      {"name": "fecha_inicio",         "type": "text",     "required": false},
+      {"name": "fecha_fin",            "type": "text",     "required": false},
+      {"name": "fecha_emision",        "type": "text",     "required": false},
+      {"name": "nombre_profesor",      "type": "text",     "required": false, "options": {"max": 150}},
+      {"name": "codigo_verificacion",  "type": "text",     "required": true,  "options": {"min": 8, "max": 60}},
+      {"name": "estado",               "type": "select",   "required": true,  "options": {"values": ["emitido","revocado"]}, "default": "emitido"},
+      {"name": "created",              "type": "autodate", "onCreate": true,  "onUpdate": false}
+    ]
   }
 ]
