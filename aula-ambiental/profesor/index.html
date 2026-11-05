@@ -1230,7 +1230,7 @@ async function cargarResultados() {
       <thead><tr><th>Estudiante</th><th>Puntaje</th><th>Estado</th><th>Fecha</th></tr></thead>
       <tbody>${items.map(res => `<tr>
         <td>${esc(res.estudiante_id||'—')}</td>
-        <td style="font-weight:600">${res.puntaje_total??'—'}</td>
+        <td style="font-weight:600">${res.nota??res.puntaje_total??'—'}</td>
         <td><span class="badge ${res.estado==='completado'?'badge-green':res.estado==='en_progreso'?'badge-yellow':'badge-gray'}">${esc(res.estado||'—')}</span></td>
         <td style="font-size:12px;color:var(--muted)">${res.fecha_fin?new Date(res.fecha_fin).toLocaleDateString('es-VE'):'—'}</td>
       </tr>`).join('')}</tbody>

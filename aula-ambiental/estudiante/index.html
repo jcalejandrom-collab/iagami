@@ -1361,7 +1361,7 @@ async function renderTareasEst() {
         ${t.url_referencia?`<a href="${esc(t.url_referencia)}" target="_blank" class="btn btn-secondary btn-sm" style="margin-bottom:8px">📎 Ver material</a>`:''}
         ${!entregada
           ? `<button class="btn btn-primary btn-sm" onclick="abrirEntregaTarea('${t.id}')">📤 Entregar</button>`
-          : `<div style="font-size:12px;color:var(--success)">Enviada el ${new Date(ent.created).toLocaleDateString('es-VE')}. ${ent.nota!==null&&ent.nota!==undefined?'Nota: '+ent.nota+'/20':'Pendiente de calificación.'}</div>`}
+          : `<div style="font-size:12px;color:var(--success)">Enviada el ${new Date(ent.created).toLocaleDateString('es-VE')}. ${(ent.calificacion??ent.nota)!==null&&(ent.calificacion??ent.nota)!==undefined?'Nota: '+(ent.calificacion??ent.nota)+'/100':'Pendiente de calificación.'}</div>`}
       </div>`;
     };
 
@@ -1427,7 +1427,7 @@ async function renderCalificaciones() {
     // Cargar entregas de tareas con notas
     let entregas = [];
     try {
-      const rE = await pbFetch(`/api/collections/entregas_tareas/records?filter=estudiante_id%3D%22${_estudiante.id}%22%26%26nota!%3Dnull&perPage=200`);
+      const rE = await pbFetch(`/api/collections/entregas_tareas/records?filter=estudiante_id%3D%22${_estudiante.id}%22%26%26calificacion!%3Dnull&perPage=200`);
       entregas = rE.items || [];
     } catch(e) {}
 
@@ -1436,11 +1436,11 @@ async function renderCalificaciones() {
     }
 
     el.innerHTML = _misCursos.map(curso => {
-      const resC = resultados.filter(r => r.curso_id === curso.id && r.nota !== null && r.nota !== undefined);
+      const resC = resultados.filter(r => r.curso_id === curso.id && r.nota !== null && r.nota !== undefined && r.nota !== '');
       const entC = entregas.filter(e => e.curso_id === curso.id);
       if (!resC.length && !entC.length) return '';
 
-      const notas = [...resC.map(r=>r.nota), ...entC.map(e=>e.nota)].filter(n=>n!==null&&n!==undefined);
+      const notas = [...resC.map(r=>r.nota), ...entC.map(e=>e.calificacion??e.nota)].filter(n=>n!==null&&n!==undefined);
       const prom = notas.length ? (notas.reduce((a,b)=>a+Number(b),0) / notas.length).toFixed(1) : '—';
       const promNum = notas.length ? parseFloat(prom) : 0;
       const color = promNum >= 10 ? 'var(--success)' : promNum > 0 ? 'var(--warn)' : 'var(--muted)';
@@ -1455,12 +1455,12 @@ async function renderCalificaciones() {
         ${resC.length ? `<div style="font-size:12px;font-weight:600;margin-bottom:6px">Evaluaciones:</div>${resC.map(r=>`
           <div style="display:flex;justify-content:space-between;padding:6px 10px;background:#f8fafc;border-radius:6px;margin-bottom:4px;font-size:12px">
             <span>${esc(r.evaluacion_id)}</span>
-            <strong>${r.nota}/20</strong>
+            <strong>${r.nota}/100</strong>
           </div>`).join('')}` : ''}
         ${entC.length ? `<div style="font-size:12px;font-weight:600;margin:8px 0 6px">Tareas:</div>${entC.map(e=>`
           <div style="display:flex;justify-content:space-between;padding:6px 10px;background:#f8fafc;border-radius:6px;margin-bottom:4px;font-size:12px">
             <span>${esc(e.tarea_id)}</span>
-            <strong>${e.nota}/20</strong>
+            <strong>${(e.calificacion??e.nota)}/100</strong>
           </div>`).join('')}` : ''}
       </div>`;
     }).filter(Boolean).join('') || '<div class="empty"><div class="ico">🏆</div><p>Aún no tienes calificaciones en tus cursos.</p></div>';
