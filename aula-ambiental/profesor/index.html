@@ -871,7 +871,7 @@ function showSec(id) {
   _secActiva = id;
   closeSidebar();
   if (id === 'cursos')     renderCursos();
-  if (id === 'clases')     renderClases();
+  if (id === 'clases')     { renderClases(); checkZoomStatus(); profLoadZoomMeetings(); }
   if (id === 'avisos')     renderAvisos();
   if (id === 'biblioteca') renderBib();
   if (id === 'perfil')     renderPerfil();
@@ -1831,6 +1831,418 @@ async function guardarAsistencia(claseId) {
   }
   if (err > 0) toast(`${ok} guardados, ${err} con error`, 'error');
   else toast(`Asistencia guardada: ${ok} registros ✅`);
+}
+
+/* ─── ZOOM ─── */
+const VPS_URL = 'https://api.iagami.online';
+let _zoomConnected = false;
+let _zoomMeetings = [];
+
+function vpsHeaders() {
+  return {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer ' + (localStorage.getItem('prof_token') || '')
+  };
+}
+
+async function checkZoomStatus() {
+  try {
+    const r = await fetch(VPS_URL + '/api/zoom/status', { headers: vpsHeaders() });
+    if (!r.ok) throw new Error('no conectado');
+    const data = await r.json();
+    _zoomConnected = data.connected === true;
+  } catch(e) { _zoomConnected = false; }
+  const dot = document.getElementById('zoom-dot');
+  const txt = document.getElementById('zoom-status-txt');
+  const sub = document.getElementById('zoom-status-sub');
+  if (!dot) return;
+  if (_zoomConnected) {
+    dot.className = 'zoom-dot on';
+    txt.textContent = 'Zoom conectado';
+    sub.textContent = 'La cuenta institucional de IAGAMI está activa';
+  } else {
+    dot.className = 'zoom-dot off';
+    txt.textContent = 'Zoom no disponible en este momento';
+    sub.textContent = 'Se configurará próximamente. Usa el formulario manual de clases.';
+  }
+}
+
+function openZoomForm() {
+  poblarSelectCursos('zm-curso');
+  document.getElementById('zm-nombre').value = '';
+  document.getElementById('zm-desc').value = '';
+  document.getElementById('zm-datetime').value = '';
+  document.getElementById('zoom-form').style.display = 'block';
+}
+
+function closeZoomForm() {
+  document.getElementById('zoom-form').style.display = 'none';
+}
+
+async function profCreateZoomMeeting() {
+  const nombre = document.getElementById('zm-nombre').value.trim();
+  const dt     = document.getElementById('zm-datetime').value;
+  if (!nombre || !dt) { toast('Nombre y fecha/hora son requeridos', 'error'); return; }
+  const curso = document.getElementById('zm-curso').value;
+  const dur   = parseInt(document.getElementById('zm-duracion').value) || 60;
+  const desc  = document.getElementById('zm-desc').value.trim();
+  const listEl = document.getElementById('zoom-meetings-list');
+  listEl.innerHTML = '<div class="loading-ai"><div class="spinner"></div><p>Creando reunión en Zoom...</p></div>';
+  try {
+    const r = await fetch(VPS_URL + '/api/zoom/meetings', {
+      method: 'POST',
+      headers: vpsHeaders(),
+      body: JSON.stringify({
+        topic: nombre,
+        start_time: new Date(dt).toISOString(),
+        duration: dur,
+        agenda: desc,
+        curso_id: curso,
+        profesor_id: _profesor.id,
+        profesor_nombre: `${_profesor.nombres} ${_profesor.apellidos||''}`.trim()
+      })
+    });
+    if (!r.ok) throw new Error(await r.text());
+    const meeting = await r.json();
+    // Guardar también en clases_virtuales de PocketBase
+    await pbFetch('/api/collections/clases_virtuales/records', {
+      method: 'POST',
+      body: JSON.stringify({
+        nombre,
+        descripcion: desc,
+        curso: curso,
+        fecha: dt.slice(0,10),
+        hora: dt.slice(11,16),
+        plataforma: 'Zoom',
+        enlace_zoom: meeting.join_url || '',
+        zoom_meeting_id: String(meeting.id || ''),
+        publicado: true,
+        profesor: `${_profesor.nombres} ${_profesor.apellidos||''}`.trim(),
+        profesor_id: _profesor.id
+      })
+    }).catch(() => {/* PB sin colección aún, silencioso */});
+    toast('Reunión Zoom creada ✅');
+    closeZoomForm();
+    await profLoadZoomMeetings();
+    await cargarDatos();
+    renderClases();
+  } catch(e) {
+    toast('Error al crear reunión: ' + (e.message||'Zoom no disponible'), 'error');
+    await profLoadZoomMeetings();
+  }
+}
+
+async function profLoadZoomMeetings() {
+  const el = document.getElementById('zoom-meetings-list');
+  if (!el) return;
+  el.innerHTML = '<div class="loading-ai"><div class="spinner"></div><p>Cargando reuniones...</p></div>';
+  try {
+    const r = await fetch(VPS_URL + '/api/zoom/meetings', { headers: vpsHeaders() });
+    if (!r.ok) throw new Error('no disponible');
+    const data = await r.json();
+    _zoomMeetings = data.meetings || data || [];
+    renderZoomMeetings(el);
+  } catch(e) {
+    el.innerHTML = `<div class="empty"><div class="ico">🔵</div><p>Zoom se configurará próximamente.<br>Por ahora usa el formulario de clases manual.</p></div>`;
+    _zoomMeetings = [];
+  }
+}
+
+function renderZoomMeetings(el) {
+  if (!_zoomMeetings.length) {
+    el.innerHTML = '<div class="empty"><div class="ico">🔵</div><p>Sin reuniones Zoom programadas</p></div>';
+    return;
+  }
+  const statusBadge = s => {
+    if (s === 'started') return '<span class="badge badge-green">En curso</span>';
+    if (s === 'waiting') return '<span class="badge badge-blue">Programada</span>';
+    if (s === 'finished') return '<span class="badge badge-gray">Finalizada</span>';
+    return `<span class="badge badge-yellow">${esc(s||'—')}</span>`;
+  };
+  el.innerHTML = _zoomMeetings.map(m => `
+    <div style="background:var(--surface);border:1px solid #bae6fd;border-radius:10px;padding:14px;margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+        <div style="font-size:14px;font-weight:600">🔵 ${esc(m.topic||m.nombre||'Reunión')}</div>
+        ${statusBadge(m.status)}
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:8px">
+        📅 ${m.start_time ? new Date(m.start_time).toLocaleString('es-VE') : '—'}
+        · ⏱ ${m.duration||60} min
+        · ID: ${esc(String(m.id||'—'))}
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button onclick="profStartMeeting('${esc(m.start_url||'')}','${esc(m.join_url||'')}')"
+          class="btn btn-primary btn-sm" ${!m.start_url?'disabled':''}>▶ Iniciar clase</button>
+        <button onclick="profCancelZoomMeeting('${esc(String(m.id||''))}')"
+          class="btn btn-danger btn-sm">🗑 Cancelar</button>
+      </div>
+    </div>`).join('');
+}
+
+function profStartMeeting(startUrl, joinUrl) {
+  if (!startUrl && !joinUrl) { toast('Enlace no disponible', 'error'); return; }
+  window.open(startUrl || joinUrl, '_blank');
+}
+
+async function profCancelZoomMeeting(zoomId) {
+  if (!zoomId) return;
+  if (!confirm('¿Cancelar esta reunión de Zoom?')) return;
+  try {
+    const r = await fetch(VPS_URL + '/api/zoom/meetings/' + encodeURIComponent(zoomId), {
+      method: 'DELETE',
+      headers: vpsHeaders()
+    });
+    if (!r.ok) throw new Error(await r.text());
+    toast('Reunión cancelada');
+    await profLoadZoomMeetings();
+  } catch(e) { toast('Error al cancelar: ' + (e.message||'Zoom no disponible'), 'error'); }
+}
+
+/* ─── IA GEMINI (vía VPS) ─── */
+let _iaLastQuiz = null;
+let _iaLastBanco = null;
+let _iaLastContenido = null;
+
+function switchIATab(tab) {
+  ['quiz','plan','banco','contenido'].forEach(t => {
+    document.getElementById('iatab-'+t).classList.toggle('active', t===tab);
+    document.querySelectorAll(`[onclick="switchIATab('${t}')"]`).forEach(b => b.classList.toggle('active', t===tab));
+  });
+}
+
+function showLoading(containerId, msg) {
+  const el = document.getElementById(containerId);
+  if (el) el.innerHTML = `<div class="loading-ai"><div class="spinner"></div><p>${esc(msg)}</p></div>`;
+}
+
+function hideActionsPanel(panelId) {
+  const el = document.getElementById(panelId);
+  if (el) el.style.display = 'none';
+}
+
+async function geminiPost(endpoint, body) {
+  const r = await fetch(VPS_URL + endpoint, {
+    method: 'POST',
+    headers: vpsHeaders(),
+    body: JSON.stringify(body)
+  });
+  if (!r.ok) {
+    const err = await r.json().catch(() => ({ message: 'Servicio no disponible' }));
+    throw new Error(err.message || `HTTP ${r.status}`);
+  }
+  return r.json();
+}
+
+async function iaGenerarQuiz() {
+  const tema = document.getElementById('ia-quiz-tema').value.trim();
+  if (!tema) { toast('Ingresa un tema', 'error'); return; }
+  const nivel = document.getElementById('ia-quiz-nivel').value;
+  const cantidad = parseInt(document.getElementById('ia-quiz-cant').value);
+  const tipos = [];
+  if (document.getElementById('ia-quiz-multiple').checked) tipos.push('selección múltiple');
+  if (document.getElementById('ia-quiz-vf').checked) tipos.push('verdadero/falso');
+  if (!tipos.length) tipos.push('selección múltiple');
+  showLoading('ia-quiz-result', 'Generando evaluación con IA Gemini...');
+  hideActionsPanel('ia-quiz-actions');
+  try {
+    const data = await geminiPost('/api/gemini/quiz-generate', { tema, nivel, cantidad, tipos });
+    _iaLastQuiz = data;
+    renderQuizPreview(data);
+    document.getElementById('ia-quiz-actions').style.display = 'flex';
+  } catch(e) {
+    document.getElementById('ia-quiz-result').innerHTML =
+      `<div class="ia-result" style="color:var(--danger)">❌ ${esc(e.message)}<br><small>El servicio de IA no está disponible en este momento. Intenta más tarde.</small></div>`;
+  }
+}
+
+function renderQuizPreview(data) {
+  const preguntas = data.preguntas || data.questions || [];
+  if (!preguntas.length) {
+    document.getElementById('ia-quiz-result').innerHTML = '<div class="ia-result">La IA no devolvió preguntas. Intenta con un tema más específico.</div>';
+    return;
+  }
+  document.getElementById('ia-quiz-result').innerHTML = `
+    <div class="ia-result">
+      <div style="font-weight:600;margin-bottom:10px">📝 ${esc(data.nombre||data.title||'Evaluación generada')} — ${preguntas.length} preguntas</div>
+      ${preguntas.map((p,i) => `
+        <div style="margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--border)">
+          <div style="font-weight:600">${i+1}. ${esc(p.enunciado||p.question||'')}</div>
+          ${(p.opciones||p.options||[]).length ? `<ul style="margin:4px 0 4px 18px;font-size:12px">${(p.opciones||p.options).map(o=>`<li>${esc(o)}</li>`).join('')}</ul>` : ''}
+          ${p.respuesta_correcta||p.answer ? `<div style="font-size:12px;color:var(--success)">✅ ${esc(p.respuesta_correcta||p.answer)}</div>` : ''}
+        </div>`).join('')}
+    </div>`;
+}
+
+async function iaGuardarEvaluacion() {
+  if (!_iaLastQuiz) return;
+  const preguntas = _iaLastQuiz.preguntas || _iaLastQuiz.questions || [];
+  const nombre = _iaLastQuiz.nombre || _iaLastQuiz.title || 'Evaluación IA';
+  try {
+    const eval_rec = await pbFetch('/api/collections/evaluaciones/records', {
+      method: 'POST',
+      body: JSON.stringify({
+        nombre: nombre + ' (IA)',
+        descripcion: `Generada automáticamente por IA Gemini`,
+        publicado: false,
+        profesor_id: _profesor.id
+      })
+    });
+    for (const p of preguntas) {
+      await pbFetch('/api/collections/preguntas_evaluacion/records', {
+        method: 'POST',
+        body: JSON.stringify({
+          evaluacion_id: eval_rec.id,
+          enunciado: p.enunciado||p.question||'',
+          tipo: (p.tipo||p.type||'multiple').toLowerCase().includes('verdad') ? 'verdadero_falso' : 'multiple',
+          opciones: JSON.stringify(p.opciones||p.options||[]),
+          respuesta_correcta: p.respuesta_correcta||p.answer||'',
+          puntaje: p.puntaje||10,
+          orden: Date.now()
+        })
+      }).catch(()=>{});
+    }
+    toast('Evaluación guardada como borrador ✅');
+    _evaluaciones = [];
+    renderEvaluaciones();
+  } catch(e) {
+    toast('Error al guardar. Verifica que PocketBase tenga las colecciones configuradas.', 'error');
+  }
+}
+
+async function iaGenerarPlan() {
+  const tema = document.getElementById('ia-plan-tema').value.trim();
+  if (!tema) { toast('Ingresa un tema', 'error'); return; }
+  const dur    = document.getElementById('ia-plan-dur').value;
+  const nivel  = document.getElementById('ia-plan-nivel').value;
+  const obj    = document.getElementById('ia-plan-obj').value.trim();
+  showLoading('ia-plan-result', 'Generando planificación de clase...');
+  document.getElementById('ia-plan-actions').style.display = 'none';
+  try {
+    const data = await geminiPost('/api/gemini/lesson-plan', { tema, duracion: dur, nivel, objetivos: obj });
+    renderPlanPreview(data);
+    document.getElementById('ia-plan-actions').style.display = 'block';
+  } catch(e) {
+    document.getElementById('ia-plan-result').innerHTML =
+      `<div class="ia-result" style="color:var(--danger)">❌ ${esc(e.message)}<br><small>El servicio de IA no está disponible en este momento.</small></div>`;
+  }
+}
+
+function renderPlanPreview(data) {
+  const fases = data.fases || data.phases || [];
+  document.getElementById('ia-plan-result').innerHTML = `
+    <div class="ia-result">
+      <div style="font-weight:600;font-size:14px;margin-bottom:12px">📅 Plan: ${esc(data.tema||data.title||'Clase')} · ${esc(String(data.duracion||data.duration||''))} min</div>
+      ${(data.objetivos||data.objectives) ? `<div style="margin-bottom:10px"><strong>Objetivos:</strong><br>${esc(data.objetivos||data.objectives)}</div>` : ''}
+      ${fases.map(f => `
+        <div style="margin-bottom:10px;padding:10px;background:#fff;border-radius:6px;border-left:3px solid var(--primary)">
+          <div style="font-weight:600;font-size:13px">${esc(f.nombre||f.name||'')} ${f.duracion||f.duration ? '— '+esc(String(f.duracion||f.duration))+' min' : ''}</div>
+          <div style="font-size:12px;margin-top:4px">${esc(f.descripcion||f.description||f.content||'')}</div>
+        </div>`).join('')}
+      ${data.recursos||data.resources ? `<div style="font-size:12px;margin-top:8px"><strong>Recursos:</strong> ${esc(data.recursos||data.resources)}</div>` : ''}
+    </div>`;
+}
+
+async function iaGenerarBanco() {
+  const tema = document.getElementById('ia-banco-tema').value.trim();
+  if (!tema) { toast('Ingresa un tema', 'error'); return; }
+  const dif   = document.getElementById('ia-banco-dif').value;
+  const cant  = parseInt(document.getElementById('ia-banco-cant').value);
+  const tipo  = document.getElementById('ia-banco-tipo').value;
+  showLoading('ia-banco-result', 'Generando banco de preguntas...');
+  hideActionsPanel('ia-banco-actions');
+  try {
+    const data = await geminiPost('/api/gemini/question-bank', { tema, dificultad: dif, cantidad: cant, tipo });
+    _iaLastBanco = data;
+    renderBancoPreview(data);
+    document.getElementById('ia-banco-actions').style.display = 'flex';
+  } catch(e) {
+    document.getElementById('ia-banco-result').innerHTML =
+      `<div class="ia-result" style="color:var(--danger)">❌ ${esc(e.message)}<br><small>El servicio de IA no está disponible en este momento.</small></div>`;
+  }
+}
+
+function renderBancoPreview(data) {
+  const preguntas = data.preguntas || data.questions || [];
+  if (!preguntas.length) {
+    document.getElementById('ia-banco-result').innerHTML = '<div class="ia-result">Sin preguntas generadas. Intenta con otro tema.</div>';
+    return;
+  }
+  const paginadas = preguntas.slice(0, 10);
+  document.getElementById('ia-banco-result').innerHTML = `
+    <div class="ia-result">
+      <div style="font-weight:600;margin-bottom:8px">❓ ${preguntas.length} preguntas generadas (mostrando primeras 10)</div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>#</th><th>Pregunta</th><th>Tipo</th><th>Respuesta</th></tr></thead>
+        <tbody>${paginadas.map((p,i) => `<tr>
+          <td style="font-size:12px">${i+1}</td>
+          <td style="font-size:12px">${esc(p.enunciado||p.question||'')}</td>
+          <td><span class="badge badge-blue" style="font-size:10px">${esc(p.tipo||p.type||'—')}</span></td>
+          <td style="font-size:12px;color:var(--success)">${esc(p.respuesta_correcta||p.answer||'—')}</td>
+        </tr>`).join('')}</tbody>
+      </table></div>
+    </div>`;
+}
+
+function iaExportarBancoCSV() {
+  if (!_iaLastBanco) return;
+  const preguntas = _iaLastBanco.preguntas || _iaLastBanco.questions || [];
+  const cab = ['#','pregunta','tipo','opciones','respuesta_correcta','dificultad'];
+  const filas = preguntas.map((p,i) => [
+    i+1,
+    (p.enunciado||p.question||'').replace(/,/g,';'),
+    p.tipo||p.type||'',
+    (p.opciones||p.options||[]).join(' | '),
+    (p.respuesta_correcta||p.answer||'').replace(/,/g,';'),
+    p.dificultad||p.difficulty||''
+  ]);
+  const csv = [cab, ...filas].map(r => r.join(',')).join('\n');
+  const blob = new Blob(['﻿'+csv], {type:'text/csv;charset=utf-8;'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'banco_preguntas_ia.csv';
+  a.click();
+}
+
+async function iaGenerarContenido() {
+  const tema = document.getElementById('ia-cont-tema').value.trim();
+  if (!tema) { toast('Ingresa un tema', 'error'); return; }
+  const tipo  = document.getElementById('ia-cont-tipo').value;
+  const nivel = document.getElementById('ia-cont-nivel').value;
+  const ext   = document.getElementById('ia-cont-ext').value;
+  showLoading('ia-cont-result', 'Generando contenido educativo...');
+  hideActionsPanel('ia-cont-actions');
+  try {
+    const data = await geminiPost('/api/gemini/content-generate', { tema, tipo, nivel, extension: ext });
+    _iaLastContenido = data.contenido || data.content || JSON.stringify(data);
+    document.getElementById('ia-cont-result').innerHTML = `
+      <div class="ia-result">
+        <div style="font-weight:600;margin-bottom:8px">${esc(data.titulo||data.title||tema)}</div>
+        <textarea class="form-control" id="ia-cont-textarea" rows="12" style="margin-top:8px">${esc(_iaLastContenido)}</textarea>
+      </div>`;
+    document.getElementById('ia-cont-actions').style.display = 'flex';
+  } catch(e) {
+    document.getElementById('ia-cont-result').innerHTML =
+      `<div class="ia-result" style="color:var(--danger)">❌ ${esc(e.message)}<br><small>El servicio de IA no está disponible en este momento.</small></div>`;
+  }
+}
+
+async function iaCopiarContenido() {
+  const ta = document.getElementById('ia-cont-textarea');
+  const texto = ta ? ta.value : (_iaLastContenido||'');
+  try {
+    await navigator.clipboard.writeText(texto);
+    toast('Contenido copiado al portapapeles ✅');
+  } catch(e) { toast('No se pudo copiar. Selecciona el texto manualmente.', 'error'); }
+}
+
+function iaDescargarJSON(tipo) {
+  const data = tipo === 'quiz' ? _iaLastQuiz : _iaLastBanco;
+  if (!data) return;
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = tipo + '_ia_' + Date.now() + '.json';
+  a.click();
 }
 
 /* ─── SESSION RESTORE ─── */
