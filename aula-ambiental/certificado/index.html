@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Verificar Certificado — IAGAMI</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root { --primary:#1d6b3e; --dark:#1a3d2b; --bg:#f5f7f5; --border:#d1e7d9; --text:#1f2937; --muted:#6b7280; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; display:flex; flex-direction:column; }
+    header { background:var(--dark); color:#fff; padding:14px 24px; display:flex; align-items:center; gap:14px; }
+    header img { width:44px; height:44px; border-radius:8px; object-fit:cover; }
+    header .title { font-family:'Poppins',sans-serif; font-size:17px; font-weight:700; }
+    header .sub { font-size:11px; opacity:.7; }
+    main { flex:1; display:flex; align-items:flex-start; justify-content:center; padding:40px 16px; }
+    .card { background:#fff; border-radius:16px; border:1px solid var(--border); padding:36px; max-width:600px; width:100%; box-shadow:0 2px 12px rgba(0,0,0,.06); }
+    h1 { font-family:'Poppins',sans-serif; font-size:22px; color:var(--primary); margin-bottom:6px; }
+    .sub-h { font-size:13px; color:var(--muted); margin-bottom:28px; }
+    .input-row { display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap; }
+    input.code-input { flex:1; min-width:200px; padding:11px 16px; border:1px solid var(--border); border-radius:10px; font-size:14px; font-family:'Inter',sans-serif; outline:none; }
+    input.code-input:focus { border-color:var(--primary); box-shadow:0 0 0 3px rgba(29,107,62,.12); }
+    .btn { padding:11px 22px; background:var(--primary); color:#fff; border:none; border-radius:10px; font-size:14px; font-weight:600; cursor:pointer; font-family:'Inter',sans-serif; }
+    .btn:hover { background:var(--dark); }
+    #resultado { margin-top:8px; }
+    .cert-valido { background:#f0fdf4; border:1.5px solid #86efac; border-radius:14px; padding:28px; }
+    .cert-valido .badge { display:inline-flex; align-items:center; gap:6px; background:var(--primary); color:#fff; font-size:12px; font-weight:700; padding:4px 12px; border-radius:20px; margin-bottom:16px; }
+    .cert-valido .nombre { font-family:'Poppins',sans-serif; font-size:21px; font-weight:700; color:var(--text); margin-bottom:4px; }
+    .cert-valido .curso { font-size:15px; color:var(--primary); font-weight:600; margin-bottom:16px; }
+    .cert-valido table { width:100%; border-collapse:collapse; font-size:13px; }
+    .cert-valido td { padding:6px 0; border-bottom:1px solid #d1fae5; }
+    .cert-valido td:first-child { color:var(--muted); font-weight:500; width:160px; }
+    .cert-invalido { background:#fef2f2; border:1.5px solid #fca5a5; border-radius:14px; padding:24px; display:flex; gap:14px; align-items:flex-start; }
+    .cert-invalido .ico { font-size:28px; }
+    .cert-invalido .msg { font-size:14px; color:#991b1b; font-weight:600; }
+    .cert-invalido .sub { font-size:12px; color:#b91c1c; margin-top:4px; }
+    .msg-info { font-size:13px; color:var(--muted); text-align:center; padding:20px 0; }
+    footer { background:var(--dark); color:#fff; text-align:center; padding:14px; font-size:12px; opacity:.8; }
+    @media(max-width:500px){ .card{padding:22px 14px;} }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="title">IAGAMI — Verificación de Certificados</div>
+    <div class="sub">Instituto Autónomo de Gestión Ambiental del Municipio Iribarren</div>
+  </div>
+</header>
+
+<main>
+  <div class="card">
+    <h1>🏅 Verificar Certificado Digital</h1>
+    <div class="sub-h">Ingresa el código de verificación que aparece en el certificado para confirmar su autenticidad.</div>
+    <div class="input-row">
+      <input class="code-input" id="inp-codigo" placeholder="Ej: IAGAMI-ABC123-XY45" oninput="limpiarResultado()" onkeydown="if(event.key==='Enter')verificar()"/>
+      <button class="btn" onclick="verificar()" id="btn-verificar">Verificar</button>
+    </div>
+    <div id="resultado"><div class="msg-info">Ingresa el código para verificar la autenticidad del certificado.</div></div>
+  </div>
+</main>
+
+<footer>IAGAMI — Barquisimeto, Estado Lara, Venezuela · iagami.online</footer>
+
+<script>
+const PB_URL = 'https://api.iagami.online';
+
+function esc(s){ return s?String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'):''; }
+
+function limpiarResultado() {
+  document.getElementById('resultado').innerHTML = '';
+}
+
+async function verificar() {
+  const codigo = document.getElementById('inp-codigo').value.trim().toUpperCase();
+  if (!codigo) { mostrarError('Ingresa un código de verificación.'); return; }
+
+  const btn = document.getElementById('btn-verificar');
+  btn.disabled = true;
+  btn.textContent = 'Verificando...';
+
+  try {
+    const res = await fetch(`${PB_URL}/api/collections/certificados/records?filter=codigo_verificacion%3D%22${encodeURIComponent(codigo)}%22&perPage=1`);
+    if (!res.ok) throw new Error('Error al consultar');
+    const data = await res.json();
+
+    if (!data.items || data.items.length === 0) {
+      mostrarInvalido();
+    } else {
+      const cert = data.items[0];
+      if (cert.estado === 'emitido') {
+        mostrarValido(cert);
+      } else if (cert.estado === 'revocado') {
+        mostrarRevocado(cert);
+      } else {
+        mostrarInvalido();
+      }
+    }
+  } catch(e) {
+    mostrarError('No se pudo verificar. Intenta de nuevo en unos momentos.');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Verificar';
+  }
+}
+
+function mostrarValido(c) {
+  const fechaI = c.fecha_inicio ? new Date(c.fecha_inicio).toLocaleDateString('es-VE',{year:'numeric',month:'long',day:'numeric'}) : '—';
+  const fechaF = c.fecha_fin    ? new Date(c.fecha_fin   ).toLocaleDateString('es-VE',{year:'numeric',month:'long',day:'numeric'}) : '—';
+  const fechaE = c.fecha_emision? new Date(c.fecha_emision).toLocaleDateString('es-VE',{year:'numeric',month:'long',day:'numeric'}) : '—';
+  document.getElementById('resultado').innerHTML = `
+    <div class="cert-valido">
+      <div class="badge">✅ CERTIFICADO VÁLIDO</div>
+      <div class="nombre">${esc(c.nombre_estudiante)}</div>
+      <div class="curso">${esc(c.nombre_curso)}</div>
+      <table>
+        <tr><td>Horas de formación</td><td><strong>${esc(String(c.horas||'—'))} horas</strong></td></tr>
+        <tr><td>Período del curso</td><td>${esc(fechaI)} — ${esc(fechaF)}</td></tr>
+        <tr><td>Facilitador</td><td>${esc(c.nombre_profesor||'—')}</td></tr>
+        <tr><td>Fecha de emisión</td><td>${esc(fechaE)}</td></tr>
+        <tr><td>Código de verificación</td><td><code style="font-size:12px;background:#e8f5ee;padding:2px 6px;border-radius:4px">${esc(c.codigo_verificacion)}</code></td></tr>
+        <tr style="border-bottom:none"><td>Institución emisora</td><td>IAGAMI — Municipio Iribarren, Estado Lara</td></tr>
+      </table>
+    </div>`;
+}
+
+function mostrarInvalido() {
+  document.getElementById('resultado').innerHTML = `
+    <div class="cert-invalido">
+      <div class="ico">❌</div>
+      <div>
+        <div class="msg">Certificado no encontrado</div>
+        <div class="sub">El código ingresado no corresponde a ningún certificado emitido por IAGAMI. Verifica que lo hayas copiado correctamente.</div>
+      </div>
+    </div>`;
+}
+
+function mostrarRevocado(c) {
+  document.getElementById('resultado').innerHTML = `
+    <div class="cert-invalido">
+      <div class="ico">⚠️</div>
+      <div>
+        <div class="msg">Certificado revocado</div>
+        <div class="sub">Este certificado fue emitido para <strong>${esc(c.nombre_estudiante)}</strong> pero ha sido revocado por la institución y ya no es válido.</div>
+      </div>
+    </div>`;
+}
+
+function mostrarError(msg) {
+  document.getElementById('resultado').innerHTML = `<div class="cert-invalido"><div class="ico">⚠️</div><div><div class="msg">${esc(msg)}</div></div></div>`;
+}
+
+/* Auto-verificar si viene con ?codigo= en la URL */
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  const c = params.get('codigo');
+  if (c) {
+    document.getElementById('inp-codigo').value = c;
+    verificar();
+  }
+})();
+</script>
+</body>
+</html>

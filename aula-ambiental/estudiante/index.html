@@ -542,6 +542,7 @@ let _regPasoActual = 1;
 let _claseTab    = 'proximas';
 let _loginAttempts = 0;
 let _loginBlocked  = false;
+let _misCertificados = [];
 
 /* ─── UTILS ─── */
 function toast(msg, tipo='ok') {
@@ -792,6 +793,12 @@ async function cargarDatos() {
     const rB = await pbFetch('/api/collections/biblioteca_multimedia/records?filter=publicado%3Dtrue&sort=-created&perPage=200');
     _bibRecursos = rB.items || [];
   } catch(e) { _bibRecursos = []; }
+
+  // Certificados
+  try {
+    const rC = await pbFetch(`/api/collections/certificados/records?filter=estudiante_id%3D%22${_estudiante.id}%22%26%26estado%3D%22emitido%22&sort=-fecha_emision&perPage=50`);
+    _misCertificados = rC.items || [];
+  } catch(e) { _misCertificados = []; }
 }
 
 /* ─── NAV ─── */
@@ -809,6 +816,7 @@ function showSec(id) {
   if (id==='tareas')          renderTareasEst();
   if (id==='calificaciones')  renderCalificaciones();
   if (id==='asistencia')      renderAsistenciaEst();
+  if (id==='certificados')    renderCertificados();
   if (id==='perfil')          renderPerfil();
 }
 function toggleSidebar(){ document.getElementById('sidebar').classList.toggle('open'); }
