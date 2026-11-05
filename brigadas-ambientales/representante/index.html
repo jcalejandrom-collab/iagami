@@ -1176,7 +1176,7 @@ async function loadActividadesAsistencia(){
     sel.innerHTML = '<option value="">— Seleccionar actividad —</option>';
     (r.items||[]).forEach(a=>{
       const o = document.createElement('option');
-      o.value = a.id; o.textContent = `${a.nombre} · ${a.fecha_inicio||''}`;
+      o.value = a.id; o.textContent = `${a.titulo||a.nombre||'Sin título'} · ${a.fecha||a.fecha_inicio||''}`;
       sel.appendChild(o);
     });
   } catch{}
@@ -1403,12 +1403,12 @@ function openInformeForm(){
   // Cargar actividades en el select
   const sel = document.getElementById('inf-actividad');
   sel.innerHTML='<option value="">— Seleccionar —</option>';
-  _misAct.forEach(a=>{ const o=document.createElement('option'); o.value=a.id; o.textContent=a.nombre; sel.appendChild(o); });
+  _misAct.forEach(a=>{ const o=document.createElement('option'); o.value=a.id; o.textContent=a.titulo||a.nombre||'Sin título'; sel.appendChild(o); });
   // Cargar actividades si están vacías
   if(!_misAct.length){
     pbFetch(`/api/collections/actividades_brigadas/records?filter=${encodeURIComponent('representante_id="'+_rep.id+'"')}&perPage=50`).then(r=>{
       _misAct=r.items||[];
-      _misAct.forEach(a=>{ const o=document.createElement('option'); o.value=a.id; o.textContent=a.nombre; sel.appendChild(o); });
+      _misAct.forEach(a=>{ const o=document.createElement('option'); o.value=a.id; o.textContent=a.titulo||a.nombre||'Sin título'; sel.appendChild(o); });
     }).catch(()=>{});
   }
 }
