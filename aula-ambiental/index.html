@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Aula Ambiental IAGAMI — Aprende y protege el ambiente</title>
+<meta name="description" content="Espacio educativo digital del IAGAMI. Videos, cursos, guías y recursos para niños, adolescentes, docentes y comunidades del Municipio Iribarren."/>
+<meta name="theme-color" content="#1d6b3e"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--verde:#1d6b3e;--verde-dark:#1a3d2b;--verde-light:#e8f5ee;--verde-border:#d4edd8;--bg:#f5f7f5;--text:#1f2937}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+a{color:inherit;text-decoration:none}
+button{cursor:pointer;font-family:inherit}
+
+/* NAV */
+.navbar{background:var(--verde);color:#fff;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.2)}
+.navbar-brand{display:flex;align-items:center;gap:10px}
+.navbar-logo{width:36px;height:36px;border-radius:8px;background:#fff;padding:3px;object-fit:contain}
+.navbar-title{font-family:'Poppins',sans-serif;font-size:15px;font-weight:700}
+.navbar-links{display:flex;gap:8px;align-items:center}
+.nav-link{background:rgba(255,255,255,.18);border:none;color:#fff;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600}
+.nav-link:hover{background:rgba(255,255,255,.28)}
+
+/* HERO */
+.hero{background:linear-gradient(135deg,var(--verde-dark) 0%,var(--verde) 100%);color:#fff;padding:48px 24px 36px;text-align:center}
+.hero-tag{font-size:11px;font-weight:700;letter-spacing:.08em;background:rgba(255,255,255,.18);border-radius:20px;display:inline-block;padding:4px 14px;margin-bottom:14px}
+.hero h1{font-family:'Poppins',sans-serif;font-size:26px;font-weight:700;line-height:1.3;margin-bottom:10px}
+.hero p{font-size:13px;opacity:.9;line-height:1.7;max-width:560px;margin:0 auto}
+
+/* CONTAINER */
+.container{max-width:1000px;margin:0 auto;padding:0 20px}
+
+/* FILTROS */
+.filtros{background:#fff;border-bottom:1px solid var(--verde-border);padding:14px 24px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;position:sticky;top:56px;z-index:90}
+.filtro-btn{padding:7px 14px;border:1.5px solid var(--verde-border);border-radius:20px;background:#fff;font-size:12px;font-weight:600;color:var(--text);transition:.15s}
+.filtro-btn:hover,.filtro-btn.active{background:var(--verde);color:#fff;border-color:var(--verde)}
+.filtro-select{padding:7px 12px;border:1.5px solid var(--verde-border);border-radius:8px;font-size:12px;font-family:inherit;color:var(--text);background:#fff}
+
+/* SECCIÓN */
+.sec{padding:32px 0}
+.sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.sec-title{font-family:'Poppins',sans-serif;font-size:18px;font-weight:700;color:var(--verde-dark)}
+.sec-ver{font-size:12px;color:var(--verde);font-weight:600;cursor:pointer}
+
+/* CARDS */
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+.card{background:#fff;border:1px solid var(--verde-border);border-radius:14px;overflow:hidden;transition:.2s;cursor:pointer}
+.card:hover{box-shadow:0 6px 24px rgba(29,107,62,.12);transform:translateY(-2px)}
+.card-thumb{width:100%;aspect-ratio:16/9;background:var(--verde-light);display:flex;align-items:center;justify-content:center;font-size:40px;position:relative;overflow:hidden}
+.card-thumb iframe{position:absolute;inset:0;width:100%;height:100%;border:none;pointer-events:none}
+.card-thumb-img{width:100%;height:100%;object-fit:cover}
+.card-body{padding:14px}
+.card-cat{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--verde);margin-bottom:5px}
+.card-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:5px;line-height:1.4}
+.card-desc{font-size:12px;color:#6b7280;line-height:1.5}
+.card-footer{padding:10px 14px;border-top:1px solid var(--verde-border);display:flex;align-items:center;justify-content:space-between}
+.card-tipo{font-size:11px;color:#6b7280}
+.card-btn{background:var(--verde-light);color:var(--verde);border:none;padding:5px 12px;border-radius:6px;font-size:11px;font-weight:600}
+.card-btn:hover{background:var(--verde);color:#fff}
+
+/* MODAL VIDEO */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:500;display:none;align-items:center;justify-content:center;padding:16px}
+.modal-overlay.open{display:flex}
+.modal-box{background:#fff;border-radius:16px;overflow:hidden;width:100%;max-width:720px;position:relative}
+.modal-close{position:absolute;top:12px;right:12px;background:rgba(0,0,0,.5);color:#fff;border:none;border-radius:50%;width:30px;height:30px;font-size:16px;z-index:10;line-height:1}
+.modal-video{width:100%;aspect-ratio:16/9}
+.modal-info{padding:16px}
+.modal-title{font-family:'Poppins',sans-serif;font-size:16px;font-weight:700;margin-bottom:4px}
+.modal-cat{font-size:12px;color:var(--verde);font-weight:600}
+
+/* CURSOS */
+.curso-card{background:#fff;border:1px solid var(--verde-border);border-radius:14px;padding:20px;display:flex;gap:16px;align-items:flex-start;margin-bottom:12px;transition:.2s}
+.curso-card:hover{box-shadow:0 4px 16px rgba(29,107,62,.1)}
+.curso-ico{font-size:36px;flex-shrink:0}
+.curso-info{flex:1}
+.curso-title{font-size:15px;font-weight:700;color:var(--verde-dark);margin-bottom:4px}
+.curso-desc{font-size:12px;color:#6b7280;line-height:1.5;margin-bottom:8px}
+.curso-tags{display:flex;gap:6px;flex-wrap:wrap}
+.curso-tag{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600}
+
+/* CLASES VIRTUALES */
+.clase-card{background:#fff;border:1px solid var(--verde-border);border-radius:12px;padding:16px;margin-bottom:10px;display:flex;align-items:center;gap:14px}
+.clase-fecha{background:var(--verde-light);border-radius:10px;padding:10px;text-align:center;min-width:52px;flex-shrink:0}
+.clase-fecha .dia{font-family:'Poppins',sans-serif;font-size:20px;font-weight:700;color:var(--verde-dark);line-height:1}
+.clase-fecha .mes{font-size:10px;color:var(--verde);font-weight:600;text-transform:uppercase}
+.clase-info{flex:1}
+.clase-title{font-size:14px;font-weight:600;color:var(--text)}
+.clase-meta{font-size:12px;color:#6b7280;margin-top:3px}
+.clase-join{background:var(--verde);color:#fff;border:none;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:600;flex-shrink:0}
+.clase-join:hover{background:var(--verde-dark)}
+.clase-join:disabled{background:#9ca3af;cursor:default}
+
+/* EMPTY */
+.empty{text-align:center;padding:48px 24px;color:#9ca3af}
+.empty .ico{font-size:40px;margin-bottom:12px}
+.empty p{font-size:13px}
+
+/* FOOTER */
+.footer{background:var(--verde-dark);color:#fff;text-align:center;padding:20px;font-size:12px;margin-top:40px}
+
+@media(max-width:600px){
+  .hero h1{font-size:20px}
+  .filtros{top:52px}
+  .cards-grid{grid-template-columns:1fr}
+  .clase-card{flex-wrap:wrap}
+}
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="navbar-brand">
+    <img src="/assets/images/logo-iagami.png" alt="IAGAMI" class="navbar-logo"/>
+    <span class="navbar-title">Aula Ambiental</span>
+  </div>
+  <div class="navbar-links">
+    <a href="/brigadas-ambientales/" class="nav-link">🌿 Brigadas</a>
+    <a href="/" class="nav-link">← Portal</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-tag">IAGAMI · Educación Ambiental</div>
+  <h1>Aula Ambiental IAGAMI</h1>
+  <p>Espacio educativo digital para niños, adolescentes, docentes, adultos y comunidades del Municipio Iribarren. Aprende, comparte y actúa por el ambiente.</p>
+</div>
+
+<!-- FILTROS -->
+<div class="filtros" id="filtros-bar">
+  <button class="filtro-btn active" onclick="setTipo('',this)">Todos</button>
+  <button class="filtro-btn" onclick="setTipo('video',this)">▶️ Videos</button>
+  <button class="filtro-btn" onclick="setTipo('pdf',this)">📄 Documentos</button>
+  <button class="filtro-btn" onclick="setTipo('guia',this)">📗 Guías</button>
+  <button class="filtro-btn" onclick="setTipo('infografia',this)">🖼️ Infografías</button>
+  <select class="filtro-select" id="cat-select" onchange="setCat(this.value)">
+    <option value="">Todas las categorías</option>
+    <option>Educación ambiental</option>
+    <option>Cambio climático</option>
+    <option>Protección del agua</option>
+    <option>Reciclaje</option>
+    <option>Reforestación</option>
+    <option>Árboles autóctonos de Lara</option>
+    <option>Biodiversidad</option>
+    <option>Protección de fauna</option>
+    <option>Contaminación ambiental</option>
+    <option>Gestión de residuos</option>
+    <option>Compostaje</option>
+    <option>Parques y áreas verdes</option>
+    <option>Ecosistemas de Iribarren</option>
+  </select>
+</div>
+
+<div class="container">
+
+<!-- CLASES VIRTUALES PRÓXIMAS -->
+<div class="sec" id="sec-clases">
+  <div class="sec-head">
+    <div class="sec-title">🎥 Próximas Clases Virtuales</div>
+  </div>
+  <div id="clases-list"><div class="empty"><div class="ico">🎥</div><p>No hay clases programadas próximamente</p></div></div>
+</div>
+
+<!-- BIBLIOTECA -->
+<div class="sec">
+  <div class="sec-head">
+    <div class="sec-title" id="biblioteca-titulo">📚 Biblioteca Multimedia</div>
+    <span style="font-size:12px;color:#9ca3af" id="recursos-count"></span>
+  </div>
+  <div class="cards-grid" id="recursos-grid">
+    <div class="empty" style="grid-column:1/-1"><div class="ico">📚</div><p>Cargando recursos...</p></div>
+  </div>
+</div>
+
+<!-- CURSOS -->
+<div class="sec" id="sec-cursos">
+  <div class="sec-head">
+    <div class="sec-title">🎓 Cursos Ambientales</div>
+  </div>
+  <div id="cursos-list">
+    <!-- Cursos estáticos de ejemplo hasta que haya BD -->
+    <div class="curso-card">
+      <div class="curso-ico">🌊</div>
+      <div class="curso-info">
+        <div class="curso-title">Protección del Agua en Iribarren</div>
+        <div class="curso-desc">Aprende sobre el ciclo del agua, cuencas hidrográficas del municipio y cómo proteger este recurso vital.</div>
+        <div class="curso-tags">
+          <span class="curso-tag" style="background:#dbeafe;color:#1d4ed8">Próximamente</span>
+          <span class="curso-tag" style="background:var(--verde-light);color:var(--verde)">Todas las edades</span>
+        </div>
+      </div>
+    </div>
+    <div class="curso-card">
+      <div class="curso-ico">🌳</div>
+      <div class="curso-info">
+        <div class="curso-title">Árboles Autóctonos de Lara</div>
+        <div class="curso-desc">Conoce las especies nativas del estado Lara, su importancia ecológica y cómo participar en jornadas de reforestación.</div>
+        <div class="curso-tags">
+          <span class="curso-tag" style="background:#dbeafe;color:#1d4ed8">Próximamente</span>
+          <span class="curso-tag" style="background:#fef3c7;color:#92400e">Niños y adolescentes</span>
+        </div>
+      </div>
+    </div>
+    <div class="curso-card">
+      <div class="curso-ico">♻️</div>
+      <div class="curso-info">
+        <div class="curso-title">Reciclaje y Economía Circular</div>
+        <div class="curso-desc">Fundamentos del reciclaje, separación de residuos, compostaje y lombricultura para el hogar y la comunidad.</div>
+        <div class="curso-tags">
+          <span class="curso-tag" style="background:#dbeafe;color:#1d4ed8">Próximamente</span>
+          <span class="curso-tag" style="background:var(--verde-light);color:var(--verde)">Adultos y docentes</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<!-- MODAL VIDEO -->
+<div class="modal-overlay" id="modal-video">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeVideo()">✕</button>
+    <div id="modal-video-container"></div>
+    <div class="modal-info">
+      <div class="modal-cat" id="modal-cat"></div>
+      <div class="modal-title" id="modal-title"></div>
+      <div style="font-size:12px;color:#6b7280;margin-top:4px" id="modal-desc"></div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">IAGAMI — Instituto Autónomo de Gestión Ambiental · Municipio Iribarren · Barquisimeto, Lara</div>
+
+<script>
+const PB_URL = 'https://api.iagami.online';
+let _recursos = [];
+let _filtroTipo = '';
+let _filtroCat = '';
+
+const tipoIco = {video:'▶️', pdf:'📄', guia:'📗', infografia:'🖼️', presentacion:'📊'};
+const tipoLabel = {video:'Video', pdf:'Documento PDF', guia:'Guía didáctica', infografia:'Infografía', presentacion:'Presentación'};
+
+function setTipo(tipo, btn) {
+  _filtroTipo = tipo;
+  document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderRecursos();
+}
+function setCat(cat) { _filtroCat = cat; renderRecursos(); }
+
+function getYoutubeId(url) {
+  if (!url) return null;
+  const m = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  return m ? m[1] : null;
+}
+
+function renderRecursos() {
+  const list = _recursos.filter(r =>
+    r.publicado !== false &&
+    (!_filtroTipo || r.tipo === _filtroTipo) &&
+    (!_filtroCat || r.categoria === _filtroCat)
+  );
+  document.getElementById('recursos-count').textContent = list.length + ' recurso' + (list.length !== 1 ? 's' : '');
+  const grid = document.getElementById('recursos-grid');
+  if (list.length === 0) {
+    grid.innerHTML = '<div class="empty" style="grid-column:1/-1"><div class="ico">📂</div><p>No hay recursos disponibles con ese filtro</p></div>';
+    return;
+  }
+  grid.innerHTML = list.map(r => {
+    const ytId = r.tipo === 'video' ? getYoutubeId(r.url) : null;
+    const thumb = ytId
+      ? `<img class="card-thumb-img" src="https://img.youtube.com/vi/${ytId}/hqdefault.jpg" alt="${r.titulo}" loading="lazy"/>`
+      : `<span>${tipoIco[r.tipo] || '📁'}</span>`;
+    return `<div class="card" onclick="abrirRecurso('${r.id}')">
+      <div class="card-thumb">${thumb}</div>
+      <div class="card-body">
+        <div class="card-cat">${r.categoria || ''}</div>
+        <div class="card-title">${r.titulo}</div>
+        <div class="card-desc">${r.descripcion || ''}</div>
+      </div>
+      <div class="card-footer">
+        <span class="card-tipo">${tipoIco[r.tipo] || ''} ${tipoLabel[r.tipo] || r.tipo}</span>
+        <button class="card-btn">${r.tipo === 'video' ? 'Ver video' : 'Abrir'}</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function abrirRecurso(id) {
+  const r = _recursos.find(x => x.id === id);
+  if (!r) return;
+  if (r.tipo === 'video') {
+    const ytId = getYoutubeId(r.url);
+    if (ytId) {
+      document.getElementById('modal-video-container').innerHTML =
+        `<iframe class="modal-video" src="https://www.youtube.com/embed/${ytId}?autoplay=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+      document.getElementById('modal-cat').textContent = r.categoria || '';
+      document.getElementById('modal-title').textContent = r.titulo;
+      document.getElementById('modal-desc').textContent = r.descripcion || '';
+      document.getElementById('modal-video').classList.add('open');
+      return;
+    }
+  }
+  if (r.url) window.open(r.url, '_blank');
+}
+
+function closeVideo() {
+  document.getElementById('modal-video').classList.remove('open');
+  document.getElementById('modal-video-container').innerHTML = '';
+}
+
+// Clases virtuales
+function renderClases(clases) {
+  const hoy = new Date();
+  const proximas = clases.filter(c => new Date(c.fecha + 'T' + (c.hora || '00:00')) >= hoy)
+    .sort((a,b) => new Date(a.fecha) - new Date(b.fecha)).slice(0, 5);
+  const el = document.getElementById('clases-list');
+  if (proximas.length === 0) {
+    el.innerHTML = '<div class="empty"><div class="ico">🎥</div><p>No hay clases programadas próximamente</p></div>';
+    return;
+  }
+  const meses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  el.innerHTML = proximas.map(c => {
+    const fecha = new Date(c.fecha + 'T12:00:00');
+    const ahora = new Date();
+    const diff = new Date(c.fecha + 'T' + (c.hora || '00:00')) - ahora;
+    const activa = diff > 0 && diff < 3600000 * 2;
+    return `<div class="clase-card">
+      <div class="clase-fecha">
+        <div class="dia">${fecha.getDate()}</div>
+        <div class="mes">${meses[fecha.getMonth()]}</div>
+      </div>
+      <div class="clase-info">
+        <div class="clase-title">${c.nombre}</div>
+        <div class="clase-meta">${c.hora || ''} · ${c.duracion || ''} · ${c.plataforma || 'Zoom'} · Prof. ${c.profesor || ''}</div>
+        ${c.descripcion ? `<div class="clase-meta" style="margin-top:4px">${c.descripcion}</div>` : ''}
+      </div>
+      ${c.enlace_zoom
+        ? `<a href="${c.enlace_zoom}" target="_blank" rel="noopener">
+            <button class="clase-join" ${activa ? '' : ''}>🎥 Unirse</button>
+           </a>`
+        : `<button class="clase-join" disabled>Próximamente</button>`}
+    </div>`;
+  }).join('');
+}
+
+// Cargar datos
+async function cargar() {
+  try {
+    const [resR, resC] = await Promise.all([
+      fetch(PB_URL + '/api/collections/biblioteca_multimedia/records?perPage=200&filter=publicado=true&sort=-created').then(r=>r.json()),
+      fetch(PB_URL + '/api/collections/clases_virtuales/records?perPage=20&sort=fecha').then(r=>r.json())
+    ]);
+    _recursos = resR.items || [];
+    renderRecursos();
+    renderClases(resC.items || []);
+  } catch(e) {
+    _recursos = [];
+    document.getElementById('recursos-grid').innerHTML =
+      '<div class="empty" style="grid-column:1/-1"><div class="ico">📡</div><p>No se pudo conectar al servidor. Intenta más tarde.</p></div>';
+    document.getElementById('clases-list').innerHTML =
+      '<div class="empty"><div class="ico">🎥</div><p>No hay clases programadas</p></div>';
+  }
+}
+cargar();
+
+// Cerrar modal con Escape
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeVideo(); });
+document.getElementById('modal-video').addEventListener('click', e => { if (e.target === e.currentTarget) closeVideo(); });
+</script>
+</body>
+</html>

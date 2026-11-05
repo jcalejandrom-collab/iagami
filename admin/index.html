@@ -1670,6 +1670,8 @@ input,select,textarea{font-family:inherit}
     <button id="atab-biblioteca" onclick="switchAulaTab('biblioteca')" style="padding:8px 16px;border:none;background:none;font-size:13px;font-weight:600;color:var(--primary);border-bottom:2px solid var(--primary);margin-bottom:-2px;cursor:pointer;font-family:inherit">📖 Biblioteca</button>
     <button id="atab-cursos" onclick="switchAulaTab('cursos')" style="padding:8px 16px;border:none;background:none;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;font-family:inherit">🎓 Cursos</button>
     <button id="atab-visitas" onclick="switchAulaTab('visitas')" style="padding:8px 16px;border:none;background:none;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;font-family:inherit">🏫 Visitas Escolares</button>
+    <button id="atab-clases" onclick="switchAulaTab('clases')" style="padding:8px 16px;border:none;background:none;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;font-family:inherit">🎥 Clases Virtuales</button>
+    <button id="atab-avisos" onclick="switchAulaTab('avisos')" style="padding:8px 16px;border:none;background:none;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;font-family:inherit">📢 Avisos</button>
   </div>
   <div id="atab-panel-biblioteca">
     <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
@@ -1705,6 +1707,62 @@ input,select,textarea{font-family:inherit}
       </div>
     </div>
   </div>
+  <!-- CLASES VIRTUALES -->
+  <div id="atab-panel-clases" style="display:none">
+    <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+      <button class="btn btn-primary" onclick="openClaseForm()">+ Nueva Clase Virtual</button>
+    </div>
+    <div id="clases-admin-list">Cargando...</div>
+    <div id="clase-form-panel" style="display:none;background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px;margin-top:16px">
+      <h4 style="margin-bottom:14px;font-family:'Poppins',sans-serif">🎥 Programar Clase Virtual</h4>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div><label class="form-label">Nombre de la clase *</label><input class="form-control" id="cls-nombre" placeholder="Ej: Taller de Reciclaje"/></div>
+        <div><label class="form-label">Profesor *</label><input class="form-control" id="cls-profesor" placeholder="Nombre del facilitador"/></div>
+        <div><label class="form-label">Curso / Grupo</label><input class="form-control" id="cls-curso" placeholder="Ej: Brigadistas Adultos"/></div>
+        <div><label class="form-label">Plataforma</label>
+          <select class="form-control" id="cls-plataforma"><option>Zoom</option><option>Google Meet</option><option>Teams</option><option>YouTube Live</option><option>Otro</option></select>
+        </div>
+        <div><label class="form-label">Fecha *</label><input class="form-control" id="cls-fecha" type="date"/></div>
+        <div><label class="form-label">Hora *</label><input class="form-control" id="cls-hora" type="time"/></div>
+        <div><label class="form-label">Duración</label><input class="form-control" id="cls-duracion" placeholder="Ej: 1 hora 30 min"/></div>
+        <div><label class="form-label">Enlace de la reunión</label><input class="form-control" id="cls-enlace" placeholder="https://zoom.us/j/..."/></div>
+        <div><label class="form-label">Contraseña (opcional)</label><input class="form-control" id="cls-pass" placeholder="Contraseña de la reunión"/></div>
+        <div><label class="form-label">URL Material Complementario</label><input class="form-control" id="cls-material" placeholder="https://..."/></div>
+        <div style="grid-column:span 2"><label class="form-label">Descripción / Bienvenida</label><textarea class="form-control" id="cls-desc" rows="2" placeholder="Mensaje de bienvenida o descripción de la clase..."></textarea></div>
+        <div style="grid-column:span 2;display:flex;align-items:center;gap:8px"><input type="checkbox" id="cls-pub" checked/><label for="cls-pub" style="font-size:13px">Publicar (visible para alumnos)</label></div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:14px">
+        <button class="btn btn-primary" onclick="saveClase()">💾 Guardar Clase</button>
+        <button class="btn btn-secondary" onclick="document.getElementById('clase-form-panel').style.display='none'">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- AVISOS -->
+  <div id="atab-panel-avisos" style="display:none">
+    <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+      <button class="btn btn-primary" onclick="openAvisoForm()">+ Nuevo Aviso</button>
+    </div>
+    <div id="avisos-admin-list">Cargando...</div>
+    <div id="aviso-form-panel" style="display:none;background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px;margin-top:16px">
+      <h4 style="margin-bottom:14px;font-family:'Poppins',sans-serif">📢 Publicar Aviso</h4>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div><label class="form-label">Título *</label><input class="form-control" id="av-titulo" placeholder="Título del aviso"/></div>
+        <div><label class="form-label">Tipo *</label>
+          <select class="form-control" id="av-tipo"><option value="aviso">Aviso general</option><option value="recordatorio">Recordatorio</option><option value="cancelacion">Cancelación</option><option value="nueva_clase">Nueva clase</option><option value="tarea">Tarea</option><option value="material">Nuevo material</option></select>
+        </div>
+        <div><label class="form-label">Profesor / Responsable</label><input class="form-control" id="av-profesor" placeholder="Nombre"/></div>
+        <div><label class="form-label">Curso / Grupo destinatario</label><input class="form-control" id="av-curso" placeholder="Ej: Todos, Brigadistas..."/></div>
+        <div style="grid-column:span 2"><label class="form-label">Contenido *</label><textarea class="form-control" id="av-contenido" rows="4" placeholder="Escribe el mensaje completo..."></textarea></div>
+        <div style="grid-column:span 2;display:flex;align-items:center;gap:8px"><input type="checkbox" id="av-pub" checked/><label for="av-pub" style="font-size:13px">Publicar inmediatamente</label></div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:14px">
+        <button class="btn btn-primary" onclick="saveAviso()">📢 Publicar Aviso</button>
+        <button class="btn btn-secondary" onclick="document.getElementById('aviso-form-panel').style.display='none'">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
   <div id="aula-form-panel" style="display:none;background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px;margin-top:16px">
     <h4 style="margin-bottom:14px;font-family:'Poppins',sans-serif">📖 Agregar Recurso Educativo</h4>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
@@ -2109,25 +2167,32 @@ let _currentAulaTab = 'biblioteca';
 
 function switchAulaTab(tab) {
   _currentAulaTab = tab;
-  ['biblioteca','cursos','visitas'].forEach(t => {
-    document.getElementById('atab-panel-' + t).style.display = t === tab ? 'block' : 'none';
+  ['biblioteca','cursos','visitas','clases','avisos'].forEach(t => {
+    const p = document.getElementById('atab-panel-' + t);
+    if (p) p.style.display = t === tab ? 'block' : 'none';
     const btn = document.getElementById('atab-' + t);
     if (btn) { btn.style.color = t === tab ? 'var(--primary)' : 'var(--muted)'; btn.style.borderBottomColor = t === tab ? 'var(--primary)' : 'transparent'; }
   });
   if (tab === 'cursos') renderAulaCursos();
   if (tab === 'visitas') renderVisitas();
   if (tab === 'biblioteca') renderAulaBiblioteca();
+  if (tab === 'clases') renderClasesAdmin();
+  if (tab === 'avisos') renderAvisosAdmin();
 }
 
 async function renderAula() {
   try {
-    const [resR, resV] = await Promise.all([
+    const [resR, resV, resC, resA] = await Promise.all([
       pb.collection('biblioteca_multimedia').getList(1, 200, {sort: '-created'}),
-      pb.collection('solicitudes_visitas').getList(1, 100, {sort: '-created'})
+      pb.collection('solicitudes_visitas').getList(1, 100, {sort: '-created'}),
+      pb.collection('clases_virtuales').getList(1, 100, {sort: '-fecha'}).catch(()=>({items:[]})),
+      pb.collection('avisos_aula').getList(1, 100, {sort: '-created'}).catch(()=>({items:[]}))
     ]);
     _aulaRecursos = resR.items || [];
-    _aulaVisitas = resV.items || [];
-  } catch(e) { _aulaRecursos = []; _aulaVisitas = []; }
+    _aulaVisitas  = resV.items || [];
+    _clases       = resC.items || [];
+    _avisos       = resA.items || [];
+  } catch(e) { _aulaRecursos = []; _aulaVisitas = []; _clases = []; _avisos = []; }
   renderAulaBiblioteca();
 }
 
@@ -2203,6 +2268,125 @@ async function updateVisitaEstado(id, estado) {
     if (idx >= 0) _aulaVisitas[idx].estado = estado;
     renderVisitas();
   } catch(e) { toast('Error', 'error'); }
+}
+
+/* ─── CLASES VIRTUALES ─── */
+let _clases = [];
+let _avisos = [];
+
+async function renderClasesAdmin() {
+  try {
+    const res = await pb.collection('clases_virtuales').getList(1, 100, {sort: '-fecha'});
+    _clases = res.items || [];
+  } catch(e) { _clases = []; }
+  const el = document.getElementById('clases-admin-list');
+  if (!el) return;
+  if (_clases.length === 0) {
+    el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted)">No hay clases virtuales registradas. Agrega la primera.</div>'; return;
+  }
+  const ahora = new Date();
+  el.innerHTML = _clases.map(c => {
+    const fecha = c.fecha ? new Date(c.fecha) : null;
+    const pasada = fecha && fecha < ahora;
+    const badge = pasada ? '<span style="font-size:11px;padding:2px 7px;border-radius:12px;background:#f1f5f9;color:#64748b">Finalizada</span>'
+                         : '<span style="font-size:11px;padding:2px 7px;border-radius:12px;background:#dcfce7;color:#166534">Próxima</span>';
+    return `<div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <div style="font-size:14px;font-weight:600">🎥 ${c.nombre}</div>${badge}
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:4px">📅 ${c.fecha||'—'} ${c.hora?'· '+c.hora:''} · ${c.plataforma||'Sin plataforma'} · Prof: ${c.profesor||'—'}</div>
+      ${c.enlace_zoom ? `<a href="${c.enlace_zoom}" target="_blank" style="font-size:12px;color:var(--primary);font-weight:600">🔗 ${c.enlace_zoom}</a>` : ''}
+      ${c.contrasena ? `<div style="font-size:12px;color:var(--muted);margin-top:2px">🔑 Contraseña: ${c.contrasena}</div>` : ''}
+      <div style="margin-top:10px;display:flex;justify-content:flex-end">
+        <button onclick="deleteClase('${c.id}')" style="font-size:11px;padding:3px 10px;border:1px solid #fca5a5;background:#fef2f2;color:#dc2626;border-radius:6px;cursor:pointer">🗑 Eliminar</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openClaseForm() { document.getElementById('clase-form-panel').style.display = 'block'; }
+function closeClaseForm() { document.getElementById('clase-form-panel').style.display = 'none'; }
+
+async function saveClase() {
+  const nombre = document.getElementById('cls-nombre').value.trim();
+  const fecha  = document.getElementById('cls-fecha').value;
+  if (!nombre || !fecha) { toast('Nombre y fecha son requeridos', 'error'); return; }
+  try {
+    await pb.collection('clases_virtuales').create({
+      nombre, fecha,
+      descripcion: document.getElementById('cls-desc').value.trim(),
+      profesor:    document.getElementById('cls-profesor').value.trim(),
+      curso:       document.getElementById('cls-curso').value.trim(),
+      hora:        document.getElementById('cls-hora').value,
+      plataforma:  document.getElementById('cls-plataforma').value,
+      enlace_zoom: document.getElementById('cls-enlace').value.trim(),
+      contrasena:  document.getElementById('cls-pass').value.trim(),
+      publicado:   document.getElementById('cls-pub').checked
+    });
+    toast('Clase virtual guardada');
+    closeClaseForm();
+    ['cls-nombre','cls-desc','cls-profesor','cls-curso','cls-enlace','cls-pass'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+    await renderClasesAdmin();
+  } catch(e) { toast('Error al guardar clase', 'error'); }
+}
+
+async function deleteClase(id) {
+  if (!confirm('¿Eliminar esta clase virtual?')) return;
+  try { await pb.collection('clases_virtuales').delete(id); toast('Clase eliminada'); await renderClasesAdmin(); }
+  catch(e) { toast('Error al eliminar', 'error'); }
+}
+
+/* ─── AVISOS AULA ─── */
+async function renderAvisosAdmin() {
+  try {
+    const res = await pb.collection('avisos_aula').getList(1, 100, {sort: '-created'});
+    _avisos = res.items || [];
+  } catch(e) { _avisos = []; }
+  const el = document.getElementById('avisos-admin-list');
+  if (!el) return;
+  if (_avisos.length === 0) {
+    el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted)">No hay avisos publicados.</div>'; return;
+  }
+  const colores = {aviso:'#2563eb',recordatorio:'#d97706',cancelacion:'#dc2626',nueva_clase:'#059669',tarea:'#7c3aed',material:'#0891b2'};
+  el.innerHTML = _avisos.map(a => `<div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+      <div style="font-size:14px;font-weight:600">📢 ${a.titulo}</div>
+      <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:#f8fafc;color:${colores[a.tipo]||'#374151'};border:1px solid currentColor">${a.tipo||'aviso'}</span>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Prof: ${a.profesor||'—'} · Curso: ${a.curso||'General'} · ${new Date(a.created).toLocaleDateString('es-VE')}</div>
+    <div style="font-size:13px;color:#374151;line-height:1.5">${a.contenido}</div>
+    <div style="margin-top:10px;display:flex;justify-content:flex-end">
+      <button onclick="deleteAviso('${a.id}')" style="font-size:11px;padding:3px 10px;border:1px solid #fca5a5;background:#fef2f2;color:#dc2626;border-radius:6px;cursor:pointer">🗑 Eliminar</button>
+    </div>
+  </div>`).join('');
+}
+
+function openAvisoForm() { document.getElementById('aviso-form-panel').style.display = 'block'; }
+function closeAvisoForm() { document.getElementById('aviso-form-panel').style.display = 'none'; }
+
+async function saveAviso() {
+  const titulo    = document.getElementById('av-titulo').value.trim();
+  const contenido = document.getElementById('av-contenido').value.trim();
+  if (!titulo || !contenido) { toast('Título y contenido son requeridos', 'error'); return; }
+  try {
+    await pb.collection('avisos_aula').create({
+      titulo, contenido,
+      tipo:     document.getElementById('av-tipo').value,
+      profesor: document.getElementById('av-profesor').value.trim(),
+      curso:    document.getElementById('av-curso').value.trim(),
+      publicado: true
+    });
+    toast('Aviso publicado');
+    closeAvisoForm();
+    ['av-titulo','av-contenido','av-profesor','av-curso'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+    await renderAvisosAdmin();
+  } catch(e) { toast('Error al publicar aviso', 'error'); }
+}
+
+async function deleteAviso(id) {
+  if (!confirm('¿Eliminar este aviso?')) return;
+  try { await pb.collection('avisos_aula').delete(id); toast('Aviso eliminado'); await renderAvisosAdmin(); }
+  catch(e) { toast('Error al eliminar', 'error'); }
 }
 
 /* ─── MOBILE ─── */

@@ -138,5 +138,51 @@
       {"name": "estado",        "type": "select", "required": true,  "options": {"values": ["recibida","aprobada","programada","ejecutada","cancelada"]}, "default": "recibida"},
       {"name": "created",       "type": "autodate","onCreate": true, "onUpdate": false}
     ]
+  },
+  {
+    "name": "clases_virtuales",
+    "type": "base",
+    "system": false,
+    "listRule": "",
+    "viewRule": "",
+    "createRule": "@request.auth.id != ''",
+    "updateRule": "@request.auth.id != ''",
+    "deleteRule": "@request.auth.id != ''",
+    "schema": [
+      {"name": "nombre",         "type": "text",     "required": true,  "options": {"min": 2, "max": 200}},
+      {"name": "descripcion",    "type": "text",     "required": false, "options": {"max": 500}},
+      {"name": "profesor",       "type": "text",     "required": false, "options": {"max": 100}},
+      {"name": "curso",          "type": "text",     "required": false, "options": {"max": 100}},
+      {"name": "fecha",          "type": "text",     "required": true},
+      {"name": "hora",           "type": "text",     "required": false, "options": {"max": 10}},
+      {"name": "duracion",       "type": "text",     "required": false, "options": {"max": 30}},
+      {"name": "plataforma",     "type": "select",   "required": false, "options": {"values": ["Zoom","Google Meet","Teams","YouTube Live","Otro"]}},
+      {"name": "enlace_zoom",    "type": "url",      "required": false},
+      {"name": "contrasena",     "type": "text",     "required": false, "options": {"max": 50}},
+      {"name": "bienvenida",     "type": "text",     "required": false, "options": {"max": 300}},
+      {"name": "material_url",   "type": "url",      "required": false},
+      {"name": "publicado",      "type": "bool",     "required": false},
+      {"name": "created",        "type": "autodate", "onCreate": true,  "onUpdate": false}
+    ]
+  },
+  {
+    "name": "avisos_aula",
+    "type": "base",
+    "system": false,
+    "listRule": "",
+    "viewRule": "",
+    "createRule": "@request.auth.id != ''",
+    "updateRule": "@request.auth.id != ''",
+    "deleteRule": "@request.auth.id != ''",
+    "schema": [
+      {"name": "titulo",         "type": "text",     "required": true,  "options": {"min": 2, "max": 150}},
+      {"name": "contenido",      "type": "text",     "required": true,  "options": {"min": 5, "max": 2000}},
+      {"name": "profesor",       "type": "text",     "required": false, "options": {"max": 100}},
+      {"name": "curso",          "type": "text",     "required": false, "options": {"max": 100}},
+      {"name": "tipo",           "type": "select",   "required": true,  "options": {"values": ["aviso","recordatorio","cancelacion","nueva_clase","tarea","material"]}},
+      {"name": "clase_virtual",  "type": "relation", "required": false, "options": {"collectionId": "clases_virtuales", "maxSelect": 1}},
+      {"name": "publicado",      "type": "bool",     "required": false},
+      {"name": "created",        "type": "autodate", "onCreate": true,  "onUpdate": false}
+    ]
   }
 ]
