@@ -561,6 +561,168 @@ textarea.form-control{resize:vertical;min-height:80px}
         </div>
       </div>
 
+      <!-- ── IA ASISTENTE ── -->
+      <div class="section" id="sec-ia-asistente">
+        <div class="page-header">
+          <div class="page-title">🤖 IA Asistente Educativo</div>
+          <div class="page-subtitle">Herramientas de inteligencia artificial para potenciar tu labor docente · Gemini API vía servidor IAGAMI</div>
+        </div>
+        <div style="background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;padding:10px 14px;font-size:12px;color:#92400e;margin-bottom:16px">
+          ⚠️ Las llamadas a Gemini pasan exclusivamente por el servidor VPS de IAGAMI. Ninguna clave API es expuesta en el navegador.
+        </div>
+        <div class="tabs">
+          <button class="tab-btn active" onclick="switchIATab('quiz')">📝 Generar Evaluación</button>
+          <button class="tab-btn" onclick="switchIATab('plan')">📅 Planificador</button>
+          <button class="tab-btn" onclick="switchIATab('banco')">❓ Banco de Preguntas</button>
+          <button class="tab-btn" onclick="switchIATab('contenido')">📄 Contenido Educativo</button>
+        </div>
+
+        <!-- Tab: Generar Evaluación -->
+        <div class="tab-panel active" id="iatab-quiz">
+          <div class="ia-tool-card">
+            <div class="card-title">📝 Generar Evaluación con IA</div>
+            <div class="form-grid">
+              <div><label class="form-label">Tema *</label><input class="form-control" id="ia-quiz-tema" placeholder="Ej: Reciclaje y manejo de residuos sólidos"/></div>
+              <div><label class="form-label">Nivel</label>
+                <select class="form-control" id="ia-quiz-nivel">
+                  <option value="básico">Básico</option>
+                  <option value="intermedio" selected>Intermedio</option>
+                  <option value="avanzado">Avanzado</option>
+                </select>
+              </div>
+              <div><label class="form-label">Número de preguntas</label>
+                <select class="form-control" id="ia-quiz-cant">
+                  <option value="5">5 preguntas</option>
+                  <option value="10" selected>10 preguntas</option>
+                  <option value="15">15 preguntas</option>
+                  <option value="20">20 preguntas</option>
+                </select>
+              </div>
+              <div><label class="form-label">Tipos de preguntas</label>
+                <div style="display:flex;gap:12px;margin-top:8px;flex-wrap:wrap">
+                  <label style="font-size:13px;display:flex;gap:5px;align-items:center"><input type="checkbox" id="ia-quiz-multiple" checked/> Múltiple opción</label>
+                  <label style="font-size:13px;display:flex;gap:5px;align-items:center"><input type="checkbox" id="ia-quiz-vf"/> Verdadero/Falso</label>
+                </div>
+              </div>
+            </div>
+            <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
+              <button class="btn btn-primary btn-sm" onclick="iaGenerarQuiz()">🤖 Generar con IA</button>
+            </div>
+            <div id="ia-quiz-result"></div>
+            <div id="ia-quiz-actions" style="display:none;margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">
+              <button class="btn btn-primary btn-sm" onclick="iaGuardarEvaluacion()">💾 Guardar como borrador</button>
+              <button class="btn btn-secondary btn-sm" onclick="iaDescargarJSON('quiz')">⬇ Descargar JSON</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: Planificador -->
+        <div class="tab-panel" id="iatab-plan">
+          <div class="ia-tool-card">
+            <div class="card-title">📅 Planificador de Clase</div>
+            <div class="form-grid">
+              <div><label class="form-label">Tema *</label><input class="form-control" id="ia-plan-tema" placeholder="Ej: Biodiversidad del estado Lara"/></div>
+              <div><label class="form-label">Duración (minutos)</label><input class="form-control" id="ia-plan-dur" type="number" value="90" min="15" max="300"/></div>
+              <div><label class="form-label">Nivel del grupo</label>
+                <select class="form-control" id="ia-plan-nivel">
+                  <option value="niños (6-12 años)">Niños (6-12 años)</option>
+                  <option value="adolescentes (13-17 años)" selected>Adolescentes (13-17)</option>
+                  <option value="adultos">Adultos</option>
+                  <option value="mixto">Mixto</option>
+                </select>
+              </div>
+              <div class="span2"><label class="form-label">Objetivos de aprendizaje</label><textarea class="form-control" id="ia-plan-obj" placeholder="¿Qué debe aprender el estudiante al finalizar la clase?"></textarea></div>
+            </div>
+            <div style="margin-top:14px;display:flex;gap:10px">
+              <button class="btn btn-primary btn-sm" onclick="iaGenerarPlan()">🤖 Generar plan</button>
+            </div>
+            <div id="ia-plan-result"></div>
+            <div id="ia-plan-actions" style="display:none;margin-top:12px">
+              <button class="btn btn-secondary btn-sm" onclick="window.print()">🖨 Imprimir plan</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: Banco de Preguntas -->
+        <div class="tab-panel" id="iatab-banco">
+          <div class="ia-tool-card">
+            <div class="card-title">❓ Generador de Banco de Preguntas</div>
+            <div class="form-grid">
+              <div><label class="form-label">Tema *</label><input class="form-control" id="ia-banco-tema" placeholder="Ej: Cambio climático y sus efectos"/></div>
+              <div><label class="form-label">Dificultad</label>
+                <select class="form-control" id="ia-banco-dif">
+                  <option value="fácil">Fácil</option>
+                  <option value="media" selected>Media</option>
+                  <option value="difícil">Difícil</option>
+                </select>
+              </div>
+              <div><label class="form-label">Cantidad</label>
+                <select class="form-control" id="ia-banco-cant">
+                  <option value="10">10 preguntas</option>
+                  <option value="20" selected>20 preguntas</option>
+                  <option value="30">30 preguntas</option>
+                </select>
+              </div>
+              <div><label class="form-label">Tipo</label>
+                <select class="form-control" id="ia-banco-tipo">
+                  <option value="selección múltiple">Selección múltiple</option>
+                  <option value="verdadero/falso">Verdadero / Falso</option>
+                  <option value="mixto" selected>Mixto</option>
+                </select>
+              </div>
+            </div>
+            <div style="margin-top:14px;display:flex;gap:10px">
+              <button class="btn btn-primary btn-sm" onclick="iaGenerarBanco()">🤖 Generar banco</button>
+            </div>
+            <div id="ia-banco-result"></div>
+            <div id="ia-banco-actions" style="display:none;margin-top:12px">
+              <button class="btn btn-secondary btn-sm" onclick="iaExportarBancoCSV()">⬇ Exportar CSV</button>
+              <button class="btn btn-secondary btn-sm" style="margin-left:8px" onclick="iaDescargarJSON('banco')">⬇ Descargar JSON</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: Contenido Educativo -->
+        <div class="tab-panel" id="iatab-contenido">
+          <div class="ia-tool-card">
+            <div class="card-title">📄 Generador de Contenido Educativo Ambiental</div>
+            <div class="form-grid">
+              <div><label class="form-label">Tema ambiental *</label><input class="form-control" id="ia-cont-tema" placeholder="Ej: Contaminación del río Turbio"/></div>
+              <div><label class="form-label">Tipo de contenido</label>
+                <select class="form-control" id="ia-cont-tipo">
+                  <option value="artículo educativo">Artículo educativo</option>
+                  <option value="actividad práctica">Actividad práctica</option>
+                  <option value="experimento sencillo">Experimento sencillo</option>
+                  <option value="cuento ambiental">Cuento ambiental</option>
+                </select>
+              </div>
+              <div><label class="form-label">Dirigido a</label>
+                <select class="form-control" id="ia-cont-nivel">
+                  <option value="niños de primaria">Niños de primaria</option>
+                  <option value="adolescentes de secundaria" selected>Adolescentes de secundaria</option>
+                  <option value="adultos y comunidad">Adultos y comunidad</option>
+                </select>
+              </div>
+              <div><label class="form-label">Extensión</label>
+                <select class="form-control" id="ia-cont-ext">
+                  <option value="corto (1-2 párrafos)">Corto</option>
+                  <option value="medio (3-5 párrafos)" selected>Medio</option>
+                  <option value="largo (6+ párrafos)">Largo</option>
+                </select>
+              </div>
+            </div>
+            <div style="margin-top:14px;display:flex;gap:10px">
+              <button class="btn btn-primary btn-sm" onclick="iaGenerarContenido()">🤖 Generar contenido</button>
+            </div>
+            <div id="ia-cont-result"></div>
+            <div id="ia-cont-actions" style="display:none;margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">
+              <button class="btn btn-secondary btn-sm" onclick="iaCopiarContenido()">📋 Copiar al portapapeles</button>
+              <button class="btn btn-secondary btn-sm" onclick="window.print()">🖨 Imprimir</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div><!-- /main-content -->
   </div><!-- /app-layout -->
 </div><!-- /screen-app -->

@@ -127,6 +127,17 @@ a{color:inherit;text-decoration:none}
 textarea.form-control{resize:vertical;min-height:70px}
 .menor-notice{background:#fef9c3;border:1px solid #fde68a;border-radius:8px;padding:12px;font-size:12px;color:#78350f;margin-bottom:14px}
 
+/* ── AI CHAT ── */
+.ai-chat-box{background:#f8fafc;border:1px solid var(--border);border-radius:var(--radius);padding:14px;min-height:180px;max-height:360px;overflow-y:auto;margin-bottom:10px;display:flex;flex-direction:column;gap:10px}
+.ai-msg{padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.5;max-width:85%}
+.ai-msg.user{background:var(--primary);color:#fff;align-self:flex-end}
+.ai-msg.bot{background:#fff;border:1px solid var(--border);align-self:flex-start}
+.ai-chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px}
+.ai-chip{padding:5px 12px;border-radius:20px;border:1.5px solid var(--primary);color:var(--primary);font-size:12px;cursor:pointer;background:#fff;font-family:'Inter',sans-serif;transition:.15s}
+.ai-chip:hover{background:var(--primary-light)}
+.loading-ai{text-align:center;padding:2rem;color:var(--muted)}
+.spinner{width:32px;height:32px;border:3px solid #e8f5ee;border-top-color:#1d6b3e;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 1rem}
+@keyframes spin{to{transform:rotate(360deg)}}
 /* ── MOBILE ── */
 .mob-btn{display:none;background:none;border:none;color:#fff;font-size:22px;cursor:pointer}
 @media(max-width:768px){
@@ -312,6 +323,7 @@ textarea.form-control{resize:vertical;min-height:70px}
       <div onclick="showSec('calificaciones')" class="nav-item"     id="nav-calificaciones"><span class="nav-ico">🏆</span> Calificaciones</div>
       <div onclick="showSec('asistencia')"  class="nav-item"        id="nav-asistencia" ><span class="nav-ico">✅</span> Asistencia</div>
       <div onclick="showSec('certificados')" class="nav-item"        id="nav-certificados"><span class="nav-ico">🏅</span> Certificados</div>
+      <div onclick="showSec('ia-estudiante')" class="nav-item"      id="nav-ia-estudiante"><span class="nav-ico">✨</span> Asistente IA</div>
       <div onclick="showSec('perfil')"     class="nav-item"        id="nav-perfil"    ><span class="nav-ico">👤</span> Mi Perfil</div>
     </div>
 
@@ -375,9 +387,11 @@ textarea.form-control{resize:vertical;min-height:70px}
         <div class="tabs">
           <button class="tab-btn active" onclick="switchClasesTab('proximas')">📅 Próximas</button>
           <button class="tab-btn" onclick="switchClasesTab('pasadas')">🕐 Realizadas</button>
+          <button class="tab-btn" onclick="switchClasesTab('grabaciones')">🎬 Grabaciones</button>
         </div>
         <div class="tab-panel active" id="cltab-proximas"><div id="clases-prox"></div></div>
         <div class="tab-panel" id="cltab-pasadas"><div id="clases-past"></div></div>
+        <div class="tab-panel" id="cltab-grabaciones"><div id="clases-grab"></div></div>
       </div>
 
       <!-- ── AVISOS ── -->
@@ -496,6 +510,47 @@ textarea.form-control{resize:vertical;min-height:70px}
         <div id="certs-lista"><div class="empty"><div class="ico">⏳</div><p>Cargando...</p></div></div>
         <!-- iframe oculto para impresión -->
         <iframe id="cert-print-frame" style="display:none;position:fixed;left:-9999px;top:0;width:800px;height:600px;border:none"></iframe>
+      </div>
+
+      <!-- ── IA ASISTENTE ── -->
+      <div class="section" id="sec-ia-estudiante">
+        <div class="page-header">
+          <div class="page-title">✨ Asistente IA Ambiental</div>
+          <div class="page-subtitle">Tu asistente educativo inteligente — impulsado por IA</div>
+        </div>
+        <div class="tabs">
+          <button class="tab-btn active" onclick="switchIATab('chat')">💬 Consultar</button>
+          <button class="tab-btn" onclick="switchIATab('recomendar')">🎯 Recomendaciones</button>
+        </div>
+        <!-- Tab chat -->
+        <div class="tab-panel active" id="iatab-chat">
+          <div class="card">
+            <div class="card-title">💬 Pregunta sobre medio ambiente</div>
+            <div style="font-size:12px;color:var(--muted);margin-bottom:10px" id="ia-counter-msg">Puedes hacer hasta 10 preguntas por sesión · <span id="ia-counter">0</span>/10 usadas</div>
+            <div class="ai-chips">
+              <button class="ai-chip" onclick="hacerPreguntaIA('¿Cómo funciona el ciclo del agua?')">💧 Ciclo del agua</button>
+              <button class="ai-chip" onclick="hacerPreguntaIA('¿Qué es el cambio climático?')">🌡️ Cambio climático</button>
+              <button class="ai-chip" onclick="hacerPreguntaIA('¿Cómo puedo ayudar al medio ambiente desde casa?')">🌿 Ayudar al ambiente</button>
+              <button class="ai-chip" onclick="hacerPreguntaIA('¿Qué son los residuos sólidos y cómo se clasifican?')">♻️ Residuos sólidos</button>
+            </div>
+            <div class="ai-chat-box" id="ia-chat-box">
+              <div class="ai-msg bot">👋 Hola, soy tu asistente ambiental de IAGAMI. Puedo ayudarte a aprender sobre medio ambiente, ecosistemas, cambio climático y más. ¿Qué quieres saber hoy?</div>
+            </div>
+            <div style="display:flex;gap:8px">
+              <input class="form-control" id="ia-pregunta" placeholder="Escribe tu pregunta ambiental..." style="flex:1" onkeydown="if(event.key==='Enter')hacerPreguntaIA()"/>
+              <button class="btn btn-primary" id="ia-btn" onclick="hacerPreguntaIA()">Preguntar</button>
+            </div>
+          </div>
+        </div>
+        <!-- Tab recomendaciones -->
+        <div class="tab-panel" id="iatab-recomendar">
+          <div class="card">
+            <div class="card-title">🎯 Recomendaciones personalizadas</div>
+            <p style="font-size:13px;color:var(--muted);margin-bottom:14px">Basado en tus cursos y progreso, la IA sugiere qué estudiar a continuación.</p>
+            <button class="btn btn-primary btn-sm" id="rec-btn" onclick="cargarRecomendaciones()">🔍 Ver mis recomendaciones</button>
+            <div id="rec-resultado" style="margin-top:16px"></div>
+          </div>
+        </div>
       </div>
 
       <!-- ── PERFIL ── -->
