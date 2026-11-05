@@ -1621,6 +1621,12 @@ input,select,textarea{font-family:inherit}
     <button id="btab-adultos" onclick="switchBrigTab('adultos')" style="padding:8px 16px;border:none;background:none;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;font-family:inherit">🧑 Adultos</button>
     <button id="btab-menores" onclick="switchBrigTab('menores')" style="padding:8px 16px;border:none;background:none;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;font-family:inherit">🧒 Menores</button>
     <button id="btab-consentimientos" onclick="switchBrigTab('consentimientos')" style="padding:8px 16px;border:none;background:none;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;font-family:inherit">📋 Consentimientos</button>
+    <button id="btab-comandantes" onclick="switchBrigTab('comandantes')" style="padding:8px 16px;border:none;background:none;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;font-family:inherit">⭐ Comandantes</button>
+    <button id="btab-representantes" onclick="switchBrigTab('representantes')" style="padding:8px 16px;border:none;background:none;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;font-family:inherit">👥 Representantes</button>
+    <button id="btab-brigadas-list" onclick="switchBrigTab('brigadas-list')" style="padding:8px 16px;border:none;background:none;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;font-family:inherit">🌿 Brigadas</button>
+    <button id="btab-convocatorias" onclick="switchBrigTab('convocatorias')" style="padding:8px 16px;border:none;background:none;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;font-family:inherit">📣 Convocatorias</button>
+    <button id="btab-solicitudes-brig" onclick="switchBrigTab('solicitudes-brig')" style="padding:8px 16px;border:none;background:none;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;font-family:inherit">🛠 Solicitudes</button>
+    <button id="btab-estadisticas-brig" onclick="switchBrigTab('estadisticas-brig')" style="padding:8px 16px;border:none;background:none;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;font-family:inherit">📊 Estadísticas</button>
   </div>
   <div id="btab-panel-censo">
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px">
@@ -1654,6 +1660,141 @@ input,select,textarea{font-family:inherit}
   <div id="btab-panel-consentimientos" style="display:none">
     <div style="font-size:13px;color:var(--muted);margin-bottom:12px">Consentimientos pendientes de revisión</div>
     <div id="brig-consent-list">Cargando...</div>
+  </div>
+
+  <!-- TAB: COMANDANTES -->
+  <div id="btab-panel-comandantes" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div style="font-size:14px;font-weight:600">Comandantes Municipales de Brigadas</div>
+      <button class="btn btn-primary" onclick="document.getElementById('brig-cmd-form').style.display='block'">+ Crear Comandante</button>
+    </div>
+    <div id="brig-cmd-form" style="display:none;background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px">
+      <h4 style="margin-bottom:14px;font-family:'Poppins',sans-serif">Nuevo Comandante Municipal</h4>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div><label class="form-label">Nombres *</label><input class="form-control" id="cmd-nombres" placeholder="Nombres"/></div>
+        <div><label class="form-label">Apellidos *</label><input class="form-control" id="cmd-apellidos" placeholder="Apellidos"/></div>
+        <div><label class="form-label">Email (usuario) *</label><input class="form-control" id="cmd-email" type="email" placeholder="correo@ejemplo.com"/></div>
+        <div><label class="form-label">Contraseña inicial *</label><input class="form-control" id="cmd-pass" type="password" placeholder="Mínimo 8 caracteres"/></div>
+        <div><label class="form-label">Cargo</label><input class="form-control" id="cmd-cargo" placeholder="Ej: Comandante Municipal"/></div>
+        <div><label class="form-label">Teléfono</label><input class="form-control" id="cmd-tel" placeholder="0414-0000000"/></div>
+        <div><label class="form-label">Parroquia asignada</label><select class="form-control" id="cmd-parroquia"><option value="Municipal">Municipal (todas)</option><option>Catedral</option><option>Concepción</option><option>El Cuji</option><option>Juan de Villegas</option><option>Tamaca</option><option>Unión</option><option>Agua Viva</option><option>Buena Vista</option><option>Cabudare</option><option>Montalbán</option><option>Olivos</option><option>Santa Rosa</option><option>Río Claro</option><option>Juárez</option><option>Aguedo Felipe Alvarado</option><option>Sarare</option></select></div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:14px">
+        <button class="btn btn-primary" onclick="brig_saveComandante()">💾 Crear Comandante</button>
+        <button class="btn btn-secondary" onclick="document.getElementById('brig-cmd-form').style.display='none'">Cancelar</button>
+      </div>
+    </div>
+    <div id="brig-cmd-list">Cargando...</div>
+  </div>
+
+  <!-- TAB: REPRESENTANTES -->
+  <div id="btab-panel-representantes" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px">
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <select id="brig-f-tipo-rep" class="form-control" style="min-width:200px" onchange="brig_loadRepresentantes()"><option value="">Todos los tipos</option><option value="representante_comuna">Rep. de Comuna</option><option value="representante_consejo_comunal">Rep. de Consejo Comunal</option></select>
+        <select id="brig-f-estado-rep" class="form-control" style="min-width:140px" onchange="brig_loadRepresentantes()"><option value="">Todos los estados</option><option value="pendiente">Pendiente</option><option value="activo">Activo</option><option value="suspendido">Suspendido</option></select>
+      </div>
+      <button class="btn btn-primary" onclick="document.getElementById('brig-rep-form').style.display='block'">+ Crear Representante</button>
+    </div>
+    <div id="brig-rep-form" style="display:none;background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px">
+      <h4 style="margin-bottom:14px;font-family:'Poppins',sans-serif">Nuevo Representante Territorial</h4>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div><label class="form-label">Nombres *</label><input class="form-control" id="rep-nombres" placeholder="Nombres"/></div>
+        <div><label class="form-label">Apellidos *</label><input class="form-control" id="rep-apellidos" placeholder="Apellidos"/></div>
+        <div><label class="form-label">Email (usuario) *</label><input class="form-control" id="rep-email" type="email" placeholder="correo@ejemplo.com"/></div>
+        <div><label class="form-label">Contraseña inicial *</label><input class="form-control" id="rep-pass" type="password" placeholder="Mínimo 8 caracteres"/></div>
+        <div><label class="form-label">Tipo *</label><select class="form-control" id="rep-tipo"><option value="representante_comuna">Representante de Comuna</option><option value="representante_consejo_comunal">Representante de Consejo Comunal</option></select></div>
+        <div><label class="form-label">Parroquia</label><select class="form-control" id="rep-parroquia"><option value="">Selecciona...</option><option>Catedral</option><option>Concepción</option><option>El Cuji</option><option>Juan de Villegas</option><option>Tamaca</option><option>Unión</option><option>Agua Viva</option><option>Buena Vista</option><option>Cabudare</option><option>Montalbán</option><option>Olivos</option><option>Santa Rosa</option><option>Río Claro</option><option>Juárez</option><option>Aguedo Felipe Alvarado</option><option>Sarare</option></select></div>
+        <div><label class="form-label">Cargo</label><input class="form-control" id="rep-cargo" placeholder="Ej: Coordinador de brigadas"/></div>
+        <div><label class="form-label">Teléfono</label><input class="form-control" id="rep-tel" placeholder="0414-0000000"/></div>
+        <div><label class="form-label">Fecha de designación</label><input class="form-control" id="rep-fecha" type="date"/></div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:14px">
+        <button class="btn btn-primary" onclick="brig_saveRepresentante()">💾 Crear Representante</button>
+        <button class="btn btn-secondary" onclick="document.getElementById('brig-rep-form').style.display='none'">Cancelar</button>
+      </div>
+    </div>
+    <div id="brig-rep-list">Cargando...</div>
+  </div>
+
+  <!-- TAB: BRIGADAS LIST -->
+  <div id="btab-panel-brigadas-list" style="display:none">
+    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
+      <input id="brig-search-nom" class="form-control" placeholder="Buscar por nombre, código..." style="flex:1;min-width:200px" oninput="brig_filterBrigadas()"/>
+      <select id="brig-f-parroquia-b" class="form-control" style="min-width:160px" onchange="brig_filterBrigadas()"><option value="">Todas las parroquias</option><option>Catedral</option><option>Concepción</option><option>El Cuji</option><option>Juan de Villegas</option><option>Tamaca</option><option>Unión</option><option>Agua Viva</option><option>Buena Vista</option><option>Cabudare</option><option>Montalbán</option><option>Olivos</option><option>Santa Rosa</option><option>Río Claro</option><option>Juárez</option><option>Aguedo Felipe Alvarado</option><option>Sarare</option></select>
+      <select id="brig-f-estado-b" class="form-control" style="min-width:160px" onchange="brig_filterBrigadas()"><option value="">Todos los estados</option><option value="en_formacion">En formación</option><option value="activa">Activa</option><option value="en_planificacion">En planificación</option><option value="suspendida">Suspendida</option><option value="inactiva">Inactiva</option></select>
+      <button class="btn btn-primary" onclick="document.getElementById('brig-new-form').style.display='block'">+ Nueva Brigada</button>
+    </div>
+    <div id="brig-new-form" style="display:none;background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px">
+      <h4 style="margin-bottom:14px;font-family:'Poppins',sans-serif">🌿 Registrar Brigada</h4>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div><label class="form-label">Nombre *</label><input class="form-control" id="brig-n-nombre" placeholder="Nombre de la brigada"/></div>
+        <div><label class="form-label">Parroquia *</label><select class="form-control" id="brig-n-parroquia"><option value="">Selecciona...</option><option>Catedral</option><option>Concepción</option><option>El Cuji</option><option>Juan de Villegas</option><option>Tamaca</option><option>Unión</option><option>Agua Viva</option><option>Buena Vista</option><option>Cabudare</option><option>Montalbán</option><option>Olivos</option><option>Santa Rosa</option><option>Río Claro</option><option>Juárez</option><option>Aguedo Felipe Alvarado</option><option>Sarare</option></select></div>
+        <div><label class="form-label">Fecha de conformación</label><input class="form-control" id="brig-n-fecha" type="date"/></div>
+        <div><label class="form-label">Estado</label><select class="form-control" id="brig-n-estado"><option value="en_formacion">En formación</option><option value="activa">Activa</option><option value="en_planificacion">En planificación</option></select></div>
+        <div style="grid-column:span 2"><label class="form-label">Área de actuación</label><input class="form-control" id="brig-n-area" placeholder="Ej: Quebrada de Barquisimeto sector norte"/></div>
+        <div style="grid-column:span 2"><label class="form-label">Objetivos</label><textarea class="form-control" id="brig-n-obj" rows="2" placeholder="Objetivos de la brigada..."></textarea></div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:14px">
+        <button class="btn btn-primary" onclick="brig_saveBrigada()">💾 Guardar Brigada</button>
+        <button class="btn btn-secondary" onclick="document.getElementById('brig-new-form').style.display='none'">Cancelar</button>
+      </div>
+    </div>
+    <div id="brig-brigadas-list">Cargando...</div>
+  </div>
+
+  <!-- TAB: CONVOCATORIAS -->
+  <div id="btab-panel-convocatorias" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div style="font-size:14px;font-weight:600">Comunicados y Convocatorias</div>
+      <button class="btn btn-primary" onclick="document.getElementById('brig-conv-form').style.display='block'">+ Nueva Convocatoria</button>
+    </div>
+    <div id="brig-conv-form" style="display:none;background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px">
+      <h4 style="margin-bottom:14px;font-family:'Poppins',sans-serif">📣 Enviar Convocatoria / Comunicado</h4>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div style="grid-column:span 2"><label class="form-label">Asunto *</label><input class="form-control" id="conv-asunto" placeholder="Asunto del comunicado"/></div>
+        <div><label class="form-label">Destinatarios</label><select class="form-control" id="conv-dest"><option value="todos">Todos los representantes</option><option value="parroquia">Una parroquia específica</option><option value="comuna">Una comuna</option><option value="consejo_comunal">Un Consejo Comunal</option></select></div>
+        <div><label class="form-label">Prioridad</label><select class="form-control" id="conv-prioridad"><option value="normal">Normal</option><option value="urgente">🔴 Urgente</option></select></div>
+        <div style="grid-column:span 2"><label class="form-label">Contenido *</label><textarea class="form-control" id="conv-contenido" rows="4" placeholder="Escriba el contenido del comunicado..."></textarea></div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:14px">
+        <button class="btn btn-primary" onclick="brig_sendConvocatoria()">📤 Enviar</button>
+        <button class="btn btn-secondary" onclick="document.getElementById('brig-conv-form').style.display='none'">Cancelar</button>
+      </div>
+    </div>
+    <div id="brig-conv-list">Cargando...</div>
+  </div>
+
+  <!-- TAB: SOLICITUDES -->
+  <div id="btab-panel-solicitudes-brig" style="display:none">
+    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+      <select id="brig-f-sol-estado" class="form-control" style="min-width:160px" onchange="brig_loadSolicitudes()"><option value="">Todos los estados</option><option value="pendiente">Pendiente</option><option value="en_proceso">En proceso</option><option value="aprobada">Aprobada</option><option value="rechazada">Rechazada</option><option value="entregada">Entregada</option></select>
+      <select id="brig-f-sol-tipo" class="form-control" style="min-width:180px" onchange="brig_loadSolicitudes()"><option value="">Todos los tipos</option><option value="plantas">Plantas</option><option value="arboles">Árboles</option><option value="herramientas">Herramientas</option><option value="bolsas">Bolsas</option><option value="guantes">Guantes</option><option value="agua">Agua</option><option value="transporte">Transporte</option><option value="material_educativo">Material educativo</option><option value="apoyo_tecnico">Apoyo técnico</option><option value="formacion">Formación</option></select>
+    </div>
+    <div id="brig-sol-list">Cargando...</div>
+    <div id="brig-sol-resp-form" style="display:none;background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px;margin-top:12px">
+      <input type="hidden" id="brig-sol-id"/>
+      <h4 style="margin-bottom:12px;font-family:'Poppins',sans-serif">Responder Solicitud</h4>
+      <div style="display:grid;gap:12px">
+        <div><label class="form-label">Estado *</label><select class="form-control" id="brig-sol-nuevo-estado"><option value="en_proceso">En proceso</option><option value="aprobada">Aprobada</option><option value="rechazada">Rechazada</option><option value="entregada">Entregada</option></select></div>
+        <div><label class="form-label">Respuesta institucional</label><textarea class="form-control" id="brig-sol-respuesta" rows="3" placeholder="Describa la acción tomada..."></textarea></div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:12px">
+        <button class="btn btn-primary" onclick="brig_responderSolicitud(document.getElementById('brig-sol-id').value)">💾 Guardar respuesta</button>
+        <button class="btn btn-secondary" onclick="document.getElementById('brig-sol-resp-form').style.display='none'">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: ESTADÍSTICAS -->
+  <div id="btab-panel-estadisticas-brig" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div style="font-size:14px;font-weight:600">Estadísticas Municipales de Brigadas</div>
+      <button class="btn btn-secondary" onclick="brig_exportCensoCSV()">⬇ Exportar censo CSV</button>
+    </div>
+    <div id="brig-stats-content">
+      <div style="text-align:center;padding:40px;color:var(--muted)">Cargando estadísticas...</div>
+    </div>
   </div>
 </div>
 

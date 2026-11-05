@@ -1,0 +1,1494 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Representante Territorial — Brigadas Ambientales IAGAMI</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --primary:#1d6b3e; --primary-dark:#1a3d2b; --primary-light:#e8f5ee;
+  --bg:#f5f7f5; --text:#1f2937; --border:#d1e7d9; --danger:#dc2626;
+  --warning:#d97706; --success:#16a34a; --radius:12px; --shadow:0 2px 8px rgba(0,0,0,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);font-size:16px;min-height:100vh}
+h1,h2,h3,h4{font-family:'Poppins',sans-serif}
+button{font-family:'Inter',sans-serif;cursor:pointer;border:none;border-radius:8px;font-size:14px;font-weight:500;transition:.2s}
+input,select,textarea{font-family:'Inter',sans-serif;font-size:15px;padding:10px 14px;border:1.5px solid var(--border);border-radius:8px;width:100%;outline:none;transition:.2s;background:#fff}
+input:focus,select:focus,textarea:focus{border-color:var(--primary)}
+label{display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:4px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:11px 20px;min-height:44px;font-weight:600;border-radius:8px;cursor:pointer;border:none;transition:.2s;font-size:14px}
+.btn-primary{background:var(--primary);color:#fff} .btn-primary:hover{background:var(--primary-dark)}
+.btn-secondary{background:#fff;color:var(--primary);border:1.5px solid var(--primary)} .btn-secondary:hover{background:var(--primary-light)}
+.btn-danger{background:#fee2e2;color:var(--danger)} .btn-sm{padding:7px 14px;min-height:36px;font-size:13px}
+.btn-block{width:100%}
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600}
+.badge-green{background:#dcfce7;color:#166534} .badge-yellow{background:#fef9c3;color:#854d0e}
+.badge-red{background:#fee2e2;color:#991b1b} .badge-blue{background:#dbeafe;color:#1e40af}
+.badge-gray{background:#f3f4f6;color:#374151} .badge-orange{background:#ffedd5;color:#9a3412}
+.card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow)}
+.form-group{margin-bottom:16px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.toast{position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:10px;font-weight:600;font-size:14px;z-index:9999;animation:fadeIn .3s;box-shadow:0 4px 12px rgba(0,0,0,.15)}
+.toast-ok{background:#dcfce7;color:#166534} .toast-err{background:#fee2e2;color:#991b1b}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.spinner{width:28px;height:28px;border:3px solid var(--primary-light);border-top-color:var(--primary);border-radius:50%;animation:spin .7s linear infinite;margin:40px auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty-state{text-align:center;padding:48px 20px;color:#9ca3af}
+.empty-state .ico{font-size:3rem;margin-bottom:12px}
+.section-title{font-size:1.3rem;font-weight:700;color:var(--primary-dark);margin-bottom:20px;display:flex;align-items:center;gap:8px}
+.tabs{display:flex;gap:4px;border-bottom:2px solid var(--border);margin-bottom:20px;overflow-x:auto}
+.tab-btn{padding:10px 18px;background:none;border:none;font-size:14px;font-weight:600;color:#6b7280;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;white-space:nowrap;transition:.2s}
+.tab-btn.active{color:var(--primary);border-bottom-color:var(--primary)}
+.tab-panel{display:none} .tab-panel.active{display:block}
+
+/* LOGIN */
+#login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+.login-card{background:#fff;border-radius:16px;padding:40px 32px;width:100%;max-width:400px;box-shadow:0 8px 32px rgba(0,0,0,.1)}
+.login-logo{text-align:center;margin-bottom:28px}
+.login-logo .ico{font-size:3rem}
+.login-logo h2{font-size:1.3rem;color:var(--primary-dark);margin-top:8px}
+.login-logo p{font-size:13px;color:#6b7280;margin-top:4px}
+#login-err{background:#fee2e2;color:var(--danger);padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:12px;display:none}
+
+/* APP LAYOUT */
+#app{display:none;min-height:100vh}
+.top-bar{background:var(--primary-dark);color:#fff;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.top-bar h1{font-size:1rem;font-weight:600}
+.top-bar-right{display:flex;align-items:center;gap:12px}
+#menu-toggle{background:none;border:none;color:#fff;font-size:1.5rem;cursor:pointer;line-height:1;padding:4px}
+.layout{display:flex;min-height:calc(100vh - 56px)}
+
+/* SIDEBAR */
+.sidebar{width:260px;background:#fff;border-right:1px solid var(--border);flex-shrink:0;overflow-y:auto}
+.sidebar-user{padding:20px;border-bottom:1px solid var(--border);text-align:center}
+.sidebar-avatar{width:56px;height:56px;border-radius:50%;background:var(--primary-light);display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin:0 auto 8px}
+.sidebar-name{font-size:14px;font-weight:700;color:var(--primary-dark)}
+.sidebar-role{font-size:12px;color:#6b7280;margin-top:2px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:13px 20px;cursor:pointer;font-size:14px;font-weight:500;color:#374151;transition:.15s;border-left:3px solid transparent}
+.nav-item:hover{background:var(--primary-light);color:var(--primary)}
+.nav-item.active{background:var(--primary-light);color:var(--primary);border-left-color:var(--primary);font-weight:600}
+.nav-item .nav-badge{margin-left:auto;background:var(--danger);color:#fff;border-radius:10px;padding:1px 7px;font-size:11px;font-weight:700}
+.sidebar-footer{padding:16px 20px;border-top:1px solid var(--border)}
+
+/* CONTENT */
+.content{flex:1;padding:24px;overflow-y:auto}
+.section{display:none} .section.active{display:block}
+
+/* DASHBOARD CARDS */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:24px}
+.stat-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:16px;text-align:center}
+.stat-card .num{font-size:1.8rem;font-weight:700;color:var(--primary);font-family:'Poppins',sans-serif}
+.stat-card .lbl{font-size:12px;color:#6b7280;margin-top:4px}
+.quick-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px}
+.quick-btn{background:var(--primary-light);color:var(--primary);border:1.5px solid var(--border);border-radius:var(--radius);padding:16px 12px;text-align:center;font-size:13px;font-weight:600;cursor:pointer;transition:.2s;min-height:60px}
+.quick-btn:hover{background:var(--primary);color:#fff}
+
+/* CALENDAR */
+.cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.cal-header h3{font-size:1.1rem;font-weight:700;color:var(--primary-dark)}
+.cal-nav{background:none;border:1.5px solid var(--border);border-radius:8px;padding:6px 12px;cursor:pointer;font-size:1rem}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cal-day-name{text-align:center;font-size:12px;font-weight:700;color:#6b7280;padding:6px 0}
+.cal-day{min-height:60px;background:#fff;border:1px solid var(--border);border-radius:6px;padding:4px;cursor:pointer;transition:.15s}
+.cal-day:hover{background:var(--primary-light)}
+.cal-day.today{border-color:var(--primary);background:var(--primary-light)}
+.cal-day.other-month{background:#f9fafb;color:#9ca3af}
+.cal-day-num{font-size:12px;font-weight:600;margin-bottom:2px}
+.cal-event-dot{font-size:9px;background:var(--primary);color:#fff;border-radius:3px;padding:1px 4px;margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* GALERIA */
+.gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.gallery-item{aspect-ratio:1;background:var(--primary-light);border-radius:8px;overflow:hidden;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:2rem}
+.gallery-item img{width:100%;height:100%;object-fit:cover}
+#lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9998;align-items:center;justify-content:center}
+#lightbox.open{display:flex}
+#lightbox img{max-width:90vw;max-height:90vh;border-radius:8px}
+#lightbox-close{position:absolute;top:16px;right:16px;background:rgba(255,255,255,.2);border:none;color:#fff;font-size:1.5rem;width:40px;height:40px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center}
+
+/* COMUNICACIONES */
+.msg-item{padding:14px 16px;border:1px solid var(--border);border-radius:var(--radius);margin-bottom:8px;background:#fff;cursor:pointer;transition:.15s}
+.msg-item:hover{border-color:var(--primary)}
+.msg-item.unread{border-left:4px solid var(--primary);background:var(--primary-light)}
+.msg-subject{font-weight:600;font-size:14px;color:var(--text)}
+.msg-meta{font-size:12px;color:#9ca3af;margin-top:4px}
+
+/* ASISTENCIA */
+.asistencia-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.asistencia-name{flex:1;font-size:14px;font-weight:500}
+.radio-group{display:flex;gap:8px}
+.radio-opt{display:flex;align-items:center;gap:4px;font-size:13px;cursor:pointer}
+.radio-opt input[type=radio]{accent-color:var(--primary);width:16px;height:16px}
+.asistencia-counter{background:var(--primary-light);border-radius:var(--radius);padding:12px 16px;display:flex;gap:20px;font-size:14px;font-weight:600;margin-bottom:16px}
+
+/* MOBILE */
+@media(max-width:768px){
+  .sidebar{position:fixed;left:-260px;top:0;height:100vh;z-index:200;transition:.3s;box-shadow:4px 0 20px rgba(0,0,0,.15)}
+  .sidebar.open{left:0}
+  .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:199}
+  .sidebar-overlay.open{display:block}
+  .content{padding:16px}
+  .grid-2{grid-template-columns:1fr}
+  .gallery-grid{grid-template-columns:repeat(2,1fr)}
+  .quick-actions{grid-template-columns:1fr 1fr}
+  .stat-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media(min-width:769px){#menu-toggle{display:none}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="ico">🌿</div>
+      <h2>Brigadas Ambientales IAGAMI</h2>
+      <p>Portal del Representante Territorial</p>
+    </div>
+    <div id="login-err"></div>
+    <div class="form-group"><label>Correo electrónico</label><input type="email" id="l-email" placeholder="correo@ejemplo.com"></div>
+    <div class="form-group"><label>Contraseña</label><input type="password" id="l-pass" placeholder="••••••••"></div>
+    <button class="btn btn-primary btn-block" id="btn-login" onclick="doLogin()">Iniciar sesión</button>
+    <p style="text-align:center;margin-top:16px;font-size:13px;color:#6b7280">¿Problemas? Contacta al Comandante Municipal</p>
+  </div>
+</div>
+
+<!-- LIGHTBOX -->
+<div id="lightbox" onclick="closeLightbox(this,event)">
+  <button id="lightbox-close" onclick="closeLightbox(null)">✕</button>
+  <img id="lightbox-img" src="" alt="">
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="top-bar">
+    <div style="display:flex;align-items:center;gap:12px">
+      <button id="menu-toggle" onclick="toggleSidebar()">☰</button>
+      <h1>Brigadas Ambientales</h1>
+    </div>
+    <div class="top-bar-right">
+      <span id="top-unread" style="display:none;background:#ef4444;color:#fff;border-radius:50%;width:22px;height:22px;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center"></span>
+      <button class="btn btn-sm" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3)" onclick="doLogout()">Salir</button>
+    </div>
+  </div>
+
+  <div class="layout">
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+    <div class="sidebar" id="sidebar">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar" id="sb-avatar">🌿</div>
+        <div class="sidebar-name" id="sb-name">Cargando...</div>
+        <div class="sidebar-role" id="sb-role">Representante</div>
+      </div>
+      <nav>
+        <div class="nav-item active" onclick="showSec('inicio')" data-sec="inicio">🏠 <span>Inicio</span></div>
+        <div class="nav-item" onclick="showSec('territorio')" data-sec="territorio">🗺️ <span>Mi Territorio</span></div>
+        <div class="nav-item" onclick="showSec('brigadas')" data-sec="brigadas">🌿 <span>Mis Brigadas</span></div>
+        <div class="nav-item" onclick="showSec('brigadistas')" data-sec="brigadistas">🧑‍🤝‍🧑 <span>Brigadistas</span></div>
+        <div class="nav-item" onclick="showSec('eventos')" data-sec="eventos">📅 <span>Eventos</span></div>
+        <div class="nav-item" onclick="showSec('calendario')" data-sec="calendario">📆 <span>Calendario</span></div>
+        <div class="nav-item" onclick="showSec('comunicaciones')" data-sec="comunicaciones">💬 <span>Comunicaciones</span> <span class="nav-badge" id="nb-msgs" style="display:none">0</span></div>
+        <div class="nav-item" onclick="showSec('asistencia')" data-sec="asistencia">✅ <span>Asistencia</span></div>
+        <div class="nav-item" onclick="showSec('evidencias')" data-sec="evidencias">📷 <span>Evidencias</span></div>
+        <div class="nav-item" onclick="showSec('solicitudes')" data-sec="solicitudes">📦 <span>Solicitudes</span></div>
+        <div class="nav-item" onclick="showSec('informes')" data-sec="informes">📋 <span>Informes</span></div>
+        <div class="nav-item" onclick="showSec('perfil')" data-sec="perfil">👤 <span>Mi Perfil</span></div>
+      </nav>
+      <div class="sidebar-footer">
+        <button class="btn btn-secondary btn-block btn-sm" onclick="doLogout()">Cerrar sesión</button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- INICIO -->
+      <div class="section active" id="sec-inicio">
+        <div class="section-title">🏠 Inicio</div>
+        <div id="inicio-content"><div class="spinner"></div></div>
+      </div>
+
+      <!-- TERRITORIO -->
+      <div class="section" id="sec-territorio">
+        <div class="section-title">🗺️ Mi Territorio</div>
+        <div id="territorio-content"><div class="spinner"></div></div>
+      </div>
+
+      <!-- BRIGADAS -->
+      <div class="section" id="sec-brigadas">
+        <div class="section-title">🌿 Mis Brigadas</div>
+        <div style="display:flex;justify-content:flex-end;margin-bottom:16px">
+          <button class="btn btn-primary" onclick="openBrigadaForm()">+ Nueva Brigada</button>
+        </div>
+        <div id="brigadas-form" style="display:none" class="card" style="margin-bottom:20px">
+          <h3 style="margin-bottom:16px;font-size:1rem">Registrar Brigada</h3>
+          <div class="grid-2">
+            <div class="form-group"><label>Nombre de la brigada</label><input id="bf-nombre" type="text"></div>
+            <div class="form-group"><label>Código (opcional)</label><input id="bf-codigo" type="text" placeholder="Se generará automáticamente"></div>
+          </div>
+          <div class="grid-2">
+            <div class="form-group"><label>Parroquia</label><input id="bf-parroquia" type="text" readonly></div>
+            <div class="form-group"><label>Consejo Comunal</label><input id="bf-cc" type="text" readonly></div>
+          </div>
+          <div class="form-group"><label>Objetivos</label><textarea id="bf-objetivos" rows="2"></textarea></div>
+          <div class="form-group"><label>Área de actuación</label><input id="bf-area" type="text"></div>
+          <div style="display:flex;gap:10px">
+            <button class="btn btn-primary" onclick="saveBrigada()">Guardar</button>
+            <button class="btn btn-secondary" onclick="document.getElementById('brigadas-form').style.display='none'">Cancelar</button>
+          </div>
+        </div>
+        <div id="brigadas-content"><div class="spinner"></div></div>
+        <div id="brigada-detalle" style="display:none"></div>
+      </div>
+
+      <!-- BRIGADISTAS -->
+      <div class="section" id="sec-brigadistas">
+        <div class="section-title">🧑‍🤝‍🧑 Brigadistas</div>
+        <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+          <input type="text" id="brig-search" placeholder="Buscar por nombre..." style="max-width:220px" oninput="filterBrigadistas()">
+          <select id="brig-filter-tipo" onchange="filterBrigadistas()" style="max-width:160px">
+            <option value="">Todos los tipos</option>
+            <option value="adulto">Adultos</option>
+            <option value="adolescente">Adolescentes</option>
+            <option value="nino">Pequeños Guardianes</option>
+          </select>
+          <select id="brig-filter-estado" onchange="filterBrigadistas()" style="max-width:160px">
+            <option value="">Todos los estados</option>
+            <option value="activo">Activos</option>
+            <option value="pendiente">Pendientes</option>
+            <option value="inactivo">Inactivos</option>
+          </select>
+        </div>
+        <div id="brigadistas-content"><div class="spinner"></div></div>
+      </div>
+
+      <!-- EVENTOS -->
+      <div class="section" id="sec-eventos">
+        <div class="section-title">📅 Eventos y Jornadas</div>
+        <div style="display:flex;justify-content:flex-end;margin-bottom:16px">
+          <button class="btn btn-primary" onclick="openEventoForm()">+ Organizar Jornada</button>
+        </div>
+        <div id="evento-form" style="display:none" class="card" style="margin-bottom:20px">
+          <h3 style="margin-bottom:16px;font-size:1rem">Nueva Jornada Ambiental</h3>
+          <div class="grid-2">
+            <div class="form-group"><label>Nombre</label><input id="ev-nombre" type="text"></div>
+            <div class="form-group"><label>Categoría</label>
+              <select id="ev-cat">
+                <option value="reforestacion">🌱 Reforestación</option>
+                <option value="arborizacion">🌳 Arborización urbana</option>
+                <option value="limpieza_quebradas">💧 Limpieza de quebradas</option>
+                <option value="areas_verdes">🏞️ Recuperación de áreas verdes</option>
+                <option value="reciclaje">♻️ Reciclaje</option>
+                <option value="educacion_ambiental">📚 Educación ambiental</option>
+                <option value="proteccion_fauna">🦋 Protección de fauna</option>
+                <option value="proteccion_agua">🚰 Protección del agua</option>
+                <option value="viveros">🌿 Viveros comunitarios</option>
+                <option value="compostaje">🍂 Compostaje</option>
+                <option value="biodiversidad">🌍 Biodiversidad</option>
+                <option value="cambio_climatico">🌡️ Cambio climático</option>
+                <option value="restauracion">🔄 Restauración ecológica</option>
+                <option value="jornada_comunitaria">🏘️ Jornada comunitaria</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group"><label>Descripción</label><textarea id="ev-desc" rows="2"></textarea></div>
+          <div class="grid-2">
+            <div class="form-group"><label>Fecha inicio</label><input id="ev-fecha-ini" type="date"></div>
+            <div class="form-group"><label>Fecha fin</label><input id="ev-fecha-fin" type="date"></div>
+            <div class="form-group"><label>Hora inicio</label><input id="ev-hora-ini" type="time"></div>
+            <div class="form-group"><label>Hora fin</label><input id="ev-hora-fin" type="time"></div>
+          </div>
+          <div class="form-group"><label>Lugar</label><input id="ev-lugar" type="text"></div>
+          <div class="form-group"><label>Meta de la actividad</label><input id="ev-meta" type="text" placeholder="Ej: Plantar 50 árboles"></div>
+          <div class="form-group"><label>Materiales necesarios</label><textarea id="ev-materiales" rows="2"></textarea></div>
+          <div style="display:flex;gap:10px">
+            <button class="btn btn-primary" onclick="saveEvento()">Guardar Borrador</button>
+            <button class="btn btn-secondary" onclick="document.getElementById('evento-form').style.display='none'">Cancelar</button>
+          </div>
+        </div>
+        <div class="tabs">
+          <button class="tab-btn active" onclick="switchEventoTab('proximos',this)">Próximos</button>
+          <button class="tab-btn" onclick="switchEventoTab('ejecucion',this)">En ejecución</button>
+          <button class="tab-btn" onclick="switchEventoTab('ejecutados',this)">Ejecutados</button>
+          <button class="tab-btn" onclick="switchEventoTab('cancelados',this)">Cancelados</button>
+        </div>
+        <div id="eventos-content"><div class="spinner"></div></div>
+      </div>
+
+      <!-- CALENDARIO -->
+      <div class="section" id="sec-calendario">
+        <div class="section-title">📆 Calendario</div>
+        <div class="card">
+          <div class="cal-header">
+            <button class="cal-nav" onclick="calNav(-1)">‹</button>
+            <h3 id="cal-title">Mes Año</h3>
+            <button class="cal-nav" onclick="calNav(1)">›</button>
+          </div>
+          <div class="cal-grid" id="cal-grid"></div>
+        </div>
+        <div id="cal-day-detail" style="margin-top:16px;display:none" class="card">
+          <h4 id="cal-day-title" style="margin-bottom:12px"></h4>
+          <div id="cal-day-events"></div>
+        </div>
+      </div>
+
+      <!-- COMUNICACIONES -->
+      <div class="section" id="sec-comunicaciones">
+        <div class="section-title">💬 Comunicaciones</div>
+        <div style="display:flex;justify-content:flex-end;margin-bottom:16px">
+          <button class="btn btn-primary" onclick="openMsgForm()">✏️ Redactar</button>
+        </div>
+        <div id="msg-form" style="display:none" class="card" style="margin-bottom:20px">
+          <h3 style="margin-bottom:16px;font-size:1rem">Nuevo Mensaje</h3>
+          <div class="form-group"><label>Destinatario</label>
+            <select id="msg-dest">
+              <option value="comandante">Comandante Municipal</option>
+              <option value="brigadas">Mis Brigadas (difusión)</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Asunto</label><input id="msg-asunto" type="text"></div>
+          <div class="form-group"><label>Mensaje</label><textarea id="msg-contenido" rows="4"></textarea></div>
+          <div style="display:flex;gap:10px">
+            <button class="btn btn-primary" onclick="sendMsg()">Enviar</button>
+            <button class="btn btn-secondary" onclick="document.getElementById('msg-form').style.display='none'">Cancelar</button>
+          </div>
+        </div>
+        <div class="tabs">
+          <button class="tab-btn active" onclick="switchComTab('recibidos',this)">📥 Recibidos</button>
+          <button class="tab-btn" onclick="switchComTab('enviados',this)">📤 Enviados</button>
+        </div>
+        <div id="com-recibidos" class="tab-panel active"><div class="spinner"></div></div>
+        <div id="com-enviados" class="tab-panel"></div>
+      </div>
+
+      <!-- ASISTENCIA -->
+      <div class="section" id="sec-asistencia">
+        <div class="section-title">✅ Registrar Asistencia</div>
+        <div class="card" style="margin-bottom:20px">
+          <div class="form-group"><label>Seleccionar Actividad</label>
+            <select id="asist-actividad" onchange="cargarListaAsistencia()"><option value="">— Seleccionar —</option></select>
+          </div>
+        </div>
+        <div id="asistencia-content"></div>
+      </div>
+
+      <!-- EVIDENCIAS -->
+      <div class="section" id="sec-evidencias">
+        <div class="section-title">📷 Evidencias</div>
+        <div class="card" style="margin-bottom:20px">
+          <div class="form-group"><label>Actividad</label>
+            <select id="evid-actividad" onchange="cargarGaleria()"><option value="">— Seleccionar —</option></select>
+          </div>
+        </div>
+        <div class="card" style="margin-bottom:20px">
+          <div style="display:flex;gap:12px;flex-wrap:wrap">
+            <div>
+              <label style="display:block;margin-bottom:6px;font-size:13px;font-weight:600">Subir foto</label>
+              <input type="file" id="evid-foto" accept="image/*" style="width:auto" onchange="previewFile(this,'evid-foto-preview')">
+              <div id="evid-foto-preview" style="font-size:12px;color:#6b7280;margin-top:4px"></div>
+            </div>
+            <div>
+              <label style="display:block;margin-bottom:6px;font-size:13px;font-weight:600">Subir documento (PDF)</label>
+              <input type="file" id="evid-doc" accept="application/pdf" style="width:auto" onchange="previewFile(this,'evid-doc-preview')">
+              <div id="evid-doc-preview" style="font-size:12px;color:#6b7280;margin-top:4px"></div>
+            </div>
+          </div>
+          <div style="margin-top:12px">
+            <button class="btn btn-primary" onclick="subirEvidencia()">📤 Subir</button>
+          </div>
+        </div>
+        <h3 style="font-size:1rem;font-weight:600;margin-bottom:12px">Galería</h3>
+        <div class="gallery-grid" id="galeria-content"></div>
+      </div>
+
+      <!-- SOLICITUDES -->
+      <div class="section" id="sec-solicitudes">
+        <div class="section-title">📦 Solicitudes de Apoyo</div>
+        <div style="display:flex;justify-content:flex-end;margin-bottom:16px">
+          <button class="btn btn-primary" onclick="openSolicitudForm()">+ Nueva Solicitud</button>
+        </div>
+        <div id="solicitud-form" style="display:none" class="card" style="margin-bottom:20px">
+          <h3 style="margin-bottom:16px;font-size:1rem">Nueva Solicitud de Apoyo</h3>
+          <div class="grid-2">
+            <div class="form-group"><label>Tipo de recurso</label>
+              <select id="sol-tipo">
+                <option value="plantas">🌱 Plantas</option>
+                <option value="arboles">🌳 Árboles</option>
+                <option value="herramientas">🔨 Herramientas</option>
+                <option value="bolsas">🛍️ Bolsas</option>
+                <option value="guantes">🧤 Guantes</option>
+                <option value="agua">💧 Agua</option>
+                <option value="transporte">🚐 Transporte</option>
+                <option value="material_educativo">📚 Material educativo</option>
+                <option value="insumos">📦 Insumos</option>
+                <option value="apoyo_tecnico">🔧 Apoyo técnico</option>
+                <option value="formacion">🎓 Formación</option>
+              </select>
+            </div>
+            <div class="form-group"><label>Prioridad</label>
+              <select id="sol-prioridad">
+                <option value="alta">🔴 Alta</option>
+                <option value="media">🟡 Media</option>
+                <option value="baja">🟢 Baja</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group"><label>Descripción</label><textarea id="sol-desc" rows="2"></textarea></div>
+          <div class="form-group"><label>Cantidad</label><input id="sol-cantidad" type="text" placeholder="Ej: 100 bolsas, 5 palas"></div>
+          <div class="form-group"><label>Justificación</label><textarea id="sol-justif" rows="2"></textarea></div>
+          <div style="display:flex;gap:10px">
+            <button class="btn btn-primary" onclick="saveSolicitud()">Enviar Solicitud</button>
+            <button class="btn btn-secondary" onclick="document.getElementById('solicitud-form').style.display='none'">Cancelar</button>
+          </div>
+        </div>
+        <div id="solicitudes-content"><div class="spinner"></div></div>
+      </div>
+
+      <!-- INFORMES -->
+      <div class="section" id="sec-informes">
+        <div class="section-title">📋 Informes de Actividad</div>
+        <div style="display:flex;justify-content:flex-end;margin-bottom:16px">
+          <button class="btn btn-primary" onclick="openInformeForm()">+ Nuevo Informe</button>
+        </div>
+        <div id="informe-form" style="display:none" class="card" style="margin-bottom:20px">
+          <h3 style="margin-bottom:16px;font-size:1rem">Informe de Actividad</h3>
+          <div class="grid-2">
+            <div class="form-group"><label>Actividad</label><select id="inf-actividad"></select></div>
+            <div class="form-group"><label>Fecha</label><input id="inf-fecha" type="date"></div>
+          </div>
+          <div class="grid-2">
+            <div class="form-group"><label>Lugar</label><input id="inf-lugar" type="text"></div>
+            <div class="form-group"><label>N° participantes</label><input id="inf-participantes" type="number" min="0"></div>
+          </div>
+          <h4 style="margin:12px 0 10px;font-size:14px;font-weight:700;color:var(--primary-dark)">🌿 Indicadores Ambientales</h4>
+          <div class="grid-2">
+            <div class="form-group"><label>Árboles plantados</label><input id="inf-arboles" type="number" min="0" value="0"></div>
+            <div class="form-group"><label>Especies utilizadas</label><input id="inf-especies" type="text"></div>
+            <div class="form-group"><label>Superficie recuperada (m²)</label><input id="inf-superficie" type="number" min="0" value="0"></div>
+            <div class="form-group"><label>Residuos recolectados (kg)</label><input id="inf-residuos" type="number" min="0" value="0"></div>
+          </div>
+          <div class="form-group"><label>Actividades educativas realizadas</label><input id="inf-educativas" type="text"></div>
+          <div class="form-group"><label>Resultados obtenidos</label><textarea id="inf-resultados" rows="3"></textarea></div>
+          <div class="form-group"><label>Dificultades encontradas</label><textarea id="inf-dificultades" rows="2"></textarea></div>
+          <div class="form-group"><label>Recomendaciones</label><textarea id="inf-recomendaciones" rows="2"></textarea></div>
+          <div class="form-group">
+            <label>Fotografías (hasta 5)</label>
+            <input type="file" id="inf-fotos" accept="image/*" multiple>
+          </div>
+          <div class="form-group">
+            <label>Documento adicional (PDF)</label>
+            <input type="file" id="inf-doc" accept="application/pdf">
+          </div>
+          <div style="display:flex;gap:10px">
+            <button class="btn btn-primary" onclick="saveInforme('enviado')">Enviar al Comandante</button>
+            <button class="btn btn-secondary" onclick="saveInforme('borrador')">Guardar Borrador</button>
+            <button class="btn btn-secondary" onclick="document.getElementById('informe-form').style.display='none'">Cancelar</button>
+          </div>
+        </div>
+        <div id="informes-content"><div class="spinner"></div></div>
+      </div>
+
+      <!-- PERFIL -->
+      <div class="section" id="sec-perfil">
+        <div class="section-title">👤 Mi Perfil</div>
+        <div class="card" style="max-width:500px">
+          <div style="text-align:center;margin-bottom:24px">
+            <div style="width:80px;height:80px;border-radius:50%;background:var(--primary-light);display:flex;align-items:center;justify-content:center;font-size:2.5rem;margin:0 auto 12px" id="perfil-avatar">🌿</div>
+            <input type="file" id="perfil-foto" accept="image/*" style="display:none" onchange="previewAvatar(this)">
+            <button class="btn btn-secondary btn-sm" onclick="document.getElementById('perfil-foto').click()">Cambiar foto</button>
+          </div>
+          <div class="grid-2">
+            <div class="form-group"><label>Nombres</label><input id="p-nombres" type="text"></div>
+            <div class="form-group"><label>Apellidos</label><input id="p-apellidos" type="text"></div>
+          </div>
+          <div class="grid-2">
+            <div class="form-group"><label>Email</label><input id="p-email" type="email" readonly style="background:#f9fafb;color:#9ca3af"></div>
+            <div class="form-group"><label>Teléfono</label><input id="p-telefono" type="tel"></div>
+          </div>
+          <div class="grid-2">
+            <div class="form-group"><label>Cédula</label><input id="p-cedula" readonly style="background:#f9fafb;color:#9ca3af"></div>
+            <div class="form-group"><label>Cargo</label><input id="p-cargo" readonly style="background:#f9fafb;color:#9ca3af"></div>
+          </div>
+          <div class="grid-2">
+            <div class="form-group"><label>Parroquia</label><input id="p-parroquia" readonly style="background:#f9fafb;color:#9ca3af"></div>
+            <div class="form-group"><label>Fecha designación</label><input id="p-fecha" type="date" readonly style="background:#f9fafb;color:#9ca3af"></div>
+          </div>
+          <button class="btn btn-primary btn-block" onclick="savePerfil()" style="margin-top:4px">Guardar cambios</button>
+          <hr style="margin:24px 0;border:none;border-top:1px solid var(--border)">
+          <h4 style="margin-bottom:16px;font-size:14px;font-weight:700">Cambiar contraseña</h4>
+          <div class="form-group"><label>Contraseña actual</label><input id="p-pass-actual" type="password"></div>
+          <div class="form-group"><label>Nueva contraseña</label><input id="p-pass-nueva" type="password"></div>
+          <div class="form-group"><label>Confirmar nueva contraseña</label><input id="p-pass-confirm" type="password"></div>
+          <button class="btn btn-secondary btn-block" onclick="changePass()">Actualizar contraseña</button>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /layout -->
+</div><!-- /app -->
+
+<script>
+const API = 'https://api.iagami.online';
+let _rep = null, _misB = [], _misAct = [], _misBrigadistas = [], _allBrigadistas = [];
+let _calYear, _calMonth, _calEventos = [];
+let _currentEvTab = 'proximos';
+
+function esc(s){ const d=document.createElement('div');d.textContent=String(s??'');return d.innerHTML; }
+
+function toast(msg, ok=true){
+  const t=document.createElement('div');
+  t.className='toast '+(ok?'toast-ok':'toast-err');
+  t.textContent=msg;
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(),3500);
+}
+
+async function pbFetch(path, opts={}){
+  const token = localStorage.getItem('rep_token');
+  const headers = {'Content-Type':'application/json', ...(opts.headers||{})};
+  if(token) headers['Authorization'] = 'Bearer '+token;
+  const r = await fetch(API+path, {...opts, headers});
+  if(!r.ok){
+    const e = await r.json().catch(()=>({}));
+    throw Object.assign(new Error(e.message||'Error'), {status:r.status});
+  }
+  return r.json();
+}
+
+function territorioFilter(){
+  if(!_rep) return '';
+  if(_rep.tipo === 'representante_consejo_comunal' && _rep.consejo_comunal_id)
+    return `consejo_comunal_id="${_rep.consejo_comunal_id}"`;
+  if(_rep.tipo === 'representante_comuna' && _rep.comuna_id)
+    return `comuna_id="${_rep.comuna_id}"`;
+  return _rep.parroquia ? `parroquia="${_rep.parroquia}"` : '';
+}
+
+// AUTH
+async function doLogin(){
+  const email = document.getElementById('l-email').value.trim();
+  const pass  = document.getElementById('l-pass').value;
+  const errEl = document.getElementById('login-err');
+  errEl.style.display = 'none';
+  if(!email||!pass){ errEl.textContent='Completa todos los campos.'; errEl.style.display='block'; return; }
+  try{
+    const data = await pbFetch('/api/collections/representantes_brigadas/auth-with-password',{
+      method:'POST', body: JSON.stringify({identity:email, password:pass})
+    });
+    const rec = data.record;
+    if(rec.estado === 'pendiente'){
+      errEl.textContent='Tu cuenta está pendiente de activación por el Comandante Municipal.';
+      errEl.style.display='block'; return;
+    }
+    if(rec.estado !== 'activo'){
+      errEl.textContent='Tu cuenta está suspendida. Contacta al Comandante Municipal.';
+      errEl.style.display='block'; return;
+    }
+    localStorage.setItem('rep_token', data.token);
+    localStorage.setItem('rep_data', JSON.stringify(rec));
+    initApp(rec);
+  } catch(e){
+    if(e.status===404||e.status===400){
+      errEl.textContent='Esta funcionalidad estará disponible cuando se complete la configuración del sistema.';
+    } else {
+      errEl.textContent='Correo o contraseña incorrectos.';
+    }
+    errEl.style.display='block';
+  }
+}
+
+document.addEventListener('keypress', e=>{ if(e.key==='Enter'&&document.getElementById('login-screen').style.display!=='none') doLogin(); });
+
+async function restoreSession(){
+  const token = localStorage.getItem('rep_token');
+  const data  = localStorage.getItem('rep_data');
+  if(!token||!data) return;
+  try{
+    const res = await pbFetch('/api/collections/representantes_brigadas/auth-refresh',{method:'POST'});
+    localStorage.setItem('rep_token', res.token);
+    localStorage.setItem('rep_data', JSON.stringify(res.record));
+    initApp(res.record);
+  } catch{ localStorage.removeItem('rep_token'); localStorage.removeItem('rep_data'); }
+}
+
+function doLogout(){
+  localStorage.removeItem('rep_token'); localStorage.removeItem('rep_data');
+  document.getElementById('app').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
+  _rep=null; _misB=[]; _misAct=[]; _misBrigadistas=[];
+}
+
+function initApp(rec){
+  _rep = rec;
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app').style.display='block';
+  document.getElementById('sb-name').textContent = esc(`${rec.nombres} ${rec.apellidos}`);
+  const tipo = rec.tipo==='representante_consejo_comunal' ? 'Rep. Consejo Comunal' : 'Rep. de Comuna';
+  document.getElementById('sb-role').textContent = tipo;
+  renderInicio();
+  loadActividadesParaSelects();
+  checkUnread();
+}
+
+function toggleSidebar(){
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebar-overlay').classList.toggle('open');
+}
+
+function showSec(id){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('sec-'+id)?.classList.add('active');
+  document.querySelector(`[data-sec="${id}"]`)?.classList.add('active');
+  if(window.innerWidth<768) toggleSidebar();
+  const loaders = {
+    territorio: renderTerritorio,
+    brigadas: renderBrigadas,
+    brigadistas: renderBrigadistas,
+    eventos: ()=>renderEventos(_currentEvTab),
+    calendario: renderCalendario,
+    comunicaciones: ()=>loadMensajes('recibidos'),
+    solicitudes: renderSolicitudes,
+    informes: renderInformes,
+    perfil: loadPerfil,
+    asistencia: loadActividadesAsistencia,
+    evidencias: loadActividadesEvidencias,
+  };
+  if(loaders[id]) loaders[id]();
+}
+
+// BADGES UTILS
+function estadoBadge(e){
+  const m={activa:'badge-green',en_formacion:'badge-yellow',en_planificacion:'badge-blue',suspendida:'badge-red',inactiva:'badge-gray'};
+  return `<span class="badge ${m[e]||'badge-gray'}">${esc(e||'—')}</span>`;
+}
+function estadoActBadge(e){
+  const m={programado:'badge-blue',convocado:'badge-yellow',confirmado:'badge-green',en_ejecucion:'badge-orange',ejecutado:'badge-green',suspendido:'badge-red',cancelado:'badge-gray',borrador:'badge-gray'};
+  return `<span class="badge ${m[e]||'badge-gray'}">${esc(e||'—')}</span>`;
+}
+function priorBadge(p){
+  const m={alta:'badge-red',media:'badge-yellow',baja:'badge-green'};
+  return `<span class="badge ${m[p]||'badge-gray'}">${esc(p||'—')}</span>`;
+}
+function infBadge(e){
+  const m={borrador:'badge-gray',enviado:'badge-blue',aprobado:'badge-green',observado:'badge-red'};
+  return `<span class="badge ${m[e]||'badge-gray'}">${esc(e||'—')}</span>`;
+}
+function catIco(c){
+  const m={reforestacion:'🌱',arborizacion:'🌳',limpieza_quebradas:'💧',areas_verdes:'🏞️',reciclaje:'♻️',educacion_ambiental:'📚',proteccion_fauna:'🦋',proteccion_agua:'🚰',viveros:'🌿',compostaje:'🍂',biodiversidad:'🌍',cambio_climatico:'🌡️',restauracion:'🔄',jornada_comunitaria:'🏘️'};
+  return m[c]||'📅';
+}
+
+// INICIO
+async function renderInicio(){
+  const el = document.getElementById('inicio-content');
+  try{
+    const tf = territorioFilter();
+    const [rB, rAct, rSol, rInf] = await Promise.all([
+      pbFetch(`/api/collections/brigadas/records?filter=${encodeURIComponent(tf)}&perPage=200`).catch(()=>({items:[]})),
+      pbFetch(`/api/collections/actividades_brigadas/records?filter=${encodeURIComponent(tf+' && fecha_inicio>="'+new Date().toISOString().split('T')[0]+'"')}&sort=fecha_inicio&perPage=5`).catch(()=>({items:[]})),
+      pbFetch(`/api/collections/solicitudes_apoyo/records?filter=${encodeURIComponent('representante_id="'+_rep.id+'" && estado="pendiente"')}&perPage=100`).catch(()=>({items:[]})),
+      pbFetch(`/api/collections/informes_actividad/records?filter=${encodeURIComponent('representante_id="'+_rep.id+'"')}&perPage=100`).catch(()=>({items:[]})),
+    ]);
+    _misB = rB.items||[];
+    _misAct = rAct.items||[];
+    const proxima = _misAct[0];
+    el.innerHTML = `
+      <div class="card" style="margin-bottom:20px;background:linear-gradient(135deg,var(--primary-dark),var(--primary));color:#fff">
+        <div style="display:flex;align-items:center;gap:14px">
+          <div style="font-size:2.5rem">🌿</div>
+          <div>
+            <div style="font-size:1.1rem;font-weight:700">${esc(_rep.nombres+' '+_rep.apellidos)}</div>
+            <div style="opacity:.85;font-size:14px">${_rep.tipo==='representante_consejo_comunal'?'Representante de Consejo Comunal':'Representante de Comuna'}</div>
+            <div style="opacity:.7;font-size:13px">${esc(_rep.parroquia||'')} ${_rep.comunidad?'· '+_rep.comunidad:''}</div>
+          </div>
+        </div>
+      </div>
+      <div class="stat-grid">
+        <div class="stat-card"><div class="num">${_misB.length}</div><div class="lbl">Brigadas</div></div>
+        <div class="stat-card"><div class="num">${rSol.items?.length||0}</div><div class="lbl">Solicitudes pendientes</div></div>
+        <div class="stat-card"><div class="num">${(rInf.items||[]).filter(i=>i.estado==='observado').length}</div><div class="lbl">Informes observados</div></div>
+        <div class="stat-card"><div class="num">${_misAct.length}</div><div class="lbl">Actividades próximas</div></div>
+      </div>
+      ${proxima ? `<div class="card" style="margin-bottom:20px;border-left:4px solid var(--primary)">
+        <div style="font-size:12px;font-weight:700;color:var(--primary);margin-bottom:6px">📅 PRÓXIMA ACTIVIDAD</div>
+        <div style="font-size:1rem;font-weight:700">${catIco(proxima.categoria)} ${esc(proxima.nombre)}</div>
+        <div style="font-size:13px;color:#6b7280;margin-top:4px">${esc(proxima.fecha_inicio||'')} ${proxima.hora_inicio?'· '+esc(proxima.hora_inicio):''} · ${esc(proxima.lugar||'Sin lugar definido')}</div>
+        ${estadoActBadge(proxima.estado)}
+      </div>` : ''}
+      <div class="quick-actions">
+        <button class="quick-btn" onclick="showSec('solicitudes');openSolicitudForm()">📦 Nueva solicitud</button>
+        <button class="quick-btn" onclick="showSec('asistencia')">✅ Registrar asistencia</button>
+        <button class="quick-btn" onclick="showSec('evidencias')">📷 Subir evidencia</button>
+        <button class="quick-btn" onclick="showSec('informes');openInformeForm()">📋 Redactar informe</button>
+      </div>`;
+  } catch(e){
+    el.innerHTML = unavailable();
+  }
+}
+
+function unavailable(){ return `<div class="empty-state"><div class="ico">🔧</div><p>Esta información estará disponible cuando se complete la configuración del sistema.</p></div>`; }
+
+async function checkUnread(){
+  try{
+    const r = await pbFetch(`/api/collections/comunicados_brigadas/records?filter=${encodeURIComponent('destinatario_id="'+_rep.id+'" && leido=false')}&perPage=100`);
+    const n = r.totalItems||0;
+    const nb = document.getElementById('nb-msgs');
+    const tu = document.getElementById('top-unread');
+    if(n>0){ nb.textContent=n; nb.style.display=''; tu.textContent=n; tu.style.display='flex'; }
+    else { nb.style.display='none'; tu.style.display='none'; }
+  } catch{}
+}
+
+// TERRITORIO
+async function renderTerritorio(){
+  const el = document.getElementById('territorio-content');
+  el.innerHTML = '<div class="spinner"></div>';
+  try{
+    if(_rep.tipo === 'representante_consejo_comunal'){
+      const [rCC, rB] = await Promise.all([
+        pbFetch(`/api/collections/consejos_comunales/records/${_rep.consejo_comunal_id}`).catch(()=>null),
+        pbFetch(`/api/collections/brigadas/records?filter=${encodeURIComponent('consejo_comunal_id="'+_rep.consejo_comunal_id+'"')}&perPage=100`).catch(()=>({items:[]})),
+      ]);
+      const brigadas = rB.items||[];
+      el.innerHTML = `
+        <div class="card" style="margin-bottom:20px">
+          <div style="font-size:1rem;font-weight:700;color:var(--primary-dark)">${esc(rCC?.nombre||_rep.consejo_comunal_id||'Mi Consejo Comunal')}</div>
+          <div style="font-size:13px;color:#6b7280;margin-top:4px">Parroquia: ${esc(_rep.parroquia||'—')} · CC asignado</div>
+          <div style="display:flex;gap:16px;margin-top:16px">
+            <div class="stat-card" style="flex:1"><div class="num">${brigadas.length}</div><div class="lbl">Brigadas</div></div>
+            <div class="stat-card" style="flex:1"><div class="num">${_misBrigadistas.length||'—'}</div><div class="lbl">Brigadistas</div></div>
+          </div>
+        </div>
+        ${brigadas.length ? brigadas.map(b=>`
+          <div class="card" style="margin-bottom:10px">
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <div>
+                <div style="font-weight:700">${esc(b.nombre)}</div>
+                <div style="font-size:12px;color:#6b7280;margin-top:3px">${esc(b.codigo||'Sin código')}</div>
+              </div>
+              ${estadoBadge(b.estado)}
+            </div>
+          </div>`).join('') : '<div class="empty-state"><div class="ico">🌿</div><p>No hay brigadas registradas aún.</p></div>'}`;
+    } else {
+      const [rCCs, rB] = await Promise.all([
+        pbFetch(`/api/collections/consejos_comunales/records?filter=${encodeURIComponent('comuna_id="'+_rep.comuna_id+'"')}&perPage=50`).catch(()=>({items:[]})),
+        pbFetch(`/api/collections/brigadas/records?filter=${encodeURIComponent('comuna_id="'+_rep.comuna_id+'"')}&perPage=200`).catch(()=>({items:[]})),
+      ]);
+      const ccs = rCCs.items||[], brigadas = rB.items||[];
+      el.innerHTML = `
+        <div class="card" style="margin-bottom:20px">
+          <div style="font-size:1rem;font-weight:700;color:var(--primary-dark)">${esc(_rep.parroquia||'Mi Territorio')}</div>
+          <div style="font-size:13px;color:#6b7280;margin-top:4px">Representante de Comuna</div>
+          <div style="display:flex;gap:16px;margin-top:16px">
+            <div class="stat-card" style="flex:1"><div class="num">${ccs.length}</div><div class="lbl">Consejos Comunales</div></div>
+            <div class="stat-card" style="flex:1"><div class="num">${brigadas.length}</div><div class="lbl">Brigadas</div></div>
+          </div>
+        </div>
+        <h3 style="font-size:1rem;font-weight:700;margin-bottom:12px">Consejos Comunales</h3>
+        ${ccs.map(cc=>{
+          const bCC = brigadas.filter(b=>b.consejo_comunal_id===cc.id);
+          return `<div class="card" style="margin-bottom:10px">
+            <div style="font-weight:700">${esc(cc.nombre)}</div>
+            <div style="font-size:13px;color:#6b7280;margin-top:4px">${bCC.length} brigada(s)</div>
+          </div>`;
+        }).join('')||'<p style="color:#9ca3af">No se encontraron Consejos Comunales.</p>'}`;
+    }
+  } catch{ el.innerHTML = unavailable(); }
+}
+
+// BRIGADAS
+function openBrigadaForm(){
+  const f = document.getElementById('brigadas-form');
+  f.style.display = f.style.display==='none'?'block':'none';
+  document.getElementById('bf-parroquia').value = _rep.parroquia||'';
+  document.getElementById('bf-cc').value = _rep.consejo_comunal_id||_rep.comuna_id||'';
+}
+
+async function renderBrigadas(){
+  const el = document.getElementById('brigadas-content');
+  el.innerHTML = '<div class="spinner"></div>';
+  try{
+    const tf = territorioFilter();
+    const r = await pbFetch(`/api/collections/brigadas/records?filter=${encodeURIComponent(tf)}&sort=-created&perPage=100`);
+    _misB = r.items||[];
+    if(!_misB.length){ el.innerHTML = '<div class="empty-state"><div class="ico">🌿</div><p>No hay brigadas registradas en tu territorio.</p></div>'; return; }
+    el.innerHTML = _misB.map(b=>`
+      <div class="card" style="margin-bottom:12px;cursor:pointer" onclick="showBrigadaDetalle('${esc(b.id)}')">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div>
+            <div style="font-weight:700">${esc(b.nombre)}</div>
+            <div style="font-size:12px;color:#6b7280;margin-top:3px">Código: ${esc(b.codigo||'—')} · ${esc(b.area_actuacion||'')}</div>
+            <div style="margin-top:6px">${estadoBadge(b.estado)}</div>
+          </div>
+          <div style="text-align:right;font-size:12px;color:#9ca3af">Ver detalle ›</div>
+        </div>
+      </div>`).join('');
+  } catch{ el.innerHTML = unavailable(); }
+}
+
+async function showBrigadaDetalle(id){
+  const det = document.getElementById('brigada-detalle');
+  det.style.display='block';
+  det.innerHTML='<div class="spinner"></div>';
+  det.scrollIntoView({behavior:'smooth'});
+  try{
+    const b = await pbFetch(`/api/collections/brigadas/records/${id}`);
+    const rBrig = await pbFetch(`/api/collections/brigadistas/records?filter=${encodeURIComponent('brigada_id="'+id+'"')}&perPage=100`).catch(()=>({items:[]}));
+    det.innerHTML = `
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:16px">
+          <h3 style="font-size:1.1rem">${esc(b.nombre)}</h3>
+          <button class="btn btn-secondary btn-sm" onclick="document.getElementById('brigada-detalle').style.display='none'">✕ Cerrar</button>
+        </div>
+        <div class="grid-2" style="margin-bottom:16px">
+          <div><b>Código:</b> ${esc(b.codigo||'—')}</div>
+          <div><b>Estado:</b> ${estadoBadge(b.estado)}</div>
+          <div><b>Parroquia:</b> ${esc(b.parroquia||'—')}</div>
+          <div><b>Conformada:</b> ${esc(b.fecha_conformacion||'—')}</div>
+        </div>
+        ${b.objetivos?`<div style="margin-bottom:12px"><b>Objetivos:</b> ${esc(b.objetivos)}</div>`:''}
+        ${b.area_actuacion?`<div style="margin-bottom:16px"><b>Área:</b> ${esc(b.area_actuacion)}</div>`:''}
+        <h4 style="margin-bottom:10px;font-size:14px">Integrantes (${rBrig.items?.length||0})</h4>
+        ${(rBrig.items||[]).map(br=>`<div style="padding:6px 0;border-bottom:1px solid var(--border);font-size:14px">${esc(br.nombres+' '+br.apellidos)} · <span style="color:#6b7280">${esc(br.categoria||br.tipo||'adulto')}</span></div>`).join('')||'<p style="color:#9ca3af;font-size:13px">Sin integrantes registrados aún.</p>'}
+      </div>`;
+  } catch{ det.innerHTML = unavailable(); }
+}
+
+async function saveBrigada(){
+  if(!document.getElementById('bf-nombre').value.trim()){ toast('El nombre es obligatorio.',false); return; }
+  try{
+    const codigo = 'BRG-'+Date.now().toString(36).toUpperCase();
+    await pbFetch('/api/collections/brigadas/records',{
+      method:'POST',
+      body: JSON.stringify({
+        nombre: document.getElementById('bf-nombre').value.trim(),
+        codigo: document.getElementById('bf-codigo').value.trim()||codigo,
+        parroquia: _rep.parroquia||'',
+        consejo_comunal_id: _rep.consejo_comunal_id||'',
+        comuna_id: _rep.comuna_id||'',
+        objetivos: document.getElementById('bf-objetivos').value.trim(),
+        area_actuacion: document.getElementById('bf-area').value.trim(),
+        representante_id: _rep.id,
+        estado: 'en_formacion',
+      })
+    });
+    toast('Brigada registrada.');
+    document.getElementById('brigadas-form').style.display='none';
+    renderBrigadas();
+  } catch(e){ toast(e.status===404?'Colección no disponible aún.':e.message,false); }
+}
+
+// BRIGADISTAS
+async function renderBrigadistas(){
+  const el = document.getElementById('brigadistas-content');
+  el.innerHTML = '<div class="spinner"></div>';
+  try{
+    const tf = territorioFilter();
+    const [rA, rM] = await Promise.all([
+      pbFetch(`/api/collections/brigadistas/records?filter=${encodeURIComponent(tf)}&sort=nombres&perPage=500`).catch(()=>({items:[]})),
+      pbFetch(`/api/collections/brigadistas_menores/records?filter=${encodeURIComponent(tf)}&sort=nombres&perPage=500`).catch(()=>({items:[]})),
+    ]);
+    const adultos = (rA.items||[]).map(b=>({...b,_tipo:'adulto'}));
+    const menores = (rM.items||[]).map(b=>({...b,_tipo:b.categoria||'nino'}));
+    _allBrigadistas = [...adultos, ...menores];
+    _misBrigadistas = _allBrigadistas;
+    renderBrigadistasList(_allBrigadistas);
+  } catch{ el.innerHTML = unavailable(); }
+}
+
+function filterBrigadistas(){
+  const q = document.getElementById('brig-search').value.toLowerCase();
+  const tipo = document.getElementById('brig-filter-tipo').value;
+  const estado = document.getElementById('brig-filter-estado').value;
+  const filtered = _allBrigadistas.filter(b=>{
+    const name = `${b.nombres} ${b.apellidos}`.toLowerCase();
+    if(q && !name.includes(q)) return false;
+    if(tipo && b._tipo !== tipo) return false;
+    if(estado && b.estado !== estado) return false;
+    return true;
+  });
+  renderBrigadistasList(filtered);
+}
+
+function renderBrigadistasList(list){
+  const el = document.getElementById('brigadistas-content');
+  if(!list.length){ el.innerHTML='<div class="empty-state"><div class="ico">🧑‍🤝‍🧑</div><p>No se encontraron brigadistas.</p></div>'; return; }
+  el.innerHTML = `<div style="background:#fff;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden">
+    <table style="width:100%;border-collapse:collapse;font-size:14px">
+      <thead><tr style="background:#f8fcfa;border-bottom:1px solid var(--border)">
+        <th style="padding:10px 14px;text-align:left">Nombre</th>
+        <th style="padding:10px 14px;text-align:left">Categoría</th>
+        <th style="padding:10px 14px;text-align:left">Estado</th>
+        <th style="padding:10px 14px;text-align:left">Brigada</th>
+      </tr></thead>
+      <tbody>${list.map(b=>{
+        const tipo = b._tipo==='adulto'?'👤 Adulto': b._tipo==='adolescente'?'🧑 Adolescente':'🧒 Pequeño Guardián';
+        // PROTECCIÓN MENORES: nunca mostrar cédula, teléfono, dirección de menores
+        const esMenor = b._tipo !== 'adulto';
+        return `<tr style="border-bottom:1px solid var(--border)">
+          <td style="padding:10px 14px;font-weight:600">${esc(b.nombres+' '+b.apellidos)}</td>
+          <td style="padding:10px 14px">${tipo}</td>
+          <td style="padding:10px 14px">${estadoBadge(b.estado||b.estado_inscripcion||'activo')}</td>
+          <td style="padding:10px 14px">${esc(b.brigada_id||b.nombre_brigada||'—')}</td>
+        </tr>`;
+      }).join('')}</tbody>
+    </table></div>`;
+}
+
+// EVENTOS
+async function renderEventos(tab){
+  _currentEvTab = tab;
+  const el = document.getElementById('eventos-content');
+  el.innerHTML = '<div class="spinner"></div>';
+  try{
+    const tf = territorioFilter();
+    const estadoMap = {
+      proximos: 'programado,convocado,confirmado,borrador',
+      ejecucion: 'en_ejecucion',
+      ejecutados: 'ejecutado',
+      cancelados: 'cancelado,suspendido',
+    };
+    const estados = estadoMap[tab]||'programado';
+    const filters = estados.split(',').map(e=>`estado="${e}"`).join('||');
+    const f = tf ? `(${tf}) && (${filters})` : `(${filters})`;
+    const r = await pbFetch(`/api/collections/actividades_brigadas/records?filter=${encodeURIComponent(f)}&sort=-fecha_inicio&perPage=50`);
+    _misAct = r.items||[];
+    if(!_misAct.length){ el.innerHTML='<div class="empty-state"><div class="ico">📅</div><p>No hay actividades en esta categoría.</p></div>'; return; }
+    el.innerHTML = _misAct.map(ev=>`
+      <div class="card" style="margin-bottom:12px">
+        <div style="display:flex;align-items:start;justify-content:space-between;gap:12px">
+          <div>
+            <div style="font-size:1.3rem">${catIco(ev.categoria)}</div>
+          </div>
+          <div style="flex:1">
+            <div style="font-weight:700">${esc(ev.nombre)}</div>
+            <div style="font-size:13px;color:#6b7280;margin-top:3px">📅 ${esc(ev.fecha_inicio||'')} ${ev.hora_inicio?'· '+esc(ev.hora_inicio):''}</div>
+            <div style="font-size:13px;color:#6b7280">📍 ${esc(ev.lugar||'Sin lugar')}</div>
+            <div style="margin-top:6px">${estadoActBadge(ev.estado)}</div>
+          </div>
+        </div>
+      </div>`).join('');
+  } catch{ el.innerHTML = unavailable(); }
+}
+
+function switchEventoTab(tab, btn){
+  document.querySelectorAll('.tab-btn').forEach(b=>{if(b.closest('#sec-eventos')) b.classList.remove('active')});
+  btn?.classList.add('active');
+  renderEventos(tab);
+}
+
+function openEventoForm(){
+  const f = document.getElementById('evento-form');
+  f.style.display = f.style.display==='none'?'block':'none';
+  document.getElementById('ev-lugar').value = _rep.parroquia||'';
+}
+
+async function saveEvento(){
+  if(!document.getElementById('ev-nombre').value.trim()){ toast('El nombre es obligatorio.',false); return; }
+  try{
+    const tf = territorioFilter();
+    const tf2 = {};
+    if(_rep.tipo==='representante_consejo_comunal') tf2.consejo_comunal_id = _rep.consejo_comunal_id;
+    if(_rep.tipo==='representante_comuna') tf2.comuna_id = _rep.comuna_id;
+    await pbFetch('/api/collections/actividades_brigadas/records',{
+      method:'POST',
+      body: JSON.stringify({
+        nombre: document.getElementById('ev-nombre').value.trim(),
+        descripcion: document.getElementById('ev-desc').value.trim(),
+        categoria: document.getElementById('ev-cat').value,
+        fecha_inicio: document.getElementById('ev-fecha-ini').value,
+        fecha_fin: document.getElementById('ev-fecha-fin').value||document.getElementById('ev-fecha-ini').value,
+        hora_inicio: document.getElementById('ev-hora-ini').value,
+        hora_fin: document.getElementById('ev-hora-fin').value,
+        lugar: document.getElementById('ev-lugar').value.trim(),
+        meta: document.getElementById('ev-meta').value.trim(),
+        materiales_necesarios: document.getElementById('ev-materiales').value.trim(),
+        parroquia: _rep.parroquia||'',
+        representante_id: _rep.id,
+        estado: 'borrador',
+        ...tf2,
+      })
+    });
+    toast('Jornada registrada como borrador.');
+    document.getElementById('evento-form').style.display='none';
+    renderEventos('proximos');
+  } catch(e){ toast(e.status===404?'Colección no disponible aún.':e.message,false); }
+}
+
+// CALENDARIO
+async function renderCalendario(){
+  const now = new Date();
+  _calYear = _calYear||now.getFullYear();
+  _calMonth = _calMonth!==undefined?_calMonth:now.getMonth();
+  await loadCalEventos();
+  buildCal();
+}
+
+async function loadCalEventos(){
+  try{
+    const tf = territorioFilter();
+    const ini = new Date(_calYear, _calMonth, 1).toISOString().split('T')[0];
+    const fin = new Date(_calYear, _calMonth+1, 0).toISOString().split('T')[0];
+    const f = tf ? `(${tf}) && fecha_inicio>="${ini}" && fecha_inicio<="${fin}"` : `fecha_inicio>="${ini}" && fecha_inicio<="${fin}"`;
+    const r = await pbFetch(`/api/collections/actividades_brigadas/records?filter=${encodeURIComponent(f)}&perPage=100`);
+    _calEventos = r.items||[];
+  } catch{ _calEventos=[]; }
+}
+
+function calNav(dir){
+  _calMonth += dir;
+  if(_calMonth < 0){ _calMonth=11; _calYear--; }
+  if(_calMonth > 11){ _calMonth=0; _calYear++; }
+  renderCalendario();
+}
+
+function buildCal(){
+  const meses=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  document.getElementById('cal-title').textContent = meses[_calMonth]+' '+_calYear;
+  const grid = document.getElementById('cal-grid');
+  const dias = ['L','M','M','J','V','S','D'];
+  let html = dias.map(d=>`<div class="cal-day-name">${d}</div>`).join('');
+  const first = new Date(_calYear, _calMonth, 1).getDay();
+  const offset = (first===0)?6:first-1;
+  const total = new Date(_calYear, _calMonth+1, 0).getDate();
+  const today = new Date();
+  for(let i=0;i<offset;i++) html+=`<div class="cal-day other-month"></div>`;
+  for(let d=1;d<=total;d++){
+    const dateStr=`${_calYear}-${String(_calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const evs = _calEventos.filter(e=>(e.fecha_inicio||'').startsWith(dateStr));
+    const isToday = today.getFullYear()===_calYear&&today.getMonth()===_calMonth&&today.getDate()===d;
+    html+=`<div class="cal-day${isToday?' today':''}" onclick="showCalDay('${dateStr}')">
+      <div class="cal-day-num">${d}</div>
+      ${evs.slice(0,2).map(e=>`<div class="cal-event-dot">${catIco(e.categoria)} ${esc(e.nombre.substring(0,10))}</div>`).join('')}
+    </div>`;
+  }
+  grid.innerHTML = html;
+}
+
+function showCalDay(dateStr){
+  const evs = _calEventos.filter(e=>(e.fecha_inicio||'').startsWith(dateStr));
+  const det = document.getElementById('cal-day-detail');
+  document.getElementById('cal-day-title').textContent = '📅 '+dateStr;
+  if(!evs.length){ document.getElementById('cal-day-events').innerHTML='<p style="color:#9ca3af">Sin actividades.</p>'; }
+  else{ document.getElementById('cal-day-events').innerHTML = evs.map(e=>`<div style="padding:8px 0;border-bottom:1px solid var(--border)">${catIco(e.categoria)} <b>${esc(e.nombre)}</b> ${estadoActBadge(e.estado)}<br><span style="font-size:12px;color:#6b7280">${esc(e.lugar||'')}</span></div>`).join(''); }
+  det.style.display='block';
+}
+
+// COMUNICACIONES
+async function loadMensajes(tab){
+  if(tab==='recibidos'){
+    const el = document.getElementById('com-recibidos');
+    el.innerHTML='<div class="spinner"></div>';
+    try{
+      const r = await pbFetch(`/api/collections/comunicados_brigadas/records?filter=${encodeURIComponent('destinatario_id="'+_rep.id+'"')}&sort=-created&perPage=50`);
+      const msgs = r.items||[];
+      el.innerHTML = msgs.length ? msgs.map(m=>`
+        <div class="msg-item${!m.leido?' unread':''}" onclick="abrirMensaje('${esc(m.id)}')">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div class="msg-subject">${m.importante?'★ ':''}${esc(m.asunto||'(sin asunto)')}</div>
+            ${!m.leido?'<span class="badge badge-blue">Nuevo</span>':''}
+          </div>
+          <div class="msg-meta">De: ${esc(m.remitente_nombre||'Sistema')} · ${esc((m.created||'').substring(0,10))}</div>
+        </div>`).join('') : '<div class="empty-state"><div class="ico">📥</div><p>No tienes mensajes recibidos.</p></div>';
+    } catch{ el.innerHTML = unavailable(); }
+  } else {
+    const el = document.getElementById('com-enviados');
+    el.innerHTML='<div class="spinner"></div>';
+    try{
+      const r = await pbFetch(`/api/collections/comunicados_brigadas/records?filter=${encodeURIComponent('remitente_id="'+_rep.id+'"')}&sort=-created&perPage=50`);
+      const msgs = r.items||[];
+      el.innerHTML = msgs.length ? msgs.map(m=>`
+        <div class="msg-item">
+          <div class="msg-subject">${esc(m.asunto||'(sin asunto)')}</div>
+          <div class="msg-meta">Para: ${esc(m.destinatario_nombre||'Comandante')} · ${esc((m.created||'').substring(0,10))}</div>
+        </div>`).join('') : '<div class="empty-state"><div class="ico">📤</div><p>No has enviado mensajes.</p></div>';
+    } catch{ el.innerHTML = unavailable(); }
+  }
+}
+
+async function abrirMensaje(id){
+  try{
+    const m = await pbFetch(`/api/collections/comunicados_brigadas/records/${id}`);
+    // Marcar como leído
+    if(!m.leido) pbFetch(`/api/collections/comunicados_brigadas/records/${id}`,{method:'PATCH',body:JSON.stringify({leido:true})}).catch(()=>{});
+    alert(`📩 ${m.asunto||'(sin asunto)'}\n\nDe: ${m.remitente_nombre||'Sistema'}\n${m.created?.substring(0,10)||''}\n\n${m.contenido||''}`);
+    loadMensajes('recibidos');
+    checkUnread();
+  } catch{ toast('No se pudo cargar el mensaje.',false); }
+}
+
+function switchComTab(tab, btn){
+  document.querySelectorAll('#sec-comunicaciones .tab-btn').forEach(b=>b.classList.remove('active'));
+  btn?.classList.add('active');
+  document.getElementById('com-recibidos').classList.toggle('active', tab==='recibidos');
+  document.getElementById('com-enviados').classList.toggle('active', tab==='enviados');
+  loadMensajes(tab);
+}
+
+function openMsgForm(){
+  const f = document.getElementById('msg-form');
+  f.style.display = f.style.display==='none'?'block':'none';
+}
+
+async function sendMsg(){
+  const asunto = document.getElementById('msg-asunto').value.trim();
+  const contenido = document.getElementById('msg-contenido').value.trim();
+  if(!contenido){ toast('El mensaje no puede estar vacío.',false); return; }
+  try{
+    await pbFetch('/api/collections/comunicados_brigadas/records',{
+      method:'POST',
+      body: JSON.stringify({
+        asunto, contenido,
+        remitente_id: _rep.id,
+        remitente_nombre: `${_rep.nombres} ${_rep.apellidos}`,
+        remitente_tipo: 'representante',
+        destinatarios: document.getElementById('msg-dest').value,
+        leido: false,
+        importante: false,
+      })
+    });
+    toast('Mensaje enviado.');
+    document.getElementById('msg-form').style.display='none';
+    document.getElementById('msg-asunto').value='';
+    document.getElementById('msg-contenido').value='';
+  } catch(e){ toast(e.status===404?'Comunicaciones no disponibles aún.':e.message,false); }
+}
+
+// ASISTENCIA
+async function loadActividadesAsistencia(){
+  try{
+    const tf = territorioFilter();
+    const f = tf ? `(${tf}) && (estado="programado"||estado="convocado"||estado="en_ejecucion"||estado="confirmado")` : `estado="programado"||estado="en_ejecucion"`;
+    const r = await pbFetch(`/api/collections/actividades_brigadas/records?filter=${encodeURIComponent(f)}&sort=-fecha_inicio&perPage=50`);
+    const sel = document.getElementById('asist-actividad');
+    sel.innerHTML = '<option value="">— Seleccionar actividad —</option>';
+    (r.items||[]).forEach(a=>{
+      const o = document.createElement('option');
+      o.value = a.id; o.textContent = `${a.nombre} · ${a.fecha_inicio||''}`;
+      sel.appendChild(o);
+    });
+  } catch{}
+}
+
+async function cargarListaAsistencia(){
+  const actId = document.getElementById('asist-actividad').value;
+  const el = document.getElementById('asistencia-content');
+  if(!actId){ el.innerHTML=''; return; }
+  el.innerHTML='<div class="spinner"></div>';
+  try{
+    const tf = territorioFilter();
+    const [rBrig, rAsist] = await Promise.all([
+      pbFetch(`/api/collections/brigadistas/records?filter=${encodeURIComponent(tf)}&perPage=200`).catch(()=>({items:[]})),
+      pbFetch(`/api/collections/asistencia_brigadas/records?filter=${encodeURIComponent('actividad_id="'+actId+'"')}&perPage=200`).catch(()=>({items:[]})),
+    ]);
+    const brigList = rBrig.items||[];
+    const asistMap = {};
+    (rAsist.items||[]).forEach(a=>asistMap[a.brigadista_id]=a);
+    if(!brigList.length){ el.innerHTML='<div class="empty-state"><div class="ico">👥</div><p>No hay brigadistas en este territorio.</p></div>'; return; }
+    let presentCount=0, ausentCount=0, justCount=0;
+    function countChange(){
+      presentCount=0; ausentCount=0; justCount=0;
+      brigList.forEach(b=>{
+        const v = document.querySelector(`input[name="asist-${b.id}"]:checked`)?.value;
+        if(v==='presente') presentCount++;
+        else if(v==='ausente') ausentCount++;
+        else if(v==='justificado') justCount++;
+      });
+      document.getElementById('asist-counter').innerHTML=`✅ ${presentCount} presentes &nbsp; ❌ ${ausentCount} ausentes &nbsp; ⚠️ ${justCount} justificados`;
+    }
+    el.innerHTML = `
+      <div class="card">
+        <div class="asistencia-counter" id="asist-counter">✅ 0 presentes &nbsp; ❌ 0 ausentes &nbsp; ⚠️ 0 justificados</div>
+        ${brigList.map(b=>{
+          const a = asistMap[b.id];
+          return `<div class="asistencia-row">
+            <div class="asistencia-name">${esc(b.nombres+' '+b.apellidos)}</div>
+            <div class="radio-group">
+              <label class="radio-opt"><input type="radio" name="asist-${b.id}" value="presente" ${a?.estado==='presente'?'checked':''} onchange="countChange()"> ✅</label>
+              <label class="radio-opt"><input type="radio" name="asist-${b.id}" value="ausente" ${a?.estado==='ausente'?'checked':''} onchange="countChange()"> ❌</label>
+              <label class="radio-opt"><input type="radio" name="asist-${b.id}" value="justificado" ${a?.estado==='justificado'?'checked':''} onchange="countChange()"> ⚠️</label>
+            </div>
+            <input type="text" placeholder="Obs." style="max-width:120px;font-size:12px;padding:6px 8px" id="obs-${b.id}" value="${esc(a?.observaciones||'')}">
+          </div>`;
+        }).join('')}
+        <button class="btn btn-primary" style="margin-top:16px" onclick="guardarAsistencia('${actId}', ${JSON.stringify(brigList.map(b=>b.id))})">💾 Guardar asistencia</button>
+      </div>`;
+  } catch{ el.innerHTML = unavailable(); }
+}
+
+async function guardarAsistencia(actId, brigIds){
+  try{
+    const promises = brigIds.map(id=>{
+      const estado = document.querySelector(`input[name="asist-${id}"]:checked`)?.value;
+      if(!estado) return null;
+      return pbFetch('/api/collections/asistencia_brigadas/records',{
+        method:'POST',
+        body: JSON.stringify({actividad_id:actId, brigadista_id:id, estado, observaciones: document.getElementById(`obs-${id}`)?.value||''})
+      });
+    }).filter(Boolean);
+    await Promise.allSettled(promises);
+    toast('Asistencia guardada correctamente.');
+  } catch(e){ toast('Error al guardar: '+e.message,false); }
+}
+
+// EVIDENCIAS
+async function loadActividadesEvidencias(){
+  try{
+    const tf = territorioFilter();
+    const r = await pbFetch(`/api/collections/actividades_brigadas/records?filter=${encodeURIComponent(tf)}&sort=-fecha_inicio&perPage=50`);
+    const sel = document.getElementById('evid-actividad');
+    sel.innerHTML='<option value="">— Seleccionar actividad —</option>';
+    (r.items||[]).forEach(a=>{ const o=document.createElement('option'); o.value=a.id; o.textContent=`${a.nombre} · ${a.fecha_inicio||''}`; sel.appendChild(o); });
+  } catch{}
+}
+
+async function cargarGaleria(){
+  const actId = document.getElementById('evid-actividad').value;
+  const el = document.getElementById('galeria-content');
+  if(!actId){ el.innerHTML=''; return; }
+  el.innerHTML='<div class="spinner"></div>';
+  try{
+    const r = await pbFetch(`/api/collections/evidencias_brigadas/records?filter=${encodeURIComponent('actividad_id="'+actId+'"')}&perPage=50`);
+    const items = r.items||[];
+    if(!items.length){ el.innerHTML='<div class="empty-state" style="grid-column:1/-1"><div class="ico">📷</div><p>Sin evidencias aún.</p></div>'; return; }
+    el.innerHTML = items.map(ev=>{
+      const isImg = ev.archivo_tipo==='imagen'||ev.archivo?.match(/\.(jpg|jpeg|png|webp|gif)$/i);
+      const url = ev.archivo ? `${API}/api/files/evidencias_brigadas/${ev.id}/${ev.archivo}` : '';
+      return `<div class="gallery-item" onclick="${isImg&&url?`openLightbox('${esc(url)}')`:''}" title="${esc(ev.descripcion||'')}">
+        ${isImg&&url?`<img src="${esc(url)}" alt="evidencia" loading="lazy">`:ev.archivo?'📄':'📷'}
+      </div>`;
+    }).join('');
+  } catch{ el.innerHTML=unavailable(); }
+}
+
+function previewFile(input, previewId){
+  const el = document.getElementById(previewId);
+  if(input.files[0]){ el.textContent = input.files[0].name + ' (' + (input.files[0].size/1024/1024).toFixed(2) + ' MB)'; }
+}
+
+async function subirEvidencia(){
+  const actId = document.getElementById('evid-actividad').value;
+  if(!actId){ toast('Selecciona una actividad primero.',false); return; }
+  const fotoFile = document.getElementById('evid-foto').files[0];
+  const docFile  = document.getElementById('evid-doc').files[0];
+  const file = fotoFile||docFile;
+  if(!file){ toast('Selecciona un archivo.',false); return; }
+  if(file.size > 10*1024*1024){ toast('El archivo supera 10 MB.',false); return; }
+  const isImg = file.type.startsWith('image/');
+  const isPDF = file.type==='application/pdf';
+  if(!isImg&&!isPDF){ toast('Solo se permiten imágenes o PDF.',false); return; }
+  try{
+    const fd = new FormData();
+    fd.append('actividad_id', actId);
+    fd.append('representante_id', _rep.id);
+    fd.append('archivo_tipo', isImg?'imagen':'documento');
+    fd.append('archivo', file);
+    const token = localStorage.getItem('rep_token');
+    const r = await fetch(`${API}/api/collections/evidencias_brigadas/records`,{
+      method:'POST',
+      headers:{'Authorization':'Bearer '+token},
+      body: fd
+    });
+    if(!r.ok) throw new Error('Error al subir');
+    toast('Evidencia subida correctamente.');
+    document.getElementById('evid-foto').value='';
+    document.getElementById('evid-doc').value='';
+    document.getElementById('evid-foto-preview').textContent='';
+    document.getElementById('evid-doc-preview').textContent='';
+    cargarGaleria();
+  } catch(e){ toast(e.status===404?'Colección no disponible aún.':e.message,false); }
+}
+
+function openLightbox(url){ document.getElementById('lightbox-img').src=url; document.getElementById('lightbox').classList.add('open'); }
+function closeLightbox(el,e){ if(!el||!e||e.target===el){ document.getElementById('lightbox').classList.remove('open'); document.getElementById('lightbox-img').src=''; } }
+
+// SOLICITUDES
+async function renderSolicitudes(){
+  const el = document.getElementById('solicitudes-content');
+  el.innerHTML='<div class="spinner"></div>';
+  try{
+    const r = await pbFetch(`/api/collections/solicitudes_apoyo/records?filter=${encodeURIComponent('representante_id="'+_rep.id+'"')}&sort=-created&perPage=50`);
+    const items = r.items||[];
+    if(!items.length){ el.innerHTML='<div class="empty-state"><div class="ico">📦</div><p>No tienes solicitudes registradas.</p></div>'; return; }
+    el.innerHTML = items.map(s=>`
+      <div class="card" style="margin-bottom:10px">
+        <div style="display:flex;align-items:start;justify-content:space-between">
+          <div>
+            <div style="font-weight:700">${esc(s.tipo_recurso||s.tipo||'—')}</div>
+            <div style="font-size:13px;color:#6b7280;margin-top:3px">${esc(s.descripcion||'')}</div>
+            ${s.respuesta_institucional?`<div style="margin-top:8px;padding:8px;background:#f0fdf4;border-radius:8px;font-size:13px;color:#166534">📢 ${esc(s.respuesta_institucional)}</div>`:''}
+          </div>
+          <div style="text-align:right">${priorBadge(s.prioridad)}<br><span style="font-size:12px;color:#9ca3af;margin-top:4px;display:block">${esc((s.created||'').substring(0,10))}</span></div>
+        </div>
+        <div style="margin-top:8px">${estadoBadge(s.estado||'pendiente')}</div>
+      </div>`).join('');
+  } catch{ el.innerHTML=unavailable(); }
+}
+
+function openSolicitudForm(){
+  const f = document.getElementById('solicitud-form');
+  f.style.display = f.style.display==='none'?'block':'none';
+}
+
+async function saveSolicitud(){
+  if(!document.getElementById('sol-desc').value.trim()){ toast('La descripción es obligatoria.',false); return; }
+  try{
+    await pbFetch('/api/collections/solicitudes_apoyo/records',{
+      method:'POST',
+      body: JSON.stringify({
+        tipo_recurso: document.getElementById('sol-tipo').value,
+        descripcion: document.getElementById('sol-desc').value.trim(),
+        cantidad: document.getElementById('sol-cantidad').value.trim(),
+        justificacion: document.getElementById('sol-justif').value.trim(),
+        prioridad: document.getElementById('sol-prioridad').value,
+        representante_id: _rep.id,
+        parroquia: _rep.parroquia||'',
+        consejo_comunal_id: _rep.consejo_comunal_id||'',
+        comuna_id: _rep.comuna_id||'',
+        estado: 'pendiente',
+      })
+    });
+    toast('Solicitud enviada.');
+    document.getElementById('solicitud-form').style.display='none';
+    renderSolicitudes();
+  } catch(e){ toast(e.status===404?'Colección no disponible aún.':e.message,false); }
+}
+
+// INFORMES
+async function renderInformes(){
+  const el = document.getElementById('informes-content');
+  el.innerHTML='<div class="spinner"></div>';
+  try{
+    const r = await pbFetch(`/api/collections/informes_actividad/records?filter=${encodeURIComponent('representante_id="'+_rep.id+'"')}&sort=-created&perPage=50`);
+    const items = r.items||[];
+    if(!items.length){ el.innerHTML='<div class="empty-state"><div class="ico">📋</div><p>No has enviado informes aún.</p></div>'; return; }
+    el.innerHTML = items.map(inf=>`
+      <div class="card" style="margin-bottom:12px">
+        <div style="display:flex;align-items:start;justify-content:space-between">
+          <div>
+            <div style="font-weight:700">${esc(inf.nombre_actividad||'Informe')}</div>
+            <div style="font-size:13px;color:#6b7280;margin-top:3px">📍 ${esc(inf.lugar||'—')} · ${esc(inf.fecha||'—')} · ${esc(inf.num_participantes||0)} participantes</div>
+            ${inf.observaciones_comandante?`<div style="margin-top:8px;padding:8px;background:#fef2f2;border-radius:8px;font-size:13px;color:#991b1b">🔴 Observación: ${esc(inf.observaciones_comandante)}<br><button class="btn btn-sm btn-primary" style="margin-top:8px" onclick="openInformeForm()">Corregir y reenviar</button></div>`:''}
+          </div>
+          <div>${infBadge(inf.estado)}</div>
+        </div>
+      </div>`).join('');
+  } catch{ el.innerHTML=unavailable(); }
+}
+
+function openInformeForm(){
+  const f = document.getElementById('informe-form');
+  f.style.display = f.style.display==='none'?'block':'none';
+  // Cargar actividades en el select
+  const sel = document.getElementById('inf-actividad');
+  sel.innerHTML='<option value="">— Seleccionar —</option>';
+  _misAct.forEach(a=>{ const o=document.createElement('option'); o.value=a.id; o.textContent=a.nombre; sel.appendChild(o); });
+  // Cargar actividades si están vacías
+  if(!_misAct.length){
+    pbFetch(`/api/collections/actividades_brigadas/records?filter=${encodeURIComponent('representante_id="'+_rep.id+'"')}&perPage=50`).then(r=>{
+      _misAct=r.items||[];
+      _misAct.forEach(a=>{ const o=document.createElement('option'); o.value=a.id; o.textContent=a.nombre; sel.appendChild(o); });
+    }).catch(()=>{});
+  }
+}
+
+async function saveInforme(estado){
+  const actId = document.getElementById('inf-actividad').value;
+  if(!actId){ toast('Selecciona una actividad.',false); return; }
+  try{
+    await pbFetch('/api/collections/informes_actividad/records',{
+      method:'POST',
+      body: JSON.stringify({
+        actividad_id: actId,
+        representante_id: _rep.id,
+        nombre_actividad: document.getElementById('inf-actividad').options[document.getElementById('inf-actividad').selectedIndex]?.text||'',
+        fecha: document.getElementById('inf-fecha').value,
+        lugar: document.getElementById('inf-lugar').value.trim(),
+        num_participantes: parseInt(document.getElementById('inf-participantes').value)||0,
+        arboles_plantados: parseInt(document.getElementById('inf-arboles').value)||0,
+        especies: document.getElementById('inf-especies').value.trim(),
+        superficie_m2: parseFloat(document.getElementById('inf-superficie').value)||0,
+        residuos_kg: parseFloat(document.getElementById('inf-residuos').value)||0,
+        actividades_educativas: document.getElementById('inf-educativas').value.trim(),
+        resultados: document.getElementById('inf-resultados').value.trim(),
+        dificultades: document.getElementById('inf-dificultades').value.trim(),
+        recomendaciones: document.getElementById('inf-recomendaciones').value.trim(),
+        estado,
+        parroquia: _rep.parroquia||'',
+        consejo_comunal_id: _rep.consejo_comunal_id||'',
+      })
+    });
+    toast(estado==='enviado'?'Informe enviado al Comandante.':'Borrador guardado.');
+    document.getElementById('informe-form').style.display='none';
+    renderInformes();
+  } catch(e){ toast(e.status===404?'Colección no disponible aún.':e.message,false); }
+}
+
+// PERFIL
+function loadPerfil(){
+  if(!_rep) return;
+  ['nombres','apellidos','email','telefono','parroquia'].forEach(f=>{
+    const el = document.getElementById('p-'+f);
+    if(el) el.value = _rep[f]||'';
+  });
+  document.getElementById('p-cedula').value = _rep.cedula||'';
+  document.getElementById('p-cargo').value = _rep.cargo||'';
+  document.getElementById('p-fecha').value = _rep.fecha_designacion||'';
+}
+
+function previewAvatar(input){
+  if(input.files[0]){
+    const url = URL.createObjectURL(input.files[0]);
+    document.getElementById('perfil-avatar').innerHTML = `<img src="${url}" style="width:80px;height:80px;border-radius:50%;object-fit:cover">`;
+  }
+}
+
+async function savePerfil(){
+  try{
+    const updated = await pbFetch(`/api/collections/representantes_brigadas/records/${_rep.id}`,{
+      method:'PATCH',
+      body: JSON.stringify({
+        nombres: document.getElementById('p-nombres').value.trim(),
+        apellidos: document.getElementById('p-apellidos').value.trim(),
+        telefono: document.getElementById('p-telefono').value.trim(),
+      })
+    });
+    _rep = {..._rep, ...updated};
+    localStorage.setItem('rep_data', JSON.stringify(_rep));
+    document.getElementById('sb-name').textContent = esc(_rep.nombres+' '+_rep.apellidos);
+    toast('Perfil actualizado.');
+  } catch(e){ toast(e.status===404?'No disponible aún.':e.message,false); }
+}
+
+async function changePass(){
+  const actual = document.getElementById('p-pass-actual').value;
+  const nueva  = document.getElementById('p-pass-nueva').value;
+  const conf   = document.getElementById('p-pass-confirm').value;
+  if(!actual||!nueva){ toast('Completa todos los campos.',false); return; }
+  if(nueva!==conf){ toast('Las contraseñas no coinciden.',false); return; }
+  if(nueva.length<8){ toast('La nueva contraseña debe tener al menos 8 caracteres.',false); return; }
+  try{
+    await pbFetch(`/api/collections/representantes_brigadas/records/${_rep.id}`,{
+      method:'PATCH',
+      body: JSON.stringify({password:nueva, passwordConfirm:conf, oldPassword:actual})
+    });
+    toast('Contraseña actualizada. Vuelve a iniciar sesión.');
+    setTimeout(doLogout, 2000);
+  } catch(e){ toast('Error: '+e.message,false); }
+}
+
+async function loadActividadesParaSelects(){
+  try{
+    const tf = territorioFilter();
+    const r = await pbFetch(`/api/collections/actividades_brigadas/records?filter=${encodeURIComponent(tf)}&sort=-fecha_inicio&perPage=50`);
+    _misAct = r.items||[];
+  } catch{}
+}
+
+// INIT
+restoreSession();
+</script>
+</body>
+</html>
