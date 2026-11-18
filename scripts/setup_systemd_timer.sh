@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # IAGAMI — Configuración de systemd timer para backups automáticos
 # Alternativa a cron. Ejecutar como root en el VPS.
 # Uso: ./setup_systemd_timer.sh [--install | --status | --remove]

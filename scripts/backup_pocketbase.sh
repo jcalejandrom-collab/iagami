@@ -33,9 +33,7 @@ encrypt_backup() {
         return
     fi
     if [ ! -f "${ENCRYPT_PASSPHRASE_FILE}" ]; then
-        log "⚠️  Archivo de passphrase no encontrado: ${ENCRYPT_PASSPHRASE_FILE}. Guardando sin cifrar."
-        echo "${FILE}"
-        return
+        fail "Cifrado activado pero no existe el archivo de passphrase: ${ENCRYPT_PASSPHRASE_FILE}"
     fi
     local ENC_FILE="${FILE}.enc"
     if openssl enc -aes-256-cbc -pbkdf2 -in "${FILE}" -out "${ENC_FILE}" -pass "file:${ENCRYPT_PASSPHRASE_FILE}" 2>/dev/null; then
@@ -44,8 +42,8 @@ encrypt_backup() {
         sha256sum "${ENC_FILE}" > "${ENC_FILE}.sha256"
         echo "${ENC_FILE}"
     else
-        log "⚠️  Error al cifrar. Guardando sin cifrar: ${FILE}"
-        echo "${FILE}"
+        rm -f "${ENC_FILE}"
+        fail "Error al cifrar el backup. No se guardará copia sin cifrar."
     fi
 }
 

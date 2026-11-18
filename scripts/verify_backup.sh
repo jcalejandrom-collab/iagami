@@ -5,8 +5,20 @@
 set -euo pipefail
 
 BACKUP_FILE="${1:-}"
-[ -z "${BACKUP_FILE}" ] && { echo "Uso: $0 <archivo.tar.gz>"; exit 1; }
+[ -z "${BACKUP_FILE}" ] && { echo "Uso: $0 <archivo.tar.gz[.enc]>"; exit 1; }
 [ -f "${BACKUP_FILE}" ] || { echo "ERROR: No existe el archivo: ${BACKUP_FILE}"; exit 1; }
+
+ENCRYPT_PASSPHRASE_FILE="/opt/backups/iagami/.backup_key"
+WORK_FILE="${BACKUP_FILE}"
+
+# Descifrar si es archivo .enc
+if [[ "${BACKUP_FILE}" == *.enc ]]; then
+    [ -f "${ENCRYPT_PASSPHRASE_FILE}" ] || { echo "ERROR: Archivo cifrado pero no existe la passphrase: ${ENCRYPT_PASSPHRASE_FILE}"; exit 1; }
+    WORK_FILE="${BACKUP_FILE%.enc}"
+    openssl enc -d -aes-256-cbc -pbkdf2 -in "${BACKUP_FILE}" -out "${WORK_FILE}" -pass "file:${ENCRYPT_PASSPHRASE_FILE}" 2>/dev/null \
+        || { echo "ERROR: No se pudo descifrar el archivo"; exit 1; }
+    echo "[IAGAMI-VERIFY] Archivo descifrado temporalmente para verificación"
+fi
 
 CHECKSUM_FILE="${BACKUP_FILE}.sha256"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
@@ -27,7 +39,7 @@ else
 fi
 
 log "Verificando estructura del archivo tar..."
-tar -tzf "${BACKUP_FILE}" > /tmp/backup_contents_${TIMESTAMP}.txt || fail "El archivo tar está corrupto"
+tar -tzf "${WORK_FILE}" > /tmp/backup_contents_${TIMESTAMP}.txt || fail "El archivo tar está corrupto"
 log "✅ Archivo tar legible"
 
 grep -q "data.db" /tmp/backup_contents_${TIMESTAMP}.txt || fail "data.db no encontrado en el backup"
@@ -42,4 +54,6 @@ FILE_COUNT=$(wc -l < /tmp/backup_contents_${TIMESTAMP}.txt)
 log "Tamaño: ${BACKUP_SIZE} | Archivos: ${FILE_COUNT}"
 
 rm -f /tmp/backup_contents_${TIMESTAMP}.txt
+# Limpiar archivo descifrado temporal
+[[ "${WORK_FILE}" != "${BACKUP_FILE}" ]] && rm -f "${WORK_FILE}"
 log "✅ VERIFICACIÓN COMPLETADA — Backup íntegro"

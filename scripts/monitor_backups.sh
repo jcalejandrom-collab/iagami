@@ -32,9 +32,9 @@ check_status() {
     fi
 
     DISK_AVAIL=$(df -h "${BACKUP_BASE_DIR}" 2>/dev/null | awk 'NR==2{print $4}' || echo "N/A")
-    DISK_USE_PCT=$(df "${BACKUP_BASE_DIR}" 2>/dev/null | awk 'NR==2{print $5}' | tr -d '%' || echo "0")
+    DISK_USE_PCT=$(df "${BACKUP_BASE_DIR}" 2>/dev/null | awk 'NR==2{print $5}' | tr -d '%' || echo "UNKNOWN")
 
-    if [ "${DISK_USE_PCT:-0}" -gt 90 ]; then
+    if [ "${DISK_USE_PCT}" != "UNKNOWN" ] && [ "${DISK_USE_PCT}" -gt 90 ]; then
         STATUS="ALERTA"
         ALERTS="${ALERTS}DISCO_LLENO(${DISK_USE_PCT}%);"
     fi

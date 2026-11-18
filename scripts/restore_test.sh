@@ -9,15 +9,17 @@ BACKUP_FILE="${1:-}"
 [ -z "${BACKUP_FILE}" ] && { echo "Uso: $0 <archivo.tar.gz> [--start-instance]"; exit 1; }
 [ -f "${BACKUP_FILE}" ] || { echo "ERROR: No existe el archivo: ${BACKUP_FILE}"; exit 1; }
 
-RESTORE_DIR="/tmp/iagami_restore_test_$(date +%Y%m%d_%H%M%S)"
+RESTORE_DIR=$(mktemp -d /tmp/iagami_restore_test_XXXXXX)
 PB_BINARY="/opt/pocketbase/pocketbase"
+ENCRYPT_PASSPHRASE_FILE="/opt/backups/iagami/.backup_key"
 TEST_PORT=8091
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 LOG_PREFIX="[IAGAMI-RESTORE-TEST ${TIMESTAMP}]"
 log() { echo "${LOG_PREFIX} $*"; }
-fail() { echo "${LOG_PREFIX} ERROR: $*" >&2; exit 1; }
+fail() { echo "${LOG_PREFIX} ERROR: $*" >&2; rm -rf "${RESTORE_DIR}"; exit 1; }
 
-[[ "${RESTORE_DIR}" == *"/tmp/"* ]] || fail "Directorio de restauración debe estar en /tmp/ — NUNCA en producción"
+# mktemp garantiza directorio en /tmp — guard explícito como segunda línea de defensa
+[[ "${RESTORE_DIR}" == /tmp/* ]] || fail "Directorio de restauración debe estar en /tmp/ — NUNCA en producción"
 
 log "=== PRUEBA DE RESTAURACIÓN — AMBIENTE AISLADO ==="
 log "Backup fuente: ${BACKUP_FILE}"
@@ -25,14 +27,24 @@ log "Directorio de prueba: ${RESTORE_DIR}"
 log "Puerto de prueba: ${TEST_PORT}"
 
 mkdir -p "${RESTORE_DIR}/pb_data"
-log "Directorio de prueba creado"
+log "Directorio de prueba creado: ${RESTORE_DIR}"
+
+WORK_FILE="${BACKUP_FILE}"
+if [[ "${BACKUP_FILE}" == *.enc ]]; then
+    [ -f "${ENCRYPT_PASSPHRASE_FILE}" ] || fail "Archivo cifrado pero no existe la passphrase: ${ENCRYPT_PASSPHRASE_FILE}"
+    WORK_FILE="${RESTORE_DIR}/backup_decrypted.tar.gz"
+    log "Descifrando backup..."
+    openssl enc -d -aes-256-cbc -pbkdf2 -in "${BACKUP_FILE}" -out "${WORK_FILE}" \
+        -pass "file:${ENCRYPT_PASSPHRASE_FILE}" 2>/dev/null || fail "No se pudo descifrar el backup"
+    log "✅ Backup descifrado"
+fi
 
 log "Verificando integridad del backup..."
-tar -tzf "${BACKUP_FILE}" > /dev/null || fail "Backup corrupto — no se puede proceder"
+tar -tzf "${WORK_FILE}" > /dev/null || fail "Backup corrupto — no se puede proceder"
 log "✅ Backup íntegro"
 
 log "Restaurando backup en ambiente aislado..."
-tar -xzf "${BACKUP_FILE}" -C "${RESTORE_DIR}/"
+tar -xzf "${WORK_FILE}" -C "${RESTORE_DIR}/"
 [ -f "${RESTORE_DIR}/pb_data/data.db" ] || fail "data.db no encontrado después de la restauración"
 log "✅ Restauración completada"
 
