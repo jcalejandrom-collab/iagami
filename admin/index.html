@@ -830,6 +830,139 @@ input,select,textarea{font-family:inherit}
       </div>
     </div>
 
+    <!-- PERMISOS AMBIENTALES -->
+    <div class="section" id="sec-permisos">
+      <div class="page-header">
+        <div><div class="page-title">🏛️ Permisos Ambientales</div><div class="page-subtitle">Gestión de solicitudes de permisos y títulos ambientales del Municipio Iribarren</div></div>
+        <button class="btn btn-primary" onclick="openPermisoForm()">+ Nueva Solicitud</button>
+      </div>
+      <!-- LISTA -->
+      <div id="permisos-list-view">
+        <div class="toolbar">
+          <div class="toolbar-search"><input type="text" placeholder="Buscar por nombre, cédula/RIF, tipo..." id="permisos-search" oninput="renderPermisos()"></div>
+          <select id="permisos-estado" onchange="renderPermisos()">
+            <option value="">Todos los estados</option>
+            <option value="pendiente_pago">Pendiente de Pago</option>
+            <option value="pago_subido">Pago Subido</option>
+            <option value="en_revision">En Revisión</option>
+            <option value="aprobado">Aprobado</option>
+            <option value="rechazado">Rechazado</option>
+            <option value="vencido">Vencido</option>
+          </select>
+          <select id="permisos-tipo" onchange="renderPermisos()">
+            <option value="">Todos los tipos</option>
+            <option value="P-01">P-01 Funcionamiento</option>
+            <option value="P-02">P-02 Reg. Simplificado</option>
+            <option value="P-03">P-03 Áreas Verdes</option>
+            <option value="P-04">P-04 Poda/Tala</option>
+            <option value="P-05">P-05 Obra</option>
+            <option value="P-06">P-06 Sonido/Eventos</option>
+            <option value="P-07">P-07 Gestores Residuos</option>
+            <option value="P-08">P-08 Grandes Generadores</option>
+            <option value="P-09">P-09 Certif. Cumplimiento</option>
+            <option value="P-10">P-10 Uso Áreas Verdes Públicas</option>
+            <option value="P-11">P-11 Fuentes Fijas Emisión</option>
+            <option value="P-12">P-12 Acondicionamiento Acústico</option>
+            <option value="P-13">P-13 Desechos Peligrosos</option>
+            <option value="P-14">P-14 Vertidos Efluentes</option>
+            <option value="P-15">P-15 Riberas/Quebradas</option>
+            <option value="P-16">P-16 Viveros/Plantas</option>
+            <option value="P-17">P-17 Fumigación/Plagas</option>
+            <option value="P-18">P-18 Consultores/Labs</option>
+            <option value="P-19">P-19 Criaderos/Pecuario</option>
+            <option value="P-20">P-20 Uso Suelo/Ubicación</option>
+            <option value="P-21">P-21 Plan Olores</option>
+            <option value="P-22">P-22 Extracción Cauces</option>
+            <option value="P-23">P-23 Especies No Nativas</option>
+            <option value="P-24">P-24 Uso Agrícola Suelo</option>
+            <option value="P-25">P-25 Desechos Sólidos/Líquidos</option>
+            <option value="P-26">P-26 Pozos</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>#</th><th>Tipo</th><th>Solicitante</th><th>Cédula/RIF</th>
+              <th>Pago SEMAT</th><th>Estado</th><th>Solicitud</th><th>Vence</th><th>Acciones</th>
+            </tr></thead>
+            <tbody id="permisos-tbody"></tbody>
+          </table>
+        </div>
+        <div id="permisos-pagination" class="pagination"></div>
+      </div>
+      <!-- FORMULARIO -->
+      <div id="permisos-form-view" style="display:none">
+        <div class="form-panel">
+          <div class="form-title" id="permisos-form-title">Nueva Solicitud de Permiso</div>
+          <div class="form-grid">
+            <div class="form-group"><label>Tipo de Permiso *</label>
+              <select id="pf-tipo">
+                <option value="">Selecciona...</option>
+                <option value="P-01">P-01 — Permiso Ambiental de Funcionamiento</option>
+                <option value="P-02">P-02 — Registro Ambiental Simplificado</option>
+                <option value="P-03">P-03 — Permiso de Áreas Verdes</option>
+                <option value="P-04">P-04 — Autorización de Poda, Tala y Trasplante</option>
+                <option value="P-05">P-05 — Autorización Ambiental de Obra</option>
+                <option value="P-06">P-06 — Permiso Especial de Sonido para Eventos</option>
+                <option value="P-07">P-07 — Registro de Gestores de Residuos</option>
+                <option value="P-08">P-08 — Plan de Manejo de Grandes Generadores</option>
+                <option value="P-09">P-09 — Certificado de Cumplimiento Ambiental</option>
+                <option value="P-10">P-10 — Uso Temporal de Áreas Verdes Públicas</option>
+                <option value="P-11">P-11 — Permiso de Fuentes Fijas de Emisión</option>
+                <option value="P-12">P-12 — Certificado de Acondicionamiento Acústico</option>
+                <option value="P-13">P-13 — Registro de Generadores de Desechos Peligrosos</option>
+                <option value="P-14">P-14 — Permiso de Vertidos de Efluentes No Domésticos</option>
+                <option value="P-15">P-15 — Autorización de Intervención en Riberas</option>
+                <option value="P-16">P-16 — Registro de Viveros y Comercializadores</option>
+                <option value="P-17">P-17 — Registro de Empresas de Fumigación</option>
+                <option value="P-18">P-18 — Registro de Consultores y Laboratorios</option>
+                <option value="P-19">P-19 — Permiso de Criaderos y Actividades Pecuarias</option>
+                <option value="P-20">P-20 — Permiso de Uso del Suelo y Ubicación</option>
+                <option value="P-21">P-21 — Aprobación del Plan de Manejo de Olores</option>
+                <option value="P-22">P-22 — Autorización de Extracción en Cauces</option>
+                <option value="P-23">P-23 — Autorización de Especies Vegetales No Nativas</option>
+                <option value="P-24">P-24 — Permiso de Uso Agrícola del Suelo</option>
+                <option value="P-25">P-25 — Permiso de Manejo de Desechos Sólidos y Líquidos</option>
+                <option value="P-26">P-26 — Autorización Ambiental de Pozos</option>
+              </select>
+            </div>
+            <div class="form-group"><label>Estado</label>
+              <select id="pf-estado">
+                <option value="pendiente_pago">Pendiente de Pago</option>
+                <option value="pago_subido">Pago Subido</option>
+                <option value="en_revision">En Revisión</option>
+                <option value="aprobado">Aprobado</option>
+                <option value="rechazado">Rechazado</option>
+                <option value="vencido">Vencido</option>
+              </select>
+            </div>
+            <div class="form-group"><label>Nombre del Solicitante *</label><input type="text" id="pf-nombre" placeholder="Nombre completo o razón social"/></div>
+            <div class="form-group"><label>Cédula o RIF *</label><input type="text" id="pf-cedula" placeholder="V-12345678 / J-87654321-0"/></div>
+            <div class="form-group"><label>Teléfono</label><input type="text" id="pf-telefono" placeholder="0424-0000000"/></div>
+            <div class="form-group"><label>Correo Electrónico</label><input type="email" id="pf-correo" placeholder="correo@empresa.com"/></div>
+            <div class="form-group"><label>Fecha de Solicitud *</label><input type="date" id="pf-fecha-sol"/></div>
+            <div class="form-group"><label>Fecha de Vencimiento</label><input type="date" id="pf-fecha-venc"/></div>
+            <div class="form-group"><label>Banco (pago SEMAT)</label><input type="text" id="pf-banco" placeholder="Ej: Banesco, BDV..."/></div>
+            <div class="form-group"><label>Referencia de Pago</label><input type="text" id="pf-referencia" placeholder="N° de referencia bancaria"/></div>
+            <div class="form-group"><label>Monto de Tasa (Bs.)</label><input type="text" id="pf-monto" placeholder="0.00"/></div>
+            <div class="form-group"><label>Inspector Asignado</label><input type="text" id="pf-inspector" placeholder="Nombre del inspector"/></div>
+            <div class="form-group form-full"><label>Descripción / Actividad</label><textarea id="pf-descripcion" rows="3" placeholder="Describa la actividad o situación objeto del permiso..."></textarea></div>
+            <div class="form-group form-full"><label>Observaciones internas</label><textarea id="pf-observaciones" rows="2" placeholder="Notas del trámite (uso interno)..."></textarea></div>
+            <div class="form-group form-full" style="background:#f0fdf4;border:1px dashed #86efac;border-radius:8px;padding:14px">
+              <label style="color:#166534;font-weight:700">📄 Comprobante de Pago SEMAT <span style="font-size:11px;font-weight:400">(imagen o PDF — máx. 10 MB)</span></label>
+              <input type="file" id="pf-comprobante" accept=".pdf,.jpg,.jpeg,.png" style="margin-top:8px;font-size:13px"/>
+              <div id="pf-comprobante-actual" style="font-size:12px;color:#166534;margin-top:6px"></div>
+            </div>
+          </div>
+          <input type="hidden" id="pf-id"/>
+          <div class="form-actions">
+            <button class="btn btn-primary" onclick="savePermisos()">💾 Guardar</button>
+            <button class="btn btn-secondary" onclick="closePermisoForm()">Cancelar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- DENUNCIAS -->
     <div class="section" id="sec-denuncias">
       <div class="page-header">
@@ -2527,6 +2660,7 @@ const NAV = [
   {id:'empresas',      icon:'🏭', label:'Empresas'},
   {id:'alertas',       icon:'🚨', label:'Alertas'},
   {id:'multas',        icon:'⚖️',  label:'Multas'},
+  {id:'permisos',      icon:'🏛️', label:'Permisos Ambientales'},
   {id:'denuncias',     icon:'⚠️',  label:'Denuncias'},
   {id:'archivos',      icon:'📁', label:'Archivos'},
   {id:'consejos',      icon:'🏘️', label:'Consejos Comunales'},
@@ -2591,6 +2725,7 @@ async function renderSection(name) {
     case 'empresas':      await renderEmpresas(); break;
     case 'alertas':       await renderAlertas(); break;
     case 'multas':        await renderMultas(); break;
+    case 'permisos':      await renderPermisos(); break;
     case 'denuncias':     await renderDenuncias(); break;
     case 'archivos':      await renderArchivos(); break;
     case 'consejos':      await renderConsejos(); break;
@@ -9095,6 +9230,165 @@ async function renderProgreso() {
       }).join('')}
     </tbody></table></div>`;
   } catch(e) { el.innerHTML = `<p style="color:var(--danger);font-size:13px">Error: ${e.message}</p>`; }
+}
+</script>
+
+<!-- PERMISOS AMBIENTALES JS -->
+<script>
+/* ═══════════════════════════════════════
+   PERMISOS AMBIENTALES
+═══════════════════════════════════════ */
+const PERMISO_ESTADOS = {
+  pendiente_pago: { label:'Pendiente de Pago', color:'#fef3c7', text:'#92400e' },
+  pago_subido:    { label:'Pago Subido',        color:'#dbeafe', text:'#1e40af' },
+  en_revision:    { label:'En Revisión',         color:'#fde68a', text:'#78350f' },
+  aprobado:       { label:'Aprobado',            color:'#dcfce7', text:'#166534' },
+  rechazado:      { label:'Rechazado',           color:'#fee2e2', text:'#991b1b' },
+  vencido:        { label:'Vencido',             color:'#f1f5f9', text:'#64748b' },
+};
+
+async function renderPermisos() {
+  const q      = (document.getElementById('permisos-search')?.value || '').toLowerCase();
+  const estado = document.getElementById('permisos-estado')?.value || '';
+  const tipo   = document.getElementById('permisos-tipo')?.value || '';
+
+  let items = await CMSDB.getAll('permisos_ambientales');
+  if (q)      items = items.filter(p =>
+    (p.solicitante_nombre||'').toLowerCase().includes(q) ||
+    (p.cedula_rif||'').toLowerCase().includes(q) ||
+    (p.tipo_permiso||'').toLowerCase().includes(q)
+  );
+  if (estado) items = items.filter(p => p.estado === estado);
+  if (tipo)   items = items.filter(p => p.tipo_permiso === tipo);
+
+  const tbody = document.getElementById('permisos-tbody');
+  if (!tbody) return;
+
+  if (!items.length) {
+    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:#94a3b8;padding:32px">Sin solicitudes de permisos registradas.</td></tr>`;
+    document.getElementById('permisos-pagination').innerHTML = '';
+    return;
+  }
+
+  const { current, total, pageItems } = paginate(items, 'permisos');
+  renderPagination('permisos-pagination', 'permisos', total, current, 'renderPermisos');
+
+  const PB_URL = document.querySelector('meta[name="pb-url"]')?.content || '';
+
+  tbody.innerHTML = pageItems.map((p, i) => {
+    const est = PERMISO_ESTADOS[p.estado] || { label: p.estado, color:'#f1f5f9', text:'#64748b' };
+    const fechaSol  = p.fecha_solicitud  ? p.fecha_solicitud.substring(0,10)  : '—';
+    const fechaVenc = p.fecha_vencimiento? p.fecha_vencimiento.substring(0,10): '—';
+    const comp = p.comprobante_pago
+      ? `<a href="${PB_URL}/api/files/permisos_ambientales/${p.id}/${p.comprobante_pago}" target="_blank" style="color:#1d6b3e;font-size:11px">📎 Ver</a>`
+      : `<span style="color:#94a3b8;font-size:11px">Sin archivo</span>`;
+    return `<tr>
+      <td>${(current-1)*10+i+1}</td>
+      <td><span style="font-family:monospace;font-weight:700;color:#1d6b3e">${escHtml(p.tipo_permiso)}</span></td>
+      <td>${escHtml(p.solicitante_nombre)}</td>
+      <td style="font-family:monospace;font-size:12px">${escHtml(p.cedula_rif)}</td>
+      <td>${comp}</td>
+      <td><span style="background:${est.color};color:${est.text};padding:3px 8px;border-radius:12px;font-size:11px;font-weight:600">${est.label}</span></td>
+      <td style="font-size:12px">${fechaSol}</td>
+      <td style="font-size:12px">${fechaVenc}</td>
+      <td>
+        <button class="btn-action edit" onclick="openPermisoForm('${p.id}')" title="Editar">✏️</button>
+        <button class="btn-action delete" onclick="deletePermiso('${p.id}')" title="Eliminar">🗑</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+async function openPermisoForm(id) {
+  document.getElementById('permisos-list-view').style.display = 'none';
+  document.getElementById('permisos-form-view').style.display = '';
+  document.getElementById('pf-comprobante-actual').textContent = '';
+
+  if (id) {
+    document.getElementById('permisos-form-title').textContent = 'Editar Solicitud de Permiso';
+    const p = await CMSDB.getOne('permisos_ambientales', id);
+    if (!p) return;
+    document.getElementById('pf-id').value            = p.id;
+    document.getElementById('pf-tipo').value          = p.tipo_permiso || '';
+    document.getElementById('pf-estado').value        = p.estado || 'pendiente_pago';
+    document.getElementById('pf-nombre').value        = p.solicitante_nombre || '';
+    document.getElementById('pf-cedula').value        = p.cedula_rif || '';
+    document.getElementById('pf-telefono').value      = p.telefono || '';
+    document.getElementById('pf-correo').value        = p.correo || '';
+    document.getElementById('pf-fecha-sol').value     = (p.fecha_solicitud||'').substring(0,10);
+    document.getElementById('pf-fecha-venc').value    = (p.fecha_vencimiento||'').substring(0,10);
+    document.getElementById('pf-banco').value         = p.banco || '';
+    document.getElementById('pf-referencia').value    = p.referencia_pago || '';
+    document.getElementById('pf-monto').value         = p.monto_tasa || '';
+    document.getElementById('pf-inspector').value     = p.inspector || '';
+    document.getElementById('pf-descripcion').value   = p.descripcion || '';
+    document.getElementById('pf-observaciones').value = p.observaciones || '';
+    if (p.comprobante_pago)
+      document.getElementById('pf-comprobante-actual').textContent = '📎 Archivo actual: ' + p.comprobante_pago;
+  } else {
+    document.getElementById('permisos-form-title').textContent = 'Nueva Solicitud de Permiso';
+    ['pf-id','pf-tipo','pf-nombre','pf-cedula','pf-telefono','pf-correo',
+     'pf-fecha-venc','pf-banco','pf-referencia','pf-monto','pf-inspector',
+     'pf-descripcion','pf-observaciones'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+    document.getElementById('pf-estado').value    = 'pendiente_pago';
+    document.getElementById('pf-fecha-sol').value = new Date().toISOString().substring(0,10);
+  }
+}
+
+function closePermisoForm() {
+  document.getElementById('permisos-form-view').style.display = 'none';
+  document.getElementById('permisos-list-view').style.display = '';
+  renderPermisos();
+}
+
+async function savePermisos() {
+  const tipo   = document.getElementById('pf-tipo').value.trim();
+  const nombre = document.getElementById('pf-nombre').value.trim();
+  const cedula = document.getElementById('pf-cedula').value.trim();
+  if (!tipo || !nombre || !cedula) {
+    showToast('Complete los campos obligatorios: Tipo, Nombre y Cédula/RIF', 'warning');
+    return;
+  }
+  const id   = document.getElementById('pf-id').value;
+  const file = document.getElementById('pf-comprobante').files[0] || null;
+  const payload = {
+    tipo_permiso:       tipo,
+    solicitante_nombre: nombre,
+    cedula_rif:         cedula,
+    telefono:           document.getElementById('pf-telefono').value.trim(),
+    correo:             document.getElementById('pf-correo').value.trim(),
+    fecha_solicitud:    document.getElementById('pf-fecha-sol').value,
+    fecha_vencimiento:  document.getElementById('pf-fecha-venc').value,
+    banco:              document.getElementById('pf-banco').value.trim(),
+    referencia_pago:    document.getElementById('pf-referencia').value.trim(),
+    monto_tasa:         document.getElementById('pf-monto').value.trim(),
+    inspector:          document.getElementById('pf-inspector').value.trim(),
+    descripcion:        document.getElementById('pf-descripcion').value.trim(),
+    observaciones:      document.getElementById('pf-observaciones').value.trim(),
+    estado:             document.getElementById('pf-estado').value,
+  };
+  if (id)   payload.id = id;
+  if (file) payload.comprobante_pago = file;
+  try {
+    await CMSDB.save('permisos_ambientales', payload);
+    showToast(id ? 'Permiso actualizado' : 'Solicitud registrada', 'success');
+    closePermisoForm();
+  } catch(e) {
+    showToast('Error al guardar: ' + e.message, 'error');
+  }
+}
+
+async function deletePermiso(id) {
+  if (!confirm('¿Eliminar esta solicitud de permiso? Esta acción no se puede deshacer.')) return;
+  try {
+    await CMSDB.deleteRecord('permisos_ambientales', id);
+    showToast('Solicitud eliminada', 'success');
+    renderPermisos();
+  } catch(e) {
+    showToast('Error al eliminar: ' + e.message, 'error');
+  }
 }
 </script>
 
