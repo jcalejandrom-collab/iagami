@@ -14,7 +14,7 @@ ADMIN_PASS="${2:-}"
 
 # --- Autenticar ---
 echo "Autenticando en PocketBase..."
-AUTH=$(curl -sf -X POST "${PB_URL}/api/admins/auth-with-password" \
+AUTH=$(curl -s -X POST "${PB_URL}/api/collections/_superusers/auth-with-password" \
   -H "Content-Type: application/json" \
   -d "{\"identity\":\"${ADMIN_EMAIL}\",\"password\":\"${ADMIN_PASS}\"}" 2>/dev/null) || {
   echo "ERROR: No se pudo conectar a PocketBase en ${PB_URL}"
