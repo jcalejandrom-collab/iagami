@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 48" fill="none">
+  <defs>
+    <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1a5c3a"/>
+      <stop offset="50%" stop-color="#2d9e5e"/>
+      <stop offset="100%" stop-color="#1a3d2b"/>
+    </linearGradient>
+    <linearGradient id="g2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#40c074"/>
+      <stop offset="100%" stop-color="#1d6b3e"/>
+    </linearGradient>
+    <linearGradient id="g3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#74d6a0"/>
+      <stop offset="100%" stop-color="#2d9e5e"/>
+    </linearGradient>
+    <filter id="s" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="1" dy="2" stdDeviation="2" flood-color="#1a3d2b" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+  <!-- Hoja principal (flecha izquierda) -->
+  <path d="M28 24 L4 24 M4 24 L14 14 M4 24 L14 34" stroke="url(#g1)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" filter="url(#s)"/>
+  <!-- Hoja grande superior -->
+  <path d="M22 22 C26 14 36 8 46 10 C44 18 36 22 28 22 Z" fill="url(#g1)" filter="url(#s)"/>
+  <!-- Reflejo hoja superior -->
+  <path d="M24 20 C27 15 34 11 42 12 C40 17 34 20 28 20 Z" fill="url(#g2)" opacity="0.6"/>
+  <!-- Hoja media -->
+  <path d="M24 24 C30 18 42 16 50 20 C46 26 36 28 28 26 Z" fill="url(#g2)" opacity="0.85" filter="url(#s)"/>
+  <!-- Hoja inferior curva -->
+  <path d="M22 26 C28 32 38 36 48 34 C44 28 34 26 26 27 Z" fill="url(#g1)" opacity="0.8" filter="url(#s)"/>
+  <!-- Rizo decorativo superior -->
+  <path d="M46 10 C52 8 56 12 54 18 C52 14 50 12 46 10 Z" fill="url(#g3)" opacity="0.7"/>
+  <!-- Rizo decorativo inferior -->
+  <path d="M48 34 C54 36 58 32 56 26 C54 30 52 32 48 34 Z" fill="url(#g3)" opacity="0.6"/>
+  <!-- Vena central hoja -->
+  <path d="M28 22 C36 20 44 18 50 20" stroke="#1a5c3a" stroke-width="1.2" fill="none" stroke-linecap="round" opacity="0.5"/>
+</svg>
