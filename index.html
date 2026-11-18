@@ -234,12 +234,18 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 .chat-fab:hover{transform:scale(1.08)}
 .chat-fab-avatar{
   width:88px;height:88px;border-radius:50%;object-fit:contain;
-  border:3px solid #4ade80;background:radial-gradient(circle at 40% 35%,#d4f5e2,#a8e6c8);
-  display:block;box-shadow:0 4px 16px rgba(29,107,62,.4);
+  border:3px solid #C6A85B;background:radial-gradient(circle at 40% 35%,#d4f5e2,#a8e6c8);
+  display:block;
+  box-shadow:0 4px 16px rgba(29,107,62,.4),0 0 12px rgba(198,168,91,.7),0 0 0 0 rgba(198,168,91,.4);
+  animation:fabGoldGlow 2.4s ease-in-out infinite;
+}
+@keyframes fabGoldGlow{
+  0%,100%{box-shadow:0 4px 16px rgba(29,107,62,.4),0 0 8px rgba(198,168,91,.6),0 0 0 0 rgba(198,168,91,.3)}
+  50%{box-shadow:0 4px 24px rgba(29,107,62,.5),0 0 22px rgba(198,168,91,1),0 0 36px rgba(198,168,91,.45)}
 }
 .chat-fab-dot{
   position:absolute;top:1px;right:1px;width:14px;height:14px;
-  background:#4ade80;border-radius:50%;border:2px solid #fff;
+  background:#C6A85B;border-radius:50%;border:2px solid #fff;
   animation:pulse 2s infinite;
 }
 
@@ -249,6 +255,8 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 .sec-tag{display:inline-block;font-size:11px;font-weight:700;color:#1d6b3e;background:#e8f5ee;border:1px solid #a8dfc0;border-radius:20px;padding:3px 13px;margin-bottom:9px;letter-spacing:.05em}
 .sec-head{text-align:center;margin-bottom:26px}
 .sec-head h2{font-family:'Poppins',sans-serif;font-size:clamp(22px,3.5vw,36px);font-weight:700;color:#1a3d2b;margin-bottom:8px;letter-spacing:-0.01em}
+.sec-wrap .sec-head h2,.sec-wrap3 .sec-head h2{color:#C6A85B}
+.sec-wrap2 .sec-head h2{color:#1d6b3e}
 .sec-head p{font-size:13px;color:#64748B}
 
 /* ===== STATS BAND ===== */
@@ -275,8 +283,8 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 @media(max-width:900px){.footer-premium-inner{grid-template-columns:1fr 1fr}}
 @media(max-width:560px){.footer-premium-inner{grid-template-columns:1fr}}
 .fp-brand-logo{display:flex;align-items:center;gap:14px;margin-bottom:18px}
-.fp-brand-logo-box{width:56px;height:56px;background:#fff;border-radius:12px;border:2px solid rgba(74,222,128,.3);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden}
-.fp-brand-logo-box img{width:50px;height:50px;object-fit:contain}
+.fp-brand-logo-box{width:72px;height:72px;background:#fff;border-radius:14px;border:2px solid rgba(198,168,91,.4);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden}
+.fp-brand-logo-box img{width:66px;height:66px;object-fit:contain}
 .fp-brand-name{font-family:'Poppins',sans-serif;font-size:20px;font-weight:800;color:#fff;letter-spacing:-.01em;line-height:1}
 .fp-brand-sub{font-size:11px;color:rgba(255,255,255,.35);margin-top:3px}
 .fp-mission{font-size:13px;line-height:1.75;color:rgba(255,255,255,.45);max-width:280px;margin-bottom:16px}
@@ -310,7 +318,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 
 /* ===== NEWS ===== */
 .news-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
-.news-card{background:#fff;border:1px solid #d4edd8;border-radius:13px;overflow:hidden;cursor:pointer;transition:.2s;display:block;text-decoration:none}
+.news-card{background:#fff;border:1px solid #C6A85B;border-radius:13px;overflow:hidden;cursor:pointer;transition:.2s;display:block;text-decoration:none}
 .news-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(29,107,62,.1);border-color:#a8dfc0}
 .news-img{height:200px;display:flex;align-items:center;justify-content:center;font-size:36px;position:relative;overflow:hidden;background:#f0fdf4}
 .news-img img{width:100%;height:100%;object-fit:contain;position:absolute;inset:0}
@@ -324,7 +332,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 
 /* ===== PROJECTS ===== */
 .proj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
-.proj-card{background:#fff;border:1px solid #d4edd8;border-radius:13px;overflow:hidden;transition:.2s;display:block;text-decoration:none}
+.proj-card{background:#fff;border:1px solid #1d6b3e;border-radius:13px;overflow:hidden;transition:.2s;display:block;text-decoration:none}
 .proj-card:hover{box-shadow:0 6px 20px rgba(29,107,62,.1);border-color:#a8dfc0}
 .proj-img{height:160px;display:flex;align-items:center;justify-content:center;font-size:28px;background:#f0fdf4}
 .proj-body{padding:13px}
@@ -339,7 +347,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 
 /* ===== AGENDA ===== */
 .agenda-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
-.ev-card{background:#fff;border:1px solid #d4edd8;border-radius:11px;padding:13px;display:flex;gap:11px;transition:.2s}
+.ev-card{background:#fff;border:1px solid #C6A85B;border-radius:11px;padding:13px;display:flex;gap:11px;transition:.2s}
 .ev-card:hover{border-color:#a8dfc0;box-shadow:0 4px 14px rgba(29,107,62,.08)}
 .ev-date{background:#e8f5ee;border-radius:9px;padding:6px 9px;text-align:center;flex-shrink:0;min-width:44px}
 .ev-day{font-family:'Poppins',sans-serif;font-size:19px;font-weight:800;color:#1d6b3e;line-height:1}
@@ -834,10 +842,6 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
         <div class="fp-brand-logo">
           <div class="fp-brand-logo-box">
             <img src="./logo-iagami.png" alt="IAGAMI" onerror="this.src='';this.style.display='none';this.parentElement.innerHTML='<span style=\'font-family:Poppins,sans-serif;font-size:13px;font-weight:800;color:#1a3d2b;text-align:center;line-height:1.1\'>IAGA<br>MI</span>'"/>
-          </div>
-          <div>
-            <div class="fp-brand-name">IAGAMI</div>
-            <div class="fp-brand-sub">Instituto Autónomo de Gestión Ambiental</div>
           </div>
         </div>
         <p class="fp-mission">Municipio Iribarren, Estado Lara, Venezuela. Comprometidos con la gestión ambiental sostenible y la participación ciudadana activa.</p>
