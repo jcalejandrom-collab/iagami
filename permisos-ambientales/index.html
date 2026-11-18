@@ -12,8 +12,8 @@
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text)}
 nav{background:var(--verde-dark);padding:0 24px;display:flex;align-items:center;height:52px}
 nav .brand{font-family:'Poppins',sans-serif;color:#fff;font-size:15px;font-weight:700;text-decoration:none}
-nav .back{margin-left:auto;color:#a8dfc0;font-size:12px;text-decoration:none}
-nav .back:hover{color:#fff}
+nav .back{margin-left:auto;display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:700;font-family:'Poppins',sans-serif;color:#fff;text-decoration:none;padding:8px 18px;border-radius:25px;background:linear-gradient(135deg,#0f2d1e,#1d6b3e);box-shadow:0 4px 12px rgba(29,107,62,.4),0 2px 4px rgba(0,0,0,.2);transition:.2s}
+nav .back:hover{background:linear-gradient(135deg,#1d6b3e,#2d8a52);transform:translateY(-1px)}
 .hero{background:linear-gradient(135deg,var(--verde-dark) 0%,var(--verde) 100%);color:#fff;padding:36px 24px 32px;text-align:center}
 .hero h1{font-family:'Poppins',sans-serif;font-size:22px;font-weight:700;margin-bottom:6px}
 .hero p{font-size:13px;opacity:.85;max-width:520px;margin:0 auto}
@@ -225,7 +225,7 @@ textarea{resize:vertical}
     <p>Su solicitud fue recibida. El equipo de IAGAMI la revisará y se comunicará con usted.</p>
     <p style="font-size:12px;color:var(--muted)">Código de seguimiento:</p>
     <div class="code" id="codigo-ref"></div>
-    <br/><a class="btn-back" href="../">← Volver al portal</a>
+    <br/><a class="btn-back" href="../" style="display:inline-flex;align-items:center;gap:7px;background:linear-gradient(135deg,#1a3d2b,#1d6b3e);color:#fff;padding:10px 24px;border-radius:25px;font-weight:700;font-size:13px;font-family:'Poppins',sans-serif;box-shadow:0 4px 12px rgba(29,107,62,.35);text-decoration:none">🌿 Portal institucional</a>
   </div>
 
 </div>
