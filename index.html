@@ -2014,14 +2014,19 @@ async function doLogin() {
     'rgba(168,214,120,.88)','rgba(74,140,84,.82)',
     'rgba(140,196,100,.86)','rgba(60,120,60,.80)'
   ];
+  const dorados = [
+    'rgba(198,168,91,.70)','rgba(220,185,100,.65)',
+    'rgba(210,175,95,.72)','rgba(190,155,80,.68)'
+  ];
   for(let i=0;i<22;i++){
     const el = document.createElement('div');
     el.className = 'hoja-hero leaf';
     const size = rnd(7,18), dur = rnd(7,13);
+    const paleta = Math.random()<0.30 ? dorados : verdes;
     el.style.cssText = `
       left:${rnd(10,88)}%;bottom:${rnd(5,90)}%;
       width:${size}px;height:${size}px;
-      background:${verdes[Math.floor(rnd(0,verdes.length))]};
+      background:${paleta[Math.floor(rnd(0,paleta.length))]};
       --dx:${rnd(-80,80)}px;--dy:${rnd(-280,-110)}px;
       --dr:${rnd(-240,240)}deg;--s:${rnd(0.65,1.35)};
       --o:${rnd(0.40,0.80)};--dur:${dur.toFixed(2)}s;
@@ -2033,9 +2038,11 @@ async function doLogin() {
     const el = document.createElement('div');
     el.className = 'hoja-hero mote';
     const size = rnd(3,8), dur = rnd(6,11);
+    const paleta = Math.random()<0.30 ? dorados : verdes;
     el.style.cssText = `
       left:${rnd(15,82)}%;bottom:${rnd(10,85)}%;
       width:${size}px;height:${size}px;
+      background:${paleta[Math.floor(rnd(0,paleta.length))]};
       --dx:${rnd(-55,55)}px;--dy:${rnd(-220,-80)}px;
       --dr:0deg;--s:${rnd(0.6,1.5)};
       --o:${rnd(0.50,0.90)};--dur:${dur.toFixed(2)}s;
