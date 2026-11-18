@@ -23,7 +23,7 @@ Navegador  ──►  Cloudflare Pages (CDN)  ──►  GitHub (fuente)
 | Frontend | HTML5 + CSS3 + JavaScript Vanilla | — |
 | Backend | PocketBase | 0.39.1 |
 | CDN / Hosting | Cloudflare Pages | — |
-| Servidor | Nginx + VPS | 166.1.88.129:8090 |
+| Servidor | Nginx + VPS | 166.1.88.188:8090 |
 | Base de datos | SQLite (vía PocketBase) | — |
 
 **Principio**: sin frameworks externos (React, Vue, Angular, Bootstrap, jQuery). Todo el código es Vanilla JS.

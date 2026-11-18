@@ -18,16 +18,16 @@ Estos archivos se ejecutan en PocketBase 0.39.1 en el VPS.
 
 ```bash
 # 1. Copiar todos los hooks al VPS
-scp -i ~/.ssh/id_rsa pb_hooks/*.pb.js root@166.1.88.129:/opt/pocketbase/pb_hooks/
+scp -i ~/.ssh/id_rsa pb_hooks/*.pb.js root@166.1.88.188:/opt/pocketbase/pb_hooks/
 
 # 2. Verificar que el directorio existe
-ssh -i ~/.ssh/id_rsa root@166.1.88.129 "ls /opt/pocketbase/pb_hooks/"
+ssh -i ~/.ssh/id_rsa root@166.1.88.188 "ls /opt/pocketbase/pb_hooks/"
 
 # 3. Reiniciar PocketBase para cargar los nuevos hooks
-ssh -i ~/.ssh/id_rsa root@166.1.88.129 "systemctl restart pocketbase"
+ssh -i ~/.ssh/id_rsa root@166.1.88.188 "systemctl restart pocketbase"
 
 # 4. Verificar que los hooks se cargaron sin errores
-ssh -i ~/.ssh/id_rsa root@166.1.88.129 "journalctl -u pocketbase -n 50 --no-pager"
+ssh -i ~/.ssh/id_rsa root@166.1.88.188 "journalctl -u pocketbase -n 50 --no-pager"
 ```
 
 ## Variables de entorno requeridas

@@ -12,7 +12,7 @@ Municipio Iribarren (IAGAMI), Barquisimeto, Estado Lara, Venezuela.
 - **Portal público**: https://iagami.online
 - **Panel administrativo**: https://iagami.online/admin
 - **API**: https://api.iagami.online
-- **VPS**: 166.1.88.129:8090 — acceso SSH con llave (sin contraseña)
+- **VPS**: 166.1.88.188:8090 — acceso SSH con llave (sin contraseña)
 - **Despliegue**: Cloudflare Pages → GitHub → VPS (Nginx → PocketBase)
 
 ---

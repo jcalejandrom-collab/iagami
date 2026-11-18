@@ -55,7 +55,7 @@ El archivo anterior puede causar confusión al momento de crear colecciones en P
 
 ### H15-004 — Nginx rate limiting no aplicado en VPS (PENDIENTE crítico pre-producción)
 **Severidad:** Media-Alta (riesgo real en producción)  
-**Componente:** VPS 166.1.88.129 — Nginx  
+**Componente:** VPS 166.1.88.188 — Nginx  
 **Situación encontrada:**  
 La protección brute-force en JavaScript es la primera capa de defensa. Los 4 portales autenticados (profesor, estudiante, representante, comandante) tienen esta protección implementada. Sin embargo, puede ser bypasseada con scripts externos que hagan requests directamente a la API de PocketBase.
 

@@ -15,7 +15,7 @@
 ## Arquitectura de datos
 
 ```
-VPS 166.1.88.129
+VPS 166.1.88.188
 └── PocketBase 0.39.1
     ├── pb_data/           ← base de datos SQLite + adjuntos
     │   ├── data.db        ← colecciones y registros
@@ -33,7 +33,7 @@ El frontend (HTML/CSS/JS) vive en **Cloudflare Pages** (repositorio GitHub). No 
 
 ```bash
 # Verificar que PocketBase está corriendo
-ssh -i <llave> root@166.1.88.129
+ssh -i <llave> root@166.1.88.188
 systemctl status pocketbase    # o el nombre del servicio configurado
 
 # Verificar que Nginx está en pie
@@ -256,4 +256,4 @@ Estas variables deben documentarse de forma segura (nunca en el repositorio):
 
 Repositorio: `jcalejandrom-collab/iagami`
 Despliegue frontend: Cloudflare Pages (push a `main`)
-API: `https://api.iagami.online` → VPS `166.1.88.129:8090`
+API: `https://api.iagami.online` → VPS `166.1.88.188:8090`

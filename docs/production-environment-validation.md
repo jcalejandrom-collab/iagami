@@ -65,7 +65,7 @@ Antes de abrir acceso a usuarios, verificar en navegador real (Chrome o Firefox)
 
 ## Fase B — Validación de infraestructura (PENDIENTE)
 
-> Requiere acceso SSH al VPS `166.1.88.129` y acceso a la consola PocketBase `https://api.iagami.online/_`.
+> Requiere acceso SSH al VPS `166.1.88.188` y acceso a la consola PocketBase `https://api.iagami.online/_`.
 > Ver también: `docs/checklist-lanzamiento.md` — Fase 1 y Fase 2.
 
 ### B.1 Conectividad y TLS

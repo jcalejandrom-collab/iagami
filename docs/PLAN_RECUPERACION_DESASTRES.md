@@ -81,7 +81,7 @@ Este escenario no implica pérdida de datos — solo indisponibilidad temporal.
 1. Verificar estado del VPS con el proveedor
 2. Si el VPS no responde en 15 minutos → contactar soporte del proveedor
 3. Una vez restaurado el VPS: `systemctl start pocketbase nginx`
-4. Verificar que Cloudflare sigue apuntando a la IP correcta (166.1.88.129)
+4. Verificar que Cloudflare sigue apuntando a la IP correcta (166.1.88.188)
 5. Si la IP cambió → actualizar registro A en Cloudflare
 
 ---
@@ -109,9 +109,9 @@ Agregar al crontab (se activa si el backup del día no existe a las 06:00 AM):
 
 ```bash
 # Desde máquina local con llave SSH:
-scp -i <llave_ssh> scripts/backup_pocketbase.sh root@166.1.88.129:/opt/scripts/
-scp -i <llave_ssh> scripts/verify_backup.sh root@166.1.88.129:/opt/scripts/
-scp -i <llave_ssh> scripts/restore_test.sh root@166.1.88.129:/opt/scripts/
+scp -i <llave_ssh> scripts/backup_pocketbase.sh root@166.1.88.188:/opt/scripts/
+scp -i <llave_ssh> scripts/verify_backup.sh root@166.1.88.188:/opt/scripts/
+scp -i <llave_ssh> scripts/restore_test.sh root@166.1.88.188:/opt/scripts/
 chmod +x /opt/scripts/*.sh
 
 # Primer backup manual para verificar funcionamiento:

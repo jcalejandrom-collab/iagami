@@ -119,7 +119,7 @@ Flujo verificado por código:
 | `__IAGAMI_CONFIG__` inyectado | ✅ | 5 referencias en index.html |
 | Nginx rate limiting | ⚠️ PENDIENTE_VPS | Documentado en `docs/nginx_rate_limiting.md` |
 
-> **ADVERTENCIA:** La protección brute-force JS es la primera capa. Es insuficiente por sí sola. **El Nginx rate limiting DEBE aplicarse en el VPS (166.1.88.129) antes de la apertura pública de cualquier portal de autenticación.** Ver `docs/nginx_rate_limiting.md`.
+> **ADVERTENCIA:** La protección brute-force JS es la primera capa. Es insuficiente por sí sola. **El Nginx rate limiting DEBE aplicarse en el VPS (166.1.88.188) antes de la apertura pública de cualquier portal de autenticación.** Ver `docs/nginx_rate_limiting.md`.
 
 ---
 

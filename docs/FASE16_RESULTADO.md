@@ -9,7 +9,7 @@
 
 **COMPLETO CON PENDIENTES DE INFRAESTRUCTURA**
 
-La Fase 16 entrega la estrategia completa de respaldo, continuidad y recuperación para SIGAP IAGAMI. Los scripts están listos para aplicarse en el VPS. La validación final requiere acceso SSH al VPS (166.1.88.129) por parte del administrador.
+La Fase 16 entrega la estrategia completa de respaldo, continuidad y recuperación para SIGAP IAGAMI. Los scripts están listos para aplicarse en el VPS. La validación final requiere acceso SSH al VPS (166.1.88.188) por parte del administrador.
 
 > Nota metodológica: los scripts han sido revisados por inspección. La ejecución real (primer backup, prueba de restauración) debe realizarse en el VPS y documentarse antes de Fase 17.
 
@@ -45,7 +45,7 @@ La Fase 16 entrega la estrategia completa de respaldo, continuidad y recuperaci�
 
 | # | Acción | Script/Comando | Prioritario |
 |---|---|---|---|
-| 1 | Copiar scripts al VPS | `scp scripts/*.sh root@166.1.88.129:/opt/scripts/` | Sí |
+| 1 | Copiar scripts al VPS | `scp scripts/*.sh root@166.1.88.188:/opt/scripts/` | Sí |
 | 2 | Dar permisos de ejecución | `chmod +x /opt/scripts/*.sh` | Sí |
 | 3 | Ejecutar primer backup manual | `/opt/scripts/backup_pocketbase.sh` | Sí |
 | 4 | Verificar el backup generado | `/opt/scripts/verify_backup.sh <archivo>` | Sí |

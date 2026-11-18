@@ -127,7 +127,7 @@ location ~ ^/api/collections/[^/]+/auth-with-password {
 - `/api/collections/comandantes_brigadas/auth-with-password`
 - `/api/collections/representantes_brigadas/auth-with-password`
 
-**Responsable de aplicar:** Administrador VPS (166.1.88.129)
+**Responsable de aplicar:** Administrador VPS (166.1.88.188)
 
 ---
 

@@ -16,7 +16,7 @@ Cloudflare Pages  ←── build automático en push a main
 (iagami.online)
      │
      ▼ (API calls desde el navegador)
-VPS 166.1.88.129
+VPS 166.1.88.188
 Nginx → PocketBase 0.39.1
 (api.iagami.online → :8090)
 ```
@@ -45,9 +45,9 @@ No existe entorno de staging actualmente. Los cambios se validan localmente con 
 **Tiempo de propagación**: 1-3 minutos.
 
 ### Backend (PocketBase en VPS)
-PocketBase corre como proceso persistente en el VPS. Actualizaciones de esquema de colecciones se realizan directamente desde la interfaz de PocketBase (`http://166.1.88.129:8090/_`).
+PocketBase corre como proceso persistente en el VPS. Actualizaciones de esquema de colecciones se realizan directamente desde la interfaz de PocketBase (`http://166.1.88.188:8090/_`).
 
-**Acceso SSH**: `ssh -i <llave> root@166.1.88.129`
+**Acceso SSH**: `ssh -i <llave> root@166.1.88.188`
 
 ---
 

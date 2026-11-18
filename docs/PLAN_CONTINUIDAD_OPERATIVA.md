@@ -8,7 +8,7 @@
 ```
 Usuarios → Cloudflare Pages (CDN) → GitHub (código estático)
                                    ↕ API calls
-                              VPS 166.1.88.129
+                              VPS 166.1.88.188
                               Nginx (puerto 80/443)
                               PocketBase 0.39.1 (puerto 8090)
                               pb_data/ (SQLite + archivos)
@@ -20,7 +20,7 @@ Usuarios → Cloudflare Pages (CDN) → GitHub (código estático)
 |---|---|---|
 | DNS | Cloudflare (SLA 100%) | Mínimo — redundancia global |
 | Código frontend | Cloudflare Pages (CDN global) | Mínimo — CDN distribuido |
-| API PocketBase | VPS 166.1.88.129 | **Punto único de fallo** |
+| API PocketBase | VPS 166.1.88.188 | **Punto único de fallo** |
 | Base de datos SQLite | Disco VPS | **Punto único de fallo** |
 | Integraciones Zoom/Gemini | Proveedores externos | Dependencia externa |
 
@@ -50,7 +50,7 @@ Usuarios → Cloudflare Pages (CDN) → GitHub (código estático)
 ## Protocolo ante caída del sistema
 
 1. **Detectar caída** — alerta desde Cloudflare o reporte de usuario
-2. **Verificar VPS** — `ssh -i <llave> root@166.1.88.129 "systemctl status pocketbase nginx"`
+2. **Verificar VPS** — `ssh -i <llave> root@166.1.88.188 "systemctl status pocketbase nginx"`
 3. **Si PocketBase caído** — `systemctl start pocketbase`
 4. **Si Nginx caído** — `systemctl start nginx`
 5. **Si VPS no responde** — contactar proveedor + activar protocolo E2 del plan de desastres
