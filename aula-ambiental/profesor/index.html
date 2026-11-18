@@ -2409,11 +2409,10 @@ async function cargarClasesJitsiProf() {
   try {
     const cursoIds = (_misCursos||[]).map(c=>c.id);
     if (!cursoIds.length) return;
-    const data = await pb.collection('clases_aula').getList(1,50,{
-      filter: cursoIds.map(id=>`curso_id="${id}"`).join('||'), sort:'-fecha'
-    });
+    const filter = encodeURIComponent(cursoIds.map(id=>`curso_id="${id}"`).join('||'));
+    const data = await pbFetch(`/api/collections/clases_virtuales/records?filter=${filter}&sort=-fecha&perPage=50`);
     sel.innerHTML = '<option value="">-- elige una clase --</option>' +
-      data.items.map(c=>`<option value="${c.id}">${c.titulo||'Clase'} ${c.fecha?'· '+c.fecha.slice(0,10):''}</option>`).join('');
+      (data.items||[]).map(c=>`<option value="${c.id}">${c.titulo||'Clase'} ${c.fecha?'· '+c.fecha.slice(0,10):''}</option>`).join('');
   } catch(e) {}
 }
 
