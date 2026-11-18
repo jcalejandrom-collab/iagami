@@ -242,7 +242,7 @@ const CMSDB = (function () {
       const _key = 'getAll_' + coleccion;
       const signal = _abortKey(_key);
       try {
-        const noSortCols = ['comunas'];
+        const noSortCols = ['comunas','permisos_ambientales'];
         const idSortCols = ['trabajadores','solicitudes_rrhh','capacitaciones','evaluaciones_desempeno','asistencia','actividades','inspecciones_empresas'];
         let sortCandidates;
         if (noSortCols.includes(coleccion)) { sortCandidates = ['']; }
