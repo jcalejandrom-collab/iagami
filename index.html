@@ -226,16 +226,16 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 /* ===== CHAT FAB ===== */
 .chat-fab{
   position:fixed;bottom:20px;right:20px;z-index:401;
-  width:80px;height:80px;background:transparent;border-radius:50%;
+  width:88px;height:88px;background:transparent;border-radius:50%;
   display:flex;align-items:center;justify-content:center;cursor:pointer;
-  box-shadow:0 4px 22px rgba(29,107,62,.65);transition:.2s;border:none;
-  padding:0;overflow:hidden;
+  box-shadow:0 6px 24px rgba(29,107,62,.55);transition:.2s;border:none;
+  padding:0;overflow:visible;
 }
-.chat-fab:hover{transform:scale(1.10)}
+.chat-fab:hover{transform:scale(1.08)}
 .chat-fab-avatar{
-  width:80px;height:80px;border-radius:50%;object-fit:cover;
-  border:2px solid #4ade80;background:#1d6b3e;
-  display:block;
+  width:88px;height:88px;border-radius:50%;object-fit:contain;
+  border:3px solid #4ade80;background:radial-gradient(circle at 40% 35%,#d4f5e2,#a8e6c8);
+  display:block;box-shadow:0 4px 16px rgba(29,107,62,.4);
 }
 .chat-fab-dot{
   position:absolute;top:1px;right:1px;width:14px;height:14px;
