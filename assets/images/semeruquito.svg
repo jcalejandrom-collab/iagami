@@ -1,144 +1,160 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-  <!-- Fondo bokeh verde/azul suave -->
   <defs>
-    <radialGradient id="bg" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="#a8e6cf"/>
-      <stop offset="60%" stop-color="#7ecba1"/>
-      <stop offset="100%" stop-color="#3d9970"/>
+    <radialGradient id="bgr" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#d4f5e2"/>
+      <stop offset="55%" stop-color="#a8e6c8"/>
+      <stop offset="100%" stop-color="#5fb98a"/>
     </radialGradient>
-    <radialGradient id="cherry" cx="40%" cy="35%" r="60%">
-      <stop offset="0%" stop-color="#ff6b6b"/>
-      <stop offset="50%" stop-color="#e63946"/>
-      <stop offset="100%" stop-color="#c1121f"/>
+    <radialGradient id="chr" cx="38%" cy="30%" r="65%">
+      <stop offset="0%" stop-color="#ff7a7a"/>
+      <stop offset="45%" stop-color="#e8282a"/>
+      <stop offset="100%" stop-color="#b01a1c"/>
     </radialGradient>
-    <radialGradient id="shine" cx="30%" cy="30%" r="50%">
-      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.8"/>
+    <radialGradient id="shineR" cx="30%" cy="25%" r="45%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.75"/>
       <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
     </radialGradient>
-    <radialGradient id="cheek" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="#ffb3c1" stop-opacity="0.9"/>
-      <stop offset="100%" stop-color="#ff8fab" stop-opacity="0.3"/>
+    <radialGradient id="eyeL" cx="35%" cy="30%" r="55%">
+      <stop offset="0%" stop-color="#3d2200"/>
+      <stop offset="100%" stop-color="#1a0800"/>
     </radialGradient>
-    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-      <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#1a3d2b" flood-opacity="0.3"/>
-    </filter>
-    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
-      <feGaussianBlur stdDeviation="3" result="blur"/>
-      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-    </filter>
+    <radialGradient id="grass" cx="50%" cy="0%" r="80%">
+      <stop offset="0%" stop-color="#52c27a"/>
+      <stop offset="100%" stop-color="#2d7a4f"/>
+    </radialGradient>
   </defs>
 
-  <!-- Fondo circular -->
-  <circle cx="100" cy="100" r="100" fill="url(#bg)"/>
+  <!-- Fondo -->
+  <circle cx="100" cy="100" r="100" fill="url(#bgr)"/>
 
-  <!-- Círculos bokeh decorativos -->
-  <circle cx="30" cy="40" r="10" fill="#ffffff" opacity="0.15"/>
-  <circle cx="170" cy="35" r="7" fill="#ffffff" opacity="0.12"/>
-  <circle cx="20" cy="130" r="6" fill="#ffffff" opacity="0.1"/>
-  <circle cx="175" cy="140" r="9" fill="#ffffff" opacity="0.13"/>
-  <circle cx="155" cy="60" r="5" fill="#ffe066" opacity="0.25"/>
-  <circle cx="40" cy="155" r="5" fill="#ffe066" opacity="0.2"/>
+  <!-- Bokeh puntos de luz -->
+  <circle cx="25" cy="35" r="8" fill="#ffffff" opacity="0.18"/>
+  <circle cx="170" cy="28" r="6" fill="#ffffff" opacity="0.15"/>
+  <circle cx="18" cy="110" r="5" fill="#ffffff" opacity="0.12"/>
+  <circle cx="178" cy="115" r="7" fill="#ffffff" opacity="0.13"/>
+  <circle cx="155" cy="55" r="4" fill="#fffde7" opacity="0.3"/>
+  <circle cx="42" cy="155" r="4" fill="#fffde7" opacity="0.25"/>
+  <circle cx="80" cy="20" r="3" fill="#ffffff" opacity="0.2"/>
+  <circle cx="130" cy="175" r="3" fill="#ffffff" opacity="0.18"/>
 
-  <!-- Pasto/tierra base -->
-  <ellipse cx="100" cy="175" rx="72" ry="20" fill="#2d6a4f"/>
-  <ellipse cx="100" cy="170" rx="68" ry="16" fill="#40916c"/>
-  <!-- Hierbita -->
-  <path d="M55 165 Q52 150 57 148 Q59 158 60 165Z" fill="#52b788"/>
-  <path d="M62 163 Q60 152 65 150 Q66 160 67 163Z" fill="#74c69d"/>
-  <path d="M137 164 Q135 153 140 151 Q142 161 143 164Z" fill="#52b788"/>
-  <path d="M145 163 Q143 154 148 152 Q149 162 150 163Z" fill="#74c69d"/>
+  <!-- Pasto base -->
+  <ellipse cx="100" cy="178" rx="80" ry="22" fill="url(#grass)"/>
+  <!-- Hierba pequeña -->
+  <path d="M46 170 Q43 158 48 155 Q51 163 52 170Z" fill="#74c69d"/>
+  <path d="M54 168 Q52 158 57 156 Q59 165 60 168Z" fill="#52b788"/>
+  <path d="M142 168 Q140 158 145 156 Q147 165 148 168Z" fill="#74c69d"/>
+  <path d="M150 170 Q148 158 153 155 Q156 163 157 170Z" fill="#52b788"/>
+  <path d="M94 171 Q92 162 97 160 Q99 168 100 171Z" fill="#95d5b2"/>
+  <path d="M103 171 Q105 162 100 160 Q99 168 100 171Z" fill="#74c69d"/>
 
-  <!-- Ardilla (izquierda) simplificada -->
-  <ellipse cx="38" cy="162" rx="12" ry="10" fill="#c9a060"/>
-  <ellipse cx="38" cy="153" rx="8" ry="8" fill="#c9a060"/>
+  <!-- Animalito izquierda (ardilla kawaii) -->
+  <ellipse cx="34" cy="168" rx="14" ry="11" fill="#d4956a"/>
+  <circle cx="34" cy="157" r="10" fill="#d4956a"/>
   <!-- Cola ardilla -->
-  <path d="M28 165 Q15 155 20 142 Q30 148 32 162Z" fill="#b07d3a"/>
-  <!-- Ojos ardilla -->
-  <circle cx="35" cy="152" r="2" fill="#2d1a00"/>
-  <circle cx="41" cy="152" r="2" fill="#2d1a00"/>
-  <!-- Nariz ardilla -->
-  <ellipse cx="38" cy="157" rx="2.5" ry="1.5" fill="#8b5e3c"/>
+  <path d="M22 170 Q8 158 14 143 Q26 150 28 168Z" fill="#b8734a" opacity="0.9"/>
+  <ellipse cx="34" cy="168" rx="14" ry="11" fill="#d4956a"/>
+  <!-- Cara ardilla -->
+  <circle cx="31" cy="156" r="2.5" fill="#2d1a00"/>
+  <circle cx="37" cy="156" r="2.5" fill="#2d1a00"/>
+  <circle cx="31.8" cy="155.2" r="1" fill="#fff"/>
+  <circle cx="37.8" cy="155.2" r="1" fill="#fff"/>
+  <ellipse cx="34" cy="161" rx="3" ry="2" fill="#c47a52"/>
+  <!-- Orejas ardilla -->
+  <ellipse cx="28" cy="149" rx="4" ry="5" fill="#d4956a"/>
+  <ellipse cx="40" cy="149" rx="4" ry="5" fill="#d4956a"/>
+  <ellipse cx="28" cy="149" rx="2.5" ry="3.5" fill="#f0b88a"/>
+  <ellipse cx="40" cy="149" rx="2.5" ry="3.5" fill="#f0b88a"/>
 
-  <!-- Mariquita (derecha) -->
-  <ellipse cx="162" cy="165" rx="10" ry="8" fill="#e63946"/>
-  <circle cx="162" cy="165" r="8" fill="#e63946"/>
-  <!-- Cabeza mariquita -->
-  <circle cx="162" cy="156" r="6" fill="#1a0000"/>
-  <!-- Manchas mariquita -->
-  <circle cx="158" cy="166" r="2.5" fill="#1a0000"/>
-  <circle cx="166" cy="166" r="2.5" fill="#1a0000"/>
-  <circle cx="162" cy="161" r="2" fill="#1a0000"/>
-  <!-- Línea mariquita -->
-  <line x1="162" y1="158" x2="162" y2="173" stroke="#1a0000" stroke-width="1.2"/>
-  <!-- Ojos mariquita -->
-  <circle cx="159" cy="155" r="1.5" fill="#ffffff"/>
-  <circle cx="165" cy="155" r="1.5" fill="#ffffff"/>
+  <!-- Animalito derecha (conejito kawaii) -->
+  <ellipse cx="166" cy="168" rx="14" ry="11" fill="#e8c4a0"/>
+  <circle cx="166" cy="157" r="10" fill="#e8c4a0"/>
+  <!-- Orejas conejito -->
+  <ellipse cx="160" cy="144" rx="4" ry="8" fill="#e8c4a0"/>
+  <ellipse cx="172" cy="144" rx="4" ry="8" fill="#e8c4a0"/>
+  <ellipse cx="160" cy="144" rx="2.5" ry="6" fill="#f4a0b0"/>
+  <ellipse cx="172" cy="144" rx="2.5" ry="6" fill="#f4a0b0"/>
+  <!-- Cara conejito -->
+  <circle cx="163" cy="156" r="2.5" fill="#2d1a00"/>
+  <circle cx="169" cy="156" r="2.5" fill="#2d1a00"/>
+  <circle cx="163.8" cy="155.2" r="1" fill="#fff"/>
+  <circle cx="169.8" cy="155.2" r="1" fill="#fff"/>
+  <ellipse cx="166" cy="160" rx="2.5" ry="1.5" fill="#f4a0b0"/>
 
-  <!-- CUERPO CEREZA KAWAII -->
-  <!-- Sombra suave cereza -->
-  <ellipse cx="100" cy="142" rx="38" ry="10" fill="#1a3d2b" opacity="0.2"/>
+  <!-- CUERPO CEREZA (grande, centrado) -->
+  <ellipse cx="100" cy="150" rx="48" ry="12" fill="#1a3d2b" opacity="0.15"/>
+  <circle cx="100" cy="118" r="52" fill="url(#chr)"/>
+  <!-- Brillo cereza -->
+  <ellipse cx="83" cy="96" rx="16" ry="12" fill="url(#shineR)" transform="rotate(-25,83,96)"/>
 
-  <!-- Cuerpo principal cereza -->
-  <circle cx="100" cy="118" r="45" fill="url(#cherry)" filter="url(#shadow)"/>
+  <!-- Brazitos kawaii -->
+  <!-- Brazo izquierdo -->
+  <ellipse cx="53" cy="128" rx="10" ry="7" fill="#e8282a" transform="rotate(30,53,128)"/>
+  <ellipse cx="53" cy="128" rx="8" ry="5.5" fill="#d42022" transform="rotate(30,53,128)"/>
+  <!-- Brazo derecho -->
+  <ellipse cx="147" cy="128" rx="10" ry="7" fill="#e8282a" transform="rotate(-30,147,128)"/>
+  <ellipse cx="147" cy="128" rx="8" ry="5.5" fill="#d42022" transform="rotate(-30,147,128)"/>
 
-  <!-- Brillo cereza (reflejo claro arriba-izquierda) -->
-  <ellipse cx="84" cy="99" rx="14" ry="10" fill="url(#shine)" transform="rotate(-30,84,99)"/>
+  <!-- Mejillas rosadas -->
+  <ellipse cx="74" cy="128" rx="13" ry="9" fill="#ff9eb5" opacity="0.65"/>
+  <ellipse cx="126" cy="128" rx="13" ry="9" fill="#ff9eb5" opacity="0.65"/>
 
-  <!-- Pecas decorativas -->
-  <circle cx="122" cy="105" r="2.5" fill="#c1121f" opacity="0.4"/>
-  <circle cx="128" cy="115" r="2" fill="#c1121f" opacity="0.3"/>
+  <!-- OJO IZQUIERDO kawaii grande -->
+  <ellipse cx="85" cy="113" rx="12" ry="13" fill="url(#eyeL)"/>
+  <!-- Iris -->
+  <ellipse cx="85" cy="115" rx="8" ry="9" fill="#2d4a8a"/>
+  <!-- Pupila -->
+  <ellipse cx="85" cy="115" rx="6" ry="7" fill="#0a0a0a"/>
+  <!-- Brillo ojo izq -->
+  <circle cx="81" cy="109" r="3.5" fill="#ffffff"/>
+  <circle cx="88" cy="108" r="1.8" fill="#ffffff" opacity="0.7"/>
 
-  <!-- Mejillas kawaii -->
-  <ellipse cx="74" cy="124" rx="11" ry="8" fill="url(#cheek)"/>
-  <ellipse cx="126" cy="124" rx="11" ry="8" fill="url(#cheek)"/>
-
-  <!-- Ojos kawaii (grandes, expresivos) -->
-  <!-- Ojo izquierdo -->
-  <ellipse cx="87" cy="114" rx="9" ry="10" fill="#1a0000"/>
-  <ellipse cx="87" cy="114" rx="7.5" ry="8.5" fill="#2d1200"/>
-  <circle cx="84" cy="110" r="3" fill="#ffffff"/>
-  <circle cx="82" cy="109" r="1.2" fill="#ffffff"/>
-  <!-- Ojo derecho -->
-  <ellipse cx="113" cy="114" rx="9" ry="10" fill="#1a0000"/>
-  <ellipse cx="113" cy="114" rx="7.5" ry="8.5" fill="#2d1200"/>
-  <circle cx="110" cy="110" r="3" fill="#ffffff"/>
-  <circle cx="108" cy="109" r="1.2" fill="#ffffff"/>
+  <!-- OJO DERECHO kawaii grande -->
+  <ellipse cx="115" cy="113" rx="12" ry="13" fill="url(#eyeL)"/>
+  <ellipse cx="115" cy="115" rx="8" ry="9" fill="#2d4a8a"/>
+  <ellipse cx="115" cy="115" rx="6" ry="7" fill="#0a0a0a"/>
+  <circle cx="111" cy="109" r="3.5" fill="#ffffff"/>
+  <circle cx="118" cy="108" r="1.8" fill="#ffffff" opacity="0.7"/>
 
   <!-- Nariz pequeña -->
-  <ellipse cx="100" cy="121" rx="2.5" ry="1.5" fill="#c1121f" opacity="0.6"/>
+  <ellipse cx="100" cy="124" rx="3" ry="2" fill="#8b1a1a" opacity="0.5"/>
 
-  <!-- Sonrisa kawaii -->
-  <path d="M88 128 Q100 139 112 128" stroke="#1a0000" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-  <!-- Dientecito -->
-  <rect x="97" y="128" width="6" height="4" rx="1" fill="#ffffff"/>
+  <!-- Boca abierta kawaii (sonrisa con dientes) -->
+  <path d="M86 131 Q100 145 114 131" fill="#1a0000"/>
+  <!-- Dientes -->
+  <path d="M86 131 Q100 143 114 131 Q114 134 100 134 Q86 134 86 131Z" fill="#ffffff"/>
+  <!-- Lengüita -->
+  <ellipse cx="100" cy="138" rx="7" ry="4" fill="#ff6b8a"/>
 
-  <!-- TALLO Y HOJAS -->
-  <!-- Tallo -->
-  <path d="M100 73 Q96 60 92 48 Q95 44 100 46 Q106 44 108 48 Q104 60 100 73Z" fill="#52b788"/>
+  <!-- TALLO -->
+  <path d="M100 66 Q97 54 93 44 Q97 40 100 42 Q103 40 107 44 Q103 54 100 66Z" fill="#52b788"/>
 
-  <!-- Hoja izquierda -->
-  <ellipse cx="84" cy="44" rx="16" ry="10" fill="#40916c" transform="rotate(-35,84,44)"/>
-  <path d="M84 44 Q76 48 84 52" stroke="#2d6a4f" stroke-width="1" fill="none"/>
+  <!-- HOJA IZQUIERDA -->
+  <ellipse cx="83" cy="40" rx="18" ry="11" fill="#2d9e5e" transform="rotate(-40,83,40)"/>
+  <path d="M100 66 Q83 40 72 36" stroke="#1d6b3e" stroke-width="1.2" fill="none"/>
+  <!-- Vena hoja -->
+  <path d="M83 40 Q79 44 83 48" stroke="#1a5c3a" stroke-width="0.8" fill="none"/>
 
-  <!-- Hoja derecha -->
-  <ellipse cx="116" cy="41" rx="16" ry="10" fill="#52b788" transform="rotate(30,116,41)"/>
-  <path d="M116 41 Q124 45 116 49" stroke="#40916c" stroke-width="1" fill="none"/>
+  <!-- HOJA DERECHA -->
+  <ellipse cx="117" cy="37" rx="18" ry="11" fill="#40916c" transform="rotate(35,117,37)"/>
+  <path d="M100 66 Q117 37 128 33" stroke="#2d7a4f" stroke-width="1.2" fill="none"/>
+  <path d="M117 37 Q121 41 117 45" stroke="#1a5c3a" stroke-width="0.8" fill="none"/>
 
-  <!-- Destello estrella (brillo) -->
-  <g transform="translate(108,30)" opacity="0.9">
-    <line x1="0" y1="-7" x2="0" y2="7" stroke="#ffe066" stroke-width="2" stroke-linecap="round"/>
-    <line x1="-7" y1="0" x2="7" y2="0" stroke="#ffe066" stroke-width="2" stroke-linecap="round"/>
-    <line x1="-5" y1="-5" x2="5" y2="5" stroke="#ffe066" stroke-width="1.5" stroke-linecap="round"/>
-    <line x1="5" y1="-5" x2="-5" y2="5" stroke="#ffe066" stroke-width="1.5" stroke-linecap="round"/>
+  <!-- DESTELLO ESTRELLA en tallo -->
+  <g transform="translate(104,24)">
+    <line x1="0" y1="-9" x2="0" y2="9" stroke="#ffe066" stroke-width="2.2" stroke-linecap="round"/>
+    <line x1="-9" y1="0" x2="9" y2="0" stroke="#ffe066" stroke-width="2.2" stroke-linecap="round"/>
+    <line x1="-6" y1="-6" x2="6" y2="6" stroke="#ffe066" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="6" y1="-6" x2="-6" y2="6" stroke="#ffe066" stroke-width="1.5" stroke-linecap="round"/>
+    <circle cx="0" cy="0" r="2.5" fill="#fff9c4"/>
   </g>
 
-  <!-- Cartel de madera -->
-  <rect x="38" y="178" width="124" height="20" rx="4" fill="#c9a060"/>
-  <rect x="39" y="179" width="122" height="18" rx="3" fill="#dfc185"/>
-  <!-- Vetas madera -->
-  <line x1="50" y1="179" x2="52" y2="197" stroke="#c9a060" stroke-width="0.8" opacity="0.5"/>
-  <line x1="80" y1="179" x2="78" y2="197" stroke="#c9a060" stroke-width="0.8" opacity="0.5"/>
-  <line x1="130" y1="179" x2="132" y2="197" stroke="#c9a060" stroke-width="0.8" opacity="0.5"/>
-  <!-- Texto cartel -->
-  <text x="100" y="192" text-anchor="middle" font-family="'Arial Black',sans-serif" font-size="7.5" font-weight="900" fill="#5c3d11" letter-spacing="0.5">SEMERUQUITO · TU ASISTENTE IA</text>
+  <!-- Estrellitas decorativas pequeñas -->
+  <g transform="translate(28,78)" opacity="0.7">
+    <line x1="0" y1="-4" x2="0" y2="4" stroke="#ffe066" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="-4" y1="0" x2="4" y2="0" stroke="#ffe066" stroke-width="1.5" stroke-linecap="round"/>
+  </g>
+  <g transform="translate(172,80)" opacity="0.7">
+    <line x1="0" y1="-4" x2="0" y2="4" stroke="#ffe066" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="-4" y1="0" x2="4" y2="0" stroke="#ffe066" stroke-width="1.5" stroke-linecap="round"/>
+  </g>
 </svg>
