@@ -1819,6 +1819,9 @@ input,select,textarea{font-family:inherit}
     <button id="atab-avisos" onclick="switchAulaTab('avisos')" style="padding:8px 16px;border:none;background:none;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;font-family:inherit">📢 Avisos</button>
     <button id="atab-certificados" onclick="switchAulaTab('certificados')" style="padding:8px 16px;border:none;background:none;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;font-family:inherit">🏅 Certificados</button>
     <button id="atab-zoom" onclick="switchAulaTab('zoom')" style="padding:8px 16px;border:none;background:none;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;font-family:inherit">🎥 Zoom API</button>
+    <button id="atab-cuestionarios" onclick="switchAulaTab('cuestionarios')" style="padding:8px 16px;border:none;background:none;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;font-family:inherit">📝 Cuestionarios</button>
+    <button id="atab-foros" onclick="switchAulaTab('foros')" style="padding:8px 16px;border:none;background:none;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;font-family:inherit">💬 Foros</button>
+    <button id="atab-progreso" onclick="switchAulaTab('progreso')" style="padding:8px 16px;border:none;background:none;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;font-family:inherit">📊 Progreso</button>
   </div>
   <div id="atab-panel-biblioteca">
     <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
@@ -2015,6 +2018,114 @@ input,select,textarea{font-family:inherit}
     </div>
   </div>
 </div>
+
+  <!-- ── PANEL: CUESTIONARIOS ── -->
+  <div id="atab-panel-cuestionarios" style="display:none">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+      <div style="font-size:14px;font-weight:600">Exámenes y Cuestionarios</div>
+      <button class="btn btn-primary btn-sm" onclick="openCuestForm()">+ Nuevo cuestionario</button>
+    </div>
+    <div id="cuest-list">Cargando...</div>
+    <!-- Form cuestionario -->
+    <div id="cuest-form-panel" style="display:none;background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:20px;margin-top:16px">
+      <div style="font-weight:700;font-size:14px;margin-bottom:14px" id="cuest-form-title">Nuevo Cuestionario</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div style="grid-column:span 2"><label class="form-label">Título *</label><input class="form-control" id="cuest-titulo" placeholder="Ej: Evaluación parcial — Cambio climático"/></div>
+        <div><label class="form-label">Curso</label>
+          <select class="form-control" id="cuest-curso"><option value="">Seleccionar curso...</option></select></div>
+        <div><label class="form-label">Tipo</label>
+          <select class="form-control" id="cuest-tipo"><option value="diagnostico">Diagnóstico</option><option value="parcial">Parcial</option><option value="final">Final</option><option value="practica">Práctica</option><option value="repaso">Repaso</option></select></div>
+        <div><label class="form-label">Tiempo límite (min, 0=sin límite)</label><input class="form-control" type="number" id="cuest-tiempo" min="0" value="0"/></div>
+        <div><label class="form-label">Intentos permitidos</label><input class="form-control" type="number" id="cuest-intentos" min="1" value="1"/></div>
+        <div><label class="form-label">Nota aprobatoria (%)</label><input class="form-control" type="number" id="cuest-nota" min="0" max="100" value="60"/></div>
+        <div><label class="form-label">Estado</label>
+          <select class="form-control" id="cuest-estado"><option value="borrador">Borrador</option><option value="activo">Activo</option><option value="cerrado">Cerrado</option></select></div>
+        <div style="display:flex;align-items:center;gap:8px;padding-top:20px"><input type="checkbox" id="cuest-mezclar"/><label for="cuest-mezclar" style="font-size:13px">Mezclar preguntas</label></div>
+        <div style="display:flex;align-items:center;gap:8px;padding-top:20px"><input type="checkbox" id="cuest-mostrar"/><label for="cuest-mostrar" style="font-size:13px">Mostrar respuestas al finalizar</label></div>
+      </div>
+      <input type="hidden" id="cuest-edit-id"/>
+      <div style="display:flex;gap:10px;margin-top:16px">
+        <button class="btn btn-primary" onclick="saveCuest()">💾 Guardar</button>
+        <button class="btn btn-secondary" onclick="closeCuestForm()">Cancelar</button>
+      </div>
+    </div>
+    <!-- Form preguntas -->
+    <div id="cuest-preguntas-panel" style="display:none;background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:20px;margin-top:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div style="font-weight:700;font-size:14px" id="cuest-preg-title">Preguntas del cuestionario</div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-primary btn-sm" onclick="openPregForm()">+ Agregar pregunta</button>
+          <button class="btn btn-secondary btn-sm" onclick="closePregPanel()">✕ Cerrar</button>
+        </div>
+      </div>
+      <div id="cuest-preguntas-list">Cargando...</div>
+      <div id="preg-form" style="display:none;border-top:1px solid var(--border);padding-top:14px;margin-top:14px">
+        <div style="font-weight:600;font-size:13px;margin-bottom:10px">Nueva pregunta</div>
+        <div style="display:grid;gap:10px">
+          <div><label class="form-label">Enunciado *</label><textarea class="form-control" id="preg-enunciado" rows="2" placeholder="Escribe la pregunta aquí..."></textarea></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div><label class="form-label">Tipo</label>
+              <select class="form-control" id="preg-tipo" onchange="renderPregOpciones()">
+                <option value="opcion_multiple">Opción múltiple</option>
+                <option value="verdadero_falso">Verdadero / Falso</option>
+                <option value="respuesta_corta">Respuesta corta</option>
+                <option value="multiple_respuesta">Múltiple respuesta</option>
+              </select></div>
+            <div><label class="form-label">Puntos</label><input class="form-control" type="number" id="preg-puntos" min="1" value="1"/></div>
+          </div>
+          <div id="preg-opciones-container"></div>
+          <div><label class="form-label">Explicación (se muestra al revisar)</label><input class="form-control" id="preg-explicacion" placeholder="Opcional..."/></div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:12px">
+          <button class="btn btn-primary btn-sm" onclick="savePreg()">Guardar pregunta</button>
+          <button class="btn btn-secondary btn-sm" onclick="document.getElementById('preg-form').style.display='none'">Cancelar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PANEL: FOROS ── -->
+  <div id="atab-panel-foros" style="display:none">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+      <div style="font-size:14px;font-weight:600">Foros de Debate por Curso</div>
+      <button class="btn btn-primary btn-sm" onclick="openForoForm()">+ Nuevo foro</button>
+    </div>
+    <div id="foros-list">Cargando...</div>
+    <div id="foro-form-panel" style="display:none;background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:20px;margin-top:16px">
+      <div style="font-weight:700;font-size:14px;margin-bottom:14px">Nuevo Foro</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div style="grid-column:span 2"><label class="form-label">Título *</label><input class="form-control" id="foro-titulo" placeholder="Ej: Dudas sobre el módulo 1"/></div>
+        <div><label class="form-label">Curso</label>
+          <select class="form-control" id="foro-curso"><option value="">Seleccionar curso...</option></select></div>
+        <div><label class="form-label">Tipo</label>
+          <select class="form-control" id="foro-tipo"><option value="general">General</option><option value="debate">Debate</option><option value="consulta">Consulta</option><option value="noticias">Noticias</option><option value="ideas">Ideas</option></select></div>
+        <div style="grid-column:span 2"><label class="form-label">Descripción</label><textarea class="form-control" id="foro-desc" rows="2"></textarea></div>
+        <div style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="foro-activo" checked/><label for="foro-activo" style="font-size:13px">Foro activo</label></div>
+      </div>
+      <input type="hidden" id="foro-edit-id"/>
+      <div style="display:flex;gap:10px;margin-top:16px">
+        <button class="btn btn-primary" onclick="saveForo()">💾 Guardar</button>
+        <button class="btn btn-secondary" onclick="closeForoForm()">Cancelar</button>
+      </div>
+    </div>
+    <div id="foro-mensajes-panel" style="display:none;background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:20px;margin-top:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div style="font-weight:700;font-size:14px" id="foro-msg-title">Mensajes del foro</div>
+        <button class="btn btn-secondary btn-sm" onclick="document.getElementById('foro-mensajes-panel').style.display='none'">✕ Cerrar</button>
+      </div>
+      <div id="foro-mensajes-list">Cargando...</div>
+    </div>
+  </div>
+
+  <!-- ── PANEL: PROGRESO ── -->
+  <div id="atab-panel-progreso" style="display:none">
+    <div style="font-size:14px;font-weight:600;margin-bottom:16px">Progreso de Estudiantes por Curso</div>
+    <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+      <select class="form-control" id="prog-f-curso" style="min-width:220px" onchange="renderProgreso()"><option value="">Todos los cursos</option></select>
+      <input class="form-control" id="prog-f-search" placeholder="Buscar estudiante..." style="min-width:200px" oninput="renderProgreso()"/>
+    </div>
+    <div id="progreso-list">Cargando...</div>
+  </div>
 
     <!-- ══════ PROFESORES ══════ -->
     <div id="sec-profesores" class="section">
@@ -2896,7 +3007,7 @@ let _certificadosAdmin = [];
 
 function switchAulaTab(tab) {
   _currentAulaTab = tab;
-  ['biblioteca','cursos','visitas','clases','avisos','certificados','zoom'].forEach(t => {
+  ['biblioteca','cursos','visitas','clases','avisos','certificados','zoom','cuestionarios','foros','progreso'].forEach(t => {
     const p = document.getElementById('atab-panel-' + t);
     if (p) p.style.display = t === tab ? 'block' : 'none';
     const btn = document.getElementById('atab-' + t);
@@ -2909,6 +3020,9 @@ function switchAulaTab(tab) {
   if (tab === 'avisos') renderAvisosAdmin();
   if (tab === 'certificados') renderCertificadosAdmin();
   if (tab === 'zoom') zoomAdminInit();
+  if (tab === 'cuestionarios') renderCuestionariosAdmin();
+  if (tab === 'foros') renderForosAdmin();
+  if (tab === 'progreso') renderProgreso();
 }
 
 async function renderAula() {
@@ -8595,6 +8709,392 @@ function renderBackupHistory(records) {
         }).join('')}
       </tbody>
     </table>`;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CUESTIONARIOS — ADMIN
+═══════════════════════════════════════════════════════════ */
+let _cuestEditId = null;
+let _cuestPregCuestId = null;
+
+async function renderCuestionariosAdmin() {
+  const el = document.getElementById('cuest-list');
+  el.innerHTML = 'Cargando...';
+  try {
+    const [resCuest, resCursos] = await Promise.all([
+      pb.collection('cuestionarios').getList(1, 200, {sort: '-created', expand: 'curso_id'}),
+      pb.collection('cursos_aula').getList(1, 200, {sort: 'nombre', filter: 'estado="activo"'})
+    ]);
+    // Poblar selects de cursos
+    ['cuest-curso','foro-curso','prog-f-curso'].forEach(id => {
+      const sel = document.getElementById(id);
+      if (!sel) return;
+      const val = sel.value;
+      sel.innerHTML = id === 'prog-f-curso'
+        ? '<option value="">Todos los cursos</option>'
+        : '<option value="">Seleccionar curso...</option>';
+      resCursos.items.forEach(c => {
+        const o = document.createElement('option');
+        o.value = c.id; o.textContent = c.nombre;
+        if (c.id === val) o.selected = true;
+        sel.appendChild(o);
+      });
+    });
+    if (!resCuest.items.length) { el.innerHTML = '<p style="color:var(--muted);font-size:13px">No hay cuestionarios. Crea uno con "+ Nuevo cuestionario".</p>'; return; }
+    const estadoColor = {borrador:'#d97706',activo:'#16a34a',cerrado:'#6b7280',archivado:'#9ca3af'};
+    el.innerHTML = `<div class="table-wrap"><table><thead><tr><th>Título</th><th>Curso</th><th>Tipo</th><th>Tiempo</th><th>Intentos</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>
+      ${resCuest.items.map(q => `<tr>
+        <td><strong>${q.titulo}</strong></td>
+        <td style="font-size:12px">${q.expand?.curso_id?.nombre || '—'}</td>
+        <td style="font-size:12px;text-transform:capitalize">${q.tipo}</td>
+        <td style="font-size:12px">${q.tiempo_limite_min ? q.tiempo_limite_min+'min' : 'Sin límite'}</td>
+        <td style="font-size:12px">${q.intentos_permitidos || 1}</td>
+        <td><span style="color:${estadoColor[q.estado]||'#6b7280'};font-size:12px;font-weight:700">${q.estado||'—'}</span></td>
+        <td style="display:flex;gap:6px;flex-wrap:wrap">
+          <button class="btn-s" onclick="openPregPanel('${q.id}','${q.titulo.replace(/'/g,"\\'")}')">📝 Preguntas</button>
+          <button class="btn-s" onclick="editCuest('${q.id}')">✏️</button>
+          <button class="btn-s" style="color:var(--danger)" onclick="deleteCuest('${q.id}')">🗑️</button>
+        </td>
+      </tr>`).join('')}
+    </tbody></table></div>`;
+  } catch(e) { el.innerHTML = `<p style="color:var(--danger);font-size:13px">Error: ${e.message}</p>`; }
+}
+
+function openCuestForm() {
+  _cuestEditId = null;
+  document.getElementById('cuest-form-title').textContent = 'Nuevo Cuestionario';
+  ['cuest-titulo','cuest-curso','cuest-tipo','cuest-estado'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { if (el.tagName === 'SELECT') el.selectedIndex = 0; else el.value = ''; }
+  });
+  document.getElementById('cuest-tiempo').value = '0';
+  document.getElementById('cuest-intentos').value = '1';
+  document.getElementById('cuest-nota').value = '60';
+  document.getElementById('cuest-mezclar').checked = false;
+  document.getElementById('cuest-mostrar').checked = false;
+  document.getElementById('cuest-edit-id').value = '';
+  document.getElementById('cuest-form-panel').style.display = 'block';
+  document.getElementById('cuest-preguntas-panel').style.display = 'none';
+}
+
+async function editCuest(id) {
+  try {
+    const q = await pb.collection('cuestionarios').getOne(id);
+    _cuestEditId = id;
+    document.getElementById('cuest-form-title').textContent = 'Editar Cuestionario';
+    document.getElementById('cuest-titulo').value = q.titulo;
+    document.getElementById('cuest-curso').value = q.curso_id || '';
+    document.getElementById('cuest-tipo').value = q.tipo;
+    document.getElementById('cuest-tiempo').value = q.tiempo_limite_min || 0;
+    document.getElementById('cuest-intentos').value = q.intentos_permitidos || 1;
+    document.getElementById('cuest-nota').value = q.nota_aprobatoria || 60;
+    document.getElementById('cuest-estado').value = q.estado || 'borrador';
+    document.getElementById('cuest-mezclar').checked = !!q.mezclar_preguntas;
+    document.getElementById('cuest-mostrar').checked = !!q.mostrar_respuestas;
+    document.getElementById('cuest-edit-id').value = id;
+    document.getElementById('cuest-form-panel').style.display = 'block';
+  } catch(e) { toast('Error al cargar cuestionario'); }
+}
+
+function closeCuestForm() { document.getElementById('cuest-form-panel').style.display = 'none'; }
+
+async function saveCuest() {
+  const titulo = document.getElementById('cuest-titulo').value.trim();
+  if (!titulo) { toast('El título es obligatorio'); return; }
+  const data = {
+    titulo,
+    curso_id: document.getElementById('cuest-curso').value || null,
+    tipo: document.getElementById('cuest-tipo').value,
+    tiempo_limite_min: parseInt(document.getElementById('cuest-tiempo').value) || 0,
+    intentos_permitidos: parseInt(document.getElementById('cuest-intentos').value) || 1,
+    nota_aprobatoria: parseFloat(document.getElementById('cuest-nota').value) || 60,
+    estado: document.getElementById('cuest-estado').value,
+    mezclar_preguntas: document.getElementById('cuest-mezclar').checked,
+    mostrar_respuestas: document.getElementById('cuest-mostrar').checked
+  };
+  try {
+    const id = document.getElementById('cuest-edit-id').value;
+    if (id) await pb.collection('cuestionarios').update(id, data);
+    else await pb.collection('cuestionarios').create(data);
+    toast(id ? 'Cuestionario actualizado' : 'Cuestionario creado');
+    closeCuestForm();
+    renderCuestionariosAdmin();
+  } catch(e) { toast('Error al guardar: ' + e.message); }
+}
+
+async function deleteCuest(id) {
+  if (!confirm('¿Eliminar este cuestionario y todas sus preguntas?')) return;
+  try {
+    const pregs = await pb.collection('preguntas_cuestionario').getFullList({filter:`cuestionario_id="${id}"`});
+    for (const p of pregs) await pb.collection('preguntas_cuestionario').delete(p.id);
+    await pb.collection('cuestionarios').delete(id);
+    toast('Cuestionario eliminado'); renderCuestionariosAdmin();
+  } catch(e) { toast('Error: ' + e.message); }
+}
+
+/* ── Preguntas ── */
+async function openPregPanel(cuestId, titulo) {
+  _cuestPregCuestId = cuestId;
+  document.getElementById('cuest-preg-title').textContent = `Preguntas: ${titulo}`;
+  document.getElementById('cuest-preguntas-panel').style.display = 'block';
+  document.getElementById('cuest-form-panel').style.display = 'none';
+  document.getElementById('preg-form').style.display = 'none';
+  renderPregsAdmin(cuestId);
+}
+function closePregPanel() { document.getElementById('cuest-preguntas-panel').style.display = 'none'; }
+
+async function renderPregsAdmin(cuestId) {
+  const el = document.getElementById('cuest-preguntas-list');
+  el.innerHTML = 'Cargando...';
+  try {
+    const res = await pb.collection('preguntas_cuestionario').getList(1, 100, {filter:`cuestionario_id="${cuestId}"`, sort:'orden'});
+    if (!res.items.length) { el.innerHTML = '<p style="color:var(--muted);font-size:13px;padding:8px 0">Sin preguntas. Agrega la primera.</p>'; return; }
+    el.innerHTML = `<div class="table-wrap"><table><thead><tr><th>#</th><th>Enunciado</th><th>Tipo</th><th>Pts</th><th></th></tr></thead><tbody>
+      ${res.items.map((p,i) => `<tr>
+        <td>${i+1}</td>
+        <td style="max-width:300px">${p.enunciado.substring(0,80)}${p.enunciado.length>80?'…':''}</td>
+        <td style="font-size:12px">${p.tipo.replace('_',' ')}</td>
+        <td>${p.puntos||1}</td>
+        <td><button class="btn-s" style="color:var(--danger)" onclick="deletePreg('${p.id}')">🗑️</button></td>
+      </tr>`).join('')}
+    </tbody></table></div>`;
+  } catch(e) { el.innerHTML = '<p style="color:var(--danger);font-size:13px">Error al cargar preguntas</p>'; }
+}
+
+function openPregForm() {
+  document.getElementById('preg-form').style.display = 'block';
+  document.getElementById('preg-enunciado').value = '';
+  document.getElementById('preg-tipo').value = 'opcion_multiple';
+  document.getElementById('preg-puntos').value = '1';
+  document.getElementById('preg-explicacion').value = '';
+  renderPregOpciones();
+}
+
+function renderPregOpciones() {
+  const tipo = document.getElementById('preg-tipo').value;
+  const cont = document.getElementById('preg-opciones-container');
+  if (tipo === 'verdadero_falso') {
+    cont.innerHTML = `<div><label class="form-label">Respuesta correcta</label>
+      <select class="form-control" id="preg-resp-vf"><option value="Verdadero">Verdadero</option><option value="Falso">Falso</option></select></div>`;
+  } else if (tipo === 'respuesta_corta') {
+    cont.innerHTML = `<div><label class="form-label">Respuesta esperada</label><input class="form-control" id="preg-resp-corta" placeholder="Texto de respuesta correcta..."/></div>`;
+  } else {
+    cont.innerHTML = `<div><label class="form-label">Opciones (marca la(s) correcta(s))</label>
+      <div id="preg-opciones-list" style="display:grid;gap:6px">
+        ${[0,1,2,3].map(i => `<div style="display:flex;align-items:center;gap:8px">
+          <input type="${tipo==='multiple_respuesta'?'checkbox':'radio'}" name="preg-correcta" id="preg-c${i}" value="${i}"/>
+          <input class="form-control" id="preg-op${i}" placeholder="Opción ${i+1}..." style="flex:1"/>
+        </div>`).join('')}
+      </div>
+      <button type="button" style="font-size:12px;color:var(--primary);background:none;border:none;cursor:pointer;margin-top:4px" onclick="addPregOpcion()">+ Agregar opción</button>
+    </div>`;
+  }
+}
+
+function addPregOpcion() {
+  const list = document.getElementById('preg-opciones-list');
+  const i = list.children.length;
+  const tipo = document.getElementById('preg-tipo').value;
+  const div = document.createElement('div');
+  div.style.cssText = 'display:flex;align-items:center;gap:8px';
+  div.innerHTML = `<input type="${tipo==='multiple_respuesta'?'checkbox':'radio'}" name="preg-correcta" id="preg-c${i}" value="${i}"/>
+    <input class="form-control" id="preg-op${i}" placeholder="Opción ${i+1}..." style="flex:1"/>`;
+  list.appendChild(div);
+}
+
+async function savePreg() {
+  const enunciado = document.getElementById('preg-enunciado').value.trim();
+  if (!enunciado) { toast('El enunciado es obligatorio'); return; }
+  const tipo = document.getElementById('preg-tipo').value;
+  let opciones = [], respuesta_correcta = [];
+  if (tipo === 'verdadero_falso') {
+    opciones = ['Verdadero','Falso'];
+    respuesta_correcta = [document.getElementById('preg-resp-vf').value];
+  } else if (tipo === 'respuesta_corta') {
+    respuesta_correcta = [document.getElementById('preg-resp-corta').value.trim()];
+  } else {
+    const list = document.getElementById('preg-opciones-list');
+    for (let i = 0; i < list.children.length; i++) {
+      const val = document.getElementById(`preg-op${i}`)?.value?.trim();
+      if (val) opciones.push(val);
+    }
+    document.querySelectorAll('input[name="preg-correcta"]:checked').forEach(el => {
+      const idx = parseInt(el.value);
+      if (opciones[idx]) respuesta_correcta.push(opciones[idx]);
+    });
+  }
+  const existing = await pb.collection('preguntas_cuestionario').getList(1,1,{filter:`cuestionario_id="${_cuestPregCuestId}"`, sort:'-orden'});
+  const orden = (existing.items[0]?.orden || 0) + 1;
+  try {
+    await pb.collection('preguntas_cuestionario').create({
+      cuestionario_id: _cuestPregCuestId, enunciado, tipo,
+      opciones, respuesta_correcta,
+      puntos: parseFloat(document.getElementById('preg-puntos').value) || 1,
+      explicacion: document.getElementById('preg-explicacion').value.trim(),
+      orden
+    });
+    toast('Pregunta guardada');
+    document.getElementById('preg-form').style.display = 'none';
+    renderPregsAdmin(_cuestPregCuestId);
+  } catch(e) { toast('Error: ' + e.message); }
+}
+
+async function deletePreg(id) {
+  if (!confirm('¿Eliminar esta pregunta?')) return;
+  try { await pb.collection('preguntas_cuestionario').delete(id); toast('Pregunta eliminada'); renderPregsAdmin(_cuestPregCuestId); }
+  catch(e) { toast('Error: ' + e.message); }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   FOROS — ADMIN
+═══════════════════════════════════════════════════════════ */
+async function renderForosAdmin() {
+  const el = document.getElementById('foros-list');
+  el.innerHTML = 'Cargando...';
+  try {
+    const res = await pb.collection('foros_aula').getList(1, 200, {sort: '-created', expand: 'curso_id'});
+    if (!res.items.length) { el.innerHTML = '<p style="color:var(--muted);font-size:13px">No hay foros. Crea uno con "+ Nuevo foro".</p>'; return; }
+    el.innerHTML = `<div class="table-wrap"><table><thead><tr><th>Título</th><th>Curso</th><th>Tipo</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>
+      ${res.items.map(f => `<tr>
+        <td><strong>${f.titulo}</strong>${f.descripcion ? `<div style="font-size:11px;color:var(--muted)">${f.descripcion.substring(0,60)}</div>` : ''}</td>
+        <td style="font-size:12px">${f.expand?.curso_id?.nombre || '—'}</td>
+        <td style="font-size:12px;text-transform:capitalize">${f.tipo||'general'}</td>
+        <td><span style="color:${f.activo?'#16a34a':'#9ca3af'};font-size:12px;font-weight:700">${f.activo?'Activo':'Inactivo'}</span></td>
+        <td style="display:flex;gap:6px">
+          <button class="btn-s" onclick="verMensajesForo('${f.id}','${f.titulo.replace(/'/g,"\\'")}')">💬 Ver mensajes</button>
+          <button class="btn-s" style="color:${f.activo?'#d97706':'#16a34a'}" onclick="toggleForo('${f.id}',${!f.activo})">${f.activo?'⏸ Pausar':'▶ Activar'}</button>
+          <button class="btn-s" style="color:var(--danger)" onclick="deleteForo('${f.id}')">🗑️</button>
+        </td>
+      </tr>`).join('')}
+    </tbody></table></div>`;
+  } catch(e) { el.innerHTML = `<p style="color:var(--danger);font-size:13px">Error: ${e.message}</p>`; }
+}
+
+function openForoForm() {
+  document.getElementById('foro-titulo').value = '';
+  document.getElementById('foro-desc').value = '';
+  document.getElementById('foro-tipo').value = 'general';
+  document.getElementById('foro-activo').checked = true;
+  document.getElementById('foro-edit-id').value = '';
+  document.getElementById('foro-form-panel').style.display = 'block';
+  document.getElementById('foro-mensajes-panel').style.display = 'none';
+}
+function closeForoForm() { document.getElementById('foro-form-panel').style.display = 'none'; }
+
+async function saveForo() {
+  const titulo = document.getElementById('foro-titulo').value.trim();
+  if (!titulo) { toast('El título es obligatorio'); return; }
+  const data = {
+    titulo,
+    curso_id: document.getElementById('foro-curso').value || null,
+    tipo: document.getElementById('foro-tipo').value,
+    descripcion: document.getElementById('foro-desc').value.trim(),
+    activo: document.getElementById('foro-activo').checked
+  };
+  try {
+    const id = document.getElementById('foro-edit-id').value;
+    if (id) await pb.collection('foros_aula').update(id, data);
+    else await pb.collection('foros_aula').create(data);
+    toast(id ? 'Foro actualizado' : 'Foro creado'); closeForoForm(); renderForosAdmin();
+  } catch(e) { toast('Error: ' + e.message); }
+}
+
+async function toggleForo(id, activo) {
+  try { await pb.collection('foros_aula').update(id, {activo}); toast(activo?'Foro activado':'Foro pausado'); renderForosAdmin(); }
+  catch(e) { toast('Error: ' + e.message); }
+}
+
+async function deleteForo(id) {
+  if (!confirm('¿Eliminar este foro y todos sus mensajes?')) return;
+  try {
+    const msgs = await pb.collection('mensajes_foro').getFullList({filter:`foro_id="${id}"`});
+    for (const m of msgs) await pb.collection('mensajes_foro').delete(m.id);
+    await pb.collection('foros_aula').delete(id);
+    toast('Foro eliminado'); renderForosAdmin();
+  } catch(e) { toast('Error: ' + e.message); }
+}
+
+async function verMensajesForo(foroId, titulo) {
+  document.getElementById('foro-msg-title').textContent = `Mensajes: ${titulo}`;
+  document.getElementById('foro-mensajes-panel').style.display = 'block';
+  const el = document.getElementById('foro-mensajes-list');
+  el.innerHTML = 'Cargando...';
+  try {
+    const res = await pb.collection('mensajes_foro').getList(1, 200, {filter:`foro_id="${foroId}"`, sort:'created'});
+    if (!res.items.length) { el.innerHTML = '<p style="color:var(--muted);font-size:13px">Sin mensajes aún.</p>'; return; }
+    el.innerHTML = res.items.map(m => `<div style="border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+        <span style="font-size:12px;font-weight:600">${m.nombre_autor||'Anónimo'} <span style="color:var(--muted);font-weight:400">(${m.tipo_autor})</span></span>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:11px;color:var(--muted)">${new Date(m.created).toLocaleString('es-VE')}</span>
+          <button class="btn-s" style="color:var(--danger);padding:2px 6px" onclick="deleteMensajeForo('${m.id}','${foroId}','${titulo.replace(/'/g,"\\'")}')">🗑️</button>
+        </div>
+      </div>
+      <div style="font-size:13px">${m.mensaje}</div>
+    </div>`).join('');
+  } catch(e) { el.innerHTML = `<p style="color:var(--danger);font-size:13px">Error: ${e.message}</p>`; }
+}
+
+async function deleteMensajeForo(id, foroId, titulo) {
+  if (!confirm('¿Eliminar este mensaje?')) return;
+  try { await pb.collection('mensajes_foro').delete(id); toast('Mensaje eliminado'); verMensajesForo(foroId, titulo); }
+  catch(e) { toast('Error: ' + e.message); }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PROGRESO ESTUDIANTES — ADMIN
+═══════════════════════════════════════════════════════════ */
+async function renderProgreso() {
+  const el = document.getElementById('progreso-list');
+  el.innerHTML = 'Cargando...';
+  const cursoFilt = document.getElementById('prog-f-curso')?.value || '';
+  const search = document.getElementById('prog-f-search')?.value?.toLowerCase() || '';
+  try {
+    const filter = cursoFilt ? `curso_id="${cursoFilt}"` : '';
+    const res = await pb.collection('progreso_estudiante').getList(1, 200, {
+      filter, sort: '-porcentaje_avance', expand: 'curso_id,estudiante_id'
+    });
+    // Poblar select de cursos si está vacío
+    const sel = document.getElementById('prog-f-curso');
+    if (sel && sel.options.length <= 1) {
+      const cursos = await pb.collection('cursos_aula').getList(1, 200, {sort:'nombre'}).catch(()=>({items:[]}));
+      cursos.items.forEach(c => { const o = document.createElement('option'); o.value = c.id; o.textContent = c.nombre; sel.appendChild(o); });
+    }
+    let items = res.items;
+    if (search) items = items.filter(p => {
+      const est = p.expand?.estudiante_id;
+      const nombre = est ? `${est.nombres||''} ${est.apellidos||''}`.toLowerCase() : '';
+      return nombre.includes(search);
+    });
+    if (!items.length) { el.innerHTML = '<p style="color:var(--muted);font-size:13px">Sin registros de progreso aún.</p>'; return; }
+    el.innerHTML = `<div class="table-wrap"><table><thead><tr>
+      <th>Estudiante</th><th>Curso</th><th>Avance</th><th>Clases</th><th>Tareas</th><th>Nota</th><th>Certificado</th><th>Última actividad</th>
+    </tr></thead><tbody>
+      ${items.map(p => {
+        const est = p.expand?.estudiante_id;
+        const nombre = est ? `${est.nombres||''} ${est.apellidos||''}`.trim() : '—';
+        const pct = p.porcentaje_avance || 0;
+        const color = pct >= 80 ? '#16a34a' : pct >= 50 ? '#d97706' : '#dc2626';
+        return `<tr>
+          <td style="font-size:13px"><strong>${nombre}</strong></td>
+          <td style="font-size:12px">${p.expand?.curso_id?.nombre || '—'}</td>
+          <td>
+            <div style="display:flex;align-items:center;gap:8px">
+              <div style="width:80px;height:6px;background:var(--border);border-radius:3px;overflow:hidden">
+                <div style="width:${pct}%;height:100%;background:${color};border-radius:3px"></div>
+              </div>
+              <span style="font-size:12px;font-weight:700;color:${color}">${pct}%</span>
+            </div>
+          </td>
+          <td style="font-size:12px">${p.clases_vistas||0}/${p.clases_total||0}</td>
+          <td style="font-size:12px">${p.tareas_entregadas||0}/${p.tareas_total||0}</td>
+          <td style="font-size:12px;font-weight:700">${p.nota_promedio ? p.nota_promedio.toFixed(1)+'%' : '—'}</td>
+          <td style="font-size:12px">${p.certificado_emitido ? '🏅 Sí' : '—'}</td>
+          <td style="font-size:11px;color:var(--muted)">${p.ultima_actividad ? new Date(p.ultima_actividad).toLocaleDateString('es-VE') : '—'}</td>
+        </tr>`;
+      }).join('')}
+    </tbody></table></div>`;
+  } catch(e) { el.innerHTML = `<p style="color:var(--danger);font-size:13px">Error: ${e.message}</p>`; }
 }
 </script>
 
