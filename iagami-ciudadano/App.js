@@ -597,6 +597,7 @@ function PantallaAtencion({ onBack }) {
     { cargo: 'Oficina — Denuncias e información', nombre: 'Teléfono fijo', num: '(0251) 257-9529', href: 'tel:+582512579529', ini: '☎' },
   ];
   const correos = [
+    { label: 'Atención al Ciudadano', addr: 'Iagami.atencionparalavida@gmail.com', nota: 'Consultas, información general y atención ciudadana directa.' },
     { label: 'Vicepresidencia — Quejas y seguimiento', addr: 'vicepresidencia.iagami@gmail.com', nota: 'Quejas sobre trabajadores o mala praxis institucional.' },
     { label: 'Control y seguimiento interno', addr: 'seguimientoycontroliagami@gmail.com', nota: 'Seguimiento de casos, control de gestión y fiscalización.' },
   ];
