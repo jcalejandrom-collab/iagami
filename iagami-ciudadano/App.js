@@ -69,38 +69,49 @@ const MODULOS = [
   { id: 'estudiante',    label: 'Portal Estudiante',    url: `${WEB}/siga-iagami/estudiante` },
 ];
 
-// 60% verdes, 40% doradas
+// 60% verdes, 40% doradas — 2 tipos: 'leaf' (diamante) y 'mote' (orbe dorado)
 const HOJAS_CONFIG = [
-  { delay: 0,    startX: 20,  size: 16, duration: 3800, dorada: false },
-  { delay: 500,  startX: 55,  size: 12, duration: 4500, dorada: false },
-  { delay: 1000, startX: 95,  size: 18, duration: 3200, dorada: true  },
-  { delay: 300,  startX: 135, size: 14, duration: 5000, dorada: false },
-  { delay: 1500, startX: 175, size: 10, duration: 4000, dorada: true  },
-  { delay: 800,  startX: 215, size: 16, duration: 3600, dorada: false },
-  { delay: 2000, startX: 255, size: 13, duration: 4200, dorada: true  },
-  { delay: 400,  startX: 295, size: 20, duration: 3500, dorada: false },
-  { delay: 1200, startX: 330, size: 11, duration: 4800, dorada: false },
-  { delay: 1800, startX: 360, size: 15, duration: 3900, dorada: true  },
+  { delay: 0,    startX: 18,  size: 15, duration: 9000,  dorada: false, tipo: 'leaf',  drift: -18, rotDeg: 180 },
+  { delay: 1100, startX: 52,  size: 11, duration: 10500, dorada: false, tipo: 'leaf',  drift:  22, rotDeg: 240 },
+  { delay: 2300, startX: 90,  size: 17, duration: 8500,  dorada: true,  tipo: 'mote',  drift: -12, rotDeg: 0   },
+  { delay: 500,  startX: 130, size: 13, duration: 11000, dorada: false, tipo: 'leaf',  drift:  25, rotDeg: 200 },
+  { delay: 3200, startX: 168, size: 9,  duration: 9500,  dorada: true,  tipo: 'mote',  drift: -20, rotDeg: 0   },
+  { delay: 800,  startX: 210, size: 16, duration: 8800,  dorada: false, tipo: 'leaf',  drift:  15, rotDeg: 160 },
+  { delay: 4000, startX: 248, size: 12, duration: 10000, dorada: true,  tipo: 'leaf',  drift: -28, rotDeg: 270 },
+  { delay: 1600, startX: 288, size: 19, duration: 9200,  dorada: false, tipo: 'leaf',  drift:  18, rotDeg: 190 },
+  { delay: 2800, startX: 325, size: 10, duration: 11500, dorada: false, tipo: 'leaf',  drift: -15, rotDeg: 220 },
+  { delay: 3600, startX: 358, size: 14, duration: 9800,  dorada: true,  tipo: 'mote',  drift:  10, rotDeg: 0   },
+  { delay: 700,  startX: 38,  size: 13, duration: 10200, dorada: false, tipo: 'leaf',  drift:  20, rotDeg: 150 },
+  { delay: 2000, startX: 192, size: 8,  duration: 8200,  dorada: true,  tipo: 'mote',  drift: -16, rotDeg: 0   },
 ];
 
-function HojaFlotante({ delay, startX, size, duration, dorada }) {
+function HojaFlotante({ delay, startX, size, duration, dorada, tipo, drift, rotDeg }) {
   const y   = useRef(new Animated.Value(0)).current;
   const x   = useRef(new Animated.Value(0)).current;
   const op  = useRef(new Animated.Value(0)).current;
   const rot = useRef(new Animated.Value(0)).current;
-  const drift = useRef((Math.random() > 0.5 ? 1 : -1) * (15 + Math.random() * 20)).current;
 
   useEffect(() => {
+    // Igual que floatUpHero del portal:
+    // 0%-12%: fade in; 12%-85%: visible; 85%-100%: fade out
+    const fadeIn  = duration * 0.12;
+    const hold    = duration * 0.73;  // 85% - 12%
+    const fadeOut = duration * 0.15;
+    const maxOp   = dorada ? 0.72 : 0.60;
+
     const anim = Animated.loop(
       Animated.sequence([
         Animated.delay(delay),
         Animated.parallel([
-          Animated.timing(y,   { toValue: -260, duration, useNativeDriver: true, easing: Easing.out(Easing.quad) }),
+          // Movimiento: sube + deriva lateralmente
+          Animated.timing(y,   { toValue: -220, duration, useNativeDriver: true, easing: Easing.out(Easing.quad) }),
           Animated.timing(x,   { toValue: drift, duration, useNativeDriver: true, easing: Easing.inOut(Easing.sin) }),
           Animated.timing(rot, { toValue: 1, duration, useNativeDriver: true }),
+          // Opacidad: fade-in rápido → hold largo → fade-out final
           Animated.sequence([
-            Animated.timing(op, { toValue: dorada ? 0.55 : 0.5, duration: duration * 0.25, useNativeDriver: true }),
-            Animated.timing(op, { toValue: 0, duration: duration * 0.75, useNativeDriver: true }),
+            Animated.timing(op, { toValue: maxOp, duration: fadeIn,  useNativeDriver: true }),
+            Animated.timing(op, { toValue: maxOp, duration: hold,    useNativeDriver: true }),
+            Animated.timing(op, { toValue: 0,     duration: fadeOut, useNativeDriver: true }),
           ]),
         ]),
         Animated.parallel([
@@ -115,28 +126,42 @@ function HojaFlotante({ delay, startX, size, duration, dorada }) {
     return () => anim.stop();
   }, []);
 
-  const rotate = rot.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '270deg'] });
-  const color  = dorada ? DORADO : '#4ade80';
+  const rotate = rot.interpolate({ inputRange: [0, 1], outputRange: [`0deg`, `${rotDeg}deg`] });
 
+  if (tipo === 'mote') {
+    // Orbe dorado brillante — igual a .hoja-hero.mote del portal
+    return (
+      <Animated.View style={{
+        position: 'absolute', bottom: 10, left: startX,
+        width: size * 2.2, height: size * 2.2, opacity: op,
+        transform: [{ translateY: y }, { translateX: x }],
+        borderRadius: size * 1.1,
+        backgroundColor: 'rgba(255,232,100,0.55)',
+        shadowColor: DORADO, shadowRadius: size, shadowOpacity: 0.6,
+        shadowOffset: { width: 0, height: 0 },
+      }} />
+    );
+  }
+
+  // Hoja diamante — igual a .hoja-hero.leaf (border-radius: 50% 0 50% 0)
+  const color = dorada ? 'rgba(198,168,91,0.85)' : 'rgba(74,222,128,0.75)';
   return (
     <Animated.View style={{
       position: 'absolute', bottom: 10, left: startX,
       width: size, height: size, opacity: op,
       transform: [{ translateY: y }, { translateX: x }, { rotate }],
-    }}>
-      {/* Hoja simple con SVG inline via texto */}
-      <View style={{
-        width: size, height: size, borderRadius: size * 0.8,
-        borderBottomRightRadius: 2,
-        backgroundColor: color,
-      }} />
-    </Animated.View>
+      backgroundColor: color,
+      borderTopLeftRadius: size * 0.5,
+      borderBottomRightRadius: size * 0.5,
+      borderTopRightRadius: 1,
+      borderBottomLeftRadius: 1,
+    }} />
   );
 }
 
 function HojasFlotantes() {
   return (
-    <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 280, pointerEvents: 'none' }}>
+    <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 240, pointerEvents: 'none' }}>
       {HOJAS_CONFIG.map((h, i) => <HojaFlotante key={i} {...h} />)}
     </View>
   );
@@ -247,7 +272,7 @@ function PantallaInicio({ ir }) {
         <Text style={s.sectionDesc}>Accede a los servicios del municipio desde tu teléfono</Text>
         <View style={s.grid}>
           {MODULOS.map(m => (
-            <TouchableOpacity key={m.id} style={s.modulo} onPress={() => Linking.openURL(m.url)}>
+            <TouchableOpacity key={m.id} style={s.modulo} onPress={() => ir(m.id)}>
               <View style={s.moduloImgWrap}>
                 <Image source={ICONOS[m.id]} style={s.moduloIcon} resizeMode="contain" />
                 <View style={s.moduloBar}>
