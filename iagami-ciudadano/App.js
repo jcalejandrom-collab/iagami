@@ -17,7 +17,7 @@ const API = 'https://api.iagami.online';
 const { width } = Dimensions.get('window');
 
 const LOGO = require('./assets/logo-iagami.png');
-const APP_ICON = require('./assets/app-icon.png');
+const HERO = require('./assets/app-icon.webp');
 const SEMERUQUITO = require('./assets/semeruquito.png');
 
 const ICONOS = {
@@ -29,23 +29,27 @@ const ICONOS = {
   agenda:        require('./assets/iconos/06_agenda_sigap.png'),
   empresas:      require('./assets/iconos/07_registro_empresa.png'),
   noticias:      require('./assets/iconos/08_noticias.png'),
+  aula:          require('./assets/iconos/16_aula_ambiental.png'),
+  brigadas:      require('./assets/iconos/15_mapa_brigadas.png'),
 };
 
 const MODULOS = [
   { id: 'denuncias',     label: 'Presentar Denuncia',  sub: 'Reporta problemas ambientales' },
   { id: 'tramites',      label: 'Trámites en Línea',   sub: 'Permisos y certificaciones' },
-  { id: 'multas',        label: 'Consultar Multas',    sub: 'Revisa tu estado de multas' },
-  { id: 'atencion',      label: 'Atención Ciudadana',  sub: 'Consultas y orientación' },
-  { id: 'transparencia', label: 'Transparencia',       sub: 'Información pública' },
-  { id: 'agenda',        label: 'Agenda SIGAP',        sub: 'Eventos y actividades' },
-  { id: 'empresas',      label: 'Registro Empresa',    sub: 'Gestión empresarial' },
+  { id: 'multas',        label: 'Multas Ambientales',  sub: 'Consulta expedientes' },
+  { id: 'atencion',      label: 'Atención Ciudadana',  sub: 'Consultas y seguimiento' },
+  { id: 'transparencia', label: 'Transparencia',       sub: 'Información institucional' },
+  { id: 'agenda',        label: 'Agenda SIGAP',        sub: 'Actividades programadas' },
+  { id: 'empresas',      label: 'Registro Empresa',    sub: 'Registro ambiental' },
   { id: 'noticias',      label: 'Noticias',            sub: 'Actualidad ambiental' },
+  { id: 'aula',          label: 'Aula Ambiental',      sub: 'IAGAMI en la Escuela' },
+  { id: 'brigadas',      label: 'Mapa de Brigadas',    sub: 'Distribución por sector' },
 ];
 
 function Navbar({ onHome }) {
   return (
     <View style={s.navbar}>
-      <TouchableOpacity onPress={onHome} style={s.navLogoBtn}>
+      <TouchableOpacity onPress={onHome} style={s.navLogoWrap}>
         <Image source={LOGO} style={s.navLogo} resizeMode="contain" />
       </TouchableOpacity>
       <View style={s.navBadge}>
@@ -77,17 +81,28 @@ function PantallaInicio({ ir }) {
   const [loadingNews, setLoadingNews] = useState(true);
 
   useEffect(() => {
-    fetch(`${API}/api/collections/noticias/records?sort=-created&perPage=3&fields=id,titulo,resumen,imagen,created`)
+    fetch(`${API}/api/collections/noticias/records?sort=-created&perPage=3&fields=id,titulo,resumen,created`)
       .then(r => r.json())
-      .then(d => { if (d.items) setNoticias(d.items); })
+      .then(d => {
+        if (d.items) {
+          // deduplicar por id
+          const uniq = [];
+          const seen = new Set();
+          for (const n of d.items) {
+            if (!seen.has(n.id)) { seen.add(n.id); uniq.push(n); }
+          }
+          setNoticias(uniq.slice(0, 3));
+        }
+      })
       .catch(() => {})
       .finally(() => setLoadingNews(false));
   }, []);
 
   return (
     <ScrollView style={s.scroll} showsVerticalScrollIndicator={false}>
+      {/* Hero */}
       <View style={s.hero}>
-        <Image source={APP_ICON} style={s.heroImg} resizeMode="cover" />
+        <Image source={HERO} style={s.heroImg} resizeMode="cover" />
         <View style={s.heroOverlay}>
           <Text style={s.heroTag}>IAGAMI · Municipio Iribarren</Text>
           <Text style={s.heroTitle}>
@@ -95,10 +110,47 @@ function PantallaInicio({ ir }) {
             <Text style={{ color: DORADO }}>futuro ambiental</Text>
             {'\n'}de nuestra ciudad
           </Text>
-          <Text style={s.heroSub}>Sistema Integral de Gestión Ambiental Pública</Text>
+          <Text style={s.heroSub}>Portal institucional IAGAMI. Planificación estratégica, seguimiento de actividades y monitoreo ambiental en tiempo real.</Text>
+          <View style={s.heroBtns}>
+            <TouchableOpacity style={s.heroBtnPrimary} onPress={() => ir('denuncias')}>
+              <Text style={s.heroBtnPrimaryTxt}>Presentar Denuncia</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={s.heroBtnSec} onPress={() => ir('tramites')}>
+              <Text style={s.heroBtnSecTxt}>Ver Trámites →</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
 
+      {/* Stats */}
+      <View style={s.statsRow}>
+        <View style={s.statItem}><Text style={s.statNum}>24/7</Text><Text style={s.statLabel}>Recepción denuncias</Text></View>
+        <View style={s.statDivider} />
+        <View style={s.statItem}><Text style={s.statNum}>SIGAP</Text><Text style={s.statLabel}>Sistema integral</Text></View>
+        <View style={s.statDivider} />
+        <View style={s.statItem}><Text style={s.statNum}>v3.0</Text><Text style={s.statLabel}>Plataforma digital</Text></View>
+      </View>
+
+      {/* Módulos */}
+      <View style={s.section}>
+        <View style={s.sectionHeader}>
+          <View style={s.sectionBar} />
+          <Text style={s.sectionTitle}>Servicios Ciudadanos</Text>
+        </View>
+        <View style={s.grid}>
+          {MODULOS.map(m => (
+            <TouchableOpacity key={m.id} style={s.modulo} onPress={() => ir(m.id)}>
+              <View style={s.moduloIconWrap}>
+                <Image source={ICONOS[m.id]} style={s.moduloIcon} resizeMode="contain" />
+              </View>
+              <Text style={s.moduloLabel} numberOfLines={2}>{m.label}</Text>
+              <Text style={s.moduloSub} numberOfLines={1}>{m.sub}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
+
+      {/* Noticias — al final */}
       <View style={s.section}>
         <View style={s.sectionHeader}>
           <View style={s.sectionBar} />
@@ -123,24 +175,6 @@ function PantallaInicio({ ir }) {
           <Text style={s.verTodoTxt}>Ver todas las noticias →</Text>
         </TouchableOpacity>
       </View>
-
-      <View style={s.section}>
-        <View style={s.sectionHeader}>
-          <View style={s.sectionBar} />
-          <Text style={s.sectionTitle}>Servicios Ciudadanos</Text>
-        </View>
-        <View style={s.grid}>
-          {MODULOS.map(m => (
-            <TouchableOpacity key={m.id} style={s.modulo} onPress={() => ir(m.id)}>
-              <View style={s.moduloIconWrap}>
-                <Image source={ICONOS[m.id]} style={s.moduloIcon} resizeMode="contain" />
-              </View>
-              <Text style={s.moduloLabel} numberOfLines={2}>{m.label}</Text>
-              <Text style={s.moduloSub} numberOfLines={1}>{m.sub}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </View>
       <View style={{ height: 100 }} />
     </ScrollView>
   );
@@ -152,8 +186,7 @@ function PantallaNoticias({ onBack }) {
 
   useEffect(() => {
     fetch(`${API}/api/collections/noticias/records?sort=-created&perPage=20`)
-      .then(r => r.json())
-      .then(d => { if (d.items) setItems(d.items); })
+      .then(r => r.json()).then(d => { if (d.items) setItems(d.items); })
       .catch(() => Alert.alert('Error', 'No se pudieron cargar las noticias'))
       .finally(() => setLoading(false));
   }, []);
@@ -198,7 +231,7 @@ function PantallaDenuncias({ onBack }) {
       });
       if (r.ok) { Alert.alert('✅ Denuncia enviada', 'Tu denuncia fue registrada exitosamente.'); setForm({ nombre:'', cedula:'', telefono:'', email:'', tipo:'', descripcion:'', ubicacion:'' }); }
       else Alert.alert('Error', 'No se pudo enviar. Intenta más tarde.');
-    } catch { Alert.alert('Error de conexión', 'Verifica tu internet e intenta de nuevo.'); }
+    } catch { Alert.alert('Error de conexión', 'Verifica tu internet.'); }
     finally { setEnviando(false); }
   };
 
@@ -217,7 +250,7 @@ function PantallaDenuncias({ onBack }) {
         <Card style={{ marginBottom: 12, borderLeftWidth: 4, borderLeftColor: DORADO }}>
           <View style={{ padding: 14 }}>
             <Text style={{ color: VERDE_DARK, fontWeight: '700', marginBottom: 4 }}>Denuncia Ambiental Ciudadana</Text>
-            <Text style={{ color: GRIS, fontSize: 13 }}>Reporta problemas ambientales en el Municipio Iribarren. Los campos (*) son obligatorios.</Text>
+            <Text style={{ color: GRIS, fontSize: 13 }}>Reporta problemas ambientales. Los campos (*) son obligatorios.</Text>
           </View>
         </Card>
         {campo('Nombre completo', 'nombre', 'Tu nombre (opcional)')}
@@ -253,7 +286,7 @@ function PantallaMultas({ onBack }) {
 
   return (
     <View style={s.flex}>
-      <Header titulo="Consultar Multas" onBack={onBack} />
+      <Header titulo="Multas Ambientales" onBack={onBack} />
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 100 }}>
         <Card style={{ marginBottom: 16 }}>
           <View style={{ padding: 14 }}>
@@ -264,8 +297,8 @@ function PantallaMultas({ onBack }) {
             </TouchableOpacity>
           </View>
         </Card>
-        {multas !== null && (
-          multas.length === 0 ? <Text style={s.empty}>No se encontraron multas para esta cédula.</Text>
+        {multas !== null && (multas.length === 0
+          ? <Text style={s.empty}>No se encontraron multas para esta cédula.</Text>
           : multas.map(m => (
             <Card key={m.id} style={{ marginBottom: 12 }}>
               <View style={{ padding: 14 }}>
@@ -282,6 +315,39 @@ function PantallaMultas({ onBack }) {
   );
 }
 
+function PantallaListado({ titulo, coleccion, campos, onBack }) {
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch(`${API}/api/collections/${coleccion}/records?sort=-created&perPage=30`)
+      .then(r => r.json()).then(d => { if (d.items) setItems(d.items); }).catch(() => {}).finally(() => setLoading(false));
+  }, []);
+
+  return (
+    <View style={s.flex}>
+      <Header titulo={titulo} onBack={onBack} />
+      {loading ? <ActivityIndicator color={VERDE} style={s.loader} /> : (
+        <FlatList data={items} keyExtractor={i => i.id}
+          contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
+          renderItem={({ item }) => (
+            <Card style={{ marginBottom: 10 }}>
+              <View style={{ padding: 14 }}>
+                {campos.map(c => item[c.key] ? (
+                  <Text key={c.key} style={{ color: c.color || TEXTO, fontWeight: c.bold ? '700' : '400', fontSize: c.size || 14, marginBottom: 2 }}>
+                    {c.label ? `${c.label}: ` : ''}{item[c.key]}
+                  </Text>
+                ) : null)}
+              </View>
+            </Card>
+          )}
+          ListEmptyComponent={<Text style={s.empty}>No hay registros disponibles</Text>}
+        />
+      )}
+    </View>
+  );
+}
+
 function PantallaEmpresas({ onBack }) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -292,7 +358,9 @@ function PantallaEmpresas({ onBack }) {
       .then(r => r.json()).then(d => { if (d.items) setItems(d.items); }).catch(() => {}).finally(() => setLoading(false));
   }, []);
 
-  const filtradas = items.filter(e => e.nombre?.toLowerCase().includes(busqueda.toLowerCase()) || e.rif?.toLowerCase().includes(busqueda.toLowerCase()));
+  const filtradas = items.filter(e =>
+    e.nombre?.toLowerCase().includes(busqueda.toLowerCase()) || e.rif?.toLowerCase().includes(busqueda.toLowerCase())
+  );
 
   return (
     <View style={s.flex}>
@@ -301,7 +369,8 @@ function PantallaEmpresas({ onBack }) {
         <TextInput style={[s.input, { margin: 0 }]} placeholder="Buscar por nombre o RIF..." placeholderTextColor={GRIS} value={busqueda} onChangeText={setBusqueda} />
       </View>
       {loading ? <ActivityIndicator color={VERDE} style={s.loader} /> : (
-        <FlatList data={filtradas} keyExtractor={i => i.id} contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
+        <FlatList data={filtradas} keyExtractor={i => i.id}
+          contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
           renderItem={({ item }) => (
             <Card style={{ marginBottom: 10 }}>
               <View style={{ padding: 14 }}>
@@ -312,36 +381,6 @@ function PantallaEmpresas({ onBack }) {
             </Card>
           )}
           ListEmptyComponent={<Text style={s.empty}>No se encontraron empresas</Text>}
-        />
-      )}
-    </View>
-  );
-}
-
-function PantallaTramites({ onBack }) {
-  const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch(`${API}/api/collections/tramites/records?sort=nombre&perPage=50`)
-      .then(r => r.json()).then(d => { if (d.items) setItems(d.items); }).catch(() => {}).finally(() => setLoading(false));
-  }, []);
-
-  return (
-    <View style={s.flex}>
-      <Header titulo="Trámites en Línea" onBack={onBack} />
-      {loading ? <ActivityIndicator color={VERDE} style={s.loader} /> : (
-        <FlatList data={items} keyExtractor={i => i.id} contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
-          renderItem={({ item }) => (
-            <Card style={{ marginBottom: 12 }}>
-              <View style={{ padding: 14 }}>
-                <Text style={{ fontWeight: '700', color: TEXTO }}>{item.nombre || item.titulo}</Text>
-                {item.descripcion && <Text style={{ color: GRIS, fontSize: 13, marginTop: 4 }}>{item.descripcion}</Text>}
-                {item.requisitos && <Text style={{ color: VERDE, fontSize: 12, marginTop: 6 }}>Requisitos: {item.requisitos}</Text>}
-              </View>
-            </Card>
-          )}
-          ListEmptyComponent={<Text style={s.empty}>No hay trámites disponibles</Text>}
         />
       )}
     </View>
@@ -361,7 +400,8 @@ function PantallaAgenda({ onBack }) {
     <View style={s.flex}>
       <Header titulo="Agenda SIGAP" onBack={onBack} />
       {loading ? <ActivityIndicator color={VERDE} style={s.loader} /> : (
-        <FlatList data={items} keyExtractor={i => i.id} contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
+        <FlatList data={items} keyExtractor={i => i.id}
+          contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
           renderItem={({ item }) => (
             <Card style={{ marginBottom: 12 }}>
               <View style={{ padding: 14 }}>
@@ -380,38 +420,6 @@ function PantallaAgenda({ onBack }) {
             </Card>
           )}
           ListEmptyComponent={<Text style={s.empty}>No hay eventos próximos</Text>}
-        />
-      )}
-    </View>
-  );
-}
-
-function PantallaTransparencia({ onBack }) {
-  const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch(`${API}/api/collections/documentos/records?sort=-created&perPage=30`)
-      .then(r => r.json()).then(d => { if (d.items) setItems(d.items); }).catch(() => {}).finally(() => setLoading(false));
-  }, []);
-
-  return (
-    <View style={s.flex}>
-      <Header titulo="Transparencia" onBack={onBack} />
-      {loading ? <ActivityIndicator color={VERDE} style={s.loader} /> : (
-        <FlatList data={items} keyExtractor={i => i.id} contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
-          renderItem={({ item }) => (
-            <Card style={{ marginBottom: 10 }}>
-              <View style={{ padding: 14, flexDirection: 'row', alignItems: 'center' }}>
-                <Text style={{ fontSize: 24, marginRight: 12 }}>📄</Text>
-                <View style={{ flex: 1 }}>
-                  <Text style={{ fontWeight: '600', color: TEXTO }}>{item.titulo || item.nombre}</Text>
-                  <Text style={{ color: GRIS, fontSize: 12, marginTop: 2 }}>{new Date(item.created).toLocaleDateString('es-VE')}</Text>
-                </View>
-              </View>
-            </Card>
-          )}
-          ListEmptyComponent={<Text style={s.empty}>No hay documentos disponibles</Text>}
         />
       )}
     </View>
@@ -445,12 +453,18 @@ function PantallaAtencion({ onBack }) {
 
 const FAQ_LOCAL = [
   { q: ['denuncia','denunciar','reportar','problema ambiental'], a: 'Para presentar una denuncia ambiental, ve al módulo "Presentar Denuncia". Puedes reportar contaminación, tala ilegal, vertidos y más.' },
-  { q: ['multa','multas','sanción','deuda'], a: 'Consulta tus multas en el módulo "Consultar Multas". Ingresa tu cédula para ver el estado de tus obligaciones.' },
+  { q: ['multa','multas','sanción','deuda','expediente'], a: 'Consulta tus multas en el módulo "Multas Ambientales". Ingresa tu cédula para ver el estado de tus obligaciones.' },
   { q: ['trámite','tramite','permiso','certificado','solicitud'], a: 'Los trámites y permisos ambientales están en el módulo "Trámites en Línea" con todos los requisitos.' },
   { q: ['empresa','registro empresa','rif','industria'], a: 'El registro y consulta de empresas está en el módulo "Registro Empresa". Busca por nombre o RIF.' },
   { q: ['evento','agenda','actividad','charla'], a: 'Consulta la "Agenda SIGAP" para ver próximos eventos y actividades ambientales del municipio.' },
   { q: ['noticia','noticias','información','comunicado'], a: 'Las últimas noticias del IAGAMI están en el módulo "Noticias" o en la pantalla principal.' },
   { q: ['transparencia','documento','informe','presupuesto'], a: 'Los documentos de gestión pública están en el módulo "Transparencia".' },
+  { q: ['indicador','indicadores','monitoreo','ambiental'], a: 'Los indicadores ambientales están en el módulo "Indicadores" para ver el estado del municipio.' },
+  { q: ['proyecto','proyectos','obras','programa'], a: 'Consulta los proyectos y obras en el módulo "Proyectos SIGAP".' },
+  { q: ['revista','publicación','digital'], a: 'La Revista Digital del IAGAMI está disponible en el módulo "Revista Digital".' },
+  { q: ['brigada','brigadas','mapa'], a: 'El Mapa de Brigadas muestra la distribución de equipos por sector del municipio.' },
+  { q: ['aula','educación','ambiental','escuela'], a: 'El Aula Ambiental ofrece recursos de educación ambiental para la comunidad.' },
+  { q: ['comuna','comunas','consejo comunal'], a: 'Información sobre Comunas y Consejos Comunales del municipio en el módulo "Comunas".' },
   { q: ['hola','buenos días','buenas','saludos','hey'], a: '¡Hola! Soy Semeruquito, el asistente virtual del IAGAMI. ¿En qué puedo ayudarte hoy?' },
   { q: ['gracias','muchas gracias','ok','listo'], a: '¡Con gusto! Estoy aquí para ayudarte con cualquier consulta ambiental.' },
   { q: ['iagami','que es','quiénes son','instituto'], a: 'El IAGAMI es el Instituto Autónomo de Gestión Ambiental del Municipio Iribarren, Barquisimeto, Estado Lara.' },
@@ -520,15 +534,30 @@ function Chatbot({ visible, onClose }) {
 }
 
 const SCREENS = {
-  noticias: PantallaNoticias, denuncias: PantallaDenuncias, multas: PantallaMultas,
-  empresas: PantallaEmpresas, tramites: PantallaTramites, agenda: PantallaAgenda,
-  transparencia: PantallaTransparencia, atencion: PantallaAtencion,
+  noticias:      PantallaNoticias,
+  denuncias:     PantallaDenuncias,
+  multas:        PantallaMultas,
+  empresas:      PantallaEmpresas,
+  agenda:        PantallaAgenda,
+  atencion:      PantallaAtencion,
+  tramites:      (p) => <PantallaListado titulo="Trámites en Línea"    coleccion="tramites"    campos={[{key:'nombre',bold:true},{key:'titulo',bold:true},{key:'descripcion',color:GRIS,size:13},{key:'requisitos',color:VERDE,size:12,label:'Requisitos'}]} {...p} />,
+  transparencia: (p) => <PantallaListado titulo="Transparencia"        coleccion="documentos"  campos={[{key:'titulo',bold:true},{key:'nombre',bold:true},{key:'created',color:GRIS,size:12}]} {...p} />,
+  revista:       (p) => <PantallaListado titulo="Revista Digital"      coleccion="revistas"    campos={[{key:'titulo',bold:true},{key:'descripcion',color:GRIS,size:13}]} {...p} />,
+  indicadores:   (p) => <PantallaListado titulo="Indicadores"          coleccion="indicadores" campos={[{key:'nombre',bold:true},{key:'valor',color:VERDE,bold:true},{key:'descripcion',color:GRIS,size:13}]} {...p} />,
+  organizacion:  (p) => <PantallaListado titulo="Organización"         coleccion="proyectos"   campos={[{key:'nombre',bold:true},{key:'descripcion',color:GRIS,size:13}]} {...p} />,
+  planificacion: (p) => <PantallaListado titulo="Planificación"        coleccion="planificacion" campos={[{key:'nombre',bold:true},{key:'descripcion',color:GRIS,size:13}]} {...p} />,
+  proyectos:     (p) => <PantallaListado titulo="Proyectos SIGAP"      coleccion="proyectos"   campos={[{key:'nombre',bold:true},{key:'descripcion',color:GRIS,size:13},{key:'estado',color:VERDE,size:12}]} {...p} />,
+  trabajador:    (p) => <PantallaListado titulo="Portal Trabajador"    coleccion="trabajadores" campos={[{key:'nombre',bold:true},{key:'cargo',color:GRIS,size:13}]} {...p} />,
+  brigadas:      (p) => <PantallaListado titulo="Mapa de Brigadas"     coleccion="control_seguimiento" campos={[{key:'nombre',bold:true},{key:'descripcion',color:GRIS,size:13}]} {...p} />,
+  aula:          (p) => <PantallaListado titulo="Aula Ambiental"       coleccion="chatbot_faq" campos={[{key:'pregunta',bold:true},{key:'respuesta',color:GRIS,size:13}]} {...p} />,
+  comunas:       (p) => <PantallaListado titulo="Comunas"              coleccion="comunas"     campos={[{key:'nombre',bold:true},{key:'parroquia',color:GRIS,size:13},{key:'descripcion',color:GRIS,size:12}]} {...p} />,
+  permisos:      (p) => <PantallaListado titulo="Permisos Ambientales" coleccion="tramites"    campos={[{key:'nombre',bold:true},{key:'descripcion',color:GRIS,size:13}]} {...p} />,
 };
 
 export default function App() {
   const [pantalla, setPantalla] = useState('inicio');
   const [chatVisible, setChatVisible] = useState(false);
-  const ir = id => { if (SCREENS[id]) setPantalla(id); };
+  const ir = id => { if (SCREENS[id] || id === 'inicio') setPantalla(id); };
   const volver = () => setPantalla('inicio');
   const Pantalla = SCREENS[pantalla];
 
@@ -537,7 +566,7 @@ export default function App() {
       <StatusBar backgroundColor={VERDE_DARK} barStyle="light-content" />
       <Navbar onHome={volver} />
       <View style={s.flex}>
-        {pantalla === 'inicio' ? <PantallaInicio ir={ir} /> : <Pantalla onBack={volver} />}
+        {pantalla === 'inicio' ? <PantallaInicio ir={ir} /> : Pantalla ? <Pantalla onBack={volver} /> : <PantallaInicio ir={ir} />}
       </View>
       <TouchableOpacity style={s.fab} onPress={() => setChatVisible(true)}>
         <Image source={SEMERUQUITO} style={s.fabImg} />
@@ -556,37 +585,50 @@ const s = StyleSheet.create({
     paddingHorizontal: 16, paddingTop: Platform.OS === 'ios' ? 44 : StatusBar.currentHeight || 24,
     paddingBottom: 10, borderBottomWidth: 2, borderBottomColor: DORADO,
   },
-  navLogoBtn: { padding: 4 },
-  navLogo: { width: 100, height: 48 },
+  navLogoWrap: {
+    borderWidth: 1.5, borderColor: DORADO, borderRadius: 8, padding: 4,
+    backgroundColor: 'rgba(198,168,91,0.08)',
+  },
+  navLogo: { width: 110, height: 44 },
   navBadge: { backgroundColor: DORADO+'22', borderColor: DORADO, borderWidth: 1, borderRadius: 12, paddingHorizontal: 10, paddingVertical: 4 },
   navBadgeTxt: { color: DORADO, fontSize: 11, fontWeight: '700' },
   header: { backgroundColor: VERDE, flexDirection: 'row', alignItems: 'center', padding: 14, borderBottomWidth: 2, borderBottomColor: DORADO },
   backBtn: { marginRight: 12, padding: 4 },
   backTxt: { color: DORADO, fontSize: 22, fontWeight: '700' },
   headerTxt: { color: '#fff', fontSize: 18, fontWeight: '700', flex: 1 },
-  hero: { width: '100%', height: 240, position: 'relative', overflow: 'hidden' },
+  hero: { width: '100%', height: 300, position: 'relative', overflow: 'hidden' },
   heroImg: { width: '100%', height: '100%' },
-  heroOverlay: { position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: 'rgba(26,61,43,0.82)', padding: 18 },
+  heroOverlay: { position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: 'rgba(26,61,43,0.80)', padding: 18 },
   heroTag: { color: DORADO, fontSize: 11, fontWeight: '700', letterSpacing: 1, marginBottom: 4 },
-  heroTitle: { color: '#fff', fontSize: 20, fontWeight: '800', lineHeight: 26 },
-  heroSub: { color: '#ffffffcc', fontSize: 12, marginTop: 6 },
+  heroTitle: { color: '#fff', fontSize: 22, fontWeight: '800', lineHeight: 28 },
+  heroSub: { color: '#ffffffbb', fontSize: 12, marginTop: 6, lineHeight: 18 },
+  heroBtns: { flexDirection: 'row', marginTop: 14, gap: 10 },
+  heroBtnPrimary: { backgroundColor: VERDE, borderRadius: 8, paddingHorizontal: 16, paddingVertical: 10, borderWidth: 1, borderColor: DORADO },
+  heroBtnPrimaryTxt: { color: '#fff', fontWeight: '700', fontSize: 13 },
+  heroBtnSec: { backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: 8, paddingHorizontal: 16, paddingVertical: 10, borderWidth: 1, borderColor: '#ffffff44' },
+  heroBtnSecTxt: { color: '#fff', fontWeight: '600', fontSize: 13 },
+  statsRow: { flexDirection: 'row', backgroundColor: '#fff', paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: '#e2e8f0' },
+  statItem: { flex: 1, alignItems: 'center' },
+  statNum: { fontSize: 18, fontWeight: '800', color: VERDE },
+  statLabel: { fontSize: 10, color: GRIS, marginTop: 2, textAlign: 'center' },
+  statDivider: { width: 1, backgroundColor: '#e2e8f0', marginVertical: 4 },
   section: { padding: 16, paddingTop: 20 },
   sectionHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 14 },
   sectionBar: { width: 4, height: 20, backgroundColor: DORADO, borderRadius: 2, marginRight: 10 },
   sectionTitle: { fontSize: 17, fontWeight: '700', color: VERDE_DARK },
-  noticiaCard: { flexDirection: 'row', alignItems: 'flex-start', backgroundColor: '#fff', borderRadius: 10, padding: 12, marginBottom: 10, borderLeftWidth: 3, borderLeftColor: VERDE, elevation: 1, shadowColor: '#000', shadowOffset: { width:0, height:1 }, shadowOpacity: 0.06, shadowRadius: 2 },
+  noticiaCard: { flexDirection: 'row', alignItems: 'flex-start', backgroundColor: '#fff', borderRadius: 10, padding: 12, marginBottom: 10, borderLeftWidth: 3, borderLeftColor: VERDE, elevation: 1, shadowColor: '#000', shadowOffset: { width:0,height:1 }, shadowOpacity: 0.06, shadowRadius: 2 },
   noticiaDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: DORADO, marginTop: 5, marginRight: 10 },
   noticiaTitle: { fontWeight: '600', color: TEXTO, fontSize: 14, lineHeight: 20 },
   noticiaSub: { color: GRIS, fontSize: 12, marginTop: 2 },
   verTodo: { alignItems: 'flex-end', marginTop: 4 },
   verTodoTxt: { color: VERDE, fontWeight: '600', fontSize: 13 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', marginHorizontal: -6 },
-  modulo: { width: (width-56)/2, backgroundColor: '#fff', borderRadius: 14, padding: 14, margin: 6, alignItems: 'center', borderWidth: 1, borderColor: DORADO+'44', elevation: 2, shadowColor: '#000', shadowOffset: { width:0, height:2 }, shadowOpacity: 0.08, shadowRadius: 4 },
+  modulo: { width: (width-56)/2, backgroundColor: '#fff', borderRadius: 14, padding: 14, margin: 6, alignItems: 'center', borderWidth: 1, borderColor: DORADO+'44', elevation: 2, shadowColor: '#000', shadowOffset: { width:0,height:2 }, shadowOpacity: 0.08, shadowRadius: 4 },
   moduloIconWrap: { width: 72, height: 72, borderRadius: 16, backgroundColor: BG, alignItems: 'center', justifyContent: 'center', marginBottom: 10, borderWidth: 1, borderColor: DORADO+'33' },
   moduloIcon: { width: 60, height: 60 },
   moduloLabel: { color: TEXTO, fontWeight: '700', fontSize: 13, textAlign: 'center' },
   moduloSub: { color: GRIS, fontSize: 11, textAlign: 'center', marginTop: 2 },
-  card: { backgroundColor: '#fff', borderRadius: 12, elevation: 2, shadowColor: '#000', shadowOffset: { width:0, height:1 }, shadowOpacity: 0.08, shadowRadius: 3, overflow: 'hidden' },
+  card: { backgroundColor: '#fff', borderRadius: 12, elevation: 2, shadowColor: '#000', shadowOffset: { width:0,height:1 }, shadowOpacity: 0.08, shadowRadius: 3, overflow: 'hidden' },
   newsImg: { width: '100%', height: 160 },
   newsTitle: { fontWeight: '700', color: TEXTO, fontSize: 15, lineHeight: 22 },
   newsSub: { color: GRIS, fontSize: 13, marginTop: 4, lineHeight: 18 },
@@ -596,7 +638,7 @@ const s = StyleSheet.create({
   input: { backgroundColor: '#fff', borderWidth: 1, borderColor: '#e2e8f0', borderRadius: 10, padding: 12, color: TEXTO, fontSize: 15 },
   btnPrimary: { backgroundColor: VERDE, borderRadius: 12, padding: 16, alignItems: 'center', borderWidth: 1.5, borderColor: DORADO },
   btnPrimaryTxt: { color: '#fff', fontWeight: '700', fontSize: 16 },
-  fab: { position: 'absolute', bottom: 28, right: 24, width: 64, height: 64, borderRadius: 32, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center', elevation: 8, shadowColor: DORADO, shadowOffset: { width:0, height:4 }, shadowOpacity: 0.5, shadowRadius: 8, borderWidth: 2, borderColor: DORADO },
+  fab: { position: 'absolute', bottom: 28, right: 24, width: 64, height: 64, borderRadius: 32, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center', elevation: 8, shadowColor: DORADO, shadowOffset: { width:0,height:4 }, shadowOpacity: 0.5, shadowRadius: 8, borderWidth: 2, borderColor: DORADO },
   fabImg: { width: 52, height: 52, borderRadius: 26 },
   chatOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
   chatBox: { backgroundColor: '#fff', borderTopLeftRadius: 20, borderTopRightRadius: 20, maxHeight: '75%', overflow: 'hidden' },
