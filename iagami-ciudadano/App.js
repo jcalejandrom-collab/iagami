@@ -41,7 +41,7 @@ const ICONOS = {
 const WEB = 'https://iagami.online';
 
 const MODULOS = [
-  { id: 'denuncias',     label: 'Presentar Denuncia',   url: WEB },
+  { id: 'denuncias',     label: 'Presentar Denuncia',   url: WEB, js: "showPage('denuncia');true;" },
   { id: 'tramites',      label: 'Trámites en Línea',    url: `${WEB}/tramites` },
   { id: 'multas',        label: 'Multas Ambientales',   url: `${WEB}/multas` },
   { id: 'atencion',      label: 'Atención Ciudadana',   url: `${WEB}/atencion` },
@@ -557,7 +557,7 @@ function PantallaAgenda({ onBack }) {
   );
 }
 
-function PantallaWeb({ url, onBack }) {
+function PantallaWeb({ url, js, onBack }) {
   const [loading, setLoading] = useState(true);
   const originUrl = useRef(url);
 
@@ -582,6 +582,7 @@ function PantallaWeb({ url, onBack }) {
         javaScriptEnabled
         domStorageEnabled
         onNavigationStateChange={handleNavChange}
+        injectedJavaScript={js || undefined}
         userAgent="Mozilla/5.0 (Linux; Android 11; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
       />
       <TouchableOpacity style={s.webBack} onPress={onBack}>
@@ -830,7 +831,7 @@ export default function App() {
   const [chatVisible, setChatVisible] = useState(false);
   const ir = (id) => {
     const mod = MODULOS.find(m => m.id === id);
-    if (mod) { setWebNav({ url: mod.url, titulo: mod.label }); return; }
+    if (mod) { setWebNav({ url: mod.url, titulo: mod.label, js: mod.js }); return; }
     if (SCREENS[id] || id === 'inicio') setPantalla(id);
   };
   const volver = () => { setWebNav(null); setPantalla('inicio'); };
@@ -842,7 +843,7 @@ export default function App() {
       <Navbar onHome={volver} />
       <View style={s.flex}>
         {webNav
-          ? <PantallaWeb url={webNav.url} titulo={webNav.titulo} onBack={() => setWebNav(null)} />
+          ? <PantallaWeb url={webNav.url} titulo={webNav.titulo} js={webNav.js} onBack={() => setWebNav(null)} />
           : pantalla === 'inicio' ? <PantallaInicio ir={ir} />
           : Pantalla ? <Pantalla onBack={volver} />
           : <PantallaInicio ir={ir} />}
