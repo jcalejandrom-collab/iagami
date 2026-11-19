@@ -50,7 +50,7 @@ const MODULOS = [
   { id: 'denuncias',     label: 'Presentar Denuncia',   url: `${WEB}/denuncias` },
   { id: 'tramites',      label: 'Trámites en Línea',    url: `${WEB}/tramites` },
   { id: 'multas',        label: 'Multas Ambientales',   url: `${WEB}/multas` },
-  { id: 'atencion',      label: 'Atención Ciudadana',   url: `${WEB}/denuncia-app` },
+  { id: 'atencion',      label: 'Atención Ciudadana',   url: `${WEB}/denuncias` },
   { id: 'transparencia', label: 'Transparencia',        url: `${WEB}/transparencia` },
   { id: 'agenda',        label: 'Agenda SIGAP',         url: `${WEB}/agenda` },
   { id: 'empresas',      label: 'Registro Empresa',     url: `${WEB}/empresas` },
@@ -63,10 +63,10 @@ const MODULOS = [
   { id: 'organizacion',  label: 'Organización',         url: `${WEB}/organizacion` },
   { id: 'planificacion', label: 'Planificación',        url: `${WEB}/planificacion` },
   { id: 'proyectos',     label: 'Proyectos SIGAP',      url: `${WEB}/proyectos` },
-  { id: 'trabajador',    label: 'Portal Trabajador',    url: `${WEB}/admin` },
+  { id: 'trabajador',    label: 'Portal Trabajador',    url: `${WEB}/siga-iagami` },
   { id: 'brigadas',      label: 'Mapa de Brigadas',     url: `${WEB}/brigadas-ambientales` },
   { id: 'aula',          label: 'Aula Ambiental',       url: `${WEB}/aula-ambiental` },
-  { id: 'estudiante',    label: 'Portal Estudiante',    url: `${WEB}/siga-iagami` },
+  { id: 'estudiante',    label: 'Portal Estudiante',    url: `${WEB}/siga-iagami/estudiante` },
 ];
 
 // 60% verdes, 40% doradas
