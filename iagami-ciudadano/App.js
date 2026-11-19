@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   View, Text, TouchableOpacity, ScrollView, StyleSheet,
   StatusBar, TextInput, Alert, ActivityIndicator,
-  SafeAreaView, Image, Platform, ImageBackground
+  Image, FlatList, Linking, Platform, Dimensions,
+  KeyboardAvoidingView, Modal
 } from 'react-native';
 
 const VERDE = '#1d6b3e';
@@ -13,448 +14,947 @@ const TEXTO = '#1f2937';
 const GRIS = '#64748b';
 
 const API = 'https://api.iagami.online';
-const RAW = 'https://raw.githubusercontent.com/jcalejandrom-collab/iagami/claude/bold-tesla-uuTwO/assets/images';
+const { width } = Dimensions.get('window');
 
-const LOGO = { uri: `${RAW}/logo-iagami.png` };
+// ─── Assets locales ──────────────────────────────────────────────────────────
+const LOGO = require('./assets/logo-iagami.png');
+const APP_ICON = require('./assets/app-icon.png');
 
+const ICONOS = {
+  denuncias:  require('./assets/iconos/01_presentar_denuncia.png'),
+  tramites:   require('./assets/iconos/02_tramites_en_linea.png'),
+  multas:     require('./assets/iconos/03_multas_ambientales.png'),
+  atencion:   require('./assets/iconos/04_atencion_ciudadana.png'),
+  transparencia: require('./assets/iconos/05_transparencia.png'),
+  agenda:     require('./assets/iconos/06_agenda_sigap.png'),
+  empresas:   require('./assets/iconos/07_registro_empresa.png'),
+  noticias:   require('./assets/iconos/08_noticias.png'),
+};
+
+// ─── Módulos de inicio ────────────────────────────────────────────────────────
 const MODULOS = [
-  { id: 'denuncias',  label: 'Presentar Denuncia',   sub: 'Reporta problemas ambientales',    icon: { uri: `${RAW}/iconos/01_presentar_denuncia.png` } },
-  { id: 'tramites',   label: 'Trámites en Línea',     sub: 'Permisos y certificaciones',        icon: { uri: `${RAW}/iconos/02_tramites_en_linea.png` } },
-  { id: 'multas',     label: 'Multas Ambientales',    sub: 'Consulta expedientes',              icon: { uri: `${RAW}/iconos/03_multas_ambientales.png` } },
-  { id: 'noticias',   label: 'Noticias',              sub: 'Actualidad institucional',          icon: { uri: `${RAW}/iconos/08_noticias.png` } },
-  { id: 'empresas',   label: 'Registro Empresa',      sub: 'Registro ambiental',                icon: { uri: `${RAW}/iconos/07_registro_empresa.png` } },
-  { id: 'comunales',  label: 'Comunas',               sub: 'Consejos comunales',                icon: { uri: `${RAW}/iconos/comunas.png` } },
-  { id: 'tramites',   label: 'Transparencia',         sub: 'Información institucional',         icon: { uri: `${RAW}/iconos/05_transparencia.png` } },
-  { id: 'agenda',     label: 'Agenda SIGAP',          sub: 'Actividades programadas',           icon: { uri: `${RAW}/iconos/06_agenda_sigap.png` } },
+  { id: 'denuncias',     label: 'Presentar Denuncia',  sub: 'Reporta problemas ambientales' },
+  { id: 'tramites',      label: 'Trámites en Línea',   sub: 'Permisos y certificaciones' },
+  { id: 'multas',        label: 'Consultar Multas',    sub: 'Revisa tu estado de multas' },
+  { id: 'atencion',      label: 'Atención Ciudadana',  sub: 'Consultas y orientación' },
+  { id: 'transparencia', label: 'Transparencia',       sub: 'Información pública' },
+  { id: 'agenda',        label: 'Agenda SIGAP',        sub: 'Eventos y actividades' },
+  { id: 'empresas',      label: 'Registro Empresa',    sub: 'Gestión empresarial' },
+  { id: 'noticias',      label: 'Noticias',            sub: 'Actualidad ambiental' },
 ];
 
+// ─── Navbar ───────────────────────────────────────────────────────────────────
+function Navbar({ onHome }) {
+  return (
+    <View style={s.navbar}>
+      <TouchableOpacity onPress={onHome} style={s.navLogoBtn}>
+        <Image source={LOGO} style={s.navLogo} resizeMode="contain" />
+      </TouchableOpacity>
+      <View style={s.navBadge}>
+        <Text style={s.navBadgeTxt}>SIGAP v3.0</Text>
+      </View>
+    </View>
+  );
+}
+
+// ─── Header de pantalla ───────────────────────────────────────────────────────
 function Header({ titulo, onBack }) {
   return (
     <View style={s.header}>
-      {onBack
-        ? <TouchableOpacity onPress={onBack} style={s.backBtn}><Text style={s.backTxt}>←</Text></TouchableOpacity>
-        : <Image source={LOGO} style={s.headerLogo} resizeMode="contain" />}
+      {onBack && (
+        <TouchableOpacity onPress={onBack} style={s.backBtn}>
+          <Text style={s.backTxt}>←</Text>
+        </TouchableOpacity>
+      )}
       <Text style={s.headerTxt} numberOfLines={1}>{titulo}</Text>
     </View>
   );
 }
 
+// ─── Card ─────────────────────────────────────────────────────────────────────
 function Card({ children, style }) {
   return <View style={[s.card, style]}>{children}</View>;
 }
 
-function Chip({ label, color = VERDE }) {
+// ─── Pantalla: Inicio ─────────────────────────────────────────────────────────
+function PantallaInicio({ ir }) {
+  const [noticias, setNoticias] = useState([]);
+  const [loadingNews, setLoadingNews] = useState(true);
+
+  useEffect(() => {
+    fetch(`${API}/api/collections/noticias/records?sort=-created&perPage=3&fields=id,titulo,resumen,imagen,created`)
+      .then(r => r.json())
+      .then(d => { if (d.items) setNoticias(d.items); })
+      .catch(() => {})
+      .finally(() => setLoadingNews(false));
+  }, []);
+
   return (
-    <View style={[s.chip, { borderColor: color }]}>
-      <Text style={[s.chipTxt, { color }]}>{label}</Text>
+    <ScrollView style={s.scroll} showsVerticalScrollIndicator={false}>
+      {/* Hero */}
+      <View style={s.hero}>
+        <Image source={APP_ICON} style={s.heroImg} resizeMode="cover" />
+        <View style={s.heroOverlay}>
+          <Text style={s.heroTag}>IAGAMI · Municipio Iribarren</Text>
+          <Text style={s.heroTitle}>
+            Gestionamos el{' '}
+            <Text style={{ color: DORADO }}>futuro ambiental</Text>
+            {'\n'}de nuestra ciudad
+          </Text>
+          <Text style={s.heroSub}>
+            Sistema Integral de Gestión Ambiental Pública
+          </Text>
+        </View>
+      </View>
+
+      {/* Últimas Noticias */}
+      <View style={s.section}>
+        <View style={s.sectionHeader}>
+          <View style={s.sectionBar} />
+          <Text style={s.sectionTitle}>Últimas Noticias</Text>
+        </View>
+        {loadingNews ? (
+          <ActivityIndicator color={VERDE} style={{ marginVertical: 16 }} />
+        ) : noticias.length === 0 ? (
+          <Text style={s.empty}>Sin noticias disponibles</Text>
+        ) : (
+          noticias.map(n => (
+            <TouchableOpacity key={n.id} style={s.noticiaCard} onPress={() => ir('noticias')}>
+              <View style={s.noticiaDot} />
+              <View style={{ flex: 1 }}>
+                <Text style={s.noticiaTitle} numberOfLines={2}>{n.titulo}</Text>
+                {n.resumen ? (
+                  <Text style={s.noticiaSub} numberOfLines={2}>{n.resumen}</Text>
+                ) : null}
+              </View>
+            </TouchableOpacity>
+          ))
+        )}
+        <TouchableOpacity style={s.verTodo} onPress={() => ir('noticias')}>
+          <Text style={s.verTodoTxt}>Ver todas las noticias →</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Módulos */}
+      <View style={s.section}>
+        <View style={s.sectionHeader}>
+          <View style={s.sectionBar} />
+          <Text style={s.sectionTitle}>Servicios Ciudadanos</Text>
+        </View>
+        <View style={s.grid}>
+          {MODULOS.map(m => (
+            <TouchableOpacity key={m.id} style={s.modulo} onPress={() => ir(m.id)}>
+              <View style={s.moduloIconWrap}>
+                <Image source={ICONOS[m.id]} style={s.moduloIcon} resizeMode="contain" />
+              </View>
+              <Text style={s.moduloLabel} numberOfLines={2}>{m.label}</Text>
+              <Text style={s.moduloSub} numberOfLines={1}>{m.sub}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
+
+      <View style={{ height: 100 }} />
+    </ScrollView>
+  );
+}
+
+// ─── Pantalla: Noticias ───────────────────────────────────────────────────────
+function PantallaNoticias({ onBack }) {
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch(`${API}/api/collections/noticias/records?sort=-created&perPage=20`)
+      .then(r => r.json())
+      .then(d => { if (d.items) setItems(d.items); })
+      .catch(() => Alert.alert('Error', 'No se pudieron cargar las noticias'))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const imgUrl = (n) => {
+    if (!n.imagen) return null;
+    return `${API}/api/files/noticias/${n.id}/${n.imagen}`;
+  };
+
+  return (
+    <View style={s.flex}>
+      <Header titulo="Noticias" onBack={onBack} />
+      {loading ? (
+        <ActivityIndicator color={VERDE} style={s.loader} />
+      ) : (
+        <FlatList
+          data={items}
+          keyExtractor={i => i.id}
+          contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
+          renderItem={({ item }) => (
+            <Card style={{ marginBottom: 14 }}>
+              {imgUrl(item) && (
+                <Image source={{ uri: imgUrl(item) }} style={s.newsImg} resizeMode="cover" />
+              )}
+              <View style={{ padding: 14 }}>
+                <Text style={s.newsTitle}>{item.titulo}</Text>
+                {item.resumen ? <Text style={s.newsSub}>{item.resumen}</Text> : null}
+                <Text style={s.newsDate}>{new Date(item.created).toLocaleDateString('es-VE')}</Text>
+              </View>
+            </Card>
+          )}
+          ListEmptyComponent={<Text style={s.empty}>Sin noticias disponibles</Text>}
+        />
+      )}
     </View>
   );
 }
 
-// ─── Pantalla: Inicio ───────────────────────────────────────────────────────
-
-function PantallaInicio({ ir }) {
-  return (
-    <SafeAreaView style={s.safe}>
-      <StatusBar barStyle="light-content" backgroundColor={VERDE_DARK} />
-
-      {/* Navbar */}
-      <View style={s.navbar}>
-        <Image source={LOGO} style={s.navLogo} resizeMode="contain" />
-        <Text style={s.navBrand}>IAGAMI</Text>
-        <View style={s.navSigap}><Text style={s.navSigapTxt}>SIGAP v3.0</Text></View>
-      </View>
-
-      <ScrollView contentContainerStyle={s.inicioScroll}>
-
-        {/* Hero */}
-        <View style={s.hero}>
-          <View style={s.heroBadge}>
-            <View style={s.heroDot} />
-            <Text style={s.heroBadgeTxt}>SIGAP · Sistema Integral de Gestión Ambiental</Text>
-          </View>
-          <Text style={s.heroSlogan}>Iribarren Verde para la vida</Text>
-          <Text style={s.heroTitulo}>
-            {'Gestionamos el '}
-            <Text style={{ color: DORADO }}>futuro{"\n"}ambiental</Text>
-            {' de nuestro municipio'}
-          </Text>
-          <Text style={s.heroSub}>
-            Portal institucional IAGAMI. Planificación estratégica, seguimiento de actividades
-            programadas, denuncias ciudadanas y monitoreo ambiental en tiempo real.
-          </Text>
-          <View style={s.heroBtns}>
-            <TouchableOpacity style={s.heroBtnVerde} onPress={() => ir('denuncias')}>
-              <Text style={s.heroBtnVerdeTxt}>📋  Presentar Denuncia</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={s.heroBtnBorde} onPress={() => ir('tramites')}>
-              <Text style={s.heroBtnBordeTxt}>Ver Trámites →</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Sección servicios */}
-        <View style={s.secHeader}>
-          <Text style={s.secTitulo}>Acceso a los Servicios Institucionales</Text>
-          <Text style={s.secSub}>del Municipio desde cualquier dispositivo</Text>
-        </View>
-
-        {/* Grid de módulos */}
-        <View style={s.grid}>
-          {MODULOS.map((m, i) => (
-            <TouchableOpacity key={i} style={s.modCard} onPress={() => ir(m.id)}>
-              <Image source={m.icon} style={s.modIcon} resizeMode="cover" />
-              <View style={s.modInfo}>
-                <Text style={s.modLabel} numberOfLines={2}>{m.label}</Text>
-                <Text style={s.modSub} numberOfLines={1}>{m.sub}</Text>
-              </View>
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        <View style={s.footer}>
-          <Image source={LOGO} style={s.footerLogo} resizeMode="contain" />
-          <Text style={s.footerTxt}>Instituto Autónomo de Gestión Ambiental{"\n"}Municipio Iribarren · Barquisimeto · Estado Lara</Text>
-        </View>
-
-      </ScrollView>
-    </SafeAreaView>
-  );
-}
-
-// ─── Pantalla: Noticias ─────────────────────────────────────────────────────
-
-function PantallaNoticias({ onBack }) {
-  const [noticias, setNoticias] = useState([]);
-  const [cargando, setCargando] = useState(true);
-  useEffect(() => {
-    fetch(`${API}/api/collections/noticias/records?sort=-created&perPage=20`)
-      .then(r => r.json()).then(d => { setNoticias(d.items || []); setCargando(false); })
-      .catch(() => setCargando(false));
-  }, []);
-  return (
-    <SafeAreaView style={s.safe}>
-      <StatusBar barStyle="light-content" backgroundColor={VERDE_DARK} />
-      <Header titulo="Últimas Noticias" onBack={onBack} />
-      {cargando ? <ActivityIndicator size="large" color={VERDE} style={{ marginTop: 40 }} /> : (
-        <ScrollView contentContainerStyle={s.listaPad}>
-          {noticias.length === 0 && <Text style={s.vacio}>No hay noticias disponibles</Text>}
-          {noticias.map(n => (
-            <Card key={n.id} style={s.noticiaCard}>
-              <Chip label={n.categoria || 'Ambiental'} />
-              <Text style={s.noticiaTitle}>{n.titulo}</Text>
-              <Text style={s.noticiaResumen} numberOfLines={3}>{n.resumen || n.contenido}</Text>
-              <Text style={s.noticiaFecha}>{n.fecha ? new Date(n.fecha).toLocaleDateString('es-VE') : ''}</Text>
-            </Card>
-          ))}
-        </ScrollView>
-      )}
-    </SafeAreaView>
-  );
-}
-
-// ─── Pantalla: Denuncia ─────────────────────────────────────────────────────
-
-function PantallaDenuncia({ onBack }) {
-  const [form, setForm] = useState({ nombre:'', cedula:'', telefono:'', email:'', tipo:'', descripcion:'', ubicacion:'' });
+// ─── Pantalla: Denuncias ──────────────────────────────────────────────────────
+function PantallaDenuncias({ onBack }) {
+  const [form, setForm] = useState({
+    nombre: '', cedula: '', telefono: '', email: '',
+    tipo: '', descripcion: '', ubicacion: ''
+  });
   const [enviando, setEnviando] = useState(false);
-  const [enviado, setEnviado] = useState(false);
-  const tipos = ['Contaminación del aire','Vertido ilegal','Tala ilegal','Contaminación de suelos','Ruido excesivo','Otro'];
+
+  const set = (k, v) => setForm(p => ({ ...p, [k]: v }));
+
   const enviar = async () => {
-    if (!form.descripcion || !form.ubicacion) { Alert.alert('Requerido','Completa descripción y ubicación.'); return; }
+    if (!form.descripcion || !form.ubicacion) {
+      Alert.alert('Campos requeridos', 'Descripción y ubicación son obligatorios.');
+      return;
+    }
     setEnviando(true);
     try {
-      const res = await fetch(`${API}/api/collections/denuncias/records`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({...form,estado:'recibida',fecha:new Date().toISOString()}) });
-      if (res.ok) setEnviado(true); else Alert.alert('Error','No se pudo enviar.');
-    } catch { Alert.alert('Sin conexión','Verifica tu internet.'); } finally { setEnviando(false); }
+      const r = await fetch(`${API}/api/collections/denuncias/records`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...form, estado: 'recibida', canal: 'app_movil' }),
+      });
+      if (r.ok) {
+        Alert.alert('✅ Denuncia enviada', 'Tu denuncia fue registrada exitosamente.');
+        setForm({ nombre: '', cedula: '', telefono: '', email: '', tipo: '', descripcion: '', ubicacion: '' });
+      } else {
+        Alert.alert('Error', 'No se pudo enviar. Intenta más tarde.');
+      }
+    } catch {
+      Alert.alert('Error de conexión', 'Verifica tu internet e intenta de nuevo.');
+    } finally {
+      setEnviando(false);
+    }
   };
-  if (enviado) return (
-    <SafeAreaView style={s.safe}><Header titulo="Denuncia" onBack={onBack} />
-      <View style={s.exitoContainer}>
-        <Text style={s.exitoIcon}>✅</Text>
-        <Text style={s.exitoTitulo}>¡Denuncia Enviada!</Text>
-        <Text style={s.exitoSub}>Tu reporte fue recibido por IAGAMI.</Text>
-        <TouchableOpacity style={s.btnVerde} onPress={onBack}><Text style={s.btnVerdeTxt}>Volver al inicio</Text></TouchableOpacity>
-      </View>
-    </SafeAreaView>
+
+  const campo = (label, key, placeholder, multi = false) => (
+    <View style={s.campo}>
+      <Text style={s.campoLabel}>{label}</Text>
+      <TextInput
+        style={[s.input, multi && { height: 100, textAlignVertical: 'top' }]}
+        placeholder={placeholder}
+        placeholderTextColor={GRIS}
+        value={form[key]}
+        onChangeText={v => set(key, v)}
+        multiline={multi}
+      />
+    </View>
   );
+
   return (
-    <SafeAreaView style={s.safe}>
-      <StatusBar barStyle="light-content" backgroundColor={VERDE_DARK} />
+    <KeyboardAvoidingView style={s.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <Header titulo="Presentar Denuncia" onBack={onBack} />
-      <ScrollView contentContainerStyle={s.listaPad} keyboardShouldPersistTaps="handled">
-        {[['nombre','Nombre completo'],['cedula','Cédula de identidad'],['telefono','Teléfono'],['email','Correo electrónico']].map(([k,p]) => (
-          <TextInput key={k} style={s.input} placeholder={p} placeholderTextColor={GRIS} value={form[k]} onChangeText={v=>setForm({...form,[k]:v})} />
-        ))}
-        <Text style={s.formSeccion}>Tipo de denuncia *</Text>
-        <View style={s.tiposGrid}>
-          {tipos.map(t=><TouchableOpacity key={t} style={[s.tipoBtn,form.tipo===t&&s.tipoBtnActivo]} onPress={()=>setForm({...form,tipo:t})}><Text style={[s.tipoBtnTxt,form.tipo===t&&s.tipoBtnTxtActivo]}>{t}</Text></TouchableOpacity>)}
-        </View>
-        <Text style={s.formSeccion}>Descripción *</Text>
-        <TextInput style={[s.input,s.inputArea]} placeholder="Describe detalladamente..." placeholderTextColor={GRIS} multiline numberOfLines={4} value={form.descripcion} onChangeText={v=>setForm({...form,descripcion:v})} />
-        <Text style={s.formSeccion}>Ubicación *</Text>
-        <TextInput style={s.input} placeholder="Dirección, sector o parroquia" placeholderTextColor={GRIS} value={form.ubicacion} onChangeText={v=>setForm({...form,ubicacion:v})} />
-        <TouchableOpacity style={[s.btnVerde,enviando&&s.btnDeshabilitado]} onPress={enviar} disabled={enviando}>
-          {enviando?<ActivityIndicator color="#fff"/>:<Text style={s.btnVerdeTxt}>📤  Enviar Denuncia</Text>}
+      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 100 }}>
+        <Card style={{ marginBottom: 12, borderLeftWidth: 4, borderLeftColor: DORADO }}>
+          <View style={{ padding: 14 }}>
+            <Text style={{ color: VERDE_DARK, fontWeight: '700', marginBottom: 4 }}>
+              Denuncia Ambiental Ciudadana
+            </Text>
+            <Text style={{ color: GRIS, fontSize: 13 }}>
+              Reporta problemas ambientales en el Municipio Iribarren. Los campos marcados (*) son obligatorios.
+            </Text>
+          </View>
+        </Card>
+        {campo('Nombre completo', 'nombre', 'Tu nombre (opcional)')}
+        {campo('Cédula', 'cedula', 'V-12345678 (opcional)')}
+        {campo('Teléfono', 'telefono', '0414-0000000 (opcional)')}
+        {campo('Email', 'email', 'correo@ejemplo.com (opcional)')}
+        {campo('Tipo de denuncia', 'tipo', 'Ej: Contaminación, Tala, Vertidos...')}
+        {campo('Ubicación *', 'ubicacion', 'Sector, calle, parroquia...')}
+        {campo('Descripción *', 'descripcion', 'Describe detalladamente la situación...', true)}
+        <TouchableOpacity
+          style={[s.btnPrimary, enviando && { opacity: 0.6 }]}
+          onPress={enviar}
+          disabled={enviando}
+        >
+          {enviando
+            ? <ActivityIndicator color="#fff" />
+            : <Text style={s.btnPrimaryTxt}>Enviar Denuncia</Text>
+          }
         </TouchableOpacity>
       </ScrollView>
-    </SafeAreaView>
+    </KeyboardAvoidingView>
   );
 }
 
-// ─── Pantalla: Multas ───────────────────────────────────────────────────────
-
+// ─── Pantalla: Multas ─────────────────────────────────────────────────────────
 function PantallaMultas({ onBack }) {
   const [cedula, setCedula] = useState('');
   const [multas, setMultas] = useState(null);
-  const [cargando, setCargando] = useState(false);
+  const [loading, setLoading] = useState(false);
+
   const consultar = async () => {
-    if (!cedula) { Alert.alert('Requerido','Ingresa tu cédula.'); return; }
-    setCargando(true);
+    if (!cedula.trim()) { Alert.alert('Ingresa tu cédula'); return; }
+    setLoading(true);
     try {
-      const res = await fetch(`${API}/api/collections/multas/records?filter=(cedula='${cedula}')&sort=-created`);
-      const d = await res.json(); setMultas(d.items||[]);
-    } catch { Alert.alert('Error','No se pudo conectar.'); } finally { setCargando(false); }
+      const r = await fetch(`${API}/api/collections/multas/records?filter=(cedula='${cedula.trim()}')`);
+      const d = await r.json();
+      setMultas(d.items || []);
+    } catch {
+      Alert.alert('Error de conexión');
+    } finally {
+      setLoading(false);
+    }
   };
+
   return (
-    <SafeAreaView style={s.safe}>
-      <StatusBar barStyle="light-content" backgroundColor={VERDE_DARK} />
-      <Header titulo="Multas Ambientales" onBack={onBack} />
-      <ScrollView contentContainerStyle={s.listaPad}>
-        <TextInput style={s.input} placeholder="Cédula de identidad (ej: V-12345678)" placeholderTextColor={GRIS} keyboardType="numeric" value={cedula} onChangeText={setCedula} />
-        <TouchableOpacity style={[s.btnVerde,cargando&&s.btnDeshabilitado]} onPress={consultar} disabled={cargando}>
-          {cargando?<ActivityIndicator color="#fff"/>:<Text style={s.btnVerdeTxt}>🔍  Consultar</Text>}
-        </TouchableOpacity>
-        {multas!==null&&multas.length===0&&<Card style={{marginTop:20,alignItems:'center'}}><Text style={{fontSize:32}}>✅</Text><Text style={s.noticiaTitle}>Sin multas registradas</Text></Card>}
-        {multas!==null&&multas.map(m=>(
-          <Card key={m.id} style={{marginTop:12}}>
-            <Text style={[s.noticiaTitle,{fontSize:20}]}>Bs. {Number(m.monto||0).toLocaleString('es-VE')}</Text>
-            <Text style={s.noticiaTitle}>{m.concepto}</Text>
-            <Text style={s.noticiaResumen}>Estado: {m.estado} · {m.fecha?new Date(m.fecha).toLocaleDateString('es-VE'):''}</Text>
-          </Card>
-        ))}
+    <View style={s.flex}>
+      <Header titulo="Consultar Multas" onBack={onBack} />
+      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 100 }}>
+        <Card style={{ marginBottom: 16 }}>
+          <View style={{ padding: 14 }}>
+            <Text style={s.campoLabel}>Número de Cédula</Text>
+            <TextInput
+              style={s.input}
+              placeholder="Ej: 12345678"
+              placeholderTextColor={GRIS}
+              value={cedula}
+              onChangeText={setCedula}
+              keyboardType="numeric"
+            />
+            <TouchableOpacity
+              style={[s.btnPrimary, { marginTop: 12 }, loading && { opacity: 0.6 }]}
+              onPress={consultar}
+              disabled={loading}
+            >
+              {loading
+                ? <ActivityIndicator color="#fff" />
+                : <Text style={s.btnPrimaryTxt}>Consultar</Text>
+              }
+            </TouchableOpacity>
+          </View>
+        </Card>
+        {multas !== null && (
+          multas.length === 0
+            ? <Text style={s.empty}>No se encontraron multas para esta cédula.</Text>
+            : multas.map(m => (
+              <Card key={m.id} style={{ marginBottom: 12 }}>
+                <View style={{ padding: 14 }}>
+                  <Text style={{ fontWeight: '700', color: TEXTO }}>{m.numero_expediente || 'Expediente s/n'}</Text>
+                  <Text style={{ color: GRIS, marginTop: 4 }}>{m.descripcion}</Text>
+                  <Text style={{ color: '#dc2626', marginTop: 6, fontWeight: '600' }}>
+                    Monto: Bs. {m.monto || '—'}
+                  </Text>
+                  <Text style={{ color: GRIS, fontSize: 12 }}>Estado: {m.estado || '—'}</Text>
+                </View>
+              </Card>
+            ))
+        )}
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
-// ─── Pantalla: Empresas ─────────────────────────────────────────────────────
-
+// ─── Pantalla: Empresas ───────────────────────────────────────────────────────
 function PantallaEmpresas({ onBack }) {
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [busqueda, setBusqueda] = useState('');
-  const [empresas, setEmpresas] = useState([]);
-  const [cargando, setCargando] = useState(false);
-  const buscar = async () => {
-    setCargando(true);
-    try {
-      const f = busqueda?`?filter=(nombre~'${busqueda}')`:'?perPage=20';
-      const res = await fetch(`${API}/api/collections/empresas/records${f}&sort=nombre`);
-      const d = await res.json(); setEmpresas(d.items||[]);
-    } catch { setEmpresas([]); } finally { setCargando(false); }
-  };
-  useEffect(()=>{buscar();},[]);
+
+  useEffect(() => {
+    fetch(`${API}/api/collections/empresas/records?sort=nombre&perPage=50`)
+      .then(r => r.json())
+      .then(d => { if (d.items) setItems(d.items); })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  const filtradas = items.filter(e =>
+    e.nombre?.toLowerCase().includes(busqueda.toLowerCase()) ||
+    e.rif?.toLowerCase().includes(busqueda.toLowerCase())
+  );
+
   return (
-    <SafeAreaView style={s.safe}>
-      <StatusBar barStyle="light-content" backgroundColor={VERDE_DARK} />
+    <View style={s.flex}>
       <Header titulo="Registro de Empresas" onBack={onBack} />
-      <View style={s.searchRow}>
-        <TextInput style={s.searchInput} placeholder="Buscar por nombre o RIF..." placeholderTextColor={GRIS} value={busqueda} onChangeText={setBusqueda} onSubmitEditing={buscar} />
-        <TouchableOpacity style={s.searchBtn} onPress={buscar}><Text style={s.searchBtnTxt}>🔍</Text></TouchableOpacity>
+      <View style={{ padding: 12, backgroundColor: '#fff' }}>
+        <TextInput
+          style={[s.input, { margin: 0 }]}
+          placeholder="Buscar por nombre o RIF..."
+          placeholderTextColor={GRIS}
+          value={busqueda}
+          onChangeText={setBusqueda}
+        />
       </View>
-      {cargando?<ActivityIndicator size="large" color={VERDE} style={{marginTop:40}}/>:(
-        <ScrollView contentContainerStyle={s.listaPad}>
-          {empresas.length===0&&<Text style={s.vacio}>No se encontraron empresas</Text>}
-          {empresas.map(e=><Card key={e.id} style={{marginBottom:10}}><Text style={s.noticiaTitle}>{e.nombre}</Text><Text style={s.noticiaResumen}>RIF: {e.rif||'N/D'} · {e.actividad||''}</Text></Card>)}
-        </ScrollView>
+      {loading ? (
+        <ActivityIndicator color={VERDE} style={s.loader} />
+      ) : (
+        <FlatList
+          data={filtradas}
+          keyExtractor={i => i.id}
+          contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
+          renderItem={({ item }) => (
+            <Card style={{ marginBottom: 10 }}>
+              <View style={{ padding: 14 }}>
+                <Text style={{ fontWeight: '700', color: TEXTO }}>{item.nombre}</Text>
+                <Text style={{ color: GRIS, fontSize: 13 }}>RIF: {item.rif || '—'}</Text>
+                {item.sector && <Text style={{ color: VERDE, fontSize: 12, marginTop: 4 }}>{item.sector}</Text>}
+              </View>
+            </Card>
+          )}
+          ListEmptyComponent={<Text style={s.empty}>No se encontraron empresas</Text>}
+        />
       )}
-    </SafeAreaView>
+    </View>
   );
 }
 
-// ─── Pantalla: Trámites ─────────────────────────────────────────────────────
-
+// ─── Pantalla: Trámites ───────────────────────────────────────────────────────
 function PantallaTramites({ onBack }) {
-  const [tramites, setTramites] = useState([]);
-  const [cargando, setCargando] = useState(true);
-  useEffect(()=>{
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
     fetch(`${API}/api/collections/tramites/records?sort=nombre&perPage=50`)
-      .then(r=>r.json()).then(d=>{setTramites(d.items||[]);setCargando(false);}).catch(()=>setCargando(false));
-  },[]);
+      .then(r => r.json())
+      .then(d => { if (d.items) setItems(d.items); })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
   return (
-    <SafeAreaView style={s.safe}>
-      <StatusBar barStyle="light-content" backgroundColor={VERDE_DARK} />
-      <Header titulo="Trámites y Servicios" onBack={onBack} />
-      {cargando?<ActivityIndicator size="large" color={VERDE} style={{marginTop:40}}/>:(
-        <ScrollView contentContainerStyle={s.listaPad}>
-          {tramites.length===0&&<Text style={s.vacio}>No hay trámites disponibles</Text>}
-          {tramites.map(t=>(
-            <Card key={t.id} style={{marginBottom:10}}>
-              <Text style={s.noticiaTitle}>{t.nombre}</Text>
-              {t.descripcion&&<Text style={s.noticiaResumen}>{t.descripcion}</Text>}
-              {t.duracion&&<Text style={[s.noticiaResumen,{color:VERDE,fontWeight:'600'}]}>⏱ {t.duracion}</Text>}
+    <View style={s.flex}>
+      <Header titulo="Trámites en Línea" onBack={onBack} />
+      {loading ? (
+        <ActivityIndicator color={VERDE} style={s.loader} />
+      ) : (
+        <FlatList
+          data={items}
+          keyExtractor={i => i.id}
+          contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
+          renderItem={({ item }) => (
+            <Card style={{ marginBottom: 12 }}>
+              <View style={{ padding: 14 }}>
+                <Text style={{ fontWeight: '700', color: TEXTO }}>{item.nombre || item.titulo}</Text>
+                {item.descripcion && <Text style={{ color: GRIS, fontSize: 13, marginTop: 4 }}>{item.descripcion}</Text>}
+                {item.requisitos && (
+                  <Text style={{ color: VERDE, fontSize: 12, marginTop: 6 }}>
+                    Requisitos: {item.requisitos}
+                  </Text>
+                )}
+              </View>
             </Card>
-          ))}
-        </ScrollView>
+          )}
+          ListEmptyComponent={<Text style={s.empty}>No hay trámites disponibles</Text>}
+        />
       )}
-    </SafeAreaView>
+    </View>
   );
 }
 
-// ─── Pantalla: Comunales ────────────────────────────────────────────────────
-
-function PantallaComunales({ onBack }) {
-  const [consejos, setConsejos] = useState([]);
-  const [cargando, setCargando] = useState(true);
-  useEffect(()=>{
-    fetch(`${API}/api/collections/consejos_comunales/records?sort=nombre&perPage=50`)
-      .then(r=>r.json()).then(d=>{setConsejos(d.items||[]);setCargando(false);}).catch(()=>setCargando(false));
-  },[]);
-  return (
-    <SafeAreaView style={s.safe}>
-      <StatusBar barStyle="light-content" backgroundColor={VERDE_DARK} />
-      <Header titulo="Consejos Comunales" onBack={onBack} />
-      {cargando?<ActivityIndicator size="large" color={VERDE} style={{marginTop:40}}/>:(
-        <ScrollView contentContainerStyle={s.listaPad}>
-          {consejos.length===0&&<Text style={s.vacio}>No hay consejos comunales registrados</Text>}
-          {consejos.map(c=>(
-            <Card key={c.id} style={{marginBottom:10}}>
-              <Text style={s.noticiaTitle}>{c.nombre}</Text>
-              {c.parroquia&&<Text style={s.noticiaResumen}>📍 {c.parroquia}</Text>}
-              {c.vocero&&<Text style={s.noticiaResumen}>👤 {c.vocero}</Text>}
-            </Card>
-          ))}
-        </ScrollView>
-      )}
-    </SafeAreaView>
-  );
-}
-
-// ─── Pantalla: Agenda ───────────────────────────────────────────────────────
-
+// ─── Pantalla: Agenda ─────────────────────────────────────────────────────────
 function PantallaAgenda({ onBack }) {
-  const [eventos, setEventos] = useState([]);
-  const [cargando, setCargando] = useState(true);
-  useEffect(()=>{
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
     fetch(`${API}/api/collections/eventos/records?sort=-fecha&perPage=20`)
-      .then(r=>r.json()).then(d=>{setEventos(d.items||[]);setCargando(false);}).catch(()=>setCargando(false));
-  },[]);
+      .then(r => r.json())
+      .then(d => { if (d.items) setItems(d.items); })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
   return (
-    <SafeAreaView style={s.safe}>
-      <StatusBar barStyle="light-content" backgroundColor={VERDE_DARK} />
+    <View style={s.flex}>
       <Header titulo="Agenda SIGAP" onBack={onBack} />
-      {cargando?<ActivityIndicator size="large" color={VERDE} style={{marginTop:40}}/>:(
-        <ScrollView contentContainerStyle={s.listaPad}>
-          {eventos.length===0&&<Text style={s.vacio}>No hay eventos programados</Text>}
-          {eventos.map(e=>(
-            <Card key={e.id} style={{marginBottom:10}}>
-              <Text style={s.noticiaFecha}>{e.fecha?new Date(e.fecha).toLocaleDateString('es-VE',{weekday:'long',day:'numeric',month:'long'}):''}</Text>
-              <Text style={s.noticiaTitle}>{e.titulo||e.nombre}</Text>
-              {e.lugar&&<Text style={s.noticiaResumen}>📍 {e.lugar}</Text>}
-              {e.descripcion&&<Text style={s.noticiaResumen}>{e.descripcion}</Text>}
+      {loading ? (
+        <ActivityIndicator color={VERDE} style={s.loader} />
+      ) : (
+        <FlatList
+          data={items}
+          keyExtractor={i => i.id}
+          contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
+          renderItem={({ item }) => (
+            <Card style={{ marginBottom: 12 }}>
+              <View style={{ padding: 14 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+                  <View style={{ backgroundColor: VERDE, borderRadius: 8, padding: 8, marginRight: 12, alignItems: 'center', minWidth: 50 }}>
+                    <Text style={{ color: '#fff', fontWeight: '700', fontSize: 16 }}>
+                      {item.fecha ? new Date(item.fecha).getDate() : '—'}
+                    </Text>
+                    <Text style={{ color: DORADO, fontSize: 10 }}>
+                      {item.fecha ? new Date(item.fecha).toLocaleString('es-VE', { month: 'short' }).toUpperCase() : ''}
+                    </Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ fontWeight: '700', color: TEXTO }}>{item.titulo || item.nombre}</Text>
+                    {item.lugar && <Text style={{ color: GRIS, fontSize: 12 }}>{item.lugar}</Text>}
+                  </View>
+                </View>
+                {item.descripcion && <Text style={{ color: GRIS, fontSize: 13 }}>{item.descripcion}</Text>}
+              </View>
             </Card>
-          ))}
-        </ScrollView>
+          )}
+          ListEmptyComponent={<Text style={s.empty}>No hay eventos próximos</Text>}
+        />
       )}
-    </SafeAreaView>
+    </View>
   );
 }
 
-// ─── App principal ──────────────────────────────────────────────────────────
+// ─── Pantalla: Transparencia ──────────────────────────────────────────────────
+function PantallaTransparencia({ onBack }) {
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch(`${API}/api/collections/documentos/records?sort=-created&perPage=30`)
+      .then(r => r.json())
+      .then(d => { if (d.items) setItems(d.items); })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  return (
+    <View style={s.flex}>
+      <Header titulo="Transparencia" onBack={onBack} />
+      {loading ? (
+        <ActivityIndicator color={VERDE} style={s.loader} />
+      ) : (
+        <FlatList
+          data={items}
+          keyExtractor={i => i.id}
+          contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
+          renderItem={({ item }) => (
+            <Card style={{ marginBottom: 10 }}>
+              <View style={{ padding: 14, flexDirection: 'row', alignItems: 'center' }}>
+                <Text style={{ fontSize: 24, marginRight: 12 }}>📄</Text>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontWeight: '600', color: TEXTO }}>{item.titulo || item.nombre}</Text>
+                  <Text style={{ color: GRIS, fontSize: 12, marginTop: 2 }}>
+                    {new Date(item.created).toLocaleDateString('es-VE')}
+                  </Text>
+                </View>
+              </View>
+            </Card>
+          )}
+          ListEmptyComponent={<Text style={s.empty}>No hay documentos disponibles</Text>}
+        />
+      )}
+    </View>
+  );
+}
+
+// ─── Pantalla: Atención ───────────────────────────────────────────────────────
+function PantallaAtencion({ onBack }) {
+  return (
+    <View style={s.flex}>
+      <Header titulo="Atención Ciudadana" onBack={onBack} />
+      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 100 }}>
+        <Card style={{ marginBottom: 14, borderLeftWidth: 4, borderLeftColor: DORADO }}>
+          <View style={{ padding: 16 }}>
+            <Text style={{ fontWeight: '700', color: VERDE_DARK, fontSize: 16, marginBottom: 10 }}>
+              IAGAMI — Municipio Iribarren
+            </Text>
+            <Text style={{ color: GRIS, marginBottom: 6 }}>📍 Barquisimeto, Estado Lara, Venezuela</Text>
+            <Text style={{ color: GRIS, marginBottom: 6 }}>🌐 iagami.online</Text>
+            <Text style={{ color: GRIS, marginBottom: 6 }}>📧 contacto@iagami.online</Text>
+          </View>
+        </Card>
+        <Card>
+          <View style={{ padding: 16 }}>
+            <Text style={{ fontWeight: '700', color: TEXTO, marginBottom: 10 }}>Horario de atención</Text>
+            <Text style={{ color: GRIS }}>Lunes a Viernes: 8:00 AM – 4:00 PM</Text>
+            <Text style={{ color: GRIS, marginTop: 4 }}>Sábados: 8:00 AM – 12:00 PM</Text>
+          </View>
+        </Card>
+      </ScrollView>
+    </View>
+  );
+}
+
+// ─── Chatbot Semeruquito ──────────────────────────────────────────────────────
+const FAQ_LOCAL = [
+  { q: ['denuncia', 'denunciar', 'reportar', 'problema ambiental'],
+    a: 'Para presentar una denuncia ambiental, ve al módulo "Presentar Denuncia" en la pantalla principal. Puedes reportar contaminación, tala ilegal, vertidos y más.' },
+  { q: ['multa', 'multas', 'sanción', 'deuda'],
+    a: 'Consulta tus multas en el módulo "Consultar Multas". Ingresa tu número de cédula para ver el estado de tus obligaciones.' },
+  { q: ['trámite', 'tramite', 'permiso', 'certificado', 'solicitud'],
+    a: 'Los trámites y permisos ambientales están disponibles en el módulo "Trámites en Línea". Allí encontrarás todos los requisitos.' },
+  { q: ['empresa', 'registro empresa', 'rif', 'industria'],
+    a: 'El registro y consulta de empresas está en el módulo "Registro Empresa". Puedes buscar por nombre o RIF.' },
+  { q: ['evento', 'agenda', 'actividad', 'charla'],
+    a: 'Consulta la "Agenda SIGAP" para ver los próximos eventos, charlas y actividades ambientales del municipio.' },
+  { q: ['noticia', 'noticias', 'información', 'comunicado'],
+    a: 'Las últimas noticias del IAGAMI están disponibles en el módulo "Noticias" o en la pantalla principal.' },
+  { q: ['transparencia', 'documento', 'informe', 'presupuesto'],
+    a: 'Los documentos de gestión pública están en el módulo "Transparencia".' },
+  { q: ['hola', 'buenos días', 'buenas', 'saludos', 'hey'],
+    a: '¡Hola! Soy Semeruquito 🌿, el asistente virtual del IAGAMI. ¿En qué puedo ayudarte hoy?' },
+  { q: ['gracias', 'muchas gracias', 'thank', 'ok', 'listo'],
+    a: '¡Con gusto! Estoy aquí para ayudarte con cualquier consulta ambiental. 🌿' },
+  { q: ['iagami', 'que es', 'quiénes son', 'instituto'],
+    a: 'El IAGAMI es el Instituto Autónomo de Gestión Ambiental del Municipio Iribarren, en Barquisimeto, Estado Lara, Venezuela.' },
+];
+
+function responder(msg) {
+  const m = msg.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  for (const item of FAQ_LOCAL) {
+    if (item.q.some(k => m.includes(k.normalize('NFD').replace(/[̀-ͯ]/g, '')))) {
+      return item.a;
+    }
+  }
+  return 'No tengo información sobre eso en este momento. Para más ayuda, visita iagami.online o contáctanos en contacto@iagami.online 🌿';
+}
+
+function Chatbot({ visible, onClose }) {
+  const [mensajes, setMensajes] = useState([
+    { id: '0', role: 'bot', text: '¡Hola! Soy Semeruquito 🌿, el asistente virtual del IAGAMI. ¿En qué puedo ayudarte?' }
+  ]);
+  const [input, setInput] = useState('');
+  const scrollRef = useRef(null);
+
+  const enviar = () => {
+    const txt = input.trim();
+    if (!txt) return;
+    const user = { id: Date.now().toString(), role: 'user', text: txt };
+    const bot = { id: (Date.now() + 1).toString(), role: 'bot', text: responder(txt) };
+    setMensajes(p => [...p, user, bot]);
+    setInput('');
+    setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 100);
+  };
+
+  return (
+    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
+      <View style={s.chatOverlay}>
+        <View style={s.chatBox}>
+          <View style={s.chatHeader}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Text style={{ fontSize: 22, marginRight: 8 }}>🌿</Text>
+              <View>
+                <Text style={s.chatHeaderTitle}>Semeruquito</Text>
+                <Text style={{ color: DORADO, fontSize: 11 }}>Asistente IAGAMI</Text>
+              </View>
+            </View>
+            <TouchableOpacity onPress={onClose} style={s.chatClose}>
+              <Text style={{ color: '#fff', fontWeight: '700', fontSize: 16 }}>✕</Text>
+            </TouchableOpacity>
+          </View>
+          <ScrollView
+            ref={scrollRef}
+            style={s.chatMsgs}
+            contentContainerStyle={{ padding: 12, paddingBottom: 8 }}
+          >
+            {mensajes.map(m => (
+              <View key={m.id} style={[s.bubble, m.role === 'user' ? s.bubbleUser : s.bubbleBot]}>
+                <Text style={[s.bubbleTxt, m.role === 'user' && { color: '#fff' }]}>{m.text}</Text>
+              </View>
+            ))}
+          </ScrollView>
+          <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+            <View style={s.chatInput}>
+              <TextInput
+                style={s.chatField}
+                placeholder="Escribe tu consulta..."
+                placeholderTextColor={GRIS}
+                value={input}
+                onChangeText={setInput}
+                onSubmitEditing={enviar}
+                returnKeyType="send"
+              />
+              <TouchableOpacity style={s.chatSend} onPress={enviar}>
+                <Text style={{ color: '#fff', fontWeight: '700' }}>↑</Text>
+              </TouchableOpacity>
+            </View>
+          </KeyboardAvoidingView>
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+// ─── App Principal ────────────────────────────────────────────────────────────
+const SCREENS = {
+  inicio: PantallaInicio,
+  noticias: PantallaNoticias,
+  denuncias: PantallaDenuncias,
+  multas: PantallaMultas,
+  empresas: PantallaEmpresas,
+  tramites: PantallaTramites,
+  agenda: PantallaAgenda,
+  transparencia: PantallaTransparencia,
+  atencion: PantallaAtencion,
+};
 
 export default function App() {
   const [pantalla, setPantalla] = useState('inicio');
-  const pantallas = {
-    inicio:    <PantallaInicio ir={setPantalla} />,
-    noticias:  <PantallaNoticias onBack={()=>setPantalla('inicio')} />,
-    denuncias: <PantallaDenuncia onBack={()=>setPantalla('inicio')} />,
-    multas:    <PantallaMultas onBack={()=>setPantalla('inicio')} />,
-    empresas:  <PantallaEmpresas onBack={()=>setPantalla('inicio')} />,
-    tramites:  <PantallaTramites onBack={()=>setPantalla('inicio')} />,
-    comunales: <PantallaComunales onBack={()=>setPantalla('inicio')} />,
-    agenda:    <PantallaAgenda onBack={()=>setPantalla('inicio')} />,
-  };
-  return pantallas[pantalla] || pantallas.inicio;
+  const [chatVisible, setChatVisible] = useState(false);
+
+  const ir = (id) => { if (SCREENS[id]) setPantalla(id); };
+  const volver = () => setPantalla('inicio');
+
+  const Pantalla = SCREENS[pantalla] || PantallaInicio;
+
+  return (
+    <View style={s.root}>
+      <StatusBar backgroundColor={VERDE_DARK} barStyle="light-content" />
+      <Navbar onHome={volver} />
+      <View style={s.flex}>
+        {pantalla === 'inicio'
+          ? <PantallaInicio ir={ir} />
+          : <Pantalla onBack={volver} />
+        }
+      </View>
+      {/* FAB Semeruquito */}
+      <TouchableOpacity style={s.fab} onPress={() => setChatVisible(true)}>
+        <Text style={s.fabTxt}>🌿</Text>
+      </TouchableOpacity>
+      <Chatbot visible={chatVisible} onClose={() => setChatVisible(false)} />
+    </View>
+  );
 }
 
-// ─── Estilos ────────────────────────────────────────────────────────────────
-
+// ─── Estilos ──────────────────────────────────────────────────────────────────
 const s = StyleSheet.create({
-  safe:          { flex: 1, backgroundColor: BG },
+  root: { flex: 1, backgroundColor: BG },
+  flex: { flex: 1 },
+  scroll: { flex: 1 },
 
-  navbar:        { backgroundColor: VERDE_DARK, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: `rgba(198,168,91,.35)` },
-  navLogo:       { width: 36, height: 36, marginRight: 8 },
-  navBrand:      { color: '#fff', fontSize: 18, fontWeight: '800', letterSpacing: 1, flex: 1 },
-  navSigap:      { backgroundColor: 'rgba(198,168,91,.2)', borderRadius: 10, paddingHorizontal: 8, paddingVertical: 3, borderWidth: 1, borderColor: DORADO },
-  navSigapTxt:   { color: DORADO, fontSize: 10, fontWeight: '700' },
+  navbar: {
+    backgroundColor: VERDE_DARK,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingTop: Platform.OS === 'ios' ? 44 : StatusBar.currentHeight || 24,
+    paddingBottom: 10,
+    borderBottomWidth: 2,
+    borderBottomColor: DORADO,
+  },
+  navLogoBtn: { padding: 4 },
+  navLogo: { width: 100, height: 48 },
+  navBadge: {
+    backgroundColor: DORADO + '22',
+    borderColor: DORADO,
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  navBadgeTxt: { color: DORADO, fontSize: 11, fontWeight: '700' },
 
-  header:        { backgroundColor: VERDE_DARK, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 12 },
-  backBtn:       { marginRight: 12, padding: 4 },
-  backTxt:       { color: '#fff', fontSize: 22 },
-  headerLogo:    { width: 32, height: 32, marginRight: 10 },
-  headerTxt:     { color: '#fff', fontSize: 17, fontWeight: '700', flex: 1 },
+  header: {
+    backgroundColor: VERDE,
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 14,
+    borderBottomWidth: 2,
+    borderBottomColor: DORADO,
+  },
+  backBtn: { marginRight: 12, padding: 4 },
+  backTxt: { color: DORADO, fontSize: 22, fontWeight: '700' },
+  headerTxt: { color: '#fff', fontSize: 18, fontWeight: '700', flex: 1 },
 
-  inicioScroll:  { paddingBottom: 32 },
+  hero: { width: '100%', height: 240, position: 'relative', overflow: 'hidden' },
+  heroImg: { width: '100%', height: '100%' },
+  heroOverlay: {
+    position: 'absolute', bottom: 0, left: 0, right: 0,
+    backgroundColor: 'rgba(26,61,43,0.82)',
+    padding: 18,
+  },
+  heroTag: { color: DORADO, fontSize: 11, fontWeight: '700', letterSpacing: 1, marginBottom: 4 },
+  heroTitle: { color: '#fff', fontSize: 20, fontWeight: '800', lineHeight: 26 },
+  heroSub: { color: '#ffffffcc', fontSize: 12, marginTop: 6 },
 
-  hero:          { backgroundColor: VERDE_DARK, padding: 24, paddingTop: 28 },
-  heroBadge:     { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
-  heroDot:       { width: 8, height: 8, borderRadius: 4, backgroundColor: '#4ade80', marginRight: 8 },
-  heroBadgeTxt:  { color: 'rgba(255,255,255,.8)', fontSize: 11 },
-  heroSlogan:    { color: DORADO, fontSize: 13, fontStyle: 'italic', marginBottom: 8 },
-  heroTitulo:    { color: '#fff', fontSize: 26, fontWeight: '800', lineHeight: 34, marginBottom: 12 },
-  heroSub:       { color: 'rgba(255,255,255,.75)', fontSize: 13, lineHeight: 20, marginBottom: 20 },
-  heroBtns:      { flexDirection: 'row', gap: 10 },
-  heroBtnVerde:  { backgroundColor: VERDE, borderRadius: 10, paddingVertical: 12, paddingHorizontal: 16, flex: 1 },
-  heroBtnVerdeTxt:{ color: '#fff', fontWeight: '700', fontSize: 13, textAlign: 'center' },
-  heroBtnBorde:  { borderWidth: 1.5, borderColor: 'rgba(255,255,255,.5)', borderRadius: 10, paddingVertical: 12, paddingHorizontal: 16 },
-  heroBtnBordeTxt:{ color: '#fff', fontWeight: '600', fontSize: 13 },
+  section: { padding: 16, paddingTop: 20 },
+  sectionHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 14 },
+  sectionBar: { width: 4, height: 20, backgroundColor: DORADO, borderRadius: 2, marginRight: 10 },
+  sectionTitle: { fontSize: 17, fontWeight: '700', color: VERDE_DARK },
 
-  secHeader:     { paddingHorizontal: 16, paddingTop: 20, paddingBottom: 4, alignItems: 'center' },
-  secTitulo:     { fontSize: 15, fontWeight: '700', color: VERDE_DARK, textAlign: 'center' },
-  secSub:        { fontSize: 12, color: GRIS, textAlign: 'center', marginTop: 2 },
+  noticiaCard: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 10,
+    borderLeftWidth: 3,
+    borderLeftColor: VERDE,
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 2,
+  },
+  noticiaDot: {
+    width: 8, height: 8, borderRadius: 4,
+    backgroundColor: DORADO, marginTop: 5, marginRight: 10,
+  },
+  noticiaTitle: { fontWeight: '600', color: TEXTO, fontSize: 14, lineHeight: 20 },
+  noticiaSub: { color: GRIS, fontSize: 12, marginTop: 2 },
+  verTodo: { alignItems: 'flex-end', marginTop: 4 },
+  verTodoTxt: { color: VERDE, fontWeight: '600', fontSize: 13 },
 
-  grid:          { flexDirection: 'row', flexWrap: 'wrap', padding: 10, gap: 10 },
-  modCard:       { width: '46%', backgroundColor: '#fff', borderRadius: 14, overflow: 'hidden', borderWidth: 1.5, borderColor: DORADO, elevation: 2 },
-  modIcon:       { width: '100%', height: 100 },
-  modInfo:       { padding: 10 },
-  modLabel:      { fontSize: 12, fontWeight: '700', color: VERDE_DARK, marginBottom: 2 },
-  modSub:        { fontSize: 10, color: GRIS },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', marginHorizontal: -6 },
+  modulo: {
+    width: (width - 56) / 2,
+    backgroundColor: '#fff',
+    borderRadius: 14,
+    padding: 14,
+    margin: 6,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: DORADO + '44',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+  },
+  moduloIconWrap: {
+    width: 72, height: 72,
+    borderRadius: 16,
+    backgroundColor: BG,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: DORADO + '33',
+  },
+  moduloIcon: { width: 60, height: 60 },
+  moduloLabel: { color: TEXTO, fontWeight: '700', fontSize: 13, textAlign: 'center' },
+  moduloSub: { color: GRIS, fontSize: 11, textAlign: 'center', marginTop: 2 },
 
-  footer:        { alignItems: 'center', padding: 24, borderTopWidth: 1, borderTopColor: '#e5e7eb', marginTop: 10 },
-  footerLogo:    { width: 60, height: 60, marginBottom: 10 },
-  footerTxt:     { fontSize: 11, color: GRIS, textAlign: 'center', lineHeight: 18 },
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 3,
+    overflow: 'hidden',
+  },
 
-  card:          { backgroundColor: '#fff', borderRadius: 12, padding: 16, elevation: 1 },
-  listaPad:      { padding: 16 },
-  vacio:         { textAlign: 'center', color: GRIS, marginTop: 40, fontSize: 15 },
+  newsImg: { width: '100%', height: 160 },
+  newsTitle: { fontWeight: '700', color: TEXTO, fontSize: 15, lineHeight: 22 },
+  newsSub: { color: GRIS, fontSize: 13, marginTop: 4, lineHeight: 18 },
+  newsDate: { color: DORADO, fontSize: 11, marginTop: 6, fontWeight: '600' },
 
-  chip:          { alignSelf: 'flex-start', borderWidth: 1, borderRadius: 20, paddingHorizontal: 10, paddingVertical: 3, marginBottom: 8 },
-  chipTxt:       { fontSize: 11, fontWeight: '600' },
+  campo: { marginBottom: 14 },
+  campoLabel: { color: TEXTO, fontWeight: '600', marginBottom: 6, fontSize: 14 },
+  input: {
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    borderRadius: 10,
+    padding: 12,
+    color: TEXTO,
+    fontSize: 15,
+  },
+  btnPrimary: {
+    backgroundColor: VERDE,
+    borderRadius: 12,
+    padding: 16,
+    alignItems: 'center',
+    borderWidth: 1.5,
+    borderColor: DORADO,
+  },
+  btnPrimaryTxt: { color: '#fff', fontWeight: '700', fontSize: 16 },
 
-  noticiaCard:   { marginBottom: 12 },
-  noticiaTitle:  { fontSize: 15, fontWeight: '700', color: TEXTO, marginBottom: 4 },
-  noticiaResumen:{ fontSize: 13, color: GRIS, lineHeight: 20 },
-  noticiaFecha:  { fontSize: 11, color: DORADO, marginTop: 4, fontWeight: '600', marginBottom: 4 },
+  fab: {
+    position: 'absolute',
+    bottom: 28,
+    right: 24,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: VERDE,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 8,
+    shadowColor: DORADO,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.5,
+    shadowRadius: 8,
+    borderWidth: 2,
+    borderColor: DORADO,
+  },
+  fabTxt: { fontSize: 26 },
 
-  formSeccion:   { fontSize: 13, fontWeight: '700', color: VERDE_DARK, marginTop: 16, marginBottom: 8 },
-  input:         { backgroundColor: '#fff', borderWidth: 1, borderColor: '#d1d5db', borderRadius: 10, padding: 12, fontSize: 14, color: TEXTO, marginBottom: 10 },
-  inputArea:     { height: 100, textAlignVertical: 'top' },
-  tiposGrid:     { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 8 },
-  tipoBtn:       { borderWidth: 1, borderColor: '#d1d5db', borderRadius: 20, paddingHorizontal: 14, paddingVertical: 7, backgroundColor: '#fff' },
-  tipoBtnActivo: { borderColor: VERDE, backgroundColor: VERDE },
-  tipoBtnTxt:    { fontSize: 12, color: GRIS },
-  tipoBtnTxtActivo: { color: '#fff', fontWeight: '600' },
+  chatOverlay: {
+    flex: 1, backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
+  },
+  chatBox: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    maxHeight: '75%',
+    overflow: 'hidden',
+  },
+  chatHeader: {
+    backgroundColor: VERDE_DARK,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 16,
+    borderBottomWidth: 2,
+    borderBottomColor: DORADO,
+  },
+  chatHeaderTitle: { color: '#fff', fontWeight: '700', fontSize: 16 },
+  chatClose: {
+    width: 32, height: 32, borderRadius: 16,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center', justifyContent: 'center',
+  },
+  chatMsgs: { flex: 1, maxHeight: 340 },
+  bubble: {
+    maxWidth: '80%',
+    padding: 12,
+    borderRadius: 14,
+    marginBottom: 10,
+  },
+  bubbleBot: {
+    backgroundColor: '#f0fdf4',
+    alignSelf: 'flex-start',
+    borderWidth: 1,
+    borderColor: VERDE + '33',
+    borderBottomLeftRadius: 4,
+  },
+  bubbleUser: {
+    backgroundColor: VERDE,
+    alignSelf: 'flex-end',
+    borderBottomRightRadius: 4,
+  },
+  bubbleTxt: { color: TEXTO, fontSize: 14, lineHeight: 20 },
+  chatInput: {
+    flexDirection: 'row',
+    padding: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#e2e8f0',
+    gap: 8,
+  },
+  chatField: {
+    flex: 1, backgroundColor: BG,
+    borderRadius: 20,
+    paddingHorizontal: 16, paddingVertical: 10,
+    borderWidth: 1, borderColor: '#e2e8f0',
+    color: TEXTO, fontSize: 14,
+  },
+  chatSend: {
+    width: 42, height: 42,
+    backgroundColor: VERDE,
+    borderRadius: 21,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 
-  btnVerde:      { backgroundColor: VERDE, borderRadius: 12, padding: 16, alignItems: 'center', marginTop: 12 },
-  btnVerdeTxt:   { color: '#fff', fontWeight: '700', fontSize: 15 },
-  btnDeshabilitado: { opacity: .6 },
-
-  exitoContainer:{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32 },
-  exitoIcon:     { fontSize: 64, marginBottom: 16 },
-  exitoTitulo:   { fontSize: 24, fontWeight: '800', color: VERDE_DARK, marginBottom: 8 },
-  exitoSub:      { fontSize: 14, color: GRIS, textAlign: 'center', lineHeight: 22, marginBottom: 32 },
-
-  searchRow:     { flexDirection: 'row', padding: 12, gap: 8 },
-  searchInput:   { flex: 1, backgroundColor: '#fff', borderWidth: 1, borderColor: '#d1d5db', borderRadius: 10, padding: 12, fontSize: 14, color: TEXTO },
-  searchBtn:     { backgroundColor: VERDE, borderRadius: 10, padding: 12, alignItems: 'center', justifyContent: 'center' },
-  searchBtnTxt:  { fontSize: 18 },
+  loader: { flex: 1, justifyContent: 'center', marginTop: 60 },
+  empty: { color: GRIS, textAlign: 'center', marginTop: 40, fontSize: 15 },
 });
