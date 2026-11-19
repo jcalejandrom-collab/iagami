@@ -601,6 +601,7 @@ function PantallaWeb({ url, js, onBack }) {
         javaScriptEnabled
         domStorageEnabled
         onNavigationStateChange={handleNavChange}
+        injectedJavaScriptBeforeContentLoaded="document.documentElement.style.visibility='hidden';true;"
         injectedJavaScript={inject}
         onMessage={({ nativeEvent }) => { if (nativeEvent.data === 'goback') onBack(); }}
         userAgent="Mozilla/5.0 (Linux; Android 11; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
