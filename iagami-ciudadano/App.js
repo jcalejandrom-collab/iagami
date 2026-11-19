@@ -559,6 +559,17 @@ function PantallaAgenda({ onBack }) {
 
 function PantallaWeb({ url, onBack }) {
   const [loading, setLoading] = useState(true);
+  const originUrl = useRef(url);
+
+  function handleNavChange({ url: current, loading: nav }) {
+    if (nav) return;
+    const isRoot = current === 'https://iagami.online' ||
+                   current === 'https://iagami.online/' ||
+                   current === 'https://iagami.online/index.html';
+    const startedAtRoot = originUrl.current === 'https://iagami.online' ||
+                          originUrl.current === 'https://iagami.online/';
+    if (isRoot && !startedAtRoot) onBack();
+  }
 
   return (
     <View style={s.flex}>
@@ -570,10 +581,9 @@ function PantallaWeb({ url, onBack }) {
         onError={() => setLoading(false)}
         javaScriptEnabled
         domStorageEnabled
-        startInLoadingState
+        onNavigationStateChange={handleNavChange}
         userAgent="Mozilla/5.0 (Linux; Android 11; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
       />
-      {/* Botón flotante para volver al app */}
       <TouchableOpacity style={s.webBack} onPress={onBack}>
         <Text style={s.webBackTxt}>← App</Text>
       </TouchableOpacity>
