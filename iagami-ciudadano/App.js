@@ -705,7 +705,7 @@ function responder(msg) {
   for (const item of FAQ_LOCAL) {
     if (item.q.some(k => m.includes(k.normalize('NFD').replace(/[̀-ͯ]/g, '')))) return item.a;
   }
-  return 'No tengo información sobre eso ahora. Para más ayuda visita iagami.online o escribe a contacto@iagami.online';
+  return 'No tengo información sobre eso ahora. Para más ayuda visita iagami.online o escribe a vicepresidencia.iagami@gmail.com';
 }
 
 function Chatbot({ visible, onClose }) {
