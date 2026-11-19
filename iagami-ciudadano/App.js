@@ -20,7 +20,6 @@ const { width } = Dimensions.get('window');
 const LOGO = require('./assets/logo-iagami.png');
 const HERO = require('./assets/app-icon.webp');
 const SEMERUQUITO = require('./assets/semeruquito.png');
-const LEAF_ARROW = require('./assets/leaf-arrow.png');
 
 const ICONOS = {
   denuncias:     require('./assets/iconos/01_presentar_denuncia.png'),
