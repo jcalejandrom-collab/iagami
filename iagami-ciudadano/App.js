@@ -558,16 +558,21 @@ function PantallaAgenda({ onBack }) {
   );
 }
 
+const INJECT_BACK = `
+(function(){
+  if(document.getElementById('_app_back_btn')) return;
+  var btn = document.createElement('div');
+  btn.id = '_app_back_btn';
+  btn.innerHTML = '<img src="https://iagami.online/assets/images/leaf-arrow.png" style="height:38px;vertical-align:middle"> <span style="font-family:Poppins,sans-serif;font-weight:800;font-size:13px;color:#1a3d2b;letter-spacing:.3px">App</span>';
+  btn.style.cssText = 'position:fixed;bottom:22px;left:14px;z-index:99999;background:rgba(255,255,255,0.93);border-radius:28px;padding:7px 14px 7px 10px;display:flex;align-items:center;gap:6px;box-shadow:0 3px 12px rgba(0,0,0,0.18);border:1.5px solid rgba(29,107,62,0.18);cursor:pointer;user-select:none;-webkit-user-select:none';
+  btn.addEventListener('click', function(){ window.ReactNativeWebView.postMessage('goback'); });
+  document.body.appendChild(btn);
+})();true;
+`;
+
 function PantallaWeb({ url, js, onBack }) {
   const [loading, setLoading] = useState(true);
-  const [kbVisible, setKbVisible] = useState(false);
   const originUrl = useRef(url);
-
-  useEffect(() => {
-    const show = Keyboard.addListener('keyboardDidShow', () => setKbVisible(true));
-    const hide = Keyboard.addListener('keyboardDidHide', () => setKbVisible(false));
-    return () => { show.remove(); hide.remove(); };
-  }, []);
 
   function handleNavChange({ url: current, loading: nav }) {
     if (nav) return;
@@ -578,6 +583,9 @@ function PantallaWeb({ url, js, onBack }) {
                           originUrl.current === 'https://iagami.online/';
     if (isRoot && !startedAtRoot) onBack();
   }
+
+  const inject = "document.head.insertAdjacentHTML('beforeend','<style>.nav,.topbar,.alert-bar{display:none!important}</style>');" +
+                 (js || '') + INJECT_BACK;
 
   return (
     <View style={s.flex}>
@@ -590,15 +598,10 @@ function PantallaWeb({ url, js, onBack }) {
         javaScriptEnabled
         domStorageEnabled
         onNavigationStateChange={handleNavChange}
-        injectedJavaScript={"document.head.insertAdjacentHTML('beforeend','<style>.nav,.topbar,.alert-bar{display:none!important}</style>');" + (js || '') + "true;"}
+        injectedJavaScript={inject}
+        onMessage={({ nativeEvent }) => { if (nativeEvent.data === 'goback') onBack(); }}
         userAgent="Mozilla/5.0 (Linux; Android 11; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
       />
-      {!kbVisible && (
-        <TouchableOpacity style={s.webBack} onPress={onBack} activeOpacity={0.75}>
-          <Image source={LEAF_ARROW} style={s.webBackImg} resizeMode="contain" />
-          <Text style={s.webBackTxt}>App</Text>
-        </TouchableOpacity>
-      )}
     </View>
   );
 }
