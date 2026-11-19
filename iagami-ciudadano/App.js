@@ -569,17 +569,43 @@ function PantallaAgenda({ onBack }) {
   );
 }
 
+const HIDE_SITE_NAV = `
+(function(){
+  var st = document.createElement('style');
+  st.textContent = '.topbar,.nav,.alert-bar,.nav-backdrop,.chat-fab{display:none!important}body{padding-top:0!important}';
+  document.head.appendChild(st);
+  true;
+})();
+`;
+
 function PantallaWeb({ url, titulo, onBack }) {
   const [loading, setLoading] = useState(true);
+  const [tituloActual, setTituloActual] = useState(titulo);
+  const webRef = useRef(null);
+
+  const onNavChange = (state) => {
+    // Si el WebView navegó al home del sitio, cerrar y volver al app
+    if (state.url === 'https://iagami.online/' || state.url === 'https://iagami.online') {
+      onBack();
+      return;
+    }
+    // Actualizar título según módulo actual
+    const mod = MODULOS.find(m => state.url.startsWith(m.url));
+    if (mod) setTituloActual(mod.label);
+  };
+
   return (
     <View style={s.flex}>
-      <Header titulo={titulo} onBack={onBack} />
+      <Header titulo={tituloActual} onBack={onBack} />
       {loading && <ActivityIndicator color={VERDE} style={{ position: 'absolute', top: '50%', alignSelf: 'center', zIndex: 10 }} />}
       <WebView
+        ref={webRef}
         source={{ uri: url }}
         style={s.flex}
         onLoadEnd={() => setLoading(false)}
         onError={() => setLoading(false)}
+        onNavigationStateChange={onNavChange}
+        injectedJavaScript={HIDE_SITE_NAV}
         javaScriptEnabled
         domStorageEnabled
         startInLoadingState
