@@ -104,7 +104,7 @@ function HojaFlotante({ delay, startX, size, duration, dorada, tipo, drift, rotD
         Animated.delay(delay),
         Animated.parallel([
           // Movimiento: sube + deriva lateralmente
-          Animated.timing(y,   { toValue: -220, duration, useNativeDriver: true, easing: Easing.out(Easing.quad) }),
+          Animated.timing(y,   { toValue: -342, duration, useNativeDriver: true, easing: Easing.out(Easing.quad) }),
           Animated.timing(x,   { toValue: drift, duration, useNativeDriver: true, easing: Easing.inOut(Easing.sin) }),
           Animated.timing(rot, { toValue: 1, duration, useNativeDriver: true }),
           // Opacidad: fade-in rápido → hold largo → fade-out final
@@ -161,7 +161,7 @@ function HojaFlotante({ delay, startX, size, duration, dorada, tipo, drift, rotD
 
 function HojasFlotantes() {
   return (
-    <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 240, pointerEvents: 'none' }}>
+    <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 360, pointerEvents: 'none' }}>
       {HOJAS_CONFIG.map((h, i) => <HojaFlotante key={i} {...h} />)}
     </View>
   );
