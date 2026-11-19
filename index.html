@@ -625,7 +625,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
         <a class="svc-card svc-img" href="multas/index.html">
           <img src="assets/images/iconos/03_multas_ambientales.png" alt="Multas Ambientales">
         </a>
-        <a class="svc-card svc-img" href="#" onclick="showPage('denuncia');return false">
+        <a class="svc-card svc-img" href="atencion/index.html">
           <img src="assets/images/iconos/04_atencion_ciudadana.png" alt="Atención Ciudadana">
         </a>
         <a class="svc-card svc-img" href="transparencia/index.html">
@@ -1330,7 +1330,7 @@ async function sendChat() {
       await new Promise(r => setTimeout(r, 700));
       const faqs = await loadChatFaqs();
       respuesta = findFaqResponse(txt, faqs) ||
-        'No encontré información exacta sobre eso. Para atención personalizada: 📞 (0251) 000-0000 o ✉ info@iagami.gob.ve — también puede usar el formulario de <strong>Denuncias</strong>.';
+        'No encontré información exacta sobre eso. Para atención personalizada: 📞 (0251) 257-9529 o ✉ vicepresidencia.iagami@gmail.com — también puede usar el formulario de <strong>Denuncias</strong>.';
     }
   } catch (_e) {
     const faqs = await loadChatFaqs();

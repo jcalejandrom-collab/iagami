@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Atención al Ciudadano — IAGAMI</title>
+<meta name="description" content="Contáctanos, consulta nuestra dirección, teléfonos y correos oficiales del IAGAMI, Barquisimeto, Estado Lara."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height:1.6}
+
+/* NAV */
+.nav{background:#fff;border-bottom:1px solid #c8ead8;position:sticky;top:0;z-index:200;box-shadow:0 1px 12px rgba(29,107,62,.06)}
+.navinner{max-width:1100px;margin:0 auto;padding:0 24px;height:58px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.logo-img{width:46px;height:46px;background:#fff;border-radius:10px;display:flex;align-items:center;justify-content:center;overflow:hidden;border:2px solid #C6A85B}
+.logo-img img{width:42px;height:42px;object-fit:contain}
+.logo-text{font-family:'Poppins',sans-serif;font-size:14px;font-weight:700;color:#1a3d2b;line-height:1.1}
+.logo-sub{font-size:10px;color:#4a8a6a;font-weight:400}
+.navback{font-size:13px;padding:7px 16px;border-radius:8px;background:#e8f5ee;color:#1d6b3e;border:1.5px solid #a8dfc0;cursor:pointer;font-weight:600;text-decoration:none;transition:.15s}
+.navback:hover{background:#d0edd8}
+
+/* HERO COMPACTO */
+.page-hero{
+  background:linear-gradient(135deg,#1a3d2b 0%,#1d6b3e 60%,#2d8a56 100%);
+  padding:52px 24px 44px;text-align:center;position:relative;overflow:hidden;
+}
+.page-hero::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 60% 50% at 50% 60%,rgba(198,168,91,.18) 0%,transparent 70%);
+}
+.page-hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(74,222,128,.14);color:#a8f0c8;border:1px solid rgba(74,222,128,.35);border-radius:20px;font-size:11px;font-weight:600;padding:5px 14px;margin-bottom:12px;letter-spacing:.05em}
+.page-hero h1{font-family:'Poppins',sans-serif;font-size:clamp(26px,5vw,42px);font-weight:800;color:#F8FAFC;margin-bottom:10px;position:relative}
+.page-hero h1 span{color:#C6A85B}
+.page-hero p{color:rgba(255,255,255,.75);font-size:14px;max-width:520px;margin:0 auto;position:relative}
+
+/* CONTENIDO */
+.contenido{max-width:1100px;margin:0 auto;padding:40px 24px 80px;display:grid;grid-template-columns:1fr 1fr;gap:28px}
+@media(max-width:720px){.contenido{grid-template-columns:1fr}}
+
+/* CARDS */
+.card{background:#fff;border-radius:16px;padding:28px;border:1px solid #e2eeea;box-shadow:0 2px 16px rgba(29,107,62,.07)}
+.card-full{grid-column:1/-1}
+.card-icon{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;font-size:22px}
+.card-icon.verde{background:#e8f5ee}
+.card-icon.dorado{background:rgba(198,168,91,.12)}
+.card-icon.rojo{background:#fef2f2}
+.card h2{font-family:'Poppins',sans-serif;font-size:17px;font-weight:700;color:#1a3d2b;margin-bottom:16px}
+.card-divider{height:1px;background:#e8f5ee;margin:14px 0}
+
+/* DIRECCIÓN */
+.dir-block{display:flex;gap:14px;align-items:flex-start}
+.dir-pin{font-size:22px;flex-shrink:0;margin-top:2px}
+.dir-text{font-size:14px;color:#374151;line-height:1.7}
+.dir-text strong{color:#1a3d2b;font-weight:700}
+.map-btn{
+  display:inline-flex;align-items:center;gap:6px;margin-top:12px;
+  background:#1d6b3e;color:#fff;border-radius:8px;padding:9px 18px;
+  font-size:13px;font-weight:600;text-decoration:none;transition:.18s;
+}
+.map-btn:hover{background:#155c32}
+
+/* TELÉFONOS */
+.tel-item{display:flex;align-items:center;gap:14px;padding:12px 0}
+.tel-avatar{
+  width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#1d6b3e,#2d8a56);
+  display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;color:#fff;
+  font-family:'Poppins',sans-serif;font-weight:700;font-size:14px;
+}
+.tel-info{flex:1}
+.tel-cargo{font-size:11px;color:#6b8a78;font-weight:600;letter-spacing:.04em;text-transform:uppercase;margin-bottom:2px}
+.tel-nombre{font-size:14px;font-weight:700;color:#1a3d2b}
+.tel-num{
+  display:inline-flex;align-items:center;gap:5px;margin-top:4px;
+  background:#e8f5ee;border-radius:8px;padding:5px 12px;
+  font-size:13px;font-weight:600;color:#1d6b3e;text-decoration:none;transition:.15s;
+}
+.tel-num:hover{background:#d0edd8}
+
+/* CORREOS */
+.email-row{display:flex;align-items:flex-start;gap:12px;padding:14px 0}
+.email-icon{font-size:22px;flex-shrink:0;margin-top:2px}
+.email-block{}
+.email-label{font-size:11px;color:#6b8a78;font-weight:600;letter-spacing:.04em;text-transform:uppercase;margin-bottom:4px}
+.email-addr{
+  display:inline-block;font-size:13px;font-weight:600;color:#1d6b3e;
+  background:#e8f5ee;border-radius:8px;padding:5px 14px;text-decoration:none;word-break:break-all;
+}
+.email-addr:hover{background:#d0edd8}
+.email-nota{font-size:12px;color:#6b8a78;margin-top:5px;font-style:italic;line-height:1.5}
+
+/* HORARIO */
+.horario-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f0f7f4;font-size:14px}
+.horario-row:last-child{border-bottom:none}
+.horario-dia{font-weight:600;color:#1a3d2b}
+.horario-hora{color:#6b8a78}
+.badge-open{background:#dcfce7;color:#15803d;border-radius:6px;padding:3px 10px;font-size:11px;font-weight:700}
+.badge-closed{background:#fee2e2;color:#dc2626;border-radius:6px;padding:3px 10px;font-size:11px;font-weight:700}
+
+/* FOOTER SIMPLE */
+.footer{background:#1a3d2b;color:rgba(255,255,255,.65);text-align:center;padding:24px;font-size:12px;border-top:3px solid #C6A85B}
+.footer a{color:#C6A85B;text-decoration:none}
+
+@media(max-width:480px){
+  .tel-item{flex-direction:column;align-items:flex-start}
+  .navinner{padding:0 14px}
+  .page-hero{padding:36px 16px 32px}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="navinner">
+    <a class="logo" href="/">
+      <div class="logo-img"><img src="/logo-iagami.png" alt="IAGAMI"/></div>
+      <div>
+        <div class="logo-text">IAGAMI</div>
+        <div class="logo-sub">Gestión Ambiental · Iribarren</div>
+      </div>
+    </a>
+    <a class="navback" href="/">← Inicio</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="page-hero">
+  <div class="page-hero-badge">📞 Contacto oficial</div>
+  <h1>Atención al <span>Ciudadano</span></h1>
+  <p>Estamos aquí para servirte. Contáctanos por teléfono, correo o visítanos en nuestra sede.</p>
+</section>
+
+<!-- CONTENIDO -->
+<div class="contenido">
+
+  <!-- DIRECCIÓN -->
+  <div class="card card-full">
+    <div class="card-icon verde">📍</div>
+    <h2>Nuestra sede</h2>
+    <div class="dir-block">
+      <div class="dir-pin">🏢</div>
+      <div class="dir-text">
+        <strong>IAGAMI — Instituto Autónomo de Gestión Ambiental del Municipio Iribarren</strong><br/>
+        Av. Libertador entre Av. Los Leones y Av. Argimiro Bracamonte<br/>
+        Barquisimeto 3001, Estado Lara, Venezuela<br/>
+        <em style="color:#6b8a78;font-size:13px;">Dentro del Parque del Este</em>
+      </div>
+    </div>
+    <a class="map-btn" href="https://mapcarta.com/es/W90798278" target="_blank" rel="noopener">
+      🗺 Ver en el mapa
+    </a>
+  </div>
+
+  <!-- TELÉFONOS -->
+  <div class="card">
+    <div class="card-icon verde">📱</div>
+    <h2>Directorio telefónico</h2>
+
+    <div class="tel-item">
+      <div class="tel-avatar">MO</div>
+      <div class="tel-info">
+        <div class="tel-cargo">Presidente</div>
+        <div class="tel-nombre">Ing. Mauricio Orellana</div>
+        <a class="tel-num" href="tel:+584265509382">📞 0426 550-9382</a>
+      </div>
+    </div>
+    <div class="card-divider"></div>
+
+    <div class="tel-item">
+      <div class="tel-avatar">DB</div>
+      <div class="tel-info">
+        <div class="tel-cargo">Vicepresidenta</div>
+        <div class="tel-nombre">Lic. Dayana Bullones</div>
+        <a class="tel-num" href="tel:+584125191992">📞 0412 519-1992</a>
+      </div>
+    </div>
+    <div class="card-divider"></div>
+
+    <div class="tel-item">
+      <div class="tel-avatar">🏛</div>
+      <div class="tel-info">
+        <div class="tel-cargo">Atención al ciudadano</div>
+        <div class="tel-nombre">Línea ciudadana IAGAMI</div>
+        <a class="tel-num" href="tel:+584126729712">📞 0412 672-9712</a>
+      </div>
+    </div>
+    <div class="card-divider"></div>
+
+    <div class="tel-item">
+      <div class="tel-avatar">☎</div>
+      <div class="tel-info">
+        <div class="tel-cargo">Teléfono fijo — Denuncias e información</div>
+        <div class="tel-nombre">Oficina central IAGAMI</div>
+        <a class="tel-num" href="tel:+582512579529">☎ (0251) 257-9529</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- CORREOS Y HORARIO -->
+  <div class="card" style="display:flex;flex-direction:column;gap:0">
+    <!-- CORREOS -->
+    <div class="card-icon rojo">✉️</div>
+    <h2>Correos oficiales</h2>
+
+    <div class="email-row">
+      <div class="email-icon">📋</div>
+      <div class="email-block">
+        <div class="email-label">Vicepresidencia — Quejas y seguimiento</div>
+        <a class="email-addr" href="mailto:vicepresidencia.iagami@gmail.com">vicepresidencia.iagami@gmail.com</a>
+        <div class="email-nota">Para quejas sobre trabajadores del IAGAMI o mala praxis institucional.</div>
+      </div>
+    </div>
+    <div class="card-divider"></div>
+
+    <div class="email-row">
+      <div class="email-icon">🔍</div>
+      <div class="email-block">
+        <div class="email-label">Control y seguimiento interno</div>
+        <a class="email-addr" href="mailto:seguimientoycontroliagami@gmail.com">seguimientoycontroliagami@gmail.com</a>
+        <div class="email-nota">Seguimiento de casos, control de gestión y fiscalización interna.</div>
+      </div>
+    </div>
+
+    <div class="card-divider" style="margin-top:20px"></div>
+
+    <!-- HORARIO -->
+    <div style="margin-top:16px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+        <div class="card-icon dorado" style="margin-bottom:0;width:36px;height:36px;font-size:18px">🕐</div>
+        <h2 style="margin-bottom:0">Horario de atención</h2>
+      </div>
+      <div class="horario-row"><span class="horario-dia">Lunes – Viernes</span><span><span class="horario-hora">8:00 AM – 4:00 PM</span> &nbsp;<span class="badge-open">Abierto</span></span></div>
+      <div class="horario-row"><span class="horario-dia">Sábado</span><span><span class="horario-hora">8:00 AM – 12:00 PM</span> &nbsp;<span class="badge-open">Abierto</span></span></div>
+      <div class="horario-row"><span class="horario-dia">Domingo</span><span><span class="horario-hora">Cerrado</span> &nbsp;<span class="badge-closed">Cerrado</span></span></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <p>© 2025 IAGAMI — Instituto Autónomo de Gestión Ambiental del Municipio Iribarren, Barquisimeto, Lara, Venezuela</p>
+  <p style="margin-top:6px"><a href="/">iagami.online</a></p>
+</footer>
+
+</body>
+</html>
