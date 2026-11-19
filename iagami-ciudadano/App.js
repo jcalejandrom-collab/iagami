@@ -3,7 +3,7 @@ import {
   View, Text, TouchableOpacity, ScrollView, StyleSheet,
   StatusBar, TextInput, Alert, ActivityIndicator,
   Image, FlatList, Platform, Dimensions,
-  KeyboardAvoidingView, Modal, Animated, Easing
+  KeyboardAvoidingView, Modal, Animated, Easing, Keyboard
 } from 'react-native';
 import { WebView } from 'react-native-webview';
 
@@ -560,7 +560,14 @@ function PantallaAgenda({ onBack }) {
 
 function PantallaWeb({ url, js, onBack }) {
   const [loading, setLoading] = useState(true);
+  const [kbVisible, setKbVisible] = useState(false);
   const originUrl = useRef(url);
+
+  useEffect(() => {
+    const show = Keyboard.addListener('keyboardDidShow', () => setKbVisible(true));
+    const hide = Keyboard.addListener('keyboardDidHide', () => setKbVisible(false));
+    return () => { show.remove(); hide.remove(); };
+  }, []);
 
   function handleNavChange({ url: current, loading: nav }) {
     if (nav) return;
@@ -586,10 +593,12 @@ function PantallaWeb({ url, js, onBack }) {
         injectedJavaScript={"document.head.insertAdjacentHTML('beforeend','<style>.nav,.topbar,.alert-bar{display:none!important}</style>');" + (js || '') + "true;"}
         userAgent="Mozilla/5.0 (Linux; Android 11; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
       />
-      <TouchableOpacity style={s.webBack} onPress={onBack} activeOpacity={0.75}>
-        <Image source={LEAF_ARROW} style={s.webBackImg} resizeMode="contain" />
-        <Text style={s.webBackTxt}>App</Text>
-      </TouchableOpacity>
+      {!kbVisible && (
+        <TouchableOpacity style={s.webBack} onPress={onBack} activeOpacity={0.75}>
+          <Image source={LEAF_ARROW} style={s.webBackImg} resizeMode="contain" />
+          <Text style={s.webBackTxt}>App</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
