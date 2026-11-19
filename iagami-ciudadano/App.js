@@ -3,7 +3,7 @@ import {
   View, Text, TouchableOpacity, ScrollView, StyleSheet,
   StatusBar, TextInput, Alert, ActivityIndicator,
   Image, FlatList, Platform, Dimensions,
-  KeyboardAvoidingView, Modal
+  KeyboardAvoidingView, Modal, Animated, Easing
 } from 'react-native';
 
 const VERDE = '#1d6b3e';
@@ -46,6 +46,73 @@ const MODULOS = [
   { id: 'brigadas',      label: 'Mapa de Brigadas',    sub: 'Distribución por sector' },
 ];
 
+// Hoja flotante individual
+function HojaFlotante({ delay, startX, size, duration }) {
+  const y = useRef(new Animated.Value(0)).current;
+  const x = useRef(new Animated.Value(0)).current;
+  const op = useRef(new Animated.Value(0)).current;
+  const rot = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const anim = Animated.loop(
+      Animated.sequence([
+        Animated.delay(delay),
+        Animated.parallel([
+          Animated.timing(y, { toValue: -120, duration, useNativeDriver: true, easing: Easing.inOut(Easing.sin) }),
+          Animated.timing(x, { toValue: (Math.random() > 0.5 ? 1 : -1) * 30, duration, useNativeDriver: true, easing: Easing.inOut(Easing.sin) }),
+          Animated.sequence([
+            Animated.timing(op, { toValue: 0.6, duration: duration * 0.3, useNativeDriver: true }),
+            Animated.timing(op, { toValue: 0, duration: duration * 0.7, useNativeDriver: true }),
+          ]),
+          Animated.timing(rot, { toValue: 1, duration, useNativeDriver: true }),
+        ]),
+        Animated.parallel([
+          Animated.timing(y, { toValue: 0, duration: 0, useNativeDriver: true }),
+          Animated.timing(x, { toValue: 0, duration: 0, useNativeDriver: true }),
+          Animated.timing(op, { toValue: 0, duration: 0, useNativeDriver: true }),
+          Animated.timing(rot, { toValue: 0, duration: 0, useNativeDriver: true }),
+        ]),
+      ])
+    );
+    anim.start();
+    return () => anim.stop();
+  }, []);
+
+  const rotate = rot.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '360deg'] });
+
+  return (
+    <Animated.Text style={{
+      position: 'absolute', bottom: 20, left: startX,
+      fontSize: size, opacity: op,
+      transform: [{ translateY: y }, { translateX: x }, { rotate }],
+    }}>🌿</Animated.Text>
+  );
+}
+
+function HojasFlotantes() {
+  const hojas = [
+    { delay: 0,    startX: 30,  size: 18, duration: 3500 },
+    { delay: 800,  startX: 80,  size: 14, duration: 4200 },
+    { delay: 1600, startX: 160, size: 20, duration: 3800 },
+    { delay: 400,  startX: 220, size: 12, duration: 5000 },
+    { delay: 2000, startX: 290, size: 16, duration: 4500 },
+    { delay: 1200, startX: 340, size: 10, duration: 3200 },
+  ];
+  return (
+    <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 160, pointerEvents: 'none' }}>
+      {hojas.map((h, i) => <HojaFlotante key={i} {...h} />)}
+    </View>
+  );
+}
+
+const MESES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+function fmtFecha(str) {
+  if (!str) return '';
+  const d = new Date(str.replace(' ', 'T'));
+  if (isNaN(d.getTime())) return '';
+  return `${d.getDate()} ${MESES[d.getMonth()]} ${d.getFullYear()}`;
+}
+
 function Navbar({ onHome }) {
   return (
     <View style={s.navbar}>
@@ -81,7 +148,7 @@ function PantallaInicio({ ir }) {
   const [loadingNews, setLoadingNews] = useState(true);
 
   useEffect(() => {
-    fetch(`${API}/api/collections/noticias/records?sort=-created&perPage=3&fields=id,titulo,resumen,created`)
+    fetch(`${API}/api/collections/noticias/records?sort=-created&perPage=3&fields=id,titulo,resumen,created,imagen`)
       .then(r => r.json())
       .then(d => {
         if (d.items) {
@@ -103,6 +170,7 @@ function PantallaInicio({ ir }) {
       {/* Hero */}
       <View style={s.hero}>
         <Image source={HERO} style={s.heroImg} resizeMode="cover" />
+        <HojasFlotantes />
         <View style={s.heroOverlay}>
           <Text style={s.heroTag}>IAGAMI · Municipio Iribarren</Text>
           <Text style={s.heroTitle}>
@@ -133,18 +201,19 @@ function PantallaInicio({ ir }) {
 
       {/* Módulos */}
       <View style={s.section}>
-        <View style={s.sectionHeader}>
-          <View style={s.sectionBar} />
-          <Text style={s.sectionTitle}>Servicios Ciudadanos</Text>
+        <View style={{ alignItems: 'center', marginBottom: 6 }}>
+          <View style={s.pillTag}><Text style={s.pillTagTxt}>SERVICIOS EN LÍNEA</Text></View>
         </View>
+        <Text style={s.sectionBigTitle}>Todo lo que necesitas,{'\n'}en un solo lugar</Text>
+        <Text style={s.sectionDesc}>Accede a los servicios del municipio desde tu teléfono</Text>
         <View style={s.grid}>
           {MODULOS.map(m => (
             <TouchableOpacity key={m.id} style={s.modulo} onPress={() => ir(m.id)}>
-              <View style={s.moduloIconWrap}>
-                <Image source={ICONOS[m.id]} style={s.moduloIcon} resizeMode="contain" />
+              <Image source={ICONOS[m.id]} style={s.moduloIcon} resizeMode="cover" />
+              <View style={s.moduloBar}>
+                <Text style={s.moduloLabel} numberOfLines={2}>{m.label}</Text>
+                <Text style={s.moduloSub} numberOfLines={1}>{m.sub}</Text>
               </View>
-              <Text style={s.moduloLabel} numberOfLines={2}>{m.label}</Text>
-              <Text style={s.moduloSub} numberOfLines={1}>{m.sub}</Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -152,22 +221,31 @@ function PantallaInicio({ ir }) {
 
       {/* Noticias — al final */}
       <View style={s.section}>
-        <View style={s.sectionHeader}>
-          <View style={s.sectionBar} />
-          <Text style={s.sectionTitle}>Últimas Noticias</Text>
+        <View style={{ alignItems: 'center', marginBottom: 6 }}>
+          <View style={s.pillTag}><Text style={s.pillTagTxt}>NOTICIAS</Text></View>
         </View>
+        <Text style={s.sectionBigTitle}>Últimas noticias{'\n'}de IAGAMI</Text>
+        <Text style={s.sectionDesc}>Información institucional y ambiental del municipio</Text>
         {loadingNews ? (
           <ActivityIndicator color={VERDE} style={{ marginVertical: 16 }} />
         ) : noticias.length === 0 ? (
           <Text style={s.empty}>Sin noticias disponibles</Text>
         ) : (
           noticias.map(n => (
-            <TouchableOpacity key={n.id} style={s.noticiaCard} onPress={() => ir('noticias')}>
-              <View style={s.noticiaDot} />
-              <View style={{ flex: 1 }}>
-                <Text style={s.noticiaTitle} numberOfLines={2}>{n.titulo}</Text>
-                {n.resumen ? <Text style={s.noticiaSub} numberOfLines={2}>{n.resumen}</Text> : null}
-              </View>
+            <TouchableOpacity key={n.id} onPress={() => ir('noticias')}>
+              <Card style={{ marginBottom: 14 }}>
+                {n.imagen
+                  ? <Image source={{ uri: `${API}/api/files/noticias/${n.id}/${n.imagen}` }} style={s.newsImg} resizeMode="cover" />
+                  : null}
+                <View style={{ padding: 14 }}>
+                  <View style={s.newsTagRow}>
+                    <View style={s.newsTagPill}><Text style={s.newsTagTxt}>Medio Ambiente</Text></View>
+                  </View>
+                  <Text style={s.newsTitle}>{n.titulo}</Text>
+                  {n.resumen ? <Text style={s.newsSub} numberOfLines={2}>{n.resumen}</Text> : null}
+                  <Text style={s.newsDate}>{fmtFecha(n.created)}</Text>
+                </View>
+              </Card>
             </TouchableOpacity>
           ))
         )}
@@ -554,6 +632,43 @@ const SCREENS = {
   permisos:      (p) => <PantallaListado titulo="Permisos Ambientales" coleccion="tramites"    campos={[{key:'nombre',bold:true},{key:'descripcion',color:GRIS,size:13}]} {...p} />,
 };
 
+function FabSemeruquito({ onPress }) {
+  const pulse = useRef(new Animated.Value(1)).current;
+  const ring = useRef(new Animated.Value(1)).current;
+  const ringOp = useRef(new Animated.Value(0.6)).current;
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulse, { toValue: 1.08, duration: 800, useNativeDriver: true, easing: Easing.inOut(Easing.sin) }),
+        Animated.timing(pulse, { toValue: 1, duration: 800, useNativeDriver: true, easing: Easing.inOut(Easing.sin) }),
+      ])
+    ).start();
+    Animated.loop(
+      Animated.sequence([
+        Animated.parallel([
+          Animated.timing(ring, { toValue: 1.5, duration: 1200, useNativeDriver: true }),
+          Animated.timing(ringOp, { toValue: 0, duration: 1200, useNativeDriver: true }),
+        ]),
+        Animated.parallel([
+          Animated.timing(ring, { toValue: 1, duration: 0, useNativeDriver: true }),
+          Animated.timing(ringOp, { toValue: 0.5, duration: 0, useNativeDriver: true }),
+        ]),
+        Animated.delay(600),
+      ])
+    ).start();
+  }, []);
+
+  return (
+    <TouchableOpacity style={s.fabWrap} onPress={onPress} activeOpacity={0.85}>
+      <Animated.View style={[s.fabRing, { transform: [{ scale: ring }], opacity: ringOp }]} />
+      <Animated.View style={[s.fab, { transform: [{ scale: pulse }] }]}>
+        <Image source={SEMERUQUITO} style={s.fabImg} />
+      </Animated.View>
+    </TouchableOpacity>
+  );
+}
+
 export default function App() {
   const [pantalla, setPantalla] = useState('inicio');
   const [chatVisible, setChatVisible] = useState(false);
@@ -568,9 +683,7 @@ export default function App() {
       <View style={s.flex}>
         {pantalla === 'inicio' ? <PantallaInicio ir={ir} /> : Pantalla ? <Pantalla onBack={volver} /> : <PantallaInicio ir={ir} />}
       </View>
-      <TouchableOpacity style={s.fab} onPress={() => setChatVisible(true)}>
-        <Image source={SEMERUQUITO} style={s.fabImg} />
-      </TouchableOpacity>
+      <FabSemeruquito onPress={() => setChatVisible(true)} />
       <Chatbot visible={chatVisible} onClose={() => setChatVisible(false)} />
     </View>
   );
@@ -622,12 +735,19 @@ const s = StyleSheet.create({
   noticiaSub: { color: GRIS, fontSize: 12, marginTop: 2 },
   verTodo: { alignItems: 'flex-end', marginTop: 4 },
   verTodoTxt: { color: VERDE, fontWeight: '600', fontSize: 13 },
+  pillTag: { backgroundColor: '#fff', borderRadius: 20, borderWidth: 1, borderColor: DORADO+'88', paddingHorizontal: 14, paddingVertical: 5 },
+  pillTagTxt: { color: GRIS, fontSize: 11, fontWeight: '700', letterSpacing: 1 },
+  sectionBigTitle: { color: DORADO, fontSize: 24, fontWeight: '800', textAlign: 'center', marginBottom: 6, lineHeight: 30 },
+  sectionDesc: { color: GRIS, fontSize: 13, textAlign: 'center', marginBottom: 18 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', marginHorizontal: -6 },
-  modulo: { width: (width-56)/2, backgroundColor: '#fff', borderRadius: 14, padding: 14, margin: 6, alignItems: 'center', borderWidth: 1, borderColor: DORADO+'44', elevation: 2, shadowColor: '#000', shadowOffset: { width:0,height:2 }, shadowOpacity: 0.08, shadowRadius: 4 },
-  moduloIconWrap: { width: 72, height: 72, borderRadius: 16, backgroundColor: BG, alignItems: 'center', justifyContent: 'center', marginBottom: 10, borderWidth: 1, borderColor: DORADO+'33' },
-  moduloIcon: { width: 60, height: 60 },
-  moduloLabel: { color: TEXTO, fontWeight: '700', fontSize: 13, textAlign: 'center' },
-  moduloSub: { color: GRIS, fontSize: 11, textAlign: 'center', marginTop: 2 },
+  modulo: { width: (width-44)/2, borderRadius: 16, margin: 6, borderWidth: 1.5, borderColor: DORADO+'88', overflow: 'hidden', backgroundColor: '#fff', elevation: 3, shadowColor: '#000', shadowOffset: { width:0,height:2 }, shadowOpacity: 0.1, shadowRadius: 4 },
+  moduloIcon: { width: '100%', height: 140 },
+  moduloBar: { backgroundColor: VERDE_DARK, padding: 10 },
+  moduloLabel: { color: '#fff', fontWeight: '700', fontSize: 13, textAlign: 'center' },
+  moduloSub: { color: '#ffffffaa', fontSize: 11, textAlign: 'center', marginTop: 2 },
+  newsTagRow: { flexDirection: 'row', marginBottom: 6 },
+  newsTagPill: { backgroundColor: VERDE+'22', borderRadius: 12, paddingHorizontal: 10, paddingVertical: 3 },
+  newsTagTxt: { color: VERDE, fontSize: 11, fontWeight: '600' },
   card: { backgroundColor: '#fff', borderRadius: 12, elevation: 2, shadowColor: '#000', shadowOffset: { width:0,height:1 }, shadowOpacity: 0.08, shadowRadius: 3, overflow: 'hidden' },
   newsImg: { width: '100%', height: 160 },
   newsTitle: { fontWeight: '700', color: TEXTO, fontSize: 15, lineHeight: 22 },
@@ -638,8 +758,10 @@ const s = StyleSheet.create({
   input: { backgroundColor: '#fff', borderWidth: 1, borderColor: '#e2e8f0', borderRadius: 10, padding: 12, color: TEXTO, fontSize: 15 },
   btnPrimary: { backgroundColor: VERDE, borderRadius: 12, padding: 16, alignItems: 'center', borderWidth: 1.5, borderColor: DORADO },
   btnPrimaryTxt: { color: '#fff', fontWeight: '700', fontSize: 16 },
-  fab: { position: 'absolute', bottom: 28, right: 24, width: 64, height: 64, borderRadius: 32, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center', elevation: 8, shadowColor: DORADO, shadowOffset: { width:0,height:4 }, shadowOpacity: 0.5, shadowRadius: 8, borderWidth: 2, borderColor: DORADO },
-  fabImg: { width: 52, height: 52, borderRadius: 26 },
+  fabWrap: { position: 'absolute', bottom: 28, right: 24, width: 68, height: 68, alignItems: 'center', justifyContent: 'center' },
+  fabRing: { position: 'absolute', width: 68, height: 68, borderRadius: 34, borderWidth: 2, borderColor: DORADO },
+  fab: { width: 64, height: 64, borderRadius: 32, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center', elevation: 8, shadowColor: DORADO, shadowOffset: { width:0,height:4 }, shadowOpacity: 0.6, shadowRadius: 10, borderWidth: 2.5, borderColor: DORADO },
+  fabImg: { width: 54, height: 54, borderRadius: 27 },
   chatOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
   chatBox: { backgroundColor: '#fff', borderTopLeftRadius: 20, borderTopRightRadius: 20, maxHeight: '75%', overflow: 'hidden' },
   chatHeader: { backgroundColor: VERDE_DARK, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, borderBottomWidth: 2, borderBottomColor: DORADO },
