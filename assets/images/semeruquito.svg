@@ -1,18 +1,160 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <!-- Hoja -->
-  <ellipse cx="50" cy="18" rx="8" ry="12" fill="#4ade80" transform="rotate(-20,50,18)"/>
-  <ellipse cx="58" cy="15" rx="6" ry="10" fill="#22c55e" transform="rotate(15,58,15)"/>
-  <!-- Manzana -->
-  <ellipse cx="50" cy="60" rx="32" ry="34" fill="#ef4444"/>
-  <ellipse cx="38" cy="52" rx="10" ry="14" fill="#f87171" opacity="0.5"/>
-  <!-- Cara -->
-  <circle cx="41" cy="60" r="4" fill="#1a0000"/>
-  <circle cx="59" cy="60" r="4" fill="#1a0000"/>
-  <circle cx="42.5" cy="58.5" r="1.5" fill="#fff"/>
-  <circle cx="60.5" cy="58.5" r="1.5" fill="#fff"/>
-  <!-- Sonrisa -->
-  <path d="M42 70 Q50 78 58 70" stroke="#1a0000" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-  <!-- Mejillas -->
-  <ellipse cx="35" cy="67" rx="5" ry="3" fill="#fca5a5" opacity="0.6"/>
-  <ellipse cx="65" cy="67" rx="5" ry="3" fill="#fca5a5" opacity="0.6"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <radialGradient id="bgr" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#d4f5e2"/>
+      <stop offset="55%" stop-color="#a8e6c8"/>
+      <stop offset="100%" stop-color="#5fb98a"/>
+    </radialGradient>
+    <radialGradient id="chr" cx="38%" cy="30%" r="65%">
+      <stop offset="0%" stop-color="#ff7a7a"/>
+      <stop offset="45%" stop-color="#e8282a"/>
+      <stop offset="100%" stop-color="#b01a1c"/>
+    </radialGradient>
+    <radialGradient id="shineR" cx="30%" cy="25%" r="45%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.75"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="eyeL" cx="35%" cy="30%" r="55%">
+      <stop offset="0%" stop-color="#3d2200"/>
+      <stop offset="100%" stop-color="#1a0800"/>
+    </radialGradient>
+    <radialGradient id="grass" cx="50%" cy="0%" r="80%">
+      <stop offset="0%" stop-color="#52c27a"/>
+      <stop offset="100%" stop-color="#2d7a4f"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Fondo -->
+  <circle cx="100" cy="100" r="100" fill="url(#bgr)"/>
+
+  <!-- Bokeh puntos de luz -->
+  <circle cx="25" cy="35" r="8" fill="#ffffff" opacity="0.18"/>
+  <circle cx="170" cy="28" r="6" fill="#ffffff" opacity="0.15"/>
+  <circle cx="18" cy="110" r="5" fill="#ffffff" opacity="0.12"/>
+  <circle cx="178" cy="115" r="7" fill="#ffffff" opacity="0.13"/>
+  <circle cx="155" cy="55" r="4" fill="#fffde7" opacity="0.3"/>
+  <circle cx="42" cy="155" r="4" fill="#fffde7" opacity="0.25"/>
+  <circle cx="80" cy="20" r="3" fill="#ffffff" opacity="0.2"/>
+  <circle cx="130" cy="175" r="3" fill="#ffffff" opacity="0.18"/>
+
+  <!-- Pasto base -->
+  <ellipse cx="100" cy="178" rx="80" ry="22" fill="url(#grass)"/>
+  <!-- Hierba pequeña -->
+  <path d="M46 170 Q43 158 48 155 Q51 163 52 170Z" fill="#74c69d"/>
+  <path d="M54 168 Q52 158 57 156 Q59 165 60 168Z" fill="#52b788"/>
+  <path d="M142 168 Q140 158 145 156 Q147 165 148 168Z" fill="#74c69d"/>
+  <path d="M150 170 Q148 158 153 155 Q156 163 157 170Z" fill="#52b788"/>
+  <path d="M94 171 Q92 162 97 160 Q99 168 100 171Z" fill="#95d5b2"/>
+  <path d="M103 171 Q105 162 100 160 Q99 168 100 171Z" fill="#74c69d"/>
+
+  <!-- Animalito izquierda (ardilla kawaii) -->
+  <ellipse cx="34" cy="168" rx="14" ry="11" fill="#d4956a"/>
+  <circle cx="34" cy="157" r="10" fill="#d4956a"/>
+  <!-- Cola ardilla -->
+  <path d="M22 170 Q8 158 14 143 Q26 150 28 168Z" fill="#b8734a" opacity="0.9"/>
+  <ellipse cx="34" cy="168" rx="14" ry="11" fill="#d4956a"/>
+  <!-- Cara ardilla -->
+  <circle cx="31" cy="156" r="2.5" fill="#2d1a00"/>
+  <circle cx="37" cy="156" r="2.5" fill="#2d1a00"/>
+  <circle cx="31.8" cy="155.2" r="1" fill="#fff"/>
+  <circle cx="37.8" cy="155.2" r="1" fill="#fff"/>
+  <ellipse cx="34" cy="161" rx="3" ry="2" fill="#c47a52"/>
+  <!-- Orejas ardilla -->
+  <ellipse cx="28" cy="149" rx="4" ry="5" fill="#d4956a"/>
+  <ellipse cx="40" cy="149" rx="4" ry="5" fill="#d4956a"/>
+  <ellipse cx="28" cy="149" rx="2.5" ry="3.5" fill="#f0b88a"/>
+  <ellipse cx="40" cy="149" rx="2.5" ry="3.5" fill="#f0b88a"/>
+
+  <!-- Animalito derecha (conejito kawaii) -->
+  <ellipse cx="166" cy="168" rx="14" ry="11" fill="#e8c4a0"/>
+  <circle cx="166" cy="157" r="10" fill="#e8c4a0"/>
+  <!-- Orejas conejito -->
+  <ellipse cx="160" cy="144" rx="4" ry="8" fill="#e8c4a0"/>
+  <ellipse cx="172" cy="144" rx="4" ry="8" fill="#e8c4a0"/>
+  <ellipse cx="160" cy="144" rx="2.5" ry="6" fill="#f4a0b0"/>
+  <ellipse cx="172" cy="144" rx="2.5" ry="6" fill="#f4a0b0"/>
+  <!-- Cara conejito -->
+  <circle cx="163" cy="156" r="2.5" fill="#2d1a00"/>
+  <circle cx="169" cy="156" r="2.5" fill="#2d1a00"/>
+  <circle cx="163.8" cy="155.2" r="1" fill="#fff"/>
+  <circle cx="169.8" cy="155.2" r="1" fill="#fff"/>
+  <ellipse cx="166" cy="160" rx="2.5" ry="1.5" fill="#f4a0b0"/>
+
+  <!-- CUERPO CEREZA (grande, centrado) -->
+  <ellipse cx="100" cy="150" rx="48" ry="12" fill="#1a3d2b" opacity="0.15"/>
+  <circle cx="100" cy="118" r="52" fill="url(#chr)"/>
+  <!-- Brillo cereza -->
+  <ellipse cx="83" cy="96" rx="16" ry="12" fill="url(#shineR)" transform="rotate(-25,83,96)"/>
+
+  <!-- Brazitos kawaii -->
+  <!-- Brazo izquierdo -->
+  <ellipse cx="53" cy="128" rx="10" ry="7" fill="#e8282a" transform="rotate(30,53,128)"/>
+  <ellipse cx="53" cy="128" rx="8" ry="5.5" fill="#d42022" transform="rotate(30,53,128)"/>
+  <!-- Brazo derecho -->
+  <ellipse cx="147" cy="128" rx="10" ry="7" fill="#e8282a" transform="rotate(-30,147,128)"/>
+  <ellipse cx="147" cy="128" rx="8" ry="5.5" fill="#d42022" transform="rotate(-30,147,128)"/>
+
+  <!-- Mejillas rosadas -->
+  <ellipse cx="74" cy="128" rx="13" ry="9" fill="#ff9eb5" opacity="0.65"/>
+  <ellipse cx="126" cy="128" rx="13" ry="9" fill="#ff9eb5" opacity="0.65"/>
+
+  <!-- OJO IZQUIERDO kawaii grande -->
+  <ellipse cx="85" cy="113" rx="12" ry="13" fill="url(#eyeL)"/>
+  <!-- Iris -->
+  <ellipse cx="85" cy="115" rx="8" ry="9" fill="#2d4a8a"/>
+  <!-- Pupila -->
+  <ellipse cx="85" cy="115" rx="6" ry="7" fill="#0a0a0a"/>
+  <!-- Brillo ojo izq -->
+  <circle cx="81" cy="109" r="3.5" fill="#ffffff"/>
+  <circle cx="88" cy="108" r="1.8" fill="#ffffff" opacity="0.7"/>
+
+  <!-- OJO DERECHO kawaii grande -->
+  <ellipse cx="115" cy="113" rx="12" ry="13" fill="url(#eyeL)"/>
+  <ellipse cx="115" cy="115" rx="8" ry="9" fill="#2d4a8a"/>
+  <ellipse cx="115" cy="115" rx="6" ry="7" fill="#0a0a0a"/>
+  <circle cx="111" cy="109" r="3.5" fill="#ffffff"/>
+  <circle cx="118" cy="108" r="1.8" fill="#ffffff" opacity="0.7"/>
+
+  <!-- Nariz pequeña -->
+  <ellipse cx="100" cy="124" rx="3" ry="2" fill="#8b1a1a" opacity="0.5"/>
+
+  <!-- Boca abierta kawaii (sonrisa con dientes) -->
+  <path d="M86 131 Q100 145 114 131" fill="#1a0000"/>
+  <!-- Dientes -->
+  <path d="M86 131 Q100 143 114 131 Q114 134 100 134 Q86 134 86 131Z" fill="#ffffff"/>
+  <!-- Lengüita -->
+  <ellipse cx="100" cy="138" rx="7" ry="4" fill="#ff6b8a"/>
+
+  <!-- TALLO -->
+  <path d="M100 66 Q97 54 93 44 Q97 40 100 42 Q103 40 107 44 Q103 54 100 66Z" fill="#52b788"/>
+
+  <!-- HOJA IZQUIERDA -->
+  <ellipse cx="83" cy="40" rx="18" ry="11" fill="#2d9e5e" transform="rotate(-40,83,40)"/>
+  <path d="M100 66 Q83 40 72 36" stroke="#1d6b3e" stroke-width="1.2" fill="none"/>
+  <!-- Vena hoja -->
+  <path d="M83 40 Q79 44 83 48" stroke="#1a5c3a" stroke-width="0.8" fill="none"/>
+
+  <!-- HOJA DERECHA -->
+  <ellipse cx="117" cy="37" rx="18" ry="11" fill="#40916c" transform="rotate(35,117,37)"/>
+  <path d="M100 66 Q117 37 128 33" stroke="#2d7a4f" stroke-width="1.2" fill="none"/>
+  <path d="M117 37 Q121 41 117 45" stroke="#1a5c3a" stroke-width="0.8" fill="none"/>
+
+  <!-- DESTELLO ESTRELLA en tallo -->
+  <g transform="translate(104,24)">
+    <line x1="0" y1="-9" x2="0" y2="9" stroke="#ffe066" stroke-width="2.2" stroke-linecap="round"/>
+    <line x1="-9" y1="0" x2="9" y2="0" stroke="#ffe066" stroke-width="2.2" stroke-linecap="round"/>
+    <line x1="-6" y1="-6" x2="6" y2="6" stroke="#ffe066" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="6" y1="-6" x2="-6" y2="6" stroke="#ffe066" stroke-width="1.5" stroke-linecap="round"/>
+    <circle cx="0" cy="0" r="2.5" fill="#fff9c4"/>
+  </g>
+
+  <!-- Estrellitas decorativas pequeñas -->
+  <g transform="translate(28,78)" opacity="0.7">
+    <line x1="0" y1="-4" x2="0" y2="4" stroke="#ffe066" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="-4" y1="0" x2="4" y2="0" stroke="#ffe066" stroke-width="1.5" stroke-linecap="round"/>
+  </g>
+  <g transform="translate(172,80)" opacity="0.7">
+    <line x1="0" y1="-4" x2="0" y2="4" stroke="#ffe066" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="-4" y1="0" x2="4" y2="0" stroke="#ffe066" stroke-width="1.5" stroke-linecap="round"/>
+  </g>
 </svg>

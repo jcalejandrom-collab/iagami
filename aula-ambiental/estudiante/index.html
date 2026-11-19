@@ -185,7 +185,7 @@ textarea.form-control{resize:vertical;min-height:70px}
       </div>
       <button class="btn btn-primary" style="width:100%;margin-top:4px" id="login-btn" onclick="doLogin()">Entrar al Aula</button>
       <p style="text-align:center;font-size:12px;color:var(--muted);margin-top:14px">¿No tienes cuenta? <span style="color:var(--primary);cursor:pointer;font-weight:600" onclick="switchAuthTab('registro')">Regístrate</span></p>
-      <p style="text-align:center;font-size:12px;margin-top:6px"><a href="../../" style="color:var(--primary)">← Portal institucional</a></p>
+      <p style="text-align:center;font-size:12px;margin-top:6px"><a href="../../" style="display:inline-flex;align-items:center;gap:12px;text-decoration:none;font-family:'Poppins',sans-serif;font-size:16px;font-weight:800;color:#3a7a1e;text-shadow:0 1px 0 #6aaa30,1px 2px 0 #2d6a1f,2px 3px 0 #1a4a10,0 0 12px rgba(80,160,40,.18);letter-spacing:.01em;transition:.2s"><img src="/assets/images/leaf-arrow.png" height="42" alt="Portal institucional" style="display:block"></a></p>
     </div>
 
     <!-- ── REGISTRO ── -->
@@ -323,6 +323,9 @@ textarea.form-control{resize:vertical;min-height:70px}
       <div onclick="showSec('calificaciones')" class="nav-item"     id="nav-calificaciones"><span class="nav-ico">🏆</span> Calificaciones</div>
       <div onclick="showSec('asistencia')"  class="nav-item"        id="nav-asistencia" ><span class="nav-ico">✅</span> Asistencia</div>
       <div onclick="showSec('certificados')" class="nav-item"        id="nav-certificados"><span class="nav-ico">🏅</span> Certificados</div>
+      <div onclick="showSec('cuestionarios')" class="nav-item"      id="nav-cuestionarios"><span class="nav-ico">📝</span> Cuestionarios</div>
+      <div onclick="showSec('foros')"        class="nav-item"       id="nav-foros"       ><span class="nav-ico">💬</span> Foros</div>
+      <div onclick="showSec('progreso')"     class="nav-item"       id="nav-progreso"    ><span class="nav-ico">📊</span> Mi Progreso</div>
       <div onclick="showSec('ia-estudiante')" class="nav-item"      id="nav-ia-estudiante"><span class="nav-ico">✨</span> Asistente IA</div>
       <div onclick="showSec('perfil')"     class="nav-item"        id="nav-perfil"    ><span class="nav-ico">👤</span> Mi Perfil</div>
     </div>
@@ -388,10 +391,26 @@ textarea.form-control{resize:vertical;min-height:70px}
           <button class="tab-btn active" onclick="switchClasesTab('proximas')">📅 Próximas</button>
           <button class="tab-btn" onclick="switchClasesTab('pasadas')">🕐 Realizadas</button>
           <button class="tab-btn" onclick="switchClasesTab('grabaciones')">🎬 Grabaciones</button>
+          <button class="tab-btn" onclick="switchClasesTab('jitsi')">🟢 Sala Virtual</button>
         </div>
         <div class="tab-panel active" id="cltab-proximas"><div id="clases-prox"></div></div>
         <div class="tab-panel" id="cltab-pasadas"><div id="clases-past"></div></div>
         <div class="tab-panel" id="cltab-grabaciones"><div id="clases-grab"></div></div>
+        <div class="tab-panel" id="cltab-jitsi">
+          <div style="margin-bottom:14px">
+            <div style="font-size:13px;font-weight:600;margin-bottom:6px">Sala de videoconferencia en vivo</div>
+            <div style="font-size:12px;color:var(--muted);margin-bottom:12px">Selecciona la clase activa para unirte directamente. No necesitas instalar nada.</div>
+            <div id="jitsi-clase-select" style="margin-bottom:12px"></div>
+            <button class="btn btn-primary" id="btn-entrar-jitsi" onclick="entrarJitsiEst()" style="display:none">🎥 Unirme a la sala</button>
+          </div>
+          <div id="jitsi-container-est" style="display:none;border-radius:12px;overflow:hidden;border:2px solid var(--verde)">
+            <div style="background:var(--verde);color:#fff;padding:10px 16px;display:flex;align-items:center;justify-content:space-between">
+              <span style="font-size:13px;font-weight:600" id="jitsi-clase-nombre-est">Sala virtual</span>
+              <button onclick="salirJitsiEst()" style="background:rgba(255,255,255,.2);border:none;color:#fff;padding:4px 10px;border-radius:6px;font-size:12px;cursor:pointer">✕ Salir</button>
+            </div>
+            <div id="jitsi-frame-est" style="height:520px"></div>
+          </div>
+        </div>
       </div>
 
       <!-- ── AVISOS ── -->
@@ -574,6 +593,68 @@ textarea.form-control{resize:vertical;min-height:70px}
           </div>
           <button class="btn btn-primary btn-sm" onclick="cambiarPass()">Actualizar contraseña</button>
         </div>
+      </div>
+
+      <!-- ── CUESTIONARIOS ── -->
+      <div class="section" id="sec-cuestionarios">
+        <div class="page-header">
+          <div class="page-title">📝 Mis Cuestionarios</div>
+          <div class="page-subtitle">Exámenes y evaluaciones disponibles para tus cursos</div>
+        </div>
+        <div id="cuest-est-list">Cargando...</div>
+        <!-- Panel de examen activo -->
+        <div id="cuest-exam-panel" style="display:none;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-top:16px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+            <div>
+              <div style="font-size:16px;font-weight:700" id="exam-titulo">Cuestionario</div>
+              <div style="font-size:12px;color:var(--muted)" id="exam-info"></div>
+            </div>
+            <div id="exam-timer-wrap" style="display:none;background:var(--verde);color:#fff;padding:6px 14px;border-radius:20px;font-size:14px;font-weight:700" id="exam-timer">00:00</div>
+          </div>
+          <div id="exam-preguntas"></div>
+          <div style="display:flex;gap:10px;margin-top:20px">
+            <button class="btn btn-primary" onclick="enviarExamen()">✅ Enviar respuestas</button>
+            <button class="btn btn-secondary" onclick="cancelarExamen()">Cancelar</button>
+          </div>
+        </div>
+        <!-- Resultado del examen -->
+        <div id="cuest-resultado-panel" style="display:none;border-radius:12px;padding:24px;margin-top:16px;text-align:center">
+          <div style="font-size:48px;margin-bottom:8px" id="res-emoji">🎉</div>
+          <div style="font-size:22px;font-weight:700;margin-bottom:4px" id="res-nota">0%</div>
+          <div style="font-size:14px;margin-bottom:16px" id="res-estado">Resultado</div>
+          <div style="font-size:13px;color:var(--muted);margin-bottom:16px" id="res-detalle"></div>
+          <button class="btn btn-secondary" onclick="document.getElementById('cuest-resultado-panel').style.display='none';renderCuestionariosEst()">↩ Volver a cuestionarios</button>
+        </div>
+      </div>
+
+      <!-- ── FOROS ── -->
+      <div class="section" id="sec-foros">
+        <div class="page-header">
+          <div class="page-title">💬 Foros de Debate</div>
+          <div class="page-subtitle">Participa en los foros de tus cursos</div>
+        </div>
+        <div id="foros-est-list">Cargando...</div>
+        <div id="foro-est-thread" style="display:none">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+            <button class="btn btn-secondary btn-sm" onclick="volverForosEst()">← Volver</button>
+            <div style="font-size:15px;font-weight:700" id="foro-thread-titulo"></div>
+          </div>
+          <div id="foro-mensajes-thread" style="margin-bottom:16px"></div>
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px">
+            <div style="font-size:13px;font-weight:600;margin-bottom:8px">Responder</div>
+            <textarea id="foro-nuevo-msg" class="form-control" rows="3" placeholder="Escribe tu mensaje..."></textarea>
+            <button class="btn btn-primary btn-sm" style="margin-top:10px" onclick="enviarMensajeForo()">📤 Publicar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── PROGRESO ── -->
+      <div class="section" id="sec-progreso">
+        <div class="page-header">
+          <div class="page-title">📊 Mi Progreso</div>
+          <div class="page-subtitle">Avance en cada uno de tus cursos</div>
+        </div>
+        <div id="progreso-est-list">Cargando...</div>
       </div>
 
     </div><!-- /main-content -->
@@ -875,6 +956,9 @@ function showSec(id) {
   if (id==='certificados')    renderCertificados();
   if (id==='ia-estudiante')   { switchIATab('chat'); }
   if (id==='perfil')          renderPerfil();
+  if (id==='cuestionarios')   renderCuestionariosEst();
+  if (id==='foros')           renderForosEst();
+  if (id==='progreso')        renderProgresoEst();
 }
 function toggleSidebar(){ document.getElementById('sidebar').classList.toggle('open'); }
 function closeSidebar()  { document.getElementById('sidebar').classList.remove('open'); }
@@ -1007,12 +1091,13 @@ function renderCursoClases() {
 /* ─── CLASES VIRTUALES ─── */
 function switchClasesTab(tab) {
   _claseTab = tab;
-  ['proximas','pasadas','grabaciones'].forEach(t => {
+  ['proximas','pasadas','grabaciones','jitsi'].forEach(t => {
     const p = document.getElementById('cltab-'+t);
     if (p) p.classList.toggle('active', t===tab);
     document.querySelectorAll(`[onclick="switchClasesTab('${t}')"]`).forEach(b=>b.classList.toggle('active',t===tab));
   });
   if (tab === 'grabaciones') renderGrabaciones();
+  else if (tab === 'jitsi') renderClasesJitsi();
   else renderClases();
 }
 
@@ -1784,6 +1869,324 @@ async function cargarRecomendaciones() {
       }).catch(()=>{ doLogout(); });
   } catch(e){}
 })();
+
+/* ─── JITSI ─── */
+let _jitsiApiEst = null;
+
+function renderClasesJitsi() {
+  const sel = document.getElementById('jitsi-clase-select');
+  if (!sel) return;
+  if (!_misClases.length) { sel.innerHTML = '<p style="color:var(--muted);font-size:13px">No tienes clases virtuales disponibles.</p>'; return; }
+  sel.innerHTML = '<label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px">Selecciona la clase virtual:</label>' +
+    '<select id="jitsi-clase-id" class="form-control" style="max-width:400px" onchange="document.getElementById(\'btn-entrar-jitsi\').style.display=this.value?\'inline-flex\':\'none\'">' +
+    '<option value="">-- elige una clase --</option>' +
+    _misClases.map(c => `<option value="${c.id}">${c.titulo||'Clase'} ${c.fecha?'· '+c.fecha.slice(0,10):''}</option>`).join('') +
+    '</select>';
+}
+
+function entrarJitsiEst() {
+  const claseId = document.getElementById('jitsi-clase-id')?.value;
+  if (!claseId) return;
+  const clase = _misClases.find(c => c.id === claseId);
+  const roomName = 'iagami-clase-' + claseId;
+  document.getElementById('jitsi-clase-nombre-est').textContent = clase?.titulo || 'Sala virtual';
+  document.getElementById('jitsi-container-est').style.display = 'block';
+  document.getElementById('btn-entrar-jitsi').style.display = 'none';
+  document.getElementById('jitsi-frame-est').innerHTML = '';
+  if (_jitsiApiEst) { try { _jitsiApiEst.dispose(); } catch(e){} _jitsiApiEst = null; }
+  if (window.JitsiMeetExternalAPI) {
+    _jitsiApiEst = new JitsiMeetExternalAPI('meet.jit.si', {
+      roomName,
+      parentNode: document.getElementById('jitsi-frame-est'),
+      width: '100%',
+      height: 520,
+      configOverwrite: { startWithAudioMuted: false, startWithVideoMuted: false, disableDeepLinking: true },
+      interfaceConfigOverwrite: { TOOLBAR_BUTTONS: ['microphone','camera','chat','tileview','fullscreen','hangup'], SHOW_JITSI_WATERMARK: false },
+      userInfo: { displayName: (_estudiante.nombre||'Estudiante') + ' ' + (_estudiante.apellido||'') }
+    });
+  } else {
+    document.getElementById('jitsi-frame-est').innerHTML = '<div style="padding:30px;text-align:center;color:var(--muted)">⚠️ Cargando Jitsi... recarga la página.</div>';
+  }
+}
+
+function salirJitsiEst() {
+  if (_jitsiApiEst) { try { _jitsiApiEst.dispose(); } catch(e){} _jitsiApiEst = null; }
+  document.getElementById('jitsi-container-est').style.display = 'none';
+  document.getElementById('btn-entrar-jitsi').style.display = 'inline-flex';
+  document.getElementById('jitsi-frame-est').innerHTML = '';
+}
+
+/* ─── CUESTIONARIOS (ESTUDIANTE) ─── */
+let _examActual = null, _pregActual = [], _respActual = {}, _examTimer = null;
+
+async function renderCuestionariosEst() {
+  const el = document.getElementById('cuest-est-list');
+  if (!el) return;
+  el.innerHTML = '<div class="loading-spinner"><div class="spinner"></div> Cargando cuestionarios...</div>';
+  document.getElementById('cuest-exam-panel').style.display = 'none';
+  document.getElementById('cuest-resultado-panel').style.display = 'none';
+  try {
+    // Obtener cursos del estudiante
+    const cursoIds = _misCursos.map(c=>c.id).join(',');
+    if (!cursoIds) { el.innerHTML = '<p style="color:var(--muted)">No estás inscrito en ningún curso.</p>'; return; }
+    const data = await pb.collection('cuestionarios').getList(1,50,{
+      filter: `publicado=true && estado="activo" && (${_misCursos.map(c=>`curso_id="${c.id}"`).join('||')})`,
+      expand: 'curso_id', sort: '-created'
+    });
+    if (!data.items.length) { el.innerHTML = '<p style="color:var(--muted);padding:20px 0">No hay cuestionarios disponibles por ahora.</p>'; return; }
+    el.innerHTML = data.items.map(q => {
+      const curso = q.expand?.curso_id;
+      const limite = q.tiempo_limite_min ? `⏱ ${q.tiempo_limite_min} min` : 'Sin límite';
+      return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+        <div>
+          <div style="font-weight:700;font-size:15px">${q.titulo}</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px">${curso?.nombre||'Curso'} · ${limite} · Nota aprobatoria: ${q.nota_aprobatoria||60}%</div>
+          ${q.descripcion?`<div style="font-size:13px;margin-top:4px">${q.descripcion}</div>`:''}
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="iniciarExamen('${q.id}')">📝 Comenzar</button>
+      </div>`;
+    }).join('');
+  } catch(e) { el.innerHTML = `<p style="color:#e53e3e">Error: ${e.message}</p>`; }
+}
+
+async function iniciarExamen(cuestionarioId) {
+  try {
+    const q = await pb.collection('cuestionarios').getOne(cuestionarioId, {expand:'curso_id'});
+    const pregsData = await pb.collection('preguntas_cuestionario').getList(1,100,{
+      filter:`cuestionario_id="${cuestionarioId}"`, sort:'orden'
+    });
+    _examActual = q;
+    _pregActual = pregsData.items;
+    _respActual = {};
+    document.getElementById('cuest-est-list').style.display = 'none';
+    document.getElementById('cuest-exam-panel').style.display = 'block';
+    document.getElementById('exam-titulo').textContent = q.titulo;
+    document.getElementById('exam-info').textContent = `${pregsData.items.length} preguntas · ${q.tiempo_limite_min?q.tiempo_limite_min+' minutos':'Sin límite de tiempo'}`;
+    renderPreguntasExamen(pregsData.items);
+    if (q.tiempo_limite_min) iniciarTimerExamen(q.tiempo_limite_min * 60);
+  } catch(e) { toast('Error al cargar examen: ' + e.message); }
+}
+
+function renderPreguntasExamen(pregs) {
+  const el = document.getElementById('exam-preguntas');
+  el.innerHTML = pregs.map((p, i) => {
+    let opcHtml = '';
+    const opts = p.opciones || [];
+    if (p.tipo === 'opcion_multiple' || p.tipo === 'verdadero_falso') {
+      opcHtml = (Array.isArray(opts)?opts:[]).map((o,j)=>`
+        <label style="display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--border);border-radius:8px;cursor:pointer;margin-bottom:6px">
+          <input type="radio" name="preg_${p.id}" value="${j}" onchange="_respActual['${p.id}']=this.value"> ${o}
+        </label>`).join('');
+    } else if (p.tipo === 'multiple_respuesta') {
+      opcHtml = (Array.isArray(opts)?opts:[]).map((o,j)=>`
+        <label style="display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--border);border-radius:8px;cursor:pointer;margin-bottom:6px">
+          <input type="checkbox" name="preg_${p.id}" value="${j}" onchange="toggleMultiResp('${p.id}',this)"> ${o}
+        </label>`).join('');
+    } else {
+      opcHtml = `<textarea class="form-control" rows="3" oninput="_respActual['${p.id}']=this.value" placeholder="Escribe tu respuesta..."></textarea>`;
+    }
+    return `<div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:14px">
+      <div style="font-weight:600;margin-bottom:10px">${i+1}. ${p.enunciado} <span style="font-size:11px;color:var(--muted)">(${p.puntos||1} pt)</span></div>
+      ${opcHtml}
+    </div>`;
+  }).join('');
+}
+
+function toggleMultiResp(pregId, cb) {
+  if (!_respActual[pregId]) _respActual[pregId] = [];
+  if (cb.checked) _respActual[pregId].push(cb.value);
+  else _respActual[pregId] = _respActual[pregId].filter(v=>v!==cb.value);
+}
+
+function iniciarTimerExamen(segs) {
+  clearInterval(_examTimer);
+  const tw = document.getElementById('exam-timer-wrap');
+  if (tw) tw.style.display = 'block';
+  let restantes = segs;
+  _examTimer = setInterval(() => {
+    restantes--;
+    const m = String(Math.floor(restantes/60)).padStart(2,'0');
+    const s = String(restantes%60).padStart(2,'0');
+    if (tw) tw.textContent = `⏱ ${m}:${s}`;
+    if (restantes <= 0) { clearInterval(_examTimer); enviarExamen(); }
+  }, 1000);
+}
+
+async function enviarExamen() {
+  clearInterval(_examTimer);
+  if (!_examActual) return;
+  let puntos = 0, puntosMax = 0;
+  _pregActual.forEach(p => {
+    const pts = p.puntos || 1;
+    puntosMax += pts;
+    const resp = _respActual[p.id];
+    const correcta = p.respuesta_correcta;
+    if (resp !== undefined && correcta !== undefined) {
+      if (Array.isArray(correcta)) {
+        const arrResp = Array.isArray(resp)?resp:[resp];
+        if (JSON.stringify([...arrResp].sort()) === JSON.stringify([...correcta].sort())) puntos += pts;
+      } else {
+        if (String(resp) === String(correcta)) puntos += pts;
+      }
+    }
+  });
+  const pct = puntosMax > 0 ? Math.round((puntos/puntosMax)*100) : 0;
+  const aprobado = pct >= (_examActual.nota_aprobatoria || 60);
+  try {
+    await pb.collection('respuestas_cuestionario').create({
+      cuestionario_id: _examActual.id,
+      estudiante_id: _estudiante.id,
+      respuestas: _respActual,
+      puntuacion: puntos,
+      puntuacion_maxima: puntosMax,
+      porcentaje: pct,
+      aprobado,
+      intento_numero: 1,
+      estado: 'completado'
+    });
+  } catch(e) {}
+  document.getElementById('cuest-exam-panel').style.display = 'none';
+  document.getElementById('cuest-est-list').style.display = '';
+  const rp = document.getElementById('cuest-resultado-panel');
+  rp.style.display = 'block';
+  rp.style.background = aprobado ? '#f0fff4' : '#fff5f5';
+  document.getElementById('res-emoji').textContent = aprobado ? '🎉' : '📚';
+  document.getElementById('res-nota').textContent = `${pct}% (${puntos}/${puntosMax} pts)`;
+  document.getElementById('res-estado').textContent = aprobado ? '✅ ¡Aprobado!' : '❌ No aprobado';
+  document.getElementById('res-detalle').textContent = `Respondiste correctamente ${puntos} de ${puntosMax} puntos.`;
+}
+
+function cancelarExamen() {
+  clearInterval(_examTimer);
+  document.getElementById('cuest-exam-panel').style.display = 'none';
+  document.getElementById('cuest-est-list').style.display = '';
+  _examActual = null; _pregActual = []; _respActual = {};
+}
+
+/* ─── FOROS (ESTUDIANTE) ─── */
+let _foroActualEst = null;
+
+async function renderForosEst() {
+  const el = document.getElementById('foros-est-list');
+  if (!el) return;
+  el.innerHTML = '<div class="loading-spinner"><div class="spinner"></div> Cargando foros...</div>';
+  document.getElementById('foro-est-thread').style.display = 'none';
+  el.style.display = '';
+  try {
+    const filter = _misCursos.length
+      ? '(' + _misCursos.map(c=>`curso_id="${c.id}"`).join('||') + ') && activo=true'
+      : 'activo=true';
+    const data = await pb.collection('foros_aula').getList(1,50,{filter, expand:'curso_id', sort:'orden,created'});
+    if (!data.items.length) { el.innerHTML = '<p style="color:var(--muted);padding:20px 0">No hay foros activos.</p>'; return; }
+    el.innerHTML = data.items.map(f => `
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:10px;cursor:pointer;transition:box-shadow .15s" onmouseenter="this.style.boxShadow='0 4px 16px rgba(29,107,62,.12)'" onmouseleave="this.style.boxShadow=''" onclick="abrirForoEst('${f.id}','${(f.titulo||'').replace(/'/g,"\\'")}')">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:22px">${{debate:'🗣️',consulta:'❓',noticias:'📰',ideas:'💡',general:'💬'}[f.tipo]||'💬'}</span>
+          <div>
+            <div style="font-weight:700;font-size:14px">${f.titulo}</div>
+            <div style="font-size:12px;color:var(--muted)">${f.expand?.curso_id?.nombre||'Curso'} · ${f.tipo||'general'}</div>
+            ${f.descripcion?`<div style="font-size:12px;margin-top:2px">${f.descripcion}</div>`:''}
+          </div>
+        </div>
+      </div>`).join('');
+  } catch(e) { el.innerHTML = `<p style="color:#e53e3e">Error: ${e.message}</p>`; }
+}
+
+async function abrirForoEst(foroId, titulo) {
+  _foroActualEst = foroId;
+  document.getElementById('foros-est-list').style.display = 'none';
+  const thread = document.getElementById('foro-est-thread');
+  thread.style.display = 'block';
+  document.getElementById('foro-thread-titulo').textContent = titulo;
+  document.getElementById('foro-mensajes-thread').innerHTML = '<div class="loading-spinner"><div class="spinner"></div></div>';
+  try {
+    const data = await pb.collection('mensajes_foro').getList(1,100,{
+      filter:`foro_id="${foroId}" && activo=true`, sort:'created'
+    });
+    const msgsEl = document.getElementById('foro-mensajes-thread');
+    if (!data.items.length) { msgsEl.innerHTML = '<p style="color:var(--muted);font-size:13px">Sé el primero en escribir.</p>'; return; }
+    msgsEl.innerHTML = data.items.map(m => {
+      const esYo = m.nombre_autor === (_estudiante.nombre + ' ' + _estudiante.apellido);
+      return `<div style="display:flex;${esYo?'flex-direction:row-reverse;':''}gap:8px;margin-bottom:12px">
+        <div style="width:36px;height:36px;border-radius:50%;background:var(--verde);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0">${(m.nombre_autor||'?')[0].toUpperCase()}</div>
+        <div style="max-width:70%">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:3px;${esYo?'text-align:right':''}">${m.nombre_autor||'Usuario'} · ${new Date(m.created).toLocaleString('es')}</div>
+          <div style="background:${esYo?'var(--verde)':'var(--surface)'};color:${esYo?'#fff':'inherit'};border-radius:${esYo?'12px 12px 0 12px':'12px 12px 12px 0'};padding:10px 14px;font-size:13px;border:1px solid var(--border)">${m.mensaje}</div>
+        </div>
+      </div>`;
+    }).join('');
+    msgsEl.scrollTop = msgsEl.scrollHeight;
+  } catch(e) { document.getElementById('foro-mensajes-thread').innerHTML = `<p style="color:#e53e3e">Error: ${e.message}</p>`; }
+}
+
+async function enviarMensajeForo() {
+  const msg = document.getElementById('foro-nuevo-msg').value.trim();
+  if (!msg || !_foroActualEst) return;
+  try {
+    await pb.collection('mensajes_foro').create({
+      foro_id: _foroActualEst,
+      mensaje: msg,
+      tipo_autor: 'estudiante',
+      nombre_autor: (_estudiante.nombre||'') + ' ' + (_estudiante.apellido||''),
+      autor_estudiante_id: _estudiante.id,
+      activo: true,
+      nivel: 0
+    });
+    document.getElementById('foro-nuevo-msg').value = '';
+    abrirForoEst(_foroActualEst, document.getElementById('foro-thread-titulo').textContent);
+  } catch(e) { toast('Error al enviar: ' + e.message); }
+}
+
+function volverForosEst() {
+  _foroActualEst = null;
+  document.getElementById('foro-est-thread').style.display = 'none';
+  renderForosEst();
+}
+
+/* ─── PROGRESO (ESTUDIANTE) ─── */
+async function renderProgresoEst() {
+  const el = document.getElementById('progreso-est-list');
+  if (!el) return;
+  el.innerHTML = '<div class="loading-spinner"><div class="spinner"></div> Calculando progreso...</div>';
+  try {
+    const data = await pb.collection('progreso_estudiante').getList(1,50,{
+      filter:`estudiante_id="${_estudiante.id}"`, expand:'curso_id', sort:'-updated'
+    });
+    if (!data.items.length) {
+      el.innerHTML = `<div style="text-align:center;padding:40px 20px;color:var(--muted)">
+        <div style="font-size:48px;margin-bottom:12px">📊</div>
+        <div style="font-size:16px;font-weight:600">Sin progreso registrado aún</div>
+        <div style="font-size:13px;margin-top:4px">Completa clases y cuestionarios para ver tu avance aquí.</div>
+      </div>`;
+      return;
+    }
+    el.innerHTML = data.items.map(p => {
+      const curso = p.expand?.curso_id;
+      const pct = p.porcentaje_avance || 0;
+      const color = pct >= 80 ? '#38a169' : pct >= 50 ? '#d69e2e' : '#e53e3e';
+      return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+          <div>
+            <div style="font-weight:700;font-size:15px">${curso?.nombre||'Curso'}</div>
+            <div style="font-size:12px;color:var(--muted)">Última actividad: ${p.ultima_actividad?new Date(p.ultima_actividad).toLocaleDateString('es'):'—'}</div>
+          </div>
+          <div style="font-size:22px;font-weight:800;color:${color}">${pct}%</div>
+        </div>
+        <div style="background:var(--border);border-radius:999px;height:10px;overflow:hidden;margin-bottom:12px">
+          <div style="height:100%;background:${color};border-radius:999px;width:${pct}%;transition:width .4s"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;font-size:12px">
+          <div style="background:var(--bg);border-radius:8px;padding:8px;text-align:center"><div style="font-weight:700;font-size:16px">${p.clases_vistas||0}/${p.clases_total||0}</div><div style="color:var(--muted)">Clases</div></div>
+          <div style="background:var(--bg);border-radius:8px;padding:8px;text-align:center"><div style="font-weight:700;font-size:16px">${p.tareas_entregadas||0}/${p.tareas_total||0}</div><div style="color:var(--muted)">Tareas</div></div>
+          <div style="background:var(--bg);border-radius:8px;padding:8px;text-align:center"><div style="font-weight:700;font-size:16px">${p.cuestionarios_completados||0}</div><div style="color:var(--muted)">Exámenes</div></div>
+          <div style="background:var(--bg);border-radius:8px;padding:8px;text-align:center"><div style="font-weight:700;font-size:16px">${p.nota_promedio?p.nota_promedio+'%':'—'}</div><div style="color:var(--muted)">Promedio</div></div>
+        </div>
+        ${p.completado?'<div style="margin-top:10px;background:#f0fff4;color:#276749;padding:8px 12px;border-radius:8px;font-size:12px;font-weight:600">🏅 ¡Curso completado! '+( p.certificado_emitido?'Certificado emitido.':'Certificado pendiente.')+'</div>':''}
+      </div>`;
+    }).join('');
+  } catch(e) { el.innerHTML = `<p style="color:#e53e3e">Error: ${e.message}</p>`; }
+}
 </script>
+<script src="https://meet.jit.si/external_api.js" async></script>
 </body>
 </html>

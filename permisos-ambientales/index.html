@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Permisos Ambientales — IAGAMI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{--verde:#1d6b3e;--verde-dark:#1a3d2b;--bg:#f5f7f5;--text:#1f2937;--border:#d4edd8;--muted:#6b7280;--danger:#dc2626;}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text)}
+nav{background:var(--verde-dark);padding:0 24px;display:flex;align-items:center;height:52px}
+nav .brand{font-family:'Poppins',sans-serif;color:#fff;font-size:15px;font-weight:700;text-decoration:none}
+nav .back{margin-left:auto;display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:700;font-family:'Poppins',sans-serif;color:#fff;text-decoration:none;padding:8px 18px;border-radius:25px;background:linear-gradient(135deg,#0f2d1e,#1d6b3e);box-shadow:0 4px 12px rgba(29,107,62,.4),0 2px 4px rgba(0,0,0,.2);transition:.2s}
+nav .back:hover{background:linear-gradient(135deg,#1d6b3e,#2d8a52);transform:translateY(-1px)}
+.hero{background:linear-gradient(135deg,var(--verde-dark) 0%,var(--verde) 100%);color:#fff;padding:36px 24px 32px;text-align:center}
+.hero h1{font-family:'Poppins',sans-serif;font-size:22px;font-weight:700;margin-bottom:6px}
+.hero p{font-size:13px;opacity:.85;max-width:520px;margin:0 auto}
+.wrap{max-width:760px;margin:24px auto 48px;padding:0 16px}
+
+/* PASO 1 — TIPO SOLICITANTE */
+.tipo-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:4px}
+.tipo-btn{background:#fff;border:2px solid var(--border);border-radius:14px;padding:18px 10px;text-align:center;cursor:pointer;transition:.2s;font-family:'Inter',sans-serif}
+.tipo-btn:hover{border-color:var(--verde);transform:translateY(-2px)}
+.tipo-btn.selected{border-color:var(--verde);background:#f0fdf4}
+.tipo-btn .ico{font-size:28px;margin-bottom:6px}
+.tipo-btn .lbl{font-size:12px;font-weight:600;color:var(--verde-dark)}
+
+/* AVISO */
+.req-box{border-radius:12px;padding:14px 18px;display:flex;gap:10px;align-items:flex-start;margin-top:16px}
+.req-box.warning{background:#fefce8;border:1.5px solid #fde68a}
+.req-box.info{background:#eff6ff;border:1.5px solid #bfdbfe}
+.req-box.ok{background:#f0fdf4;border:1.5px solid #86efac}
+.req-box .ico{font-size:20px;flex-shrink:0}
+.req-box strong{font-size:12px;font-weight:700;display:block;margin-bottom:2px}
+.req-box p{font-size:12px;line-height:1.5}
+.req-box a{color:var(--verde);font-weight:600}
+
+/* FORM */
+.form-card{background:#fff;border:1px solid var(--border);border-radius:16px;padding:28px;margin-top:20px;display:none}
+.section-title{font-family:'Poppins',sans-serif;font-size:13px;font-weight:700;color:var(--verde-dark);margin:20px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.section-title:first-child{margin-top:0}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-group{display:flex;flex-direction:column;gap:4px}
+.form-group.full{grid-column:1/-1}
+label{font-size:12px;font-weight:600}
+label span{color:var(--danger)}
+input,select,textarea{border:1.5px solid #d1d5db;border-radius:8px;padding:9px 12px;font-size:13px;font-family:'Inter',sans-serif;width:100%;transition:border .2s}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--verde)}
+textarea{resize:vertical}
+.docs-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.doc-slot{border:1.5px dashed #d1d5db;border-radius:10px;padding:12px;transition:border .2s}
+.doc-slot:hover{border-color:var(--verde)}
+.doc-slot .dlbl{font-size:12px;font-weight:600;color:var(--verde-dark);display:flex;align-items:center;gap:6px;margin-bottom:5px}
+.doc-slot .dlbl .num{background:var(--verde);color:#fff;border-radius:50%;width:17px;height:17px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
+.doc-slot input[type=file]{border:none;padding:0;font-size:11px;color:var(--muted)}
+.doc-slot .hint{font-size:10px;color:var(--muted);margin-top:3px}
+#estado-box{border-radius:10px;padding:12px 16px;text-align:center;display:none;margin-top:16px;font-size:13px;font-weight:600}
+#estado-box.error{background:#fef2f2;border:1px solid #fca5a5;color:var(--danger)}
+.btn-primary{background:var(--verde);color:#fff;border:none;padding:12px;border-radius:9px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;width:100%;margin-top:20px;transition:.2s}
+.btn-primary:hover{background:var(--verde-dark)}
+.btn-primary:disabled{opacity:.6;cursor:not-allowed}
+.success-panel{display:none;text-align:center;padding:48px 20px}
+.success-panel .check{font-size:56px;margin-bottom:16px}
+.success-panel h2{font-family:'Poppins',sans-serif;font-size:20px;color:var(--verde-dark);margin-bottom:8px}
+.success-panel p{font-size:13px;color:var(--muted);max-width:400px;margin:0 auto 16px}
+.success-panel .code{background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:12px 24px;display:inline-block;font-family:monospace;font-size:17px;font-weight:700;color:var(--verde-dark)}
+.btn-back{display:inline-block;margin-top:16px;color:var(--verde);font-size:13px;font-weight:600;text-decoration:none}
+@media(max-width:580px){.form-grid,.docs-grid,.tipo-grid{grid-template-columns:1fr}.form-card{padding:18px 14px}}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="brand" href="../">🌿 IAGAMI</a>
+  <a href="../" style="display:inline-flex;align-items:center;gap:12px;text-decoration:none;font-family:'Poppins',sans-serif;font-size:16px;font-weight:800;color:#3a7a1e;text-shadow:0 1px 0 #6aaa30,1px 2px 0 #2d6a1f,2px 3px 0 #1a4a10,0 0 12px rgba(80,160,40,.18);letter-spacing:.01em;transition:.2s"><img src="/assets/images/leaf-arrow.png" height="42" alt="Portal institucional" style="display:block"></a>
+</nav>
+
+<div class="hero">
+  <h1>🏛️ Solicitud de Permiso Ambiental</h1>
+  <p>Seleccione su tipo de solicitante, complete el formulario y adjunte los documentos requeridos.</p>
+</div>
+
+<div class="wrap">
+
+  <!-- PASO 1 -->
+  <div id="paso1-card" style="background:#fff;border:1px solid var(--border);border-radius:16px;padding:24px">
+    <div style="font-family:'Poppins',sans-serif;font-size:14px;font-weight:700;color:var(--verde-dark);margin-bottom:14px">
+      Paso 1 — ¿Quién solicita el permiso?
+    </div>
+    <div class="tipo-grid">
+      <div class="tipo-btn" onclick="seleccionarTipo('persona_individual')">
+        <div class="ico">👤</div><div class="lbl">Persona Individual</div>
+      </div>
+      <div class="tipo-btn" onclick="seleccionarTipo('comunidad')">
+        <div class="ico">🏘️</div><div class="lbl">Comunidad</div>
+      </div>
+      <div class="tipo-btn" onclick="seleccionarTipo('consejo_comunal')">
+        <div class="ico">🤝</div><div class="lbl">Consejo Comunal</div>
+      </div>
+      <div class="tipo-btn" onclick="seleccionarTipo('comuna')">
+        <div class="ico">🌿</div><div class="lbl">Comuna</div>
+      </div>
+      <div class="tipo-btn" onclick="seleccionarTipo('empresa')">
+        <div class="ico">🏭</div><div class="lbl">Empresa</div>
+      </div>
+    </div>
+    <div id="req-aviso"></div>
+  </div>
+
+  <!-- FORMULARIO -->
+  <div class="form-card" id="form-card">
+
+    <div class="section-title">👤 Datos del Solicitante</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Nombre completo / Razón social <span>*</span></label>
+        <input type="text" id="f-nombre" placeholder="Nombre o denominación"/>
+      </div>
+      <div class="form-group">
+        <label id="lbl-cedula">Cédula de identidad <span>*</span></label>
+        <input type="text" id="f-cedula" placeholder="V-12345678"/>
+      </div>
+      <div class="form-group">
+        <label>Teléfono <span>*</span></label>
+        <input type="tel" id="f-telefono" placeholder="0424-0000000"/>
+      </div>
+      <div class="form-group">
+        <label>Correo electrónico <span>*</span></label>
+        <input type="email" id="f-correo" placeholder="correo@ejemplo.com"/>
+      </div>
+    </div>
+
+    <div class="section-title">📋 Tipo de Permiso</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Permiso solicitado <span>*</span></label>
+        <select id="f-tipo">
+          <option value="">Selecciona...</option>
+          <optgroup label="── Permisos frecuentes ──">
+            <option value="P-04">P-04 — Autorización de Poda, Tala y Trasplante</option>
+            <option value="P-01">P-01 — Permiso Ambiental de Funcionamiento</option>
+            <option value="P-09">P-09 — Certificado de Cumplimiento Ambiental</option>
+            <option value="P-10">P-10 — Uso Temporal de Áreas Verdes Públicas</option>
+          </optgroup>
+          <optgroup label="── Todos los permisos ──">
+            <option value="P-02">P-02 — Registro Ambiental Simplificado</option>
+            <option value="P-03">P-03 — Permiso de Áreas Verdes</option>
+            <option value="P-05">P-05 — Autorización Ambiental de Obra</option>
+            <option value="P-06">P-06 — Permiso Especial de Sonido para Eventos</option>
+            <option value="P-07">P-07 — Registro de Gestores de Residuos</option>
+            <option value="P-08">P-08 — Plan de Manejo de Grandes Generadores</option>
+            <option value="P-11">P-11 — Permiso de Fuentes Fijas de Emisión</option>
+            <option value="P-12">P-12 — Certificado de Acondicionamiento Acústico</option>
+            <option value="P-13">P-13 — Registro de Generadores de Desechos Peligrosos</option>
+            <option value="P-14">P-14 — Permiso de Vertidos de Efluentes No Domésticos</option>
+            <option value="P-15">P-15 — Autorización de Intervención en Riberas</option>
+            <option value="P-16">P-16 — Registro de Viveros y Comercializadores</option>
+            <option value="P-17">P-17 — Registro de Empresas de Fumigación</option>
+            <option value="P-18">P-18 — Registro de Consultores y Laboratorios</option>
+            <option value="P-19">P-19 — Permiso de Criaderos y Actividades Pecuarias</option>
+            <option value="P-20">P-20 — Permiso de Uso del Suelo y Ubicación</option>
+            <option value="P-21">P-21 — Aprobación del Plan de Manejo de Olores</option>
+            <option value="P-22">P-22 — Autorización de Extracción en Cauces</option>
+            <option value="P-23">P-23 — Autorización de Especies Vegetales No Nativas</option>
+            <option value="P-24">P-24 — Permiso de Uso Agrícola del Suelo</option>
+            <option value="P-25">P-25 — Permiso de Manejo de Desechos Sólidos y Líquidos</option>
+            <option value="P-26">P-26 — Autorización Ambiental de Pozos</option>
+          </optgroup>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Fecha de solicitud</label>
+        <input type="date" id="f-fecha"/>
+      </div>
+      <div class="form-group full">
+        <label>Descripción de la actividad <span>*</span></label>
+        <textarea id="f-descripcion" rows="3" placeholder="Describa la actividad o situación para la que solicita el permiso..."></textarea>
+      </div>
+    </div>
+
+    <div class="section-title">📄 Documentos Requeridos <span style="font-size:11px;font-weight:400;color:var(--muted)">(PDF, JPG, PNG — máx. 10 MB c/u)</span></div>
+    <div class="docs-grid">
+      <div class="doc-slot">
+        <div class="dlbl"><span class="num">1</span> <span id="doc1-lbl">Documento de identidad</span></div>
+        <input type="file" id="doc-1" accept=".pdf,.jpg,.jpeg,.png"/>
+        <div class="hint" id="doc1-hint">Cédula o RIF vigente</div>
+      </div>
+      <div class="doc-slot">
+        <div class="dlbl"><span class="num">2</span> <span id="doc2-lbl">Solvencia municipal (SEMAT)</span></div>
+        <input type="file" id="doc-2" accept=".pdf,.jpg,.jpeg,.png"/>
+        <div class="hint" id="doc2-hint">Solvencia de impuestos municipales</div>
+      </div>
+      <div class="doc-slot">
+        <div class="dlbl"><span class="num">3</span> <span id="doc3-lbl">Comprobante de pago de tasa</span></div>
+        <input type="file" id="doc-3" accept=".pdf,.jpg,.jpeg,.png"/>
+        <div class="hint" id="doc3-hint">Pago de tasa ambiental ante SEMAT</div>
+      </div>
+      <div class="doc-slot">
+        <div class="dlbl"><span class="num">4</span> <span id="doc4-lbl">Memoria descriptiva / Planos</span></div>
+        <input type="file" id="doc-4" accept=".pdf,.jpg,.jpeg,.png"/>
+        <div class="hint" id="doc4-hint">Planos o descripción de la actividad</div>
+      </div>
+      <div class="doc-slot">
+        <div class="dlbl"><span class="num">5</span> <span id="doc5-lbl">Documento adicional 1</span></div>
+        <input type="file" id="doc-5" accept=".pdf,.jpg,.jpeg,.png"/>
+        <div class="hint" id="doc5-hint">Documento complementario</div>
+      </div>
+      <div class="doc-slot">
+        <div class="dlbl"><span class="num">6</span> <span id="doc6-lbl">Documento adicional 2</span></div>
+        <input type="file" id="doc-6" accept=".pdf,.jpg,.jpeg,.png"/>
+        <div class="hint" id="doc6-hint">Documento complementario</div>
+      </div>
+    </div>
+
+    <div id="estado-box" class="error"></div>
+    <button class="btn-primary" id="btn-enviar" onclick="enviarSolicitud()">📨 Enviar Solicitud</button>
+  </div>
+
+  <!-- ÉXITO -->
+  <div class="success-panel" id="success-panel">
+    <div class="check">✅</div>
+    <h2>¡Solicitud enviada!</h2>
+    <p>Su solicitud fue recibida. El equipo de IAGAMI la revisará y se comunicará con usted.</p>
+    <p style="font-size:12px;color:var(--muted)">Código de seguimiento:</p>
+    <div class="code" id="codigo-ref"></div>
+    <br/><a href="../" style="display:inline-flex;align-items:center;gap:12px;text-decoration:none;font-family:'Poppins',sans-serif;font-size:16px;font-weight:800;color:#3a7a1e;text-shadow:0 1px 0 #6aaa30,1px 2px 0 #2d6a1f,2px 3px 0 #1a4a10,0 0 12px rgba(80,160,40,.18);letter-spacing:.01em;transition:.2s"><img src="/assets/images/leaf-arrow.png" height="42" alt="Portal institucional" style="display:block"></a>
+  </div>
+
+</div>
+
+<script>
+const API = 'https://api.iagami.online';
+let tipoSeleccionado = '';
+
+const AVISOS = {
+  persona_individual: {
+    cls:'ok', ico:'✅',
+    titulo:'Puede continuar',
+    texto:'Las personas individuales pueden solicitar permisos directamente sin registro previo.'
+  },
+  comunidad: {
+    cls:'warning', ico:'⚠️',
+    titulo:'Requisito previo',
+    texto:'Su Comunidad debe estar registrada como Consejo Comunal o Comuna en IAGAMI. <a href="../consejos-comunales/index.html">Regístrela aquí</a> antes de continuar.'
+  },
+  consejo_comunal: {
+    cls:'warning', ico:'⚠️',
+    titulo:'Requisito previo',
+    texto:'Su Consejo Comunal debe estar registrado en IAGAMI. <a href="../consejos-comunales/index.html">Regístrelo aquí</a> antes de continuar.'
+  },
+  comuna: {
+    cls:'warning', ico:'⚠️',
+    titulo:'Requisito previo',
+    texto:'Su Comuna debe estar registrada en IAGAMI. <a href="../consejos-comunales/index.html">Regístrela aquí</a> antes de continuar.'
+  },
+  empresa: {
+    cls:'warning', ico:'⚠️',
+    titulo:'Requisito previo',
+    texto:'Su empresa debe estar registrada en IAGAMI. <a href="../empresas/index.html">Regístrela aquí</a> antes de continuar.'
+  }
+};
+
+const DOCS = {
+  persona_individual: [
+    ['Cédula de identidad','Documento de identidad vigente'],
+    ['Solvencia municipal (SEMAT)','Solvencia de impuestos municipales'],
+    ['Comprobante de pago de tasa','Pago de tasa ambiental ante SEMAT'],
+    ['Memoria descriptiva / Planos','Descripción o planos de la actividad'],
+    ['Documento adicional 1','Documento complementario'],
+    ['Documento adicional 2','Documento complementario'],
+  ],
+  comunidad: [
+    ['Acta de asamblea comunitaria','Acta que autoriza la solicitud'],
+    ['Cédula del vocero/representante','Documento de identidad vigente'],
+    ['Solvencia municipal (SEMAT)','Solvencia de impuestos municipales'],
+    ['Comprobante de pago de tasa','Pago de tasa ambiental ante SEMAT'],
+    ['Memoria descriptiva / Planos','Descripción o planos de la actividad'],
+    ['Documento adicional','Documento complementario'],
+  ],
+  consejo_comunal: [
+    ['Acta constitutiva del CC','Acta de constitución del Consejo Comunal'],
+    ['Cédula del vocero principal','Documento de identidad vigente'],
+    ['Solvencia municipal (SEMAT)','Solvencia de impuestos municipales'],
+    ['Comprobante de pago de tasa','Pago de tasa ambiental ante SEMAT'],
+    ['Memoria descriptiva / Planos','Descripción o planos de la actividad'],
+    ['Documento adicional','Documento complementario'],
+  ],
+  comuna: [
+    ['Acta constitutiva de la Comuna','Documento de constitución oficial'],
+    ['Cédula del portavoz/representante','Documento de identidad vigente'],
+    ['Solvencia municipal (SEMAT)','Solvencia de impuestos municipales'],
+    ['Comprobante de pago de tasa','Pago de tasa ambiental ante SEMAT'],
+    ['Memoria descriptiva / Planos','Descripción o planos de la actividad'],
+    ['Documento adicional','Documento complementario'],
+  ],
+  empresa: [
+    ['RIF de la empresa','Registro de Información Fiscal vigente'],
+    ['Cédula del representante legal','Documento de identidad vigente'],
+    ['Acta constitutiva','Documento de constitución legal'],
+    ['Solvencia municipal (SEMAT)','Solvencia de impuestos municipales'],
+    ['Comprobante de pago de tasa','Pago de tasa ambiental ante SEMAT'],
+    ['Memoria descriptiva / Planos','Descripción o planos de la actividad'],
+  ]
+};
+
+const CEDULA_LABELS = {
+  persona_individual: 'Cédula de identidad',
+  comunidad: 'Cédula del representante',
+  consejo_comunal: 'Cédula del vocero principal',
+  comuna: 'Cédula del portavoz',
+  empresa: 'RIF de la empresa'
+};
+
+function seleccionarTipo(tipo) {
+  tipoSeleccionado = tipo;
+  document.querySelectorAll('.tipo-btn').forEach(b => b.classList.remove('selected'));
+  event.currentTarget.classList.add('selected');
+
+  const av = AVISOS[tipo];
+  document.getElementById('req-aviso').innerHTML = `
+    <div class="req-box ${av.cls}" style="margin-top:14px">
+      <div class="ico">${av.ico}</div>
+      <div><strong>${av.titulo}</strong><p>${av.texto}</p></div>
+    </div>`;
+
+  // Actualizar labels documentos
+  const docs = DOCS[tipo];
+  for (let i = 0; i < 6; i++) {
+    document.getElementById(`doc${i+1}-lbl`).textContent = docs[i][0];
+    document.getElementById(`doc${i+1}-hint`).textContent = docs[i][1];
+  }
+
+  // Actualizar label cédula
+  document.getElementById('lbl-cedula').innerHTML = CEDULA_LABELS[tipo] + ' <span style="color:var(--danger)">*</span>';
+
+  // Actualizar placeholder cédula
+  const cedulaInput = document.getElementById('f-cedula');
+  cedulaInput.placeholder = tipo === 'empresa' ? 'J-87654321-0' : 'V-12345678';
+
+  document.getElementById('f-fecha').value = new Date().toISOString().substring(0,10);
+  document.getElementById('form-card').style.display = 'block';
+  document.getElementById('form-card').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+async function enviarSolicitud() {
+  const nombre = document.getElementById('f-nombre').value.trim();
+  const cedula = document.getElementById('f-cedula').value.trim();
+  const telefono = document.getElementById('f-telefono').value.trim();
+  const correo = document.getElementById('f-correo').value.trim();
+  const tipo = document.getElementById('f-tipo').value;
+  const descripcion = document.getElementById('f-descripcion').value.trim();
+
+  if (!nombre || !cedula || !telefono || !correo || !tipo || !descripcion) {
+    const box = document.getElementById('estado-box');
+    box.style.display = 'block';
+    box.textContent = '⚠️ Complete todos los campos obligatorios marcados con *';
+    return;
+  }
+
+  const btn = document.getElementById('btn-enviar');
+  btn.disabled = true; btn.textContent = '⏳ Enviando...';
+
+  const fd = new FormData();
+  fd.append('tipo_solicitante', tipoSeleccionado);
+  fd.append('solicitante_nombre', nombre);
+  fd.append('cedula_rif', cedula);
+  fd.append('telefono', telefono);
+  fd.append('correo', correo);
+  fd.append('tipo_permiso', tipo);
+  fd.append('descripcion', descripcion);
+  fd.append('fecha_solicitud', document.getElementById('f-fecha').value);
+  fd.append('estado', 'pendiente_pago');
+
+  for (let i = 1; i <= 6; i++) {
+    const file = document.getElementById('doc-' + i).files[0];
+    if (file) fd.append('doc_' + i, file);
+  }
+
+  try {
+    const res = await fetch(`${API}/api/collections/solicitudes_permisos/records`, {method:'POST', body:fd});
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Error al enviar');
+    document.getElementById('paso1-card').style.display = 'none';
+    document.getElementById('form-card').style.display = 'none';
+    document.getElementById('success-panel').style.display = 'block';
+    document.getElementById('codigo-ref').textContent = data.id.substring(0,8).toUpperCase();
+    window.scrollTo({top:0, behavior:'smooth'});
+  } catch(e) {
+    const box = document.getElementById('estado-box');
+    box.style.display = 'block';
+    box.textContent = '❌ Error: ' + e.message;
+    btn.disabled = false; btn.textContent = '📨 Enviar Solicitud';
+  }
+}
+</script>
+</body>
+</html>

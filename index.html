@@ -33,16 +33,16 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 .topbar{background:#1d6b3e;color:rgba(255,255,255,.88);text-align:center;font-size:11px;padding:6px 16px;letter-spacing:.06em;font-weight:500}
 
 /* ===== NAV ===== */
-.nav{background:#fff;border-bottom:1px solid #c8ead8;position:sticky;top:0;z-index:200;box-shadow:0 1px 12px rgba(29,107,62,.06)}
+.nav{background:#fff;border-top:1px solid rgba(198,168,91,.35);border-bottom:1px solid rgba(198,168,91,.35);position:sticky;top:0;z-index:200;box-shadow:0 1px 12px rgba(29,107,62,.06)}
 .navinner{max-width:1200px;margin:0 auto;padding:0 24px;height:58px;display:flex;align-items:center;justify-content:space-between;gap:16px}
 .logo{display:flex;align-items:center;gap:10px;flex-shrink:0;text-decoration:none}
 .logo-img{width:48px;height:48px;background:#fff;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;border:1px solid #d4edd8}
 .logo-img img{width:44px;height:44px;object-fit:contain}
 .logo-img svg{width:22px;height:22px}
 .logo-text{font-family:'Poppins',sans-serif;font-size:15px;font-weight:700;color:#1a3d2b;line-height:1.1}
-.logo-sub{font-size:10px;color:#4a8a6a;font-weight:400}
+.logo-sub{font-size:10px;color:#64748B;font-weight:400}
 .navlinks{display:flex;gap:2px;align-items:center}
-.nl{font-size:12px;padding:6px 10px;border-radius:7px;color:#4a6a5a;cursor:pointer;transition:.15s;white-space:nowrap;text-decoration:none;border:none;background:none}
+.nl{font-size:12px;padding:6px 10px;border-radius:7px;color:#64748B;cursor:pointer;transition:.15s;white-space:nowrap;text-decoration:none;border:none;background:none}
 .nl:hover,.nl.active{background:#e8f5ee;color:#1d6b3e}
 .navr{display:flex;gap:8px;flex-shrink:0}
 .navbtn{font-size:12px;padding:7px 16px;border-radius:8px;background:#1d6b3e;color:#fff;border:none;cursor:pointer;font-weight:600;transition:.15s}
@@ -68,7 +68,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 @keyframes ticker{0%{transform:translateX(100%)}100%{transform:translateX(-100%)}}
 
 /* ===== HERO ===== */
-.hero-wrap{position:relative}
+.hero-wrap{position:relative;border-top:1px solid #C6A85B;border-bottom:1px solid #C6A85B;box-shadow:0 -1px 0 rgba(198,168,91,.3),0 1px 0 rgba(198,168,91,.3)}
 .hero{
   position:relative;
   min-height:520px;
@@ -179,7 +179,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 
 .hero-badge{
   display:inline-flex;align-items:center;gap:7px;
-  background:rgba(74,222,128,.14);color:#a8f0c8;
+  background:rgba(74,222,128,.14);color:#B7E4C7;
   border:1px solid rgba(74,222,128,.35);border-radius:20px;
   font-size:11px;font-weight:600;padding:5px 14px;
   margin-bottom:12px;letter-spacing:.05em;
@@ -187,7 +187,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 }
 .hero-slogan{
   font-family:'Poppins',sans-serif;font-size:16px;font-weight:700;
-  color:#a8f0c8;margin-bottom:10px;letter-spacing:.02em;font-style:italic;
+  color:#B7E4C7;margin-bottom:10px;letter-spacing:.02em;font-style:italic;
   text-shadow:0 2px 12px rgba(0,0,0,.4);
 }
 .hero h1{
@@ -195,7 +195,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
   line-height:1.1;color:#F8FAFC;margin-bottom:14px;
   text-shadow:0 2px 16px rgba(0,0,0,.35);letter-spacing:-0.02em;
 }
-.hero h1 .green{color:#4ade80}
+.hero h1 .green{color:#C6A85B}
 .hero-desc{font-size:14px;color:#E2E8F0;line-height:1.75;margin-bottom:24px;max-width:420px}
 .hero-btns{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:28px}
 .btn-p{
@@ -220,26 +220,32 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
   display:grid;grid-template-columns:repeat(3,1fr);gap:12px;
   border-top:1px solid rgba(255,255,255,.18);padding-top:20px;
 }
-.stat-v{font-family:'Poppins',sans-serif;font-size:24px;font-weight:800;color:#4ade80;text-shadow:0 0 20px rgba(74,222,128,.4)}
+.stat-v{font-family:'Poppins',sans-serif;font-size:24px;font-weight:800;color:#C6A85B;text-shadow:0 0 20px rgba(74,222,128,.4)}
 .stat-l{font-size:10px;color:rgba(255,255,255,.6);margin-top:2px;line-height:1.4}
 
 /* ===== CHAT FAB ===== */
 .chat-fab{
   position:fixed;bottom:20px;right:20px;z-index:401;
-  width:58px;height:58px;background:transparent;border-radius:50%;
+  width:88px;height:88px;background:transparent;border-radius:50%;
   display:flex;align-items:center;justify-content:center;cursor:pointer;
-  box-shadow:0 4px 22px rgba(29,107,62,.65);transition:.2s;border:none;
-  padding:0;overflow:hidden;
+  box-shadow:0 6px 24px rgba(29,107,62,.55);transition:.2s;border:none;
+  padding:0;overflow:visible;
 }
-.chat-fab:hover{transform:scale(1.10)}
+.chat-fab:hover{transform:scale(1.08)}
 .chat-fab-avatar{
-  width:58px;height:58px;border-radius:50%;object-fit:cover;
-  border:2px solid #4ade80;background:#1d6b3e;
+  width:88px;height:88px;border-radius:50%;object-fit:contain;
+  border:3px solid #C6A85B;background:radial-gradient(circle at 40% 35%,#d4f5e2,#a8e6c8);
   display:block;
+  box-shadow:0 4px 16px rgba(29,107,62,.4),0 0 12px rgba(198,168,91,.7),0 0 0 0 rgba(198,168,91,.4);
+  animation:fabGoldGlow 2.4s ease-in-out infinite;
+}
+@keyframes fabGoldGlow{
+  0%,100%{box-shadow:0 4px 16px rgba(29,107,62,.4),0 0 8px rgba(198,168,91,.6),0 0 0 0 rgba(198,168,91,.3)}
+  50%{box-shadow:0 4px 24px rgba(29,107,62,.5),0 0 22px rgba(198,168,91,1),0 0 36px rgba(198,168,91,.45)}
 }
 .chat-fab-dot{
   position:absolute;top:1px;right:1px;width:14px;height:14px;
-  background:#4ade80;border-radius:50%;border:2px solid #fff;
+  background:#C6A85B;border-radius:50%;border:2px solid #fff;
   animation:pulse 2s infinite;
 }
 
@@ -249,7 +255,9 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 .sec-tag{display:inline-block;font-size:11px;font-weight:700;color:#1d6b3e;background:#e8f5ee;border:1px solid #a8dfc0;border-radius:20px;padding:3px 13px;margin-bottom:9px;letter-spacing:.05em}
 .sec-head{text-align:center;margin-bottom:26px}
 .sec-head h2{font-family:'Poppins',sans-serif;font-size:clamp(22px,3.5vw,36px);font-weight:700;color:#1a3d2b;margin-bottom:8px;letter-spacing:-0.01em}
-.sec-head p{font-size:13px;color:#4a8a6a}
+.sec-wrap .sec-head h2,.sec-wrap3 .sec-head h2{color:#C6A85B}
+.sec-wrap2 .sec-head h2{color:#1d6b3e}
+.sec-head p{font-size:13px;color:#64748B}
 
 /* ===== STATS BAND ===== */
 .stats-band{background:#d4f5e2;padding:48px 24px;border-top:2px solid #a8dfc0;border-bottom:2px solid #a8dfc0}
@@ -258,7 +266,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 .sband-item{text-align:center;padding:16px;border-right:1px solid #c8ead8}
 .sband-item:last-child{border-right:none}
 .sband-num{font-family:'Poppins',sans-serif;font-size:clamp(2.2rem,4vw,3.8rem);font-weight:800;color:#1d6b3e;line-height:1;letter-spacing:-0.02em}
-.sband-desc{font-size:12px;color:#4a8a6a;margin-top:8px;letter-spacing:.05em;text-transform:uppercase;font-weight:600}
+.sband-desc{font-size:12px;color:#64748B;margin-top:8px;letter-spacing:.05em;text-transform:uppercase;font-weight:600}
 
 /* ===== WAVE DIVIDER ===== */
 .wave-div{line-height:0;overflow:hidden;display:block}
@@ -275,26 +283,28 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 @media(max-width:900px){.footer-premium-inner{grid-template-columns:1fr 1fr}}
 @media(max-width:560px){.footer-premium-inner{grid-template-columns:1fr}}
 .fp-brand-logo{display:flex;align-items:center;gap:14px;margin-bottom:18px}
-.fp-brand-logo-box{width:56px;height:56px;background:#fff;border-radius:12px;border:2px solid rgba(74,222,128,.3);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden}
-.fp-brand-logo-box img{width:50px;height:50px;object-fit:contain}
+.fp-brand-logo-box{width:72px;height:72px;background:#fff;border-radius:14px;border:2px solid rgba(198,168,91,.4);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden}
+.fp-brand-logo-box img{width:66px;height:66px;object-fit:contain}
 .fp-brand-name{font-family:'Poppins',sans-serif;font-size:20px;font-weight:800;color:#fff;letter-spacing:-.01em;line-height:1}
 .fp-brand-sub{font-size:11px;color:rgba(255,255,255,.35);margin-top:3px}
 .fp-mission{font-size:13px;line-height:1.75;color:rgba(255,255,255,.45);max-width:280px;margin-bottom:16px}
-.fp-tagline{font-size:13px;color:#4ade80;font-weight:600;display:flex;align-items:center;gap:6px}
-.fp-col-title{font-family:'Poppins',sans-serif;font-size:10px;font-weight:700;color:#4ade80;letter-spacing:.12em;text-transform:uppercase;margin-bottom:18px}
+.fp-tagline{font-size:13px;color:#C6A85B;font-weight:600;display:flex;align-items:center;gap:6px}
+.fp-col-title{font-family:'Poppins',sans-serif;font-size:10px;font-weight:700;color:#C6A85B;letter-spacing:.12em;text-transform:uppercase;margin-bottom:18px}
 .fp-links{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:11px}
 .fp-links a,.fp-links li{font-size:13px;color:rgba(255,255,255,.5);text-decoration:none;transition:color .2s,padding-left .2s;cursor:pointer}
-.fp-links a:hover,.fp-links li:hover{color:#4ade80;padding-left:4px}
+.fp-links a:hover,.fp-links li:hover{color:#C6A85B;padding-left:4px}
 .fp-bottom{border-top:1px solid rgba(255,255,255,.06);padding:20px 0;max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;font-size:11px;color:rgba(255,255,255,.28)}
 .fp-bottom-badge{color:rgba(74,222,128,.5);font-size:11px}
 
 /* ===== SERVICES ===== */
-.svc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(115px,1fr));gap:11px}
-.svc-card{background:#fff;border:1px solid #d4edd8;border-radius:13px;padding:16px 10px;text-align:center;cursor:pointer;transition:.2s;text-decoration:none;display:block}
-.svc-card:hover{border-color:#1d6b3e;transform:translateY(-3px);box-shadow:0 8px 28px rgba(29,107,62,.12)}
-.svc-ico{width:44px;height:44px;border-radius:11px;display:flex;align-items:center;justify-content:center;margin:0 auto 9px;font-size:20px}
-.svc-name{font-size:12px;font-weight:600;color:#1a3d2b;line-height:1.3}
-.svc-desc{font-size:10px;color:#4a8a6a;margin-top:3px;line-height:1.4}
+.svc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:14px}
+.svc-card{background:#fafff8;border:1px solid #C6A85B;border-radius:18px;padding:22px 12px 16px;text-align:center;cursor:pointer;transition:.25s;text-decoration:none;display:block;box-shadow:0 2px 12px rgba(198,168,91,.12),inset 0 1px 0 rgba(255,220,100,.25)}
+.svc-card:hover{border-color:#d4b06a;transform:translateY(-4px);box-shadow:0 10px 32px rgba(198,168,91,.28),inset 0 1px 0 rgba(255,220,100,.35);background:#fffef5}
+.svc-ico{width:68px;height:68px;border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 11px;font-size:34px;background:#fff;border:1.5px solid #a8dfc0;box-shadow:0 2px 8px rgba(29,107,62,.1)}
+.svc-name{font-size:12px;font-weight:700;color:#1a3d2b;line-height:1.3;font-family:'Poppins',sans-serif}
+.svc-desc{font-size:10px;color:#64748B;margin-top:4px;line-height:1.4}
+.svc-img{padding:6px!important}
+.svc-img img{width:100%;height:auto;border-radius:12px;display:block}
 
 /* ===== INDICATORS ===== */
 .ind-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:11px}
@@ -302,27 +312,27 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 .ind-card:hover{border-color:#a8dfc0;box-shadow:0 4px 16px rgba(29,107,62,.08)}
 .ind-ico{font-size:22px;margin-bottom:4px}
 .ind-val{font-family:'Poppins',sans-serif;font-size:19px;font-weight:700;color:#1d6b3e}
-.ind-unit{font-size:10px;color:#4a8a6a}
-.ind-name{font-size:10px;color:#4a8a6a;margin-top:2px}
+.ind-unit{font-size:10px;color:#64748B}
+.ind-name{font-size:10px;color:#64748B;margin-top:2px}
 .ind-t{font-size:10px;margin-top:3px;font-weight:500}
 
 /* ===== NEWS ===== */
 .news-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
-.news-card{background:#fff;border:1px solid #d4edd8;border-radius:13px;overflow:hidden;cursor:pointer;transition:.2s;display:block;text-decoration:none}
+.news-card{background:#fff;border:1px solid #C6A85B;border-radius:13px;overflow:hidden;cursor:pointer;transition:.2s;display:block;text-decoration:none}
 .news-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(29,107,62,.1);border-color:#a8dfc0}
 .news-img{height:200px;display:flex;align-items:center;justify-content:center;font-size:36px;position:relative;overflow:hidden;background:#f0fdf4}
 .news-img img{width:100%;height:100%;object-fit:contain;position:absolute;inset:0}
 .news-body{padding:13px}
 .news-cat{font-size:10px;font-weight:700;background:#e8f5ee;color:#1d6b3e;border-radius:20px;padding:2px 9px;display:inline-block;margin-bottom:6px}
 .news-title{font-size:12px;font-weight:600;color:#1a3d2b;line-height:1.45;margin-bottom:5px}
-.news-date{font-size:10px;color:#4a8a6a}
+.news-date{font-size:10px;color:#64748B}
 .ver-mas-row{text-align:center;margin-top:20px}
 .btn-ver-mas{display:inline-flex;align-items:center;gap:7px;padding:11px 24px;background:#fff;color:#1d6b3e;border:1.5px solid #a8dfc0;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;transition:.2s;text-decoration:none}
 .btn-ver-mas:hover{background:#e8f5ee;border-color:#1d6b3e}
 
 /* ===== PROJECTS ===== */
 .proj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
-.proj-card{background:#fff;border:1px solid #d4edd8;border-radius:13px;overflow:hidden;transition:.2s;display:block;text-decoration:none}
+.proj-card{background:#fff;border:1px solid #1d6b3e;border-radius:13px;overflow:hidden;transition:.2s;display:block;text-decoration:none}
 .proj-card:hover{box-shadow:0 6px 20px rgba(29,107,62,.1);border-color:#a8dfc0}
 .proj-img{height:160px;display:flex;align-items:center;justify-content:center;font-size:28px;background:#f0fdf4}
 .proj-body{padding:13px}
@@ -333,18 +343,18 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 .proj-name{font-size:12px;font-weight:600;color:#1a3d2b;margin-bottom:7px}
 .proj-bar{width:100%;height:5px;background:#e8f5ee;border-radius:3px;overflow:hidden;margin-bottom:3px}
 .proj-fill{height:100%;border-radius:3px;background:#1d6b3e}
-.proj-pct{font-size:10px;color:#4a8a6a}
+.proj-pct{font-size:10px;color:#64748B}
 
 /* ===== AGENDA ===== */
 .agenda-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
-.ev-card{background:#fff;border:1px solid #d4edd8;border-radius:11px;padding:13px;display:flex;gap:11px;transition:.2s}
+.ev-card{background:#fff;border:1px solid #C6A85B;border-radius:11px;padding:13px;display:flex;gap:11px;transition:.2s}
 .ev-card:hover{border-color:#a8dfc0;box-shadow:0 4px 14px rgba(29,107,62,.08)}
 .ev-date{background:#e8f5ee;border-radius:9px;padding:6px 9px;text-align:center;flex-shrink:0;min-width:44px}
 .ev-day{font-family:'Poppins',sans-serif;font-size:19px;font-weight:800;color:#1d6b3e;line-height:1}
-.ev-mon{font-size:9px;color:#4a8a6a;text-transform:uppercase;letter-spacing:.06em}
+.ev-mon{font-size:9px;color:#64748B;text-transform:uppercase;letter-spacing:.06em}
 .ev-tipo{font-size:10px;background:#e8f5ee;color:#1d6b3e;border-radius:20px;padding:1px 8px;display:inline-block;margin-bottom:3px;font-weight:600}
 .ev-title{font-size:12px;font-weight:600;color:#1a3d2b;margin-bottom:2px;line-height:1.35}
-.ev-place{font-size:10px;color:#4a8a6a}
+.ev-place{font-size:10px;color:#64748B}
 
 /* ===== CTA ===== */
 .cta{background:linear-gradient(135deg,#0d2d1a 0%,#1d6b3e 100%);padding:56px 24px;text-align:center;color:#fff;position:relative;overflow:hidden}
@@ -391,7 +401,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 .fsubmit:hover{background:#155c32}
 .dinfo-card{background:#fff;border:1px solid #d4edd8;border-radius:16px;padding:20px;margin-bottom:14px}
 .dinfo-card h4{font-size:13px;font-weight:600;color:#1a3d2b;margin-bottom:12px}
-.dinfo-row{display:flex;align-items:flex-start;gap:8px;margin-bottom:8px;font-size:12px;color:#4a8a6a}
+.dinfo-row{display:flex;align-items:flex-start;gap:8px;margin-bottom:8px;font-size:12px;color:#64748B}
 .dinfo-ico{font-size:14px;flex-shrink:0;margin-top:1px}
 
 /* ===== TOAST ===== */
@@ -403,8 +413,8 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 .modal-bg.open{display:flex}
 .modal{background:#fff;border-radius:16px;padding:28px;max-width:380px;width:90%;position:relative;box-shadow:0 8px 40px rgba(0,0,0,.2)}
 .modal h3{font-family:'Poppins',sans-serif;font-size:18px;font-weight:700;color:#1a3d2b;margin-bottom:4px}
-.modal p{font-size:12px;color:#4a8a6a;margin-bottom:18px}
-.modal-close{position:absolute;top:14px;right:16px;background:none;border:none;font-size:20px;cursor:pointer;color:#4a8a6a;line-height:1}
+.modal p{font-size:12px;color:#64748B;margin-bottom:18px}
+.modal-close{position:absolute;top:14px;right:16px;background:none;border:none;font-size:20px;cursor:pointer;color:#64748B;line-height:1}
 .modal .fg{margin-bottom:12px}
 .modal-footer{display:flex;gap:10px;margin-top:6px}
 
@@ -417,14 +427,14 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 .chat-head span{font-size:13px;font-weight:600}
 .chat-close{background:none;border:none;color:#fff;font-size:22px;cursor:pointer;line-height:1;padding:0 2px;opacity:.9}
 .chat-close:hover{opacity:1}
-.chat-msgs{padding:14px;min-height:100px;max-height:320px;overflow-y:auto;font-size:12px;color:#4a6a5a;display:flex;flex-direction:column;gap:8px;flex:1}
+.chat-msgs{padding:14px;min-height:100px;max-height:320px;overflow-y:auto;font-size:12px;color:#64748B;display:flex;flex-direction:column;gap:8px;flex:1}
 .chat-bubble{background:#e8f5ee;border-radius:10px 10px 10px 2px;padding:9px 12px;max-width:85%;line-height:1.5}
 .chat-input-row{display:flex;border-top:1px solid #d4edd8}
 .chat-input-row input{flex:1;border:none;padding:10px 12px;font-size:12px;outline:none;font-family:'Inter',sans-serif}
 .chat-input-row button{background:#1d6b3e;border:none;color:#fff;padding:0 14px;cursor:pointer;font-size:14px}
 
 /* ===== EMPTY STATE ===== */
-.empty-state{text-align:center;padding:32px 16px;color:#4a8a6a;font-size:13px}
+.empty-state{text-align:center;padding:32px 16px;color:#64748B;font-size:13px}
 .empty-state .ico{font-size:32px;margin-bottom:10px}
 
 /* ===== DROP ZONE ===== */
@@ -432,15 +442,15 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 .drop-zone:hover,.drop-zone.over{border-color:#1d6b3e;background:#e8f5ee}
 .dz-icon{font-size:28px;margin-bottom:6px}
 .dz-text{font-size:13px;color:#1a3d2b;margin-bottom:3px}
-.dz-sub{font-size:11px;color:#4a8a6a}
+.dz-sub{font-size:11px;color:#64748B}
 .adjuntos-preview{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
 .adj-item{position:relative;border:1px solid #d4edd8;border-radius:8px;overflow:hidden;background:#fff;width:90px;flex-shrink:0}
 .adj-img{width:90px;height:70px;object-fit:cover;display:block}
-.adj-file{width:90px;height:70px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:10px;color:#4a8a6a;padding:4px}
+.adj-file{width:90px;height:70px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:10px;color:#64748B;padding:4px}
 .adj-file-ico{font-size:26px}
-.adj-name{font-size:9px;color:#4a8a6a;text-align:center;padding:3px 4px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;max-width:88px}
+.adj-name{font-size:9px;color:#64748B;text-align:center;padding:3px 4px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;max-width:88px}
 .adj-remove{position:absolute;top:2px;right:2px;width:18px;height:18px;background:rgba(220,38,38,.9);border:none;border-radius:50%;color:#fff;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1}
-.adj-size{font-size:9px;color:#4a8a6a;text-align:center;padding-bottom:3px}
+.adj-size{font-size:9px;color:#64748B;text-align:center;padding-bottom:3px}
 
 /* ===== RESPONSIVE ===== */
 @media(max-width:980px){
@@ -490,14 +500,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
   <nav class="nav">
     <div class="navinner">
       <a class="logo" href="#" onclick="showPage('home');return false">
-        <div class="logo-img">
-          <img src="./logo-iagami.png" alt="Logo IAGAMI" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"/>
-          <svg style="display:none" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        </div>
-        <div>
-          <div class="logo-text">IAGAMI</div>
-          <div class="logo-sub">Gestión Ambiental · Iribarren</div>
-        </div>
+        <img src="./logo-iagami.png" alt="Logo IAGAMI" style="height:48px;width:auto;display:block" onerror="this.style.display='none'"/>
       </a>
       <div class="navlinks" id="navlinks">
         <a class="nl active" href="#" onclick="showPage('home');closeMobileNav();return false">Inicio</a>
@@ -571,7 +574,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 
       </div>
       <button class="chat-fab" title="Semeruquito — Asistente Virtual IAGAMI" aria-label="Abrir asistente virtual Semeruquito" onclick="toggleChat()">
-        <img class="chat-fab-avatar" src="assets/images/semeruquito.svg" alt="Semeruquito"
+        <img class="chat-fab-avatar" src="assets/images/semeruquito.png" alt="Semeruquito"
           onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
         <span style="display:none;width:58px;height:58px;background:#1d6b3e;border-radius:50%;align-items:center;justify-content:center;font-size:28px">🍎</span>
         <div class="chat-fab-dot"></div>
@@ -613,105 +616,68 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
         <p>Accede a los servicios institucionales del municipio desde cualquier dispositivo</p>
       </div>
       <div class="svc-grid">
-        <a class="svc-card" href="#" onclick="showPage('denuncia');return false">
-          <div class="svc-ico" style="background:#fee2e2">🚨</div>
-          <div class="svc-name">Presentar Denuncia</div>
-          <div class="svc-desc">Reporta problemas ambientales</div>
+        <a class="svc-card svc-img" href="#" onclick="showPage('denuncia');return false">
+          <img src="assets/images/iconos/01_presentar_denuncia.png" alt="Presentar Denuncia">
         </a>
-        <a class="svc-card" href="tramites/index.html">
-          <div class="svc-ico" style="background:#dbeafe">📋</div>
-          <div class="svc-name">Trámites en Línea</div>
-          <div class="svc-desc">Permisos y certificaciones</div>
+        <a class="svc-card svc-img" href="tramites/index.html">
+          <img src="assets/images/iconos/02_tramites_en_linea.png" alt="Trámites en Línea">
         </a>
-        <a class="svc-card" href="multas/index.html">
-          <div class="svc-ico" style="background:#fef3c7">⚖️</div>
-          <div class="svc-name">Multas Ambientales</div>
-          <div class="svc-desc">Consulta expedientes</div>
+        <a class="svc-card svc-img" href="multas/index.html">
+          <img src="assets/images/iconos/03_multas_ambientales.png" alt="Multas Ambientales">
         </a>
-        <a class="svc-card" href="atencion/index.html">
-          <div class="svc-ico" style="background:#f3e8ff">👥</div>
-          <div class="svc-name">Atención Ciudadana</div>
-          <div class="svc-desc">Consultas y seguimiento</div>
+        <a class="svc-card svc-img" href="atencion/index.html">
+          <img src="assets/images/iconos/04_atencion_ciudadana.png" alt="Atención Ciudadana">
         </a>
-        <a class="svc-card" href="transparencia/index.html">
-          <div class="svc-ico" style="background:#ccfbf1">🏛️</div>
-          <div class="svc-name">Transparencia</div>
-          <div class="svc-desc">Información institucional</div>
+        <a class="svc-card svc-img" href="transparencia/index.html">
+          <img src="assets/images/iconos/05_transparencia.png" alt="Transparencia">
         </a>
-        <a class="svc-card" href="agenda/index.html">
-          <div class="svc-ico" style="background:#e0f2fe">📅</div>
-          <div class="svc-name">Agenda SIGAP</div>
-          <div class="svc-desc">Actividades programadas</div>
+        <a class="svc-card svc-img" href="agenda/index.html">
+          <img src="assets/images/iconos/06_agenda_sigap.png" alt="Agenda SIGAP">
         </a>
-        <a class="svc-card" href="empresas/index.html">
-          <div class="svc-ico" style="background:#dcfce7">🏢</div>
-          <div class="svc-name">Registro Empresa</div>
-          <div class="svc-desc">Registro ambiental</div>
+        <a class="svc-card svc-img" href="empresas/index.html">
+          <img src="assets/images/iconos/07_registro_empresa.png" alt="Registro Empresa">
         </a>
-        <a class="svc-card" href="consejos-comunales/index.html">
-          <div class="svc-ico" style="background:#fce7f3">🌿</div>
-          <div class="svc-name">Comunas</div>
-          <div class="svc-desc">Consejos comunales</div>
+        <a class="svc-card svc-img" href="permisos-ambientales/index.html">
+          <img src="assets/images/iconos/permisos_ambientales.png" alt="Permisos Ambientales">
         </a>
-        <a class="svc-card" href="noticias/index.html">
-          <div class="svc-ico" style="background:#ffedd5">📰</div>
-          <div class="svc-name">Noticias</div>
-          <div class="svc-desc">Actualidad institucional</div>
+        <a class="svc-card svc-img" href="consejos-comunales/index.html">
+          <img src="assets/images/iconos/comunas.png" alt="Comunas">
         </a>
-        <a class="svc-card" href="revista/index.html">
-          <div class="svc-ico" style="background:#ede9fe">📖</div>
-          <div class="svc-name">Revista</div>
-          <div class="svc-desc">Publicación digital</div>
+        <a class="svc-card svc-img" href="noticias/index.html">
+          <img src="assets/images/iconos/08_noticias.png" alt="Noticias">
         </a>
-        <a class="svc-card" href="indicadores/index.html">
-          <div class="svc-ico" style="background:#d1fae5">📊</div>
-          <div class="svc-name">Indicadores</div>
-          <div class="svc-desc">Monitoreo ambiental</div>
+        <a class="svc-card svc-img" href="revista/index.html">
+          <img src="assets/images/iconos/09_revista.png" alt="Revista">
         </a>
-        <a class="svc-card" href="sala-situacional/index.html">
-          <div class="svc-ico" style="background:#cffafe">💧</div>
-          <div class="svc-name">Sala del Agua</div>
-          <div class="svc-desc">Sala situacional</div>
+        <a class="svc-card svc-img" href="indicadores/index.html">
+          <img src="assets/images/iconos/10_indicadores.png" alt="Indicadores">
         </a>
-        <a class="svc-card" href="organizacion/index.html">
-          <div class="svc-ico" style="background:#fef9c3">🏢</div>
-          <div class="svc-name">Organización</div>
-          <div class="svc-desc">Estructura institucional</div>
+        <a class="svc-card svc-img" href="sala-situacional/index.html">
+          <img src="assets/images/iconos/19_sala_del_agua.png" alt="Sala del Agua">
         </a>
-        <a class="svc-card" href="planificacion/index.html">
-          <div class="svc-ico" style="background:#e0e7ff">🗂️</div>
-          <div class="svc-name">Planificación</div>
-          <div class="svc-desc">Planes y proyectos</div>
+        <a class="svc-card svc-img" href="organizacion/index.html">
+          <img src="assets/images/iconos/11_organizacion.png" alt="Organización">
         </a>
-        <a class="svc-card" href="proyectos/index.html">
-          <div class="svc-ico" style="background:#dcfce7">🏗️</div>
-          <div class="svc-name">Proyectos SIGAP</div>
-          <div class="svc-desc">Obras y programas</div>
+        <a class="svc-card svc-img" href="planificacion/index.html">
+          <img src="assets/images/iconos/12_planificacion.png" alt="Planificación">
         </a>
-        <a class="svc-card" href="siga-iagami/login.html">
-          <div class="svc-ico" style="background:#e0f2fe">🏢</div>
-          <div class="svc-name">Portal del Trabajador</div>
-          <div class="svc-desc">Intranet IAGAMI</div>
+        <a class="svc-card svc-img" href="proyectos/index.html">
+          <img src="assets/images/iconos/13_proyectos_sigap.png" alt="Proyectos SIGAP">
         </a>
-        <a class="svc-card" href="brigadas-ambientales/index.html">
-          <div class="svc-ico" style="background:#d1fae5">🌿</div>
-          <div class="svc-name">Brigadas Ambientales</div>
-          <div class="svc-desc">Únete y protege el ambiente</div>
+        <a class="svc-card svc-img" href="siga-iagami/login.html">
+          <img src="assets/images/iconos/14_portal_trabajador.png" alt="Portal del Trabajador">
         </a>
-        <a class="svc-card" href="brigadas-ambientales/mapa/index.html">
-          <div class="svc-ico" style="background:#d1fae5">🗺️</div>
-          <div class="svc-name">Mapa de Brigadas</div>
-          <div class="svc-desc">Distribución por parroquia</div>
+        <a class="svc-card svc-img" href="brigadas-ambientales/index.html">
+          <img src="assets/images/iconos/15_mapa_brigadas.png" alt="Brigadas Ambientales">
         </a>
-        <a class="svc-card" href="aula-ambiental/index.html">
-          <div class="svc-ico" style="background:#fef3c7">📚</div>
-          <div class="svc-name">Aula Ambiental</div>
-          <div class="svc-desc">Videos, cursos y recursos</div>
+        <a class="svc-card svc-img" href="brigadas-ambientales/mapa/index.html">
+          <img src="assets/images/iconos/18_mapa_brigadas_alternativo.png" alt="Mapa de Brigadas">
         </a>
-        <a class="svc-card" href="aula-ambiental/estudiante/index.html">
-          <div class="svc-ico" style="background:#ede9fe">📗</div>
-          <div class="svc-name">Portal del Estudiante</div>
-          <div class="svc-desc">Accede a tus cursos y clases</div>
+        <a class="svc-card svc-img" href="aula-ambiental/index.html">
+          <img src="assets/images/iconos/16_aula_ambiental.png" alt="Aula Ambiental">
+        </a>
+        <a class="svc-card svc-img" href="aula-ambiental/estudiante/index.html">
+          <img src="assets/images/iconos/17_portal_estudiante.png" alt="Portal del Estudiante">
         </a>
       </div>
     </div>
@@ -856,7 +822,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
   <div class="cta" style="background:linear-gradient(135deg,#061209 0%,#0d2d1a 50%,#061a0d 100%);position:relative;overflow:hidden">
     <div style="position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 50% 100%,rgba(34,197,94,.12),transparent 70%);pointer-events:none"></div>
     <div style="position:relative;z-index:1">
-      <div class="sec-tag" style="background:rgba(74,222,128,.12);border-color:rgba(74,222,128,.3);color:#4ade80">PARTICIPACIÓN CIUDADANA</div>
+      <div class="sec-tag" style="background:rgba(74,222,128,.12);border-color:rgba(74,222,128,.3);color:#C6A85B">PARTICIPACIÓN CIUDADANA</div>
       <h2 style="margin-top:12px;font-size:clamp(24px,4vw,40px);letter-spacing:-0.02em;color:#F8FAFC">¿Observas un problema ambiental?</h2>
       <p style="color:rgba(255,255,255,.6);max-width:520px;margin:12px auto 28px;line-height:1.75">Tu denuncia es importante. Con tecnología IA asignamos prioridad y área competente automáticamente. Juntos protegemos el Municipio Iribarren.</p>
       <button class="cta-btn" onclick="showPage('denuncia')" data-ripple>
@@ -876,10 +842,6 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
         <div class="fp-brand-logo">
           <div class="fp-brand-logo-box">
             <img src="./logo-iagami.png" alt="IAGAMI" onerror="this.src='';this.style.display='none';this.parentElement.innerHTML='<span style=\'font-family:Poppins,sans-serif;font-size:13px;font-weight:800;color:#1a3d2b;text-align:center;line-height:1.1\'>IAGA<br>MI</span>'"/>
-          </div>
-          <div>
-            <div class="fp-brand-name">IAGAMI</div>
-            <div class="fp-brand-sub">Instituto Autónomo de Gestión Ambiental</div>
           </div>
         </div>
         <p class="fp-mission">Municipio Iribarren, Estado Lara, Venezuela. Comprometidos con la gestión ambiental sostenible y la participación ciudadana activa.</p>
@@ -938,7 +900,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
         <div><div class="logo-text">IAGAMI</div><div class="logo-sub">Gestión Ambiental · Iribarren</div></div>
       </a>
       <div class="navlinks">
-        <a class="nl" href="#" onclick="showPage('home');return false">← Volver al Inicio</a>
+        <a href="#" onclick="showPage('home');return false" style="display:inline-flex;align-items:center;gap:12px;text-decoration:none;font-family:'Poppins',sans-serif;font-size:16px;font-weight:800;color:#3a7a1e;text-shadow:0 1px 0 #6aaa30,1px 2px 0 #2d6a1f,2px 3px 0 #1a4a10,0 0 12px rgba(80,160,40,.18);letter-spacing:.01em;transition:.2s"><img src="/assets/images/leaf-arrow.png" height="42" alt="Portal institucional" style="display:block"></a>
       </div>
       <div class="navr">
         <button class="navbtn-o nav-admin-btn" style="display:none" onclick="window.location='admin/index.html'">Admin</button>
@@ -997,7 +959,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
           </div>
           <!-- ADJUNTOS -->
           <div class="fg">
-            <label class="flabel">Fotos o documentos adjuntos <span style="font-weight:400;color:#4a8a6a">(opcional)</span></label>
+            <label class="flabel">Fotos o documentos adjuntos <span style="font-weight:400;color:#64748B">(opcional)</span></label>
             <div id="drop-zone" class="drop-zone" onclick="document.getElementById('den-archivos').click()" ondragover="dzOver(event)" ondragleave="dzLeave(event)" ondrop="dzDrop(event)" role="button" tabindex="0" aria-label="Zona para adjuntar archivos" onkeydown="if(event.key==='Enter')this.click()">
               <div class="dz-icon">📎</div>
               <div class="dz-text">Arrastra archivos aquí o <strong>haz clic para seleccionar</strong></div>
@@ -1064,7 +1026,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
     <h3 id="denuncia-ok-title">¡Denuncia enviada!</h3>
     <p style="margin-bottom:8px">Tu caso ha sido registrado y asignado al área competente.</p>
     <p id="modal-caso-num" style="font-size:12px;color:#1d6b3e;font-weight:700;margin-bottom:4px"></p>
-    <p style="font-size:11px;color:#4a8a6a">Recibirás respuesta en el tiempo establecido según la prioridad asignada.</p>
+    <p style="font-size:11px;color:#64748B">Recibirás respuesta en el tiempo establecido según la prioridad asignada.</p>
     <button class="fsubmit" style="margin-top:18px" onclick="closeModal('modal-denuncia-ok')">Aceptar</button>
   </div>
 </div>
@@ -1073,7 +1035,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
 <div id="chat-panel" class="chat-panel" role="dialog" aria-label="Asistente virtual Semeruquito">
   <div class="chat-head">
     <div class="chat-head-info">
-      <img class="chat-head-avatar" src="assets/images/semeruquito.svg" alt=""
+      <img class="chat-head-avatar" src="assets/images/semeruquito.png" alt=""
         onerror="this.style.display='none'" aria-hidden="true"/>
       <span>Semeruquito — Asistente IAGAMI</span>
     </div>
@@ -1104,7 +1066,7 @@ body{font-family:'Inter',sans-serif;background:#f0faf5;color:#1a3d2b;line-height
       </div>
     </div>
     <div style="background:#fff;padding:18px 28px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid #e8f5ee">
-      <div style="font-size:11px;color:#4a8a6a;font-weight:500">Portal Institucional IAGAMI · Municipio Iribarren</div>
+      <div style="font-size:11px;color:#64748B;font-weight:500">Portal Institucional IAGAMI · Municipio Iribarren</div>
       <button onclick="cerrarBienvenida()" style="background:#1d6b3e;color:#fff;border:none;border-radius:10px;padding:10px 24px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;display:inline-flex;align-items:center;gap:8px;transition:.2s;white-space:nowrap">
         Continuar
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
@@ -1502,7 +1464,7 @@ function renderAdjuntos() {
       <button class="adj-remove" onclick="removeAdjunto(${i})" aria-label="Eliminar ${safeName}" title="Eliminar">×</button>
       ${isImg
         ? `<img class="adj-img" src="${f.dataUrl}" alt="${safeName}"/>`
-        : `<div class="adj-file"><span class="adj-file-ico">${fileIcon}</span><span style="font-size:9px;color:#4a8a6a;text-align:center;padding:2px 4px">${f.type.split('/')[1]?.toUpperCase()||'FILE'}</span></div>`
+        : `<div class="adj-file"><span class="adj-file-ico">${fileIcon}</span><span style="font-size:9px;color:#64748B;text-align:center;padding:2px 4px">${f.type.split('/')[1]?.toUpperCase()||'FILE'}</span></div>`
       }
       <div class="adj-name" title="${safeName}">${safeName}</div>
       <div class="adj-size">${sizeStr}</div>
@@ -1615,7 +1577,7 @@ async function renderAlertBar() {
   if (!ticker) return;
   const items = alertas
     .map(a => `<span class="alert-pill">${escHtml(a.mensaje)}</span>`)
-    .join('<span style="color:#4a8a6a;padding:0 8px">·</span>');
+    .join('<span style="color:#64748B;padding:0 8px">·</span>');
   ticker.innerHTML = alertas.length > 1
     ? items + '<span style="padding:0 24px">·</span>' + items
     : items;
@@ -1797,7 +1759,7 @@ async function renderHomeRevista() {
       <div style="padding:14px;flex:1;display:flex;flex-direction:column;gap:6px">
         <div style="font-size:10px;font-weight:700;color:#1d6b3e;text-transform:uppercase;letter-spacing:.06em">${escHtml(r.categoria) || 'Institucional'}</div>
         <div style="font-family:'Poppins',sans-serif;font-size:13px;font-weight:700;color:#1a3d2b;line-height:1.3;flex:1">${escHtml(r.titulo)}</div>
-        <div style="font-size:11px;color:#4a8a6a">📅 ${escHtml(r.fecha) || '—'} · Edición Nº ${escHtml(r.edicion)}</div>
+        <div style="font-size:11px;color:#64748B">📅 ${escHtml(r.fecha) || '—'} · Edición Nº ${escHtml(r.edicion)}</div>
         <div style="display:flex;gap:7px;margin-top:6px">
           <a href="revista/visor.html?id=${encodeURIComponent(r.id)}" style="flex:1;padding:7px;background:#1d6b3e;color:#fff;border-radius:7px;font-size:11px;font-weight:700;text-align:center;text-decoration:none;font-family:'Poppins',sans-serif">👁 Ver</a>
           <a href="revista/index.html" style="flex:1;padding:7px;background:#fff;color:#1d6b3e;border:1.5px solid #1d6b3e;border-radius:7px;font-size:11px;font-weight:700;text-align:center;text-decoration:none;font-family:'Poppins',sans-serif">⬇ PDF</a>
@@ -1830,8 +1792,8 @@ async function renderHomeTramites() {
           <div style="font-family:'Poppins',sans-serif;font-size:13px;font-weight:700;color:#1a3d2b;line-height:1.3">${escHtml(t.nombre)}</div>
         </div>
       </div>
-      ${t.descripcion ? `<div style="font-size:12px;color:#4a6a5a;line-height:1.5">${escHtml(t.descripcion.slice(0,100))}${t.descripcion.length>100?'…':''}</div>` : ''}
-      <div style="display:flex;gap:12px;font-size:11px;color:#4a8a6a">
+      ${t.descripcion ? `<div style="font-size:12px;color:#64748B;line-height:1.5">${escHtml(t.descripcion.slice(0,100))}${t.descripcion.length>100?'…':''}</div>` : ''}
+      <div style="display:flex;gap:12px;font-size:11px;color:#64748B">
         ${t.tiempo_respuesta ? `<span>⏱ ${escHtml(t.tiempo_respuesta)}</span>` : ''}
         ${t.costo ? `<span>💰 ${escHtml(t.costo)}</span>` : ''}
       </div>
@@ -1862,7 +1824,7 @@ async function renderHomeDocumentos() {
           <div style="font-family:'Poppins',sans-serif;font-size:13px;font-weight:700;color:#1a3d2b;line-height:1.3">${escHtml(d.titulo)}</div>
         </div>
       </div>
-      ${d.descripcion ? `<div style="font-size:12px;color:#4a6a5a;line-height:1.5">${escHtml(d.descripcion.slice(0,100))}${d.descripcion.length>100?'…':''}</div>` : ''}
+      ${d.descripcion ? `<div style="font-size:12px;color:#64748B;line-height:1.5">${escHtml(d.descripcion.slice(0,100))}${d.descripcion.length>100?'…':''}</div>` : ''}
       ${d.pdf_url ? `<a href="${/^https?:\/\//i.test(d.pdf_url) ? escHtml(d.pdf_url) : '#'}" target="_blank" rel="noopener noreferrer" style="margin-top:auto;padding:7px 14px;background:#1d6b3e;color:#fff;border-radius:8px;font-size:11px;font-weight:700;text-align:center;text-decoration:none;font-family:'Poppins',sans-serif">⬇ Descargar PDF</a>`
         : `<a href="transparencia/index.html" style="margin-top:auto;padding:7px 14px;background:#fff;color:#1d6b3e;border:1.5px solid #1d6b3e;border-radius:8px;font-size:11px;font-weight:700;text-align:center;text-decoration:none;font-family:'Poppins',sans-serif">Ver en Transparencia →</a>`}
     </div>`).join('');
@@ -2052,14 +2014,19 @@ async function doLogin() {
     'rgba(168,214,120,.88)','rgba(74,140,84,.82)',
     'rgba(140,196,100,.86)','rgba(60,120,60,.80)'
   ];
+  const dorados = [
+    'rgba(198,168,91,.70)','rgba(220,185,100,.65)',
+    'rgba(210,175,95,.72)','rgba(190,155,80,.68)'
+  ];
   for(let i=0;i<22;i++){
     const el = document.createElement('div');
     el.className = 'hoja-hero leaf';
     const size = rnd(7,18), dur = rnd(7,13);
+    const paleta = Math.random()<0.30 ? dorados : verdes;
     el.style.cssText = `
       left:${rnd(10,88)}%;bottom:${rnd(5,90)}%;
       width:${size}px;height:${size}px;
-      background:${verdes[Math.floor(rnd(0,verdes.length))]};
+      background:${paleta[Math.floor(rnd(0,paleta.length))]};
       --dx:${rnd(-80,80)}px;--dy:${rnd(-280,-110)}px;
       --dr:${rnd(-240,240)}deg;--s:${rnd(0.65,1.35)};
       --o:${rnd(0.40,0.80)};--dur:${dur.toFixed(2)}s;
@@ -2071,9 +2038,11 @@ async function doLogin() {
     const el = document.createElement('div');
     el.className = 'hoja-hero mote';
     const size = rnd(3,8), dur = rnd(6,11);
+    const paleta = Math.random()<0.30 ? dorados : verdes;
     el.style.cssText = `
       left:${rnd(15,82)}%;bottom:${rnd(10,85)}%;
       width:${size}px;height:${size}px;
+      background:${paleta[Math.floor(rnd(0,paleta.length))]};
       --dx:${rnd(-55,55)}px;--dy:${rnd(-220,-80)}px;
       --dr:0deg;--s:${rnd(0.6,1.5)};
       --o:${rnd(0.50,0.90)};--dur:${dur.toFixed(2)}s;

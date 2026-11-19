@@ -149,7 +149,7 @@ textarea.form-control{resize:vertical;min-height:80px}
     </div>
     <button class="btn btn-primary" style="width:100%;margin-top:4px" onclick="doLogin()">Ingresar al Portal</button>
     <p style="text-align:center;font-size:12px;color:var(--muted);margin-top:16px">¿Sin acceso? Contacta al administrador de IAGAMI.</p>
-    <p style="text-align:center;font-size:12px;margin-top:8px"><a href="../../" style="color:var(--primary)">← Volver al portal público</a></p>
+    <p style="text-align:center;font-size:12px;margin-top:8px"><a href="../../" style="display:inline-flex;align-items:center;gap:12px;text-decoration:none;font-family:'Poppins',sans-serif;font-size:16px;font-weight:800;color:#3a7a1e;text-shadow:0 1px 0 #6aaa30,1px 2px 0 #2d6a1f,2px 3px 0 #1a4a10,0 0 12px rgba(80,160,40,.18);letter-spacing:.01em;transition:.2s"><img src="/assets/images/leaf-arrow.png" height="42" alt="Portal institucional" style="display:block"></a></p>
   </div>
 </div>
 
@@ -181,6 +181,9 @@ textarea.form-control{resize:vertical;min-height:80px}
       <div onclick="showSec('evaluaciones')" class="nav-item" id="nav-evaluaciones"><span class="nav-ico">📝</span> Evaluaciones</div>
       <div onclick="showSec('tareas')"       class="nav-item" id="nav-tareas"      ><span class="nav-ico">📋</span> Tareas</div>
       <div onclick="showSec('asistencia')"   class="nav-item" id="nav-asistencia"  ><span class="nav-ico">✅</span> Asistencia</div>
+      <div onclick="showSec('cuestionarios')" class="nav-item"    id="nav-cuestionarios"><span class="nav-ico">📝</span> Cuestionarios</div>
+      <div onclick="showSec('foros')"        class="nav-item"    id="nav-foros"       ><span class="nav-ico">💬</span> Foros</div>
+      <div onclick="showSec('progreso')"     class="nav-item"    id="nav-progreso"    ><span class="nav-ico">📊</span> Progreso Alumnos</div>
       <div onclick="showSec('ia-asistente')" class="nav-item"      id="nav-ia-asistente"><span class="nav-ico">🤖</span> IA Asistente</div>
       <div onclick="showSec('perfil')"    class="nav-item"        id="nav-perfil"   ><span class="nav-ico">👤</span> Mi Perfil</div>
     </div>
@@ -723,6 +726,88 @@ textarea.form-control{resize:vertical;min-height:80px}
         </div>
       </div>
 
+      <!-- ── JITSI (tab en sec-clases se agrega dinámicamente) ── -->
+
+      <!-- ── CUESTIONARIOS (PROFESOR) ── -->
+      <div class="section" id="sec-cuestionarios">
+        <div class="page-header">
+          <div class="page-title">📝 Cuestionarios</div>
+          <div class="page-subtitle">Crea exámenes para tus cursos y revisa resultados</div>
+          <button class="btn btn-primary btn-sm" onclick="openCuestFormProf()">+ Nuevo cuestionario</button>
+        </div>
+        <!-- Formulario -->
+        <div id="cuest-form-prof" style="display:none;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px">
+          <div style="font-weight:700;font-size:15px;margin-bottom:14px" id="cuest-form-titulo-prof">Nuevo Cuestionario</div>
+          <input type="hidden" id="cuest-edit-id-prof">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div class="form-group"><label class="form-label">Título *</label><input class="form-control" id="cuest-titulo-prof" placeholder="Título del cuestionario"></div>
+            <div class="form-group"><label class="form-label">Curso *</label><select class="form-control" id="cuest-curso-prof"><option value="">Seleccionar...</option></select></div>
+            <div class="form-group"><label class="form-label">Tipo</label><select class="form-control" id="cuest-tipo-prof"><option value="practica">Práctica</option><option value="parcial">Parcial</option><option value="final">Final</option><option value="diagnostico">Diagnóstico</option></select></div>
+            <div class="form-group"><label class="form-label">Tiempo límite (min)</label><input class="form-control" type="number" id="cuest-tiempo-prof" placeholder="Dejar vacío = sin límite"></div>
+            <div class="form-group"><label class="form-label">Nota aprobatoria (%)</label><input class="form-control" type="number" id="cuest-nota-prof" value="60"></div>
+            <div class="form-group"><label class="form-label">Estado</label><select class="form-control" id="cuest-estado-prof"><option value="borrador">Borrador</option><option value="activo">Activo (visible)</option><option value="cerrado">Cerrado</option></select></div>
+          </div>
+          <div class="form-group"><label class="form-label">Descripción</label><textarea class="form-control" id="cuest-desc-prof" rows="2"></textarea></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
+            <label style="display:flex;align-items:center;gap:6px;font-size:13px"><input type="checkbox" id="cuest-publicado-prof"> Publicado</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:13px"><input type="checkbox" id="cuest-mezclar-prof"> Mezclar preguntas</label>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:14px">
+            <button class="btn btn-primary btn-sm" onclick="saveCuestProf()">Guardar</button>
+            <button class="btn btn-secondary btn-sm" onclick="closeCuestFormProf()">Cancelar</button>
+          </div>
+        </div>
+        <div id="cuest-prof-list">Cargando...</div>
+      </div>
+
+      <!-- ── FOROS (PROFESOR) ── -->
+      <div class="section" id="sec-foros">
+        <div class="page-header">
+          <div class="page-title">💬 Foros</div>
+          <div class="page-subtitle">Administra los foros de debate de tus cursos</div>
+          <button class="btn btn-primary btn-sm" onclick="openForoFormProf()">+ Nuevo foro</button>
+        </div>
+        <div id="foro-form-prof" style="display:none;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px">
+          <div style="font-weight:700;margin-bottom:12px">Nuevo Foro</div>
+          <input type="hidden" id="foro-edit-id-prof">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div class="form-group"><label class="form-label">Título *</label><input class="form-control" id="foro-titulo-prof" placeholder="Tema del foro"></div>
+            <div class="form-group"><label class="form-label">Curso *</label><select class="form-control" id="foro-curso-prof"><option value="">Seleccionar...</option></select></div>
+            <div class="form-group"><label class="form-label">Tipo</label><select class="form-control" id="foro-tipo-prof"><option value="general">General</option><option value="debate">Debate</option><option value="consulta">Consulta</option><option value="ideas">Ideas</option></select></div>
+            <div class="form-group"><label class="form-label">Estado</label><select class="form-control" id="foro-activo-prof"><option value="true">Activo</option><option value="false">Inactivo</option></select></div>
+          </div>
+          <div class="form-group"><label class="form-label">Descripción</label><textarea class="form-control" id="foro-desc-prof" rows="2"></textarea></div>
+          <div style="display:flex;gap:8px;margin-top:14px">
+            <button class="btn btn-primary btn-sm" onclick="saveForoProf()">Guardar</button>
+            <button class="btn btn-secondary btn-sm" onclick="closeForoFormProf()">Cancelar</button>
+          </div>
+        </div>
+        <div id="foros-prof-list">Cargando...</div>
+        <div id="foro-thread-prof" style="display:none">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+            <button class="btn btn-secondary btn-sm" onclick="volverForosProf()">← Volver</button>
+            <div style="font-size:15px;font-weight:700" id="foro-thread-titulo-prof"></div>
+          </div>
+          <div id="foro-mensajes-thread-prof" style="max-height:400px;overflow-y:auto;margin-bottom:16px"></div>
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px">
+            <textarea id="foro-nuevo-msg-prof" class="form-control" rows="3" placeholder="Escribe tu respuesta..."></textarea>
+            <button class="btn btn-primary btn-sm" style="margin-top:10px" onclick="enviarMensajeForoProf()">📤 Publicar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── PROGRESO ALUMNOS (PROFESOR) ── -->
+      <div class="section" id="sec-progreso">
+        <div class="page-header">
+          <div class="page-title">📊 Progreso de Alumnos</div>
+          <div class="page-subtitle">Monitorea el avance de cada estudiante en tus cursos</div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px">
+          <select class="form-control" id="prog-curso-prof" style="min-width:200px" onchange="renderProgresoProf()"><option value="">Todos los cursos</option></select>
+        </div>
+        <div id="progreso-prof-list">Cargando...</div>
+      </div>
+
     </div><!-- /main-content -->
   </div><!-- /app-layout -->
 </div><!-- /screen-app -->
@@ -890,6 +975,9 @@ function showSec(id) {
   if (id === 'evaluaciones') renderEvaluaciones();
   if (id === 'tareas')       renderTareas();
   if (id === 'asistencia')   renderAsistencia();
+  if (id === 'cuestionarios') renderCuestionariosProf();
+  if (id === 'foros')         renderForosProf();
+  if (id === 'progreso')      renderProgresoProf();
 }
 
 function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
@@ -2284,6 +2372,354 @@ function iaDescargarJSON(tipo) {
     }).catch(() => { doLogout(); });
   } catch(e) { /* silent */ }
 })();
+
+/* ─── JITSI (PROFESOR — iniciar sala) ─── */
+let _jitsiApiProf = null;
+
+function inyectarJitsiEnClases() {
+  const wrap = document.getElementById('zoom-meetings-list');
+  if (!wrap || document.getElementById('jitsi-btn-prof')) return;
+  const div = document.createElement('div');
+  div.style.cssText = 'margin-top:20px;padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:12px';
+  div.innerHTML = `
+    <div style="font-weight:700;font-size:15px;margin-bottom:8px">🟢 Sala Virtual Jitsi Meet</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:12px">Inicia una videollamada en vivo con tus alumnos. Sin instalación, gratis, hasta 100 participantes.</div>
+    <div style="margin-bottom:12px">
+      <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px">Clase a transmitir:</label>
+      <select id="jitsi-clase-prof-sel" class="form-control" style="max-width:400px"><option value="">-- elige una clase --</option></select>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button id="jitsi-btn-prof" class="btn btn-primary" onclick="iniciarJitsiProf()">🎥 Iniciar sala</button>
+      <button class="btn btn-secondary btn-sm" onclick="cargarClasesJitsiProf()">↻ Actualizar lista</button>
+    </div>
+    <div id="jitsi-container-prof" style="display:none;margin-top:16px;border-radius:12px;overflow:hidden;border:2px solid var(--primary)">
+      <div style="background:var(--primary);color:#fff;padding:10px 16px;display:flex;align-items:center;justify-content:space-between">
+        <span id="jitsi-clase-nombre-prof" style="font-weight:600">Sala virtual</span>
+        <button onclick="salirJitsiProf()" style="background:rgba(255,255,255,.2);border:none;color:#fff;padding:4px 10px;border-radius:6px;font-size:12px;cursor:pointer">✕ Finalizar</button>
+      </div>
+      <div id="jitsi-frame-prof" style="height:560px"></div>
+    </div>`;
+  wrap.parentElement.appendChild(div);
+  cargarClasesJitsiProf();
+}
+
+async function cargarClasesJitsiProf() {
+  const sel = document.getElementById('jitsi-clase-prof-sel');
+  if (!sel) return;
+  try {
+    const cursoIds = (_misCursos||[]).map(c=>c.id);
+    if (!cursoIds.length) return;
+    const filter = encodeURIComponent(cursoIds.map(id=>`curso_id="${id}"`).join('||'));
+    const data = await pbFetch(`/api/collections/clases_virtuales/records?filter=${filter}&sort=-fecha&perPage=50`);
+    sel.innerHTML = '<option value="">-- elige una clase --</option>' +
+      (data.items||[]).map(c=>`<option value="${c.id}">${c.titulo||'Clase'} ${c.fecha?'· '+c.fecha.slice(0,10):''}</option>`).join('');
+  } catch(e) {}
+}
+
+function iniciarJitsiProf() {
+  const claseId = document.getElementById('jitsi-clase-prof-sel')?.value;
+  if (!claseId) { toast('Selecciona una clase primero', 'error'); return; }
+  const sel = document.getElementById('jitsi-clase-prof-sel');
+  const titulo = sel.options[sel.selectedIndex]?.text || 'Sala virtual';
+  document.getElementById('jitsi-clase-nombre-prof').textContent = titulo;
+  document.getElementById('jitsi-container-prof').style.display = 'block';
+  document.getElementById('jitsi-frame-prof').innerHTML = '';
+  if (_jitsiApiProf) { try { _jitsiApiProf.dispose(); } catch(e){} _jitsiApiProf = null; }
+  if (window.JitsiMeetExternalAPI) {
+    _jitsiApiProf = new JitsiMeetExternalAPI('meet.jit.si', {
+      roomName: 'iagami-clase-' + claseId,
+      parentNode: document.getElementById('jitsi-frame-prof'),
+      width: '100%',
+      height: 560,
+      configOverwrite: { startWithAudioMuted: false, startWithVideoMuted: false, disableDeepLinking: true },
+      interfaceConfigOverwrite: { TOOLBAR_BUTTONS: ['microphone','camera','chat','tileview','fullscreen','hangup','recording'], SHOW_JITSI_WATERMARK: false },
+      userInfo: { displayName: 'Prof. ' + ((_profesor?.nombre||'') + ' ' + (_profesor?.apellido||'')).trim() }
+    });
+  } else {
+    document.getElementById('jitsi-frame-prof').innerHTML = '<div style="padding:30px;text-align:center;color:var(--muted)">⚠️ Cargando Jitsi... recarga la página.</div>';
+  }
+}
+
+function salirJitsiProf() {
+  if (_jitsiApiProf) { try { _jitsiApiProf.dispose(); } catch(e){} _jitsiApiProf = null; }
+  document.getElementById('jitsi-container-prof').style.display = 'none';
+  document.getElementById('jitsi-frame-prof').innerHTML = '';
+}
+
+/* ─── CUESTIONARIOS (PROFESOR) ─── */
+async function renderCuestionariosProf() {
+  const el = document.getElementById('cuest-prof-list');
+  if (!el) return;
+  el.innerHTML = '<div class="loading-ai"><div class="spinner"></div><p>Cargando...</p></div>';
+  // Cargar cursos en selector del formulario
+  const selCurso = document.getElementById('cuest-curso-prof');
+  if (selCurso && selCurso.options.length <= 1) {
+    (_misCursos||[]).forEach(c => { const o = document.createElement('option'); o.value=c.id; o.textContent=c.nombre||c.id; selCurso.appendChild(o); });
+  }
+  try {
+    const cursoIds = (_misCursos||[]).map(c=>c.id);
+    const filter = cursoIds.length ? cursoIds.map(id=>`curso_id="${id}"`).join('||') : 'id=""';
+    const data = await pb.collection('cuestionarios').getList(1,50,{filter, expand:'curso_id', sort:'-created'});
+    if (!data.items.length) { el.innerHTML = '<p style="color:var(--muted);padding:20px 0">No has creado cuestionarios aún.</p>'; return; }
+    el.innerHTML = `<div style="overflow-x:auto"><table class="table"><thead><tr><th>Título</th><th>Curso</th><th>Tipo</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>` +
+      data.items.map(q => `<tr>
+        <td><strong>${q.titulo}</strong><br><small style="color:var(--muted)">${q.tiempo_limite_min?q.tiempo_limite_min+' min':'Sin límite'} · Aprueba: ${q.nota_aprobatoria||60}%</small></td>
+        <td>${q.expand?.curso_id?.nombre||'—'}</td>
+        <td><span class="badge badge-blue">${q.tipo||'—'}</span></td>
+        <td><span class="badge ${q.estado==='activo'?'badge-green':q.estado==='cerrado'?'badge-gray':'badge-yellow'}">${q.estado||'borrador'}</span></td>
+        <td style="display:flex;gap:6px;flex-wrap:wrap">
+          <button class="btn btn-secondary btn-sm" onclick="editCuestProf('${q.id}')">✏️</button>
+          <button class="btn btn-secondary btn-sm" onclick="verRespuestasProf('${q.id}','${(q.titulo||'').replace(/'/g,"\\'")}')">📊 Resultados</button>
+          <button class="btn btn-secondary btn-sm" style="color:#e53e3e" onclick="deleteCuestProf('${q.id}')">🗑</button>
+        </td>
+      </tr>`).join('') + '</tbody></table></div>';
+  } catch(e) { el.innerHTML = `<p style="color:#e53e3e">Error: ${e.message}</p>`; }
+}
+
+function openCuestFormProf(data={}) {
+  document.getElementById('cuest-form-prof').style.display = 'block';
+  document.getElementById('cuest-form-titulo-prof').textContent = data.id ? 'Editar Cuestionario' : 'Nuevo Cuestionario';
+  document.getElementById('cuest-edit-id-prof').value = data.id||'';
+  document.getElementById('cuest-titulo-prof').value = data.titulo||'';
+  document.getElementById('cuest-desc-prof').value = data.descripcion||'';
+  document.getElementById('cuest-tipo-prof').value = data.tipo||'practica';
+  document.getElementById('cuest-tiempo-prof').value = data.tiempo_limite_min||'';
+  document.getElementById('cuest-nota-prof').value = data.nota_aprobatoria||60;
+  document.getElementById('cuest-estado-prof').value = data.estado||'borrador';
+  document.getElementById('cuest-publicado-prof').checked = !!data.publicado;
+  document.getElementById('cuest-mezclar-prof').checked = !!data.mezclar_preguntas;
+  document.getElementById('cuest-curso-prof').value = data.curso_id||'';
+}
+
+function closeCuestFormProf() { document.getElementById('cuest-form-prof').style.display='none'; }
+
+async function editCuestProf(id) {
+  try { const d = await pb.collection('cuestionarios').getOne(id); openCuestFormProf(d); }
+  catch(e) { toast('Error: '+e.message,'error'); }
+}
+
+async function saveCuestProf() {
+  const titulo = document.getElementById('cuest-titulo-prof').value.trim();
+  const cursoId = document.getElementById('cuest-curso-prof').value;
+  if (!titulo) { toast('El título es requerido','error'); return; }
+  if (!cursoId) { toast('Selecciona un curso','error'); return; }
+  const payload = {
+    titulo, curso_id: cursoId,
+    descripcion: document.getElementById('cuest-desc-prof').value,
+    tipo: document.getElementById('cuest-tipo-prof').value,
+    tiempo_limite_min: parseInt(document.getElementById('cuest-tiempo-prof').value)||null,
+    nota_aprobatoria: parseFloat(document.getElementById('cuest-nota-prof').value)||60,
+    estado: document.getElementById('cuest-estado-prof').value,
+    publicado: document.getElementById('cuest-publicado-prof').checked,
+    mezclar_preguntas: document.getElementById('cuest-mezclar-prof').checked
+  };
+  const id = document.getElementById('cuest-edit-id-prof').value;
+  try {
+    if (id) await pb.collection('cuestionarios').update(id, payload);
+    else await pb.collection('cuestionarios').create(payload);
+    toast(id?'Cuestionario actualizado':'Cuestionario creado');
+    closeCuestFormProf(); renderCuestionariosProf();
+  } catch(e) { toast('Error: '+e.message,'error'); }
+}
+
+async function deleteCuestProf(id) {
+  if (!confirm('¿Eliminar este cuestionario?')) return;
+  try { await pb.collection('cuestionarios').delete(id); toast('Eliminado'); renderCuestionariosProf(); }
+  catch(e) { toast('Error: '+e.message,'error'); }
+}
+
+async function verRespuestasProf(cuestionarioId, titulo) {
+  const el = document.getElementById('cuest-prof-list');
+  el.innerHTML = `<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+    <button class="btn btn-secondary btn-sm" onclick="renderCuestionariosProf()">← Volver</button>
+    <div style="font-weight:700">Resultados: ${titulo}</div>
+  </div><div class="loading-ai"><div class="spinner"></div><p>Cargando resultados...</p></div>`;
+  try {
+    const data = await pb.collection('respuestas_cuestionario').getList(1,100,{
+      filter:`cuestionario_id="${cuestionarioId}" && estado="completado"`,
+      expand:'estudiante_id', sort:'-created'
+    });
+    if (!data.items.length) { el.querySelector('.loading-ai').outerHTML = '<p style="color:var(--muted)">Nadie ha completado este cuestionario aún.</p>'; return; }
+    const resHtml = `<div style="overflow-x:auto"><table class="table"><thead><tr><th>Estudiante</th><th>Nota</th><th>Resultado</th><th>Fecha</th></tr></thead><tbody>` +
+      data.items.map(r => `<tr>
+        <td>${r.expand?.estudiante_id?.nombre||'—'} ${r.expand?.estudiante_id?.apellido||''}</td>
+        <td><strong>${r.porcentaje||0}%</strong> (${r.puntuacion||0}/${r.puntuacion_maxima||0} pts)</td>
+        <td><span class="badge ${r.aprobado?'badge-green':'badge-red'}">${r.aprobado?'Aprobado':'No aprobado'}</span></td>
+        <td>${r.created?new Date(r.created).toLocaleDateString('es'):'—'}</td>
+      </tr>`).join('') + '</tbody></table></div>';
+    el.innerHTML = el.innerHTML.replace('<div class="loading-ai"><div class="spinner"></div><p>Cargando resultados...</p></div>', resHtml);
+  } catch(e) { el.innerHTML += `<p style="color:#e53e3e">Error: ${e.message}</p>`; }
+}
+
+/* ─── FOROS (PROFESOR) ─── */
+let _foroActualProf = null;
+
+async function renderForosProf() {
+  const el = document.getElementById('foros-prof-list');
+  if (!el) return;
+  el.innerHTML = '<div class="loading-ai"><div class="spinner"></div><p>Cargando...</p></div>';
+  document.getElementById('foro-thread-prof').style.display = 'none';
+  el.style.display = '';
+  const selCurso = document.getElementById('foro-curso-prof');
+  if (selCurso && selCurso.options.length <= 1) {
+    (_misCursos||[]).forEach(c => { const o = document.createElement('option'); o.value=c.id; o.textContent=c.nombre||c.id; selCurso.appendChild(o); });
+  }
+  try {
+    const cursoIds = (_misCursos||[]).map(c=>c.id);
+    const filter = cursoIds.length ? cursoIds.map(id=>`curso_id="${id}"`).join('||') : 'id=""';
+    const data = await pb.collection('foros_aula').getList(1,50,{filter, expand:'curso_id', sort:'orden,created'});
+    if (!data.items.length) { el.innerHTML = '<p style="color:var(--muted);padding:20px 0">No has creado foros aún.</p>'; return; }
+    el.innerHTML = `<div style="overflow-x:auto"><table class="table"><thead><tr><th>Título</th><th>Curso</th><th>Tipo</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>` +
+      data.items.map(f => `<tr>
+        <td><strong>${f.titulo}</strong>${f.descripcion?`<br><small style="color:var(--muted)">${f.descripcion}</small>`:''}</td>
+        <td>${f.expand?.curso_id?.nombre||'—'}</td>
+        <td>${f.tipo||'general'}</td>
+        <td><span class="badge ${f.activo?'badge-green':'badge-gray'}">${f.activo?'Activo':'Inactivo'}</span></td>
+        <td style="display:flex;gap:6px;flex-wrap:wrap">
+          <button class="btn btn-secondary btn-sm" onclick="abrirForoProf('${f.id}','${(f.titulo||'').replace(/'/g,"\\'")}')">💬 Ver mensajes</button>
+          <button class="btn btn-secondary btn-sm" onclick="editForoProf('${f.id}')">✏️</button>
+          <button class="btn btn-secondary btn-sm" style="color:#e53e3e" onclick="deleteForoProf('${f.id}')">🗑</button>
+        </td>
+      </tr>`).join('') + '</tbody></table></div>';
+  } catch(e) { el.innerHTML = `<p style="color:#e53e3e">Error: ${e.message}</p>`; }
+}
+
+function openForoFormProf(data={}) {
+  document.getElementById('foro-form-prof').style.display = 'block';
+  document.getElementById('foro-edit-id-prof').value = data.id||'';
+  document.getElementById('foro-titulo-prof').value = data.titulo||'';
+  document.getElementById('foro-desc-prof').value = data.descripcion||'';
+  document.getElementById('foro-tipo-prof').value = data.tipo||'general';
+  document.getElementById('foro-activo-prof').value = data.activo!==false?'true':'false';
+  document.getElementById('foro-curso-prof').value = data.curso_id||'';
+}
+
+function closeForoFormProf() { document.getElementById('foro-form-prof').style.display='none'; }
+
+async function editForoProf(id) {
+  try { const d = await pb.collection('foros_aula').getOne(id); openForoFormProf(d); }
+  catch(e) { toast('Error: '+e.message,'error'); }
+}
+
+async function saveForoProf() {
+  const titulo = document.getElementById('foro-titulo-prof').value.trim();
+  const cursoId = document.getElementById('foro-curso-prof').value;
+  if (!titulo) { toast('El título es requerido','error'); return; }
+  if (!cursoId) { toast('Selecciona un curso','error'); return; }
+  const payload = {
+    titulo, curso_id: cursoId,
+    descripcion: document.getElementById('foro-desc-prof').value,
+    tipo: document.getElementById('foro-tipo-prof').value,
+    activo: document.getElementById('foro-activo-prof').value === 'true'
+  };
+  const id = document.getElementById('foro-edit-id-prof').value;
+  try {
+    if (id) await pb.collection('foros_aula').update(id, payload);
+    else await pb.collection('foros_aula').create(payload);
+    toast(id?'Foro actualizado':'Foro creado');
+    closeForoFormProf(); renderForosProf();
+  } catch(e) { toast('Error: '+e.message,'error'); }
+}
+
+async function deleteForoProf(id) {
+  if (!confirm('¿Eliminar este foro y todos sus mensajes?')) return;
+  try { await pb.collection('foros_aula').delete(id); toast('Foro eliminado'); renderForosProf(); }
+  catch(e) { toast('Error: '+e.message,'error'); }
+}
+
+async function abrirForoProf(foroId, titulo) {
+  _foroActualProf = foroId;
+  document.getElementById('foros-prof-list').style.display = 'none';
+  document.getElementById('foro-form-prof').style.display = 'none';
+  const thread = document.getElementById('foro-thread-prof');
+  thread.style.display = 'block';
+  document.getElementById('foro-thread-titulo-prof').textContent = titulo;
+  const msgsEl = document.getElementById('foro-mensajes-thread-prof');
+  msgsEl.innerHTML = '<div class="loading-ai"><div class="spinner"></div></div>';
+  try {
+    const data = await pb.collection('mensajes_foro').getList(1,100,{filter:`foro_id="${foroId}"`, sort:'created'});
+    if (!data.items.length) { msgsEl.innerHTML = '<p style="color:var(--muted);font-size:13px">Sin mensajes aún.</p>'; return; }
+    msgsEl.innerHTML = data.items.map(m => `
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <div style="width:36px;height:36px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0">${(m.nombre_autor||'?')[0].toUpperCase()}</div>
+        <div style="flex:1;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 14px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+            <span style="font-size:12px;font-weight:600">${m.nombre_autor||'Usuario'} <span style="color:var(--muted);font-weight:400">· ${m.tipo_autor||''}</span></span>
+            <div style="display:flex;gap:6px">
+              <span style="font-size:11px;color:var(--muted)">${new Date(m.created).toLocaleString('es')}</span>
+              <button class="btn btn-secondary btn-sm" style="font-size:11px;padding:2px 8px;color:#e53e3e" onclick="deleteMsgForoProf('${m.id}')">🗑</button>
+            </div>
+          </div>
+          <div style="font-size:13px">${m.mensaje}</div>
+        </div>
+      </div>`).join('');
+  } catch(e) { msgsEl.innerHTML = `<p style="color:#e53e3e">Error: ${e.message}</p>`; }
+}
+
+async function deleteMsgForoProf(id) {
+  if (!confirm('¿Eliminar este mensaje?')) return;
+  try { await pb.collection('mensajes_foro').delete(id); abrirForoProf(_foroActualProf, document.getElementById('foro-thread-titulo-prof').textContent); }
+  catch(e) { toast('Error: '+e.message,'error'); }
+}
+
+async function enviarMensajeForoProf() {
+  const msg = document.getElementById('foro-nuevo-msg-prof').value.trim();
+  if (!msg || !_foroActualProf) return;
+  try {
+    await pb.collection('mensajes_foro').create({
+      foro_id: _foroActualProf, mensaje: msg, tipo_autor: 'profesor',
+      nombre_autor: ((_profesor?.nombre||'') + ' ' + (_profesor?.apellido||'')).trim(),
+      activo: true, nivel: 0
+    });
+    document.getElementById('foro-nuevo-msg-prof').value = '';
+    abrirForoProf(_foroActualProf, document.getElementById('foro-thread-titulo-prof').textContent);
+  } catch(e) { toast('Error: '+e.message,'error'); }
+}
+
+function volverForosProf() {
+  _foroActualProf = null;
+  document.getElementById('foro-thread-prof').style.display = 'none';
+  renderForosProf();
+}
+
+/* ─── PROGRESO ALUMNOS (PROFESOR) ─── */
+async function renderProgresoProf() {
+  const el = document.getElementById('progreso-prof-list');
+  if (!el) return;
+  el.innerHTML = '<div class="loading-ai"><div class="spinner"></div><p>Cargando...</p></div>';
+  const selCurso = document.getElementById('prog-curso-prof');
+  if (selCurso && selCurso.options.length <= 1) {
+    (_misCursos||[]).forEach(c => { const o = document.createElement('option'); o.value=c.id; o.textContent=c.nombre||c.id; selCurso.appendChild(o); });
+  }
+  const cursoFiltro = selCurso?.value;
+  try {
+    let filter = (_misCursos||[]).map(c=>`curso_id="${c.id}"`).join('||');
+    if (cursoFiltro) filter = `curso_id="${cursoFiltro}"`;
+    if (!filter) { el.innerHTML = '<p style="color:var(--muted)">No tienes cursos activos.</p>'; return; }
+    const data = await pb.collection('progreso_estudiante').getList(1,100,{filter, expand:'curso_id,estudiante_id', sort:'-porcentaje_avance'});
+    if (!data.items.length) { el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted)"><div style="font-size:48px">📊</div><p>Sin datos de progreso aún.</p></div>'; return; }
+    el.innerHTML = `<div style="overflow-x:auto"><table class="table"><thead><tr><th>Estudiante</th><th>Curso</th><th>Avance</th><th>Clases</th><th>Tareas</th><th>Promedio</th><th>Estado</th></tr></thead><tbody>` +
+      data.items.map(p => {
+        const pct = p.porcentaje_avance||0;
+        const color = pct>=80?'#38a169':pct>=50?'#d69e2e':'#e53e3e';
+        return `<tr>
+          <td>${p.expand?.estudiante_id?.nombre||'—'} ${p.expand?.estudiante_id?.apellido||''}</td>
+          <td>${p.expand?.curso_id?.nombre||'—'}</td>
+          <td>
+            <div style="display:flex;align-items:center;gap:8px">
+              <div style="background:var(--border);border-radius:999px;height:8px;width:80px;overflow:hidden"><div style="height:100%;background:${color};width:${pct}%"></div></div>
+              <span style="font-weight:700;color:${color}">${pct}%</span>
+            </div>
+          </td>
+          <td>${p.clases_vistas||0}/${p.clases_total||0}</td>
+          <td>${p.tareas_entregadas||0}/${p.tareas_total||0}</td>
+          <td>${p.nota_promedio?p.nota_promedio+'%':'—'}</td>
+          <td><span class="badge ${p.completado?'badge-green':'badge-yellow'}">${p.completado?'Completado':'En progreso'}</span></td>
+        </tr>`;
+      }).join('') + '</tbody></table></div>';
+  } catch(e) { el.innerHTML = `<p style="color:#e53e3e">Error: ${e.message}</p>`; }
+}
 </script>
+<script src="https://meet.jit.si/external_api.js" async onload="inyectarJitsiEnClases()"></script>
 </body>
 </html>
