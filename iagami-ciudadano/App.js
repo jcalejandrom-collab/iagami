@@ -590,25 +590,92 @@ function PantallaWeb({ url, titulo, onBack }) {
 }
 
 function PantallaAtencion({ onBack }) {
+  const telefonos = [
+    { cargo: 'Presidente', nombre: 'Ing. Mauricio Orellana', num: '0426 550-9382', href: 'tel:+584265509382', ini: 'MO' },
+    { cargo: 'Vicepresidenta', nombre: 'Lic. Dayana Bullones', num: '0412 519-1992', href: 'tel:+584125191992', ini: 'DB' },
+    { cargo: 'Atención al ciudadano', nombre: 'Línea ciudadana IAGAMI', num: '0412 672-9712', href: 'tel:+584126729712', ini: '📞' },
+    { cargo: 'Oficina — Denuncias e información', nombre: 'Teléfono fijo', num: '(0251) 257-9529', href: 'tel:+582512579529', ini: '☎' },
+  ];
+  const correos = [
+    { label: 'Vicepresidencia — Quejas y seguimiento', addr: 'vicepresidencia.iagami@gmail.com', nota: 'Quejas sobre trabajadores o mala praxis institucional.' },
+    { label: 'Control y seguimiento interno', addr: 'seguimientoycontroliagami@gmail.com', nota: 'Seguimiento de casos, control de gestión y fiscalización.' },
+  ];
   return (
     <View style={s.flex}>
-      <Header titulo="Atención Ciudadana" onBack={onBack} />
+      <Header titulo="Atención al Ciudadano" onBack={onBack} />
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 100 }}>
-        <Card style={{ marginBottom: 14, borderLeftWidth: 4, borderLeftColor: DORADO }}>
+
+        {/* Dirección */}
+        <Card style={{ marginBottom: 14, borderLeftWidth: 4, borderLeftColor: VERDE }}>
           <View style={{ padding: 16 }}>
-            <Text style={{ fontWeight: '700', color: VERDE_DARK, fontSize: 16, marginBottom: 10 }}>IAGAMI — Municipio Iribarren</Text>
-            <Text style={{ color: GRIS, marginBottom: 6 }}>📍 Barquisimeto, Estado Lara, Venezuela</Text>
-            <Text style={{ color: GRIS, marginBottom: 6 }}>🌐 iagami.online</Text>
-            <Text style={{ color: GRIS, marginBottom: 6 }}>📧 contacto@iagami.online</Text>
+            <Text style={{ color: DORADO, fontSize: 11, fontWeight: '700', letterSpacing: 1, marginBottom: 6 }}>📍 SEDE PRINCIPAL</Text>
+            <Text style={{ fontWeight: '700', color: VERDE_DARK, fontSize: 15, marginBottom: 6 }}>IAGAMI — Municipio Iribarren</Text>
+            <Text style={{ color: TEXTO, fontSize: 13, lineHeight: 20 }}>Av. Libertador entre Av. Los Leones y Av. Argimiro Bracamonte{'\n'}Barquisimeto 3001, Estado Lara</Text>
+            <Text style={{ color: GRIS, fontSize: 12, marginTop: 4, fontStyle: 'italic' }}>Dentro del Parque del Este</Text>
           </View>
         </Card>
+
+        {/* Teléfonos */}
+        <Card style={{ marginBottom: 14 }}>
+          <View style={{ padding: 16 }}>
+            <Text style={{ color: DORADO, fontSize: 11, fontWeight: '700', letterSpacing: 1, marginBottom: 14 }}>📱 DIRECTORIO TELEFÓNICO</Text>
+            {telefonos.map((t, i) => (
+              <View key={i}>
+                {i > 0 && <View style={{ height: 1, backgroundColor: '#e8f5ee', marginVertical: 10 }} />}
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                  <View style={{ width: 42, height: 42, borderRadius: 10, backgroundColor: VERDE, alignItems: 'center', justifyContent: 'center' }}>
+                    <Text style={{ color: '#fff', fontSize: 12, fontWeight: '700' }}>{t.ini}</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ fontSize: 10, color: GRIS, fontWeight: '600', letterSpacing: 0.5, textTransform: 'uppercase' }}>{t.cargo}</Text>
+                    <Text style={{ fontSize: 14, fontWeight: '700', color: VERDE_DARK }}>{t.nombre}</Text>
+                    <Text style={{ fontSize: 13, color: VERDE, fontWeight: '600', marginTop: 2 }}>{t.num}</Text>
+                  </View>
+                </View>
+              </View>
+            ))}
+          </View>
+        </Card>
+
+        {/* Correos */}
+        <Card style={{ marginBottom: 14 }}>
+          <View style={{ padding: 16 }}>
+            <Text style={{ color: DORADO, fontSize: 11, fontWeight: '700', letterSpacing: 1, marginBottom: 14 }}>✉️ CORREOS OFICIALES</Text>
+            {correos.map((c, i) => (
+              <View key={i}>
+                {i > 0 && <View style={{ height: 1, backgroundColor: '#e8f5ee', marginVertical: 12 }} />}
+                <Text style={{ fontSize: 10, color: GRIS, fontWeight: '600', letterSpacing: 0.5, textTransform: 'uppercase', marginBottom: 4 }}>{c.label}</Text>
+                <View style={{ backgroundColor: '#e8f5ee', borderRadius: 8, padding: 10 }}>
+                  <Text style={{ color: VERDE, fontWeight: '700', fontSize: 13 }}>{c.addr}</Text>
+                </View>
+                <Text style={{ color: GRIS, fontSize: 12, marginTop: 5, fontStyle: 'italic', lineHeight: 17 }}>{c.nota}</Text>
+              </View>
+            ))}
+          </View>
+        </Card>
+
+        {/* Horario */}
         <Card>
           <View style={{ padding: 16 }}>
-            <Text style={{ fontWeight: '700', color: TEXTO, marginBottom: 10 }}>Horario de atención</Text>
-            <Text style={{ color: GRIS }}>Lunes a Viernes: 8:00 AM – 4:00 PM</Text>
-            <Text style={{ color: GRIS, marginTop: 4 }}>Sábados: 8:00 AM – 12:00 PM</Text>
+            <Text style={{ color: DORADO, fontSize: 11, fontWeight: '700', letterSpacing: 1, marginBottom: 14 }}>🕐 HORARIO DE ATENCIÓN</Text>
+            {[
+              { dia: 'Lunes – Viernes', hora: '8:00 AM – 4:00 PM', abierto: true },
+              { dia: 'Sábado',          hora: '8:00 AM – 12:00 PM', abierto: true },
+              { dia: 'Domingo',         hora: 'Cerrado',             abierto: false },
+            ].map((h, i) => (
+              <View key={i} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 9, borderBottomWidth: i < 2 ? 1 : 0, borderBottomColor: '#e8f5ee' }}>
+                <Text style={{ fontWeight: '600', color: VERDE_DARK, fontSize: 14 }}>{h.dia}</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                  <Text style={{ color: GRIS, fontSize: 13 }}>{h.hora}</Text>
+                  <View style={{ backgroundColor: h.abierto ? '#dcfce7' : '#fee2e2', borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 }}>
+                    <Text style={{ color: h.abierto ? '#15803d' : '#dc2626', fontSize: 10, fontWeight: '700' }}>{h.abierto ? 'Abierto' : 'Cerrado'}</Text>
+                  </View>
+                </View>
+              </View>
+            ))}
           </View>
         </Card>
+
       </ScrollView>
     </View>
   );
