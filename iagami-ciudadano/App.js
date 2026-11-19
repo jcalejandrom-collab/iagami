@@ -582,7 +582,7 @@ function PantallaWeb({ url, js, onBack }) {
         javaScriptEnabled
         domStorageEnabled
         onNavigationStateChange={handleNavChange}
-        injectedJavaScript={js || undefined}
+        injectedJavaScript={"document.head.insertAdjacentHTML('beforeend','<style>.nav,.topbar,.alert-bar{display:none!important}</style>');" + (js || '') + "true;"}
         userAgent="Mozilla/5.0 (Linux; Android 11; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
       />
       <TouchableOpacity style={s.webBack} onPress={onBack}>
