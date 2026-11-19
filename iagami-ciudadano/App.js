@@ -3,8 +3,9 @@ import {
   View, Text, TouchableOpacity, ScrollView, StyleSheet,
   StatusBar, TextInput, Alert, ActivityIndicator,
   Image, FlatList, Platform, Dimensions,
-  KeyboardAvoidingView, Modal, Animated, Easing, Linking
+  KeyboardAvoidingView, Modal, Animated, Easing
 } from 'react-native';
+import { WebView } from 'react-native-webview';
 
 const VERDE = '#1d6b3e';
 const VERDE_DARK = '#1a3d2b';
@@ -218,10 +219,10 @@ function PantallaInicio({ ir }) {
           </Text>
           <Text style={s.heroSub}>Portal institucional IAGAMI. Planificación estratégica, seguimiento de actividades y monitoreo ambiental en tiempo real.</Text>
           <View style={s.heroBtns}>
-            <TouchableOpacity style={s.heroBtnPrimary} onPress={() => Linking.openURL(`${WEB}/#denuncias`)}>
+            <TouchableOpacity style={s.heroBtnPrimary} onPress={() => ir('denuncias')}>
               <Text style={s.heroBtnPrimaryTxt}>Presentar Denuncia</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={s.heroBtnSec} onPress={() => Linking.openURL(`${WEB}/#tramites`)}>
+            <TouchableOpacity style={s.heroBtnSec} onPress={() => ir('tramites')}>
               <Text style={s.heroBtnSecTxt}>Ver Trámites →</Text>
             </TouchableOpacity>
           </View>
@@ -288,7 +289,7 @@ function PantallaInicio({ ir }) {
             </TouchableOpacity>
           ))
         )}
-        <TouchableOpacity style={s.verTodo} onPress={() => Linking.openURL(`${WEB}/#noticias`)}>
+        <TouchableOpacity style={s.verTodo} onPress={() => ir('noticias')}>
           <Text style={s.verTodoTxt}>Ver todas las noticias →</Text>
         </TouchableOpacity>
       </View>
@@ -543,6 +544,26 @@ function PantallaAgenda({ onBack }) {
   );
 }
 
+function PantallaWeb({ url, titulo, onBack }) {
+  const [loading, setLoading] = useState(true);
+  return (
+    <View style={s.flex}>
+      <Header titulo={titulo} onBack={onBack} />
+      {loading && <ActivityIndicator color={VERDE} style={{ position: 'absolute', top: '50%', alignSelf: 'center', zIndex: 10 }} />}
+      <WebView
+        source={{ uri: url }}
+        style={s.flex}
+        onLoadEnd={() => setLoading(false)}
+        onError={() => setLoading(false)}
+        javaScriptEnabled
+        domStorageEnabled
+        startInLoadingState
+        userAgent="Mozilla/5.0 (Linux; Android 11; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
+      />
+    </View>
+  );
+}
+
 function PantallaAtencion({ onBack }) {
   return (
     <View style={s.flex}>
@@ -710,9 +731,14 @@ function FabSemeruquito({ onPress }) {
 
 export default function App() {
   const [pantalla, setPantalla] = useState('inicio');
+  const [webNav, setWebNav] = useState(null); // { url, titulo }
   const [chatVisible, setChatVisible] = useState(false);
-  const ir = id => { if (SCREENS[id] || id === 'inicio') setPantalla(id); };
-  const volver = () => setPantalla('inicio');
+  const ir = (id) => {
+    const mod = MODULOS.find(m => m.id === id);
+    if (mod) { setWebNav({ url: mod.url, titulo: mod.label }); return; }
+    if (SCREENS[id] || id === 'inicio') setPantalla(id);
+  };
+  const volver = () => { setWebNav(null); setPantalla('inicio'); };
   const Pantalla = SCREENS[pantalla];
 
   return (
@@ -720,7 +746,11 @@ export default function App() {
       <StatusBar backgroundColor={VERDE_DARK} barStyle="light-content" />
       <Navbar onHome={volver} />
       <View style={s.flex}>
-        {pantalla === 'inicio' ? <PantallaInicio ir={ir} /> : Pantalla ? <Pantalla onBack={volver} /> : <PantallaInicio ir={ir} />}
+        {webNav
+          ? <PantallaWeb url={webNav.url} titulo={webNav.titulo} onBack={() => setWebNav(null)} />
+          : pantalla === 'inicio' ? <PantallaInicio ir={ir} />
+          : Pantalla ? <Pantalla onBack={volver} />
+          : <PantallaInicio ir={ir} />}
       </View>
       <FabSemeruquito onPress={() => setChatVisible(true)} />
       <Chatbot visible={chatVisible} onClose={() => setChatVisible(false)} />
