@@ -1,9 +1,9 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import {
   View, Text, TouchableOpacity, ScrollView, StyleSheet,
-  StatusBar, TextInput, Alert, ActivityIndicator,
-  Image, FlatList, Platform, Dimensions,
-  KeyboardAvoidingView, Modal, Animated, Easing, Keyboard
+  StatusBar, ActivityIndicator, Image, Platform, Dimensions,
+  KeyboardAvoidingView, Modal, Animated, Easing,
+  TextInput, Alert, BackHandler, Linking,
 } from 'react-native';
 import { WebView } from 'react-native-webview';
 
@@ -39,7 +39,7 @@ const ICONOS = {
 const WEB = 'https://iagami.online';
 
 const MODULOS = [
-  { id: 'denuncias',     label: 'Presentar Denuncia',   url: WEB, js: "showPage('denuncia');true;" },
+  { id: 'denuncias',     label: 'Presentar Denuncia',   url: WEB, pagina: 'denuncia' },
   { id: 'tramites',      label: 'Trámites en Línea',    url: `${WEB}/tramites` },
   { id: 'multas',        label: 'Multas Ambientales',   url: `${WEB}/multas` },
   { id: 'atencion',      label: 'Atención Ciudadana',   url: `${WEB}/atencion` },
@@ -217,8 +217,6 @@ function PantallaInicio({ ir }) {
       <View style={s.hero}>
         <Image source={HERO} style={s.heroImg} resizeMode="cover" />
         <HojasFlotantes />
-        {/* Degradado solo en la parte inferior */}
-        <View style={s.heroGradient} />
         <View style={s.heroOverlay}>
           <Text style={s.heroTag}>IAGAMI · Municipio Iribarren</Text>
           <Text style={s.heroTitle}>
@@ -307,305 +305,273 @@ function PantallaInicio({ ir }) {
   );
 }
 
-function PantallaNoticias({ onBack }) {
-  const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetch(`${API}/api/collections/noticias/records?sort=-created&perPage=20`)
-      .then(r => r.json()).then(d => { if (d.items) setItems(d.items); })
-      .catch(() => Alert.alert('Error', 'No se pudieron cargar las noticias'))
-      .finally(() => setLoading(false));
-  }, []);
+function crearScript(pagina) {
+  return String.raw`(function(){
+  if (window.__iagamiApp) { try { window.__iagamiApp.run(); } catch(e){} return; }
+  var A = window.__iagamiApp = {};
+  var PAGINA = ` + JSON.stringify(pagina || '') + String.raw`;
+  var RX = /portal institucional|acceso representantes|personal iagami/i;
+  var de = document.documentElement;
+  var revelado = false;
 
-  const imgUrl = n => n.imagen ? `${API}/api/files/noticias/${n.id}/${n.imagen}` : null;
+  function post(m){ try { if (window.ReactNativeWebView) window.ReactNativeWebView.postMessage(m); } catch(e){} }
+  function revelar(){ if (revelado) return; revelado = true; try { de.style.visibility = 'visible'; } catch(e){} post('ready'); }
+  try { de.style.visibility = 'hidden'; } catch(e){}
+  setTimeout(revelar, 5000);
 
-  return (
-    <View style={s.flex}>
-      <Header titulo="Noticias" onBack={onBack} />
-      {loading ? <ActivityIndicator color={VERDE} style={s.loader} /> : (
-        <FlatList data={items} keyExtractor={i => i.id}
-          contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
-          renderItem={({ item }) => (
-            <Card style={{ marginBottom: 14 }}>
-              {imgUrl(item) && <Image source={{ uri: imgUrl(item) }} style={[s.newsImg, { height: 220 }]} resizeMode="cover" />}
-              <View style={{ padding: 14 }}>
-                <Text style={s.newsTitle}>{item.titulo}</Text>
-                {item.resumen ? <Text style={s.newsSub}>{item.resumen}</Text> : null}
-                <Text style={s.newsDate}>{new Date(item.created).toLocaleDateString('es-VE')}</Text>
-              </View>
-            </Card>
-          )}
-          ListEmptyComponent={<Text style={s.empty}>Sin noticias disponibles</Text>}
-        />
-      )}
-    </View>
-  );
-}
+  var CSS =
+    'body>header,body>nav,body>div>header,body>div>nav,header nav,[role=banner],nav[role=navigation],' +
+    '.nav:not(.nav-tabs):not(.nav-pills),.navbar,.topbar,.top-bar,.alert-bar,.site-header,.main-header,' +
+    '.portal-header,#navbar,#header,#topbar,#nav{display:none!important}' +
+    'html,body{touch-action:pan-x pan-y!important;-webkit-text-size-adjust:100%!important;text-size-adjust:100%!important;overflow-x:hidden!important}' +
+    'body{padding-top:0!important}';
+  function css(){
+    if (document.getElementById('_app_css')) return;
+    var st = document.createElement('style'); st.id = '_app_css'; st.textContent = CSS;
+    (document.head || de).appendChild(st);
+  }
 
-function PantallaDenuncias({ onBack }) {
-  const [form, setForm] = useState({ nombre:'', cedula:'', telefono:'', email:'', tipo:'', descripcion:'', ubicacion:'' });
-  const [enviando, setEnviando] = useState(false);
-  const set = (k, v) => setForm(p => ({ ...p, [k]: v }));
+  var VP = 'width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover';
+  function vp(){
+    var h = document.head; if (!h) return;
+    var ms = document.querySelectorAll('meta[name=viewport]'), m = ms[0];
+    for (var i = 1; i < ms.length; i++) ms[i].parentNode.removeChild(ms[i]);
+    if (!m) { m = document.createElement('meta'); m.setAttribute('name','viewport'); h.insertBefore(m, h.firstChild); }
+    if (m.getAttribute('content') !== VP) m.setAttribute('content', VP);
+  }
 
-  const enviar = async () => {
-    if (!form.descripcion || !form.ubicacion) { Alert.alert('Campos requeridos', 'Descripción y ubicación son obligatorios.'); return; }
-    setEnviando(true);
+  function ocultar(el){
+    if (!el || el === document.body || el === de) return;
+    if (el.id === '_app_back_btn' || el.querySelector('#_app_back_btn')) return;
+    el.style.setProperty('display','none','important');
+  }
+  function yDoc(el){ return el.getBoundingClientRect().top + (window.pageYOffset || 0); }
+  function barra(el){
+    var best = null, n = el;
+    while (n && n !== document.body && n !== de) {
+      var r = n.getBoundingClientRect();
+      if (r.height > 170) break;
+      if (r.top + (window.pageYOffset||0) < 260) best = n;
+      n = n.parentElement;
+    }
+    return best;
+  }
+  function limpiar(){
+    var b = document.body; if (!b) return;
     try {
-      const r = await fetch(`${API}/api/collections/denuncias/records`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...form, estado: 'recibida', canal: 'app_movil' }),
-      });
-      if (r.ok) { Alert.alert('✅ Denuncia enviada', 'Tu denuncia fue registrada exitosamente.'); setForm({ nombre:'', cedula:'', telefono:'', email:'', tipo:'', descripcion:'', ubicacion:'' }); }
-      else Alert.alert('Error', 'No se pudo enviar. Intenta más tarde.');
-    } catch { Alert.alert('Error de conexión', 'Verifica tu internet.'); }
-    finally { setEnviando(false); }
-  };
+      var els = b.querySelectorAll('a,button,span,li,p,small,strong,b,h1,h2,h3,h4,h5,h6,div');
+      for (var i = 0; i < els.length; i++) {
+        var e = els[i];
+        if (e.childElementCount > 4 || !e.getClientRects().length) continue;
+        var t = e.textContent || '';
+        if (t.length > 70 || !RX.test(t) || yDoc(e) > 300) continue;
+        ocultar(barra(e));
+      }
+      var imgs = b.querySelectorAll('img');
+      for (var j = 0; j < imgs.length; j++) {
+        var im = imgs[j];
+        if (im.closest('#_app_back_btn') || !im.getClientRects().length) continue;
+        var file = (im.getAttribute('src') || '').split('?')[0].split('/').pop();
+        var alt = im.getAttribute('alt') || '';
+        if (!(/logo/i.test(file) || /iagami/i.test(alt))) continue;
+        if (yDoc(im) > 200) continue;
+        ocultar(barra(im));
+      }
+      var all = b.getElementsByTagName('*');
+      for (var k = 0; k < all.length; k++) {
+        var el = all[k]; if (el.id === '_app_back_btn') continue;
+        var cs = window.getComputedStyle(el);
+        if (cs.display === 'none' || (cs.position !== 'fixed' && cs.position !== 'sticky')) continue;
+        var rr = el.getBoundingClientRect();
+        var top = cs.position === 'fixed' ? rr.top : rr.top + (window.pageYOffset||0);
+        if (top <= 8 && rr.height > 0 && rr.height < 170 && rr.width > window.innerWidth * 0.6) ocultar(el);
+      }
+    } catch(e){}
+  }
 
-  const campo = (label, key, ph, multi = false) => (
-    <View style={s.campo}>
-      <Text style={s.campoLabel}>{label}</Text>
-      <TextInput style={[s.input, multi && { height: 100, textAlignVertical: 'top' }]}
-        placeholder={ph} placeholderTextColor={GRIS} value={form[key]} onChangeText={v => set(key, v)} multiline={multi} />
-    </View>
-  );
-
-  return (
-    <KeyboardAvoidingView style={s.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <Header titulo="Presentar Denuncia" onBack={onBack} />
-      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 100 }}>
-        <Card style={{ marginBottom: 12, borderLeftWidth: 4, borderLeftColor: DORADO }}>
-          <View style={{ padding: 14 }}>
-            <Text style={{ color: VERDE_DARK, fontWeight: '700', marginBottom: 4 }}>Denuncia Ambiental Ciudadana</Text>
-            <Text style={{ color: GRIS, fontSize: 13 }}>Reporta problemas ambientales. Los campos (*) son obligatorios.</Text>
-          </View>
-        </Card>
-        {campo('Nombre completo', 'nombre', 'Tu nombre (opcional)')}
-        {campo('Cédula', 'cedula', 'V-12345678 (opcional)')}
-        {campo('Teléfono', 'telefono', '0414-0000000 (opcional)')}
-        {campo('Email', 'email', 'correo@ejemplo.com (opcional)')}
-        {campo('Tipo de denuncia', 'tipo', 'Ej: Contaminación, Tala, Vertidos...')}
-        {campo('Ubicación *', 'ubicacion', 'Sector, calle, parroquia...')}
-        {campo('Descripción *', 'descripcion', 'Describe detalladamente la situación...', true)}
-        <TouchableOpacity style={[s.btnPrimary, enviando && { opacity: 0.6 }]} onPress={enviar} disabled={enviando}>
-          {enviando ? <ActivityIndicator color="#fff" /> : <Text style={s.btnPrimaryTxt}>Enviar Denuncia</Text>}
-        </TouchableOpacity>
-      </ScrollView>
-    </KeyboardAvoidingView>
-  );
-}
-
-function PantallaMultas({ onBack }) {
-  const [cedula, setCedula] = useState('');
-  const [multas, setMultas] = useState(null);
-  const [loading, setLoading] = useState(false);
-
-  const consultar = async () => {
-    if (!cedula.trim()) { Alert.alert('Ingresa tu cédula'); return; }
-    setLoading(true);
-    try {
-      const r = await fetch(`${API}/api/collections/multas/records?filter=(cedula='${cedula.trim()}')`);
-      const d = await r.json();
-      setMultas(d.items || []);
-    } catch { Alert.alert('Error de conexión'); }
-    finally { setLoading(false); }
-  };
-
-  return (
-    <View style={s.flex}>
-      <Header titulo="Multas Ambientales" onBack={onBack} />
-      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 100 }}>
-        <Card style={{ marginBottom: 16 }}>
-          <View style={{ padding: 14 }}>
-            <Text style={s.campoLabel}>Número de Cédula</Text>
-            <TextInput style={s.input} placeholder="Ej: 12345678" placeholderTextColor={GRIS} value={cedula} onChangeText={setCedula} keyboardType="numeric" />
-            <TouchableOpacity style={[s.btnPrimary, { marginTop: 12 }, loading && { opacity: 0.6 }]} onPress={consultar} disabled={loading}>
-              {loading ? <ActivityIndicator color="#fff" /> : <Text style={s.btnPrimaryTxt}>Consultar</Text>}
-            </TouchableOpacity>
-          </View>
-        </Card>
-        {multas !== null && (multas.length === 0
-          ? <Text style={s.empty}>No se encontraron multas para esta cédula.</Text>
-          : multas.map(m => (
-            <Card key={m.id} style={{ marginBottom: 12 }}>
-              <View style={{ padding: 14 }}>
-                <Text style={{ fontWeight: '700', color: TEXTO }}>{m.numero_expediente || 'Expediente s/n'}</Text>
-                <Text style={{ color: GRIS, marginTop: 4 }}>{m.descripcion}</Text>
-                <Text style={{ color: '#dc2626', marginTop: 6, fontWeight: '600' }}>Monto: Bs. {m.monto || '—'}</Text>
-                <Text style={{ color: GRIS, fontSize: 12 }}>Estado: {m.estado || '—'}</Text>
-              </View>
-            </Card>
-          ))
-        )}
-      </ScrollView>
-    </View>
-  );
-}
-
-function PantallaListado({ titulo, coleccion, campos, onBack }) {
-  const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch(`${API}/api/collections/${coleccion}/records?sort=-created&perPage=30`)
-      .then(r => r.json()).then(d => { if (d.items) setItems(d.items); }).catch(() => {}).finally(() => setLoading(false));
-  }, []);
-
-  return (
-    <View style={s.flex}>
-      <Header titulo={titulo} onBack={onBack} />
-      {loading ? <ActivityIndicator color={VERDE} style={s.loader} /> : (
-        <FlatList data={items} keyExtractor={i => i.id}
-          contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
-          renderItem={({ item }) => (
-            <Card style={{ marginBottom: 10 }}>
-              <View style={{ padding: 14 }}>
-                {campos.map(c => item[c.key] ? (
-                  <Text key={c.key} style={{ color: c.color || TEXTO, fontWeight: c.bold ? '700' : '400', fontSize: c.size || 14, marginBottom: 2 }}>
-                    {c.label ? `${c.label}: ` : ''}{item[c.key]}
-                  </Text>
-                ) : null)}
-              </View>
-            </Card>
-          )}
-          ListEmptyComponent={<Text style={s.empty}>No hay registros disponibles</Text>}
-        />
-      )}
-    </View>
-  );
-}
-
-function PantallaEmpresas({ onBack }) {
-  const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [busqueda, setBusqueda] = useState('');
-
-  useEffect(() => {
-    fetch(`${API}/api/collections/empresas/records?sort=nombre&perPage=50`)
-      .then(r => r.json()).then(d => { if (d.items) setItems(d.items); }).catch(() => {}).finally(() => setLoading(false));
-  }, []);
-
-  const filtradas = items.filter(e =>
-    e.nombre?.toLowerCase().includes(busqueda.toLowerCase()) || e.rif?.toLowerCase().includes(busqueda.toLowerCase())
-  );
-
-  return (
-    <View style={s.flex}>
-      <Header titulo="Registro de Empresas" onBack={onBack} />
-      <View style={{ padding: 12, backgroundColor: '#fff' }}>
-        <TextInput style={[s.input, { margin: 0 }]} placeholder="Buscar por nombre o RIF..." placeholderTextColor={GRIS} value={busqueda} onChangeText={setBusqueda} />
-      </View>
-      {loading ? <ActivityIndicator color={VERDE} style={s.loader} /> : (
-        <FlatList data={filtradas} keyExtractor={i => i.id}
-          contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
-          renderItem={({ item }) => (
-            <Card style={{ marginBottom: 10 }}>
-              <View style={{ padding: 14 }}>
-                <Text style={{ fontWeight: '700', color: TEXTO }}>{item.nombre}</Text>
-                <Text style={{ color: GRIS, fontSize: 13 }}>RIF: {item.rif || '—'}</Text>
-                {item.sector && <Text style={{ color: VERDE, fontSize: 12, marginTop: 4 }}>{item.sector}</Text>}
-              </View>
-            </Card>
-          )}
-          ListEmptyComponent={<Text style={s.empty}>No se encontraron empresas</Text>}
-        />
-      )}
-    </View>
-  );
-}
-
-function PantallaAgenda({ onBack }) {
-  const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch(`${API}/api/collections/eventos/records?sort=-fecha&perPage=20`)
-      .then(r => r.json()).then(d => { if (d.items) setItems(d.items); }).catch(() => {}).finally(() => setLoading(false));
-  }, []);
-
-  return (
-    <View style={s.flex}>
-      <Header titulo="Agenda SIGAP" onBack={onBack} />
-      {loading ? <ActivityIndicator color={VERDE} style={s.loader} /> : (
-        <FlatList data={items} keyExtractor={i => i.id}
-          contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
-          renderItem={({ item }) => (
-            <Card style={{ marginBottom: 12 }}>
-              <View style={{ padding: 14 }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
-                  <View style={{ backgroundColor: VERDE, borderRadius: 8, padding: 8, marginRight: 12, alignItems: 'center', minWidth: 50 }}>
-                    <Text style={{ color: '#fff', fontWeight: '700', fontSize: 16 }}>{item.fecha ? new Date(item.fecha).getDate() : '—'}</Text>
-                    <Text style={{ color: DORADO, fontSize: 10 }}>{item.fecha ? new Date(item.fecha).toLocaleString('es-VE', { month: 'short' }).toUpperCase() : ''}</Text>
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <Text style={{ fontWeight: '700', color: TEXTO }}>{item.titulo || item.nombre}</Text>
-                    {item.lugar && <Text style={{ color: GRIS, fontSize: 12 }}>{item.lugar}</Text>}
-                  </View>
-                </View>
-                {item.descripcion && <Text style={{ color: GRIS, fontSize: 13 }}>{item.descripcion}</Text>}
-              </View>
-            </Card>
-          )}
-          ListEmptyComponent={<Text style={s.empty}>No hay eventos próximos</Text>}
-        />
-      )}
-    </View>
-  );
-}
-
-function makeInject(extraJs) {
-  return `(function(){
-  document.documentElement.style.visibility='hidden';
-  document.head.insertAdjacentHTML('beforeend','<style>.nav,.navbar,.topbar,.alert-bar,nav{display:none!important}html,body{touch-action:pan-x pan-y;-ms-touch-action:pan-x pan-y}</style>');
-  var vm=document.querySelector('meta[name=viewport]');
-  if(vm) vm.setAttribute('content','width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no');
-  var first=document.body.firstElementChild;
-  if(first && first.tagName==='DIV' && !first.className) first.style.display='none';
-  ${extraJs || ''}
-  if(!document.getElementById('_app_back_btn')){
-    var b=document.createElement('div');
-    b.id='_app_back_btn';
-    b.innerHTML='<img src="https://iagami.online/assets/images/leaf-arrow.png" style="height:36px;vertical-align:middle"><span style="font-family:Poppins,sans-serif;font-weight:800;font-size:13px;color:#1a3d2b;margin-left:6px">App</span>';
-    b.style.cssText='position:fixed;bottom:22px;left:14px;z-index:99999;background:rgba(255,255,255,.93);border-radius:28px;padding:7px 14px 7px 10px;display:flex;align-items:center;box-shadow:0 3px 12px rgba(0,0,0,.18);border:1.5px solid rgba(29,107,62,.18);cursor:pointer';
-    b.onclick=function(){window.ReactNativeWebView.postMessage('goback');};
+  function boton(){
+    if (!document.body || document.getElementById('_app_back_btn')) return;
+    var b = document.createElement('div');
+    b.id = '_app_back_btn'; b.setAttribute('role','button');
+    b.style.cssText = 'position:fixed;bottom:22px;left:14px;z-index:2147483647;background:rgba(255,255,255,.93);border-radius:28px;padding:7px 14px 7px 10px;display:flex;align-items:center;box-shadow:0 3px 12px rgba(0,0,0,.18);border:1.5px solid rgba(29,107,62,.18);cursor:pointer';
+    var img = document.createElement('img');
+    img.src = 'https://iagami.online/assets/images/leaf-arrow.png';
+    img.style.cssText = 'height:36px;vertical-align:middle';
+    img.onerror = function(){ img.style.display = 'none'; };
+    var sp = document.createElement('span');
+    sp.textContent = 'App';
+    sp.style.cssText = 'font-family:Poppins,sans-serif;font-weight:800;font-size:13px;color:#1a3d2b;margin-left:6px';
+    b.appendChild(img); b.appendChild(sp);
+    b.addEventListener('click', function(ev){ ev.preventDefault(); ev.stopPropagation(); post('goback'); });
     document.body.appendChild(b);
   }
-  requestAnimationFrame(function(){document.documentElement.style.visibility='visible';});
+
+  function esRaiz(u){
+    try {
+      var a = document.createElement('a'); a.href = u;
+      var host = a.hostname.replace(/^www\./,'');
+      var p = a.pathname.replace(/\/(index\.html)?$/,'');
+      var h = a.hash;
+      return host === 'iagami.online' && p === '' && (!h || h === '#' || h === '#inicio' || h === '#home');
+    } catch(e){ return false; }
+  }
+  document.addEventListener('click', function(ev){
+    var a = ev.target && ev.target.closest ? ev.target.closest('a[href]') : null;
+    if (!a || a.closest('#_app_back_btn')) return;
+    if (esRaiz(a.href) || RX.test(a.textContent || '')) { ev.preventDefault(); ev.stopPropagation(); post('goback'); }
+  }, true);
+  try {
+    var hb = history.back.bind(history);
+    history.back = function(){ if (history.length <= 1) post('goback'); else hb(); };
+  } catch(e){}
+
+  var paginaHecha = !PAGINA;
+  function irPagina(){
+    if (paginaHecha) return true;
+    if (typeof window.showPage !== 'function') return false;
+    try { window.showPage(PAGINA); } catch(e){}
+    var orig = window.showPage;
+    window.showPage = function(p){
+      if (String(p).indexOf(PAGINA) === -1) { post('goback'); return; }
+      return orig.apply(this, arguments);
+    };
+    paginaHecha = true; return true;
+  }
+
+  function run(){ css(); vp(); limpiar(); boton(); if (revelado) post('ready'); }
+  A.run = run;
+
+  css();
+  var tmr = null;
+  new MutationObserver(function(){
+    vp(); css();
+    if (tmr) return;
+    tmr = setTimeout(function(){ tmr = null; limpiar(); boton(); }, 120);
+  }).observe(de, { childList: true, subtree: true, attributes: true, attributeFilter: ['content'] });
+
+  function listo(){
+    vp(); css(); limpiar(); boton();
+    var t0 = Date.now();
+    (function esperar(){
+      if (irPagina() || Date.now() - t0 > 4000) {
+        limpiar();
+        requestAnimationFrame(function(){ requestAnimationFrame(revelar); });
+      } else setTimeout(esperar, 50);
+    })();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', listo);
+  else listo();
 })();true;`;
 }
 
-function PantallaWeb({ url, js, onBack }) {
-  const [loading, setLoading] = useState(true);
-  const originUrl = useRef(url);
+const esRaizNativa = u => !!u && u.replace('://www.', '://').replace(/\/(index\.html)?$/, '') === WEB;
 
-  function handleNavChange({ url: current, loading: nav }) {
-    if (nav) return;
-    const isRoot = current === 'https://iagami.online' ||
-                   current === 'https://iagami.online/' ||
-                   current === 'https://iagami.online/index.html';
-    const startedAtRoot = originUrl.current === 'https://iagami.online' ||
-                          originUrl.current === 'https://iagami.online/';
-    if (isRoot && !startedAtRoot) onBack();
+function abrirExterno(url) {
+  Linking.openURL(url).catch(() => Alert.alert('No se pudo abrir', 'No hay una aplicación para abrir este enlace.'));
+}
+
+function PantallaWeb({ url, pagina, onBack, backRef }) {
+  const webRef = useRef(null);
+  const puedeAtras = useRef(false);
+  const cargaInicial = useRef(false);
+  const onBackRef = useRef(onBack); onBackRef.current = onBack;
+  const volver = () => onBackRef.current();
+
+  const [cubierto, setCubierto] = useState(true);
+  const [error, setError] = useState(null);
+  const [recarga, setRecarga] = useState(0);
+
+  const source = useMemo(() => ({ uri: url }), [url]);
+  const script = useMemo(() => crearScript(pagina), [pagina]);
+  const empezoEnRaiz = esRaizNativa(url);
+
+  useEffect(() => {
+    if (!backRef) return undefined;
+    backRef.current = () => {
+      if (puedeAtras.current && webRef.current) { webRef.current.goBack(); return true; }
+      return false;
+    };
+    return () => { backRef.current = null; };
+  }, [backRef]);
+
+  useEffect(() => {
+    if (!cubierto) return undefined;
+    const t = setTimeout(() => setCubierto(false), 7000);
+    return () => clearTimeout(t);
+  }, [cubierto, recarga]);
+
+  function permitirCarga(req) {
+    const u = req.url || '';
+    if (req.isTopFrame === false) return true;
+    if (/^(about:|data:|blob:|javascript:)/i.test(u)) return true;
+    if (/^https?:\/\//i.test(u)) {
+      const host = (u.split('/')[2] || '').toLowerCase().split(':')[0];
+      const interno = host === 'iagami.online' || host.endsWith('.iagami.online');
+      const esPdf = /\.pdf($|[?#])/i.test(u);
+      if (interno && !esPdf) {
+        if (cargaInicial.current && esRaizNativa(u)) { volver(); return false; }
+        return true;
+      }
+    }
+    abrirExterno(u);
+    return false;
   }
 
-  const inject = makeInject(js);
+  function onNav(nav) {
+    puedeAtras.current = !!nav.canGoBack;
+    if (!nav.loading && cargaInicial.current && !empezoEnRaiz && esRaizNativa(nav.url)) volver();
+  }
 
   return (
     <View style={s.flex}>
-      {loading && <ActivityIndicator color={VERDE} style={{ position: 'absolute', top: '50%', alignSelf: 'center', zIndex: 10 }} />}
       <WebView
-        source={{ uri: url }}
+        key={recarga}
+        ref={webRef}
+        source={source}
         style={s.flex}
-        onLoadEnd={() => setLoading(false)}
-        onError={() => setLoading(false)}
+        originWhitelist={['*']}
         javaScriptEnabled
         domStorageEnabled
-        onNavigationStateChange={handleNavChange}
-        injectedJavaScriptBeforeContentLoaded="document.documentElement.style.visibility='hidden';true;"
-        injectedJavaScript={inject}
-        onMessage={({ nativeEvent }) => { if (nativeEvent.data === 'goback') onBack(); }}
-        userAgent="Mozilla/5.0 (Linux; Android 11; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
+        geolocationEnabled
+        allowsInlineMediaPlayback
+        allowsBackForwardNavigationGestures
+        setSupportMultipleWindows={false}
+        textZoom={100}
+        setBuiltInZoomControls={false}
+        setDisplayZoomControls={false}
+        bounces={false}
+        overScrollMode="never"
+        automaticallyAdjustContentInsets={false}
+        contentInsetAdjustmentBehavior="never"
+        applicationNameForUserAgent="IAGAMIApp/3.0"
+        injectedJavaScriptBeforeContentLoaded={script}
+        injectedJavaScript={script}
+        onShouldStartLoadWithRequest={permitirCarga}
+        onNavigationStateChange={onNav}
+        onLoadEnd={() => { cargaInicial.current = true; setTimeout(() => setCubierto(false), 1500); }}
+        onError={({ nativeEvent }) => { setCubierto(false); setError(nativeEvent?.description || 'Error'); }}
+        onMessage={({ nativeEvent }) => {
+          if (nativeEvent.data === 'goback') volver();
+          else if (nativeEvent.data === 'ready') setCubierto(false);
+        }}
       />
+      {cubierto && !error && (
+        <View pointerEvents="none" style={[StyleSheet.absoluteFillObject, { backgroundColor: BG, alignItems: 'center', justifyContent: 'center' }]}>
+          <ActivityIndicator size="large" color={VERDE} />
+        </View>
+      )}
+      {error && (
+        <View style={[StyleSheet.absoluteFillObject, { backgroundColor: BG, alignItems: 'center', justifyContent: 'center', padding: 24 }]}>
+          <Text style={{ color: VERDE_DARK, fontWeight: '700', fontSize: 16, marginBottom: 6 }}>No se pudo cargar la página</Text>
+          <Text style={{ color: GRIS, fontSize: 13, textAlign: 'center', marginBottom: 16 }}>Verifica tu conexión e intenta de nuevo.</Text>
+          <TouchableOpacity style={[s.btnPrimary, { paddingHorizontal: 28, marginBottom: 10 }]}
+            onPress={() => { setError(null); setCubierto(true); cargaInicial.current = false; setRecarga(k => k + 1); }}>
+            <Text style={s.btnPrimaryTxt}>Reintentar</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={volver}><Text style={s.verTodoTxt}>← Volver</Text></TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 }
@@ -704,35 +670,42 @@ function PantallaAtencion({ onBack }) {
 }
 
 const FAQ_LOCAL = [
-  { q: ['denuncia','denunciar','reportar','problema ambiental'], a: 'Para presentar una denuncia ambiental, ve al módulo "Presentar Denuncia". Puedes reportar contaminación, tala ilegal, vertidos y más.' },
-  { q: ['multa','multas','sanción','deuda','expediente'], a: 'Consulta tus multas en el módulo "Multas Ambientales". Ingresa tu cédula para ver el estado de tus obligaciones.' },
-  { q: ['trámite','tramite','permiso','certificado','solicitud'], a: 'Los trámites y permisos ambientales están en el módulo "Trámites en Línea" con todos los requisitos.' },
-  { q: ['empresa','registro empresa','rif','industria'], a: 'El registro y consulta de empresas está en el módulo "Registro Empresa". Busca por nombre o RIF.' },
-  { q: ['evento','agenda','actividad','charla'], a: 'Consulta la "Agenda SIGAP" para ver próximos eventos y actividades ambientales del municipio.' },
-  { q: ['noticia','noticias','información','comunicado'], a: 'Las últimas noticias del IAGAMI están en el módulo "Noticias" o en la pantalla principal.' },
-  { q: ['transparencia','documento','informe','presupuesto'], a: 'Los documentos de gestión pública están en el módulo "Transparencia".' },
-  { q: ['indicador','indicadores','monitoreo','ambiental'], a: 'Los indicadores ambientales están en el módulo "Indicadores" para ver el estado del municipio.' },
-  { q: ['proyecto','proyectos','obras','programa'], a: 'Consulta los proyectos y obras en el módulo "Proyectos SIGAP".' },
-  { q: ['revista','publicación','digital'], a: 'La Revista Digital del IAGAMI está disponible en el módulo "Revista Digital".' },
-  { q: ['brigada','brigadas','mapa'], a: 'El Mapa de Brigadas muestra la distribución de equipos por sector del municipio.' },
-  { q: ['aula','educación','ambiental','escuela'], a: 'El Aula Ambiental ofrece recursos de educación ambiental para la comunidad.' },
-  { q: ['comuna','comunas','consejo comunal'], a: 'Información sobre Comunas y Consejos Comunales del municipio en el módulo "Comunas".' },
-  { q: ['hola','buenos días','buenas','saludos','hey'], a: '¡Hola! Soy Semeruquito, el asistente virtual del IAGAMI. ¿En qué puedo ayudarte hoy?' },
-  { q: ['gracias','muchas gracias','ok','listo'], a: '¡Con gusto! Estoy aquí para ayudarte con cualquier consulta ambiental.' },
+  { q: ['denuncia','denunciar','reportar','problema'], a: 'Para presentar una denuncia ambiental, ve al módulo "Presentar Denuncia". Puedes reportar contaminación, tala ilegal, vertidos y más.', go: 'denuncias' },
+  { q: ['multa','multas','sanción','deuda','expediente'], a: 'Consulta tus multas en el módulo "Multas Ambientales". Ingresa tu cédula para ver el estado de tus obligaciones.', go: 'multas' },
+  { q: ['trámite','tramite','certificado','solicitud'], a: 'Los trámites ambientales están en el módulo "Trámites en Línea" con todos los requisitos.', go: 'tramites' },
+  { q: ['permiso','permisos'], a: 'Los permisos ambientales están en el módulo "Permisos Ambientales".', go: 'permisos' },
+  { q: ['empresa','registro empresa','rif','industria'], a: 'El registro y consulta de empresas está en el módulo "Registro Empresa". Busca por nombre o RIF.', go: 'empresas' },
+  { q: ['noticia','noticias','información','comunicado'], a: 'Las últimas noticias del IAGAMI están en el módulo "Noticias" o en la pantalla principal.', go: 'noticias' },
+  { q: ['proyecto','proyectos','obras','programa'], a: 'Consulta los proyectos y obras en el módulo "Proyectos SIGAP".', go: 'proyectos' },
+  { q: ['brigada','brigadas','mapa brigadas'], a: 'El Mapa de Brigadas muestra la distribución de equipos por sector del municipio.', go: 'brigadas' },
+  { q: ['aula ambiental','aula','educación','escuela'], a: 'El Aula Ambiental ofrece recursos de educación ambiental para la comunidad.', go: 'aula' },
+  { q: ['estudiante','portal estudiante'], a: 'Accede al Portal del Estudiante para recursos educativos ambientales.', go: 'estudiante' },
+  { q: ['comuna','comunas','consejo comunal'], a: 'Información sobre Comunas y Consejos Comunales del municipio en el módulo "Comunas".', go: 'comunas' },
+  { q: ['atención','atencion','contacto','teléfono','dirección'], a: 'Encuentra nuestros datos de contacto en Atención Ciudadana.', go: 'atencion' },
+  { q: ['hola','buenos días','buenas tardes','saludos'], a: '¡Hola! Soy Semeruquito, el asistente virtual del IAGAMI. ¿En qué puedo ayudarte hoy?' },
+  { q: ['gracias','muchas gracias'], a: '¡Con gusto! Estoy aquí para ayudarte con cualquier consulta ambiental.' },
   { q: ['iagami','que es','quiénes son','instituto'], a: 'El IAGAMI es el Instituto Autónomo de Gestión Ambiental del Municipio Iribarren, Barquisimeto, Estado Lara.' },
 ];
 
+const norm = s => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+const escRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const FAQ_RE = FAQ_LOCAL.map(it => ({ ...it,
+  re: it.q.map(k => ({ k, re: new RegExp('(^|[^a-z0-9])' + escRe(norm(k))) })) }));
+
 function responder(msg) {
-  const m = msg.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
-  for (const item of FAQ_LOCAL) {
-    if (item.q.some(k => m.includes(k.normalize('NFD').replace(/[̀-ͯ]/g, '')))) return item.a;
+  const m = norm(msg); let mejor = null, pts = 0;
+  for (const it of FAQ_RE) {
+    const p = it.re.reduce((a, { k, re }) => re.test(m) ? Math.max(a, k.length) : a, 0);
+    if (p > pts) { pts = p; mejor = it; }
   }
-  return 'No tengo información sobre eso ahora. Para más ayuda visita iagami.online o escribe a vicepresidencia.iagami@gmail.com';
+  return mejor
+    ? { text: mejor.a, go: mejor.go }
+    : { text: 'No tengo información sobre eso ahora. Llama al 0412 672-9712 o escribe a Iagami.atencionparalavida@gmail.com', go: 'atencion' };
 }
 
-function Chatbot({ visible, onClose }) {
+function Chatbot({ visible, onClose, onIr }) {
   const [mensajes, setMensajes] = useState([
-    { id: '0', role: 'bot', text: '¡Hola! Soy Semeruquito, el asistente virtual del IAGAMI. ¿En qué puedo ayudarte?' }
+    { id: '0', role: 'bot', text: '¡Hola! Soy Semeruquito, el asistente virtual del IAGAMI. ¿En qué puedo ayudarte?', go: null }
   ]);
   const [input, setInput] = useState('');
   const scrollRef = useRef(null);
@@ -740,71 +713,60 @@ function Chatbot({ visible, onClose }) {
   const enviar = () => {
     const txt = input.trim();
     if (!txt) return;
-    const user = { id: Date.now().toString(), role: 'user', text: txt };
-    const bot = { id: (Date.now()+1).toString(), role: 'bot', text: responder(txt) };
+    const resp = responder(txt);
+    const user = { id: Date.now().toString(), role: 'user', text: txt, go: null };
+    const bot = { id: (Date.now()+1).toString(), role: 'bot', text: resp.text, go: resp.go };
     setMensajes(p => [...p, user, bot]);
     setInput('');
-    setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 100);
   };
 
   return (
-    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
-      <View style={s.chatOverlay}>
-        <View style={s.chatBox}>
-          <View style={s.chatHeader}>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Image source={SEMERUQUITO} style={s.chatAvatar} />
-              <View>
-                <Text style={s.chatHeaderTitle}>Semeruquito</Text>
-                <Text style={{ color: DORADO, fontSize: 11 }}>Asistente IAGAMI</Text>
+    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose} statusBarTranslucent>
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        <View style={s.chatOverlay}>
+          <View style={s.chatBox}>
+            <View style={s.chatHeader}>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Image source={SEMERUQUITO} style={s.chatAvatar} />
+                <View>
+                  <Text style={s.chatHeaderTitle}>Semeruquito</Text>
+                  <Text style={{ color: DORADO, fontSize: 11 }}>Asistente IAGAMI</Text>
+                </View>
               </View>
+              <TouchableOpacity onPress={onClose} style={s.chatClose}>
+                <Text style={{ color: '#fff', fontWeight: '700', fontSize: 16 }}>✕</Text>
+              </TouchableOpacity>
             </View>
-            <TouchableOpacity onPress={onClose} style={s.chatClose}>
-              <Text style={{ color: '#fff', fontWeight: '700', fontSize: 16 }}>✕</Text>
-            </TouchableOpacity>
-          </View>
-          <ScrollView ref={scrollRef} style={s.chatMsgs} contentContainerStyle={{ padding: 12, paddingBottom: 8 }}>
-            {mensajes.map(m => (
-              <View key={m.id} style={[s.bubble, m.role === 'user' ? s.bubbleUser : s.bubbleBot]}>
-                <Text style={[s.bubbleTxt, m.role === 'user' && { color: '#fff' }]}>{m.text}</Text>
-              </View>
-            ))}
-          </ScrollView>
-          <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+            <ScrollView ref={scrollRef} style={s.chatMsgs} contentContainerStyle={{ padding: 12, paddingBottom: 8 }}
+              onContentSizeChange={() => scrollRef.current?.scrollToEnd({ animated: true })}>
+              {mensajes.map(m => (
+                <View key={m.id} style={{ alignItems: m.role === 'user' ? 'flex-end' : 'flex-start', marginBottom: 10 }}>
+                  <View style={[s.bubble, m.role === 'user' ? s.bubbleUser : s.bubbleBot]}>
+                    <Text style={[s.bubbleTxt, m.role === 'user' && { color: '#fff' }]}>{m.text}</Text>
+                  </View>
+                  {m.go && onIr && (
+                    <TouchableOpacity onPress={() => { onClose(); onIr(m.go); }}
+                      style={{ marginTop: 4, backgroundColor: VERDE, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 6 }}>
+                      <Text style={{ color: '#fff', fontSize: 12, fontWeight: '700' }}>Abrir módulo →</Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
+              ))}
+            </ScrollView>
             <View style={s.chatInput}>
               <TextInput style={s.chatField} placeholder="Escribe tu consulta..." placeholderTextColor={GRIS}
-                value={input} onChangeText={setInput} onSubmitEditing={enviar} returnKeyType="send" />
+                value={input} onChangeText={setInput} onSubmitEditing={enviar} returnKeyType="send" blurOnSubmit={false} />
               <TouchableOpacity style={s.chatSend} onPress={enviar}>
                 <Text style={{ color: '#fff', fontWeight: '700' }}>↑</Text>
               </TouchableOpacity>
             </View>
-          </KeyboardAvoidingView>
+          </View>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }
 
-const SCREENS = {
-  noticias:      PantallaNoticias,
-  denuncias:     PantallaDenuncias,
-  multas:        PantallaMultas,
-  empresas:      PantallaEmpresas,
-  agenda:        PantallaAgenda,
-  atencion:      PantallaAtencion,
-  tramites:      (p) => <PantallaListado titulo="Trámites en Línea"    coleccion="tramites"    campos={[{key:'nombre',bold:true},{key:'titulo',bold:true},{key:'descripcion',color:GRIS,size:13},{key:'requisitos',color:VERDE,size:12,label:'Requisitos'}]} {...p} />,
-  transparencia: (p) => <PantallaListado titulo="Transparencia"        coleccion="documentos"  campos={[{key:'titulo',bold:true},{key:'nombre',bold:true},{key:'created',color:GRIS,size:12}]} {...p} />,
-  revista:       (p) => <PantallaListado titulo="Revista Digital"      coleccion="revistas"    campos={[{key:'titulo',bold:true},{key:'descripcion',color:GRIS,size:13}]} {...p} />,
-  indicadores:   (p) => <PantallaListado titulo="Indicadores"          coleccion="indicadores" campos={[{key:'nombre',bold:true},{key:'valor',color:VERDE,bold:true},{key:'descripcion',color:GRIS,size:13}]} {...p} />,
-  organizacion:  (p) => <PantallaListado titulo="Organización"         coleccion="proyectos"   campos={[{key:'nombre',bold:true},{key:'descripcion',color:GRIS,size:13}]} {...p} />,
-  planificacion: (p) => <PantallaListado titulo="Planificación"        coleccion="planificacion" campos={[{key:'nombre',bold:true},{key:'descripcion',color:GRIS,size:13}]} {...p} />,
-  proyectos:     (p) => <PantallaListado titulo="Proyectos SIGAP"      coleccion="proyectos"   campos={[{key:'nombre',bold:true},{key:'descripcion',color:GRIS,size:13},{key:'estado',color:VERDE,size:12}]} {...p} />,
-  trabajador:    (p) => <PantallaListado titulo="Portal Trabajador"    coleccion="trabajadores" campos={[{key:'nombre',bold:true},{key:'cargo',color:GRIS,size:13}]} {...p} />,
-  brigadas:      (p) => <PantallaListado titulo="Mapa de Brigadas"     coleccion="control_seguimiento" campos={[{key:'nombre',bold:true},{key:'descripcion',color:GRIS,size:13}]} {...p} />,
-  aula:          (p) => <PantallaListado titulo="Aula Ambiental"       coleccion="chatbot_faq" campos={[{key:'pregunta',bold:true},{key:'respuesta',color:GRIS,size:13}]} {...p} />,
-  comunas:       (p) => <PantallaListado titulo="Comunas"              coleccion="comunas"     campos={[{key:'nombre',bold:true},{key:'parroquia',color:GRIS,size:13},{key:'descripcion',color:GRIS,size:12}]} {...p} />,
-  permisos:      (p) => <PantallaListado titulo="Permisos Ambientales" coleccion="tramites"    campos={[{key:'nombre',bold:true},{key:'descripcion',color:GRIS,size:13}]} {...p} />,
-};
 
 function FabSemeruquito({ onPress }) {
   const pulse = useRef(new Animated.Value(1)).current;
@@ -844,16 +806,28 @@ function FabSemeruquito({ onPress }) {
 }
 
 export default function App() {
-  const [pantalla, setPantalla] = useState('inicio');
-  const [webNav, setWebNav] = useState(null); // { url, titulo }
+  const [webNav, setWebNav] = useState(null);
   const [chatVisible, setChatVisible] = useState(false);
+  const webBack = useRef(null);
+  const webNavRef = useRef(webNav); webNavRef.current = webNav;
+
   const ir = (id) => {
     const mod = MODULOS.find(m => m.id === id);
-    if (mod) { setWebNav({ url: mod.url, titulo: mod.label, js: mod.js }); return; }
-    if (SCREENS[id] || id === 'inicio') setPantalla(id);
+    if (mod) setWebNav({ url: mod.url, pagina: mod.pagina });
   };
-  const volver = () => { setWebNav(null); setPantalla('inicio'); };
-  const Pantalla = SCREENS[pantalla];
+  const volver = () => setWebNav(null);
+
+  useEffect(() => {
+    const sub = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (webNavRef.current) {
+        if (webBack.current && webBack.current()) return true;
+        setWebNav(null);
+        return true;
+      }
+      return false;
+    });
+    return () => sub.remove();
+  }, []);
 
   return (
     <View style={s.root}>
@@ -861,13 +835,11 @@ export default function App() {
       <Navbar onHome={volver} />
       <View style={s.flex}>
         {webNav
-          ? <PantallaWeb url={webNav.url} titulo={webNav.titulo} js={webNav.js} onBack={() => setWebNav(null)} />
-          : pantalla === 'inicio' ? <PantallaInicio ir={ir} />
-          : Pantalla ? <Pantalla onBack={volver} />
+          ? <PantallaWeb key={webNav.url + (webNav.pagina || '')} url={webNav.url} pagina={webNav.pagina} onBack={volver} backRef={webBack} />
           : <PantallaInicio ir={ir} />}
       </View>
-      <FabSemeruquito onPress={() => setChatVisible(true)} />
-      <Chatbot visible={chatVisible} onClose={() => setChatVisible(false)} />
+      {!webNav && <FabSemeruquito onPress={() => setChatVisible(true)} />}
+      <Chatbot visible={chatVisible} onClose={() => setChatVisible(false)} onIr={ir} />
     </View>
   );
 }
@@ -896,15 +868,11 @@ const s = StyleSheet.create({
   headerTxt: { color: '#fff', fontSize: 18, fontWeight: '700', flex: 1 },
   hero: { width: '100%', height: 380, position: 'relative', overflow: 'hidden' },
   heroImg: { width: '100%', height: '100%' },
-  heroGradient: { position: 'absolute', bottom: 0, left: 0, right: 0, height: 220, backgroundColor: 'transparent',
-    borderTopWidth: 0,
-    // degradado simulado con opacidad
-  },
-  heroOverlay: { position: 'absolute', bottom: 0, left: 0, right: 0, height: '38%', backgroundColor: 'rgba(20,50,32,0.88)', padding: 14, justifyContent: 'flex-end' },
+  heroOverlay: { position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: 'rgba(20,50,32,0.88)', padding: 14 },
   heroTag: { color: DORADO, fontSize: 11, fontWeight: '700', letterSpacing: 1, marginBottom: 4 },
   heroTitle: { color: '#fff', fontSize: 22, fontWeight: '800', lineHeight: 28 },
   heroSub: { color: '#ffffffbb', fontSize: 12, marginTop: 6, lineHeight: 18 },
-  heroBtns: { flexDirection: 'row', marginTop: 14, gap: 10 },
+  heroBtns: { flexDirection: 'row', marginTop: 14, gap: 10, flexWrap: 'wrap' },
   heroBtnPrimary: { backgroundColor: VERDE, borderRadius: 8, paddingHorizontal: 16, paddingVertical: 10, borderWidth: 1, borderColor: DORADO },
   heroBtnPrimaryTxt: { color: '#fff', fontWeight: '700', fontSize: 13 },
   heroBtnSec: { backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: 8, paddingHorizontal: 16, paddingVertical: 10, borderWidth: 1, borderColor: '#ffffff44' },
@@ -953,12 +921,12 @@ const s = StyleSheet.create({
   fab: { width: 64, height: 64, borderRadius: 32, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center', elevation: 8, shadowColor: DORADO, shadowOffset: { width:0,height:4 }, shadowOpacity: 0.6, shadowRadius: 10, borderWidth: 2.5, borderColor: DORADO },
   fabImg: { width: 54, height: 54, borderRadius: 27 },
   chatOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
-  chatBox: { backgroundColor: '#fff', borderTopLeftRadius: 20, borderTopRightRadius: 20, maxHeight: '75%', overflow: 'hidden' },
+  chatBox: { backgroundColor: '#fff', borderTopLeftRadius: 20, borderTopRightRadius: 20, height: '72%', overflow: 'hidden' },
   chatHeader: { backgroundColor: VERDE_DARK, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, borderBottomWidth: 2, borderBottomColor: DORADO },
   chatAvatar: { width: 40, height: 40, borderRadius: 20, marginRight: 10, borderWidth: 1.5, borderColor: DORADO },
   chatHeaderTitle: { color: '#fff', fontWeight: '700', fontSize: 16 },
   chatClose: { width: 32, height: 32, borderRadius: 16, backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' },
-  chatMsgs: { flex: 1, maxHeight: 340 },
+  chatMsgs: { flex: 1 },
   bubble: { maxWidth: '80%', padding: 12, borderRadius: 14, marginBottom: 10 },
   bubbleBot: { backgroundColor: '#f0fdf4', alignSelf: 'flex-start', borderWidth: 1, borderColor: VERDE+'33', borderBottomLeftRadius: 4 },
   bubbleUser: { backgroundColor: VERDE, alignSelf: 'flex-end', borderBottomRightRadius: 4 },
@@ -968,15 +936,4 @@ const s = StyleSheet.create({
   chatSend: { width: 42, height: 42, backgroundColor: VERDE, borderRadius: 21, alignItems: 'center', justifyContent: 'center' },
   loader: { flex: 1, justifyContent: 'center', marginTop: 60 },
   empty: { color: GRIS, textAlign: 'center', marginTop: 40, fontSize: 15 },
-  webBack: {
-    position: 'absolute', bottom: 24, left: 16,
-    backgroundColor: 'rgba(255,255,255,0.92)',
-    borderRadius: 28, paddingHorizontal: 14, paddingVertical: 8,
-    flexDirection: 'row', alignItems: 'center', gap: 6,
-    shadowColor: '#000', shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.18, shadowRadius: 8, elevation: 8,
-    borderWidth: 1.5, borderColor: 'rgba(29,107,62,0.18)',
-  },
-  webBackImg: { width: 44, height: 44 },
-  webBackTxt: { color: '#1a3d2b', fontWeight: '800', fontSize: 13, letterSpacing: 0.3 },
 });
