@@ -225,9 +225,11 @@ function PantallaInicio({ ir }) {
         <View style={s.grid}>
           {MODULOS.map(m => (
             <TouchableOpacity key={m.id} style={s.modulo} onPress={() => ir(m.id)}>
-              <Image source={ICONOS[m.id]} style={s.moduloIcon} resizeMode="contain" />
-              <View style={s.moduloBar}>
-                <Text style={s.moduloLabel} numberOfLines={2}>{m.label}</Text>
+              <View style={s.moduloImgWrap}>
+                <Image source={ICONOS[m.id]} style={s.moduloIcon} resizeMode="contain" />
+                <View style={s.moduloBar}>
+                  <Text style={s.moduloLabel} numberOfLines={2}>{m.label}</Text>
+                </View>
               </View>
             </TouchableOpacity>
           ))}
@@ -732,7 +734,7 @@ const s = StyleSheet.create({
     borderTopWidth: 0,
     // degradado simulado con opacidad
   },
-  heroOverlay: { position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: 'rgba(20,50,32,0.82)', padding: 18, paddingTop: 22 },
+  heroOverlay: { position: 'absolute', bottom: 0, left: 0, right: 0, height: '38%', backgroundColor: 'rgba(20,50,32,0.88)', padding: 14, justifyContent: 'flex-end' },
   heroTag: { color: DORADO, fontSize: 11, fontWeight: '700', letterSpacing: 1, marginBottom: 4 },
   heroTitle: { color: '#fff', fontSize: 22, fontWeight: '800', lineHeight: 28 },
   heroSub: { color: '#ffffffbb', fontSize: 12, marginTop: 6, lineHeight: 18 },
@@ -761,9 +763,10 @@ const s = StyleSheet.create({
   sectionBigTitle: { color: DORADO, fontSize: 24, fontWeight: '800', textAlign: 'center', marginBottom: 6, lineHeight: 30 },
   sectionDesc: { color: GRIS, fontSize: 13, textAlign: 'center', marginBottom: 18 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', marginHorizontal: -6 },
-  modulo: { width: (width-44)/2, borderRadius: 16, margin: 6, borderWidth: 1.5, borderColor: DORADO+'88', overflow: 'hidden', backgroundColor: '#fff', elevation: 3, shadowColor: '#000', shadowOffset: { width:0,height:2 }, shadowOpacity: 0.1, shadowRadius: 4 },
-  moduloIcon: { width: '100%', aspectRatio: 1, resizeMode: 'contain', backgroundColor: '#e8f5e9' },
-  moduloBar: { backgroundColor: VERDE_DARK, padding: 10 },
+  modulo: { width: (width-44)/2, borderRadius: 16, margin: 6, borderWidth: 2.5, borderColor: DORADO, overflow: 'hidden', backgroundColor: '#e8f5e9', elevation: 4, shadowColor: DORADO, shadowOffset: { width:0,height:2 }, shadowOpacity: 0.4, shadowRadius: 6 },
+  moduloImgWrap: { width: '100%', aspectRatio: 1, position: 'relative' },
+  moduloIcon: { width: '100%', height: '100%', resizeMode: 'contain' },
+  moduloBar: { position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: 'rgba(26,61,43,0.88)', paddingVertical: 8, paddingHorizontal: 6 },
   moduloLabel: { color: '#fff', fontWeight: '700', fontSize: 13, textAlign: 'center' },
   moduloSub: { color: '#ffffffaa', fontSize: 11, textAlign: 'center', marginTop: 2 },
   newsTagRow: { flexDirection: 'row', marginBottom: 6 },
