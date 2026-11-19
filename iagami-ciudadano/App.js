@@ -225,10 +225,9 @@ function PantallaInicio({ ir }) {
         <View style={s.grid}>
           {MODULOS.map(m => (
             <TouchableOpacity key={m.id} style={s.modulo} onPress={() => ir(m.id)}>
-              <Image source={ICONOS[m.id]} style={s.moduloIcon} resizeMode="cover" />
+              <Image source={ICONOS[m.id]} style={s.moduloIcon} resizeMode="contain" />
               <View style={s.moduloBar}>
                 <Text style={s.moduloLabel} numberOfLines={2}>{m.label}</Text>
-                <Text style={s.moduloSub} numberOfLines={1}>{m.sub}</Text>
               </View>
             </TouchableOpacity>
           ))}
