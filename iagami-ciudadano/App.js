@@ -763,7 +763,7 @@ const s = StyleSheet.create({
   sectionDesc: { color: GRIS, fontSize: 13, textAlign: 'center', marginBottom: 18 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', marginHorizontal: -6 },
   modulo: { width: (width-44)/2, borderRadius: 16, margin: 6, borderWidth: 1.5, borderColor: DORADO+'88', overflow: 'hidden', backgroundColor: '#fff', elevation: 3, shadowColor: '#000', shadowOffset: { width:0,height:2 }, shadowOpacity: 0.1, shadowRadius: 4 },
-  moduloIcon: { width: '100%', height: 150, resizeMode: 'contain', backgroundColor: '#e8f5e9' },
+  moduloIcon: { width: '100%', aspectRatio: 1, resizeMode: 'contain', backgroundColor: '#e8f5e9' },
   moduloBar: { backgroundColor: VERDE_DARK, padding: 10 },
   moduloLabel: { color: '#fff', fontWeight: '700', fontSize: 13, textAlign: 'center' },
   moduloSub: { color: '#ffffffaa', fontSize: 11, textAlign: 'center', marginTop: 2 },
