@@ -572,7 +572,14 @@ const INJECT_BACK = `
 
 function PantallaWeb({ url, js, onBack }) {
   const [loading, setLoading] = useState(true);
+  const [kbVisible, setKbVisible] = useState(false);
   const originUrl = useRef(url);
+
+  useEffect(() => {
+    const show = Keyboard.addListener('keyboardDidShow', () => setKbVisible(true));
+    const hide = Keyboard.addListener('keyboardDidHide', () => setKbVisible(false));
+    return () => { show.remove(); hide.remove(); };
+  }, []);
 
   function handleNavChange({ url: current, loading: nav }) {
     if (nav) return;
