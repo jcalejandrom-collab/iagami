@@ -556,7 +556,11 @@ function PantallaAgenda({ onBack }) {
 function makeInject(extraJs) {
   return `(function(){
   document.documentElement.style.visibility='hidden';
-  document.head.insertAdjacentHTML('beforeend','<style>.nav,.topbar,.alert-bar{display:none!important}</style>');
+  document.head.insertAdjacentHTML('beforeend','<style>.nav,.navbar,.topbar,.alert-bar,nav{display:none!important}html,body{touch-action:pan-x pan-y;-ms-touch-action:pan-x pan-y}</style>');
+  var vm=document.querySelector('meta[name=viewport]');
+  if(vm) vm.setAttribute('content','width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no');
+  var first=document.body.firstElementChild;
+  if(first && first.tagName==='DIV' && !first.className) first.style.display='none';
   ${extraJs || ''}
   if(!document.getElementById('_app_back_btn')){
     var b=document.createElement('div');
