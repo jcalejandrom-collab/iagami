@@ -456,7 +456,7 @@ function crearScript(pagina) {
     (function esperar(){
       if (irPagina() || Date.now() - t0 > 4000) {
         limpiar();
-        requestAnimationFrame(function(){ requestAnimationFrame(revelar); });
+        setTimeout(function(){ requestAnimationFrame(revelar); }, PAGINA ? 600 : 0);
       } else setTimeout(esperar, 50);
     })();
   }
