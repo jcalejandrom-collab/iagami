@@ -3,7 +3,7 @@ import {
   View, Text, TouchableOpacity, ScrollView, StyleSheet,
   StatusBar, TextInput, Alert, ActivityIndicator,
   Image, FlatList, Platform, Dimensions,
-  KeyboardAvoidingView, Modal, Animated, Easing
+  KeyboardAvoidingView, Modal, Animated, Easing, Linking
 } from 'react-native';
 
 const VERDE = '#1d6b3e';
@@ -33,17 +33,19 @@ const ICONOS = {
   brigadas:      require('./assets/iconos/15_mapa_brigadas.png'),
 };
 
+const WEB = 'https://iagami.online';
+
 const MODULOS = [
-  { id: 'denuncias',     label: 'Presentar Denuncia',  sub: 'Reporta problemas ambientales' },
-  { id: 'tramites',      label: 'Trámites en Línea',   sub: 'Permisos y certificaciones' },
-  { id: 'multas',        label: 'Multas Ambientales',  sub: 'Consulta expedientes' },
-  { id: 'atencion',      label: 'Atención Ciudadana',  sub: 'Consultas y seguimiento' },
-  { id: 'transparencia', label: 'Transparencia',       sub: 'Información institucional' },
-  { id: 'agenda',        label: 'Agenda SIGAP',        sub: 'Actividades programadas' },
-  { id: 'empresas',      label: 'Registro Empresa',    sub: 'Registro ambiental' },
-  { id: 'noticias',      label: 'Noticias',            sub: 'Actualidad ambiental' },
-  { id: 'aula',          label: 'Aula Ambiental',      sub: 'IAGAMI en la Escuela' },
-  { id: 'brigadas',      label: 'Mapa de Brigadas',    sub: 'Distribución por sector' },
+  { id: 'denuncias',     label: 'Presentar Denuncia',  url: `${WEB}/#denuncias` },
+  { id: 'tramites',      label: 'Trámites en Línea',   url: `${WEB}/#tramites` },
+  { id: 'multas',        label: 'Multas Ambientales',  url: `${WEB}/#multas` },
+  { id: 'atencion',      label: 'Atención Ciudadana',  url: `${WEB}/#contacto` },
+  { id: 'transparencia', label: 'Transparencia',       url: `${WEB}/#transparencia` },
+  { id: 'agenda',        label: 'Agenda SIGAP',        url: `${WEB}/#agenda` },
+  { id: 'empresas',      label: 'Registro Empresa',    url: `${WEB}/#empresas` },
+  { id: 'noticias',      label: 'Noticias',            url: `${WEB}/#noticias` },
+  { id: 'aula',          label: 'Aula Ambiental',      url: `${WEB}/#aula` },
+  { id: 'brigadas',      label: 'Mapa de Brigadas',    url: `${WEB}/#brigadas` },
 ];
 
 // 60% verdes, 40% doradas
@@ -196,10 +198,10 @@ function PantallaInicio({ ir }) {
           </Text>
           <Text style={s.heroSub}>Portal institucional IAGAMI. Planificación estratégica, seguimiento de actividades y monitoreo ambiental en tiempo real.</Text>
           <View style={s.heroBtns}>
-            <TouchableOpacity style={s.heroBtnPrimary} onPress={() => ir('denuncias')}>
+            <TouchableOpacity style={s.heroBtnPrimary} onPress={() => Linking.openURL(`${WEB}/#denuncias`)}>
               <Text style={s.heroBtnPrimaryTxt}>Presentar Denuncia</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={s.heroBtnSec} onPress={() => ir('tramites')}>
+            <TouchableOpacity style={s.heroBtnSec} onPress={() => Linking.openURL(`${WEB}/#tramites`)}>
               <Text style={s.heroBtnSecTxt}>Ver Trámites →</Text>
             </TouchableOpacity>
           </View>
@@ -224,7 +226,7 @@ function PantallaInicio({ ir }) {
         <Text style={s.sectionDesc}>Accede a los servicios del municipio desde tu teléfono</Text>
         <View style={s.grid}>
           {MODULOS.map(m => (
-            <TouchableOpacity key={m.id} style={s.modulo} onPress={() => ir(m.id)}>
+            <TouchableOpacity key={m.id} style={s.modulo} onPress={() => Linking.openURL(m.url)}>
               <View style={s.moduloImgWrap}>
                 <Image source={ICONOS[m.id]} style={s.moduloIcon} resizeMode="contain" />
                 <View style={s.moduloBar}>
@@ -266,7 +268,7 @@ function PantallaInicio({ ir }) {
             </TouchableOpacity>
           ))
         )}
-        <TouchableOpacity style={s.verTodo} onPress={() => ir('noticias')}>
+        <TouchableOpacity style={s.verTodo} onPress={() => Linking.openURL(`${WEB}/#noticias`)}>
           <Text style={s.verTodoTxt}>Ver todas las noticias →</Text>
         </TouchableOpacity>
       </View>
@@ -716,12 +718,12 @@ const s = StyleSheet.create({
     paddingBottom: 10, borderBottomWidth: 3, borderBottomColor: DORADO,
   },
   navLogoWrap: {
-    borderWidth: 2.5, borderColor: DORADO, borderRadius: 10, padding: 5,
-    backgroundColor: 'rgba(198,168,91,0.12)',
-    shadowColor: DORADO, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.6, shadowRadius: 8,
-    elevation: 4,
+    borderWidth: 3, borderColor: DORADO, borderRadius: 10, padding: 5,
+    backgroundColor: 'rgba(198,168,91,0.15)',
+    shadowColor: DORADO, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.9, shadowRadius: 12,
+    elevation: 6,
   },
-  navLogo: { width: 120, height: 48 },
+  navLogo: { width: 124, height: 50 },
   navBadge: { backgroundColor: DORADO+'22', borderColor: DORADO, borderWidth: 1, borderRadius: 12, paddingHorizontal: 10, paddingVertical: 4 },
   navBadgeTxt: { color: DORADO, fontSize: 11, fontWeight: '700' },
   header: { backgroundColor: VERDE, flexDirection: 'row', alignItems: 'center', padding: 14, borderBottomWidth: 2, borderBottomColor: DORADO },
