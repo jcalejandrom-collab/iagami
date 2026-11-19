@@ -46,30 +46,44 @@ const MODULOS = [
   { id: 'brigadas',      label: 'Mapa de Brigadas',    sub: 'Distribución por sector' },
 ];
 
-// Hoja flotante individual
-function HojaFlotante({ delay, startX, size, duration }) {
-  const y = useRef(new Animated.Value(0)).current;
-  const x = useRef(new Animated.Value(0)).current;
-  const op = useRef(new Animated.Value(0)).current;
+// 60% verdes, 40% doradas
+const HOJAS_CONFIG = [
+  { delay: 0,    startX: 20,  size: 16, duration: 3800, dorada: false },
+  { delay: 500,  startX: 55,  size: 12, duration: 4500, dorada: false },
+  { delay: 1000, startX: 95,  size: 18, duration: 3200, dorada: true  },
+  { delay: 300,  startX: 135, size: 14, duration: 5000, dorada: false },
+  { delay: 1500, startX: 175, size: 10, duration: 4000, dorada: true  },
+  { delay: 800,  startX: 215, size: 16, duration: 3600, dorada: false },
+  { delay: 2000, startX: 255, size: 13, duration: 4200, dorada: true  },
+  { delay: 400,  startX: 295, size: 20, duration: 3500, dorada: false },
+  { delay: 1200, startX: 330, size: 11, duration: 4800, dorada: false },
+  { delay: 1800, startX: 360, size: 15, duration: 3900, dorada: true  },
+];
+
+function HojaFlotante({ delay, startX, size, duration, dorada }) {
+  const y   = useRef(new Animated.Value(0)).current;
+  const x   = useRef(new Animated.Value(0)).current;
+  const op  = useRef(new Animated.Value(0)).current;
   const rot = useRef(new Animated.Value(0)).current;
+  const drift = useRef((Math.random() > 0.5 ? 1 : -1) * (15 + Math.random() * 20)).current;
 
   useEffect(() => {
     const anim = Animated.loop(
       Animated.sequence([
         Animated.delay(delay),
         Animated.parallel([
-          Animated.timing(y, { toValue: -120, duration, useNativeDriver: true, easing: Easing.inOut(Easing.sin) }),
-          Animated.timing(x, { toValue: (Math.random() > 0.5 ? 1 : -1) * 30, duration, useNativeDriver: true, easing: Easing.inOut(Easing.sin) }),
-          Animated.sequence([
-            Animated.timing(op, { toValue: 0.6, duration: duration * 0.3, useNativeDriver: true }),
-            Animated.timing(op, { toValue: 0, duration: duration * 0.7, useNativeDriver: true }),
-          ]),
+          Animated.timing(y,   { toValue: -260, duration, useNativeDriver: true, easing: Easing.out(Easing.quad) }),
+          Animated.timing(x,   { toValue: drift, duration, useNativeDriver: true, easing: Easing.inOut(Easing.sin) }),
           Animated.timing(rot, { toValue: 1, duration, useNativeDriver: true }),
+          Animated.sequence([
+            Animated.timing(op, { toValue: dorada ? 0.55 : 0.5, duration: duration * 0.25, useNativeDriver: true }),
+            Animated.timing(op, { toValue: 0, duration: duration * 0.75, useNativeDriver: true }),
+          ]),
         ]),
         Animated.parallel([
-          Animated.timing(y, { toValue: 0, duration: 0, useNativeDriver: true }),
-          Animated.timing(x, { toValue: 0, duration: 0, useNativeDriver: true }),
-          Animated.timing(op, { toValue: 0, duration: 0, useNativeDriver: true }),
+          Animated.timing(y,   { toValue: 0, duration: 0, useNativeDriver: true }),
+          Animated.timing(x,   { toValue: 0, duration: 0, useNativeDriver: true }),
+          Animated.timing(op,  { toValue: 0, duration: 0, useNativeDriver: true }),
           Animated.timing(rot, { toValue: 0, duration: 0, useNativeDriver: true }),
         ]),
       ])
@@ -78,29 +92,29 @@ function HojaFlotante({ delay, startX, size, duration }) {
     return () => anim.stop();
   }, []);
 
-  const rotate = rot.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '360deg'] });
+  const rotate = rot.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '270deg'] });
+  const color  = dorada ? DORADO : '#4ade80';
 
   return (
-    <Animated.Text style={{
-      position: 'absolute', bottom: 20, left: startX,
-      fontSize: size, opacity: op,
+    <Animated.View style={{
+      position: 'absolute', bottom: 10, left: startX,
+      width: size, height: size, opacity: op,
       transform: [{ translateY: y }, { translateX: x }, { rotate }],
-    }}>🌿</Animated.Text>
+    }}>
+      {/* Hoja simple con SVG inline via texto */}
+      <View style={{
+        width: size, height: size, borderRadius: size * 0.8,
+        borderBottomRightRadius: 2,
+        backgroundColor: color,
+      }} />
+    </Animated.View>
   );
 }
 
 function HojasFlotantes() {
-  const hojas = [
-    { delay: 0,    startX: 30,  size: 18, duration: 3500 },
-    { delay: 800,  startX: 80,  size: 14, duration: 4200 },
-    { delay: 1600, startX: 160, size: 20, duration: 3800 },
-    { delay: 400,  startX: 220, size: 12, duration: 5000 },
-    { delay: 2000, startX: 290, size: 16, duration: 4500 },
-    { delay: 1200, startX: 340, size: 10, duration: 3200 },
-  ];
   return (
-    <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 160, pointerEvents: 'none' }}>
-      {hojas.map((h, i) => <HojaFlotante key={i} {...h} />)}
+    <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 280, pointerEvents: 'none' }}>
+      {HOJAS_CONFIG.map((h, i) => <HojaFlotante key={i} {...h} />)}
     </View>
   );
 }
@@ -171,6 +185,8 @@ function PantallaInicio({ ir }) {
       <View style={s.hero}>
         <Image source={HERO} style={s.heroImg} resizeMode="cover" />
         <HojasFlotantes />
+        {/* Degradado solo en la parte inferior */}
+        <View style={s.heroGradient} />
         <View style={s.heroOverlay}>
           <Text style={s.heroTag}>IAGAMI · Municipio Iribarren</Text>
           <Text style={s.heroTitle}>
@@ -279,7 +295,7 @@ function PantallaNoticias({ onBack }) {
           contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
           renderItem={({ item }) => (
             <Card style={{ marginBottom: 14 }}>
-              {imgUrl(item) && <Image source={{ uri: imgUrl(item) }} style={s.newsImg} resizeMode="cover" />}
+              {imgUrl(item) && <Image source={{ uri: imgUrl(item) }} style={[s.newsImg, { height: 220 }]} resizeMode="cover" />}
               <View style={{ padding: 14 }}>
                 <Text style={s.newsTitle}>{item.titulo}</Text>
                 {item.resumen ? <Text style={s.newsSub}>{item.resumen}</Text> : null}
@@ -695,23 +711,29 @@ const s = StyleSheet.create({
   scroll: { flex: 1 },
   navbar: {
     backgroundColor: VERDE_DARK, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingHorizontal: 16, paddingTop: Platform.OS === 'ios' ? 44 : StatusBar.currentHeight || 24,
-    paddingBottom: 10, borderBottomWidth: 2, borderBottomColor: DORADO,
+    paddingHorizontal: 14, paddingTop: Platform.OS === 'ios' ? 44 : StatusBar.currentHeight || 24,
+    paddingBottom: 10, borderBottomWidth: 3, borderBottomColor: DORADO,
   },
   navLogoWrap: {
-    borderWidth: 1.5, borderColor: DORADO, borderRadius: 8, padding: 4,
-    backgroundColor: 'rgba(198,168,91,0.08)',
+    borderWidth: 2.5, borderColor: DORADO, borderRadius: 10, padding: 5,
+    backgroundColor: 'rgba(198,168,91,0.12)',
+    shadowColor: DORADO, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.6, shadowRadius: 8,
+    elevation: 4,
   },
-  navLogo: { width: 110, height: 44 },
+  navLogo: { width: 120, height: 48 },
   navBadge: { backgroundColor: DORADO+'22', borderColor: DORADO, borderWidth: 1, borderRadius: 12, paddingHorizontal: 10, paddingVertical: 4 },
   navBadgeTxt: { color: DORADO, fontSize: 11, fontWeight: '700' },
   header: { backgroundColor: VERDE, flexDirection: 'row', alignItems: 'center', padding: 14, borderBottomWidth: 2, borderBottomColor: DORADO },
   backBtn: { marginRight: 12, padding: 4 },
   backTxt: { color: DORADO, fontSize: 22, fontWeight: '700' },
   headerTxt: { color: '#fff', fontSize: 18, fontWeight: '700', flex: 1 },
-  hero: { width: '100%', height: 300, position: 'relative', overflow: 'hidden' },
+  hero: { width: '100%', height: 380, position: 'relative', overflow: 'hidden' },
   heroImg: { width: '100%', height: '100%' },
-  heroOverlay: { position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: 'rgba(26,61,43,0.80)', padding: 18 },
+  heroGradient: { position: 'absolute', bottom: 0, left: 0, right: 0, height: 220, backgroundColor: 'transparent',
+    borderTopWidth: 0,
+    // degradado simulado con opacidad
+  },
+  heroOverlay: { position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: 'rgba(20,50,32,0.82)', padding: 18, paddingTop: 22 },
   heroTag: { color: DORADO, fontSize: 11, fontWeight: '700', letterSpacing: 1, marginBottom: 4 },
   heroTitle: { color: '#fff', fontSize: 22, fontWeight: '800', lineHeight: 28 },
   heroSub: { color: '#ffffffbb', fontSize: 12, marginTop: 6, lineHeight: 18 },
@@ -741,7 +763,7 @@ const s = StyleSheet.create({
   sectionDesc: { color: GRIS, fontSize: 13, textAlign: 'center', marginBottom: 18 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', marginHorizontal: -6 },
   modulo: { width: (width-44)/2, borderRadius: 16, margin: 6, borderWidth: 1.5, borderColor: DORADO+'88', overflow: 'hidden', backgroundColor: '#fff', elevation: 3, shadowColor: '#000', shadowOffset: { width:0,height:2 }, shadowOpacity: 0.1, shadowRadius: 4 },
-  moduloIcon: { width: '100%', height: 140 },
+  moduloIcon: { width: '100%', height: 150, resizeMode: 'contain', backgroundColor: '#e8f5e9' },
   moduloBar: { backgroundColor: VERDE_DARK, padding: 10 },
   moduloLabel: { color: '#fff', fontWeight: '700', fontSize: 13, textAlign: 'center' },
   moduloSub: { color: '#ffffffaa', fontSize: 11, textAlign: 'center', marginTop: 2 },
@@ -749,7 +771,7 @@ const s = StyleSheet.create({
   newsTagPill: { backgroundColor: VERDE+'22', borderRadius: 12, paddingHorizontal: 10, paddingVertical: 3 },
   newsTagTxt: { color: VERDE, fontSize: 11, fontWeight: '600' },
   card: { backgroundColor: '#fff', borderRadius: 12, elevation: 2, shadowColor: '#000', shadowOffset: { width:0,height:1 }, shadowOpacity: 0.08, shadowRadius: 3, overflow: 'hidden' },
-  newsImg: { width: '100%', height: 160 },
+  newsImg: { width: '100%', height: 200, resizeMode: 'cover' },
   newsTitle: { fontWeight: '700', color: TEXTO, fontSize: 15, lineHeight: 22 },
   newsSub: { color: GRIS, fontSize: 13, marginTop: 4, lineHeight: 18 },
   newsDate: { color: DORADO, fontSize: 11, marginTop: 6, fontWeight: '600' },
