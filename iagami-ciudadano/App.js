@@ -3,7 +3,7 @@ import {
   View, Text, TouchableOpacity, ScrollView, StyleSheet,
   StatusBar, TextInput, Alert, ActivityIndicator,
   Image, FlatList, Platform, Dimensions,
-  KeyboardAvoidingView, Modal, Animated, Easing
+  KeyboardAvoidingView, Modal, Animated, Easing, Keyboard
 } from 'react-native';
 import { WebView } from 'react-native-webview';
 
@@ -20,6 +20,7 @@ const { width } = Dimensions.get('window');
 const LOGO = require('./assets/logo-iagami.png');
 const HERO = require('./assets/app-icon.webp');
 const SEMERUQUITO = require('./assets/semeruquito.png');
+const LEAF_ARROW = require('./assets/leaf-arrow.png');
 
 const ICONOS = {
   denuncias:     require('./assets/iconos/01_presentar_denuncia.png'),
@@ -559,7 +560,14 @@ function PantallaAgenda({ onBack }) {
 
 function PantallaWeb({ url, js, onBack }) {
   const [loading, setLoading] = useState(true);
+  const [kbVisible, setKbVisible] = useState(false);
   const originUrl = useRef(url);
+
+  useEffect(() => {
+    const show = Keyboard.addListener('keyboardDidShow', () => setKbVisible(true));
+    const hide = Keyboard.addListener('keyboardDidHide', () => setKbVisible(false));
+    return () => { show.remove(); hide.remove(); };
+  }, []);
 
   function handleNavChange({ url: current, loading: nav }) {
     if (nav) return;
@@ -585,9 +593,12 @@ function PantallaWeb({ url, js, onBack }) {
         injectedJavaScript={"document.head.insertAdjacentHTML('beforeend','<style>.nav,.topbar,.alert-bar{display:none!important}</style>');" + (js || '') + "true;"}
         userAgent="Mozilla/5.0 (Linux; Android 11; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
       />
-      <TouchableOpacity style={s.webBack} onPress={onBack}>
-        <Text style={s.webBackTxt}>← App</Text>
-      </TouchableOpacity>
+      {!kbVisible && (
+        <TouchableOpacity style={s.webBack} onPress={onBack} activeOpacity={0.75}>
+          <Image source={LEAF_ARROW} style={s.webBackImg} resizeMode="contain" />
+          <Text style={s.webBackTxt}>App</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
@@ -952,11 +963,13 @@ const s = StyleSheet.create({
   empty: { color: GRIS, textAlign: 'center', marginTop: 40, fontSize: 15 },
   webBack: {
     position: 'absolute', bottom: 24, left: 16,
-    backgroundColor: VERDE_DARK, borderRadius: 20,
-    paddingHorizontal: 16, paddingVertical: 9,
-    borderWidth: 1.5, borderColor: DORADO,
-    shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3, shadowRadius: 6, elevation: 8,
+    backgroundColor: 'rgba(255,255,255,0.92)',
+    borderRadius: 28, paddingHorizontal: 14, paddingVertical: 8,
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.18, shadowRadius: 8, elevation: 8,
+    borderWidth: 1.5, borderColor: 'rgba(29,107,62,0.18)',
   },
-  webBackTxt: { color: '#fff', fontWeight: '700', fontSize: 13 },
+  webBackImg: { width: 44, height: 44 },
+  webBackTxt: { color: '#1a3d2b', fontWeight: '800', fontSize: 13, letterSpacing: 0.3 },
 });
