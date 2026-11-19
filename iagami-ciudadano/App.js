@@ -569,48 +569,26 @@ function PantallaAgenda({ onBack }) {
   );
 }
 
-const HIDE_SITE_NAV = `
-(function(){
-  var st = document.createElement('style');
-  st.textContent = '.topbar,.nav,.alert-bar,.nav-backdrop,.chat-fab{display:none!important}body{padding-top:0!important}';
-  document.head.appendChild(st);
-  true;
-})();
-`;
-
-function PantallaWeb({ url, titulo, onBack }) {
+function PantallaWeb({ url, onBack }) {
   const [loading, setLoading] = useState(true);
-  const [tituloActual, setTituloActual] = useState(titulo);
-  const webRef = useRef(null);
-
-  const onNavChange = (state) => {
-    // Si el WebView navegó al home del sitio, cerrar y volver al app
-    if (state.url === 'https://iagami.online/' || state.url === 'https://iagami.online') {
-      onBack();
-      return;
-    }
-    // Actualizar título según módulo actual
-    const mod = MODULOS.find(m => state.url.startsWith(m.url));
-    if (mod) setTituloActual(mod.label);
-  };
 
   return (
     <View style={s.flex}>
-      <Header titulo={tituloActual} onBack={onBack} />
       {loading && <ActivityIndicator color={VERDE} style={{ position: 'absolute', top: '50%', alignSelf: 'center', zIndex: 10 }} />}
       <WebView
-        ref={webRef}
         source={{ uri: url }}
         style={s.flex}
         onLoadEnd={() => setLoading(false)}
         onError={() => setLoading(false)}
-        onNavigationStateChange={onNavChange}
-        injectedJavaScript={HIDE_SITE_NAV}
         javaScriptEnabled
         domStorageEnabled
         startInLoadingState
         userAgent="Mozilla/5.0 (Linux; Android 11; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
       />
+      {/* Botón flotante para volver al app */}
+      <TouchableOpacity style={s.webBack} onPress={onBack}>
+        <Text style={s.webBackTxt}>← App</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -973,4 +951,13 @@ const s = StyleSheet.create({
   chatSend: { width: 42, height: 42, backgroundColor: VERDE, borderRadius: 21, alignItems: 'center', justifyContent: 'center' },
   loader: { flex: 1, justifyContent: 'center', marginTop: 60 },
   empty: { color: GRIS, textAlign: 'center', marginTop: 40, fontSize: 15 },
+  webBack: {
+    position: 'absolute', bottom: 24, left: 16,
+    backgroundColor: VERDE_DARK, borderRadius: 20,
+    paddingHorizontal: 16, paddingVertical: 9,
+    borderWidth: 1.5, borderColor: DORADO,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3, shadowRadius: 6, elevation: 8,
+  },
+  webBackTxt: { color: '#fff', fontWeight: '700', fontSize: 13 },
 });
